@@ -4,7 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test"
+    "build": "node scripts/build.mjs && node scripts/sources.mjs",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "node --test tests/unit/",
+    "test:e2e": "node --test --test-concurrency=1 tests/e2e/",
+    "screens": "node scripts/screens.mjs"
   },
   "devDependencies": {
     "playwright": "1.65.1",
