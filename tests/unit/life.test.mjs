@@ -74,3 +74,26 @@ test('at 15:00 people per m2 in shade is at least 2x the density in sun', () => 
   assert.ok(mean >= 2, `mean ratio ${mean}`);
   assert.ok(Math.min(...ratios) >= 2, `min ratio ${Math.min(...ratios)}`);
 });
+
+test('sweat cue: pure, sparse, only on hot sunlit ground', async () => {
+  const { sweatState, sweatStrength, SWEAT_TMRT } = await import('../../engine/life.js');
+  assert.equal(sweatStrength(SWEAT_TMRT - 0.1, 1), 0);
+  assert.equal(sweatStrength(70, 0.4), 0, 'no sweat in shade');
+  assert.equal(sweatStrength(65, 1), 1);
+  assert.deepEqual(sweatState(7, 12.3, 62, 1), sweatState(7, 12.3, 62, 1));
+  let shown = 0;
+  let n = 0;
+  for (let k = 0; k < 50; k++) {
+    for (let t = 0; t < 20; t += 0.05) {
+      const s = sweatState(k, t, 70, 1);
+      n++;
+      if (s.drops.length) shown++;
+      assert.ok(s.drops.length <= 3);
+      for (const d of s.drops) assert.ok(d.fall >= 0 && d.fall <= 1 && d.alpha >= 0 && d.alpha <= 1);
+      assert.equal(sweatState(k, t, 40, 1).drops.length, 0);
+    }
+  }
+  const share = shown / n;
+  console.log(`sweat droplets visible ${(share * 100).toFixed(1)}% of the time at full heat`);
+  assert.ok(share > 0.05 && share < 0.3, `share ${share}`);
+});
