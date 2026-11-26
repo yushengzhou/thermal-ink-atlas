@@ -79,7 +79,8 @@ test('sweat cue: pure, sparse, only on hot sunlit ground', async () => {
   const { sweatState, sweatStrength, SWEAT_TMRT } = await import('../../engine/life.js');
   assert.equal(sweatStrength(SWEAT_TMRT - 0.1, 1), 0);
   assert.equal(sweatStrength(70, 0.4), 0, 'no sweat in shade');
-  assert.equal(sweatStrength(65, 1), 1);
+  assert.equal(sweatStrength(70, 1), 1);
+  assert.equal(sweatStrength(62, 1), 0, 'sunlit lawn (~61 C Tmrt) does not sweat');
   assert.deepEqual(sweatState(7, 12.3, 62, 1), sweatState(7, 12.3, 62, 1));
   let shown = 0;
   let n = 0;
@@ -88,12 +89,12 @@ test('sweat cue: pure, sparse, only on hot sunlit ground', async () => {
       const s = sweatState(k, t, 70, 1);
       n++;
       if (s.drops.length) shown++;
-      assert.ok(s.drops.length <= 3);
+      assert.ok(s.drops.length === 0 || (s.drops.length >= 2 && s.drops.length <= 3));
       for (const d of s.drops) assert.ok(d.fall >= 0 && d.fall <= 1 && d.alpha >= 0 && d.alpha <= 1);
-      assert.equal(sweatState(k, t, 40, 1).drops.length, 0);
+      assert.equal(sweatState(k, t, 60, 1).drops.length, 0);
     }
   }
   const share = shown / n;
   console.log(`sweat droplets visible ${(share * 100).toFixed(1)}% of the time at full heat`);
-  assert.ok(share > 0.05 && share < 0.3, `share ${share}`);
+  assert.ok(share > 0.4 && share < 0.8, `share ${share}`);
 });
