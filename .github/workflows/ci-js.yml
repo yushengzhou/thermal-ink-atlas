@@ -7,11 +7,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npm test
+      - name: Unit tests (sun, shadows, SVF, thermal model, routes, build, sources)
+        run: npm run test:unit
+      - name: Playwright checks (size, offline, determinism, build order, thermal pixels, shade, perf)
+        run: npm run test:e2e
