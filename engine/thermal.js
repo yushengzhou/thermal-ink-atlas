@@ -373,9 +373,9 @@ export const PALETTE_STOPS = [
   [34, '#d6ceb0'],
   [38, '#dcb987'],
   [44, '#d3965f'],
-  [52, '#bd6a45'],
-  [62, '#a14a37'],
-  [70, '#7e3a31'],
+  [52, '#b96d4d'],
+  [62, '#9e5040'],
+  [70, '#7e4038'],
 ];
 
 const STOP_RGB = PALETTE_STOPS.map(([t, c]) => [t, hexRgb(c)]);

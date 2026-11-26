@@ -216,13 +216,13 @@ export class Renderer {
         const wx = (x + 0.5) * R;
         const wy = (y + 0.5) * R;
         // blooming edges: jitter the sample point with smooth noise
-        const jx = (noise2(wx / 9, wy / 9, 31) - 0.5) * 3.2;
-        const jy = (noise2(wx / 9, wy / 9, 32) - 0.5) * 3.2;
+        const jx = (noise2(wx / 9, wy / 9, 31) - 0.5) * 2;
+        const jy = (noise2(wx / 9, wy / 9, 32) - 0.5) * 2;
         const sh = sample(ground, wx + jx, wy + jy);
         const so = sample(soft, wx, wy);
-        const t = so + (sh - so) * 0.75;
+        const t = so + (sh - so) * 0.9;
         const c = heatRgb(t);
-        const edge = 1 - Math.min(0.16, Math.abs(sh - so) * 0.03);
+        const edge = 1 - Math.min(0.08, Math.abs(sh - so) * 0.012);
         const pig = 1 - 0.035 * noise2(wx / 3.5, wy / 3.5, 33);
         const k = (y * M + x) * 4;
         d.data[k] = c[0] * edge * pig;

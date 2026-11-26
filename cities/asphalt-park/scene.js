@@ -205,5 +205,5 @@ export const SCENE = {
     { at: [325, 127.5, 18], dx: -60, dy: 120, key: 'roofs' },
     { at: [232, 360, 0], dx: -120, dy: 75, key: 'pond' },
   ],
-  startCam: { z: 3, cx: 200, cy: 250 },
+  startCam: { z: 2.5, cx: 230, cy: 250 },
 };
