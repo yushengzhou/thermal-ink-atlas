@@ -22,7 +22,8 @@ test('every glossary term opens its footnote from the terms panel; Esc closes it
     await page.locator(`#termsList .gl[data-gl="${key}"]`).click();
     assert.equal(await fnKey(page), key);
     const text = await page.locator('#fn').textContent();
-    assert.ok(text.includes(g.term) && text.includes('Typical:') && text.includes('Why it matters:'), key);
+    assert.ok(text.includes(g.term) && text.includes(g.model ? 'In this model:' : 'Typical:') && text.includes('Why it matters:'), key);
+    assert.ok(!/undefined|NaN/.test(text), `${key}: ${text}`);
     await page.keyboard.press('Escape');
     assert.equal(await fnKey(page), null, `${key} closes with Esc`);
   }
@@ -51,6 +52,22 @@ test('heat card, header and legend terms open footnotes (click, hover, focus); c
   await page.locator('#cartouche .gl[data-gl="surfaceTemp"]').focus();
   assert.equal(await fnKey(page), 'surfaceTemp');
   await page.keyboard.press('Enter');
+  assert.equal(await fnKey(page), null);
+  // tooltip semantics: trigger described by #fn and expanded while open
+  await page.locator('#cartouche .gl[data-gl="forceRestore"]').click();
+  assert.equal(await page.getAttribute('#fn', 'role'), 'tooltip');
+  assert.equal(await page.getAttribute('#cartouche .gl[data-gl="forceRestore"]', 'aria-describedby'), 'fn');
+  assert.equal(await page.getAttribute('#cartouche .gl[data-gl="forceRestore"]', 'aria-expanded'), 'true');
+  // hover over another term does not replace a pinned footnote
+  await page.hover('#legend .gl[data-gl="surfaceTemp"]');
+  await page.waitForTimeout(400);
+  assert.equal(await fnKey(page), 'forceRestore');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.getAttribute('#cartouche .gl[data-gl="forceRestore"]', 'aria-expanded'), 'false');
+  // a focus-opened footnote closes when focus moves off the terms (to the slider)
+  await page.locator('#legend .gl[data-gl="forceRestore"]').focus();
+  assert.equal(await fnKey(page), 'forceRestore');
+  await page.locator('#hour').focus();
   assert.equal(await fnKey(page), null);
   // the cool-roof card marks "cool roof"
   await page.evaluate(() => window.atlas.seek(400, { z: 3, cx: 325, cy: 128 }));

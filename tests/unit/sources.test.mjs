@@ -42,3 +42,16 @@ test('the docs disclose the assumptions the result depends on', () => {
   }
   assert.ok(!/within the range of the research brief/.test(md));
 });
+
+test('glossary numbers carry a literature source key or are computed from the model', async () => {
+  const { GLOSSARY } = await import('../../engine/glossary.js');
+  for (const [k, g] of Object.entries(GLOSSARY)) {
+    if (g.model) {
+      assert.equal(g.range, undefined, `${k}: model-derived entries must not hard-code a range`);
+    } else {
+      assert.ok(g.range && g.src, `${k}: range needs a source`);
+      for (const key of g.src.split(',').map((x) => x.trim())) assert.ok(key in SOURCES, `${k}: unknown source ${key}`);
+    }
+  }
+  assert.ok(md.includes('## Glossary sources'));
+});

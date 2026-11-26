@@ -57,6 +57,29 @@ test('model vs literature: exact brief ranges, table in docs/sources.md is in sy
   assert.ok(md.includes(targetsMarkdown(rows)), 'run `node scripts/sources.mjs` to refresh the table');
 });
 
+// Regression guard for the documented deviations: the set of rows outside the
+// brief is pinned, and each may sit at most PIN_SLACK beyond its distance when
+// pinned. Changing this list is a deliberate, reviewed act (update the docs too).
+const PINNED_OUTSIDE = {
+  'Aged asphalt (sunlit at 15:00) @15': 1.7,
+  'Aged asphalt (sunlit at 15:00) @23': 0.6,
+  'Shaded paving @15': 0.6,
+  'Cool roof @23': 1.2,
+  'Irrigated grass (sunlit at 15:00) @23': 3.9,
+  'Open water @23': 0.5,
+  'Ground in tree shade @23': 1.6,
+};
+const PIN_SLACK = 0.5;
+
+test('deviations from the brief are pinned: same rows outside, no further than pinned + 0.5 K', () => {
+  const rows = targetRows(W, T);
+  const dist = (r) => (r.value < r.lo ? r.lo - r.value : r.value - r.hi);
+  const outside = Object.fromEntries(rows.filter((r) => !r.inside).map((r) => [`${r.label} @${r.h}`, +dist(r).toFixed(2)]));
+  console.log('outside the brief (K beyond range):', outside);
+  assert.deepEqual(Object.keys(outside).sort(), Object.keys(PINNED_OUTSIDE).sort(), 'the set of rows outside the brief changed');
+  for (const [k, d] of Object.entries(outside)) assert.ok(d <= PINNED_OUTSIDE[k] + PIN_SLACK, `${k}: ${d} K beyond range (pinned ${PINNED_OUTSIDE[k]})`);
+});
+
 test('model is deterministic', () => {
   const T2 = runModel(W, { slots: base().slots });
   for (let i = 0; i < W.n * W.n; i += 97) assert.equal(T2.ts(i, 15), T.ts(i, 15));
