@@ -142,17 +142,17 @@ export class Life {
       dwell.push([best, used[best]]);
       used[best]++;
     }
-    const p = { choice, dwell, costs, shade, hot };
+    const p = { choice, dwell, costs, shade, hot, weight };
     this.plans.set(hq, p);
     return p;
   }
 
-  _bestOffset(v, s, pref, shade) {
+  _bestOffset(v, s, pref, shade, weight) {
     const [x, y, dx, dy] = pointAt(v, s);
     let best = pref;
     let bc = Infinity;
     for (const o of [pref, -2.1, -1.2, -0.3, 0.6, 1.5, 2.1]) {
-      const c = WEIGHT[shadeAt(shade, x - dy * o, y + dx * o)] + 0.02 * Math.abs(o - pref);
+      const c = weight[shadeAt(shade, x - dy * o, y + dx * o)] + 0.02 * Math.abs(o - pref);
       if (c < bc) {
         bc = c;
         best = o;
@@ -183,8 +183,8 @@ export class Life {
       if (P.hot) {
         const kb = Math.floor(s / 4);
         const f = s / 4 - kb;
-        const a = this._bestOffset(v, kb * 4 + 2, w.lateral, P.shade);
-        const b = this._bestOffset(v, kb * 4 + 6, w.lateral, P.shade);
+        const a = this._bestOffset(v, kb * 4 + 2, w.lateral, P.shade, P.weight);
+        const b = this._bestOffset(v, kb * 4 + 6, w.lateral, P.shade, P.weight);
         off = a + (b - a) * smoothStep(f);
       }
       out.push({ x: x - dy * off, y: y + dx * off, hx: dx * dir, hy: dy * dir, walk: (s / 0.7) % 2, shirt: w.shirt, k: w.k, sit: false });

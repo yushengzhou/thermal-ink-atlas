@@ -30,7 +30,10 @@ export function hash3(a, b = 0, c = 0) {
   return (h >>> 0) / 4294967296;
 }
 
-/** Small sequential generator seeded by an integer (xorshift-multiply). */
+/**
+ * Small sequential generator seeded by an integer. This is the mulberry32
+ * generator (Tommy Ettinger, public domain) with a seed scramble.
+ */
 export function makeRng(seed) {
   let s = (seed | 0) ^ 0x5bd1e995;
   return function next() {
