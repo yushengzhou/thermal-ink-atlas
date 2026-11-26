@@ -16,7 +16,7 @@ const SHADOW_RGB = hexRgb('#4b5a78');
 const THERMAL_WALL = hexRgb('#e7dfcd');
 const NIGHT_RGB = hexRgb('#27355a');
 const LIT = hexRgb('#f4cf7a');
-const SWEAT_CSS = 'rgba(160,192,212,0.95)';
+const SWEAT_CSS = 'rgba(143,182,207,0.95)';
 
 function makeCanvas(w, h) {
   if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(w, h);
@@ -611,7 +611,9 @@ export class Renderer {
     const hc = this.hourCtx(hq);
     const sh = hc.up ? [-Math.sin(hc.sun.az * DEG), Math.cos(hc.sun.az * DEG)] : null;
     const shLen = hc.up ? Math.min(4, 1.7 / Math.tan(Math.max(8, hc.sun.alt) * DEG)) : 0;
-    const s = Z * 1.25; // people drawn a little larger than life for legibility
+    // people drawn a little larger than life, with a floor so they (and the
+    // sweat cue) stay legible at the default overview zoom
+    const s = Math.max(Z * 1.25, 5.5 * this.dpr);
     const lw = Math.max(0.8, this.lineBase(cam.z) * 0.8);
     const ink = rgbCss(INK);
     let count = 0;
@@ -658,9 +660,9 @@ export class Renderer {
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
-      const hr = Math.max(1, 0.19 * s);
+      const hr = Math.max(1.6 * this.dpr, 0.19 * s);
       const hy = top - 0.2 * s;
-      const sw = hc.up && hr >= 1.3 ? this.sweatAt(a, f / 60, hq) : null;
+      const sw = hc.up ? this.sweatAt(a, f / 60, hq) : null;
       if (sw && sw.fan) {
         // hand to brow
         ctx.beginPath();
@@ -676,11 +678,15 @@ export class Renderer {
       ctx.stroke();
       if (sw && sw.drops.length) {
         this.stats.sweating++;
-        const r = hr * 0.36 * (0.85 + 0.3 * sw.s);
-        ctx.lineWidth = Math.max(0.5, lw * 0.6);
+        // cartoon-sized: a pixel floor keeps the cue legible at the default zoom
+        const dp = this.dpr;
+        const r = Math.max(2.1 * dp, hr * 0.5) * (0.9 + 0.25 * sw.s);
+        const ox = Math.max(hr * 1.7, hr + r * 1.4);
+        const fall = Math.max(hr * 2.8, 7 * dp);
+        ctx.lineWidth = Math.max(0.6 * dp, lw * 0.6);
         for (const d of sw.drops) {
-          const x = X + d.side * hr * 1.6;
-          const y = hy - hr * 0.5 + d.fall * hr * 2.4;
+          const x = X + d.side * ox;
+          const y = hy - hr * 0.5 - r + d.fall * fall;
           ctx.globalAlpha = alpha * d.alpha;
           ctx.beginPath();
           ctx.moveTo(x, y - r * 2.1);

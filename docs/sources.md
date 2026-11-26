@@ -50,7 +50,7 @@ Shown on the heat cards as a caveat:
 | `buildingShadeWeight` | 0.84 [melnikov] *cited value*, unverified (shade walking perceived ~16% shorter) |
 | `treeShadeWeight` | 0.92 [melnikov] *interpretation of the source*, unverified (tree shade ~half as effective as building shade, read as half the 16% benefit) |
 | `shadeHeatRamp` | 26 -> 32 C [engine] *engine assumption (no source)*, unverified (shade benefit scales linearly from none at air <= 26 C to full at >= 32 C) |
-| `sweatCue` | Tmrt 50 -> 65 C [engine] *engine assumption (no source)*, unverified (visual cue only: droplets on people in sun, strength rising from Tmrt 50 C to full at 65 C; no physiological model) |
+| `sweatCue` | Tmrt 65 -> 70 C [engine] *engine assumption (no source)*, unverified (visual cue only: droplets on people in sun, strength rising from Tmrt 65 C to full at 70 C (separates sunlit pavement from sunlit lawn in this model); no physiological model) |
 
 The wall term's daytime part peaks at 6.8 K on the design day (total wall excess up to 8.8 K above air).
 

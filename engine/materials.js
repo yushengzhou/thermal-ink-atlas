@@ -123,7 +123,7 @@ export const MODEL = {
   buildingShadeWeight: v(0.84, 'melnikov', 'cited', false, 'shade walking perceived ~16% shorter'),
   treeShadeWeight: v(0.92, 'melnikov', 'interp', false, 'tree shade ~half as effective as building shade, read as half the 16% benefit'),
   shadeHeatRamp: v('26 -> 32 C', 'engine', 'engine', false, 'shade benefit scales linearly from none at air <= 26 C to full at >= 32 C'),
-  sweatCue: v('Tmrt 50 -> 65 C', 'engine', 'engine', false, 'visual cue only: droplets on people in sun, strength rising from Tmrt 50 C to full at 65 C; no physiological model'),
+  sweatCue: v('Tmrt 65 -> 70 C', 'engine', 'engine', false, 'visual cue only: droplets on people in sun, strength rising from Tmrt 65 C to full at 70 C (separates sunlit pavement from sunlit lawn in this model); no physiological model'),
 };
 
 /** Parameter keys a material uses (for cards and docs). */
