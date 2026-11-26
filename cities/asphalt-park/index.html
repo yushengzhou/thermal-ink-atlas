@@ -25,7 +25,7 @@
   #legendBar { height: 12px; border: 1px solid #2b2621; margin: 4px 0 2px; }
   #legend .ends { display: flex; justify-content: space-between; font-size: 12px; white-space: nowrap; }
   #legend .cap { font-size: 11px; opacity: .7; margin-top: 2px; }
-  #card { display: none; position: fixed; width: 310px; max-height: calc(100vh - 20px); overflow: auto; box-sizing: border-box; padding: 12px 14px; background: #fbf7ee; border: 1.5px solid #2b2621;
+  #card { display: none; position: fixed; width: 350px; max-height: calc(100vh - 20px); overflow: auto; box-sizing: border-box; padding: 12px 14px; background: #fbf7ee; border: 1.5px solid #2b2621;
     border-radius: 4px 10px 5px 9px; box-shadow: 3px 4px 0 rgba(43,38,33,.2); font-size: 13px; }
   #card h3 { margin: 0 0 2px; font-size: 17px; }
   #card .mat { opacity: .75; margin-bottom: 6px; }
@@ -38,7 +38,21 @@
   #card .caveat { margin: 4px 0; padding: 4px 6px; font-size: 12px; background: #f3e3d6; border-left: 3px solid #8a2f22; }
   #card .note { margin: 8px 0 4px; font-style: italic; }
   #card .src { margin: 4px 0 0; font-size: 11px; opacity: .75; }
-  .noui #cartouche, .noui #bar, .noui #legend { display: none; }
+  .noui #cartouche, .noui #bar, .noui #legend, .noui #terms { display: none; }
+  #cartouche .sim { font-size: 12px; opacity: .7; letter-spacing: .02em; }
+  .gl { border-bottom: 1px dotted currentColor; cursor: help; }
+  .gl:focus-visible { outline: 1.5px dashed #8a2f22; outline-offset: 2px; }
+  #termsBtn { font: 12px/1 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; border-radius: 4px 7px 3px 6px; background: #fbf7ee; cursor: pointer; color: #2b2621; }
+  #terms { position: fixed; right: 18px; bottom: 74px; width: 250px; max-height: 50vh; overflow: auto; padding: 8px 12px; background: #fbf7ee;
+    border: 1.5px solid #2b2621; border-radius: 6px 3px 8px 3px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); font-size: 13px; }
+  #terms ul { margin: 4px 0 0; padding-left: 16px; }
+  #terms li { margin: 2px 0; }
+  #fn { position: fixed; z-index: 10; width: 270px; padding: 9px 12px 8px; background: #fffaf0; border: 1.5px solid #2b2621;
+    border-radius: 3px 9px 4px 8px; box-shadow: 2px 3px 0 rgba(43,38,33,.22); font-size: 12.5px; line-height: 1.4; }
+  #fn b { display: block; font-size: 13.5px; margin-bottom: 2px; }
+  #fn p { margin: 3px 0; }
+  #fn .rng { opacity: .8; }
+  #fn .why { font-style: italic; }
   #card .x { position: absolute; right: 6px; top: 4px; border: 0; background: none; font-size: 18px; cursor: pointer; color: #2b2621; }
 </style>
 </head>
@@ -47,16 +61,23 @@
 <div id="cartouche">
   <h1>Thermal-Ink Atlas</h1>
   <p class="hand">Asphalt street vs pocket park</p>
+  <p class="sim">Simulated block · invented geometry · <span class="gl" tabindex="0" role="button" aria-haspopup="dialog" data-gl="forceRestore">modelled</span> <span class="gl" tabindex="0" role="button" aria-haspopup="dialog" data-gl="surfaceTemp">temperatures</span></p>
   <p>Assumed heat-wave day: 35° N, 20 July, air 25–35 °C, light wind 1.5 m/s.</p>
 </div>
-<div id="legend"><div class="hand">surface temperature</div><div id="legendBar"></div>
+<div id="legend"><div class="hand"><span class="gl" tabindex="0" role="button" aria-haspopup="dialog" data-gl="surfaceTemp">surface temperature</span></div><div id="legendBar"></div>
   <div class="ends"><span id="legendLo"></span><span id="legendHi"></span></div>
-  <div class="cap">modelled surface temperature; inputs not yet verified are flagged on the cards</div></div>
+  <div class="cap">Simulated with a <span class="gl" tabindex="0" role="button" aria-haspopup="dialog" data-gl="forceRestore">force-restore model</span> on an invented block, not measured. Inputs not yet verified are flagged on the cards.</div></div>
 <div id="bar">
   <input id="hour" type="range" min="0" max="23.75" step="0.25" value="15" aria-label="hour of day">
   <span id="hourLabel" class="hand"></span>
   <span id="keys"><kbd>T</kbd> heat · <kbd>H</kbd> hour · drag · wheel · click a parcel</span>
+  <button id="termsBtn" type="button" aria-expanded="false" aria-controls="terms">terms</button>
 </div>
+<div id="terms" role="dialog" aria-label="Glossary of terms" hidden>
+  <div class="hand">Terms used here</div>
+  <ul id="termsList"></ul>
+</div>
+<div id="fn" role="dialog" aria-live="polite" hidden></div>
 <div id="card" data-open="0"></div>
 <script>
 'use strict';
@@ -2421,6 +2442,7 @@ class Renderer {
       if (intro) lifeA = clamp((f - INTRO.wash) / (INTRO.life - INTRO.wash), 0, 1);
     }
     this.stats.people = 0;
+    this.noteHits = [];
     if (lifeA > 0) {
       if (look.people !== false) this.drawPeople(ctx, f, cam, hq, W, H, lifeA, look.thermalMix ?? 0);
       if (look.notes) this.drawNotes(ctx, cam, W, H, look.notes, lifeA);
@@ -2558,6 +2580,7 @@ class Renderer {
   }
 
   drawNotes(ctx, cam, W, H, notes, alpha) {
+    this.noteHits = [];
     const [ox, oy, Z] = this.origin(cam, W, H);
     const d = this.dpr;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -2596,6 +2619,24 @@ class Renderer {
       ctx.strokeRect(bx - 5 * d, by - 3 * d, w + 10 * d, lines.length * lh + 6 * d);
       ctx.fillStyle = rgbCss(i === 0 ? hexRgb('#8a2f22') : INK);
       lines.forEach((l, k) => ctx.fillText(l, bx, by + k * lh));
+      // glossary terms: dotted underline + hit box (CSS px) for the footnotes
+      for (const [key, sub] of n.terms ?? []) {
+        const k = lines.findIndex((l) => l.includes(sub));
+        if (k < 0) continue;
+        const x0 = bx + ctx.measureText(lines[k].slice(0, lines[k].indexOf(sub))).width;
+        const w = ctx.measureText(sub).width;
+        const y = by + k * lh + 16 * d;
+        ctx.save();
+        ctx.setLineDash([1.5 * d, 2 * d]);
+        ctx.lineWidth = 1 * d;
+        ctx.strokeStyle = ctx.fillStyle;
+        ctx.beginPath();
+        ctx.moveTo(x0, y);
+        ctx.lineTo(x0 + w, y);
+        ctx.stroke();
+        ctx.restore();
+        this.noteHits.push({ key, x: x0 / d, y: y / d, w: w / d, h: lh / d });
+      }
     });
     ctx.globalAlpha = 1;
   }
@@ -2603,6 +2644,96 @@ class Renderer {
 
 
 return { TILE, HOUR_STEP, INTRO, quantHour, Renderer };
+})();
+
+__m['glossary'] = (() => {
+// glossary: one shared set of plain-English footnotes for the technical terms
+// shown on the page (heat cards, margin notes, legend, header, terms panel).
+// Each entry: term (title), text (1-2 sentences), range (typical values),
+// why (why it matters for heat).
+
+const GLOSSARY = {
+  albedo: {
+    term: 'Albedo (α)',
+    text: 'The share of sunlight a surface reflects: 0 absorbs everything, 1 reflects everything.',
+    range: 'Fresh asphalt 0.05, aged asphalt 0.12–0.15, grass 0.16–0.26, new white roof 0.65–0.85.',
+    why: 'Each extra 0.1 of albedo turns away roughly 100 W/m² of midday sun, so dark surfaces run far hotter.',
+  },
+  emissivity: {
+    term: 'Emissivity (ε)',
+    text: 'How well a surface gives off heat as invisible infrared light, from 0 to 1.',
+    range: 'Most building materials, soil and plants 0.85–0.97; bare shiny metal 0.1–0.3.',
+    why: 'High emissivity lets a surface shed heat to the cold sky, especially at night.',
+  },
+  admittance: {
+    term: 'Thermal admittance (μ)',
+    text: 'How readily a material soaks up heat and later gives it back (the square root of conductivity × heat capacity).',
+    range: 'Dry soil ~600, asphalt ~1200, concrete ~1800, stone ~2200 J m⁻² s⁻½ K⁻¹.',
+    why: 'High-admittance pavements warm up more slowly but stay warm long after sunset.',
+  },
+  heatCapacity: {
+    term: 'Thin-layer heat capacity (C)',
+    text: 'How much heat a thin skin, such as sheet metal, stores per square metre for each degree it warms.',
+    range: 'About 5–20 kJ m⁻² K⁻¹ for metal sheet and thin roof layers.',
+    why: 'With so little storage, a metal roof heats fast in sun and cools fast at night.',
+  },
+  ef: {
+    term: 'Evaporative fraction',
+    text: 'The share of a surface’s net sunshine that goes into evaporating water instead of heating it.',
+    range: 'Dry paving 0; watered lawns and tree leaves 0.6–0.8.',
+    why: 'Evaporation is the main reason lawns and trees stay cooler than pavement.',
+  },
+  svf: {
+    term: 'Sky view factor (SVF)',
+    text: 'How much of the sky a spot can see, from 1 (open field) to 0 (fully enclosed).',
+    range: 'Open lawn ~0.95; street between tall buildings 0.3–0.6.',
+    why: 'A low sky view traps heat at night, because surfaces cannot radiate it away to the cold sky.',
+  },
+  surfaceTemp: {
+    term: 'Surface temperature',
+    text: 'The temperature of the ground or roof skin itself, which can be very different from the air.',
+    range: 'On a 35 °C afternoon: lawn 30–40 °C, shaded paving 34–40 °C, dark asphalt 55–65 °C.',
+    why: 'Hot surfaces warm the air above them and radiate heat onto people nearby.',
+  },
+  tmrt: {
+    term: 'Mean radiant temperature (Tmrt)',
+    text: 'One number for all the sunshine and infrared heat falling on a standing person from every direction.',
+    range: 'Hot afternoon: about 35–45 °C in shade, 60–70 °C in open sun.',
+    why: 'It shapes how hot it feels outdoors more than air temperature does.',
+  },
+  forceRestore: {
+    term: 'Force-restore model (simulation)',
+    text: 'A simple surface energy balance (Deardorff 1978): sun, sky and air heat each 5 m cell, and a deep-ground term pulls it back toward its daily mean.',
+    range: 'Here: 5 m grid, 1-minute steps, the design day repeated until it settles.',
+    why: 'It captures daytime heating and night lag cheaply enough to run in your browser. All temperatures here are modelled, not measured.',
+  },
+  nightLag: {
+    term: 'Thermal inertia / night lag',
+    text: 'Heavy materials store heat during the day and release it after sunset, so they stay warm into the night.',
+    range: 'Here asphalt and concrete stay about 3–5 °C warmer than the lawn at 11 pm.',
+    why: 'Night lag keeps cities warm at night, when people most need to cool down.',
+  },
+  coolRoof: {
+    term: 'Cool roof',
+    text: 'A roof finished with a highly reflective coating, usually white.',
+    range: 'Albedo 0.65–0.85 when new, about 0.5–0.6 after weathering.',
+    why: 'Reflecting more sun keeps the roof, and the rooms under it, much cooler.',
+  },
+  permeable: {
+    term: 'Permeable paving',
+    text: 'Paving with gaps or pores that let rain soak through into the ground.',
+    range: 'Albedo 0.15–0.30; 5–10 °C cooler than concrete while wet (not modelled in this block).',
+    why: 'Water evaporating from wet paving cools it, but only while there is water left to evaporate.',
+  },
+};
+
+/** Inline marker for a term: dotted underline, focusable, opens the footnote. */
+function gl(key, label) {
+  if (!GLOSSARY[key]) throw new Error(`unknown glossary term ${key}`);
+  return `<span class="gl" tabindex="0" role="button" aria-haspopup="dialog" data-gl="${key}">${label ?? GLOSSARY[key].term}</span>`;
+}
+
+return { GLOSSARY, gl };
 })();
 
 __m['app'] = (() => {
@@ -2615,6 +2746,7 @@ const { runModel, shadeClassField, paletteLut, PALETTE_STOPS, heatRgb } = __m['t
 const { Life, shadeDensity, shadeAt } = __m['life'];
 const { Renderer, INTRO, quantHour } = __m['render'];
 const { MATERIALS, SOURCES, BASIS, paramKeys } = __m['materials'];
+const { GLOSSARY, gl } = __m['glossary'];
 
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
@@ -2687,7 +2819,15 @@ function boot(scene, root = document) {
     roofs: [`White roof ${fmt(at('coolRoof', 15))} °C,`, `dark roof ${fmt(at('darkRoof', 15))} °C at 3 pm`],
     pond: [`The pond stays near ${fmt(at('water', 15))} °C`],
   };
-  const notes = scene.notes.slice(0, 5).map((n) => ({ ...n, text: notesText[n.key] }));
+  // glossary terms inside the canvas notes: [key, exact substring of a line]
+  const notesTerms = {
+    asphalt: [['albedo', 'albedo 0.12'], ['nightLag', `still ${fmt(at('asphalt', 23))} °C at 11 pm`]],
+    lawn: [['surfaceTemp', `${fmt(at('grass', 15))} °C at 3 pm`], ['nightLag', `${fmt(at('grass', 23))} °C at 11 pm`]],
+    shade: [['tmrt', 'shady pavement']],
+    roofs: [['coolRoof', 'White roof']],
+    pond: [],
+  };
+  const notes = scene.notes.slice(0, 5).map((n) => ({ ...n, text: notesText[n.key], terms: notesTerms[n.key] }));
 
   const thermalMix = (f) => {
     const k = clamp((f - S.since) / FADE, 0, 1);
@@ -2763,7 +2903,11 @@ function boot(scene, root = document) {
     else if (k === 'r' || k === 'R') {
       S.frame = 0;
       S.intro = true;
-    } else if (k === 'Escape') hideCard();
+    } else if (k === 'Escape') {
+      if (!fn.hidden) hideFn();
+      else if (!terms.hidden) toggleTerms(false);
+      else hideCard();
+    }
     else if (k === '+' || k === '=') zoomBy(1);
     else if (k === '-' || k === '_') zoomBy(-1);
     else if (k.startsWith('Arrow')) {
@@ -2792,8 +2936,15 @@ function boot(scene, root = document) {
     drag = { x: e.clientX, y: e.clientY, cam: { ...S.cam }, moved: false };
     canvas.setPointerCapture(e.pointerId);
   });
+  const noteHit = (x, y) => (R.noteHits ?? []).find((h) => x >= h.x && x <= h.x + h.w && y >= h.y - h.h && y <= h.y + 3);
   canvas.addEventListener('pointermove', (e) => {
-    if (!drag) return;
+    if (!drag) {
+      const h = noteHit(e.clientX, e.clientY);
+      canvas.style.cursor = h ? 'help' : '';
+      if (h && fn.hidden) showFn(h.key, { left: h.x, right: h.x + h.w, top: h.y - h.h, bottom: h.y + 3 }, false);
+      else if (!h && !fn.hidden && !fnPinned) hideFn();
+      return;
+    }
     const dx = e.clientX - drag.x;
     const dy = e.clientY - drag.y;
     if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
@@ -2807,6 +2958,12 @@ function boot(scene, root = document) {
     const d = drag;
     drag = null;
     if (d && !d.moved) {
+      const h = noteHit(e.clientX, e.clientY);
+      if (h) {
+        showFn(h.key, { left: h.x, right: h.x + h.w, top: h.y - h.h, bottom: h.y + 3 }, true);
+        return;
+      }
+      if (!fn.hidden) hideFn();
       const p = pick(e.clientX, e.clientY);
       if (p) showCard(p, e.clientX, e.clientY);
       else hideCard();
@@ -2873,6 +3030,7 @@ function boot(scene, root = document) {
     const ts = mat === 'canopy' ? (hh) => thermal.canopyTemp(hh) : mean;
     return {
       title,
+      matId: mat,
       material: m.name,
       params: Object.fromEntries(paramKeys(m).map((k) => [k, m[k]])),
       caveat: m.caveat ?? null,
@@ -2898,31 +3056,31 @@ function boot(scene, root = document) {
       (v.verified ? '' : ' <span class="unv" title="value not yet checked against the primary source">unverified</span>');
     const P = d.params;
     const heat = P.thinC
-      ? `<tr><td>heat capacity C (thin layer)</td><td>${P.thinC.value / 1000} kJ m⁻² K⁻¹${tag(P.thinC)}</td></tr>`
+      ? `<tr><td>${gl('heatCapacity', 'heat capacity C')}</td><td>${P.thinC.value / 1000} kJ m⁻² K⁻¹${tag(P.thinC)}</td></tr>`
       : P.mu
-        ? `<tr><td>admittance μ</td><td>${P.mu.value} J m⁻² s⁻½ K⁻¹${tag(P.mu)}</td></tr>`
+        ? `<tr><td>${gl('admittance', 'admittance μ')}</td><td>${P.mu.value} J m⁻² s⁻½ K⁻¹${tag(P.mu)}</td></tr>`
         : '';
     const srcs = [...new Set(Object.values(d.params).map((v) => v.source))];
     card.innerHTML = `
       <button class="x" aria-label="close">×</button>
       <h3>${d.title}</h3>
-      <div class="mat">${d.material}</div>
+      <div class="mat">${d.matId === 'coolroof' ? gl('coolRoof', d.material) : d.material}</div>
       <table>
-        <tr><td>albedo α</td><td>${P.alpha.value}${tag(P.alpha)}</td></tr>
-        <tr><td>emissivity ε</td><td>${P.eps.value}${tag(P.eps)}</td></tr>
+        <tr><td>${gl('albedo', 'albedo α')}</td><td>${P.alpha.value}${tag(P.alpha)}</td></tr>
+        <tr><td>${gl('emissivity', 'emissivity ε')}</td><td>${P.eps.value}${tag(P.eps)}</td></tr>
         ${heat}
-        <tr><td>evaporative fraction</td><td>${P.ef.value}${tag(P.ef)}</td></tr>
-        <tr><td>sky view factor</td><td>${d.svf.toFixed(2)}</td></tr>
-        <tr class="t"><td>surface now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
-        <tr class="t"><td>surface 15:00 / 23:00</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
+        <tr><td>${gl('ef', 'evaporative fraction')}</td><td>${P.ef.value}${tag(P.ef)}</td></tr>
+        <tr><td>${gl('svf', 'sky view factor')}</td><td>${d.svf.toFixed(2)}</td></tr>
+        <tr class="t"><td>${gl('surfaceTemp', 'surface')} now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
+        <tr class="t"><td>surface 15:00 / ${gl('nightLag', '23:00')}</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
         ${d.groundNow !== null ? `<tr><td>ground beneath now</td><td>${fmt(d.groundNow)} °C</td></tr>` : ''}
-        ${d.tmrtNow !== null ? `<tr><td>Tmrt (person) now / 15:00</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
+        ${d.tmrtNow !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} (person) now / 15:00</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
         <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
       </table>
       <p class="note">${d.note}</p>
       ${d.caveat ? `<p class="caveat">${d.caveat}</p>` : ''}
       ${d.prescribed ? `<p class="caveat">${d.prescribed}</p>` : ''}
-      <p class="src">Sources: ${srcs.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: force-restore (Deardorff 1978). Basis tags and the model-vs-literature table: docs/sources.md.</p>`;
+      <p class="src">Sources: ${srcs.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: ${gl('forceRestore', 'force-restore')} (Deardorff 1978), simulated. Basis tags and the model-vs-literature table: docs/sources.md.</p>`;
     card.querySelector('.x').onclick = hideCard;
     card._pick = p;
     card.dataset.open = '1';
@@ -2940,6 +3098,84 @@ function boot(scene, root = document) {
     card.style.display = 'none';
     card.dataset.open = '0';
   }
+
+  // ---- footnotes (glossary) ---------------------------------------------------------------
+  const fn = $('fn');
+  const terms = $('terms');
+  const termsBtn = $('termsBtn');
+  let fnPinned = false;
+  let fnTimer = null;
+  $('termsList').innerHTML = Object.keys(GLOSSARY).map((k) => `<li>${gl(k)}</li>`).join('');
+  function showFn(key, r, pinned, inCard = false) {
+    const g = GLOSSARY[key];
+    if (!g) return;
+    clearTimeout(fnTimer);
+    fn.innerHTML = `<b>${g.term}</b><p>${g.text}</p><p class="rng">Typical: ${g.range}</p><p class="why">Why it matters: ${g.why}</p>`;
+    fn.dataset.key = key;
+    fn.hidden = false;
+    fnPinned = pinned;
+    const w = fn.offsetWidth;
+    const h = fn.offsetHeight;
+    let top = r.bottom + 6;
+    let left = r.left;
+    if (inCard) {
+      // beside the heat card, so it never hides the card's other rows
+      const c = card.getBoundingClientRect();
+      left = c.left - w - 8 >= 8 ? c.left - w - 8 : c.right + 8;
+      top = r.top - 10;
+    } else if (top + h > window.innerHeight - 8) top = r.top - h - 6;
+    fn.style.left = `${Math.max(8, Math.min(window.innerWidth - w - 8, left))}px`;
+    fn.style.top = `${Math.max(8, Math.min(window.innerHeight - h - 8, top))}px`;
+  }
+  function hideFn() {
+    fn.hidden = true;
+    fn.dataset.key = '';
+    fnPinned = false;
+  }
+  function toggleTerms(open = terms.hidden) {
+    terms.hidden = !open;
+    termsBtn.setAttribute('aria-expanded', String(open));
+  }
+  termsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleTerms();
+  });
+  const termOf = (e) => (e.target && e.target.closest ? e.target.closest('.gl') : null);
+  root.addEventListener('mouseover', (e) => {
+    const t = termOf(e);
+    if (t && !(fnPinned && fn.dataset.key === t.dataset.gl)) showFn(t.dataset.gl, t.getBoundingClientRect(), false, card.contains(t));
+  });
+  root.addEventListener('mouseout', (e) => {
+    const t = termOf(e);
+    if (t && !fnPinned) fnTimer = setTimeout(hideFn, 300);
+  });
+  fn.addEventListener('mouseenter', () => clearTimeout(fnTimer));
+  fn.addEventListener('mouseleave', () => {
+    if (!fnPinned) fnTimer = setTimeout(hideFn, 300);
+  });
+  root.addEventListener('focusin', (e) => {
+    const t = termOf(e);
+    if (t) showFn(t.dataset.gl, t.getBoundingClientRect(), true, card.contains(t));
+  });
+  root.addEventListener('click', (e) => {
+    const t = termOf(e);
+    if (t) {
+      e.stopPropagation();
+      showFn(t.dataset.gl, t.getBoundingClientRect(), true, card.contains(t));
+      return;
+    }
+    if (!fn.hidden && !fn.contains(e.target) && e.target !== canvas) hideFn();
+    if (!terms.hidden && !terms.contains(e.target) && e.target !== termsBtn) toggleTerms(false);
+  }, true);
+  root.addEventListener('keydown', (e) => {
+    const t = termOf(e);
+    if (t && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!fn.hidden && fn.dataset.key === t.dataset.gl) hideFn();
+      else showFn(t.dataset.gl, t.getBoundingClientRect(), true, card.contains(t));
+    }
+  }, true);
 
   // ---- loop ----------------------------------------------------------------------------------
   const frameTimes = [];
@@ -3019,6 +3255,9 @@ function boot(scene, root = document) {
     },
     card: (kind, a, b) => cardData(kind === 'building' ? { kind, B: world.buildings.find((B) => B.id === a) } : { kind: 'ground', x: a, y: b, g: scene.ground[world.parcelAt(a, b)] }),
     stats: () => ({ ...lastStats }),
+    /** Glossary keys, and the on-canvas note term hit boxes (CSS px). */
+    glossaryKeys: () => Object.keys(GLOSSARY),
+    noteTerms: () => (R.noteHits ?? []).map((h) => ({ ...h })),
     /**
      * Opaque boxes in draw order (for occlusion masks in checks):
      * {kind, b (building index or -1), box: [x0, y0, x1, y1, z0, z1]}.

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const city = process.argv[2] ?? 'asphalt-park';
-const MODULES = ['core', 'sun', 'materials', 'thermal', 'world', 'pen', 'kit', 'life', 'render', 'app'];
+const MODULES = ['core', 'sun', 'materials', 'thermal', 'world', 'pen', 'kit', 'life', 'render', 'glossary', 'app'];
 const LIMIT = 500 * 1024;
 
 // Each ES module becomes a function scope; imports become destructuring.

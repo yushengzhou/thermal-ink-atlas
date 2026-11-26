@@ -7,6 +7,7 @@ import { runModel, shadeClassField, paletteLut, PALETTE_STOPS, heatRgb } from '.
 import { Life, shadeDensity, shadeAt } from './life.js';
 import { Renderer, INTRO, quantHour } from './render.js';
 import { MATERIALS, SOURCES, BASIS, paramKeys } from './materials.js';
+import { GLOSSARY, gl } from './glossary.js';
 
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
@@ -79,7 +80,15 @@ export function boot(scene, root = document) {
     roofs: [`White roof ${fmt(at('coolRoof', 15))} °C,`, `dark roof ${fmt(at('darkRoof', 15))} °C at 3 pm`],
     pond: [`The pond stays near ${fmt(at('water', 15))} °C`],
   };
-  const notes = scene.notes.slice(0, 5).map((n) => ({ ...n, text: notesText[n.key] }));
+  // glossary terms inside the canvas notes: [key, exact substring of a line]
+  const notesTerms = {
+    asphalt: [['albedo', 'albedo 0.12'], ['nightLag', `still ${fmt(at('asphalt', 23))} °C at 11 pm`]],
+    lawn: [['surfaceTemp', `${fmt(at('grass', 15))} °C at 3 pm`], ['nightLag', `${fmt(at('grass', 23))} °C at 11 pm`]],
+    shade: [['tmrt', 'shady pavement']],
+    roofs: [['coolRoof', 'White roof']],
+    pond: [],
+  };
+  const notes = scene.notes.slice(0, 5).map((n) => ({ ...n, text: notesText[n.key], terms: notesTerms[n.key] }));
 
   const thermalMix = (f) => {
     const k = clamp((f - S.since) / FADE, 0, 1);
@@ -155,7 +164,11 @@ export function boot(scene, root = document) {
     else if (k === 'r' || k === 'R') {
       S.frame = 0;
       S.intro = true;
-    } else if (k === 'Escape') hideCard();
+    } else if (k === 'Escape') {
+      if (!fn.hidden) hideFn();
+      else if (!terms.hidden) toggleTerms(false);
+      else hideCard();
+    }
     else if (k === '+' || k === '=') zoomBy(1);
     else if (k === '-' || k === '_') zoomBy(-1);
     else if (k.startsWith('Arrow')) {
@@ -184,8 +197,15 @@ export function boot(scene, root = document) {
     drag = { x: e.clientX, y: e.clientY, cam: { ...S.cam }, moved: false };
     canvas.setPointerCapture(e.pointerId);
   });
+  const noteHit = (x, y) => (R.noteHits ?? []).find((h) => x >= h.x && x <= h.x + h.w && y >= h.y - h.h && y <= h.y + 3);
   canvas.addEventListener('pointermove', (e) => {
-    if (!drag) return;
+    if (!drag) {
+      const h = noteHit(e.clientX, e.clientY);
+      canvas.style.cursor = h ? 'help' : '';
+      if (h && fn.hidden) showFn(h.key, { left: h.x, right: h.x + h.w, top: h.y - h.h, bottom: h.y + 3 }, false);
+      else if (!h && !fn.hidden && !fnPinned) hideFn();
+      return;
+    }
     const dx = e.clientX - drag.x;
     const dy = e.clientY - drag.y;
     if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
@@ -199,6 +219,12 @@ export function boot(scene, root = document) {
     const d = drag;
     drag = null;
     if (d && !d.moved) {
+      const h = noteHit(e.clientX, e.clientY);
+      if (h) {
+        showFn(h.key, { left: h.x, right: h.x + h.w, top: h.y - h.h, bottom: h.y + 3 }, true);
+        return;
+      }
+      if (!fn.hidden) hideFn();
       const p = pick(e.clientX, e.clientY);
       if (p) showCard(p, e.clientX, e.clientY);
       else hideCard();
@@ -265,6 +291,7 @@ export function boot(scene, root = document) {
     const ts = mat === 'canopy' ? (hh) => thermal.canopyTemp(hh) : mean;
     return {
       title,
+      matId: mat,
       material: m.name,
       params: Object.fromEntries(paramKeys(m).map((k) => [k, m[k]])),
       caveat: m.caveat ?? null,
@@ -290,31 +317,31 @@ export function boot(scene, root = document) {
       (v.verified ? '' : ' <span class="unv" title="value not yet checked against the primary source">unverified</span>');
     const P = d.params;
     const heat = P.thinC
-      ? `<tr><td>heat capacity C (thin layer)</td><td>${P.thinC.value / 1000} kJ m⁻² K⁻¹${tag(P.thinC)}</td></tr>`
+      ? `<tr><td>${gl('heatCapacity', 'heat capacity C')}</td><td>${P.thinC.value / 1000} kJ m⁻² K⁻¹${tag(P.thinC)}</td></tr>`
       : P.mu
-        ? `<tr><td>admittance μ</td><td>${P.mu.value} J m⁻² s⁻½ K⁻¹${tag(P.mu)}</td></tr>`
+        ? `<tr><td>${gl('admittance', 'admittance μ')}</td><td>${P.mu.value} J m⁻² s⁻½ K⁻¹${tag(P.mu)}</td></tr>`
         : '';
     const srcs = [...new Set(Object.values(d.params).map((v) => v.source))];
     card.innerHTML = `
       <button class="x" aria-label="close">×</button>
       <h3>${d.title}</h3>
-      <div class="mat">${d.material}</div>
+      <div class="mat">${d.matId === 'coolroof' ? gl('coolRoof', d.material) : d.material}</div>
       <table>
-        <tr><td>albedo α</td><td>${P.alpha.value}${tag(P.alpha)}</td></tr>
-        <tr><td>emissivity ε</td><td>${P.eps.value}${tag(P.eps)}</td></tr>
+        <tr><td>${gl('albedo', 'albedo α')}</td><td>${P.alpha.value}${tag(P.alpha)}</td></tr>
+        <tr><td>${gl('emissivity', 'emissivity ε')}</td><td>${P.eps.value}${tag(P.eps)}</td></tr>
         ${heat}
-        <tr><td>evaporative fraction</td><td>${P.ef.value}${tag(P.ef)}</td></tr>
-        <tr><td>sky view factor</td><td>${d.svf.toFixed(2)}</td></tr>
-        <tr class="t"><td>surface now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
-        <tr class="t"><td>surface 15:00 / 23:00</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
+        <tr><td>${gl('ef', 'evaporative fraction')}</td><td>${P.ef.value}${tag(P.ef)}</td></tr>
+        <tr><td>${gl('svf', 'sky view factor')}</td><td>${d.svf.toFixed(2)}</td></tr>
+        <tr class="t"><td>${gl('surfaceTemp', 'surface')} now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
+        <tr class="t"><td>surface 15:00 / ${gl('nightLag', '23:00')}</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
         ${d.groundNow !== null ? `<tr><td>ground beneath now</td><td>${fmt(d.groundNow)} °C</td></tr>` : ''}
-        ${d.tmrtNow !== null ? `<tr><td>Tmrt (person) now / 15:00</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
+        ${d.tmrtNow !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} (person) now / 15:00</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
         <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
       </table>
       <p class="note">${d.note}</p>
       ${d.caveat ? `<p class="caveat">${d.caveat}</p>` : ''}
       ${d.prescribed ? `<p class="caveat">${d.prescribed}</p>` : ''}
-      <p class="src">Sources: ${srcs.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: force-restore (Deardorff 1978). Basis tags and the model-vs-literature table: docs/sources.md.</p>`;
+      <p class="src">Sources: ${srcs.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: ${gl('forceRestore', 'force-restore')} (Deardorff 1978), simulated. Basis tags and the model-vs-literature table: docs/sources.md.</p>`;
     card.querySelector('.x').onclick = hideCard;
     card._pick = p;
     card.dataset.open = '1';
@@ -332,6 +359,84 @@ export function boot(scene, root = document) {
     card.style.display = 'none';
     card.dataset.open = '0';
   }
+
+  // ---- footnotes (glossary) ---------------------------------------------------------------
+  const fn = $('fn');
+  const terms = $('terms');
+  const termsBtn = $('termsBtn');
+  let fnPinned = false;
+  let fnTimer = null;
+  $('termsList').innerHTML = Object.keys(GLOSSARY).map((k) => `<li>${gl(k)}</li>`).join('');
+  function showFn(key, r, pinned, inCard = false) {
+    const g = GLOSSARY[key];
+    if (!g) return;
+    clearTimeout(fnTimer);
+    fn.innerHTML = `<b>${g.term}</b><p>${g.text}</p><p class="rng">Typical: ${g.range}</p><p class="why">Why it matters: ${g.why}</p>`;
+    fn.dataset.key = key;
+    fn.hidden = false;
+    fnPinned = pinned;
+    const w = fn.offsetWidth;
+    const h = fn.offsetHeight;
+    let top = r.bottom + 6;
+    let left = r.left;
+    if (inCard) {
+      // beside the heat card, so it never hides the card's other rows
+      const c = card.getBoundingClientRect();
+      left = c.left - w - 8 >= 8 ? c.left - w - 8 : c.right + 8;
+      top = r.top - 10;
+    } else if (top + h > window.innerHeight - 8) top = r.top - h - 6;
+    fn.style.left = `${Math.max(8, Math.min(window.innerWidth - w - 8, left))}px`;
+    fn.style.top = `${Math.max(8, Math.min(window.innerHeight - h - 8, top))}px`;
+  }
+  function hideFn() {
+    fn.hidden = true;
+    fn.dataset.key = '';
+    fnPinned = false;
+  }
+  function toggleTerms(open = terms.hidden) {
+    terms.hidden = !open;
+    termsBtn.setAttribute('aria-expanded', String(open));
+  }
+  termsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleTerms();
+  });
+  const termOf = (e) => (e.target && e.target.closest ? e.target.closest('.gl') : null);
+  root.addEventListener('mouseover', (e) => {
+    const t = termOf(e);
+    if (t && !(fnPinned && fn.dataset.key === t.dataset.gl)) showFn(t.dataset.gl, t.getBoundingClientRect(), false, card.contains(t));
+  });
+  root.addEventListener('mouseout', (e) => {
+    const t = termOf(e);
+    if (t && !fnPinned) fnTimer = setTimeout(hideFn, 300);
+  });
+  fn.addEventListener('mouseenter', () => clearTimeout(fnTimer));
+  fn.addEventListener('mouseleave', () => {
+    if (!fnPinned) fnTimer = setTimeout(hideFn, 300);
+  });
+  root.addEventListener('focusin', (e) => {
+    const t = termOf(e);
+    if (t) showFn(t.dataset.gl, t.getBoundingClientRect(), true, card.contains(t));
+  });
+  root.addEventListener('click', (e) => {
+    const t = termOf(e);
+    if (t) {
+      e.stopPropagation();
+      showFn(t.dataset.gl, t.getBoundingClientRect(), true, card.contains(t));
+      return;
+    }
+    if (!fn.hidden && !fn.contains(e.target) && e.target !== canvas) hideFn();
+    if (!terms.hidden && !terms.contains(e.target) && e.target !== termsBtn) toggleTerms(false);
+  }, true);
+  root.addEventListener('keydown', (e) => {
+    const t = termOf(e);
+    if (t && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!fn.hidden && fn.dataset.key === t.dataset.gl) hideFn();
+      else showFn(t.dataset.gl, t.getBoundingClientRect(), true, card.contains(t));
+    }
+  }, true);
 
   // ---- loop ----------------------------------------------------------------------------------
   const frameTimes = [];
@@ -411,6 +516,9 @@ export function boot(scene, root = document) {
     },
     card: (kind, a, b) => cardData(kind === 'building' ? { kind, B: world.buildings.find((B) => B.id === a) } : { kind: 'ground', x: a, y: b, g: scene.ground[world.parcelAt(a, b)] }),
     stats: () => ({ ...lastStats }),
+    /** Glossary keys, and the on-canvas note term hit boxes (CSS px). */
+    glossaryKeys: () => Object.keys(GLOSSARY),
+    noteTerms: () => (R.noteHits ?? []).map((h) => ({ ...h })),
     /**
      * Opaque boxes in draw order (for occlusion masks in checks):
      * {kind, b (building index or -1), box: [x0, y0, x1, y1, z0, z1]}.

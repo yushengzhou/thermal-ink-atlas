@@ -510,6 +510,7 @@ export class Renderer {
       if (intro) lifeA = clamp((f - INTRO.wash) / (INTRO.life - INTRO.wash), 0, 1);
     }
     this.stats.people = 0;
+    this.noteHits = [];
     if (lifeA > 0) {
       if (look.people !== false) this.drawPeople(ctx, f, cam, hq, W, H, lifeA, look.thermalMix ?? 0);
       if (look.notes) this.drawNotes(ctx, cam, W, H, look.notes, lifeA);
@@ -647,6 +648,7 @@ export class Renderer {
   }
 
   drawNotes(ctx, cam, W, H, notes, alpha) {
+    this.noteHits = [];
     const [ox, oy, Z] = this.origin(cam, W, H);
     const d = this.dpr;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -685,6 +687,24 @@ export class Renderer {
       ctx.strokeRect(bx - 5 * d, by - 3 * d, w + 10 * d, lines.length * lh + 6 * d);
       ctx.fillStyle = rgbCss(i === 0 ? hexRgb('#8a2f22') : INK);
       lines.forEach((l, k) => ctx.fillText(l, bx, by + k * lh));
+      // glossary terms: dotted underline + hit box (CSS px) for the footnotes
+      for (const [key, sub] of n.terms ?? []) {
+        const k = lines.findIndex((l) => l.includes(sub));
+        if (k < 0) continue;
+        const x0 = bx + ctx.measureText(lines[k].slice(0, lines[k].indexOf(sub))).width;
+        const w = ctx.measureText(sub).width;
+        const y = by + k * lh + 16 * d;
+        ctx.save();
+        ctx.setLineDash([1.5 * d, 2 * d]);
+        ctx.lineWidth = 1 * d;
+        ctx.strokeStyle = ctx.fillStyle;
+        ctx.beginPath();
+        ctx.moveTo(x0, y);
+        ctx.lineTo(x0 + w, y);
+        ctx.stroke();
+        ctx.restore();
+        this.noteHits.push({ key, x: x0 / d, y: y / d, w: w / d, h: lh / d });
+      }
     });
     ctx.globalAlpha = 1;
   }

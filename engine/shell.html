@@ -25,7 +25,7 @@
   #legendBar { height: 12px; border: 1px solid #2b2621; margin: 4px 0 2px; }
   #legend .ends { display: flex; justify-content: space-between; font-size: 12px; white-space: nowrap; }
   #legend .cap { font-size: 11px; opacity: .7; margin-top: 2px; }
-  #card { display: none; position: fixed; width: 310px; max-height: calc(100vh - 20px); overflow: auto; box-sizing: border-box; padding: 12px 14px; background: #fbf7ee; border: 1.5px solid #2b2621;
+  #card { display: none; position: fixed; width: 350px; max-height: calc(100vh - 20px); overflow: auto; box-sizing: border-box; padding: 12px 14px; background: #fbf7ee; border: 1.5px solid #2b2621;
     border-radius: 4px 10px 5px 9px; box-shadow: 3px 4px 0 rgba(43,38,33,.2); font-size: 13px; }
   #card h3 { margin: 0 0 2px; font-size: 17px; }
   #card .mat { opacity: .75; margin-bottom: 6px; }
@@ -38,7 +38,21 @@
   #card .caveat { margin: 4px 0; padding: 4px 6px; font-size: 12px; background: #f3e3d6; border-left: 3px solid #8a2f22; }
   #card .note { margin: 8px 0 4px; font-style: italic; }
   #card .src { margin: 4px 0 0; font-size: 11px; opacity: .75; }
-  .noui #cartouche, .noui #bar, .noui #legend { display: none; }
+  .noui #cartouche, .noui #bar, .noui #legend, .noui #terms { display: none; }
+  #cartouche .sim { font-size: 12px; opacity: .7; letter-spacing: .02em; }
+  .gl { border-bottom: 1px dotted currentColor; cursor: help; }
+  .gl:focus-visible { outline: 1.5px dashed #8a2f22; outline-offset: 2px; }
+  #termsBtn { font: 12px/1 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; border-radius: 4px 7px 3px 6px; background: #fbf7ee; cursor: pointer; color: #2b2621; }
+  #terms { position: fixed; right: 18px; bottom: 74px; width: 250px; max-height: 50vh; overflow: auto; padding: 8px 12px; background: #fbf7ee;
+    border: 1.5px solid #2b2621; border-radius: 6px 3px 8px 3px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); font-size: 13px; }
+  #terms ul { margin: 4px 0 0; padding-left: 16px; }
+  #terms li { margin: 2px 0; }
+  #fn { position: fixed; z-index: 10; width: 270px; padding: 9px 12px 8px; background: #fffaf0; border: 1.5px solid #2b2621;
+    border-radius: 3px 9px 4px 8px; box-shadow: 2px 3px 0 rgba(43,38,33,.22); font-size: 12.5px; line-height: 1.4; }
+  #fn b { display: block; font-size: 13.5px; margin-bottom: 2px; }
+  #fn p { margin: 3px 0; }
+  #fn .rng { opacity: .8; }
+  #fn .why { font-style: italic; }
   #card .x { position: absolute; right: 6px; top: 4px; border: 0; background: none; font-size: 18px; cursor: pointer; color: #2b2621; }
 </style>
 </head>
@@ -47,16 +61,23 @@
 <div id="cartouche">
   <h1>Thermal-Ink Atlas</h1>
   <p class="hand">__TITLE__</p>
+  <p class="sim">Simulated block · invented geometry · <span class="gl" tabindex="0" role="button" aria-haspopup="dialog" data-gl="forceRestore">modelled</span> <span class="gl" tabindex="0" role="button" aria-haspopup="dialog" data-gl="surfaceTemp">temperatures</span></p>
   <p>__SUBTITLE__</p>
 </div>
-<div id="legend"><div class="hand">surface temperature</div><div id="legendBar"></div>
+<div id="legend"><div class="hand"><span class="gl" tabindex="0" role="button" aria-haspopup="dialog" data-gl="surfaceTemp">surface temperature</span></div><div id="legendBar"></div>
   <div class="ends"><span id="legendLo"></span><span id="legendHi"></span></div>
-  <div class="cap">modelled surface temperature; inputs not yet verified are flagged on the cards</div></div>
+  <div class="cap">Simulated with a <span class="gl" tabindex="0" role="button" aria-haspopup="dialog" data-gl="forceRestore">force-restore model</span> on an invented block, not measured. Inputs not yet verified are flagged on the cards.</div></div>
 <div id="bar">
   <input id="hour" type="range" min="0" max="23.75" step="0.25" value="15" aria-label="hour of day">
   <span id="hourLabel" class="hand"></span>
   <span id="keys"><kbd>T</kbd> heat · <kbd>H</kbd> hour · drag · wheel · click a parcel</span>
+  <button id="termsBtn" type="button" aria-expanded="false" aria-controls="terms">terms</button>
 </div>
+<div id="terms" role="dialog" aria-label="Glossary of terms" hidden>
+  <div class="hand">Terms used here</div>
+  <ul id="termsList"></ul>
+</div>
+<div id="fn" role="dialog" aria-live="polite" hidden></div>
 <div id="card" data-open="0"></div>
 <script>
 __BUNDLE__
