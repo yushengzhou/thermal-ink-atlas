@@ -56,6 +56,7 @@ export function boot(scene, root = document) {
     notes: q.get('notes') !== '0',
     intro: true,
   };
+  if (q.get('ui') === '0') root.body.classList.add('noui');
   if (q.has('hour')) S.hour = clamp(parseFloat(q.get('hour')) || 0, 0, 23.75);
   if (q.has('thermal')) S.thermal = true;
   if (q.has('cam')) {
@@ -304,11 +305,15 @@ export function boot(scene, root = document) {
     card.querySelector('.x').onclick = hideCard;
     card._pick = p;
     card.dataset.open = '1';
-    if (x !== undefined) {
-      card.style.left = `${Math.min(window.innerWidth - 340, x + 16)}px`;
-      card.style.top = `${Math.max(10, Math.min(window.innerHeight - 420, y - 40))}px`;
-    }
     card.style.display = 'block';
+    if (x !== undefined) {
+      // keep the card inside the window, beside the click
+      const w = card.offsetWidth;
+      const h = card.offsetHeight;
+      const left = x + 16 + w > window.innerWidth - 10 ? x - 16 - w : x + 16;
+      card.style.left = `${Math.max(10, left)}px`;
+      card.style.top = `${Math.max(10, Math.min(window.innerHeight - h - 10, y - 40))}px`;
+    }
   }
   function hideCard() {
     card.style.display = 'none';

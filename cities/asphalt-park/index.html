@@ -20,11 +20,12 @@
   #hourLabel { min-width: 150px; font-variant-numeric: tabular-nums; }
   #keys { font-size: 12px; opacity: .75; }
   kbd { font: 12px/1 ui-monospace, Menlo, monospace; border: 1px solid #2b2621; border-radius: 3px; padding: 1px 4px; background: #fbf7ee; }
-  #legend { position: fixed; right: 18px; top: 18px; width: 220px; padding: 8px 12px; background: rgba(246,240,226,.92);
+  #legend { position: fixed; right: 18px; top: 18px; width: 240px; padding: 8px 12px; background: rgba(246,240,226,.92);
     border: 1.5px solid #2b2621; border-radius: 6px 3px 8px 3px; transition: opacity .6s; opacity: 0; }
   #legendBar { height: 12px; border: 1px solid #2b2621; margin: 4px 0 2px; }
-  #legend .ends { display: flex; justify-content: space-between; font-size: 12px; }
-  #card { display: none; position: fixed; width: 310px; padding: 12px 14px; background: #fbf7ee; border: 1.5px solid #2b2621;
+  #legend .ends { display: flex; justify-content: space-between; font-size: 12px; white-space: nowrap; }
+  #legend .cap { font-size: 11px; opacity: .7; margin-top: 2px; }
+  #card { display: none; position: fixed; width: 310px; max-height: calc(100vh - 20px); overflow: auto; box-sizing: border-box; padding: 12px 14px; background: #fbf7ee; border: 1.5px solid #2b2621;
     border-radius: 4px 10px 5px 9px; box-shadow: 3px 4px 0 rgba(43,38,33,.2); font-size: 13px; }
   #card h3 { margin: 0 0 2px; font-size: 17px; }
   #card .mat { opacity: .75; margin-bottom: 6px; }
@@ -35,6 +36,7 @@
   #card .unv { display: inline-block; margin-left: 4px; padding: 0 4px; font-size: 10px; border: 1px dashed #8a2f22; color: #8a2f22; border-radius: 3px; }
   #card .note { margin: 8px 0 4px; font-style: italic; }
   #card .src { margin: 4px 0 0; font-size: 11px; opacity: .75; }
+  .noui #cartouche, .noui #bar, .noui #legend { display: none; }
   #card .x { position: absolute; right: 6px; top: 4px; border: 0; background: none; font-size: 18px; cursor: pointer; color: #2b2621; }
 </style>
 </head>
@@ -43,10 +45,11 @@
 <div id="cartouche">
   <h1>Thermal-Ink Atlas</h1>
   <p class="hand">Asphalt street vs pocket park</p>
-  <p>Assumed heat-wave day: 35 N, 20 July, air 25-35 C, light wind 1.5 m/s.</p>
+  <p>Assumed heat-wave day: 35° N, 20 July, air 25–35 °C, light wind 1.5 m/s.</p>
 </div>
 <div id="legend"><div class="hand">surface temperature</div><div id="legendBar"></div>
-  <div class="ends"><span id="legendLo"></span><span>model, unverified inputs flagged</span><span id="legendHi"></span></div></div>
+  <div class="ends"><span id="legendLo"></span><span id="legendHi"></span></div>
+  <div class="cap">modelled surface temperature; inputs not yet verified are flagged on the cards</div></div>
 <div id="bar">
   <input id="hour" type="range" min="0" max="23.75" step="0.25" value="15" aria-label="hour of day">
   <span id="hourLabel" class="hand"></span>
@@ -2606,6 +2609,7 @@ function boot(scene, root = document) {
     notes: q.get('notes') !== '0',
     intro: true,
   };
+  if (q.get('ui') === '0') root.body.classList.add('noui');
   if (q.has('hour')) S.hour = clamp(parseFloat(q.get('hour')) || 0, 0, 23.75);
   if (q.has('thermal')) S.thermal = true;
   if (q.has('cam')) {
@@ -2854,11 +2858,15 @@ function boot(scene, root = document) {
     card.querySelector('.x').onclick = hideCard;
     card._pick = p;
     card.dataset.open = '1';
-    if (x !== undefined) {
-      card.style.left = `${Math.min(window.innerWidth - 340, x + 16)}px`;
-      card.style.top = `${Math.max(10, Math.min(window.innerHeight - 420, y - 40))}px`;
-    }
     card.style.display = 'block';
+    if (x !== undefined) {
+      // keep the card inside the window, beside the click
+      const w = card.offsetWidth;
+      const h = card.offsetHeight;
+      const left = x + 16 + w > window.innerWidth - 10 ? x - 16 - w : x + 16;
+      card.style.left = `${Math.max(10, left)}px`;
+      card.style.top = `${Math.max(10, Math.min(window.innerHeight - h - 10, y - 40))}px`;
+    }
   }
   function hideCard() {
     card.style.display = 'none';
@@ -3022,7 +3030,7 @@ const SCENE = {
     taMax: 35,
     wind: 1.5,
     vapourHpa: 20,
-    note: 'Assumed heat-wave day: 35 N, 20 July, air 25-35 C, light wind 1.5 m/s.',
+    note: 'Assumed heat-wave day: 35° N, 20 July, air 25–35 °C, light wind 1.5 m/s.',
   },
   // Ground parcels, painted in order (later wins). Base is concrete yards.
   ground: [
