@@ -513,6 +513,7 @@ export class Renderer {
     }
     this.stats.people = 0;
     this.stats.sweating = 0;
+    this.stats.sweatGlyphPx = 0;
     this.noteHits = [];
     if (lifeA > 0) {
       if (look.people !== false) this.drawPeople(ctx, f, cam, hq, W, H, lifeA, look.thermalMix ?? 0);
@@ -604,6 +605,61 @@ export class Renderer {
     return sweatState(a.k, t, h.tmrt, inSun ? h.sunlit : 0);
   }
 
+  /**
+   * Cartoon sweat cue: an arc of 2-3 teardrops flying off the head plus a short
+   * heat-shimmer stroke. Glyphs have a pixel floor (>= 9 px tall at DPR 1) so
+   * the cue reads at the default overview; ink outline, pale-blue wash, white
+   * highlight, same ink as the rest of the drawing.
+   */
+  drawSweat(ctx, X, hy, hr, sw, alpha, f) {
+    const dp = this.dpr;
+    const Hd = Math.max(9 * dp, hr * 1.6) * (0.9 + 0.2 * sw.s);
+    const r = Hd * 0.3;
+    this.stats.sweatGlyphPx = Math.max(this.stats.sweatGlyphPx || 0, Hd / dp);
+    ctx.save();
+    ctx.lineWidth = Math.max(0.9 * dp, hr * 0.12);
+    ctx.strokeStyle = rgbCss(INK);
+    for (const d of sw.drops) {
+      const dist = hr * 1.3 + Hd * (0.5 + 1.0 * d.fall);
+      const x = X + Math.sin(d.ang) * dist;
+      const y = hy - Math.cos(d.ang) * dist + d.fall * d.fall * Hd * 0.6; // arcs over, then drops
+      ctx.globalAlpha = alpha * d.alpha;
+      ctx.setTransform(1, 0, 0, 1, x, y);
+      ctx.rotate(d.ang + Math.PI); // tip points back toward the head
+      ctx.beginPath();
+      ctx.moveTo(0, -Hd * 0.5);
+      ctx.bezierCurveTo(r * 0.9, -Hd * 0.15, r * 1.05, Hd * 0.2, 0, Hd * 0.5);
+      ctx.bezierCurveTo(-r * 1.05, Hd * 0.2, -r * 0.9, -Hd * 0.15, 0, -Hd * 0.5);
+      ctx.fillStyle = SWEAT_CSS;
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.ellipse(-r * 0.35, Hd * 0.12, r * 0.28, r * 0.4, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.fill();
+    }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    if (sw.s >= 0.4) {
+      // heat shimmer: two short wavy ink strokes above the head
+      const w = Hd * 0.9;
+      ctx.globalAlpha = alpha * 0.5 * sw.drops[0].alpha;
+      ctx.lineWidth = Math.max(0.8 * dp, hr * 0.1);
+      for (let k = 0; k < 2; k++) {
+        const y0 = hy - hr - Hd * (0.55 + 0.35 * k);
+        ctx.beginPath();
+        for (let i = 0; i <= 12; i++) {
+          const u = i / 12;
+          const xx = X - w / 2 + u * w;
+          const yy = y0 + Math.sin(u * Math.PI * 3 + f * 0.25 + k * 2) * 1.3 * dp;
+          if (i) ctx.lineTo(xx, yy);
+          else ctx.moveTo(xx, yy);
+        }
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+
   drawPeople(ctx, f, cam, hq, W, H, alpha, thermalMix) {
     const agents = this.life.at(f / 60, hq);
     const [ox, oy, Z] = this.origin(cam, W, H);
@@ -678,26 +734,7 @@ export class Renderer {
       ctx.stroke();
       if (sw && sw.drops.length) {
         this.stats.sweating++;
-        // cartoon-sized: a pixel floor keeps the cue legible at the default zoom
-        const dp = this.dpr;
-        const r = Math.max(2.1 * dp, hr * 0.5) * (0.9 + 0.25 * sw.s);
-        const ox = Math.max(hr * 1.7, hr + r * 1.4);
-        const fall = Math.max(hr * 2.8, 7 * dp);
-        ctx.lineWidth = Math.max(0.6 * dp, lw * 0.6);
-        for (const d of sw.drops) {
-          const x = X + d.side * ox;
-          const y = hy - hr * 0.5 - r + d.fall * fall;
-          ctx.globalAlpha = alpha * d.alpha;
-          ctx.beginPath();
-          ctx.moveTo(x, y - r * 2.1);
-          ctx.quadraticCurveTo(x + r * 1.05, y - r * 0.2, x, y + r);
-          ctx.quadraticCurveTo(x - r * 1.05, y - r * 0.2, x, y - r * 2.1);
-          ctx.fillStyle = SWEAT_CSS;
-          ctx.fill();
-          ctx.stroke();
-        }
-        ctx.globalAlpha = alpha;
-        ctx.lineWidth = lw;
+        this.drawSweat(ctx, X, hy, hr, sw, alpha, f);
       }
     }
     ctx.globalAlpha = 1;

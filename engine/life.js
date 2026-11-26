@@ -231,12 +231,13 @@ export function shadeDensity(world, agents, shade) {
 // Tmrt 65 C to 1 at Tmrt 70 C (sunlit lawn sits near 61 C in this model,
 // sunlit asphalt and concrete 65-71 C), so it marks the hot pavement rather
 // than any afternoon sun. Nothing in shade (sunlit share < 0.5) or at night.
-// Each person runs a 1.2 s cycle; in a cycle 2-3 droplets fall for 0.8 s with
-// probability 0.4 + 0.6 x strength. Pure function of (key, t, Tmrt, sunlit).
+// Each person pulses every 1.5 s (staggered by person): for 0.6 s, 2-3
+// droplets fly off the head in a small arc, with probability 0.6 + 0.4 x
+// strength per pulse. Pure function of (key, t, Tmrt, sunlit).
 export const SWEAT_TMRT = 65;
 const SWEAT_FULL = 70;
-const CYCLE = 1.2;
-const DROP = 0.8;
+const CYCLE = 1.5;
+const DROP = 0.6;
 
 export function sweatStrength(tmrt, sunlit) {
   if (!(sunlit >= 0.5)) return 0;
@@ -244,8 +245,9 @@ export function sweatStrength(tmrt, sunlit) {
 }
 
 /**
- * @returns {{s:number, drops:{side:number, fall:number, alpha:number}[], fan:boolean}}
- *   side: -1 left / +1 right of the head; fall: 0..1 of the drop's path.
+ * @returns {{s:number, drops:{ang:number, fall:number, alpha:number}[], fan:boolean}}
+ *   ang: flight direction in radians from straight up (negative = left);
+ *   fall: 0..1 progress of the drop along its flight.
  */
 export function sweatState(k, t, tmrt, sunlit) {
   const s = sweatStrength(tmrt, sunlit);
@@ -254,12 +256,13 @@ export function sweatState(k, t, tmrt, sunlit) {
   const c = Math.floor(tt / CYCLE);
   const ph = (tt - c * CYCLE) / DROP;
   const drops = [];
-  if (ph < 1 && hash3(k, c, 52) < 0.4 + 0.6 * s) {
-    const n = 2 + (hash3(k, c, 53) < 0.5 * s ? 1 : 0); // 2-3 droplets
-    const side0 = hash3(k, c, 54) < 0.5 ? -1 : 1;
+  if (ph < 1 && hash3(k, c, 52) < 0.6 + 0.4 * s) {
+    const n = 2 + (hash3(k, c, 53) < 0.5 + 0.5 * s ? 1 : 0); // 2-3 droplets
+    const flip = hash3(k, c, 54) < 0.5 ? -1 : 1;
+    const angs = n === 3 ? [-0.95, -0.15, 0.75] : [-0.7, 0.6];
     for (let d = 0; d < n; d++) {
-      const p = Math.min(1, ph * 0.85 + d * 0.22);
-      drops.push({ side: d === 1 ? -side0 : side0, fall: p, alpha: 1 - p * p * p });
+      const p = Math.max(0.02, Math.min(1, ph * 1.1 - d * 0.08));
+      drops.push({ ang: angs[d] * flip, fall: p, alpha: 1 - p * p * p });
     }
   }
   // occasional hand-to-brow fan, only in strong heat

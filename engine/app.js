@@ -549,7 +549,7 @@ export function boot(scene, root = document) {
       return life.at(frame / 60, hq).map((a) => {
         const h = R.heatAt(a.x, a.y, hq);
         const st = R.sweatAt(a, frame / 60, hq);
-        return { x: a.x, y: a.y, tmrt: h.tmrt, sunlit: h.sunlit, shade: shadeAt(shadeFor(hq), a.x, a.y), s: st.s, drops: st.drops.length, fan: st.fan };
+        return { x: a.x, y: a.y, tmrt: h.tmrt, sunlit: h.sunlit, shade: shadeAt(shadeFor(hq), a.x, a.y), s: st.s, drops: st.drops.length, fall: st.drops.length ? st.drops[0].fall : null, fan: st.fan, hidden: R.hidden(a.x, a.y) };
       });
     },
     shadeStats(frame = S.frame, hour = S.hour) {
