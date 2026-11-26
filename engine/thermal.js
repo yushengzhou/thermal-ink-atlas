@@ -250,7 +250,8 @@ export function runModel(world, opts = {}) {
       const taK = ta[m] + K0;
       const ta4 = taK * taK * taK * taK;
       // walls seen from the ground: air + 2 K plus a sun term by day that
-      // peaks near 6.9 K at noon (engine assumption; ignores wall orientation)
+      // peaks at midday (engine assumption; ignores wall orientation; the peak
+      // value is computed in docs/sources.md)
       const tw = taK + 2 + (6 * (beamH[m] + dif[m])) / 900;
       const tw4 = tw * tw * tw * tw;
       const lsky = skyEmissivity(site.vapourHpa, taK) * SIGMA * ta4;
@@ -354,7 +355,7 @@ export class Thermal {
   /**
    * Mean radiant temperature (deg C) for a standing person on a ground cell,
    * SOLWEIG-style six-direction sum (Lindberg et al. 2008), simplified:
-   * walls are treated as air + 2 K (+ up to ~6.9 K in sun) and reflect no shortwave.
+   * walls are treated as air + 2 K plus the same sun term as above, and reflect no shortwave.
    */
   tmrt(i, h) {
     const site = this.info.site;

@@ -9,6 +9,7 @@ import { solarPosition } from '../engine/sun.js';
 import { irradiance } from '../engine/thermal.js';
 import { SCENE } from '../cities/asphalt-park/scene.js';
 import { base, targetRows, sensitivity, TIERS } from './regions.mjs';
+import { GLOSSARY, glossaryStats, rangeLine } from '../engine/glossary.js';
 
 const UNITS = { mu: ' J m⁻² s⁻½ K⁻¹', thinC: ' J m⁻² K⁻¹' };
 const cell = (p, k = '') =>
@@ -49,6 +50,13 @@ export function sensitivityMarkdown(cases) {
   return `| Case (one change) | tree shade | water | grass | cool roof | shaded paving | asphalt | dark roof | 15:00 order |
 |---|---|---|---|---|---|---|---|---|
 ${rows.join('\n')}`;
+}
+
+export function glossaryMarkdown(world, model) {
+  const st = glossaryStats(world, model);
+  return Object.entries(GLOSSARY)
+    .map(([k, g]) => `- **${g.term}**: ${rangeLine(k, st)} ${g.model ? '[this model]' : `[${g.src}]`}`)
+    .join('\n');
 }
 
 export function sourcesMarkdown() {
@@ -122,6 +130,13 @@ ${Object.entries(SOURCES).map(([k, v]) => `- **[${k}]** ${v}`).join('\n')}
 - Mean radiant temperature [solweig], simplified six-direction sum: Tmrt = ((S_str + L_str)/(a_p·σ))^¼ − 273.15, a_k = 0.7, a_p = 0.97, f_p = 0.308·cos(β(1 − β²/48402)); walls reflect no shortwave.
 - Pedestrian route cost [melnikov]: sun distance + w_b × building-shade distance + w_t × tree-shade distance, with w_b = 1 − 0.16·s and w_t = 1 − 0.08·s.
   w_b = 0.84 at full heat is cited; w_t = 0.92 is an *interpretation* of "tree shade about half as effective"; the heat factor s rises linearly from 0 at air ≤ 26 °C to 1 at air ≥ 32 °C (*engine assumption*, not in the source). The same weights drive the sideways drift toward shade within a pavement (only when air > 28 °C).
+
+## Glossary sources
+
+Numbers quoted in the on-page footnotes (\`engine/glossary.js\`). Literature ranges carry a source key;
+"In this model" lines are computed from the model at load, the same way as here.
+
+${glossaryMarkdown(world, model)}
 
 ## Model vs literature targets
 

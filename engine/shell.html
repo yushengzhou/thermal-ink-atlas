@@ -61,12 +61,12 @@
 <div id="cartouche">
   <h1>Thermal-Ink Atlas</h1>
   <p class="hand">__TITLE__</p>
-  <p class="sim">Simulated block · invented geometry · <span class="gl" tabindex="0" role="button" aria-haspopup="dialog" data-gl="forceRestore">modelled</span> <span class="gl" tabindex="0" role="button" aria-haspopup="dialog" data-gl="surfaceTemp">temperatures</span></p>
+  <p class="sim">Simulated block · invented geometry · <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">modelled</span> <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">temperatures</span></p>
   <p>__SUBTITLE__</p>
 </div>
-<div id="legend"><div class="hand"><span class="gl" tabindex="0" role="button" aria-haspopup="dialog" data-gl="surfaceTemp">surface temperature</span></div><div id="legendBar"></div>
+<div id="legend"><div class="hand"><span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">surface temperature</span></div><div id="legendBar"></div>
   <div class="ends"><span id="legendLo"></span><span id="legendHi"></span></div>
-  <div class="cap">Simulated with a <span class="gl" tabindex="0" role="button" aria-haspopup="dialog" data-gl="forceRestore">force-restore model</span> on an invented block, not measured. Inputs not yet verified are flagged on the cards.</div></div>
+  <div class="cap">Simulated with a <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">force-restore model</span> on an invented block, not measured. Inputs not yet verified are flagged on the cards.</div></div>
 <div id="bar">
   <input id="hour" type="range" min="0" max="23.75" step="0.25" value="15" aria-label="hour of day">
   <span id="hourLabel" class="hand"></span>
@@ -77,7 +77,7 @@
   <div class="hand">Terms used here</div>
   <ul id="termsList"></ul>
 </div>
-<div id="fn" role="dialog" aria-live="polite" hidden></div>
+<div id="fn" role="tooltip" hidden></div>
 <div id="card" data-open="0"></div>
 <script>
 __BUNDLE__

@@ -87,6 +87,24 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - Pedestrian route cost [melnikov]: sun distance + w_b × building-shade distance + w_t × tree-shade distance, with w_b = 1 − 0.16·s and w_t = 1 − 0.08·s.
   w_b = 0.84 at full heat is cited; w_t = 0.92 is an *interpretation* of "tree shade about half as effective"; the heat factor s rises linearly from 0 at air ≤ 26 °C to 1 at air ≥ 32 °C (*engine assumption*, not in the source). The same weights drive the sideways drift toward shade within a pavement (only when air > 28 °C).
 
+## Glossary sources
+
+Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature ranges carry a source key;
+"In this model" lines are computed from the model at load, the same way as here.
+
+- **Albedo (α)**: Typical: Fresh asphalt 0.05, aged asphalt 0.12–0.15, grass 0.16–0.26, new white roof 0.65 or more. [lbnl, brief]
+- **Emissivity (ε)**: Typical: Concrete 0.71–0.90, asphalt about 0.95, grass 0.90–0.95, tree leaves 0.97–0.99. [brief]
+- **Thermal admittance (μ)**: Typical: Soils 600–2200, asphalt ~1200, concrete ~1785, stone ~2220 J m⁻² s⁻½ K⁻¹. [brief]
+- **Thin-layer heat capacity (C)**: Typical: About 5–20 kJ m⁻² K⁻¹ for metal sheet and thin roof layers. [brief]
+- **Evaporative fraction**: Typical: Dry paving 0; watered lawns and tree leaves 0.6–0.8. [brief]
+- **Sky view factor (SVF)**: In this model: Open lawn about 0.98; paved ground near buildings 0.54–0.87. [this model]
+- **Surface temperature**: Typical: On a hot afternoon (air 25–35 °C): lawn 30–40 °C, shaded paving 34–40 °C, aged asphalt 55–62 °C, fresh asphalt 60–68 °C. [brief]
+- **Mean radiant temperature (Tmrt)**: In this model: At 3 pm: 37–45 °C in building shade, 61–71 °C on sunlit ground (5th–95th percentile). [this model]
+- **Force-restore model (simulation)**: In this model: 5 m grid, 1-minute steps, the design day repeated 7 times until it settles. [this model]
+- **Thermal inertia / night lag**: In this model: At 11 pm asphalt is 3.6 °C and concrete 4.3 °C warmer than the open lawn. [this model]
+- **Cool roof**: Typical: Albedo 0.65 or more when new, about 0.5–0.6 after weathering. [brief]
+- **Permeable paving**: Typical: Albedo 0.15–0.30; 5–10 °C cooler than concrete while wet (not modelled in this block). [brief]
+
 ## Model vs literature targets
 
 | Surface (model region mean) | Hour | Model °C | Brief range °C | |

@@ -7,7 +7,7 @@ import { runModel, shadeClassField, paletteLut, PALETTE_STOPS, heatRgb } from '.
 import { Life, shadeDensity, shadeAt } from './life.js';
 import { Renderer, INTRO, quantHour } from './render.js';
 import { MATERIALS, SOURCES, BASIS, paramKeys } from './materials.js';
-import { GLOSSARY, gl } from './glossary.js';
+import { GLOSSARY, gl, glossaryStats, rangeLine } from './glossary.js';
 
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
@@ -361,20 +361,40 @@ export function boot(scene, root = document) {
   }
 
   // ---- footnotes (glossary) ---------------------------------------------------------------
+  // #fn is a tooltip: the trigger gets aria-describedby + aria-expanded while open.
+  // "pinned" footnotes (click, tap, Enter, keyboard focus) are not replaced by hover.
   const fn = $('fn');
   const terms = $('terms');
   const termsBtn = $('termsBtn');
+  const gstats = glossaryStats(world, thermal);
   let fnPinned = false;
+  let fnByFocus = false;
+  let fnTrigger = null;
   let fnTimer = null;
   $('termsList').innerHTML = Object.keys(GLOSSARY).map((k) => `<li>${gl(k)}</li>`).join('');
-  function showFn(key, r, pinned, inCard = false) {
+  function releaseTrigger() {
+    if (fnTrigger) {
+      fnTrigger.removeAttribute('aria-describedby');
+      fnTrigger.setAttribute('aria-expanded', 'false');
+    }
+    fnTrigger = null;
+  }
+  function showFn(key, r, pinned, trigger = null) {
     const g = GLOSSARY[key];
     if (!g) return;
     clearTimeout(fnTimer);
-    fn.innerHTML = `<b>${g.term}</b><p>${g.text}</p><p class="rng">Typical: ${g.range}</p><p class="why">Why it matters: ${g.why}</p>`;
+    fn.innerHTML = `<b>${g.term}</b><p>${g.text}</p><p class="rng">${rangeLine(key, gstats)}</p><p class="why">Why it matters: ${g.why}</p>`;
     fn.dataset.key = key;
     fn.hidden = false;
     fnPinned = pinned;
+    fnByFocus = false;
+    releaseTrigger();
+    if (trigger) {
+      fnTrigger = trigger;
+      trigger.setAttribute('aria-describedby', 'fn');
+      trigger.setAttribute('aria-expanded', 'true');
+    }
+    const inCard = !!trigger && card.contains(trigger);
     const w = fn.offsetWidth;
     const h = fn.offsetHeight;
     let top = r.bottom + 6;
@@ -392,6 +412,8 @@ export function boot(scene, root = document) {
     fn.hidden = true;
     fn.dataset.key = '';
     fnPinned = false;
+    fnByFocus = false;
+    releaseTrigger();
   }
   function toggleTerms(open = terms.hidden) {
     terms.hidden = !open;
@@ -401,40 +423,51 @@ export function boot(scene, root = document) {
     e.stopPropagation();
     toggleTerms();
   });
-  const termOf = (e) => (e.target && e.target.closest ? e.target.closest('.gl') : null);
+  const termOf = (el) => (el && el.closest ? el.closest('.gl') : null);
   root.addEventListener('mouseover', (e) => {
-    const t = termOf(e);
-    if (t && !(fnPinned && fn.dataset.key === t.dataset.gl)) showFn(t.dataset.gl, t.getBoundingClientRect(), false, card.contains(t));
+    const t = termOf(e.target);
+    if (!t) return;
+    if (fnPinned) {
+      if (fn.dataset.key === t.dataset.gl) clearTimeout(fnTimer);
+      return; // never replace a pinned footnote on hover
+    }
+    showFn(t.dataset.gl, t.getBoundingClientRect(), false, t);
   });
   root.addEventListener('mouseout', (e) => {
-    const t = termOf(e);
-    if (t && !fnPinned) fnTimer = setTimeout(hideFn, 300);
+    if (termOf(e.target) && !fnPinned) fnTimer = setTimeout(hideFn, 300);
   });
   fn.addEventListener('mouseenter', () => clearTimeout(fnTimer));
   fn.addEventListener('mouseleave', () => {
     if (!fnPinned) fnTimer = setTimeout(hideFn, 300);
   });
   root.addEventListener('focusin', (e) => {
-    const t = termOf(e);
-    if (t) showFn(t.dataset.gl, t.getBoundingClientRect(), true, card.contains(t));
+    const t = termOf(e.target);
+    if (t) {
+      showFn(t.dataset.gl, t.getBoundingClientRect(), true, t);
+      fnByFocus = true;
+    }
+  });
+  root.addEventListener('focusout', (e) => {
+    // a footnote opened by focus closes when focus moves off the terms
+    if (fnByFocus && termOf(e.target) && !termOf(e.relatedTarget) && !(e.relatedTarget && fn.contains(e.relatedTarget))) hideFn();
   });
   root.addEventListener('click', (e) => {
-    const t = termOf(e);
+    const t = termOf(e.target);
     if (t) {
       e.stopPropagation();
-      showFn(t.dataset.gl, t.getBoundingClientRect(), true, card.contains(t));
+      showFn(t.dataset.gl, t.getBoundingClientRect(), true, t);
       return;
     }
     if (!fn.hidden && !fn.contains(e.target) && e.target !== canvas) hideFn();
     if (!terms.hidden && !terms.contains(e.target) && e.target !== termsBtn) toggleTerms(false);
   }, true);
   root.addEventListener('keydown', (e) => {
-    const t = termOf(e);
+    const t = termOf(e.target);
     if (t && (e.key === 'Enter' || e.key === ' ')) {
       e.preventDefault();
       e.stopPropagation();
       if (!fn.hidden && fn.dataset.key === t.dataset.gl) hideFn();
-      else showFn(t.dataset.gl, t.getBoundingClientRect(), true, card.contains(t));
+      else showFn(t.dataset.gl, t.getBoundingClientRect(), true, t);
     }
   }, true);
 
@@ -527,6 +560,7 @@ export function boot(scene, root = document) {
     stats: () => ({ ...lastStats }),
     /** Glossary keys, and the on-canvas note term hit boxes (CSS px). */
     glossaryKeys: () => Object.keys(GLOSSARY),
+    glossaryStats: () => ({ ...gstats }),
     noteTerms: () => (R.noteHits ?? []).map((h) => ({ ...h })),
     /**
      * Opaque boxes in draw order (for occlusion masks in checks):
