@@ -1,0 +1,5 @@
+materials/
+node_modules/
+test-results/
+dist/
+.DS_Store

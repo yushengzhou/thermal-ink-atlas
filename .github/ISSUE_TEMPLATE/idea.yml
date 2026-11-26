@@ -1,0 +1,15 @@
+name: Idea
+description: A new thing to explore or build
+labels: [idea]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What and why
+      description: The idea in a few sentences, and what you hope to learn or get.
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Links, data, prior work
