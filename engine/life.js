@@ -4,14 +4,22 @@
 //   cost = sun distance + 0.84 x building-shade distance + 0.92 x tree-shade distance
 // Melnikov et al. 2022 (doi 10.1038/s41598-022-06383-5): walking in shade is
 // perceived ~16% shorter; tree shade gives about half the benefit of building
-// shade (so its weight is 1 - 0.16/2 = 0.92). Positions are a pure function of
-// (seed, t, hour).
+// shade (so its weight is 1 - 0.16/2 = 0.92). Those effects were measured in
+// hot weather, so the shade benefit is scaled by heat: full weights at air
+// >= 32 C (15:00 on the design day is 35 C), none at <= 26 C.
+// Positions are a pure function of (seed, t, hour).
 import { hash3, hexRgb } from './core.js';
 
 export const W_SUN = 1;
 export const W_BUILDING = 0.84;
 export const W_TREE = 1 - (1 - W_BUILDING) / 2;
 const WEIGHT = [W_SUN, W_BUILDING, W_TREE];
+
+/** Shade weights at a given air temperature (heat factor 0..1). */
+export function shadeWeights(air) {
+  const s = Math.min(1, Math.max(0, (air - 26) / 6));
+  return [W_SUN, 1 - (1 - W_BUILDING) * s, 1 - (1 - W_TREE) * s];
+}
 
 const SHIRTS = ['#b5533c', '#3f6e6a', '#c9973f', '#5b6b8c', '#e8e1d0', '#8e4b5e', '#2f3e52', '#d07a5a', '#6f8c52'].map(hexRgb);
 
@@ -30,7 +38,7 @@ export function polyLength(p) {
 }
 
 /** Perceived cost of walking polyline p under a shade raster. */
-export function routeCost(p, shade, step = 1) {
+export function routeCost(p, shade, step = 1, weight = WEIGHT) {
   let cost = 0;
   for (let i = 0; i + 3 < p.length; i += 2) {
     const L = Math.hypot(p[i + 2] - p[i], p[i + 3] - p[i + 1]);
@@ -39,7 +47,7 @@ export function routeCost(p, shade, step = 1) {
       const t = (k + 0.5) / n;
       const x = p[i] + (p[i + 2] - p[i]) * t;
       const y = p[i + 1] + (p[i + 3] - p[i + 1]) * t;
-      cost += (L / n) * WEIGHT[shadeAt(shade, x, y)];
+      cost += (L / n) * weight[shadeAt(shade, x, y)];
     }
   }
   return cost;
@@ -105,16 +113,18 @@ export class Life {
   plan(hq) {
     if (this.plans.has(hq)) return this.plans.get(hq);
     const shade = this.shadeFor(hq);
-    const costs = this.scene.routes.map((r) => r.variants.map((v) => routeCost(v, shade)));
+    const air = this.airFor(hq);
+    const weight = shade.night ? [1, 1, 1] : shadeWeights(air);
+    const costs = this.scene.routes.map((r) => r.variants.map((v) => routeCost(v, shade, 1, weight)));
     const choice = this.walkers.map((w) => {
       const c = costs[w.route];
       return c[0] * w.tol[0] <= c[1] * w.tol[1] ? 0 : 1;
     });
     // dwellers: in heat, shade is cheaper; when it is cool, sun is mildly preferred
-    const hot = this.airFor(hq) > 28 && !shade.night;
+    const hot = air > 28 && !shade.night;
     const spots = this.scene.spots.map((s) => {
       const cls = shadeAt(shade, s.x, s.y);
-      return hot ? WEIGHT[cls] : cls === 0 ? 0.95 : 1;
+      return hot ? weight[cls] : cls === 0 ? 0.95 : 1;
     });
     const used = new Array(spots.length).fill(0);
     const dwell = [];
