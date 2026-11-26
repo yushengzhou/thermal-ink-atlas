@@ -511,7 +511,7 @@ export class Renderer {
     }
     this.stats.people = 0;
     if (lifeA > 0) {
-      this.drawPeople(ctx, f, cam, hq, W, H, lifeA, look.thermalMix ?? 0);
+      if (look.people !== false) this.drawPeople(ctx, f, cam, hq, W, H, lifeA, look.thermalMix ?? 0);
       if (look.notes) this.drawNotes(ctx, cam, W, H, look.notes, lifeA);
     }
     this.stats.phase = intro && f < INTRO.pen ? 'pen' : intro && f < INTRO.wash ? 'wash' : intro && f < INTRO.life ? 'life' : 'steady';
@@ -678,8 +678,11 @@ export class Renderer {
       const w = Math.max(...lines.map((l) => ctx.measureText(l).width));
       const bx = tx - (n.dx < 0 ? w + 6 * d : -6 * d);
       const by = ty - (n.dy < 0 ? lines.length * lh : 0);
-      ctx.fillStyle = 'rgba(246,240,226,0.82)';
+      ctx.fillStyle = 'rgba(248,243,231,0.94)';
       ctx.fillRect(bx - 5 * d, by - 3 * d, w + 10 * d, lines.length * lh + 6 * d);
+      ctx.strokeStyle = 'rgba(43,38,33,0.55)';
+      ctx.lineWidth = 0.8 * d;
+      ctx.strokeRect(bx - 5 * d, by - 3 * d, w + 10 * d, lines.length * lh + 6 * d);
       ctx.fillStyle = rgbCss(i === 0 ? hexRgb('#8a2f22') : INK);
       lines.forEach((l, k) => ctx.fillText(l, bx, by + k * lh));
     });

@@ -34,6 +34,8 @@
   #card td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
   #card tr.t td { font-weight: bold; color: #8a2f22; }
   #card .unv { display: inline-block; margin-left: 4px; padding: 0 4px; font-size: 10px; border: 1px dashed #8a2f22; color: #8a2f22; border-radius: 3px; }
+  #card .basis { display: inline-block; margin-left: 4px; padding: 0 4px; font-size: 10px; border: 1px solid #6d6355; color: #4b443b; border-radius: 3px; }
+  #card .caveat { margin: 4px 0; padding: 4px 6px; font-size: 12px; background: #f3e3d6; border-left: 3px solid #8a2f22; }
   #card .note { margin: 8px 0 4px; font-style: italic; }
   #card .src { margin: 4px 0 0; font-size: 11px; opacity: .75; }
   .noui #cartouche, .noui #bar, .noui #legend { display: none; }
@@ -93,7 +95,10 @@ function hash3(a, b = 0, c = 0) {
   return (h >>> 0) / 4294967296;
 }
 
-/** Small sequential generator seeded by an integer (xorshift-multiply). */
+/**
+ * Small sequential generator seeded by an integer. This is the mulberry32
+ * generator (Tommy Ettinger, public domain) with a seed scramble.
+ */
 function makeRng(seed) {
   let s = (seed | 0) ^ 0x5bd1e995;
   return function next() {
@@ -339,118 +344,146 @@ return { dayOfYear, solarPosition, sunVector, shadowOffset, boxShadow, canopySha
 
 __m['materials'] = (() => {
 // materials: surface parameters for the thermal model.
-// Every value carries a source key (see SOURCES and docs/sources.md) and a
-// `verified` flag. verified:false means the value is a plausible textbook /
-// assumed figure that has not been checked against the primary source yet;
-// heat cards label these "unverified".
+// Every value carries:
+//   source   - a key into SOURCES (where the number or range comes from)
+//   basis    - how the value relates to that source (see BASIS)
+//   verified - false until checked against the primary source; heat cards
+//              label these "unverified".
+// docs/sources.md is generated from this file (scripts/sources.mjs).
 
 const SOURCES = {
   lbnl: 'Pomerantz et al. (2000) LBNL-49283, cool pavements: asphalt albedo 0.05 fresh, 0.12-0.15 aged',
-  oke: 'Oke (1987/2017) Boundary Layer Climates / Urban Climates, surface property tables (cited from memory)',
+  oke: 'Oke (1987/2017) Boundary Layer Climates / Urban Climates, surface property tables (cited from memory in the research brief)',
   epa: 'US EPA (2008) Reducing Urban Heat Islands: Cool Pavements / Cool Roofs compendium',
+  brief: 'Research brief docs/research/thermal-model-brief.md (ranges compiled from the sources above; not yet checked)',
   deardorff: 'Deardorff (1978) J. Geophys. Res. 83(C4) 1889-1903, force-restore method (NASA NTRS 19780019748)',
-  assumed: 'Assumed for this model (engineering guess within the range of the research brief)',
+  melnikov: 'Melnikov et al. (2022) Scientific Reports 12, 2617, doi 10.1038/s41598-022-06383-5',
+  engine: 'Engine assumption: no literature source',
 };
 
-const v = (value, source, verified = false) => ({ value, source, verified });
+/** How a value relates to its source. */
+const BASIS = {
+  cited: 'cited value',
+  range: 'cited range',
+  edge: 'edge of cited range',
+  interp: 'interpretation of the source',
+  engine: 'engine assumption (no source)',
+};
+
+const v = (value, source, basis, verified = false, note = '') => ({ value, source, basis, verified, note });
 
 /**
  * alpha: shortwave albedo; eps: longwave emissivity;
- * mu: thermal admittance sqrt(k C) in J m-2 s-1/2 K-1 (force-restore);
+ * mu: thermal admittance sqrt(k C), J m-2 s-1/2 K-1 (force-restore), or
+ * thinC: effective heat capacity of a thin layer, J m-2 K-1 (no restore term);
  * ef: evaporative fraction of positive net radiation.
+ * prescribed: the grid model does not use these parameters (temperature is set
+ * by a formula instead); they are listed for reference only.
  */
 const MATERIALS = {
   asphalt: {
     name: 'Aged asphalt',
-    alpha: v(0.12, 'lbnl', true),
-    eps: v(0.95, 'oke'),
-    mu: v(1200, 'oke'),
-    ef: v(0, 'assumed'),
+    alpha: v(0.12, 'lbnl', 'cited', true, 'LBNL aged asphalt 0.12-0.15'),
+    eps: v(0.95, 'oke', 'cited'),
+    mu: v(1200, 'oke', 'cited'),
+    ef: v(0, 'brief', 'cited', false, 'dry impervious'),
     note: 'Dark, dense and dry: it soaks up most of the sun and gives the heat back long after dark.',
   },
   concrete: {
     name: 'Concrete paving',
-    alpha: v(0.3, 'oke'),
-    eps: v(0.9, 'oke'),
-    mu: v(1785, 'oke'),
-    ef: v(0, 'assumed'),
+    alpha: v(0.3, 'oke', 'range', false, 'cited 0.10-0.35'),
+    eps: v(0.9, 'oke', 'edge', false, 'cited 0.71-0.90'),
+    mu: v(1785, 'oke', 'cited'),
+    ef: v(0, 'brief', 'cited', false, 'dry impervious'),
     note: 'Lighter than asphalt so it peaks lower, but its mass keeps it warm into the night.',
   },
   stone: {
     name: 'Stone paving / gravel path',
-    alpha: v(0.3, 'oke'),
-    eps: v(0.92, 'oke'),
-    mu: v(1500, 'assumed'),
-    ef: v(0.05, 'assumed'),
+    alpha: v(0.3, 'oke', 'range', false, 'cited 0.20-0.40'),
+    eps: v(0.92, 'oke', 'range', false, 'cited 0.85-0.95'),
+    mu: v(1500, 'brief', 'range', false, 'between brick 1065 and stone 2220'),
+    ef: v(0.05, 'engine', 'engine'),
     note: 'Pale and porous: warm in the sun, cools sooner than the street.',
   },
   grass: {
     name: 'Irrigated lawn',
-    alpha: v(0.25, 'oke'),
-    eps: v(0.95, 'oke'),
-    mu: v(1400, 'assumed'),
-    ef: v(0.8, 'assumed'),
+    alpha: v(0.25, 'oke', 'edge', false, 'cited 0.16-0.26'),
+    eps: v(0.95, 'oke', 'edge', false, 'cited 0.90-0.95'),
+    mu: v(1400, 'brief', 'range', false, 'soil 600-2200'),
+    ef: v(0.8, 'brief', 'edge', false, 'cited 0.6-0.8'),
     note: 'Watered grass spends much of its sunshine evaporating water, and at night it cools below the air.',
+    caveat: 'Its 3 pm place below shaded paving holds only with evaporative fraction and albedo at the top of their cited ranges (see Sensitivity in docs/sources.md).',
   },
   water: {
     name: 'Pond (open water)',
-    alpha: v(0.06, 'oke'),
-    eps: v(0.96, 'oke'),
-    mu: v(1545, 'oke'),
-    ef: v(1, 'assumed'),
+    alpha: v(0.06, 'oke', 'range', false, 'cited 0.03-0.10'),
+    eps: v(0.96, 'oke', 'range', false, 'cited 0.92-0.97'),
+    mu: v(1545, 'oke', 'cited'),
+    ef: v(1, 'engine', 'engine'),
+    prescribed: 'Not used by the grid model: the pond is held at daily mean air - 1 K, +-1 K (research brief).',
     note: 'Mixing and evaporation hold the pond near the daily mean air temperature.',
   },
   membrane: {
     name: 'Dark membrane roof',
-    alpha: v(0.1, 'oke'),
-    eps: v(0.92, 'oke'),
-    mu: v(450, 'assumed'),
-    ef: v(0, 'assumed'),
+    alpha: v(0.1, 'oke', 'range', false, 'cited 0.08-0.18'),
+    eps: v(0.92, 'oke', 'cited'),
+    mu: v(450, 'brief', 'range', false, 'brief assumes 300-500'),
+    ef: v(0, 'brief', 'cited', false, 'dry impervious'),
     note: 'A thin, dark, insulated skin: one of the hottest surfaces at 3 pm, cold again by midnight.',
   },
   metal: {
     name: 'Dark metal roof',
-    alpha: v(0.15, 'oke'),
-    eps: v(0.85, 'assumed'),
-    mu: v(320, 'assumed'),
-    ef: v(0, 'assumed'),
+    alpha: v(0.15, 'oke', 'range', false, 'cited 0.10-0.25'),
+    eps: v(0.9, 'brief', 'cited', false, '~0.9 painted'),
+    thinC: v(12000, 'brief', 'range', false, 'thin layers 5-20 kJ m-2 K-1'),
+    ef: v(0, 'brief', 'cited', false, 'dry impervious'),
     note: 'Painted sheet metal has almost no heat capacity: it follows the sun up and the sky down.',
   },
   coolroof: {
     name: 'Cool (white) roof',
-    alpha: v(0.8, 'epa'),
-    eps: v(0.88, 'epa'),
-    mu: v(450, 'assumed'),
-    ef: v(0, 'assumed'),
+    alpha: v(0.8, 'epa', 'edge', false, 'cited >=0.65 new, 0.5-0.6 aged; 0.80 is a new, clean white roof'),
+    eps: v(0.88, 'epa', 'range', false, 'cited 0.85-0.90'),
+    mu: v(450, 'brief', 'range', false, 'same build-up as the dark membrane'),
+    ef: v(0, 'brief', 'cited', false, 'dry impervious'),
     note: 'The same roof build-up as its dark neighbour, painted white: it reflects most of the sun.',
+    caveat: 'Its 3 pm place below shaded paving holds only with albedo at the top of its cited range (see Sensitivity in docs/sources.md).',
   },
   canopy: {
     name: 'Tree canopy',
-    alpha: v(0.18, 'oke'),
-    eps: v(0.97, 'oke'),
-    mu: v(0, 'assumed'),
-    ef: v(0.7, 'assumed'),
+    alpha: v(0.18, 'oke', 'range', false, 'cited 0.15-0.20'),
+    eps: v(0.97, 'oke', 'range', false, 'cited 0.97-0.99'),
+    ef: v(0.7, 'brief', 'range', false, 'cited 0.6-0.8'),
+    prescribed: 'Not used by the grid model: leaf temperature = air + 2.5 K x (K/900 W m-2) by day, air - 0.5 K at night (engine assumption; brief: air +0-3 K).',
     note: 'Leaves stay within a few degrees of the air; the ground beneath sits in their shade.',
   },
 };
 
-/** Model constants shared by thermal.js (with sources). */
+/** Model constants shared by thermal.js and life.js. */
 const MODEL = {
-  hc: { value: '5.7 + 3.8 u', source: 'oke', verified: false },
-  canopyTransmission: { value: 0.17, source: 'assumed', verified: false }, // exp(-0.5 LAI), LAI ~ 3.5
-  diffuseFraction: { value: 0.12, source: 'assumed', verified: false },
-  roofWind: { value: 1.6, source: 'assumed', verified: false }, // roof-level wind / street-level wind
+  hc: v('5.7 + 3.8 u', 'oke', 'cited'),
+  canopyTransmission: v(0.17, 'brief', 'interp', false, 'exp(-0.5 LAI) with LAI 3.5 (LAI is an engine assumption)'),
+  diffuseFraction: v(0.12, 'brief', 'cited', false, 'D = 0.12 I_b sin(beta)'),
+  wallTerm: v('Ta + 2 K + 6 K x K/900', 'engine', 'engine', false, 'warms the walls seen from the ground; ignores wall orientation'),
+  efClip: v('EF x max(Q*, 0)', 'engine', 'engine', false, 'brief writes EF x Q*; clipped so latent heat never warms the surface at night'),
+  buildingShadeWeight: v(0.84, 'melnikov', 'cited', false, 'shade walking perceived ~16% shorter'),
+  treeShadeWeight: v(0.92, 'melnikov', 'interp', false, 'tree shade ~half as effective as building shade, read as half the 16% benefit'),
+  shadeHeatRamp: v('26 -> 32 C', 'engine', 'engine', false, 'shade benefit scales linearly from none at air <= 26 C to full at >= 32 C'),
 };
 
-return { SOURCES, MATERIALS, MODEL };
+/** Parameter keys a material uses (for cards and docs). */
+const paramKeys = (m) => ['alpha', 'eps', m.thinC ? 'thinC' : 'mu', 'ef'].filter((k) => m[k]);
+
+return { SOURCES, BASIS, MATERIALS, MODEL, paramKeys };
 })();
 
 __m['thermal'] = (() => {
 // thermal: force-restore surface energy balance on a 5 m grid.
 // dTs/dt = (2 sqrt(pi) / (mu sqrt(tau))) G - (2 pi / tau) (Ts - Td)   (Deardorff 1978)
 // G = (1-a) K + e L_down - e s Ts^4 - hc (Ts - Ta) - EF max(Q*, 0)
-// Computed once at load (1-min steps, 3-day spin-up), stored at 15-min
-// resolution for the last day; seek() only looks values up.
+// Thin layers (sheet metal) use dTs/dt = G / C instead (no restore term).
+// Computed once at load with 1-min steps, repeating the design day until the
+// deep temperature Td converges (max change < 0.05 K, at least 3 days), and
+// stored at 15-min resolution for the last day; seek() only looks values up.
 const { MATERIALS, MODEL } = __m['materials'];
 const { solarPosition, boxShadow, canopyShadow, rasterise } = __m['sun'];
 const { lerp, hexRgb, DEG } = __m['core'];
@@ -621,10 +654,14 @@ function cellMat(world, i) {
 /**
  * Run the force-restore model. Returns a Thermal object with hourly lookups.
  * @param {object} world from buildWorld()
- * @param {object} [opts] {days: 3, dt: 60}
+ * @param {object} [opts] {minDays: 3, maxDays: 30, tol: 0.05 K, dt: 60,
+ *   materials: override table (sensitivity runs), slots: reuse sun slots}
  */
 function runModel(world, opts = {}) {
-  const days = opts.days ?? 3;
+  const minDays = opts.minDays ?? 3;
+  const maxDays = opts.maxDays ?? 30;
+  const tol = opts.tol ?? 0.05;
+  const mats = opts.materials ?? MATERIALS;
   const dt = opts.dt ?? 60;
   const site = world.scene.site;
   const { n } = world;
@@ -632,25 +669,31 @@ function runModel(world, opts = {}) {
   const { rise } = daylight(site);
   const slots = opts.slots ?? sunSlots(world);
   const hc = 5.7 + 3.8 * site.wind;
-  const hcRoof = 5.7 + 3.8 * site.wind * MODEL.roofWind.value;
   const tauFac = (2 * Math.PI) / TAU;
   const sqrtTau = Math.sqrt(TAU);
 
   // per-cell parameters
   const alpha = new Float32Array(N);
   const eps = new Float32Array(N);
-  const cap = new Float32Array(N); // 2 sqrt(pi) / (mu sqrt(tau))
+  const cap = new Float32Array(N); // 2 sqrt(pi) / (mu sqrt(tau)), or 1 / C for thin layers
+  const restore = new Float32Array(N); // 2 pi / tau, or 0 for thin layers
   const ef = new Float32Array(N);
   const water = new Uint8Array(N);
-  const hcs = new Float32Array(N);
   for (let i = 0; i < N; i++) {
-    hcs[i] = world.bld[i] >= 0 ? hcRoof : hc;
-    const m = MATERIALS[cellMat(world, i)];
+    const id = cellMat(world, i);
+    const m = mats[id];
+    water[i] = id === 'water' ? 1 : 0;
+    if (water[i]) continue; // prescribed temperature
     alpha[i] = m.alpha.value;
     eps[i] = m.eps.value;
-    cap[i] = (2 * Math.sqrt(Math.PI)) / (m.mu.value * sqrtTau);
     ef[i] = m.ef.value;
-    water[i] = cellMat(world, i) === 'water' ? 1 : 0;
+    if (m.thinC) {
+      cap[i] = 1 / m.thinC.value;
+      restore[i] = 0;
+    } else if (m.mu && m.mu.value > 0) {
+      cap[i] = (2 * Math.sqrt(Math.PI)) / (m.mu.value * sqrtTau);
+      restore[i] = tauFac;
+    } else throw new Error(`material ${id} has neither mu > 0 nor thinC`);
   }
   const svf = world.svf;
 
@@ -677,13 +720,16 @@ function runModel(world, opts = {}) {
   const store = new Float32Array(N * STORE);
   const stepsPerStore = M / STORE;
 
-  for (let d = 0; d < days; d++) {
+  let days = 0;
+  let maxDelta = Infinity;
+  while (days < maxDays && (days < minDays || maxDelta >= tol)) {
     sumDay.fill(0);
     for (let m = 0; m < M; m += dt / 60) {
       const h = m / 60;
       const taK = ta[m] + K0;
       const ta4 = taK * taK * taK * taK;
-      // walls seen from the ground: air + 2 K, plus a sun term by day
+      // walls seen from the ground: air + 2 K plus a sun term by day that
+      // peaks near 6.9 K at noon (engine assumption; ignores wall orientation)
       const tw = taK + 2 + (6 * (beamH[m] + dif[m])) / 900;
       const tw4 = tw * tw * tw * tw;
       const lsky = skyEmissivity(site.vapourHpa, taK) * SIGMA * ta4;
@@ -706,20 +752,26 @@ function runModel(world, opts = {}) {
           const t = Ts[i];
           const t4 = t * t * t * t;
           const qstar = (1 - alpha[i]) * K + eps[i] * L - eps[i] * SIGMA * t4;
-          const G = qstar - hcs[i] * (t - taK) - (qstar > 0 ? ef[i] * qstar : 0);
-          Ts[i] = t + dt * (cap[i] * G - tauFac * (t - Td[i]));
+          const G = qstar - hc * (t - taK) - (qstar > 0 ? ef[i] * qstar : 0);
+          Ts[i] = t + dt * (cap[i] * G - restore[i] * (t - Td[i]));
         }
         sumDay[i] += Ts[i];
       }
-      if (d === days - 1 && m % stepsPerStore === 0) {
+      if (m % stepsPerStore === 0) {
         const k = m / stepsPerStore;
         for (let i = 0; i < N; i++) store[i * STORE + k] = Ts[i] - K0;
       }
     }
     const steps = M / (dt / 60);
-    for (let i = 0; i < N; i++) Td[i] = sumDay[i] / steps;
+    maxDelta = 0;
+    for (let i = 0; i < N; i++) {
+      const next = sumDay[i] / steps;
+      if (!water[i]) maxDelta = Math.max(maxDelta, Math.abs(next - Td[i]));
+      Td[i] = next;
+    }
+    days++;
   }
-  return new Thermal(world, store, slots, { rise, taMean, hc, hcRoof, site, ta });
+  return new Thermal(world, store, slots, { rise, taMean, hc, site, ta, days, maxDelta, mats });
 }
 
 class Thermal {
@@ -781,7 +833,7 @@ class Thermal {
   /**
    * Mean radiant temperature (deg C) for a standing person on a ground cell,
    * SOLWEIG-style six-direction sum (Lindberg et al. 2008), simplified:
-   * walls are treated as air + 2 K (+ up to 6 K in sun) and reflect no shortwave.
+   * walls are treated as air + 2 K (+ up to ~6.9 K in sun) and reflect no shortwave.
    */
   tmrt(i, h) {
     const site = this.info.site;
@@ -790,21 +842,21 @@ class Thermal {
     const sl = this.sunlit(i, h);
     const v = this.world.svf[i];
     const taK = this.air(h) + K0;
-    const mat = MATERIALS[cellMat(this.world, i)];
+    const mat = (this.info.mats ?? MATERIALS)[cellMat(this.world, i)];
     const tg = this.ts(i, h) + K0;
     const Kh = sl * ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + v * ir.diffuse;
     const b = Math.max(0, s.alt);
     const fp = 0.308 * Math.cos(b * (1 - (b * b) / 48402) * DEG);
     const ak = 0.7;
     const ap = 0.97;
-    const Kup = v * ir.diffuse;
-    const Kdn = mat.alpha.value * Kh;
-    const Klat = 0.5 * Kup + 0.5 * Kdn;
-    const S = ak * (0.06 * Kup + 0.06 * Kdn + 0.88 * Klat + fp * ir.beam * sl);
+    const Ksky = v * ir.diffuse; // onto the upward-facing side (direct beam via fp)
+    const Kground = mat.alpha.value * Kh; // reflected up from the ground
+    const Klat = 0.5 * Ksky + 0.5 * Kground;
+    const S = ak * (0.06 * Ksky + 0.06 * Kground + 0.88 * Klat + fp * ir.beam * sl);
     const lsky = skyEmissivity(site.vapourHpa, taK) * SIGMA * taK ** 4;
     const tw = taK + 2 + (6 * (ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + ir.diffuse)) / 900;
     const Ldown = v * lsky + (1 - v) * SIGMA * tw ** 4;
-    const Lg = mat.eps.value * SIGMA * tg ** 4;
+    const Lg = mat.eps.value * SIGMA * tg ** 4 + (1 - mat.eps.value) * Ldown; // emitted + reflected
     const Llat = 0.5 * Ldown + 0.5 * Lg;
     const L = ap * (0.06 * Ldown + 0.06 * Lg + 0.88 * Llat);
     return Math.pow((S + L) / (ap * SIGMA), 0.25) - K0;
@@ -853,7 +905,7 @@ function paletteLut() {
 }
 
 
-return { SIGMA, SLOTS, STORE, daylight, airTemp, irradiance, skyEmissivity, svfAt, shadowPolys, sunlitField, shadeClassField, sunSlots, runModel, Thermal, PALETTE_STOPS, heatRgb, paletteLut };
+return { SIGMA, SLOTS, STORE, daylight, airTemp, irradiance, skyEmissivity, svfAt, shadowPolys, sunlitField, shadeClassField, sunSlots, cellMat, runModel, Thermal, PALETTE_STOPS, heatRgb, paletteLut };
 })();
 
 __m['world'] = (() => {
@@ -1769,17 +1821,17 @@ class Life {
       dwell.push([best, used[best]]);
       used[best]++;
     }
-    const p = { choice, dwell, costs, shade, hot };
+    const p = { choice, dwell, costs, shade, hot, weight };
     this.plans.set(hq, p);
     return p;
   }
 
-  _bestOffset(v, s, pref, shade) {
+  _bestOffset(v, s, pref, shade, weight) {
     const [x, y, dx, dy] = pointAt(v, s);
     let best = pref;
     let bc = Infinity;
     for (const o of [pref, -2.1, -1.2, -0.3, 0.6, 1.5, 2.1]) {
-      const c = WEIGHT[shadeAt(shade, x - dy * o, y + dx * o)] + 0.02 * Math.abs(o - pref);
+      const c = weight[shadeAt(shade, x - dy * o, y + dx * o)] + 0.02 * Math.abs(o - pref);
       if (c < bc) {
         bc = c;
         best = o;
@@ -1810,8 +1862,8 @@ class Life {
       if (P.hot) {
         const kb = Math.floor(s / 4);
         const f = s / 4 - kb;
-        const a = this._bestOffset(v, kb * 4 + 2, w.lateral, P.shade);
-        const b = this._bestOffset(v, kb * 4 + 6, w.lateral, P.shade);
+        const a = this._bestOffset(v, kb * 4 + 2, w.lateral, P.shade, P.weight);
+        const b = this._bestOffset(v, kb * 4 + 6, w.lateral, P.shade, P.weight);
         off = a + (b - a) * smoothStep(f);
       }
       out.push({ x: x - dy * off, y: y + dx * off, hx: dx * dir, hy: dy * dir, walk: (s / 0.7) % 2, shirt: w.shirt, k: w.k, sit: false });
@@ -2370,7 +2422,7 @@ class Renderer {
     }
     this.stats.people = 0;
     if (lifeA > 0) {
-      this.drawPeople(ctx, f, cam, hq, W, H, lifeA, look.thermalMix ?? 0);
+      if (look.people !== false) this.drawPeople(ctx, f, cam, hq, W, H, lifeA, look.thermalMix ?? 0);
       if (look.notes) this.drawNotes(ctx, cam, W, H, look.notes, lifeA);
     }
     this.stats.phase = intro && f < INTRO.pen ? 'pen' : intro && f < INTRO.wash ? 'wash' : intro && f < INTRO.life ? 'life' : 'steady';
@@ -2537,8 +2589,11 @@ class Renderer {
       const w = Math.max(...lines.map((l) => ctx.measureText(l).width));
       const bx = tx - (n.dx < 0 ? w + 6 * d : -6 * d);
       const by = ty - (n.dy < 0 ? lines.length * lh : 0);
-      ctx.fillStyle = 'rgba(246,240,226,0.82)';
+      ctx.fillStyle = 'rgba(248,243,231,0.94)';
       ctx.fillRect(bx - 5 * d, by - 3 * d, w + 10 * d, lines.length * lh + 6 * d);
+      ctx.strokeStyle = 'rgba(43,38,33,0.55)';
+      ctx.lineWidth = 0.8 * d;
+      ctx.strokeRect(bx - 5 * d, by - 3 * d, w + 10 * d, lines.length * lh + 6 * d);
       ctx.fillStyle = rgbCss(i === 0 ? hexRgb('#8a2f22') : INK);
       lines.forEach((l, k) => ctx.fillText(l, bx, by + k * lh));
     });
@@ -2559,7 +2614,7 @@ const { drawWorld } = __m['kit'];
 const { runModel, shadeClassField, paletteLut, PALETTE_STOPS, heatRgb } = __m['thermal'];
 const { Life, shadeDensity, shadeAt } = __m['life'];
 const { Renderer, INTRO, quantHour } = __m['render'];
-const { MATERIALS, SOURCES } = __m['materials'];
+const { MATERIALS, SOURCES, BASIS, paramKeys } = __m['materials'];
 
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
@@ -2607,10 +2662,11 @@ function boot(scene, root = document) {
     thermal: false,
     since: -1e9,
     notes: q.get('notes') !== '0',
+    people: q.get('people') !== '0',
     intro: true,
   };
   if (q.get('ui') === '0') root.body.classList.add('noui');
-  if (q.has('hour')) S.hour = clamp(parseFloat(q.get('hour')) || 0, 0, 23.75);
+  if (q.has('hour')) S.hour = Math.round(clamp(parseFloat(q.get('hour')) || 0, 0, 23.75) / 0.25) * 0.25;
   if (q.has('thermal')) S.thermal = true;
   if (q.has('cam')) {
     const [z, cx, cy] = q.get('cam').split(',').map(Number);
@@ -2637,7 +2693,7 @@ function boot(scene, root = document) {
     const k = clamp((f - S.since) / FADE, 0, 1);
     return S.thermal ? k : 1 - k;
   };
-  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro });
+  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people });
 
   // ---- sizing ------------------------------------------------------------------------------
   const resize = () => {
@@ -2818,7 +2874,9 @@ function boot(scene, root = document) {
     return {
       title,
       material: m.name,
-      params: { alpha: m.alpha, eps: m.eps, mu: m.mu, ef: m.ef },
+      params: Object.fromEntries(paramKeys(m).map((k) => [k, m[k]])),
+      caveat: m.caveat ?? null,
+      prescribed: m.prescribed ?? null,
       svf,
       tsNow: ts(h),
       ts15: ts(15),
@@ -2835,17 +2893,25 @@ function boot(scene, root = document) {
   function showCard(p, x, y) {
     if (!p) return;
     const d = cardData(p);
-    const tag = (v) => (v.verified ? '' : ' <span class="unv" title="value not yet checked against the primary source">unverified</span>');
+    const tag = (v) =>
+      (v.basis !== 'cited' ? ` <span class="basis">${BASIS[v.basis]}</span>` : '') +
+      (v.verified ? '' : ' <span class="unv" title="value not yet checked against the primary source">unverified</span>');
+    const P = d.params;
+    const heat = P.thinC
+      ? `<tr><td>heat capacity C (thin layer)</td><td>${P.thinC.value / 1000} kJ m⁻² K⁻¹${tag(P.thinC)}</td></tr>`
+      : P.mu
+        ? `<tr><td>admittance μ</td><td>${P.mu.value} J m⁻² s⁻½ K⁻¹${tag(P.mu)}</td></tr>`
+        : '';
     const srcs = [...new Set(Object.values(d.params).map((v) => v.source))];
     card.innerHTML = `
       <button class="x" aria-label="close">×</button>
       <h3>${d.title}</h3>
       <div class="mat">${d.material}</div>
       <table>
-        <tr><td>albedo α</td><td>${d.params.alpha.value}${tag(d.params.alpha)}</td></tr>
-        <tr><td>emissivity ε</td><td>${d.params.eps.value}${tag(d.params.eps)}</td></tr>
-        <tr><td>admittance μ</td><td>${d.params.mu.value} J m⁻² s⁻½ K⁻¹${tag(d.params.mu)}</td></tr>
-        <tr><td>evaporative fraction</td><td>${d.params.ef.value}${tag(d.params.ef)}</td></tr>
+        <tr><td>albedo α</td><td>${P.alpha.value}${tag(P.alpha)}</td></tr>
+        <tr><td>emissivity ε</td><td>${P.eps.value}${tag(P.eps)}</td></tr>
+        ${heat}
+        <tr><td>evaporative fraction</td><td>${P.ef.value}${tag(P.ef)}</td></tr>
         <tr><td>sky view factor</td><td>${d.svf.toFixed(2)}</td></tr>
         <tr class="t"><td>surface now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
         <tr class="t"><td>surface 15:00 / 23:00</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
@@ -2854,7 +2920,9 @@ function boot(scene, root = document) {
         <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
       </table>
       <p class="note">${d.note}</p>
-      <p class="src">Sources: ${srcs.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: force-restore (Deardorff 1978); see docs/sources.md.</p>`;
+      ${d.caveat ? `<p class="caveat">${d.caveat}</p>` : ''}
+      ${d.prescribed ? `<p class="caveat">${d.prescribed}</p>` : ''}
+      <p class="src">Sources: ${srcs.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: force-restore (Deardorff 1978). Basis tags and the model-vs-literature table: docs/sources.md.</p>`;
     card.querySelector('.x').onclick = hideCard;
     card._pick = p;
     card.dataset.open = '1';
@@ -2916,6 +2984,7 @@ function boot(scene, root = document) {
       }
       if (o.notes !== undefined) S.notes = !!o.notes;
       if (o.intro !== undefined) S.intro = !!o.intro;
+      if (o.people !== undefined) S.people = !!o.people;
       syncUi();
     },
     state: () => ({ frame: S.frame, cam: { ...S.cam }, hour: S.hour, thermal: S.thermal, mix: thermalMix(S.frame), paused: S.paused }),
@@ -2950,6 +3019,27 @@ function boot(scene, root = document) {
     },
     card: (kind, a, b) => cardData(kind === 'building' ? { kind, B: world.buildings.find((B) => B.id === a) } : { kind: 'ground', x: a, y: b, g: scene.ground[world.parcelAt(a, b)] }),
     stats: () => ({ ...lastStats }),
+    /**
+     * Opaque boxes in draw order (for occlusion masks in checks):
+     * {kind, b (building index or -1), box: [x0, y0, x1, y1, z0, z1]}.
+     */
+    boxes() {
+      const out = [];
+      for (const o of display.objects) {
+        if (o.kind === 'b') {
+          const B = o.o;
+          out.push({ kind: 'b', b: B.index, gable: !!B.gable, box: [B.x0, B.y0, B.x1, B.y1, 0, B.h + (B.gable ? 4 : 0)] });
+          if (B.chimney) {
+            const [cx, cy, ch] = B.chimney;
+            out.push({ kind: 'chimney', b: -1, box: [cx - 1.6, cy - 1.6, cx + 1.6, cy + 1.6, B.h, ch] });
+          }
+          for (const A of world.awnings) if (A.b === B.index) out.push({ kind: 'a', b: -1, box: [A.x0, A.y0, A.x1, A.y1, A.z0 - 0.3, A.z1] });
+        } else if (o.kind === 'c') out.push({ kind: 'c', b: -1, box: [o.x0, o.y0, o.x1, o.y1, 0, 1.6] });
+        else if (o.kind === 's') out.push({ kind: 's', b: -1, box: [o.x0, o.y0, o.x1, o.y1, 0, 2.6] });
+        else if (o.kind === 'n') out.push({ kind: 'n', b: -1, box: [o.x0, o.y0, o.x1, o.y1, 0, 1] });
+      }
+      return out;
+    },
     /** Measure n animation frames; returns rAF intervals and draw cost. */
     perf(n = 300) {
       return new Promise((resolve) => {
@@ -3182,7 +3272,7 @@ const SCENE = {
     concrete: [215, 147.5, 0],
   },
   notes: [
-    { at: [200, 160, 0], dx: 70, dy: -95, key: 'asphalt' },
+    { at: [200, 160, 0], dx: 55, dy: 48, key: 'asphalt' },
     { at: [228, 338, 0], dx: 150, dy: 35, key: 'lawn' },
     { at: [122.5, 190, 0], dx: -60, dy: 70, key: 'shade' },
     { at: [325, 127.5, 18], dx: -60, dy: 120, key: 'roofs' },

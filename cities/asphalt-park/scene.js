@@ -199,7 +199,7 @@ export const SCENE = {
     concrete: [215, 147.5, 0],
   },
   notes: [
-    { at: [200, 160, 0], dx: 70, dy: -95, key: 'asphalt' },
+    { at: [200, 160, 0], dx: 55, dy: 48, key: 'asphalt' },
     { at: [228, 338, 0], dx: 150, dy: 35, key: 'lawn' },
     { at: [122.5, 190, 0], dx: -60, dy: 70, key: 'shade' },
     { at: [325, 127.5, 18], dx: -60, dy: 120, key: 'roofs' },

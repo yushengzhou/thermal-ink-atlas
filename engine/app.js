@@ -6,7 +6,7 @@ import { drawWorld } from './kit.js';
 import { runModel, shadeClassField, paletteLut, PALETTE_STOPS, heatRgb } from './thermal.js';
 import { Life, shadeDensity, shadeAt } from './life.js';
 import { Renderer, INTRO, quantHour } from './render.js';
-import { MATERIALS, SOURCES } from './materials.js';
+import { MATERIALS, SOURCES, BASIS, paramKeys } from './materials.js';
 
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
@@ -54,10 +54,11 @@ export function boot(scene, root = document) {
     thermal: false,
     since: -1e9,
     notes: q.get('notes') !== '0',
+    people: q.get('people') !== '0',
     intro: true,
   };
   if (q.get('ui') === '0') root.body.classList.add('noui');
-  if (q.has('hour')) S.hour = clamp(parseFloat(q.get('hour')) || 0, 0, 23.75);
+  if (q.has('hour')) S.hour = Math.round(clamp(parseFloat(q.get('hour')) || 0, 0, 23.75) / 0.25) * 0.25;
   if (q.has('thermal')) S.thermal = true;
   if (q.has('cam')) {
     const [z, cx, cy] = q.get('cam').split(',').map(Number);
@@ -84,7 +85,7 @@ export function boot(scene, root = document) {
     const k = clamp((f - S.since) / FADE, 0, 1);
     return S.thermal ? k : 1 - k;
   };
-  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro });
+  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people });
 
   // ---- sizing ------------------------------------------------------------------------------
   const resize = () => {
@@ -265,7 +266,9 @@ export function boot(scene, root = document) {
     return {
       title,
       material: m.name,
-      params: { alpha: m.alpha, eps: m.eps, mu: m.mu, ef: m.ef },
+      params: Object.fromEntries(paramKeys(m).map((k) => [k, m[k]])),
+      caveat: m.caveat ?? null,
+      prescribed: m.prescribed ?? null,
       svf,
       tsNow: ts(h),
       ts15: ts(15),
@@ -282,17 +285,25 @@ export function boot(scene, root = document) {
   function showCard(p, x, y) {
     if (!p) return;
     const d = cardData(p);
-    const tag = (v) => (v.verified ? '' : ' <span class="unv" title="value not yet checked against the primary source">unverified</span>');
+    const tag = (v) =>
+      (v.basis !== 'cited' ? ` <span class="basis">${BASIS[v.basis]}</span>` : '') +
+      (v.verified ? '' : ' <span class="unv" title="value not yet checked against the primary source">unverified</span>');
+    const P = d.params;
+    const heat = P.thinC
+      ? `<tr><td>heat capacity C (thin layer)</td><td>${P.thinC.value / 1000} kJ m⁻² K⁻¹${tag(P.thinC)}</td></tr>`
+      : P.mu
+        ? `<tr><td>admittance μ</td><td>${P.mu.value} J m⁻² s⁻½ K⁻¹${tag(P.mu)}</td></tr>`
+        : '';
     const srcs = [...new Set(Object.values(d.params).map((v) => v.source))];
     card.innerHTML = `
       <button class="x" aria-label="close">×</button>
       <h3>${d.title}</h3>
       <div class="mat">${d.material}</div>
       <table>
-        <tr><td>albedo α</td><td>${d.params.alpha.value}${tag(d.params.alpha)}</td></tr>
-        <tr><td>emissivity ε</td><td>${d.params.eps.value}${tag(d.params.eps)}</td></tr>
-        <tr><td>admittance μ</td><td>${d.params.mu.value} J m⁻² s⁻½ K⁻¹${tag(d.params.mu)}</td></tr>
-        <tr><td>evaporative fraction</td><td>${d.params.ef.value}${tag(d.params.ef)}</td></tr>
+        <tr><td>albedo α</td><td>${P.alpha.value}${tag(P.alpha)}</td></tr>
+        <tr><td>emissivity ε</td><td>${P.eps.value}${tag(P.eps)}</td></tr>
+        ${heat}
+        <tr><td>evaporative fraction</td><td>${P.ef.value}${tag(P.ef)}</td></tr>
         <tr><td>sky view factor</td><td>${d.svf.toFixed(2)}</td></tr>
         <tr class="t"><td>surface now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
         <tr class="t"><td>surface 15:00 / 23:00</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
@@ -301,7 +312,9 @@ export function boot(scene, root = document) {
         <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
       </table>
       <p class="note">${d.note}</p>
-      <p class="src">Sources: ${srcs.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: force-restore (Deardorff 1978); see docs/sources.md.</p>`;
+      ${d.caveat ? `<p class="caveat">${d.caveat}</p>` : ''}
+      ${d.prescribed ? `<p class="caveat">${d.prescribed}</p>` : ''}
+      <p class="src">Sources: ${srcs.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: force-restore (Deardorff 1978). Basis tags and the model-vs-literature table: docs/sources.md.</p>`;
     card.querySelector('.x').onclick = hideCard;
     card._pick = p;
     card.dataset.open = '1';
@@ -363,6 +376,7 @@ export function boot(scene, root = document) {
       }
       if (o.notes !== undefined) S.notes = !!o.notes;
       if (o.intro !== undefined) S.intro = !!o.intro;
+      if (o.people !== undefined) S.people = !!o.people;
       syncUi();
     },
     state: () => ({ frame: S.frame, cam: { ...S.cam }, hour: S.hour, thermal: S.thermal, mix: thermalMix(S.frame), paused: S.paused }),
@@ -397,6 +411,27 @@ export function boot(scene, root = document) {
     },
     card: (kind, a, b) => cardData(kind === 'building' ? { kind, B: world.buildings.find((B) => B.id === a) } : { kind: 'ground', x: a, y: b, g: scene.ground[world.parcelAt(a, b)] }),
     stats: () => ({ ...lastStats }),
+    /**
+     * Opaque boxes in draw order (for occlusion masks in checks):
+     * {kind, b (building index or -1), box: [x0, y0, x1, y1, z0, z1]}.
+     */
+    boxes() {
+      const out = [];
+      for (const o of display.objects) {
+        if (o.kind === 'b') {
+          const B = o.o;
+          out.push({ kind: 'b', b: B.index, gable: !!B.gable, box: [B.x0, B.y0, B.x1, B.y1, 0, B.h + (B.gable ? 4 : 0)] });
+          if (B.chimney) {
+            const [cx, cy, ch] = B.chimney;
+            out.push({ kind: 'chimney', b: -1, box: [cx - 1.6, cy - 1.6, cx + 1.6, cy + 1.6, B.h, ch] });
+          }
+          for (const A of world.awnings) if (A.b === B.index) out.push({ kind: 'a', b: -1, box: [A.x0, A.y0, A.x1, A.y1, A.z0 - 0.3, A.z1] });
+        } else if (o.kind === 'c') out.push({ kind: 'c', b: -1, box: [o.x0, o.y0, o.x1, o.y1, 0, 1.6] });
+        else if (o.kind === 's') out.push({ kind: 's', b: -1, box: [o.x0, o.y0, o.x1, o.y1, 0, 2.6] });
+        else if (o.kind === 'n') out.push({ kind: 'n', b: -1, box: [o.x0, o.y0, o.x1, o.y1, 0, 1] });
+      }
+      return out;
+    },
     /** Measure n animation frames; returns rAF intervals and draw cost. */
     perf(n = 300) {
       return new Promise((resolve) => {
