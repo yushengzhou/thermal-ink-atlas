@@ -96,5 +96,5 @@ test('sweat cue: pure, sparse, only on hot sunlit ground', async () => {
   }
   const share = shown / n;
   console.log(`sweat droplets visible ${(share * 100).toFixed(1)}% of the time at full heat`);
-  assert.ok(share > 0.4 && share < 0.8, `share ${share}`);
+  assert.ok(share > 0.25 && share < 0.5, `share ${share}`);
 });

@@ -33,7 +33,7 @@ test('sweating walkers only on hot sunlit cells at 15:00, none at 23:00', async 
   assert.deepEqual(r.bad.slice(0, 3), [], 'sweat only on hot sunlit cells');
   const share = r.sweating / r.hotSun;
   console.log(`share of people on baking ground showing droplets: ${(share * 100).toFixed(0)}%`);
-  assert.ok(share > 0.3 && share < 0.9, 'a good share, but not everyone at once');
+  assert.ok(share > 0.25 && share < 0.6, 'a good share, but not everyone at once (pulsed)');
   assert.equal(r.night, 0, 'no sweat at 23:00');
   // drawn at the default camera, and the frame stays deterministic
   const drawn = await page.evaluate(() => {
@@ -48,5 +48,30 @@ test('sweating walkers only on hot sunlit cells at 15:00, none at 23:00', async 
   });
   console.log(`default camera z ${drawn.cam.z}: at least ${drawn.min} people showing droplets in every sampled frame`);
   assert.ok(drawn.min >= 3 && drawn.same);
+  // the glyphs are big enough to read at the default zoom (DPR 1): pale-blue
+  // pixels added by the people layer (people on minus people off), per sweating person
+  const blue = await page.evaluate(() => {
+    const cam = window.atlas.state().cam;
+    const count = () => {
+      const c = document.getElementById('atlas');
+      const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+      let n = 0;
+      for (let i = 0; i < d.length; i += 4) if (d[i + 2] - d[i] > 40 && d[i + 2] > 150) n++;
+      return n;
+    };
+    window.atlas.look({ people: true });
+    window.atlas.seek(640, cam);
+    const on = count();
+    const people = window.atlas.stats().sweating;
+    const glyph = window.atlas.stats().sweatGlyphPx;
+    window.atlas.look({ people: false });
+    window.atlas.seek(640, cam);
+    const off = count();
+    window.atlas.look({ people: true });
+    return { n: on - off, people, glyph };
+  });
+  console.log(`default view: ${blue.people} people sweating, droplet glyphs ${blue.glyph.toFixed(1)} CSS px tall, ${blue.n} clearly blue pixels (${(blue.n / Math.max(1, blue.people)).toFixed(0)} per person)`);
+  assert.ok(blue.glyph >= 9, 'droplet glyphs at least 9 px tall at the default zoom');
+  assert.ok(blue.n / blue.people >= 8, 'droplets are drawn, not specks');
   await context.close();
 });
