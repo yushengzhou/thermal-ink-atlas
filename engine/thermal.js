@@ -1,8 +1,10 @@
 // thermal: force-restore surface energy balance on a 5 m grid.
 // dTs/dt = (2 sqrt(pi) / (mu sqrt(tau))) G - (2 pi / tau) (Ts - Td)   (Deardorff 1978)
 // G = (1-a) K + e L_down - e s Ts^4 - hc (Ts - Ta) - EF max(Q*, 0)
-// Computed once at load (1-min steps, 3-day spin-up), stored at 15-min
-// resolution for the last day; seek() only looks values up.
+// Thin layers (sheet metal) use dTs/dt = G / C instead (no restore term).
+// Computed once at load with 1-min steps, repeating the design day until the
+// deep temperature Td converges (max change < 0.05 K, at least 3 days), and
+// stored at 15-min resolution for the last day; seek() only looks values up.
 import { MATERIALS, MODEL } from './materials.js';
 import { solarPosition, boxShadow, canopyShadow, rasterise } from './sun.js';
 import { lerp, hexRgb, DEG } from './core.js';
@@ -164,7 +166,7 @@ export function sunSlots(world) {
 }
 
 /** Effective material for a cell: roof material for building cells. */
-function cellMat(world, i) {
+export function cellMat(world, i) {
   const b = world.bld[i];
   if (b >= 0) return world.buildings[b].roof;
   return world.matIds[world.mat[i]];
@@ -173,10 +175,14 @@ function cellMat(world, i) {
 /**
  * Run the force-restore model. Returns a Thermal object with hourly lookups.
  * @param {object} world from buildWorld()
- * @param {object} [opts] {days: 3, dt: 60}
+ * @param {object} [opts] {minDays: 3, maxDays: 30, tol: 0.05 K, dt: 60,
+ *   materials: override table (sensitivity runs), slots: reuse sun slots}
  */
 export function runModel(world, opts = {}) {
-  const days = opts.days ?? 3;
+  const minDays = opts.minDays ?? 3;
+  const maxDays = opts.maxDays ?? 30;
+  const tol = opts.tol ?? 0.05;
+  const mats = opts.materials ?? MATERIALS;
   const dt = opts.dt ?? 60;
   const site = world.scene.site;
   const { n } = world;
@@ -184,25 +190,31 @@ export function runModel(world, opts = {}) {
   const { rise } = daylight(site);
   const slots = opts.slots ?? sunSlots(world);
   const hc = 5.7 + 3.8 * site.wind;
-  const hcRoof = 5.7 + 3.8 * site.wind * MODEL.roofWind.value;
   const tauFac = (2 * Math.PI) / TAU;
   const sqrtTau = Math.sqrt(TAU);
 
   // per-cell parameters
   const alpha = new Float32Array(N);
   const eps = new Float32Array(N);
-  const cap = new Float32Array(N); // 2 sqrt(pi) / (mu sqrt(tau))
+  const cap = new Float32Array(N); // 2 sqrt(pi) / (mu sqrt(tau)), or 1 / C for thin layers
+  const restore = new Float32Array(N); // 2 pi / tau, or 0 for thin layers
   const ef = new Float32Array(N);
   const water = new Uint8Array(N);
-  const hcs = new Float32Array(N);
   for (let i = 0; i < N; i++) {
-    hcs[i] = world.bld[i] >= 0 ? hcRoof : hc;
-    const m = MATERIALS[cellMat(world, i)];
+    const id = cellMat(world, i);
+    const m = mats[id];
+    water[i] = id === 'water' ? 1 : 0;
+    if (water[i]) continue; // prescribed temperature
     alpha[i] = m.alpha.value;
     eps[i] = m.eps.value;
-    cap[i] = (2 * Math.sqrt(Math.PI)) / (m.mu.value * sqrtTau);
     ef[i] = m.ef.value;
-    water[i] = cellMat(world, i) === 'water' ? 1 : 0;
+    if (m.thinC) {
+      cap[i] = 1 / m.thinC.value;
+      restore[i] = 0;
+    } else if (m.mu && m.mu.value > 0) {
+      cap[i] = (2 * Math.sqrt(Math.PI)) / (m.mu.value * sqrtTau);
+      restore[i] = tauFac;
+    } else throw new Error(`material ${id} has neither mu > 0 nor thinC`);
   }
   const svf = world.svf;
 
@@ -229,13 +241,16 @@ export function runModel(world, opts = {}) {
   const store = new Float32Array(N * STORE);
   const stepsPerStore = M / STORE;
 
-  for (let d = 0; d < days; d++) {
+  let days = 0;
+  let maxDelta = Infinity;
+  while (days < maxDays && (days < minDays || maxDelta >= tol)) {
     sumDay.fill(0);
     for (let m = 0; m < M; m += dt / 60) {
       const h = m / 60;
       const taK = ta[m] + K0;
       const ta4 = taK * taK * taK * taK;
-      // walls seen from the ground: air + 2 K, plus a sun term by day
+      // walls seen from the ground: air + 2 K plus a sun term by day that
+      // peaks near 6.9 K at noon (engine assumption; ignores wall orientation)
       const tw = taK + 2 + (6 * (beamH[m] + dif[m])) / 900;
       const tw4 = tw * tw * tw * tw;
       const lsky = skyEmissivity(site.vapourHpa, taK) * SIGMA * ta4;
@@ -258,20 +273,26 @@ export function runModel(world, opts = {}) {
           const t = Ts[i];
           const t4 = t * t * t * t;
           const qstar = (1 - alpha[i]) * K + eps[i] * L - eps[i] * SIGMA * t4;
-          const G = qstar - hcs[i] * (t - taK) - (qstar > 0 ? ef[i] * qstar : 0);
-          Ts[i] = t + dt * (cap[i] * G - tauFac * (t - Td[i]));
+          const G = qstar - hc * (t - taK) - (qstar > 0 ? ef[i] * qstar : 0);
+          Ts[i] = t + dt * (cap[i] * G - restore[i] * (t - Td[i]));
         }
         sumDay[i] += Ts[i];
       }
-      if (d === days - 1 && m % stepsPerStore === 0) {
+      if (m % stepsPerStore === 0) {
         const k = m / stepsPerStore;
         for (let i = 0; i < N; i++) store[i * STORE + k] = Ts[i] - K0;
       }
     }
     const steps = M / (dt / 60);
-    for (let i = 0; i < N; i++) Td[i] = sumDay[i] / steps;
+    maxDelta = 0;
+    for (let i = 0; i < N; i++) {
+      const next = sumDay[i] / steps;
+      if (!water[i]) maxDelta = Math.max(maxDelta, Math.abs(next - Td[i]));
+      Td[i] = next;
+    }
+    days++;
   }
-  return new Thermal(world, store, slots, { rise, taMean, hc, hcRoof, site, ta });
+  return new Thermal(world, store, slots, { rise, taMean, hc, site, ta, days, maxDelta, mats });
 }
 
 export class Thermal {
@@ -333,7 +354,7 @@ export class Thermal {
   /**
    * Mean radiant temperature (deg C) for a standing person on a ground cell,
    * SOLWEIG-style six-direction sum (Lindberg et al. 2008), simplified:
-   * walls are treated as air + 2 K (+ up to 6 K in sun) and reflect no shortwave.
+   * walls are treated as air + 2 K (+ up to ~6.9 K in sun) and reflect no shortwave.
    */
   tmrt(i, h) {
     const site = this.info.site;
@@ -342,21 +363,21 @@ export class Thermal {
     const sl = this.sunlit(i, h);
     const v = this.world.svf[i];
     const taK = this.air(h) + K0;
-    const mat = MATERIALS[cellMat(this.world, i)];
+    const mat = (this.info.mats ?? MATERIALS)[cellMat(this.world, i)];
     const tg = this.ts(i, h) + K0;
     const Kh = sl * ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + v * ir.diffuse;
     const b = Math.max(0, s.alt);
     const fp = 0.308 * Math.cos(b * (1 - (b * b) / 48402) * DEG);
     const ak = 0.7;
     const ap = 0.97;
-    const Kup = v * ir.diffuse;
-    const Kdn = mat.alpha.value * Kh;
-    const Klat = 0.5 * Kup + 0.5 * Kdn;
-    const S = ak * (0.06 * Kup + 0.06 * Kdn + 0.88 * Klat + fp * ir.beam * sl);
+    const Ksky = v * ir.diffuse; // onto the upward-facing side (direct beam via fp)
+    const Kground = mat.alpha.value * Kh; // reflected up from the ground
+    const Klat = 0.5 * Ksky + 0.5 * Kground;
+    const S = ak * (0.06 * Ksky + 0.06 * Kground + 0.88 * Klat + fp * ir.beam * sl);
     const lsky = skyEmissivity(site.vapourHpa, taK) * SIGMA * taK ** 4;
     const tw = taK + 2 + (6 * (ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + ir.diffuse)) / 900;
     const Ldown = v * lsky + (1 - v) * SIGMA * tw ** 4;
-    const Lg = mat.eps.value * SIGMA * tg ** 4;
+    const Lg = mat.eps.value * SIGMA * tg ** 4 + (1 - mat.eps.value) * Ldown; // emitted + reflected
     const Llat = 0.5 * Ldown + 0.5 * Lg;
     const L = ap * (0.06 * Ldown + 0.06 * Lg + 0.88 * Llat);
     return Math.pow((S + L) / (ap * SIGMA), 0.25) - K0;
