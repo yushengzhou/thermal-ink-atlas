@@ -13,7 +13,8 @@ const shots = [
   ['docs/media/day-1500.jpg', 'hour=15&f=400', { width: 1280, height: 800 }],
   ['docs/media/thermal-1500.jpg', 'thermal&hour=15&f=400', { width: 1280, height: 800 }],
   ['docs/media/thermal-2300.jpg', 'thermal&hour=23&f=400', { width: 1280, height: 800 }],
-  ['docs/media/sweat-default.jpg', 'hour=15&f=640&notes=0', { width: 1280, height: 800 }],
+  ['docs/media/sweat-default.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
+  ['docs/media/sweat-default-2x.jpg', 'hour=15&f=640', { width: 1280, height: 800, dpr: 2 }],
   ['docs/media/intro-pen.jpg', 'hour=15&f=110', { width: 1280, height: 800 }],
   [
     'docs/media/footnote.jpg',
@@ -30,7 +31,7 @@ const shots = [
 ];
 const browser = await chromium.launch();
 for (const [out, q, viewport, act] of shots) {
-  const ctx = await browser.newContext({ viewport, deviceScaleFactor: 1 });
+  const ctx = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height }, deviceScaleFactor: viewport.dpr ?? 1 });
   await ctx.setOffline(true);
   const page = await ctx.newPage();
   await page.goto(`${page0}?${q}`);
