@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thermal-Ink Atlas</title>
+<style>
+  body { margin: 0; min-height: 100vh; background: #f3ecdd; color: #2b2621;
+    font: 16px/1.5 "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 48px 24px; }
+  h1 { margin: 0; font-size: 34px; letter-spacing: .02em; }
+  .lede { margin: 6px 0 36px; max-width: 640px; opacity: .85; }
+  .hand { font-family: "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 28px; }
+  a.card { display: block; color: inherit; text-decoration: none; background: #fbf7ee; border: 1.5px solid #2b2621;
+    border-radius: 4px 12px 5px 10px; box-shadow: 3px 4px 0 rgba(43,38,33,.18); overflow: hidden; transition: transform .15s; }
+  a.card:hover, a.card:focus { transform: translate(-1px, -2px); }
+  a.card img { display: block; width: 100%; aspect-ratio: 8 / 5; object-fit: cover; border-bottom: 1.5px solid #2b2621; }
+  a.card div { padding: 12px 16px 14px; }
+  a.card h2 { margin: 0; font-size: 20px; }
+  a.card p { margin: 4px 0 0; font-size: 14px; opacity: .8; }
+  a.card p.sim { font-size: 12px; opacity: .65; letter-spacing: .02em; }
+  footer { margin-top: 48px; font-size: 13px; opacity: .7; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Thermal-Ink Atlas</h1>
+  <p class="lede">Hand-inked city blocks that show urban heat through a heat-wave day. Each block is invented, not a
+    real place, and its surface temperatures are simulated with a simple, cited energy-balance model. Each block is one
+    offline HTML file.</p>
+  <div class="cards">
+    <a class="card" href="cities/asphalt-park/index.html">
+      <img src="thumbs/asphalt-park.jpg" alt="Isometric ink drawing of an asphalt street and a shady pocket park">
+      <div>
+        <h2>Asphalt street vs pocket park</h2>
+        <p class="hand">An old sunbaked street, one block from a shady lawn and pond.</p>
+        <p class="sim">Simulated block · invented geometry · modelled temperatures</p>
+        <p>Press T for heat, H for the hour.</p>
+      </div>
+    </a>
+  </div>
+  <footer>MIT licence · thermal-ink-atlas contributors · model inputs marked unverified on the cards</footer>
+</main>
+</body>
+</html>
