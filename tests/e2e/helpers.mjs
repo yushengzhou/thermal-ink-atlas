@@ -12,7 +12,7 @@ export async function launch() {
 
 /** Open the atlas with a query string; returns {page, context, requests, errors}. */
 export async function open(browser, query = '', opts = {}) {
-  const context = await browser.newContext({ viewport: opts.viewport ?? VIEWPORT, deviceScaleFactor: opts.dpr ?? 1 });
+  const context = await browser.newContext({ viewport: opts.viewport ?? VIEWPORT, deviceScaleFactor: opts.dpr ?? 1, hasTouch: !!opts.touch });
   await context.setOffline(true);
   const page = await context.newPage();
   const requests = [];
