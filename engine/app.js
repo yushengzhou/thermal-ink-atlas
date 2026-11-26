@@ -510,6 +510,15 @@ export function boot(scene, root = document) {
       const sh = shadeFor(hq);
       return life.at(frame / 60, hq).map((a) => ({ x: a.x, y: a.y, sit: a.sit, shade: shadeAt(sh, a.x, a.y) }));
     },
+    /** Sweat cue per person: position, local Tmrt, sunlit share, strength, droplets showing. */
+    sweat(frame = S.frame, hour = S.hour) {
+      const hq = quantHour(hour);
+      return life.at(frame / 60, hq).map((a) => {
+        const h = R.heatAt(a.x, a.y, hq);
+        const st = R.sweatAt(a, frame / 60, hq);
+        return { x: a.x, y: a.y, tmrt: h.tmrt, sunlit: h.sunlit, shade: shadeAt(shadeFor(hq), a.x, a.y), s: st.s, drops: st.drops.length, fan: st.fan };
+      });
+    },
     shadeStats(frame = S.frame, hour = S.hour) {
       const hq = quantHour(hour);
       return shadeDensity(world, life.at(frame / 60, hq), shadeFor(hq));

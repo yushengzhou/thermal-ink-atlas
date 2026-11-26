@@ -4,6 +4,7 @@
 // function of (frame, camera, look); caches only skip repeated work.
 import { iso, hash3, noise2, clamp, smooth, rgbCss, mixRgb, scaleRgb, hexRgb, PAPER, INK, ISO_C, ISO_S, ISO_Z, DEG } from './core.js';
 import { shadowPolys, heatRgb } from './thermal.js';
+import { sweatState, shadeAt } from './life.js';
 
 export const TILE = 512;
 export const HOUR_STEP = 0.25;
@@ -15,6 +16,7 @@ const SHADOW_RGB = hexRgb('#4b5a78');
 const THERMAL_WALL = hexRgb('#e7dfcd');
 const NIGHT_RGB = hexRgb('#27355a');
 const LIT = hexRgb('#f4cf7a');
+const SWEAT_CSS = 'rgba(160,192,212,0.95)';
 
 function makeCanvas(w, h) {
   if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(w, h);
@@ -510,6 +512,7 @@ export class Renderer {
       if (intro) lifeA = clamp((f - INTRO.wash) / (INTRO.life - INTRO.wash), 0, 1);
     }
     this.stats.people = 0;
+    this.stats.sweating = 0;
     this.noteHits = [];
     if (lifeA > 0) {
       if (look.people !== false) this.drawPeople(ctx, f, cam, hq, W, H, lifeA, look.thermalMix ?? 0);
@@ -583,6 +586,24 @@ export class Renderer {
     return false;
   }
 
+  /** Tmrt and sunlit share at a person's 5 m cell, cached per quantised hour. */
+  heatAt(x, y, hq) {
+    if (!this.tmrtCache || this.tmrtCache.hq !== hq) {
+      this.tmrtCache = { hq, t: new Float32Array(this.world.n * this.world.n).fill(NaN) };
+    }
+    const i = this.world.cellIndex(x, y);
+    const c = this.tmrtCache.t;
+    if (c[i] !== c[i]) c[i] = this.thermal.tmrt(i, hq);
+    return { tmrt: c[i], sunlit: this.thermal.sunlit(i, hq) };
+  }
+
+  /** Sweat cue: hot cell (Tmrt) and the person in sun on the fine shade raster. */
+  sweatAt(a, t, hq) {
+    const h = this.heatAt(a.x, a.y, hq);
+    const inSun = shadeAt(this.life.plan(hq).shade, a.x, a.y) === 0 && !this.life.plan(hq).shade.night;
+    return sweatState(a.k, t, h.tmrt, inSun ? h.sunlit : 0);
+  }
+
   drawPeople(ctx, f, cam, hq, W, H, alpha, thermalMix) {
     const agents = this.life.at(f / 60, hq);
     const [ox, oy, Z] = this.origin(cam, W, H);
@@ -637,11 +658,41 @@ export class Renderer {
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
+      const hr = Math.max(1, 0.19 * s);
+      const hy = top - 0.2 * s;
+      const sw = hc.up && hr >= 1.3 ? this.sweatAt(a, f / 60, hq) : null;
+      if (sw && sw.fan) {
+        // hand to brow
+        ctx.beginPath();
+        ctx.moveTo(X + bw * 0.9, top + bw * 0.7);
+        ctx.lineTo(X + hr * 1.5, hy - hr * 0.1);
+        ctx.lineTo(X + hr * 0.6, hy - hr * 0.55);
+        ctx.stroke();
+      }
       ctx.fillStyle = rgbCss(hash3(a.k, 11) < 0.5 ? hexRgb('#e2b894') : hexRgb('#9c6b4e'));
       ctx.beginPath();
-      ctx.arc(X, top - 0.2 * s, Math.max(1, 0.19 * s), 0, Math.PI * 2);
+      ctx.arc(X, hy, hr, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
+      if (sw && sw.drops.length) {
+        this.stats.sweating++;
+        const r = hr * 0.36 * (0.85 + 0.3 * sw.s);
+        ctx.lineWidth = Math.max(0.5, lw * 0.6);
+        for (const d of sw.drops) {
+          const x = X + d.side * hr * 1.6;
+          const y = hy - hr * 0.5 + d.fall * hr * 2.4;
+          ctx.globalAlpha = alpha * d.alpha;
+          ctx.beginPath();
+          ctx.moveTo(x, y - r * 2.1);
+          ctx.quadraticCurveTo(x + r * 1.05, y - r * 0.2, x, y + r);
+          ctx.quadraticCurveTo(x - r * 1.05, y - r * 0.2, x, y - r * 2.1);
+          ctx.fillStyle = SWEAT_CSS;
+          ctx.fill();
+          ctx.stroke();
+        }
+        ctx.globalAlpha = alpha;
+        ctx.lineWidth = lw;
+      }
     }
     ctx.globalAlpha = 1;
     this.stats.people = count;
