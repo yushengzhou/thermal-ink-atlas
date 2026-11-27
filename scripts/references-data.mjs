@@ -465,5 +465,81 @@ export const REFS = {
     authors: 'Bolton, D.', year: 1980,
     title: 'The computation of equivalent potential temperature',
     venue: 'Monthly Weather Review 108, 1046–1053',
+  },  // ---- block 6 ----
+  brief6: {
+    authors: 'This project', year: 2026, title: 'Research brief: open-air parking lot / industrial brownfield (block 6)',
+    venue: 'docs/research/parking-brief.md', link: 'docs/research/parking-brief.md',
+  },
+  golden2007: {
+    authors: 'Golden, J. S. et al.', year: 2007,
+    title: 'A comparative study of the thermal and radiative impacts of photovoltaic canopies on pavement surface temperatures',
+    venue: 'Solar Energy 81, 872 (Phoenix, 17 June 2004)',
+    doi: '10.1016/j.solener.2006.11.007',
+  },
+  stempihar2012: {
+    authors: 'Stempihar, J. J. et al.', year: 2012,
+    title: 'Porous asphalt pavement temperature effects for urban heat island analysis',
+    venue: 'Transportation Research Record 2293',
+    doi: '10.3141/2293-15',
+  },
+  takebayashi2009: {
+    authors: 'Takebayashi, H. & Moriyama, M.', year: 2009,
+    title: 'Study on the urban heat island mitigation effect achieved by converting to grass-covered parking',
+    venue: 'Solar Energy 83, 1211',
+    doi: '10.1016/j.solener.2009.01.019',
+  },
+  asaeda1996: {
+    authors: 'Asaeda, T., Ca, V. T. & Wake, A.', year: 1996, title: null,
+    venue: 'Atmospheric Environment (pavement heat and the urban atmosphere; via the block-6 brief)',
+  },
+  zhu2022: {
+    authors: 'Zhu et al.', year: 2022, title: null,
+    venue: 'Frontiers in Environmental Science 9 (ECOSTRESS surface temperatures in Phoenix)',
+    doi: '10.3389/fenvs.2021.795474',
+  },
+  hoehne2020: {
+    authors: 'Hoehne, C. G. et al.', year: '2020 / 2022', title: null,
+    venue: 'Sustainable and Resilient Infrastructure (pavement and vehicle heat in Phoenix; snippet only)',
+    doi: '10.1080/23789689.2020.1773013',
+  },
+  matias2025: {
+    authors: 'Matias et al.', year: 2025, title: null,
+    venue: 'Parked cars and street heat in Lisbon (abstract and press; via the block-6 brief)',
+  },
+  levinson2011: {
+    authors: 'Levinson, R. et al.', year: 2011,
+    title: 'Potential benefits of solar reflective car shells: cooler cabins, fuel savings and emission reductions',
+    venue: 'Applied Energy 88',
+    doi: '10.1016/j.apenergy.2011.05.006',
+  },
+  vanos2018: {
+    authors: 'Vanos, J. K. et al.', year: 2018,
+    title: 'Evaluating the impact of solar radiation on pediatric heat balance within enclosed, hot vehicles',
+    venue: 'Temperature 5 (Tempe, Arizona)',
+    doi: '10.1080/23328940.2018.1468205',
+  },
+  mclaren2005: {
+    authors: 'McLaren, C., Null, J. & Quinn, J.', year: 2005,
+    title: 'Heat stress from enclosed vehicles: moderate ambient temperatures cause significant temperature rise in enclosed vehicles',
+    venue: 'Pediatrics 116 (PMID 15995010)',
+  },
+  nsc: {
+    authors: 'US National Safety Council', year: null, title: null,
+    venue: 'Child hot-car death statistics (web; via the block-6 brief)',
+  },
+  scott1999: {
+    authors: 'Scott, K. I., Simpson, J. R. & McPherson, E. G.', year: 1999,
+    title: 'Effects of tree cover on parking lot microclimate and vehicle emissions',
+    venue: 'Journal of Arboriculture 25, 129',
+  },
+  onishi2010: {
+    authors: 'Onishi, A. et al.', year: 2010,
+    title: 'Evaluating the potential for urban heat-island mitigation by greening parking lots',
+    venue: 'Urban Forestry & Urban Greening 9',
+    doi: '10.1016/j.ufug.2010.06.002',
+  },
+  optris: {
+    authors: 'Optris; Fluke', year: null, title: null,
+    venue: 'Emissivity tables for infrared thermometers (web; via the block-6 brief)',
   },
 };

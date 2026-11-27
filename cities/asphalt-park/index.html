@@ -99,6 +99,17 @@
   #hutong .measures .hand { flex-basis: 100%; }
   #hutong .measures button { font-size: 12px; padding: 2px 6px; }
   .noui #hutong { display: none; }
+  #parking { position: fixed; left: 18px; bottom: 16px; width: 212px; padding: 8px 10px 9px; background: rgba(246,240,226,.93);
+    border: 1.5px solid #2b2621; border-radius: 4px 9px 5px 8px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); font-size: 13px; }
+  #parking .seg { display: flex; align-items: center; gap: 4px; margin: 0 0 6px; flex-wrap: wrap; }
+  #parking button { font: 12.5px/1.2 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; background: #fbf7ee; color: #2b2621;
+    border-radius: 4px 7px 3px 6px; cursor: pointer; }
+  #parking button[aria-pressed="true"] { background: #2b2621; color: #fbf7ee; }
+  #parking .measures { display: flex; flex-wrap: wrap; gap: 4px; border-top: 1px dashed #6d6355; padding-top: 6px; }
+  #parking .measures .hand { flex-basis: 100%; }
+  #parking .measures button { font-size: 12px; padding: 2px 6px; }
+  #parking .measures button.warn { border-color: #8a2f22; color: #8a2f22; }
+  .noui #parking { display: none; }
   #terms .refs a { color: #8a2f22; }
   #card table.cmp td { text-align: right; }
   #card table.cmp td:first-child, #card table.cmp td.sub { text-align: left; }
@@ -567,6 +578,21 @@ const SOURCES = {
   deng: 'Deng Yunxiang, Tianpeng zheyin (The Paper, newsDetail_forward_18319465), via the block-5 brief: summer mat awnings over Beijing courtyards; the old Beijing saying "tianpeng, fish bowl, pomegranate tree", which the cartoonist Li Binsheng drew',
   visitBeijing: 'Visit Beijing (official tourism site), via the block-5 brief: jujube and pagoda trees in courtyards; the pomegranate stands for many children',
   bolton1980: 'Bolton (1980) Monthly Weather Review 108, 1046-1053: saturation vapour pressure e_s = 6.112 exp(17.67 T / (T + 243.5)) hPa (formula from memory, not checked)',
+  brief6: 'Research brief docs/research/parking-brief.md (block 6; values compiled from the sources below, items marked unverified there are flagged here; brownfield values are mostly its assumptions)',
+  golden2007: 'Golden et al. (2007) Solar Energy 81, 872, doi 10.1016/j.solener.2006.11.007: Phoenix, 17 June 2004 (air max 41.0 C, wind 0.86 m/s): exposed asphalt (SVF 0.90) max 63.5 / min 28.5 / mean 43.6 C, under a PV canopy (SVF 0.11) 37.0 / 27.7 / 32.1 C; the paper has internal inconsistencies',
+  stempihar2012: 'Stempihar et al. (2012) Transportation Research Record 2293, doi 10.3141/2293-15: modelled Phoenix pavements, max 53-69 C, min 29-35 C; HMA k 1.2, rho 2238, c 921; PCC k 1.5, rho 2350, c 1000; eps 0.91; surface temperatures asymptotic above about 203 mm thickness',
+  takebayashi2009: 'Takebayashi & Moriyama (2009) Solar Energy 83, 1211, doi 10.1016/j.solener.2009.01.019: grass parking vs asphalt, sensible heat about 100-150 W m-2 lower by day and about 50 W m-2 lower at night',
+  asaeda1996: 'Asaeda, Ca & Wake (1996), via the block-6 brief: asphalt emits about 150 W m-2 more infrared than bare soil at its maximum (extra sensible heat 50 vs 200 W m-2 across abstracts, unverified)',
+  zhu2022: 'Zhu et al. (2022) Frontiers in Environmental Science, doi 10.3389/fenvs.2021.795474, ECOSTRESS Phoenix: roads the only class warming at night; a 100% road pixel about 4.5 K warmer than grass at night (interpretation, unverified)',
+  hoehne2020: 'Hoehne et al. (2020/2022) Sustainable and Resilient Infrastructure, doi 10.1080/23789689.2020.1773013: Phoenix pavement and vehicle sensible heat, 67% roads, 29% parking, 3.9% vehicles (snippet only, unverified)',
+  matias2025: 'Matias et al. (2025), Lisbon parked cars (abstract and press, unverified): black roofs about 71 C vs white about 45 C; air 2.5-3.8 K warmer next to black cars',
+  levinson2011: 'Levinson et al. (2011) Applied Energy, doi 10.1016/j.apenergy.2011.05.006: black vs silver car roof up to 25 K hotter; cabin soak air 5-6 K',
+  vanos2018: 'Vanos et al. (2018) Temperature, doi 10.1080/23328940.2018.1468205: Tempe, after 1 h: cabin air 46 C in sun vs 38 C in shade, dashboard 69 vs 48 C',
+  mclaren2005: 'McLaren, Null & Quinn (2005) Pediatrics (PMID 15995010): parked-car cabin +1.8 K per 5 min, 80% of the rise in the first 30 min, 47 C at 22 C ambient; cracking the windows did not help',
+  nsc: 'US National Safety Council, child hot-car deaths (via the block-6 brief): 1,010 US children 1998-2024, 39 in 2024',
+  scott1999: 'Scott, Simpson & McPherson (1999) Journal of Arboriculture 25, 129: parking-lot tree shade, asphalt -20 K, air at 0.5 m -1.3 K, car cabins -26 K',
+  onishi2010: 'Onishi et al. (2010) Urban Forestry & Urban Greening, doi 10.1016/j.ufug.2010.06.002: parking-lot greening, surface temperature up to -7.26 K',
+  optris: 'Optris and Fluke emissivity tables, via the block-6 brief: rusty or oxidised steel about 0.69-0.88 (unverified)',
 };
 
 /** How a value relates to its source. */
@@ -824,6 +850,53 @@ Object.assign(MATERIALS, {
   },
 });
 
+// ---- block 6: car park and industrial brownfield ------------------------------
+// The thick asphalt of the car park and the concrete loading yard are the
+// shared asphalt and concrete (Oke values, inside the brief's ranges).
+Object.assign(MATERIALS, {
+  ballast: {
+    name: 'Rail ballast (gravel)',
+    alpha: v(0.2, 'brief6', 'engine', false, 'brief assumption 0.20 (0.10-0.30)'),
+    eps: v(0.92, 'brief6', 'engine', false, 'brief assumption'),
+    mu: v(700, 'brief6', 'engine', false, 'effective admittance of a loose, airy layer; brief assumption 700 (600-900)'),
+    ef: v(0, 'brief6', 'engine', false, 'dry, drains at once'),
+    note: 'Loose crushed stone under the rails: full of air, so it heats fast in the sun and lets go of the heat soon after dark.',
+  },
+  drySoil: {
+    name: 'Bare compacted soil',
+    alpha: v(0.25, 'brief6', 'engine', false, 'brief assumption 0.25 (0.20-0.35)'),
+    eps: v(0.93, 'brief6', 'engine', false, 'brief assumption'),
+    mu: v(800, 'brief6', 'interp', false, 'dry soil about 600 [oke], read up to 800 for compacted ground (brief assumption)'),
+    ef: v(0.05, 'brief6', 'engine', false, 'dry, a little moisture left deep down (brief assumption)'),
+    note: 'Dry, compacted ground of the old works: lighter than asphalt and with less heat store, so it cools sooner after dark.',
+  },
+  scrub: {
+    name: 'Scrubby dry vegetation',
+    alpha: v(0.22, 'brief6', 'engine', false, 'brief assumption'),
+    eps: v(0.95, 'brief6', 'engine', false, 'brief assumption'),
+    mu: v(800, 'brief6', 'engine', false, 'the dry soil beneath (brief assumption)'),
+    ef: v(0.2, 'brief6', 'engine', false, 'sparse, drought-stressed plants: little water to spend (brief assumption)'),
+    note: 'Weeds and dry grass that took over the brownfield: a little evaporation, not much shade.',
+  },
+  rustShed: {
+    name: 'Rusty corrugated steel shed roof',
+    alpha: v(0.2, 'brief6', 'engine', false, 'brief assumption for rusted steel'),
+    eps: v(0.75, 'optris', 'range', false, 'oxidised steel 0.69-0.88 [optris]'),
+    thinC: v(3000, 'brief6', 'interp', false, 'one corrugated sheet about 0.7 mm of steel, rho c about 3.6 MJ m-3 K-1 (calculation in the brief); range 2-5 kJ m-2 K-1'),
+    ef: v(0, 'brief6', 'cited', false, 'dry'),
+    note: 'A single sheet of rusty steel over an open shed: almost no heat store, so it follows the sun up and drops below the air within minutes of sunset.',
+  },
+  pvCanopy: {
+    name: 'Solar (PV) canopy over the bays',
+    alpha: v(0.1, 'engine', 'engine', false, 'not used: the panels are a screen here'),
+    eps: v(0.9, 'engine', 'engine', false, 'not used'),
+    ef: v(0, 'engine', 'engine', false, 'not used'),
+    tr: v(0, 'golden2007', 'interp', false, 'opaque panels: no direct sun through them'),
+    prescribed: 'Not used by the grid model as a surface: a flat opaque screen 4.2 m up; the ground beneath sees the sky with SVF 0.11 [golden2007] and the panel undersides as warm walls (engine assumption).',
+    note: 'Rows of solar panels on steel posts over the parking bays: shade for the cars by day and a lid on the night sky.',
+  },
+});
+
 // ---- block 3: glass presets ---------------------------------------------------
 // rho0: normal-incidence solar reflectance (the angular shape is Fresnel, see
 // reflect.js); absorb: solar absorptance of the pane (glass temperature);
@@ -900,6 +973,13 @@ const MODEL = {
   splashHour: v(19, 'brief5', 'cited', false, 'the evening splash, every evening of the repeated design day (evening watering recommended [takebayashi2023]; the uchimizu custom [nippon])'),
   shadeSamples: v('4 x 4 per 5 m cell', 'engine', 'engine', false, 'block 5 only: shade sampled every 1.25 m, so the 1.2 m wall shadow of a 5 m lane at noon registers (blocks 1-4: 2 x 2)'),
   screenCover: v('SVF x (1 - 0.75)', 'engine', 'engine', false, 'cells under a pergola or awning take the crown factor of a full tree crown for the sky view and wall reflection, as cells under trees do'),
+  // ---- block 6 (car park and brownfield): ground heat flux, cars, PV canopy ----
+  groundFlux: v('G = (1 - a) K + eps L - eps sigma Ts^4 - h_c (Ts - Ta) - EF max(Q*, 0)', 'deardorff', 'cited', false, 'the force-restore surface flux into the ground (thin layers: C dTs/dt), stored every 15 min; negative = the ground gives stored heat back'),
+  dampingDepth: v('d = sqrt(kappa tau / pi)', 'brief6', 'cited', false, 'kappa = k / (rho c); HMA 0.126 m, PCC 0.133 m from the Stempihar inputs [stempihar2012]; force-restore holds for slabs thicker than about 1.5 d (about 0.2 m)'),
+  pvSvf: v(0.11, 'golden2007', 'cited', false, 'sky view factor of the ground under the PV canopy, as measured by Golden et al.; set on the cells whose centre is under a panel row'),
+  carShade: v('sunlit x (1 - car share)', 'engine', 'engine', false, 'parked cars as a sub-grid shade: each cell loses the share of its area under car footprints from its direct sun, all day (the lot is taken as full; shadows are not offset with the sun angle)'),
+  carSky: v('SVF x (1 - car share)', 'engine', 'engine', false, 'at night the ground under a car sees the car underside, taken as the warm-wall term (air + 2 K), instead of the sky'),
+  thinPaving: v(600, 'brief6', 'interp', false, 'effective admittance of thin (< 0.2 m) asphalt over a loose base, for the thin-layer check only (not in the scene); brief: thin paving needs a lower effective mu'),
 };
 
 /** Parameter keys a material uses (for cards and docs). */
@@ -1219,6 +1299,9 @@ __m['thermal'] = (() => {
 //   G = ... - EF max(Q*, 0) - LE,  LE = L beta(W) (h_c / c_p) max(0, q_sat(Ts) - q_a),
 //   beta(W) = beta_wet min(1, W / W_c),  dW/dt = -LE / L,  W := W0 at the splash hour.
 // Blocks without wet cells never enter that step (stepSplash below).
+// Block 6 keeps G itself (opts.flux): on the stored 15-min steps the model
+// minute runs through stepFlux, the same arithmetic as stepPlain that also
+// writes G per cell; the other minutes and every other block are unchanged.
 // Computed once at load with 1-min steps, repeating the design day until the
 // deep temperature Td converges (max change < 0.05 K, at least 3 days), and
 // stored at 15-min resolution for the last day; seek() only looks values up.
@@ -1774,6 +1857,10 @@ function runModel(world, opts = {}) {
   const sumDay = new Float64Array(NN);
   let store = new Float32Array(NN * STORE);
   const stepsPerStore = M / STORE;
+  // block 6: ground heat flux G (W m-2, into the surface) on the stored steps
+  const flux = opts.flux ? new Float32Array(NN * STORE) : null;
+  if (flux && (gv || WS || hcA || kinds)) throw new Error('opts.flux needs the plain step (no glass, wind factor, water kinds or water store)');
+  const Gnow = flux ? new Float64Array(NN) : null;
 
   // per-cell inputs and state for the step functions (one minute, all cells)
   const C = { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, hcA, dt, gOpaque, g0, g1, g2, g3, wt: new Float64Array(4), WS };
@@ -1825,7 +1912,8 @@ function runModel(world, opts = {}) {
       } else if (hcA || kinds) {
         for (let k = 1; k <= 3; k++) C.wt[k] = waterTemp(k, taMean, h) + K0;
         stepWind(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK);
-      } else stepPlain(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT);
+      } else if (flux && keep && m % stepsPerStore === 0) stepFlux(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT, Gnow);
+      else stepPlain(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT);
       if (WS && keep) {
         for (let i = 0; i < NN; i++) {
           if (WS.wet[i] && WS.W[i] > 0 && Ts[i] - twK[m] < WS.margin) {
@@ -1837,6 +1925,7 @@ function runModel(world, opts = {}) {
       if (keep && m % stepsPerStore === 0) {
         const k = m / stepsPerStore;
         for (let i = 0; i < NN; i++) store[i * STORE + k] = Ts[i] - K0;
+        if (flux) for (let i = 0; i < NN; i++) flux[i * STORE + k] = Gnow[i];
         if (WS) for (let i = 0; i < NN; i++) WS.store[i * STORE + k] = WS.W[i];
       }
     }
@@ -1882,12 +1971,17 @@ function runModel(world, opts = {}) {
     // (mass balance: evap = start - before + w0 - end on wet cells)
     wetInfo = { margin: WS.margin, marginAt: WS.marginAt, store: wst, evap: full(WS.evap), start: full(WS.start), before: full(WS.before), end: full(WS.end), wet: full(WS.wet), w0: WS.w0, beta: WS.beta, wc: WS.wc, hour: sp.hour, efOnly: WS.efOnly, qa: WS.qa };
   }
+  let fluxFull = flux;
   if (idx) {
     const full = new Float32Array(NF * STORE);
     idx.forEach((i, c) => full.set(store.subarray(c * STORE, (c + 1) * STORE), i * STORE));
     store = full;
+    if (flux) {
+      fluxFull = new Float32Array(NF * STORE);
+      idx.forEach((i, c) => fluxFull.set(flux.subarray(c * STORE, (c + 1) * STORE), i * STORE));
+    }
   }
-  return new Thermal(world, store, slots, { rise, taMean, hc, fw: fwFull, wind: uSite, site, ta, days, maxDelta, mats, cells: idx, refl: reflFull, glass, warm: warmUsed ? opts.warm : 0, warmFactor, ...(wetInfo ? { wet: wetInfo } : {}) });
+  return new Thermal(world, store, slots, { ...(fluxFull ? { flux: fluxFull } : {}), rise, taMean, hc, fw: fwFull, wind: uSite, site, ta, days, maxDelta, mats, cells: idx, refl: reflFull, glass, warm: warmUsed ? opts.warm : 0, warmFactor, ...(wetInfo ? { wet: wetInfo } : {}) });
 }
 
 // ---- block 5: moist air and the surface water store --------------------------
@@ -2021,6 +2115,34 @@ function stepPlain(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT) {
 }
 
 /**
+ * One model minute for every cell, as stepPlain, that also writes the ground
+ * heat flux G (W m-2, positive into the surface) of each cell before its step
+ * to Gout (block 6, opts.flux; water cells 0). The arithmetic of Ts is the
+ * same statement as in stepPlain, so a flux run matches a plain run bit for bit.
+ */
+function stepFlux(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT, Gout) {
+  const { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, dt } = C;
+  for (let i = 0; i < NN; i++) {
+    if (water[i]) {
+      Ts[i] = waterT;
+      Gout[i] = 0;
+    } else {
+      const sl = f0[i] + (f1[i] - f0[i]) * st;
+      const v = svf[i];
+      const K = sl * bh + v * df + cw[i] * k0 + cwa[i] * kg;
+      const L = v * lsky + (1 - v) * lwall;
+      const t = Ts[i];
+      const t4 = t * t * t * t;
+      const qstar = (1 - alpha[i]) * K + eps[i] * L - eps[i] * SIGMA * t4;
+      const G = qstar - hc * (t - taK) - (qstar > 0 ? ef[i] * qstar : 0);
+      Gout[i] = G;
+      Ts[i] = t + dt * (cap[i] * G - restore[i] * (t - Td[i]));
+    }
+    sumDay[i] += Ts[i];
+  }
+}
+
+/**
  * One model minute for every cell with a per-cell h_c and / or several water
  * kinds (block 4). The same arithmetic as stepPlain, with hcA[i] for hc (or
  * the scalar hc when there is no wind factor) and C.wt[kind] for the water.
@@ -2132,6 +2254,18 @@ class Thermal {
   /** Water evaporated from cell i's store over the design day, mm (the model's own 1-min sum; block 5). */
   evaporated(i) {
     return this.info.wet ? this.info.wet.evap[i] : 0;
+  }
+
+  /** Ground heat flux G into cell i at hour h, W m-2 (block 6 flux runs; null elsewhere). Negative: the surface gives stored heat back. */
+  flux(i, h) {
+    const F = this.info.flux;
+    if (!F) return null;
+    const x = ((((h % 24) + 24) % 24) * STORE) / 24;
+    const k = Math.floor(x);
+    const f = x - k;
+    const a = F[i * STORE + (k % STORE)];
+    const b = F[i * STORE + ((k + 1) % STORE)];
+    return a + (b - a) * f;
   }
 
   /** Wind factor f_w of cell i (1 for blocks without a wind direction). */
@@ -2381,7 +2515,7 @@ function paletteLut() {
 }
 
 
-return { SIGMA, SLOTS, STORE, LATENT, WATER_KIND, isWater, waterTemp, daylight, airTemp, irradiance, skyEmissivity, svfAt, svfGridAt, shadowPolys, screenShadow, buildingMask, buildingMaskPoly, buildingMaskRay, sunlitField, shadeClassField, sunSlots, cellMat, runModel, CP_AIR, P_AIR, satVapour, specificHumidity, qSat, QSAT_T0, QSAT_DT, qSatTable, wetBulb, stepSplash, coarseStability, wallTemp, wallReflectCoef, wallShortwave, glassLongwave, Thermal, PALETTE_STOPS, heatRgb, paletteLut };
+return { SIGMA, SLOTS, STORE, LATENT, WATER_KIND, isWater, waterTemp, daylight, airTemp, irradiance, skyEmissivity, svfAt, svfGridAt, shadowPolys, screenShadow, buildingMask, buildingMaskPoly, buildingMaskRay, sunlitField, shadeClassField, sunSlots, cellMat, runModel, CP_AIR, P_AIR, satVapour, specificHumidity, qSat, QSAT_T0, QSAT_DT, qSatTable, wetBulb, stepSplash, coarseStability, stepFlux, wallTemp, wallReflectCoef, wallShortwave, glassLongwave, Thermal, PALETTE_STOPS, heatRgb, paletteLut };
 })();
 
 __m['wind'] = { isWindBlock: () => false };
@@ -2394,7 +2528,7 @@ const { svfAt, svfGridAt } = __m['thermal'];
 const { windField, isWindBlock } = __m['wind'];
 const { MATERIALS } = __m['materials'];
 
-const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water', 'pavers', 'porousAsphalt', 'coolPave', 'raingarden', 'river', 'pond', 'greyBrick'];
+const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water', 'pavers', 'porousAsphalt', 'coolPave', 'raingarden', 'river', 'pond', 'greyBrick', 'ballast', 'drySoil', 'scrub'];
 const WALKABLE = { concrete: 1, stone: 1, grass: 1, pavers: 1, greyBrick: 1 };
 
 /** Shopfront segments [s0, s1] (metres along a face) for a shop building. */
@@ -2588,6 +2722,8 @@ function depthOrder(boxes) {
     const B = boxes[b];
     const overlapX = A.x0 < B.x1 && B.x0 < A.x1;
     const overlapY = A.y0 < B.y1 && B.y0 < A.y1;
+    // block 6: an overhead screen marked front (PV canopy) is drawn after whatever its footprint overlaps
+    if (overlapX && overlapY && !A.front !== !B.front) return !!B.front;
     if (overlapX && overlapY) return A.x0 + A.x1 + A.y0 + A.y1 < B.x0 + B.x1 + B.y0 + B.y1;
     const west = A.x1 <= B.x0;
     const north = A.y1 <= B.y0;
@@ -2865,6 +3001,9 @@ const GROUND_RGB = {
   river: hexRgb('#7ea3ab'),
   pond: hexRgb('#87adb2'),
   greyBrick: hexRgb('#b9b3a6'),
+  ballast: hexRgb('#a29a8d'),
+  drySoil: hexRgb('#cbb38c'),
+  scrub: hexRgb('#b2ad7c'),
 };
 const ROOF_RGB = {
   membrane: hexRgb('#5c5e66'),
@@ -2874,6 +3013,7 @@ const ROOF_RGB = {
   coolroofAged: hexRgb('#ddd8cc'),
   greenroof: hexRgb('#93a865'),
   greyTile: hexRgb('#6e7072'),
+  rustShed: hexRgb('#97603f'),
 };
 const SOIL = hexRgb('#b49a77');
 const WIN = hexRgb('#5f7480');
@@ -3115,6 +3255,16 @@ function drawDecor(pen, world, D) {
   // block 5: brick courses in lanes and courtyards, the well, fish bowls under the awnings
   for (const r of D.brick ?? []) brickCourses(pen, ...r);
   if (D.well) well(pen, ...D.well);
+  // block 6: rails on the ballast, brownfield tufts and speckle, faded bay stripes
+  for (const r of D.rails ?? []) rails(pen, ...r);
+  for (const [x0, y0, x1, y1, n, seed] of D.tufts ?? []) tufts(pen, x0, y0, x1, y1, n, seed);
+  for (const [x0, y0, x1, y1, n, seed] of D.soil ?? []) speckle(pen, x0, y0, x1, y1, n, seed, hexRgb('#9a8463'));
+  for (const [xa, xb, ya, yb, step] of D.stripes ?? []) {
+    const segs = [];
+    for (let x = xa; x <= xb + 1e-9; x += step) segs.push([[x, ya], [x, yb]]);
+    pen.tag = 'gm';
+    pen.lines(segs, { lw: 0.6, stroke: hexRgb('#efe8d6'), a: 0.6, over: 0.1 });
+  }
   if (D.pond) {
     const [cx, cy, rx, ry] = D.pond;
     groundEllipse(pen, cx, cy, rx + 0.8, ry + 0.8, null, { lw: 0.7, a: 0.6, t: 'gm' });
@@ -3131,6 +3281,29 @@ function brickCourses(pen, x0, y0, x1, y1) {
   if (x1 - x0 >= y1 - y0) for (let y = y0 + 2; y < y1 - 0.5; y += 2) segs.push([[x0 + 0.3, y], [x1 - 0.3, y]]);
   else for (let x = x0 + 2; x < x1 - 0.5; x += 2) segs.push([[x, y0 + 0.3], [x, y1 - 0.3]]);
   if (segs.length) pen.lines(segs, { lw: 0.35, stroke: hexRgb('#8f897d'), a: 0.4, over: 0.1 });
+}
+
+/** A rail siding (block 6): two rails 1.435 m apart along x at y, sleepers every 0.8 m, as two items. */
+function rails(pen, y, x0, x1) {
+  pen.tag = 'gm';
+  const sl = [];
+  for (let x = x0 + 0.4; x < x1; x += 0.8) sl.push([[x, y - 1.25], [x, y + 1.25]]);
+  pen.lines(sl, { lw: 0.55, stroke: hexRgb('#6b5443'), a: 0.6, over: 0 });
+  pen.lines([[[x0, y - 0.72], [x1, y - 0.72]], [[x0, y + 0.72], [x1, y + 0.72]]], { lw: 0.9, stroke: hexRgb('#4a4744'), a: 0.85, over: 0.1 });
+}
+
+/** Dry tufts on the brownfield (block 6): n small three-blade strokes, one item. */
+function tufts(pen, x0, y0, x1, y1, n, seed) {
+  const r = makeRng(seed);
+  pen.tag = 'gm';
+  const segs = [];
+  for (let i = 0; i < n; i++) {
+    const x = x0 + r() * (x1 - x0);
+    const y = y0 + r() * (y1 - y0);
+    const h = 0.5 + r() * 0.7;
+    for (let k = -1; k <= 1; k++) segs.push([[x, y, 0], [x + k * 0.3, y - 0.1, h]]);
+  }
+  pen.lines(segs, { lw: 0.45, stroke: hexRgb('#6d6a3a'), a: 0.7, over: 0 });
 }
 
 /** The old well of Well Square (block 5): a stone curb, dark water and a windlass. */
@@ -3352,7 +3525,7 @@ function building(pen, B, world = null) {
     pen.shape([[x0 + p, y0 + p, h - 0.1], [x1 - p, y0 + p, h - 0.1], [x1 - p, y1 - p, h - 0.1], [x0 + p, y1 - p, h - 0.1]], roof, { lw: 0.5, a: 0.7, t: 'r' });
     pen.tag = 'rd';
     const rng = makeRng(B.index * 101 + 7);
-    if (B.roof === 'metal') {
+    if (B.roof === 'metal' || B.roof === 'rustShed') {
       for (let x = x0 + 1.5; x < x1 - 1; x += 1.5) pen.line([[x, y0 + p, h], [x, y1 - p, h]], { lw: 0.4, a: 0.35, over: 0.1, t: 'rd' });
     } else if (B.roof === 'greenroof') {
       // sedum tufts in loose rows, and a gravel margin inside the parapet
@@ -3576,6 +3749,49 @@ function screen(pen, P, i) {
   }
 }
 
+/**
+ * A solar (PV) canopy (block 6): steel posts every 8 m along its long edges
+ * and a row of dark panels at z, gridded into modules; tagged as crowns
+ * (as block 5 screens), so the heat wash of the bays shows through it.
+ */
+function pvCanopy(pen, P, i) {
+  const { x0, y0, x1, y1, z } = P;
+  pen.tag = 'trunk';
+  const posts = [];
+  for (let x = x0 + 2; x <= x1 - 1.9; x += 8) for (const y of [y0 + 1, y1 - 1]) posts.push([[x, y, 0], [x, y, z - 0.2]]);
+  pen.lines(posts, { lw: 0.8, stroke: hexRgb('#6f7378'), a: 0.9, over: 0.05, t: 'trunk' });
+  pen.tag = 'tree';
+  pen.shape([[x0, y0, z], [x1, y0, z], [x1, y1, z - 0.6], [x0, y1, z - 0.6]], jitter(hexRgb('#40506a'), i * 17, 0.05), { lw: 0.9, t: 'tree', a: 0.94 });
+  const grid = [];
+  for (let x = x0 + 2; x < x1 - 0.5; x += 2) grid.push([[x, y0, z], [x, y1, z - 0.6]]);
+  const mid = (y0 + y1) / 2;
+  grid.push([[x0, mid, z - 0.3], [x1, mid, z - 0.3]]);
+  pen.lines(grid, { lw: 0.3, stroke: hexRgb('#9fb1c4'), a: 0.5, over: 0, t: 'treeTick' });
+}
+
+/**
+ * A parked car of the block 6 lot, in three items (body sides, body top,
+ * cabin) instead of block 1's six; tagged 'car', so the thermal view draws
+ * only its outline over the heat wash (the car itself is not modelled).
+ */
+function lotCar(pen, x, y, axis, colour, i) {
+  const L = 4.4;
+  const W = 1.8;
+  const c = hexRgb(colour);
+  const [hx, hy] = axis === 'x' ? [L / 2, W / 2] : [W / 2, L / 2];
+  const sides = (x0, y0, x1, y1, z0, z1) => [[[x0, y1, z0], [x1, y1, z0], [x1, y1, z1], [x0, y1, z1]], [[x1, y1, z0], [x1, y0, z0], [x1, y0, z1], [x1, y1, z1]]];
+  const top = (x0, y0, x1, y1, z) => [[x0, y0, z], [x1, y0, z], [x1, y1, z], [x0, y1, z]];
+  pen.tag = 'car';
+  pen.shapes(sides(x - hx, y - hy, x + hx, y + hy, 0.25, 1.0), { k: 'wall', c, n: [0, 1] }, { lw: 0.5, t: 'car' });
+  pen.shape(top(x - hx, y - hy, x + hx, y + hy, 1.0), scaleRgb(c, 1.08), { lw: 0.5, t: 'car' });
+  const [cx, cy] = axis === 'x' ? [L * 0.27, W * 0.42] : [W * 0.42, L * 0.27];
+  const off = (hash3(i, 3) - 0.5) * 0.6;
+  const ox = axis === 'x' ? off : 0;
+  const oy = axis === 'y' ? off : 0;
+  const g = mixRgb(c, hexRgb('#c9d3d6'), 0.45);
+  pen.shapes([...sides(x - cx + ox, y - cy + oy, x + cx + ox, y + cy + oy, 1.0, 1.5), top(x - cx + ox, y - cy + oy, x + cx + ox, y + cy + oy, 1.5)], g, { lw: 0.45, t: 'car' });
+}
+
 /** A glazed fish bowl under the awning (block 5). */
 function bowl(pen, x, y) {
   pen.tag = 'o';
@@ -3681,7 +3897,7 @@ function drawWorld(world, seed = 1) {
   if (world.screens) {
     world.screens.forEach((P, i) => {
       const e = P.kind === 'awning' ? 6 : 0;
-      objs.push({ kind: 'p', o: P, i, x0: P.x0, y0: P.y0, x1: P.x1 + e, y1: P.y1 + e });
+      objs.push({ kind: 'p', o: P, i, x0: P.x0, y0: P.y0, x1: P.x1 + e, y1: P.y1 + e, ...(P.kind === 'pvCanopy' ? { front: true } : {}) });
     });
     for (const [x, y] of D?.bowls ?? []) objs.push({ kind: 'f', o: [x, y], i: 0, x0: x - 0.6, y0: y - 0.6, x1: x + 0.6, y1: y + 0.6 });
   }
@@ -3690,6 +3906,8 @@ function drawWorld(world, seed = 1) {
     const ob = objs[k];
     pen.group = gi + 1;
     if (ob.kind === 'b' && ob.o.style === 'hutong') hutongHouse(pen, ob.o, world);
+    else if (ob.kind === 'p' && ob.o.kind === 'pvCanopy') pvCanopy(pen, ob.o, ob.i);
+    else if (ob.kind === 'c' && world.scene.parkingBlock) lotCar(pen, ...ob.o, ob.i);
     else if (ob.kind === 'p') screen(pen, ob.o, ob.i);
     else if (ob.kind === 'f') bowl(pen, ...ob.o);
     else if (ob.kind === 'b') building(pen, ob.o, world);
@@ -3703,7 +3921,7 @@ function drawWorld(world, seed = 1) {
 }
 
 
-return { GROUND_RGB, ROOF_RGB, drawGround, drawDecor, box, isGlassFace, building, hutongHouse, screen, bowl, tree, car, bench, lamp, drawWorld };
+return { GROUND_RGB, ROOF_RGB, drawGround, drawDecor, box, isGlassFace, building, hutongHouse, screen, pvCanopy, lotCar, bowl, tree, car, bench, lamp, drawWorld };
 })();
 
 __m['life'] = (() => {
@@ -4053,6 +4271,9 @@ const AC_INK = hexRgb('#8a2f22');
 const AIR_COOL = hexRgb('#3b6573');
 const AIR_WARM = hexRgb('#b96d4d');
 const WIND_INK = hexRgb('#24354a');
+// block 6: the night-release strokes (heat out of the ground) and the uptake ticks
+const FLUX_UP = hexRgb('#a2452f');
+const FLUX_DOWN = hexRgb('#3b6573');
 const HAND_FONT = '"Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive';
 
 function makeCanvas(w, h) {
@@ -4137,6 +4358,7 @@ class Renderer {
     this.glass = 'lowe'; // glass type (block 3): pane colours
     this.spotFor = null; // (hq) -> reflection spot field on the 2 m grid, or null (block 3)
     this.wind = null; // block 4: {lines, items} wind lines (wind.js windLines + pen.stream items)
+    this.flux = null; // block 6: (hq) -> [{x, y, z, g}] ground heat flux samples (parking.js fluxSamples)
     this.pool = world.scene.pooling !== false; // edge pooling on washes (off in block 5)
     // block 5: skip shadow polygons off the tile. Not used elsewhere: Skia may anti-alias a smaller
     // path differently, so blocks 1-4 keep their exact pixels
@@ -4421,6 +4643,7 @@ class Renderer {
       if (it.t === 'slab') return scaleRgb(THERMAL_WALL, 0.85);
       if (it.t === 'r' || it.t === 'rd') return it.b >= 0 ? heatRgb(hc.roof[it.b]) : null;
       if (it.t === 'tree') return null;
+      if (it.t === 'car') return null; // block 6: parked cars are outlines over the wash (not modelled)
       if (it.t === 'win') return null;
       const n = f.n ?? [0, 1];
       return scaleRgb(THERMAL_WALL, n[0] ? 0.9 : 1);
@@ -4454,6 +4677,7 @@ class Renderer {
         if (t === 'g' || t === 'gm' || t === 'treeTick') strokeA *= 0.28;
         else if (t === 'win') strokeA *= 0.22;
         else if (t === 'tree') strokeA *= 0.55;
+        else if (t === 'car') strokeA *= 0.4;
         else strokeA *= 0.7;
       }
       if (mode === 'scaffold' && (t === 'gm' || t === 'treeTick')) strokeA *= 0.8;
@@ -4865,9 +5089,12 @@ class Renderer {
     this.noteHits = [];
     this.stats.windDashes = 0;
     this.stats.airSegs = 0;
+    this.stats.fluxUp = 0;
+    this.stats.fluxDown = 0;
     if (lifeA > 0) {
       if (this.wind && (look.wind || look.air)) this.drawWind(ctx, f, cam, W, H, lifeA, look, hq);
       if (look.ac) this.drawAc(ctx, f, cam, W, H, lifeA);
+      if (look.flux && this.flux) this.drawFlux(ctx, f, cam, W, H, lifeA, hq);
       if (look.people !== false) this.drawPeople(ctx, f, cam, hq, W, H, lifeA, look.thermalMix ?? 0);
       if (look.notes) this.drawNotes(ctx, cam, W, H, look.notes, lifeA);
     }
@@ -5032,6 +5259,98 @@ class Renderer {
     }
     ctx.restore();
     this.stats.ac = !!label;
+  }
+
+  /**
+   * Block 6: the night-release overlay. On a 10 m grid of samples, where the
+   * ground gives stored heat back (G < 0) soft warm strokes rise from the
+   * surface, longer and stronger for more W m-2; where it takes heat in
+   * (G > 0) short cool ticks point down; the share of samples drawn grows
+   * with |G| (all of them from 120 W m-2). The strokes drift upward with the
+   * frame number (a pure function of frame, camera and hour), and a label
+   * says what they show.
+   */
+  drawFlux(ctx, f, cam, W, H, alpha, hq) {
+    const [ox, oy, Z] = this.origin(cam, W, H);
+    const d = this.dpr;
+    const samples = this.flux(hq);
+    const B = 5;
+    const up = Array.from({ length: B }, () => []);
+    const down = Array.from({ length: B }, () => []);
+    const unit = Math.max(10 * d, 4.2 * Z); // stroke length at 100 W m-2
+    for (let k = 0; k < samples.length; k++) {
+      const s = samples[k];
+      const a = Math.abs(s.g);
+      // stroke density follows |G| too: every sample at 120 W m-2 or more, fewer below
+      if (a < 15 || hash3(k, 9, 91) >= a / 120) continue;
+      const p = iso(s.x, s.y, s.z);
+      const X = ox + p[0] * Z;
+      const Y = oy + p[1] * Z;
+      if (X < -20 || X > W + 20 || Y < -unit * 2 || Y > H + 20) continue;
+      if (this.clip && (X < this.clip[0] || X > this.clip[1])) continue;
+      const b = Math.min(B - 1, Math.floor((a / 175) * B));
+      (s.g < 0 ? up : down)[b].push(X, Y, a, k);
+    }
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.lineCap = 'round';
+    ctx.lineWidth = Math.max(1.1 * d, 0.45 * Z);
+    const t = f / 60;
+    ctx.strokeStyle = rgbCss(FLUX_UP);
+    for (let b = 0; b < B; b++) {
+      const P = up[b];
+      if (!P.length) continue;
+      ctx.globalAlpha = alpha * (0.25 + 0.6 * ((b + 0.5) / B));
+      ctx.beginPath();
+      for (let q = 0; q < P.length; q += 4) {
+        const L = (unit * Math.min(1.75, P[q + 2] / 100));
+        const k = P[q + 3];
+        // rise: the stroke slides up by up to half its length and starts again (period 2.5 s)
+        const ph = (t / 2.5 + hash3(k, 7, 91)) % 1;
+        const y0 = P[q + 1] - ph * L * 0.5;
+        const x0 = P[q] + (hash3(k, 8, 91) - 0.5) * 3 * d;
+        ctx.moveTo(x0, y0);
+        for (let i = 1; i <= 4; i++) ctx.lineTo(x0 + Math.sin(i * 1.7 + k + t * 1.3) * 1.4 * d, y0 - (L * i) / 4);
+      }
+      ctx.stroke();
+      this.stats.fluxUp += P.length / 4;
+    }
+    ctx.strokeStyle = rgbCss(FLUX_DOWN);
+    for (let b = 0; b < B; b++) {
+      const P = down[b];
+      if (!P.length) continue;
+      ctx.globalAlpha = alpha * (0.15 + 0.35 * ((b + 0.5) / B));
+      ctx.beginPath();
+      for (let q = 0; q < P.length; q += 4) {
+        const L = unit * 0.45 * Math.min(1.75, P[q + 2] / 100);
+        const x0 = P[q] + (hash3(P[q + 3], 8, 91) - 0.5) * 3 * d;
+        const y0 = P[q + 1] - L - 2 * d;
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x0, y0 + L);
+        ctx.moveTo(x0 - 1.6 * d, y0 + L - 2 * d);
+        ctx.lineTo(x0, y0 + L);
+        ctx.lineTo(x0 + 1.6 * d, y0 + L - 2 * d);
+      }
+      ctx.stroke();
+      this.stats.fluxDown += P.length / 4;
+    }
+    const night = this.stats.fluxUp >= this.stats.fluxDown;
+    const text = `Ground heat flux G (simulated): ${night ? 'rising strokes = stored heat coming back out' : 'ticks down = heat going into the ground; rising strokes = heat coming back out'} · more and longer strokes = more W/m²`;
+    ctx.globalAlpha = alpha;
+    ctx.font = `${Math.round(13 * d)}px ${HAND_FONT}`;
+    ctx.textBaseline = 'bottom';
+    const w = ctx.measureText(text).width;
+    const bx = clamp(W / 2 - w / 2, 8 * d, W - w - 8 * d);
+    const by = H - 84 * d;
+    ctx.fillStyle = 'rgba(248,243,231,0.94)';
+    ctx.fillRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
+    ctx.strokeStyle = rgbCss(FLUX_UP, 0.7);
+    ctx.lineWidth = 0.9 * d;
+    ctx.strokeRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
+    ctx.fillStyle = rgbCss(FLUX_UP);
+    ctx.fillText(text, bx, by);
+    ctx.restore();
+    this.stats.fluxLabel = text;
   }
 
   /**
@@ -5603,6 +5922,35 @@ const GLOSSARY = {
     why: 'Splashed paving cannot get colder than this by evaporating, so it bounds how much a splash can cool.',
     scenes: ['hutong'],
   },
+  // ---- block 6 (car park and brownfield) -------------------------------------
+  heatStorage: {
+    term: 'Heat storage',
+    text: 'Heat a surface soaks down into its own material by day and gives back after dark. Thick, dense paving stores a lot; a thin metal sheet almost none.',
+    model: (S) => S.storageLine,
+    why: 'Stored heat is why a car park stays warm long after sunset, while a tin roof is cold within the hour.',
+    scenes: ['parking'],
+  },
+  dampingDepth: {
+    term: 'Damping depth (d)',
+    text: 'How deep the daily swing of the surface temperature reaches into the ground: at depth d it is down to about a third, at 3d to a twentieth. d = √(κτ/π), κ the thermal diffusivity and τ one day.',
+    model: (S) => S.dampingLine,
+    why: 'A slab much thicker than d holds a full day\'s heat; thin paving over loose stone holds less, so it runs hotter by day and cooler at night.',
+    scenes: ['parking'],
+  },
+  groundFlux: {
+    term: 'Ground heat flux (G)',
+    text: 'The heat going into the ground through its surface (positive) or coming back out (negative), in watts per square metre. The night-release strokes (G) draw it.',
+    model: (S) => S.fluxLine,
+    why: 'At night G is the heat the pavement keeps feeding to its surface, so the surface cannot cool down to the air.',
+    scenes: ['parking'],
+  },
+  thermalInertia: {
+    term: 'Thermal inertia',
+    text: 'How slowly a surface changes temperature when its heating changes: high for thick, dense materials (asphalt, concrete), low for loose or thin ones (soil, ballast, sheet metal). Measured here by the admittance μ.',
+    model: (S) => S.inertiaLine,
+    why: 'High-inertia surfaces lag behind the sun: they peak late and stay warm into the night.',
+    scenes: ['parking'],
+  },
   // ---- block 2 (sponge-retrofit) --------------------------------------------
   permeablePaving: {
     term: 'Permeable paving',
@@ -5723,6 +6071,7 @@ function glossaryStats(world, thermal, extra = {}) {
     out.windLine = `Over the river ${r2(w.river)}; along Quay Street ${r2(w.corridor)}; Rope Walk, behind the warehouses, ${r2(w.shelter)} (mean), ${r2(w.lee)} within one building height of the wall.`;
   }
   if (extra.hutong) Object.assign(out, extra.hutong);
+  if (extra.parking) Object.assign(out, extra.parking);
   if (extra.spot) {
     const s = extra.spot;
     out.spotLine = `At 3 pm with ${s.glassName}: Tmrt ${r0(s.tmrtSpotShade)} °C in shaded spots vs ${r0(s.tmrtShade)} °C in plain shade and ${r0(s.tmrtSun)} °C in sun.`;
@@ -5761,6 +6110,10 @@ __m['hutong'] = { isHutong: () => false };
 
 __m['hutui'] = {};
 
+__m['parking'] = { isParking: () => false };
+
+__m['pkui'] = {};
+
 __m['app'] = (() => {
 // app: boot, clock, keys, seek(), query modes, overlay (slider, notes, heat
 // card) and a small window.atlas API used by the checks.
@@ -5770,7 +6123,7 @@ const { drawWorld } = __m['kit'];
 const { runModel, shadeClassField, paletteLut, PALETTE_STOPS, heatRgb } = __m['thermal'];
 const { Life, shadeDensity, shadeAt } = __m['life'];
 const { Renderer, INTRO, quantHour } = __m['render'];
-const { MATERIALS, SOURCES, BASIS, paramKeys } = __m['materials'];
+const { MATERIALS, SOURCES, BASIS, MODEL, paramKeys } = __m['materials'];
 const { GLOSSARY, gl, glossaryStats, rangeLine, termsFor } = __m['glossary'];
 const { isRetrofit, sceneState, stateMaterials, runShared, resolveId, MEASURES, measureStats, waterBudget, ALIASES, D_MAX, D_DEFAULT } = __m['retrofit'];
 const { retrofitNotes, measureCard, tradeoffCard, spongeCard, drawDivider } = __m['retroui'];
@@ -5788,6 +6141,8 @@ const { penLines, SPEEDS, apparentTemp } = __m['wind'];
 const { Pen } = __m['pen'];
 const { isHutong, hutongSetup, lanesOf, solarNoon, splashStats, efPathRun, efPathStats, splashSensitivity, roofStats, courtyardStats, treeStats, shadedLanes, hutongGlossary, dwellShade } = __m['hutong'];
 const { htNotes, lanesCard, courtyardCard, tianpengCard, splashCard, treesCard, HT_CARDS } = __m['hutui'];
+const { isParking, parkingSetup, parkingStats, parkingGlossary, fluxSamples, pvCompare, slab, STEMPIHAR, tsMean, fluxMean, shedTau } = __m['parking'];
+const { pkNotes, storageCard, pvCard, lotTreesCard, shedCard, soilCard, hotCarCard, PK_CARDS } = __m['pkui'];
 
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
@@ -5884,6 +6239,10 @@ function boot(scene, root = document) {
   const htMode = isHutong(scene);
   let htSet = null;
   const htQ = htMode ? { splash: q.get('splash') !== '0' } : null;
+  // car park block (block 6): the night-release overlay, ?flux=0|1 (default off)
+  const pkMode = isParking(scene);
+  let pkSet = null;
+  const pkQ = pkMode ? { flux: q.get('flux') === '1' } : null;
   if (!retro) {
     world = buildWorld(scene);
     t1 = performance.now();
@@ -5911,6 +6270,9 @@ function boot(scene, root = document) {
       const tc = performance.now();
       thermal = htSet.model(htQ.splash);
       htSet.timing = { slotsMs: tb - ta, runMs: tc - tb, splashMs: performance.now() - tc };
+    } else if (pkMode) {
+      pkSet = parkingSetup(world);
+      thermal = pkSet.model;
     } else thermal = runModel(world);
     t2 = performance.now();
     V = { main: makeView('main', scene, world, thermal, canvas, glassMode ? { type: () => glassNow.type } : null, wfMode ? { lines: wfSet.lines() } : null) };
@@ -5950,6 +6312,17 @@ function boot(scene, root = document) {
   // ?spotskip=0 (checks): draw the glint on every tile, without the bounding-box skip
   if (glassMode && q.get('spotskip') === '0') main.R.spotSkip = false;
   const R = main.R;
+  // car park block: ground heat flux samples for the night-release overlay, per quantised hour
+  if (pkMode) {
+    const fc = new Map();
+    R.flux = (hq) => {
+      if (!fc.has(hq)) {
+        if (fc.size >= 24) fc.delete(fc.keys().next().value);
+        fc.set(hq, fluxSamples(world, thermal, hq));
+      }
+      return fc.get(hq);
+    };
+  }
   const display = main.display;
   const t3 = performance.now();
 
@@ -5975,6 +6348,8 @@ function boot(scene, root = document) {
     ...(wfMode ? wfQ : {}),
     // hutong only: the evening splash on or off
     ...(htMode ? htQ : {}),
+    // car park only: the night-release overlay
+    ...(pkMode ? pkQ : {}),
   };
   if (q.get('ui') === '0') root.body.classList.add('noui');
   if (q.has('hour')) S.hour = Math.round(clamp(parseFloat(q.get('hour')) || 0, 0, 23.75) / 0.25) * 0.25;
@@ -6108,7 +6483,16 @@ function boot(scene, root = document) {
       laneSunTmrt: m(mc.filter((i) => thermal.sunlit(i, 15) > 0.95)),
     };
   }
-  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode ? htNotes(scene, htNoteData()) : block1Notes();
+  // car park block: numbers for notes, cards and glossary (one model, computed once)
+  let pkFixed = null;
+  const pk = () => (pkFixed ??= { st: parkingStats(world, thermal), pv: null });
+  /** Lazily: the PV comparison with an empty bay under the canopy (a run without cars on those cells). */
+  const pkPv = () => (pk().pv ??= pvCompare(world, thermal, pk().st.C));
+  function pkNoteData() {
+    const t = pk().st.table;
+    return { asphalt15: t.openAsphalt.t15, asphalt23: t.openAsphalt.t23, asphaltG23: t.openAsphalt.g23, shed15: t.shed.t15, shed23: t.shed.t23, air23: thermal.air(23), pv15: t.pvBays.t15, soil23: t.soil.t23, yard15: t.yard.t15, yard23: t.yard.t23 };
+  }
+  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode ? htNotes(scene, htNoteData()) : pkMode ? pkNotes(scene, pkNoteData()) : block1Notes();
   function block1Notes() {
   const notesText = {
     asphalt: ['Kiln Street, old asphalt (albedo 0.12):', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
@@ -6135,7 +6519,7 @@ function boot(scene, root = document) {
   // glass block: its tall façades make a day tile slower to bake (about 7 ms),
   // so a slider drag bakes one tile per frame instead of two; the hutong block
   // likewise (hundreds of small tiled roofs and crowns per tile)
-  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people, scrub: S.scrub, ac: !!S.ac, budget: glassMode || htMode ? 1 : undefined, ...(wfMode ? { wind: S.wind, air: S.air, u: S.u } : {}) });
+  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people, scrub: S.scrub, ac: !!S.ac, budget: glassMode || htMode ? 1 : undefined, ...(wfMode ? { wind: S.wind, air: S.air, u: S.u } : {}), ...(pkMode ? { flux: !!S.flux } : {}) });
 
   // ---- sizing ------------------------------------------------------------------------------
   const resize = () => {
@@ -6357,7 +6741,10 @@ function boot(scene, root = document) {
     card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
   }
   function reopenCard() {
-    if (card._measure && card._measure.startsWith('ht:')) {
+    if (card._measure && card._measure.startsWith('pk:')) {
+      card.innerHTML = pkCardHtml(card._measure.slice(3));
+      card.querySelector('.x').onclick = hideCard;
+    } else if (card._measure && card._measure.startsWith('ht:')) {
       card.innerHTML = htCardHtml(card._measure.slice(3));
       card.querySelector('.x').onclick = hideCard;
     } else if (card._measure && card._measure.startsWith('wf:')) {
@@ -6575,6 +6962,65 @@ function boot(scene, root = document) {
     card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
   }
 
+  // ---- car park controls (block 6): the night-release overlay, cards -------------------------
+  const pkUi = pkMode ? buildPkUi() : null;
+  function buildPkUi() {
+    const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
+    root.body.insertAdjacentHTML(
+      'beforeend',
+      `<div id="parking" aria-label="Car park controls">
+        <div class="seg">${btn('data-flux', '1', 'night release G')}</div>
+        <div class="measures"><div class="hand">Cards</div>${PK_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'car' ? 'class="warn"' : '')).join('')}</div>
+      </div>`,
+    );
+    const el = root.getElementById('parking');
+    el.addEventListener('click', (e) => {
+      const b = e.target.closest ? e.target.closest('button') : null;
+      if (!b) return;
+      if (b.dataset.flux) setFlux(!S.flux);
+      else if (b.dataset.card) showPkCard(b.dataset.card, b);
+    });
+    return { el };
+  }
+  function syncPk() {
+    if (!pkUi) return;
+    pkUi.el.querySelector('[data-flux]').setAttribute('aria-pressed', String(!!S.flux));
+    root.body.dataset.flux = S.flux ? '1' : '0';
+  }
+  function setFlux(on) {
+    S.flux = !!on;
+    syncPk();
+    if (card.dataset.open === '1') reopenCard();
+    if (S.paused) draw();
+  }
+  function pkCardHtml(id) {
+    const P = pk();
+    const st = P.st;
+    if (id === 'storage') {
+      const C = st.C;
+      const curve = [9, 12, 15, 18, 20, 23, 2, 5].map((h) => ({ h, asphalt: tsMean(thermal, C.openAsphalt, h), gA: fluxMean(thermal, C.openAsphalt, h), concrete: tsMean(thermal, C.yard, h), gC: fluxMean(thermal, C.yard, h), soil: tsMean(thermal, C.soil, h), gS: fluxMean(thermal, C.soil, h), shed: tsMean(thermal, C.shed, h), gSh: fluxMean(thermal, C.shed, h), air: thermal.air(h) }));
+      return storageCard({ st, curve, slabs: { hma: slab(STEMPIHAR.hma.k, STEMPIHAR.hma.rho, STEMPIHAR.hma.c), pcc: slab(STEMPIHAR.pcc.k, STEMPIHAR.pcc.rho, STEMPIHAR.pcc.c) }, flux: !!S.flux });
+    }
+    if (id === 'pv') return pvCard({ pv: pkPv() });
+    if (id === 'trees') return lotTreesCard({ trees: st.table.treeBays, openBays: st.table.openBays, share: (st.table.openBays.share + st.table.treeBays.share) / 2 });
+    if (id === 'shed') return shedCard({ shed: st.table.shed, cool: st.cool.shed, tau: shedTau(thermal.air(st.set), thermal.info.hc), air: st.air, set: st.set });
+    if (id === 'soil') return soilCard({ st });
+    return hotCarCard({ openBay15: st.table.openBays.t15, openAsphalt15: st.table.openAsphalt.t15 });
+  }
+  function showPkCard(id, anchor) {
+    card.innerHTML = pkCardHtml(id);
+    card.querySelector('.x').onclick = hideCard;
+    card._pick = null;
+    card._measure = `pk:${id}`;
+    card.dataset.open = '1';
+    card.dataset.kind = id;
+    card.style.display = 'block';
+    const r = anchor ? anchor.getBoundingClientRect() : { top: 120 };
+    const panel = pkUi.el.getBoundingClientRect();
+    card.style.left = `${Math.min(window.innerWidth - card.offsetWidth - 10, panel.right + 12)}px`;
+    card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
+  }
+
   const toggleThermal = () => {
     const m = thermalMix(S.frame);
     S.thermal = !S.thermal;
@@ -6591,6 +7037,7 @@ function boot(scene, root = document) {
     else if (wfMode && (k === 'w' || k === 'W')) setWindLines(!S.wind);
     else if (wfMode && (k === 'a' || k === 'A')) setAir(!S.air);
     else if (htMode && (k === 'p' || k === 'P')) setSplash(!S.splash);
+    else if (pkMode && (k === 'g' || k === 'G')) setFlux(!S.flux);
     else if (k === 'h') setHour(S.hour + 1);
     else if (k === 'H') setHour(S.hour - 1);
     else if (k === 'n' || k === 'N') S.notes = !S.notes;
@@ -6783,12 +7230,17 @@ function boot(scene, root = document) {
       : null;
     // hutong: water on a splashed cell now
     const waterInfo = htMode && tmrtCell !== null && htSplashSet().has(tmrtCell) ? { now: thermal.water(tmrtCell, h), on: !!S.splash } : null;
+    // car park: ground heat flux G of the cells now and at 23:00; the share of a ground cell under cars
+    const fluxInfo = pkMode && cells.length && !leaf
+      ? { now: cells.reduce((a, i) => a + thermal.flux(i, h), 0) / cells.length, g23: cells.reduce((a, i) => a + thermal.flux(i, 23), 0) / cells.length, cars: tmrtCell !== null ? world.parking.share[tmrtCell] : 0, pv: tmrtCell !== null ? !!world.parking.pv[tmrtCell] : false }
+      : null;
     return {
       title,
       state: view.id,
       compare,
       wind: windInfo,
       water: waterInfo,
+      flux: fluxInfo,
       glass: glassInfo,
       wallsNow: sw ? sw.walls : null,
       glassNow: sw ? sw.glass : null,
@@ -6861,6 +7313,7 @@ function boot(scene, root = document) {
         ${d.wallsNow !== null ? `<tr><td>sun off the ${gl('wallReflection', 'walls')} now</td><td>${Math.round(d.wallsNow)} W m⁻²</td></tr>` : ''}
         ${d.glassNow !== null && glassMode ? `<tr><td>sun off the ${gl('specular', 'glass')} now</td><td>${Math.round(d.glassNow)} W m⁻²</td></tr>` : ''}
         <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
+        ${d.flux ? `<tr class="t"><td>${gl('groundFlux', 'ground heat flux G')} now / 23:00</td><td>${Math.round(d.flux.now)} / ${Math.round(d.flux.g23)} W m⁻² (${d.flux.now < 0 ? 'giving heat back' : 'taking heat in'})</td></tr>${d.flux.cars > 0 ? `<tr><td>share of the cell under cars</td><td>${Math.round(d.flux.cars * 100)}% (shade and night sky, sub-grid)</td></tr>` : ''}${d.flux.pv ? `<tr><td>under the PV canopy</td><td>yes (sky view ${MODEL.pvSvf.value} before cars, Golden et al. 2007)</td></tr>` : ''}` : ''}
         ${d.water ? `<tr><td>${gl('waterStore', 'water on the paving')} now</td><td>${d.water.now.toFixed(2)} mm${d.water.on ? ' (splashed at 19:00)' : ' (splash off: P)'}</td></tr>` : ''}
         ${d.wind ? `<tr><td>${gl('windFactor', 'wind factor f_w')}</td><td>${d.wind.fw.toFixed(2)} · ${fmt(d.wind.u)} of ${d.wind.site} m/s</td></tr>
         <tr><td>convection h_c</td><td>${fmt(d.wind.hc)} W m⁻² K⁻¹</td></tr>
@@ -6912,7 +7365,9 @@ function boot(scene, root = document) {
         ? glossaryStats(world, thermal, { wind: { river: wf().st.river.mean, corridor: wf().st.corridorMean, shelter: wf().st.shelterMean, lee: wf().st.lee01.mean } })
         : htMode
           ? glossaryStats(world, thermal, { hutong: hutongGlossary(world, thermal, ht()) })
-          : glossaryStats(world, thermal);
+          : pkMode
+            ? glossaryStats(world, thermal, { parking: parkingGlossary(pk().st) })
+            : glossaryStats(world, thermal);
   let fnPinned = false;
   let fnByFocus = false;
   let fnTrigger = null;
@@ -7074,6 +7529,7 @@ function boot(scene, root = document) {
   syncGlass();
   syncWf();
   syncHt();
+  syncPk();
   draw();
   requestAnimationFrame(loop);
 
@@ -7094,6 +7550,7 @@ function boot(scene, root = document) {
       ...(glassSet ? glassSet.timing : {}),
       ...(wfSet ? wfSet.timing : {}),
       ...(htSet ? htSet.timing : {}),
+      ...(pkSet ? pkSet.timing : {}),
     },
     /** Pure seek: render frame N with an optional camera {z,cx,cy}; pauses the clock. */
     seek(frame, cam) {
@@ -7317,6 +7774,27 @@ function boot(scene, root = document) {
           return dwellShade(main.life, main.shadeFor(hq), hq);
         },
         models: () => htSet.cached(),
+      }
+      : null,
+    /**
+     * Car park block (block 6) only: state {flux}; set() it; numbers for the
+     * bands and cards; card HTML; G at a point; the overlay's samples.
+     */
+    parking: pkMode
+      ? {
+        state: () => ({ flux: !!S.flux }),
+        set(o) {
+          if (o.flux !== undefined) setFlux(!!o.flux);
+        },
+        stats: () => {
+          const st = pk().st;
+          return { table: st.table, cool: st.cool, ranges: st.ranges, gap: st.gap, set: st.set, peakG: st.peakG, air: st.air, lotShare: st.lotShare, n: Object.fromEntries(Object.entries(st.C).map(([k, v]) => [k, v.length])) };
+        },
+        pv: () => pkPv(),
+        html: (id) => pkCardHtml(id),
+        show: (id) => showPkCard(id, root.querySelector(`#parking [data-card="${id}"]`)),
+        flux: (x, y, h = S.hour) => thermal.flux(world.cellIndex(x, y), h),
+        samples: (h = S.hour) => R.flux(quantHour(h)).length,
       }
       : null,
     retro: retro

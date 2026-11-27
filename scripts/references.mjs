@@ -29,7 +29,7 @@ const root = fileURLToPath(new URL('..', import.meta.url));
 const read = (p) => readFileSync(`${root}${p}`, 'utf8');
 
 /** Block order on the page; cities not listed here follow, sorted by id. */
-export const ORDER = ['asphalt-park', 'sponge-retrofit', 'glass-cbd', 'waterfront', 'hutong'];
+export const ORDER = ['asphalt-park', 'sponge-retrofit', 'glass-cbd', 'waterfront', 'hutong', 'parking'];
 /** Block-specific method references also listed under "Model and methods". */
 export const METHOD_EXTRA = ['fresnel', 'energyplus', 'steadman1994', 'bom'];
 
