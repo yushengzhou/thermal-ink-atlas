@@ -34,7 +34,7 @@ export const ES = {
   perFlat: v(3.3, 'brief7', 'engine'),
   condensers: v('2 south + 1 north per flat', 'brief7', 'range'),
   plumeWidth: v(1.5, 'engine', 'engine'),
-  wallDT: v(2, 'brief7', 'edge'),
+  wallDT: v(2, 'brief7', 'engine'),
   acProfile: v('peak 20:00-21:00', 'engine', 'engine'),
 };
 
@@ -473,6 +473,32 @@ export function estateStats(world, T, plume) {
     plumeMax: dMax, plumeAt: dAt, plumeCourt21: dCourt[0],
     plumeShare: { max: Math.max(...ground.map((i) => world.estate.plume[i])), mean: mean(C.court.map((i) => world.estate.plume[i])) },
   };
+}
+
+/**
+ * Tmrt against sky view at hour h: the least-squares slope over building-shaded,
+ * crown-free paved ground cells (concrete, asphalt), K per unit SVF (band 5).
+ */
+export function svfSlope(world, T, h = 15) {
+  const xs = [];
+  const ys = [];
+  for (let i = 0; i < world.n * world.n; i++) {
+    if (world.bld[i] >= 0 || world.canopy[i] > 0) continue;
+    if (T.sunlit(i, h) > 0.05) continue;
+    const m = cellMat(world, i);
+    if (m !== 'concrete' && m !== 'asphalt') continue;
+    xs.push(world.svf[i]);
+    ys.push(T.tmrt(i, h));
+  }
+  const mx = xs.reduce((a, x) => a + x, 0) / xs.length;
+  const my = ys.reduce((a, x) => a + x, 0) / ys.length;
+  let sxy = 0;
+  let sxx = 0;
+  xs.forEach((x, k) => {
+    sxy += (x - mx) * (ys[k] - my);
+    sxx += (x - mx) ** 2;
+  });
+  return { n: xs.length, slope: sxy / sxx, svf: [Math.min(...xs), Math.max(...xs)] };
 }
 
 /** Hours of 大寒 sun at the sill points of one slab (for the cards): {min, mean}. */

@@ -5424,7 +5424,7 @@ const ES = {
   perFlat: v(3.3, 'brief7', 'engine'),
   condensers: v('2 south + 1 north per flat', 'brief7', 'range'),
   plumeWidth: v(1.5, 'engine', 'engine'),
-  wallDT: v(2, 'brief7', 'edge'),
+  wallDT: v(2, 'brief7', 'engine'),
   acProfile: v('peak 20:00-21:00', 'engine', 'engine'),
 };
 
@@ -5865,6 +5865,32 @@ function estateStats(world, T, plume) {
   };
 }
 
+/**
+ * Tmrt against sky view at hour h: the least-squares slope over building-shaded,
+ * crown-free paved ground cells (concrete, asphalt), K per unit SVF (band 5).
+ */
+function svfSlope(world, T, h = 15) {
+  const xs = [];
+  const ys = [];
+  for (let i = 0; i < world.n * world.n; i++) {
+    if (world.bld[i] >= 0 || world.canopy[i] > 0) continue;
+    if (T.sunlit(i, h) > 0.05) continue;
+    const m = cellMat(world, i);
+    if (m !== 'concrete' && m !== 'asphalt') continue;
+    xs.push(world.svf[i]);
+    ys.push(T.tmrt(i, h));
+  }
+  const mx = xs.reduce((a, x) => a + x, 0) / xs.length;
+  const my = ys.reduce((a, x) => a + x, 0) / ys.length;
+  let sxy = 0;
+  let sxx = 0;
+  xs.forEach((x, k) => {
+    sxy += (x - mx) * (ys[k] - my);
+    sxx += (x - mx) ** 2;
+  });
+  return { n: xs.length, slope: sxy / sxx, svf: [Math.min(...xs), Math.max(...xs)] };
+}
+
 /** Hours of 大寒 sun at the sill points of one slab (for the cards): {min, mean}. */
 function slabRule(world, id) {
   const B = world.buildings.find((b) => b.id === id);
@@ -5872,7 +5898,7 @@ function slabRule(world, id) {
   return { min: Math.min(...s.map((p) => p.hours)), mean: mean(s.map((p) => p.hours)) };
 }
 
-return { isEstate, ES, AC_SHARE, acShare, winterSite, solarMinutes, clockOf, sunAtSolar, ewCrossing, effHeight, rayHits, sillPoints, sunHours, solarSamples, ruleCheck, shadowDepth, maskDepth, courtShade, qRej, rhoAir, exhaustDT, flatsOf, plumeShares, siteHeat, faceKw, plumeField, plumeLw, addPlumeTerm, prepWorld, estateSetup, cellClasses, tsMean, tmrtMean, sunMean, estateStats, slabRule };
+return { isEstate, ES, AC_SHARE, acShare, winterSite, solarMinutes, clockOf, sunAtSolar, ewCrossing, effHeight, rayHits, sillPoints, sunHours, solarSamples, ruleCheck, shadowDepth, maskDepth, courtShade, qRej, rhoAir, exhaustDT, flatsOf, plumeShares, siteHeat, faceKw, plumeField, plumeLw, addPlumeTerm, prepWorld, estateSetup, cellClasses, tsMean, tmrtMean, sunMean, estateStats, svfSlope, slabRule };
 })();
 
 __m['esui'] = (() => {
@@ -5882,7 +5908,7 @@ __m['esui'] = (() => {
 // heat-card rows and the block's API, as a block plugin for app.js.
 const { SOURCES, BASIS } = __m['materials'];
 const { gl } = __m['glossary'];
-const { ES, estateStats, winterSite, acShare, siteHeat, exhaustDT, qRej, flatsOf, faceKw, courtShade, sunAtSolar, shadowDepth, effHeight, slabRule, plumeShares, tsMean, tmrtMean } = __m['estate'];
+const { ES, estateStats, winterSite, acShare, siteHeat, exhaustDT, qRej, flatsOf, faceKw, courtShade, sunAtSolar, shadowDepth, effHeight, slabRule, plumeShares, tsMean, tmrtMean, svfSlope } = __m['estate'];
 const { esOverlay, hidden } = __m['eskit'];
 const { DEG } = __m['core'];
 
@@ -5982,7 +6008,7 @@ function courtCard(d) {
     </table>
     <p class="note">Between 10:00 and 16:00 the slab's shadow stays within ${r0(d.far)} m of its north face (${(d.far / d.H).toFixed(2)} H); the rest of the courtyard, the lawns, the parking and the sills of the next row, is in the sun. The only shade at midday is the strip along the north faces, and walkers keep to it.</p>
     <p class="lit">Hong Kong, in shade: Tmrt rises 1.6 K per 10 W m⁻² of extra longwave, about what 0.1 less sky view brings (Lai, Maing &amp; Ng 2017); a sky view near 0.4 or below marked the cooler spaces in a later Hong Kong study (Li et al. 2023). Shanghai high-rise quarters: greenery mattered more at night (Yang, Lau &amp; Qian 2010).</p>
-    <p class="caveat">Shade here is from the buildings only (the courtyard trees are few). After about 15:50 solar time the July sun is north of west and the next row's south face shades a thin strip too. The air under the slabs and any breeze between the rows are not modelled.</p>
+    <p class="caveat">This model gives ${fmt(-0.1 * d.slope15)} K of Tmrt per 0.1 less sky view in shade at 15:00 (${fmt(-0.1 * d.slope21)} K after dark), well short of the 1.6 K measured in Hong Kong: the soft band for it is missed (see docs/sources.md); not tuned. Shade here is from the buildings only (the courtyard trees are few). After about 15:50 solar time the July sun is north of west and the next row's south face shades a thin strip too. The air under the slabs and any breeze between the rows are not modelled.</p>
     ${srcLine(['lai2017', 'li2023', 'yang2010', 'brief7'])}`;
 }
 
@@ -6069,6 +6095,7 @@ function esApp(env) {
   };
   if (env.query.get('acwall') === '0') plume.on = false; // checks: the plume wall term off
   let fixed = null;
+  let slopes = null; // Tmrt against sky view in shade (court card), lazily
   const es = () => (fixed ??= estateStats(world, thermal, plume));
   const site = scene.site;
   const win = winterSite(site);
@@ -6148,6 +6175,7 @@ function esApp(env) {
     plume.on = !!on;
     R.tmrtCache = null;
     fixed = null;
+    slopes = null;
     changed();
   }
   const rows = () => [0, 1, 2, 3].map((r) => {
@@ -6166,7 +6194,8 @@ function esApp(env) {
     if (id === 'rule') return ruleCard({ st: s, G, k: G / effHeight(slab), rows: rows() });
     if (id === 'court') {
       const sh = courtRows();
-      return courtCard({ st: s, G, H: slab.h, shade: sh, far: Math.max(...sh.map((x) => x.far)) });
+      slopes ??= [svfSlope(world, thermal, 15).slope, svfSlope(world, thermal, 21).slope];
+      return courtCard({ st: s, G, H: slab.h, shade: sh, far: Math.max(...sh.map((x) => x.far)), slope15: slopes[0], slope21: slopes[1] });
     }
     if (id === 'towers') {
       const T = world.buildings.find((b) => b.kind === 'tower');
@@ -7746,7 +7775,7 @@ function boot(scene, root = document) {
     /** Hutong block (block 5) only: its plugin's API (hutui.js htApp). */
     hutong: htMode ? blk.api : null,
     /** Car park block (block 6) only: its plugin's API (pkui.js pkApp). */
-    parking: blk ? blk.api : null,
+    parking: pkMode ? blk.api : null,
     /** Estate block (block 7) only: its plugin's API (esui.js esApp). */
     estate: esMode ? blk.api : null,
     retro: retro

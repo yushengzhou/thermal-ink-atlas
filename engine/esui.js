@@ -4,7 +4,7 @@
 // heat-card rows and the block's API, as a block plugin for app.js.
 import { SOURCES, BASIS } from './materials.js';
 import { gl } from './glossary.js';
-import { ES, estateStats, winterSite, acShare, siteHeat, exhaustDT, qRej, flatsOf, faceKw, courtShade, sunAtSolar, shadowDepth, effHeight, slabRule, plumeShares, tsMean, tmrtMean } from './estate.js';
+import { ES, estateStats, winterSite, acShare, siteHeat, exhaustDT, qRej, flatsOf, faceKw, courtShade, sunAtSolar, shadowDepth, effHeight, slabRule, plumeShares, tsMean, tmrtMean, svfSlope } from './estate.js';
 import { esOverlay, hidden } from './eskit.js';
 import { DEG } from './core.js';
 
@@ -104,7 +104,7 @@ export function courtCard(d) {
     </table>
     <p class="note">Between 10:00 and 16:00 the slab's shadow stays within ${r0(d.far)} m of its north face (${(d.far / d.H).toFixed(2)} H); the rest of the courtyard, the lawns, the parking and the sills of the next row, is in the sun. The only shade at midday is the strip along the north faces, and walkers keep to it.</p>
     <p class="lit">Hong Kong, in shade: Tmrt rises 1.6 K per 10 W m⁻² of extra longwave, about what 0.1 less sky view brings (Lai, Maing &amp; Ng 2017); a sky view near 0.4 or below marked the cooler spaces in a later Hong Kong study (Li et al. 2023). Shanghai high-rise quarters: greenery mattered more at night (Yang, Lau &amp; Qian 2010).</p>
-    <p class="caveat">Shade here is from the buildings only (the courtyard trees are few). After about 15:50 solar time the July sun is north of west and the next row's south face shades a thin strip too. The air under the slabs and any breeze between the rows are not modelled.</p>
+    <p class="caveat">This model gives ${fmt(-0.1 * d.slope15)} K of Tmrt per 0.1 less sky view in shade at 15:00 (${fmt(-0.1 * d.slope21)} K after dark), well short of the 1.6 K measured in Hong Kong: the soft band for it is missed (see docs/sources.md); not tuned. Shade here is from the buildings only (the courtyard trees are few). After about 15:50 solar time the July sun is north of west and the next row's south face shades a thin strip too. The air under the slabs and any breeze between the rows are not modelled.</p>
     ${srcLine(['lai2017', 'li2023', 'yang2010', 'brief7'])}`;
 }
 
@@ -191,6 +191,7 @@ export function esApp(env) {
   };
   if (env.query.get('acwall') === '0') plume.on = false; // checks: the plume wall term off
   let fixed = null;
+  let slopes = null; // Tmrt against sky view in shade (court card), lazily
   const es = () => (fixed ??= estateStats(world, thermal, plume));
   const site = scene.site;
   const win = winterSite(site);
@@ -270,6 +271,7 @@ export function esApp(env) {
     plume.on = !!on;
     R.tmrtCache = null;
     fixed = null;
+    slopes = null;
     changed();
   }
   const rows = () => [0, 1, 2, 3].map((r) => {
@@ -288,7 +290,8 @@ export function esApp(env) {
     if (id === 'rule') return ruleCard({ st: s, G, k: G / effHeight(slab), rows: rows() });
     if (id === 'court') {
       const sh = courtRows();
-      return courtCard({ st: s, G, H: slab.h, shade: sh, far: Math.max(...sh.map((x) => x.far)) });
+      slopes ??= [svfSlope(world, thermal, 15).slope, svfSlope(world, thermal, 21).slope];
+      return courtCard({ st: s, G, H: slab.h, shade: sh, far: Math.max(...sh.map((x) => x.far)), slope15: slopes[0], slope21: slopes[1] });
     }
     if (id === 'towers') {
       const T = world.buildings.find((b) => b.kind === 'tower');
