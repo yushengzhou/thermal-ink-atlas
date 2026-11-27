@@ -60,7 +60,7 @@ export const GLOSSARY = {
   tmrt: {
     term: 'Mean radiant temperature (Tmrt)',
     text: 'One number for all the sunshine and infrared heat falling on a standing person from every direction.',
-    model: (S) => `At 3 pm: ${S.tmrtShade} °C in building shade, ${S.tmrtSun} °C on sunlit ground (5th–95th percentile).`,
+    model: (S) => S.tmrtLine ?? `At 3 pm: ${S.tmrtShade} °C in building shade, ${S.tmrtSun} °C on sunlit ground (5th–95th percentile).`,
     why: 'It shapes how hot it feels outdoors more than air temperature does.',
   },
   forceRestore: {
@@ -135,7 +135,7 @@ export const GLOSSARY = {
     range: 'Sky view factor at the centre of a long canyon: 1/√(1 + (2H/W)²), i.e. 0.45 at H/W 1, 0.24 at 2, 0.16 at 3, 0.10 at 5. Oke (1981): calm-night urban–rural air difference about 7.45 + 3.97 ln(H/W) K (secondary source).',
     src: 'brief3, oke1981',
     why: 'Deep canyons shade the street by day but see little cold sky at night, so they cool slowly after dark.',
-    scenes: ['glass-cbd'],
+    scenes: ['glass-cbd', 'hutong'],
   },
   lowE: {
     term: 'Low-e glass',
@@ -192,6 +192,36 @@ export const GLOSSARY = {
     src: 'bom, steadman1994',
     why: 'It lets the walkers weigh a breeze against shade: both make a hot afternoon feel cooler.',
     scenes: ['waterfront'],
+  },
+  // ---- block 5 (hutong) -----------------------------------------------------
+  siheyuan: {
+    term: 'Siheyuan (四合院)',
+    text: 'A courtyard house: four single-storey houses (the main house, two side houses and a gate house) around a paved yard, entered from the lane through a gate in one corner.',
+    model: (S) => S.courtLine,
+    why: 'Walls on all four sides shade the edges of the yard; the rest needs trees, vines or an awning. Measured courtyards can hold air a few degrees cooler than the lane, which this model does not simulate.',
+    scenes: ['hutong'],
+  },
+  tianpeng: {
+    term: 'Tianpeng (天棚), the summer mat awning',
+    text: 'A shed of reed mats on poles built over a Beijing courtyard each summer, higher than the eaves, with side mats that roll up to let the air through.',
+    range: 'Reed mats let through about 10–30% of the sun (the brief, unverified); this model uses 20%.',
+    src: 'deng, brief5',
+    why: 'It shades the whole courtyard at midday, when the low walls give almost no shade.',
+    scenes: ['hutong'],
+  },
+  waterStore: {
+    term: 'Surface water store (W)',
+    text: 'The water left lying on the paving after a splash, in millimetres (1 mm is 1 litre per square metre). While it lasts it evaporates, and the heat that takes comes out of the paving.',
+    model: (S) => S.waterLine,
+    why: 'Only water that is there can cool: when the store runs dry, the cooling stops.',
+    scenes: ['hutong'],
+  },
+  wetBulb: {
+    term: 'Wet-bulb temperature',
+    text: 'The temperature a wet surface cools to when evaporation alone sets it, from the air temperature and humidity: the drier the air, the further below the air it lies.',
+    model: (S) => S.wetBulbLine,
+    why: 'Splashed paving cannot get colder than this by evaporating, so it bounds how much a splash can cool.',
+    scenes: ['hutong'],
   },
   // ---- block 2 (sponge-retrofit) --------------------------------------------
   permeablePaving: {
@@ -312,6 +342,7 @@ export function glossaryStats(world, thermal, extra = {}) {
     const w = extra.wind;
     out.windLine = `Over the river ${r2(w.river)}; along Quay Street ${r2(w.corridor)}; Rope Walk, behind the warehouses, ${r2(w.shelter)} (mean), ${r2(w.lee)} within one building height of the wall.`;
   }
+  if (extra.hutong) Object.assign(out, extra.hutong);
   if (extra.spot) {
     const s = extra.spot;
     out.spotLine = `At 3 pm with ${s.glassName}: Tmrt ${r0(s.tmrtSpotShade)} °C in shaded spots vs ${r0(s.tmrtShade)} °C in plain shade and ${r0(s.tmrtSun)} °C in sun.`;

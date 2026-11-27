@@ -60,6 +60,24 @@ export const SOURCES = {
   webb2008: 'Webb et al. (2008) Hydrological Processes, river water temperature review: large deep rivers have the smallest daily range ("< 1 K" unverified)',
   steadman1994: 'Steadman (1994) Australian Meteorological Magazine 43, apparent temperature with radiation (the paper itself was not read; formula via [bom])',
   bom: 'Australian Bureau of Meteorology, Thermal stress: About the formula for the apparent temperature (bom.gov.au/info/thermal_stress/): AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25, ws the 10 m wind, Q the net radiation absorbed per unit area of body surface (W m-2); coefficients checked against this page',
+  brief5: 'Research brief docs/research/hutong-brief.md (block 5; values compiled from the sources below, items marked unverified there are flagged here)',
+  hendel2015: 'Hendel et al. (2015) J. Sustain. Dev. Energy Water Environ. Syst., doi 10.13044/j.sdewes.2015.03.0001: watering the Rue du Louvre, Paris, about 1 L m-2 per cycle; surface -7.5 K at 19:30 and -6 K at 20:30, lasting several hours',
+  hendel2016: 'Hendel et al. (2016) Urban Climate, doi 10.1016/j.uclim.2016.02.003: pavement watering in Paris, air -0.79 K at most, Tmrt -1.76 K',
+  takebayashi2023: 'Takebayashi et al. (2023) Atmosphere 14, 1014, doi 10.3390/atmos14061014: road watering in Kobe, 0.025 mm per pass, -2 to -4 K at once, about 6 K on average, gone within 30 min in sun, evening watering recommended; lE = l beta alpha_w (X_s - X_a) with beta 0.15 on asphalt',
+  kato2008: 'Kato et al. (2008), via the block-5 brief: a watered road 50 -> 40 C in about 60 min (unverified)',
+  nippon: 'nippon.com feature on uchimizu (via the block-5 brief): sprinkling water in the evening and in shade, a custom since the Edo period',
+  lin2019: 'Lin et al. (2019) Int. J. Environ. Res. Public Health 16, 2986, doi 10.3390/ijerph16162986: traditional block in Harbin, SVF lanes 0.09-0.27, courtyards 0.22-0.37; lower-SVF courtyards 0.3 K cooler air (at most 0.6 K) and 0.4 K globe (at most 1.0 K)',
+  spainCourtyard: 'Cordoba and Seville courtyard studies, MDPI Proceedings 2(22) 1390 and 1381, 38(1) 17 (abstracts only, unverified): courtyards 3-6 K below the outdoor air on hot days, up to 11-15 K at 40-45 C',
+  yang2024: 'Yang & Wang (2024) J. Beijing Forestry Univ., doi 10.12171/j.1000-1522.20240012 (abstract only): Beijing street-tree shade -1.0 to -2.1 K air and -481 to -789 W m-2; pagoda tree second for comfort',
+  carb: 'California Air Resources Board cool-roof data, via the block-5 brief: clay tile solar reflectance 0.40-0.50, emissivity 0.80-0.90 (light terracotta; grey reduced-fired tile is darker, unverified)',
+  midlandBrick: 'Midland Brick product data, via the block-5 brief: brick solar absorptance 0.45 (light grey) to 0.90 (slate grey)',
+  sohuRoof: 'Web article (sohu), via the block-5 brief: northern roofs of paired tiles on a mud or lime back, not ventilated (secondary, unverified)',
+  miller2007: 'Miller (2007), Oak Ridge National Laboratory, via the block-5 brief: ventilated tile roofs run cooler; does not apply to mud-backed, unventilated roofs',
+  ucdavis: 'UC Davis guidance, via the block-5 brief: overhead vine arbours give more than 90% cover',
+  jjshs: 'J. Japan. Soc. Hort. Sci. 54(3) 293, via the block-5 brief: pergola vines need LAI 2 or more, ideally 3',
+  deng: 'Deng Yunxiang, Tianpeng zheyin (The Paper, newsDetail_forward_18319465), via the block-5 brief: summer mat awnings over Beijing courtyards; Li Binsheng\'s "tianpeng, fish bowl, pomegranate tree"',
+  visitBeijing: 'Visit Beijing (official tourism site), via the block-5 brief: jujube and pagoda trees in courtyards; the pomegranate stands for many children',
+  bolton1980: 'Bolton (1980) Monthly Weather Review 108, 1046-1053: saturation vapour pressure e_s = 6.112 exp(17.67 T / (T + 243.5)) hPa (formula from memory, not checked)',
 };
 
 /** How a value relates to its source. */
@@ -274,6 +292,49 @@ Object.assign(MATERIALS, {
   },
 });
 
+// ---- block 5: hutong lanes and courtyards ------------------------------------
+// tr: share of the sun a crown or screen lets through, exp(-0.5 LAI) as for
+// MODEL.canopyTransmission (sun.js / thermal.js: per tree or per screen).
+const leaf = (ef, efNote, tr, trNote, trSource = 'brief5') => ({
+  alpha: v(0.18, 'oke', 'range', false, 'cited 0.15-0.20'),
+  eps: v(0.97, 'oke', 'range', false, 'cited 0.97-0.99'),
+  ef: v(ef, 'brief5', 'cited', false, efNote),
+  tr: v(tr, trSource, 'interp', false, trNote),
+  tree: true,
+  prescribed: 'Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.',
+});
+Object.assign(MATERIALS, {
+  greyBrick: {
+    name: 'Grey brick paving (青砖)',
+    alpha: v(0.2, 'brief5', 'range', false, 'brief 0.20 (0.15-0.30); brick absorptance 0.45 light grey to 0.90 slate grey [midlandBrick]'),
+    eps: v(0.92, 'brief5', 'cited', false),
+    mu: v(1100, 'brief5', 'cited', false),
+    ef: v(0.02, 'brief5', 'cited', false, 'dry, porous brick'),
+    note: 'Lanes and courtyards are paved with fired grey brick: darker than stone, a little porous, and it holds the day\'s heat into the evening.',
+  },
+  greyTile: {
+    name: 'Grey tile roof on a mud and lime back',
+    alpha: v(0.18, 'brief5', 'range', false, 'brief 0.18 (0.12-0.25); light terracotta clay tile 0.40-0.50 [carb], grey reduced-fired tile darker (unverified)'),
+    eps: v(0.9, 'brief5', 'cited', false, 'clay tile 0.80-0.90 [carb]'),
+    mu: v(1000, 'brief5', 'cited', false, 'tiles bedded on a mud and lime back, not ventilated [sohuRoof]; the ventilated-tile result [miller2007] does not apply'),
+    ef: v(0, 'brief5', 'cited', false, 'dry'),
+    note: 'Paired grey tiles laid on a thick mud and lime bed: dark and heavy, the roof bakes in the afternoon and gives the heat back slowly.',
+  },
+  jujube: { name: 'Jujube tree (枣树)', ...leaf(0.6, 'brief value', 0.37, 'exp(-0.5 x 2.0); brief LAI 1.5-2.5 (no measured LAI for jujube), i.e. 0.29-0.47'), note: 'A small courtyard tree with an open, airy crown: patchy shade.' },
+  pomegranate: { name: 'Pomegranate (石榴)', ...leaf(0.6, 'brief value', 0.29, 'exp(-0.5 x 2.5); brief LAI 2-3, i.e. 0.22-0.37'), note: 'A low, dense courtyard tree; its fruit stands for many children.' },
+  pagodaTree: { name: 'Pagoda tree (国槐)', ...leaf(0.7, 'brief value', 0.17, 'exp(-0.5 x 3.5); brief LAI 3-4 (no measured LAI), i.e. 0.14-0.22'), note: 'The big shade tree of the Beijing lanes: a wide, dense crown high above the roofs.' },
+  pergola: { name: 'Vine pergola (葡萄架)', ...leaf(0.6, 'brief value', 0.29, 'exp(-0.5 x 2.5); pergola vines LAI 2-3 [jjshs], overhead arbours > 90% cover [ucdavis]', 'jjshs'), note: 'A grape vine trained over a trellis at head height: dappled shade over the courtyard path.' },
+  awning: {
+    name: 'Summer mat awning (天棚)',
+    alpha: v(0.3, 'engine', 'engine', false, 'not used: only the transmission of the mat matters here'),
+    eps: v(0.9, 'engine', 'engine', false, 'not used'),
+    ef: v(0, 'engine', 'engine', false, 'not used'),
+    tr: v(0.2, 'brief5', 'range', false, 'brief 0.1-0.3 for reed mats (unverified)'),
+    prescribed: 'Not used by the grid model as a surface: a flat screen above the eaves that lets through tr of the sun; the cells under it count as fully covered for the sky view (crown factor).',
+    note: 'A shed of reed mats on poles, built over the whole courtyard each summer, higher than the eaves; its side mats roll up to let the air through.',
+  },
+});
+
 // ---- block 3: glass presets ---------------------------------------------------
 // rho0: normal-incidence solar reflectance (the angular shape is Fresnel, see
 // reflect.js); absorb: solar absorptance of the pane (glass temperature);
@@ -341,7 +402,16 @@ export const MODEL = {
   apparentTemp: v('AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25', 'bom', 'cited', true, 'Steadman (1994) [steadman1994], coefficients checked against the BoM page; comfort for the walkers in block 4 (a stand-in for UTCI, which is not implemented); ws = u_10 f_w clamped to 0.5-17 m/s as the brief gives for UTCI'),
   atRadiation: v('Q = 6.1 W m-2 K-1 x (Tmrt - Ta)', 'bom', 'interp', false, 'extra radiation absorbed by a person, linearised: 4 eps sigma T^3 with eps 0.97 and T 303 K over the whole body surface. At a sunlit Tmrt near 68 C (341 K) 4 eps sigma T^3 is about 8.7, so Q is understated by about 30% there; a standing person radiates over only about 0.7 of the body surface (ASHRAE effective radiating area), which errs the other way. Route weights divide by the sun-shade AT gap, so this largely cancels for the walkers; absolute AT on the cards carries it'),
   windLines: v('seeds every 20 m upwind, RK2 2.5 m steps, slide along buildings', 'brief4', 'engine', false, 'drawing only: assumed direction x shelter factor, not computed flow; dash spacing and speed proportional to u_i (speed drawn 4x)'),
+  // ---- block 5 (hutong): surface water store, shade sampling, screens ----
+  waterStore: v('LE = L beta(W) (h_c / c_p) max(0, q_sat(Ts) - q_a), dW/dt = -LE / L', 'brief5', 'cited', false, 'bulk evaporation from the splashed paving; beta(W) = beta_wet min(1, W / W_c); c_p 1005 J kg-1 K-1, p 1013.25 hPa, q = 0.622 e / (p - 0.378 e); adds to the EF term, which is zero after sunset'),
+  satVapour: v('e_s = 6.112 exp(17.67 T / (T + 243.5)) hPa', 'bolton1980', 'cited', false, 'saturation vapour pressure over water'),
+  splashW0: v(1.0, 'brief5', 'edge', false, 'W0, mm of evaporable water left on the paving by one splash; brief 0.5-1.0 mm of the 1-2 L m-2 thrown (about 1 L m-2 per cycle in Paris [hendel2015])'),
+  splashBeta: v(0.5, 'brief5', 'range', false, 'beta_wet, the wetness factor of splashed brick; brief 0.3-1 (unverified); Kobe asphalt 0.15 [takebayashi2023]'),
+  splashWc: v(0.2, 'brief5', 'cited', false, 'W_c, mm: below it the wet patch dries up and beta falls in proportion'),
+  splashHour: v(19, 'brief5', 'cited', false, 'the evening splash, every evening of the repeated design day (evening watering recommended [takebayashi2023]; the uchimizu custom [nippon])'),
+  shadeSamples: v('4 x 4 per 5 m cell', 'engine', 'engine', false, 'block 5 only: shade sampled every 1.25 m, so the 1.2 m wall shadow of a 5 m lane at noon registers (blocks 1-4: 2 x 2)'),
+  screenCover: v('SVF x (1 - 0.75)', 'engine', 'engine', false, 'cells under a pergola or awning take the crown factor of a full tree crown for the sky view and wall reflection, as cells under trees do'),
 };
 
 /** Parameter keys a material uses (for cards and docs). */
-export const paramKeys = (m) => ['alpha', 'eps', m.thinC ? 'thinC' : 'mu', 'muWet', 'ef', 'efWet', 'tau', 'storage'].filter((k) => m[k]);
+export const paramKeys = (m) => ['alpha', 'eps', m.thinC ? 'thinC' : 'mu', 'muWet', 'ef', 'efWet', 'tau', 'storage', 'tr'].filter((k) => m[k]);

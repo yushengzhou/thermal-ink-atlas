@@ -875,7 +875,7 @@ export class Renderer {
     ctx.drawImage(c, 0, 0);
   }
 
-  /** True if the person's hip at (x, y) is hidden behind a building. */
+  /** True if the person's hip at (x, y) is hidden behind a building (block 5: or under a pergola or awning). */
   hidden(x, y) {
     for (const B of this.world.buildings) {
       const dIn = Math.max(B.x0 - x, B.y0 - y, 0);
@@ -883,6 +883,14 @@ export class Renderer {
       if (dOut <= dIn) continue;
       const top = B.h + (B.gable ? 2 : 0);
       if (top > 0.9 + dIn / ISO_Z) return true;
+    }
+    if (this.world.screens) {
+      // a flat top at z hides the hip if the line of sight passes through it inside its footprint
+      for (const P of this.world.screens) {
+        const dIn = Math.max(P.x0 - x, P.y0 - y, 0);
+        const dOut = Math.min(P.x1 - x, P.y1 - y);
+        if (dOut > dIn && 0.9 + dIn / ISO_Z <= P.z && 0.9 + dOut / ISO_Z >= P.z - 0.1) return true;
+      }
     }
     return false;
   }
