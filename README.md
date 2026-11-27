@@ -1,20 +1,22 @@
 # thermal-ink-atlas
 
-A hand-inked isometric city block that shows urban heat: an old asphalt street
-next to a shady pocket park, through one heat-wave day.
+Hand-inked isometric city blocks that show urban heat through one heat-wave day:
 
-Block 2, `cities/sponge-retrofit/index.html`, shows one invented block Before and After a sponge-city and cool-roof retrofit, side by side with a draggable divider (`B` swaps) and a days-since-rain slider.
+- Block 1, `asphalt-park`: an old asphalt street next to a shady pocket park.
+- Block 2, `sponge-retrofit`: one block Before and After a sponge-city and
+  cool-roof retrofit, with a draggable divider and a days-since-rain slider.
 
 Live: https://yushengzhou.github.io/thermal-ink-atlas/
 
-The block is simulated and invented (not a real address). Temperatures are
+Both blocks are simulated and invented (no real addresses). Temperatures are
 modelled with a simple surface energy-balance model, not measured.
 
-![Thermal view of the block at 15:00](docs/media/thermal-1500.jpg)
+![Thermal view of block 1 at 15:00](docs/media/thermal-1500.jpg)
 
 ## Open it
 
-- Double-click `cities/asphalt-park/index.html`. It is one offline file.
+- Double-click `cities/asphalt-park/index.html` or
+  `cities/sponge-retrofit/index.html`. Each is one offline file.
 - Or serve the folder and open <http://localhost:8000/>:
 
   ```sh
@@ -31,6 +33,7 @@ modelled with a simple surface energy-balance model, not measured.
 | drag / wheel | pan / zoom |
 | click a parcel | heat card (material, temperatures, source) |
 | `terms` button | glossary of terms |
+| `B` (block 2) | swap Before / After |
 
 ## Build and test
 
