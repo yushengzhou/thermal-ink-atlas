@@ -233,11 +233,14 @@ function decor(pen, world) {
   ticks(pen, world, 'gravel', 2600, 1101, hexRgb('#9b8466'), (x, y, r) => [[x, y], [x + 0.25 + r() * 0.3, y + (r() - 0.5) * 0.25]]);
   ticks(pen, world, 'desertLawn', 900, 1102, hexRgb('#55683a'), (x, y) => [[x - 0.35, y + 0.2], [x, y - 0.15], [x + 0.3, y + 0.25]]);
   const g = world.scene.ground.find((p) => p.id === 'main');
+  const x = world.scene.ground.find((p) => p.id === 'cross');
   if (g) {
+    // one colour array for both halves (either side of the cross street), changed in place by the toggle
     const c = DS_STREET.coated.slice();
     world.dsCoat = c;
     pen.tag = 'g';
-    pen.shape([[g.poly[0], g.poly[1] + 0.6, 0], [g.poly[2], g.poly[3] + 0.6, 0], [g.poly[4], g.poly[5] - 0.6, 0], [g.poly[6], g.poly[7] - 0.6, 0]], c, { stroke: null, t: 'g' });
+    const [y0, y1] = [g.poly[1] + 0.6, g.poly[5] - 0.6];
+    for (const [a, b] of x ? [[g.poly[0], x.poly[0]], [x.poly[2], g.poly[2]]] : [[g.poly[0], g.poly[2]]]) pen.shape([[a, y0, 0], [b, y0, 0], [b, y1, 0], [a, y1, 0]], c, { stroke: null, t: 'g' });
   }
   pen.tag = 'gm';
   const edge = [];
@@ -320,7 +323,7 @@ export function drawWater(R, ctx, cam, W, H, alpha) {
   }
   for (const p of E.patios) poly([[p.x0, p.y0], [p.x1, p.y0], [p.x1, p.y1], [p.x0, p.y1]], (w.misters[0] + w.misters[1]) / 2);
   ctx.globalAlpha = alpha;
-  const text = `Water used (L): litres per square metre a day · watered lawn ${w.lawn.toFixed(1)} (calculated) · desert trees ${w.trees[0]}–${w.trees[1]} (watering guides) · patio misters ${w.misters[0]}–${w.misters[1]} each hour they run · gravel and sails 0`;
+  const text = `Water (L), litres per m² a day: lawn ${w.lawn.toFixed(1)} (calculated) · desert trees ${w.trees[0]}–${w.trees[1]} · misters ${w.misters[0]}–${w.misters[1]} per hour on · gravel, sails 0`;
   label(R, ctx, text, W, H);
   R.stats.water = n;
   R.stats.waterLabel = text;

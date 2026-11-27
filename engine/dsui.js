@@ -85,7 +85,7 @@ export function sailsCard(d) {
   return `
     ${close}
     <h3>Sails or trees?</h3>
-    <p class="lead">At 3 pm, standing under a shade sail feels about ${r0(-S.sail[h].d)} degrees cooler than standing in the open sun, about as much as under a mesquite tree, and the sail needs no water.</p>
+    <p class="lead">At 3 pm, standing under a shade sail feels about ${r0(-S.sail[h].d)} degrees cooler than standing in the open sun; under a mesquite tree about ${r0(-S.mesquite[h].d)} degrees. The sail needs no water.</p>
     <table class="cmp">
       <tr><td>3 pm, standing under</td><td>feels like</td><td>against open sun</td><td>measured, degrees</td></tr>
       <tr><td>open sun on the plaza</td><td>${r0(d.st.ref[h].tmrt)} °C</td><td>—</td><td>—</td></tr>
@@ -95,9 +95,10 @@ export function sailsCard(d) {
       ${row('paloVerde', '−14', '−20')}
       <tr><td colspan="4" class="sub">"Feels like" is the radiant heat on a standing person (${gl('tmrt', 'mean radiant temperature')}), not the air. ${sailMiss || ramMiss || paloMiss ? `Outside the range measured in Tempe: ${[sailMiss ? 'the sails' : '', ramMiss ? 'the ramada' : '', paloMiss ? 'the palo verdes' : ''].filter(Boolean).join(', ')}${MISS}.` : 'All inside the range measured in Tempe.'}</td></tr>
     </table>
+    ${sailMiss || ramMiss || paloMiss ? `<p class="caveat">Why the model differs, likely: ${sailMiss ? `the sails here stop 85% of the direct sun, and a person under them sees only the shaded ground below, not the hot gravel around (in test runs, sails letting through 25% of the sun, the top of the suggested range, land at about −19 degrees; with the gravel around in view, about −21). ` : ''}${ramMiss ? `The ramada is a solid roof, so it acts like the arcade (measured 23 to 31 degrees cooler); the 14 to 20 degrees were measured under sails and umbrellas. ` : ''}${paloMiss ? `${d.palo.court.n} of the ${d.palo.court.n + d.palo.open.n} palo verde spots are in house courtyards, where the light walls throw sunlight back onto a person (${deg(d.palo.court.d)}); the one in the open plaza: ${deg(d.palo.open.d)}.` : ''}</p>` : ''}
     <p class="note">A sail stops most of the sunshine before it reaches you; a desert tree does the same with its leaves and also evaporates a little water. Here the air temperature is the same under both: measured shade in Tempe changed the air by less than 1.3 degrees.</p>
     ${experts(`<p class="lit">Middel et al. (2021), Tempe: ΔTmrt −16.7 K (mesquite, Prosopis) to −25.9 K (Canary Island pine) by species; sails and umbrellas −17.3 K; ΔTs tree over gravel −21.2 K (12:30); lightweight shade −11 to −14 K at the surface.</p>
-      <p class="caveat">The sail lets through ${MATERIALS.desertSail.tr.value}${tag(MATERIALS.desertSail.tr)} of the direct sun; the ramada none. The mesquite crown's share of sun (${f2(MATERIALS.mesquite.tr.value)}${tag(MATERIALS.mesquite.tr)}) is set so the mesquites match the measured −16.7 K, so their row cannot test the model; the palo verdes take the same crown (no measured value${tag(MATERIALS.paloVerde.tr)}). Under a screen the model counts the cloth or roof as a warm surface overhead (the engine's shared warm-wall term), and no blocked sky.</p>`, ['middel2021', 'colter2019', 'brief11'])}`;
+      <p class="caveat">The sail lets through ${MATERIALS.desertSail.tr.value}${tag(MATERIALS.desertSail.tr)} of the direct sun; the ramada none. The mesquite crown's share of sun (${f2(MATERIALS.mesquite.tr.value)}${tag(MATERIALS.mesquite.tr)}) is set so the mesquites match the measured −16.7 K, so their row cannot test the model; the palo verdes take the same crown (no measured value${tag(MATERIALS.paloVerde.tr)}), and as they stand on the corners of the 5 m grid cells, the cells in their shade keep their open sky view. Under a screen the model counts the cloth or roof as a warm surface overhead (the engine's shared warm-wall term), and no blocked sky.</p>`, ['middel2021', 'colter2019', 'brief11'])}`;
 }
 
 /** Arcades and courtyards card. d: {st}. */
@@ -120,6 +121,7 @@ export function arcadeCard(d) {
       <tr><td colspan="2" class="sub">After dark (9 pm) the shade turns around: under a roof it feels warmer than in the open, because the roof hides the cold night sky. Measured: 0 to 5 degrees warmer.</td></tr>
       ${nightRows}
     </table>
+    ${nightRows.includes('outside') ? '<p class="caveat">After dark the model keeps every spot under a roof, a sail or a crown 6 to 11 degrees warmer than the open plaza, more than measured. Likely: the model hides three quarters of the night sky under any of them behind a surface near the air temperature, while the open plaza sees the cold, dry desert sky; in a test run, roofs and sails cooling 3 degrees below the air at night (as a thin sheet does here) still leave a gap of about 6 to 8 degrees.</p>' : ''}
     <p class="note">The arcade has the building on one side and a roof above, so it sees little sky and no afternoon sun. The courtyards of the houses are small and walled: by 3 pm about half of each lies in the shade of its own walls.</p>
     ${experts(`<p class="lit">Middel et al. (2021): arcades, tunnels and overhangs ΔTmrt −22.8 to −30.9 K by day, tunnels +3.2 K at night; trees up to +5 K after sunset. Sky view: arcade ${f2(A[h].svf)}, courtyards ${f2(st.court.svf)} (5 m grid, walls at their true distance).</p>
       <p class="caveat">Every wall is the engine's shared warm wall (air + 2 K, more in the sun; issue #28), whatever its colour or shade, so the arcade's shaded back wall and the roof overhead likely read warmer than real stucco in shade.</p>`, ['middel2021', 'middelKrayenhoff2019', 'brief11'])}`;
@@ -142,11 +144,11 @@ export function lawnCard(d) {
       <tr><td>lawn, watered as the guidance says</td><td>about ${w.lawnApplied}</td></tr>
       <tr><td>desert tree, per m² of its crown</td><td>${w.trees[0]}–${w.trees[1]}</td></tr>
       <tr><td>gravel yard, shade sail</td><td>0</td></tr>
-      <tr><td colspan="2" class="sub">Lawn surface at 3 pm ${fmt(L.ts15)} °C${tsMiss ? ` (more than 2 degrees above the air${MISS})` : ' (measured: irrigated grass is never far above the air)'}; sunlit gravel ${fmt(d.st.gravel.ts15)} °C.</td></tr>
+      <tr><td colspan="2" class="sub">Lawn surface at 3 pm ${fmt(L.ts15)} °C${tsMiss ? ` (more than 2 degrees above the air${MISS})` : ' (measured: irrigated grass is never far above the air)'}; sunlit gravel ${fmt(d.st.gravel.ts15)} °C${outside(d.st.gravel.ts15, DS_BANDS.gravel) ? ` (measured 55–63 °C${MISS}: likely the engine's strong midday sun and an air 1.4 degrees warmer than on the measurement day; gravel at the light end of its likely range would be about 61 °C)` : ''}.</td></tr>
     </table>
     <p class="note">The lawn cools itself by evaporating water: the sun that would heat it goes into turning water to vapour. In dry desert air that works well, but it needs water every day. A neighbourhood study found that much more watering would cool the evenings only a little faster.</p>
     ${experts(`<p class="lit">Reference evapotranspiration at Phoenix Encanto in July 7.1–7.8 mm a day; bermudagrass crop coefficient 0.78 in July, so about 5–7 mm a day (1 mm = 1 L m⁻²); lawns watered every 3 days, about 6.4 mm a day applied; a desert tree with a 6.1 m crown about 890 L every 7–21 days. Gober et al.: 32.8% more outdoor water for 0.41–0.82 K per hour faster evening cooling. Middel et al. (2014): xeric yards warmest, then oasis, then mesic; by day the form of a neighbourhood matters more than its landscaping. Middel et al. (2015): about −0.14 K of air per 1% more tree canopy.</p>
-      <p class="caveat">The lawn's ${gl('ef', 'evaporative fraction')} is ${MATERIALS.desertLawn.ef.value}${tag(MATERIALS.desertLawn.ef)}: a fixed share of its net sunshine, so it cannot draw extra heat out of the dry air that blows over it, as a real lawn in the desert does (the "oasis effect"). That likely keeps the model's daily water below the 5–7 L estimated from crop water needs (${L.evapMin.toFixed(1)}–${L.evapMax.toFixed(1)} L across the lawn here).</p>`, ['azmet', 'az1195', 'amwua', 'gober2009', 'middel2014', 'middel2015', 'templeton2018', 'brief11'])}`;
+      <p class="caveat">The lawn's ${gl('ef', 'evaporative fraction')} is ${MATERIALS.desertLawn.ef.value}${tag(MATERIALS.desertLawn.ef)}: a fixed share of its net sunshine. It does not depend on how dry the air is, and it cannot draw extra heat out of the hot, dry air blowing over the lawn (the "oasis effect": a real lawn here likely evaporates about as much water as all its net sunshine could). Here it evaporates ${L.evapMin.toFixed(1)}–${L.evapMax.toFixed(1)} L a day across the lawn, inside the 5–7 L estimate.</p>`, ['azmet', 'az1195', 'amwua', 'gober2009', 'middel2014', 'middel2015', 'templeton2018', 'brief11'])}`;
 }
 
 /** Misters card (quoted, not modelled). */
@@ -184,6 +186,7 @@ export function coatCard(d) {
       <tr><td>a person on it, noon</td><td>${r0(n.tmrt)} / ${r0(n.tmrtBare)} °C</td><td>${deg(n.dTmrt)}</td><td>about 3 warmer</td></tr>
       <tr><td colspan="4" class="sub">${d.on ? 'Coating on' : 'Coating off'} (C, or the panel button). The cross street is bare asphalt: ${fmt(d.st.cross.ts15)} °C at 3 pm.</td></tr>
     </table>
+    ${tmMiss ? `<p class="caveat">Likely why the model's change is above the measured 2.5–3.2 degrees: a person here sees only the coated road below them; in a test run with the sidewalks and yards around them in view, about +3.1 degrees.</p>` : ''}
     <p class="note">A light coating helps the road and the buildings next to it, and helps at night a little; for people walking at midday it is the wrong tool on its own. Shade over the sidewalk does both.</p>
     ${experts(`<p class="lit">Phoenix cool pavement pilot, phase 2 (2024): coated road −6.7 K at noon, −5.8 K in the afternoon; pedestrian Tmrt +3.2 K at noon, +2.5 K in the afternoon; air −0.07 K on average, a little warmer at 8–9 pm. Erell et al. (2014): high-albedo street canyons can worsen pedestrian heat stress. Los Angeles coated streets: Middel et al. (2020).</p>
       <p class="caveat">Coating ${gl('albedo', 'albedo')} ${MATERIALS.coolCoat.alpha.value}${tag(MATERIALS.coolCoat.alpha)}; the bare street is the atlas's aged asphalt (${MATERIALS.asphalt.alpha.value}), lighter than the 0.036 measured on the Phoenix streets, so the change in reflectance here (${f2(MATERIALS.coolCoat.alpha.value - MATERIALS.asphalt.alpha.value)}) is likely smaller than in the trial. No cars, no traffic heat, no wind from the street.</p>`, ['coolPave2024', 'erell2014', 'middel2020', 'middelKrayenhoff2019', 'brief11'])}`;
@@ -323,7 +326,7 @@ export function dsApp(env) {
       for (let m = 600; m <= 900; m++) ghi = Math.max(ghi, base.shortwave(world.ds.F.ref[0], m / 60).direct + base.shortwave(world.ds.F.ref[0], m / 60).sky);
       return designCard({ st: s, site, ghi });
     }
-    if (id === 'sails') return sailsCard({ st: s });
+    if (id === 'sails') return sailsCard({ st: s, palo: palo() });
     if (id === 'arcade') return arcadeCard({ st: s });
     if (id === 'lawn') return lawnCard({ st: s, water: water() });
     if (id === 'mist') return mistCard({ st: s, water: water() });
@@ -331,6 +334,17 @@ export function dsApp(env) {
     if (id === 'dry') return dryCard({ st: s, site });
     return deathsCard();
   }
+  /** Band 7's palo verde cells split: in the courtyards and in the open plaza (Tmrt − open sun at 15:00). */
+  const palo = () => {
+    const h = DS.hour.value;
+    const c = shadeCells(world, base, h).paloVerde;
+    const court = new Set(world.ds.F.court);
+    const ref = stats().ref[h].tmrt;
+    const d = (a) => (a.length ? a.reduce((x, i) => x + base.tmrt(i, h), 0) / a.length - ref : 0);
+    const a = c.filter((i) => court.has(i));
+    const b = c.filter((i) => !court.has(i));
+    return { court: { n: a.length, d: d(a) }, open: { n: b.length, d: d(b) } };
+  };
   function show(id, anchor) {
     card.innerHTML = html(id);
     card.querySelector('.x').onclick = env.hideCard;

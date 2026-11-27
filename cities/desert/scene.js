@@ -164,11 +164,11 @@ export const SCENE = {
   },
   // Margin notes (at most 5).
   notes: [
-    { at: [242.5, 30, 4], dx: -150, dy: -110, key: 'sail' },
+    { at: [242.5, 30, 4], dx: -50, dy: -190, key: 'sail' },
     { at: [300, 167.5, 0], dx: 120, dy: -150, key: 'arcade' },
     { at: [305, 265, 0], dx: 140, dy: 70, key: 'lawn' },
-    { at: [120, 187.5, 0], dx: -120, dy: 110, key: 'street' },
-    { at: [280, 95, 0], dx: 150, dy: -170, key: 'plaza' },
+    { at: [120, 187.5, 0], dx: 40, dy: 150, key: 'street' },
+    { at: [280, 95, 0], dx: 20, dy: -215, key: 'plaza' },
   ],
   startCam: { z: 2, cx: 230, cy: 180 },
 };
