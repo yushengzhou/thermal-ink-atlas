@@ -213,8 +213,8 @@ unverified on the card. Rain, runoff and flooding are not modelled.
 - **Porous asphalt is hotter when dry.** It is darker (α 0.08) and lighter-weight than dense asphalt, so it only
   cools in the first day or two after rain (Li et al. 2013: dry porous asphalt about +5 K).
 - **Pavers are lighter, so they also reflect more sun onto people** at midday once dry; the pavers card shows ΔTmrt.
-- **Ageing:** a coating that starts at 0.26 is about 0.18 after a year (Ko et al. 2022); in-service cool roofs often sit
-  below their aged rating (LBNL-6714E). The page defaults to aged values.
+- **Ageing:** a coating that starts at 0.26 is about 0.18 after a year (Ko et al. 2022); in-service cool roofs generally sit
+  below their listed aged values (70 Chicago-area roofs, Rupar & Graham 2015, abstract only [rupar2015]). The page defaults to aged values.
 `;
 }
 

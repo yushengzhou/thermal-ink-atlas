@@ -182,7 +182,7 @@ compares the same glass with the specular bounce switched off (same glass temper
 ${spots.map((r) => `| ${GLASS[r.g].name} | ${r.h}:00 | ${r.n} | ${f2(r.r)} | ${signed(r.dTmrt)} K | ${signed(r.dTmrtMax)} K | ${f1(r.tmrtSpotShade)} °C (${r.nShade}) | ${f1(r.tmrtShade)} °C | ${f1(r.tmrtSun)} °C | ${f1(r.tmrtSpotSun)} °C |`).join('\n')}
 
 Field comparison: Chengdu, Chunxi Road (August 2023), reflection zones Tmrt +4 to +13 °C, air +1–2 °C, UTCI +2–5 °C,
-peak Tmrt 73.9 °C [du2025]. SOLWEIG with reflective walls also puts the highest Tmrt in front of sunlit façades [wallenberg2026].
+peak Tmrt 73.9 °C [du2025]. Wallenberg et al., who give SOLWEIG walls an albedo of 0.5, note that Tmrt is highest in front of sunlit façades [wallenberg2026].
 Reflective façades lower cooling energy but raise canyon UTCI [chen2024]; low-emissivity glass can cut Tmrt by up to 5 K
 in simulation [sanagar2025] (not modelled: glass emissivity is 0.84 for every type here).
 

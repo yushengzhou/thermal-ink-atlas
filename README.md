@@ -73,7 +73,7 @@ Key sources per block:
 - All blocks (model): Deardorff 1978 (force-restore); NOAA solar equations;
   Brutsaert 1975 (sky emissivity); Oke 1987/2017 (surface properties);
   Lindberg et al. 2008 (SOLWEIG, Tmrt).
-- Block 1, `asphalt-park`: Pomerantz et al. 2000 (LBNL-49283); US EPA 2008
+- Block 1, `asphalt-park`: Pomerantz et al. 2000 (LBNL-43442); US EPA 2008 / 2012
   heat-island compendium; Melnikov et al. 2022 (shade-seeking walkers).
 - Block 2, `sponge-retrofit`: Santamouris 2014; Li, Harvey et al. 2013
   (permeable pavements); Middel et al. 2020 (reflective pavement); Ko et al.

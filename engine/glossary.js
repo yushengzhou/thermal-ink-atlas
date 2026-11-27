@@ -12,7 +12,7 @@ export const GLOSSARY = {
   albedo: {
     term: 'Albedo (α)',
     text: 'The share of sunlight a surface reflects: 0 absorbs everything, 1 reflects everything.',
-    range: 'Fresh asphalt 0.05, aged asphalt 0.12–0.15, grass 0.16–0.26, new white roof 0.65 or more.',
+    range: 'Fresh asphalt about 0.05, aged asphalt about 0.12 ± 0.03 (after about 5 years), grass 0.16–0.26, new white roof 0.65 or more.',
     src: 'lbnl, brief',
     why: 'Each extra 0.1 of albedo turns away roughly 100 W/m² of midday sun, so dark surfaces run far hotter.',
   },

@@ -18,7 +18,7 @@ the sources listed below without checking them.
 
 | Material | albedo α | emissivity ε | heat storage (μ, or thin-layer C) | evaporative fraction | wet after rain, drying time, water held (block 2); crown transmission (block 5) |
 |---|---|---|---|---|---|
-| Aged asphalt (`asphalt`) | 0.12 [lbnl] *cited value* (LBNL aged asphalt 0.12-0.15) | 0.95 [oke] *cited value*, unverified | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 0 [brief] *cited value*, unverified (dry impervious) | — |
+| Aged asphalt (`asphalt`) | 0.12 [lbnl] *cited value* (LBNL-43442: about 0.12 +- 0.03 after about 5 years) | 0.95 [oke] *cited value*, unverified | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Concrete paving (`concrete`) | 0.3 [oke] *cited range*, unverified (cited 0.10-0.35) | 0.9 [oke] *edge of cited range*, unverified (cited 0.71-0.90) | μ 1785 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Stone paving / gravel path (`stone`) | 0.3 [oke] *cited range*, unverified (cited 0.20-0.40) | 0.92 [oke] *cited range*, unverified (cited 0.85-0.95) | μ 1500 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (between brick 1065 and stone 2220) | 0.05 [engine] *engine assumption (no source)*, unverified | — |
 | Irrigated lawn (`grass`) | 0.25 [oke] *edge of cited range*, unverified (cited 0.16-0.26) | 0.95 [oke] *edge of cited range*, unverified (cited 0.90-0.95) | μ 1400 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (soil 600-2200) | 0.8 [brief] *edge of cited range*, unverified (cited 0.6-0.8) | — |
@@ -115,15 +115,16 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 
 ## Source keys
 
-- **[lbnl]** Pomerantz et al. (2000) LBNL-49283, cool pavements: asphalt albedo 0.05 fresh, 0.12-0.15 aged
-- **[oke]** Oke (1987/2017) Boundary Layer Climates / Urban Climates, surface property tables (cited from memory in the research brief)
-- **[epa]** US EPA (2008) Reducing Urban Heat Islands: Cool Pavements / Cool Roofs compendium
+- **[lbnl]** Pomerantz, Pon, Akbari & Chang (2000) LBNL-43442, The effect of pavements' temperatures on air temperatures in large cities (Fig. 1): asphalt albedo about 0.05 fresh, about 0.12 +- 0.03 after about 5 years; secondary: Pomerantz et al. (2003) LBNL-49283, doi 10.2172/816205, which quotes the same values
+- **[oke]** Oke (1987) Boundary Layer Climates, 2nd ed. (Methuen) / Oke, Mills, Christen & Voogt (2017) Urban Climates (Cambridge University Press), surface property tables (cited from memory in the research brief)
+- **[epa]** US EPA Reducing Urban Heat Islands: Compendium of Strategies (October 2008; the Cool Pavements chapter updated 2012, cited as 2012; the 2012 text was not read)
 - **[brief]** Research brief docs/research/thermal-model-brief.md (ranges compiled from the sources above; not yet checked)
 - **[deardorff]** Deardorff (1978) J. Geophys. Res. 83(C4) 1889-1903, force-restore method (NASA NTRS 19780019748)
-- **[melnikov]** Melnikov et al. (2022) Scientific Reports 12, 2617, doi 10.1038/s41598-022-06383-5
+- **[melnikov]** Melnikov et al. (2022) Scientific Reports 12, 2441, doi 10.1038/s41598-022-06383-5
 - **[engine]** Engine assumption: no literature source
 - **[brief2]** Research brief docs/research/retrofit-brief.md (block 2; values compiled from the sources below, items marked unverified there are flagged here)
-- **[lbnlRoof]** US EPA Cool Roofs compendium with ENERGY STAR / LBNL roof data: new white roof albedo about 0.80; LBNL-6714E: in-service roofs often below their CRRC aged rating
+- **[lbnlRoof]** US EPA Cool Roofs compendium with ENERGY STAR / LBNL roof data: new white roof albedo about 0.80
+- **[rupar2015]** Rupar & Graham (2015) ASTM STP1590, 153-205, doi 10.1520/STP159020150019 (abstract only): 70 Chicago-area roofs 2008-2012, in-service reflectance generally below the listed aged values
 - **[chicago]** Chicago energy code via the block-2 brief: low-slope roofs need initial albedo >= 0.72 or 3-year aged >= 0.50
 - **[santamouris]** Santamouris (2014) Solar Energy 103, 682-703, doi 10.1016/j.solener.2012.07.003, cool roofs and pavements review
 - **[noaaGreen]** NOAA Institutional Repository noaa_57843: Javits Center green roof, NYC, up to 18.4 K cooler than a black roof
@@ -143,13 +144,13 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[oke1981]** Oke (1981) J. Climatol. 1, 237-254, doi 10.1002/joc.3370010304: max nocturnal UHI = 7.45 + 3.97 ln(H/W) (coefficients via a secondary source, redalyc 283230157011)
 - **[theeuwes2014]** Theeuwes et al. (2014) Q. J. R. Meteorol. Soc., doi 10.1002/qj.2289: the Oke relation breaks down at high H/W
 - **[johansson2006]** Johansson (2006) Building and Environment, doi 10.1016/j.buildenv.2005.05.022: Fez deep canyon (H/W about 10) about 6 K, up to 10 K, cooler by day
-- **[zhu2018]** Zhu, Jahn & Rein (2018) J. Building Performance Simulation, doi 10.1080/19401493.2018.1538389: 20 Fenchurch St simulated peak 3,384 W m-2 (worst 4,176)
+- **[zhu2018]** Zhu, Jahn & Rein (2019, online 2018) J. Building Performance Simulation 12(4), 378-387, doi 10.1080/19401493.2018.1538389: 20 Fenchurch St simulated peak 3,384 W m-2 (worst 4,176)
 - **[vdara]** Vdara hotel, Las Vegas, 2010 pool-deck hot zone (NBC News; Architectural Record): anecdotal
 - **[speroni2022]** Speroni et al. (2022) Sustainability 14, 5781, doi 10.3390/su14105781 (abstract only): scale models, diffuse façades <= +30%, flat mirror > +100%, concave > +300% at pedestrian level
 - **[du2025]** Du et al. (2025) J. Harbin Inst. Tech. 57(9), doi 10.11918/202406062: Chengdu Chunxi Road, Aug 2023, reflection zones Tmrt +4 to +13 C, air +1-2 C, UTCI +2-5 C, peak Tmrt 73.9 C
 - **[chen2024]** Chen et al. (2024) Energy and Buildings, doi 10.1016/j.enbuild.2024.114926: reflective façades lower cooling energy but raise canyon UTCI
 - **[sanagar2025]** Sanagar Darbani et al. (2025) Developments in the Built Environment, doi 10.1016/j.dibe.2025.100758: low-emissivity glass cuts Tmrt by up to 5 K (simulation)
-- **[wallenberg2026]** Wallenberg et al. (2026) Geosci. Model Dev. 19, 1321, doi 10.5194/gmd-19-1321-2026: SOLWEIG wall albedo 0.5 with reflected shortwave; highest Tmrt in front of sunlit façades
+- **[wallenberg2026]** Wallenberg et al. (2026) Geosci. Model Dev. 19, 1321-1336, doi 10.5194/gmd-19-1321-2026: SOLWEIG wall albedo 0.5 with reflected shortwave (abstract, sections 2.6 and 3); the authors note, as background, that Tmrt is highest in front of sunlit façades
 - **[xie2016]** Xie et al. (2016) Atmos. Chem. Phys. 16, 6071, doi 10.5194/acp-16-6071-2016: dense urban anthropogenic heat 20-70 W m-2 of ground area, occasionally > 100
 - **[sailor2011]** Sailor (2011) Int. J. Climatol., doi 10.1002/joc.2106, anthropogenic heat review; Sailor et al. (2015) citing Ichinose (1999): central Tokyo > 400 W m-2 by day
 - **[sponge2015]** State Council General Office (2015) Guiding Opinions on Promoting Sponge City Construction, Guo Ban Fa [2015] No. 75 (English notice, gov.cn, 2015-10-16; reprint waizi.org.cn/law/6860.html; MOHURD interpretation via cs.com.cn; the primary Chinese text was not located)
@@ -160,10 +161,10 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[theeuwes2013]** Theeuwes et al. (2013) J. Geophys. Res. Atmos., doi 10.1002/jgrd.50704 (WRF): water warmer than the air at night worsens night-time comfort
 - **[jacobs2020]** Jacobs et al. (2020) Are urban water bodies really cooling? Urban Climate (ENVI-met, small Dutch water bodies): afternoon air -0.2 K typical, -0.6 K at most; PET -0.6 typical, -1.9 at most; shade gives PET -1 to -7 K
 - **[cheonggyecheon]** Cheonggyecheon, Seoul (TMU repository; AMS abstract): more than 1 K cooler to 70-80 m (north side), about 0.5 K to 30-50 m (south side); before / after -0.1 to -0.9 K
-- **[ota]** Murakawa group, Ota River, Hiroshima (AIJ papers, J-STAGE aijax 415): river cooling detectable 150-500 m inland along streets perpendicular to the river, more with wind, wider streets and lower density (unverified)
+- **[ota]** Murakawa et al. (1990) J. Archit. Plann. Environ. Eng. (Trans. AIJ) 415, 9-19, doi 10.3130/aijax.415.0_9, Ota River, Hiroshima: river cooling detectable 150-500 m inland along streets perpendicular to the river, more with wind, wider streets and lower density (unverified: via the block-4 brief; the abstract mentions an effect up to about 20 m height and the 150-500 m figure was not found in it)
 - **[corridor]** Ventilation-corridor planning criteria: corridors within 30 deg of the prevailing wind (Chinese planning criteria and Givoni 20-30 deg, via Ren et al. 2018 (CUHK) and MDPI Buildings 14(2):348)
 - **[oke1988]** Oke (1988) Energy and Buildings 11, street-canyon flow regimes, thresholds about 0.3-0.4 and 0.65-0.7 H/W (unverified)
-- **[wake]** Building Simulation (Springer), doi 10.1007/s12273-024-1103-z: building wake recirculation length about 1.6-2.6 x building width
+- **[wake]** Chen, Mo & Hang (2024) Building Simulation 17(4), 509-524, doi 10.1007/s12273-024-1103-z: building wake recirculation length about 1.6-2.6 x building width
 - **[solcerova2019]** Solcerova et al. (2019) Frontiers in Earth Science 7, 156, doi 10.3389/feart.2019.00156: a Delft pond is warmer than the air at night and releases about 2.7 MJ m-2 per night (43% longwave, 39% latent, 11% sensible)
 - **[webb2008]** Webb et al. (2008) Hydrological Processes, river water temperature review: large deep rivers have the smallest daily range ("< 1 K" unverified)
 - **[steadman1994]** Steadman (1994) Australian Meteorological Magazine 43, apparent temperature with radiation (the paper itself was not read; formula via [bom])
@@ -223,7 +224,7 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature ranges carry a source key;
 "In this model" lines are computed from the model at load, the same way as here.
 
-- **Albedo (α)**: Typical: Fresh asphalt 0.05, aged asphalt 0.12–0.15, grass 0.16–0.26, new white roof 0.65 or more. [lbnl, brief]
+- **Albedo (α)**: Typical: Fresh asphalt about 0.05, aged asphalt about 0.12 ± 0.03 (after about 5 years), grass 0.16–0.26, new white roof 0.65 or more. [lbnl, brief]
 - **Emissivity (ε)**: Typical: Concrete 0.71–0.90, asphalt about 0.95, grass 0.90–0.95, tree leaves 0.97–0.99. [brief]
 - **Thermal admittance (μ)**: Typical: Soils 600–2200, asphalt ~1200, concrete ~1785, stone ~2220 J m⁻² s⁻½ K⁻¹. [brief]
 - **Thin-layer heat capacity (C)**: Typical: About 5–20 kJ m⁻² K⁻¹ for metal sheet and thin roof layers. [brief]
@@ -443,8 +444,8 @@ unverified on the card. Rain, runoff and flooding are not modelled.
 - **Porous asphalt is hotter when dry.** It is darker (α 0.08) and lighter-weight than dense asphalt, so it only
   cools in the first day or two after rain (Li et al. 2013: dry porous asphalt about +5 K).
 - **Pavers are lighter, so they also reflect more sun onto people** at midday once dry; the pavers card shows ΔTmrt.
-- **Ageing:** a coating that starts at 0.26 is about 0.18 after a year (Ko et al. 2022); in-service cool roofs often sit
-  below their aged rating (LBNL-6714E). The page defaults to aged values.
+- **Ageing:** a coating that starts at 0.26 is about 0.18 after a year (Ko et al. 2022); in-service cool roofs generally sit
+  below their listed aged values (70 Chicago-area roofs, Rupar & Graham 2015, abstract only [rupar2015]). The page defaults to aged values.
 
 ## Block 3: glass CBD
 
@@ -575,7 +576,7 @@ compares the same glass with the specular bounce switched off (same glass temper
 | Reflective (mirror) glass | 15:00 | 769 | 0.40 | +11.7 K | +25.6 K | 52.7 °C (258) | 40.1 °C | 70.9 °C | 81.9 °C |
 
 Field comparison: Chengdu, Chunxi Road (August 2023), reflection zones Tmrt +4 to +13 °C, air +1–2 °C, UTCI +2–5 °C,
-peak Tmrt 73.9 °C [du2025]. SOLWEIG with reflective walls also puts the highest Tmrt in front of sunlit façades [wallenberg2026].
+peak Tmrt 73.9 °C [du2025]. Wallenberg et al., who give SOLWEIG walls an albedo of 0.5, note that Tmrt is highest in front of sunlit façades [wallenberg2026].
 Reflective façades lower cooling energy but raise canyon UTCI [chen2024]; low-emissivity glass can cut Tmrt by up to 5 K
 in simulation [sanagar2025] (not modelled: glass emissivity is 0.84 for every type here).
 
