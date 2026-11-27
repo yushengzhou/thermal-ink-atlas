@@ -54,24 +54,23 @@
   #fn p { margin: 3px 0; }
   #fn .rng { opacity: .8; }
   #fn .why { font-style: italic; }
-  /* block control panels (blocks 2-6): one look */
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus, #busstop) { position: fixed; left: 18px; bottom: 16px; width: 212px; padding: 8px 10px 9px; background: rgba(246,240,226,.93); border: 1.5px solid #2b2621; border-radius: 4px 9px 5px 8px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); font-size: 13px; }
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus, #busstop) .seg, :is(#retro, #glass) .row { display: flex; align-items: center; gap: 4px; margin: 0 0 6px; flex-wrap: wrap; }
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus, #busstop) button { font: 12.5px/1.2 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; background: #fbf7ee; color: #2b2621; border-radius: 4px 7px 3px 6px; cursor: pointer; }
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus, #busstop) button[aria-pressed="true"] { background: #2b2621; color: #fbf7ee; }
+  /* block control panels (every block's .blockpanel): one look */
+  .blockpanel { position: fixed; left: 18px; bottom: 16px; width: 212px; padding: 8px 10px 9px; background: rgba(246,240,226,.93); border: 1.5px solid #2b2621; border-radius: 4px 9px 5px 8px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); font-size: 13px; }
+  .blockpanel .seg, :is(#retro, #glass) .row { display: flex; align-items: center; gap: 4px; margin: 0 0 6px; flex-wrap: wrap; }
+  .blockpanel button { font: 12.5px/1.2 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; background: #fbf7ee; color: #2b2621; border-radius: 4px 7px 3px 6px; cursor: pointer; }
+  .blockpanel button[aria-pressed="true"] { background: #2b2621; color: #fbf7ee; }
   :is(#retro, #glass) input[type=range] { width: 96px; accent-color: #3f6e6a; }
   :is(#retro, #glass) #rainLabel { font-size: 12px; flex-basis: 100%; }
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus, #busstop) .measures { display: flex; flex-wrap: wrap; gap: 4px; border-top: 1px dashed #6d6355; padding-top: 6px; }
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus, #busstop) .measures .hand { flex-basis: 100%; }
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus, #busstop) .measures button { font-size: 12px; padding: 2px 6px; }
+  .blockpanel .measures { display: flex; flex-wrap: wrap; gap: 4px; border-top: 1px dashed #6d6355; padding-top: 6px; }
+  .blockpanel .measures .hand { flex-basis: 100%; }
+  .blockpanel .measures button { font-size: 12px; padding: 2px 6px; }
   :is(#retro, #glass, #wind, #parking) .measures button.warn { border-color: #8a2f22; color: #8a2f22; }
-  .noui #wind, .noui #hutong, .noui #parking, .noui #estate, .noui #campus, .noui #busstop { display: none; }
   #terms .refs a { color: #8a2f22; }
   #card table.cmp td { text-align: right; }
   #card table.cmp td:first-child, #card table.cmp td.sub { text-align: left; }
   #card .sub { font-size: 11.5px; opacity: .8; font-weight: normal; }
   #card .lit { margin: 4px 0; font-size: 12px; }
-  .noui #retro, .noui #glass { display: none; }
+  .noui .blockpanel { display: none; }
   #card .x { position: absolute; right: 6px; top: 4px; border: 0; background: none; font-size: 18px; cursor: pointer; color: #2b2621; }
 </style>
 </head>
@@ -5622,9 +5621,10 @@ const POINT_MATS = ['concrete', 'metal', 'asphalt', 'grass'];
  * (person's head above the surface, 0: a surface only)}]. Each point is a
  * cell of a one-row "world" with its own sun share (at the surface) and sky
  * view; the person's Tmrt takes the body's sun share and the sky view at
- * mid-body. Returns {pts, T (surface), TB (person), ts, tmrt, body, head, sky}.
+ * mid-body. mats, extra: other materials and runModel options (docs sensitivity
+ * runs only). Returns {pts, T (surface), TB (person), ts, tmrt, body, head, sky}.
  */
-function pointModel(world, G, pts, slots0 = null, mats = null) {
+function pointModel(world, G, pts, slots0 = null, mats = null, extra = null) {
   const NP = pts.length;
   const n = Math.max(1, Math.ceil(Math.sqrt(NP)));
   const N = n * n;
@@ -5667,7 +5667,7 @@ function pointModel(world, G, pts, slots0 = null, mats = null) {
     buildings: [],
   };
   const slots = { suns, fields: ground };
-  const T = runModel(pw, { slots, cells: [...Array(NP).keys()], ...(mats ? { materials: mats } : {}) });
+  const T = runModel(pw, { slots, cells: [...Array(NP).keys()], ...(mats ? { materials: mats } : {}), ...extra });
   const TB = new Thermal({ ...pw, svf: F32((i) => (skyB[i] ? skyB[i].svf : sky[i].svf)) }, T.store, T.slots, T.info);
   const lerpSlot = (arr, i, h) => {
     const x = ((((h % 24) + 24) % 24) * SLOTS) / 24;
@@ -6009,9 +6009,12 @@ function kerbCompare(world, base, hours = [12, 14, 15, 16, 17]) {
   for (const [k, m] of [['west', false], ['east', true]]) {
     const V = { stop: 'B', roofs: [{ id: 'roofB', ...r, x0: m ? mx(r.x1) : r.x0, x1: m ? mx(r.x0) : r.x1, tr }], panels: B.panels.map((P) => panel(P, m)) };
     const pts = B.slots.filter(([x]) => x >= r.x0 && x <= r.x1).map(([x, y, seated]) => ({ x: m ? mx(x) : x, y, z: 0, mat: 'concrete', head: seated ? BS.headSeat.value : BS.headStand.value, seated: !!seated }));
+    const o = pts.length; // an open reference, standing, 6 m north of the shelter on its line (clear of its shadow)
+    const xo = (r.x0 + r.x1) / 2;
+    pts.push({ x: m ? mx(xo) : xo, y: r.y0 - 6, z: 0, mat: 'concrete', head: BS.headStand.value, seated: null });
     const P = pointModel(world, geometry(world, V), pts, { suns: base.slots.suns });
     const avg = (h, s) => mean(pts.map((p, i) => [p, i]).filter(([p]) => p.seated === s).map(([, i]) => P.tmrt(i, h)));
-    out[k] = Object.fromEntries(hours.map((h) => [h, { seated: avg(h, true), standing: avg(h, false), lit: mean(pts.map((_, i) => (P.head(i, h) >= 0.5 ? 1 : 0))) }]));
+    out[k] = Object.fromEntries(hours.map((h) => [h, { seated: avg(h, true), standing: avg(h, false), open: P.tmrt(o, h), lit: mean(pts.slice(0, o).map((_, i) => (P.head(i, h) >= 0.5 ? 1 : 0))) }]));
   }
   return { hours, ...out };
 }
@@ -6172,7 +6175,7 @@ function stopCard(d) {
     </table>
     <p class="note">${note}</p>
     <p class="lit">${STOP_LIT[s.id]}</p>
-    <p class="caveat">Conditions while waiting, for an adult at the heights given: the model does not follow how a body heats up over a wait, and the dose is this page's own measure, not a health threshold. ${s.id === 'E' ? 'The warm air trapped in a glass box is not modelled (the air is fixed), so inside is understated. ' : ''}${d.misses && s.id === 'A' && d.misses.groundMiss ? `The shaded concrete under this roof comes out ${fmt(d.misses.groundShade)} K from the air at 3 pm, outside the brief's 0–8 K above it (band missed, see docs/sources.md); not tuned. ` : ''}Panels and walls reflect no sunlight here.</p>
+    <p class="caveat">Conditions while waiting, for an adult at the heights given: the model does not follow how a body heats up over a wait, and the dose is this page's own measure, not a health threshold. ${s.id === 'E' ? 'The warm air trapped in a glass box is not modelled (the air is fixed), so inside is understated. ' : ''}${d.misses && s.id === 'A' && d.misses.groundMiss ? `The shaded concrete under this roof comes out ${fmt(d.misses.groundShade)} K from the air at 3 pm, outside the brief's 0–8 K above it (band missed, see docs/sources.md): likely because the roof's underside is taken at the shared warm-wall temperature (a sunlit metal roof is far hotter underneath) and a 2 m strip at a point gets no heat from the sunlit slab around it; not tuned. ` : ''}Panels and walls reflect no sunlight here.</p>
     ${srcLine(['brief9', ...STOP_SRC[s.id]])}`;
 }
 
@@ -6191,7 +6194,7 @@ function kerbCard(d) {
       <tr><td>west kerb, standing under the roof</td>${H.map((h) => `<td>${fmt(k.west[h].standing)}</td>`).join('')}</tr>
       <tr><td>east kerb, standing under the roof</td>${H.map((h) => `<td>${fmt(k.east[h].standing)}</td>`).join('')}</tr>
     </table>
-    <p class="note">On a north–south street the afternoon sun comes from across the road. A shelter on the west kerb turns its back panel to it; on the east kerb its open front faces it, and the roof alone cannot keep the sun off: at 4 pm the seated places are ${fmt(k.east[16].seated - k.west[16].seated)} K warmer in Tmrt on the east kerb.</p>
+    <p class="note">On a north–south street the afternoon sun comes from across the road. A shelter on the west kerb turns its back panel to it; on the east kerb its open front faces it, and the roof alone cannot keep the sun off: at 4 pm the seated places are ${fmt(k.east[16].seated - k.west[16].seated)} K warmer in Tmrt on the east kerb. Standing under the roof at 3 pm, against the open 6 m away, the roof takes ${fmt(k.west[15].open - k.west[15].standing)} K off on the west kerb and ${fmt(k.east[15].open - k.east[15].standing)} K on the east kerb: the east kerb is far outside the 20–35 K an opaque roof gives in the brief's band 1 (a supplementary row in docs/sources.md), because there the sun comes in under it.</p>
     <p class="lit">The brief: on a north–south arterial the west-kerb stop's back blocks the afternoon sun and the east-kerb stop's open front takes it; check every design with a sun-shadow analysis (Hong Kong Highways Department BS/GN/047).</p>
     <p class="caveat">A comparison computed for this card only (the east-kerb shelter is not drawn). Panels reflect no sunlight; the air is fixed.</p>
     ${srcLine(['brief9', 'hyd047'])}`;
@@ -6214,7 +6217,7 @@ function phoenixCard(d) {
       <tr><td>this model: concrete</td><td>${fmt(A.open[15].ts)} °C</td><td>${fmt(A.centre[15].ts)} °C</td></tr>
     </table>
     <p class="note">Shade cut PET by 19 °C on average; metal roofs (20.6 °C) and ad panels (20.3 °C) did a little better than polycarbonate (18.2 °C), sparse vines made no significant difference, and stops without side panels did worse. Most riders arrived less than 5 min before their bus.</p>
-    <p class="caveat">${d.misses.groundMiss ? `The shaded concrete here is ${fmt(d.misses.groundShade)} K from the air at 3 pm, outside the brief's 0–8 K above it (Phoenix: 41.3 °C at 41.2 °C air): band missed, see docs/sources.md; likely because a 2 m strip of shade at a point gets no heat from the sunlit slab around it; not tuned. ` : ''}Phoenix is hotter and drier than this design day (air 35 °C here), and globe temperature and PET are not Tmrt, so the rows compare only the direction and the rough size of the effect.</p>
+    <p class="caveat">${d.misses.groundMiss ? `The shaded concrete here is ${fmt(d.misses.groundShade)} K from the air at 3 pm, outside the brief's 0–8 K above it (Phoenix: 41.3 °C at 41.2 °C air): band missed, see docs/sources.md; likely because the roof's underside is taken at the shared warm-wall temperature (a sunlit metal roof is far hotter underneath) and a 2 m strip of shade at a point gets no heat from the sunlit slab around it; not tuned. ` : ''}Phoenix is hotter and drier than this design day (air 35 °C here), and globe temperature and PET are not Tmrt, so the rows compare only the direction and the rough size of the effect.</p>
     ${srcLine(['dzyuban2022', 'brief9'])}`;
 }
 
@@ -6487,7 +6490,7 @@ function bsApp(env) {
   const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
   root.body.insertAdjacentHTML(
     'beforeend',
-    `<div id="busstop" aria-label="Bus stop controls">
+    `<div id="busstop" class="blockpanel" aria-label="Bus stop controls">
         <div class="seg">${btn('data-spots', '1', 'waiting places')}${btn('data-burn', '1', 'burn flags')}</div>
         <div class="measures"><div class="hand">Cards (stops A–E)</div>${BS_CARDS.map(([id, label]) => btn('data-card', id, label, id.startsWith('stop') ? `aria-label="Stop ${id.slice(4)}"` : '')).join('')}</div>
       </div>`,
@@ -7134,7 +7137,7 @@ function boot(scene, root = document) {
     const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
     root.body.insertAdjacentHTML(
       'beforeend',
-      `<div id="retro" aria-label="Retrofit controls">
+      `<div id="retro" class="blockpanel" aria-label="Retrofit controls">
         <div class="seg" role="group" aria-label="Show Before, After or both">${btn('data-state', 'before', 'Before')}${btn('data-state', 'split', 'Split')}${btn('data-state', 'after', 'After')}</div>
         <div class="row"><label for="rain">${gl('daysSinceRain', 'days since rain')}</label><input id="rain" type="range" min="0" max="${D_MAX}" step="1" aria-label="days since rain"><span id="rainLabel" class="hand"></span></div>
         <div class="seg" role="group" aria-label="Materials aged or new"><span>${gl('albedoAgeing', 'materials')}:</span>${btn('data-aged', '1', 'aged')}${btn('data-aged', '0', 'new')}</div>
@@ -7255,7 +7258,7 @@ function boot(scene, root = document) {
     const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
     root.body.insertAdjacentHTML(
       'beforeend',
-      `<div id="glass" aria-label="Glass controls">
+      `<div id="glass" class="blockpanel" aria-label="Glass controls">
         <div class="seg" role="group" aria-label="Glass type"><span>${gl('curtainWall', 'glass')}:</span>${GLASS_IDS.map((id) => btn('data-glass', id, { clear: 'clear', lowe: 'low-e', mirror: 'mirror' }[id])).join('')}</div>
         <div class="seg">${btn('data-ac', '1', 'AC heat overlay', 'aria-pressed="false"')}</div>
         <div class="measures"><div class="hand">Cards</div>${CBD_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'extreme' || id === 'spot' ? 'class="warn"' : '')).join('')}</div>
@@ -7326,7 +7329,7 @@ function boot(scene, root = document) {
     const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
     root.body.insertAdjacentHTML(
       'beforeend',
-      `<div id="wind" aria-label="Wind controls">
+      `<div id="wind" class="blockpanel" aria-label="Wind controls">
         <div class="seg" role="group" aria-label="Wind speed"><span>${gl('windFactor', 'wind')}:</span>${btn('data-u', '1', 'calm 1 m/s')}${btn('data-u', '3', 'breezy 3 m/s')}</div>
         <div class="seg">${btn('data-lines', '1', 'wind lines (W)')}${btn('data-air', '1', 'air overlay (A)')}</div>
         <div class="measures"><div class="hand">Cards</div>${WF_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'shelter' ? 'class="warn"' : '')).join('')}</div>

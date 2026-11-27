@@ -54,24 +54,23 @@
   #fn p { margin: 3px 0; }
   #fn .rng { opacity: .8; }
   #fn .why { font-style: italic; }
-  /* block control panels (blocks 2-6): one look */
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus, #busstop) { position: fixed; left: 18px; bottom: 16px; width: 212px; padding: 8px 10px 9px; background: rgba(246,240,226,.93); border: 1.5px solid #2b2621; border-radius: 4px 9px 5px 8px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); font-size: 13px; }
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus, #busstop) .seg, :is(#retro, #glass) .row { display: flex; align-items: center; gap: 4px; margin: 0 0 6px; flex-wrap: wrap; }
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus, #busstop) button { font: 12.5px/1.2 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; background: #fbf7ee; color: #2b2621; border-radius: 4px 7px 3px 6px; cursor: pointer; }
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus, #busstop) button[aria-pressed="true"] { background: #2b2621; color: #fbf7ee; }
+  /* block control panels (every block's .blockpanel): one look */
+  .blockpanel { position: fixed; left: 18px; bottom: 16px; width: 212px; padding: 8px 10px 9px; background: rgba(246,240,226,.93); border: 1.5px solid #2b2621; border-radius: 4px 9px 5px 8px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); font-size: 13px; }
+  .blockpanel .seg, :is(#retro, #glass) .row { display: flex; align-items: center; gap: 4px; margin: 0 0 6px; flex-wrap: wrap; }
+  .blockpanel button { font: 12.5px/1.2 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; background: #fbf7ee; color: #2b2621; border-radius: 4px 7px 3px 6px; cursor: pointer; }
+  .blockpanel button[aria-pressed="true"] { background: #2b2621; color: #fbf7ee; }
   :is(#retro, #glass) input[type=range] { width: 96px; accent-color: #3f6e6a; }
   :is(#retro, #glass) #rainLabel { font-size: 12px; flex-basis: 100%; }
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus, #busstop) .measures { display: flex; flex-wrap: wrap; gap: 4px; border-top: 1px dashed #6d6355; padding-top: 6px; }
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus, #busstop) .measures .hand { flex-basis: 100%; }
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus, #busstop) .measures button { font-size: 12px; padding: 2px 6px; }
+  .blockpanel .measures { display: flex; flex-wrap: wrap; gap: 4px; border-top: 1px dashed #6d6355; padding-top: 6px; }
+  .blockpanel .measures .hand { flex-basis: 100%; }
+  .blockpanel .measures button { font-size: 12px; padding: 2px 6px; }
   :is(#retro, #glass, #wind, #parking) .measures button.warn { border-color: #8a2f22; color: #8a2f22; }
-  .noui #wind, .noui #hutong, .noui #parking, .noui #estate, .noui #campus, .noui #busstop { display: none; }
   #terms .refs a { color: #8a2f22; }
   #card table.cmp td { text-align: right; }
   #card table.cmp td:first-child, #card table.cmp td.sub { text-align: left; }
   #card .sub { font-size: 11.5px; opacity: .8; font-weight: normal; }
   #card .lit { margin: 4px 0; font-size: 12px; }
-  .noui #retro, .noui #glass { display: none; }
+  .noui .blockpanel { display: none; }
   #card .x { position: absolute; right: 6px; top: 4px; border: 0; background: none; font-size: 18px; cursor: pointer; color: #2b2621; }
 </style>
 </head>
@@ -6617,7 +6616,7 @@ function boot(scene, root = document) {
     const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
     root.body.insertAdjacentHTML(
       'beforeend',
-      `<div id="retro" aria-label="Retrofit controls">
+      `<div id="retro" class="blockpanel" aria-label="Retrofit controls">
         <div class="seg" role="group" aria-label="Show Before, After or both">${btn('data-state', 'before', 'Before')}${btn('data-state', 'split', 'Split')}${btn('data-state', 'after', 'After')}</div>
         <div class="row"><label for="rain">${gl('daysSinceRain', 'days since rain')}</label><input id="rain" type="range" min="0" max="${D_MAX}" step="1" aria-label="days since rain"><span id="rainLabel" class="hand"></span></div>
         <div class="seg" role="group" aria-label="Materials aged or new"><span>${gl('albedoAgeing', 'materials')}:</span>${btn('data-aged', '1', 'aged')}${btn('data-aged', '0', 'new')}</div>
@@ -6738,7 +6737,7 @@ function boot(scene, root = document) {
     const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
     root.body.insertAdjacentHTML(
       'beforeend',
-      `<div id="glass" aria-label="Glass controls">
+      `<div id="glass" class="blockpanel" aria-label="Glass controls">
         <div class="seg" role="group" aria-label="Glass type"><span>${gl('curtainWall', 'glass')}:</span>${GLASS_IDS.map((id) => btn('data-glass', id, { clear: 'clear', lowe: 'low-e', mirror: 'mirror' }[id])).join('')}</div>
         <div class="seg">${btn('data-ac', '1', 'AC heat overlay', 'aria-pressed="false"')}</div>
         <div class="measures"><div class="hand">Cards</div>${CBD_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'extreme' || id === 'spot' ? 'class="warn"' : '')).join('')}</div>
@@ -6809,7 +6808,7 @@ function boot(scene, root = document) {
     const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
     root.body.insertAdjacentHTML(
       'beforeend',
-      `<div id="wind" aria-label="Wind controls">
+      `<div id="wind" class="blockpanel" aria-label="Wind controls">
         <div class="seg" role="group" aria-label="Wind speed"><span>${gl('windFactor', 'wind')}:</span>${btn('data-u', '1', 'calm 1 m/s')}${btn('data-u', '3', 'breezy 3 m/s')}</div>
         <div class="seg">${btn('data-lines', '1', 'wind lines (W)')}${btn('data-air', '1', 'air overlay (A)')}</div>
         <div class="measures"><div class="hand">Cards</div>${WF_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'shelter' ? 'class="warn"' : '')).join('')}</div>
