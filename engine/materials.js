@@ -94,6 +94,21 @@ export const SOURCES = {
   scott1999: 'Scott, Simpson & McPherson (1999) Journal of Arboriculture 25, 129: parking-lot tree shade, asphalt -20 K, air at 0.5 m -1.3 K, car cabins -26 K',
   onishi2010: 'Onishi et al. (2010) Urban Forestry & Urban Greening, doi 10.1016/j.ufug.2010.06.002: parking-lot greening, surface temperature up to -7.26 K',
   optris: 'Optris and Fluke emissivity tables, via the block-6 brief: rusty or oxidised steel about 0.69-0.88 (unverified)',
+  brief7: 'Research brief docs/research/estate-brief.md (block 7; geometry calculated there, other values compiled from the sources below, items marked unverified there are flagged here; the estate counts, the AC profile and the condenser plume term are assumptions of the brief or of this block)',
+  gb50180: 'GB 50180-2018 Standard for urban residential area planning and design (issued 2018-07-10, in force 2018-12-01), clause 4.0.9 / Table 4.0.9 sunlight standards, via the block-7 brief (codeofchina): zones I, II, III and VII, cities of 500,000 or more, at least 2 h on the Great Cold day (大寒); table values from memory, unverified',
+  db33: 'Zhejiang DB33/1050 sunlight analysis rules (draft), via the block-7 brief: 大寒 08:00-16:00 and 冬至 09:00-15:00 true solar time, cumulative, only stretches of 10 min or more, steps of at most 5 min, test point 0.9 m above the floor (unverified)',
+  gb55038: 'GB 55038-2025, mandatory from 2025-05-01, via the block-7 brief: its restatement of the sunlight rule was not checked (unverified)',
+  mu2025: 'Mu et al. (2025) Atmosphere 16(1) 100, doi 10.3390/atmos16010100, Changsha: AC condenser exhaust 5.2 K above the air by day and 6.5 K at night, relative humidity -14.2% (snippet only, unverified)',
+  chow1999: 'Chow & Lin (1999), via the block-7 brief: condensers in a Hong Kong building re-entrant, air at the top floors more than 7 K above ambient (unverified)',
+  bojic2001: 'Bojic et al., via the block-7 brief: air at the condensers 4-9 K above ambient at the 30th storey of a high-rise (unverified)',
+  bruelisauer2014: 'Bruelisauer et al. (2014) Energy and Buildings 71, 28, via the block-7 brief: condenser air in the void of a Singapore high-rise 10-13 K above ambient, inlets near 50 C from floor 10, efficiency -32% (unverified)',
+  demunck2013: 'de Munck et al. (2013) International Journal of Climatology, via the block-7 brief: AC waste heat raises Paris street air by 0.5-2 K (simulated; unverified)',
+  berlin2020: 'Berlin AC waste-heat study (2020) Int. J. Environ. Res. Public Health 17(13) 4645, doi 10.3390/ijerph17134645, via the block-7 brief: street air +0.5 / +0.6 K (unverified)',
+  lai2017: 'Lai, Maing & Ng (2017) Building and Environment 114, 397-409, doi 10.1016/j.buildenv.2016.12.034, Hong Kong outdoor spaces under shade: Tmrt +1.6 K per +10 W m-2 of longwave, the longwave 0.1 less sky view brings (abstract checked against the paper)',
+  plea2016: 'Lai, Maing & Ng (2016) PLEA 2016 Los Angeles, Wo Che Estate, Sha Tin, Hong Kong: sky view factor 0.327 next to the sitting areas (checked against the paper; the brief gives 0.32-0.35 for the podium)',
+  li2023: 'Li et al. (2023) Building and Environment, doi 10.1016/j.buildenv.2023.110225, Hong Kong: a sky view factor threshold near 0.4 (via the block-7 brief, unverified)',
+  yang2010: 'Yang, Lau & Qian (2010) Building and Environment 45(1) 115, Shanghai high-rise housing quarters: vegetation matters more at night; the night heat island not explained by the site, so anthropogenic heat (via the block-7 brief, unverified)',
+  cai2017: 'Cai & Hu (2017) Int. J. Environ. Sci. Dev. 8(5) 378-384, doi 10.18178/ijesd.2017.8.5.981, Wuhan, August 2015: under direct sun hard paving 9.87 K and open space 3.67 K hotter than grass (checked against the paper)',
 };
 
 /** How a value relates to its source. */

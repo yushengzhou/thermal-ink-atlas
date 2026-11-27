@@ -252,6 +252,47 @@ export const GLOSSARY = {
     why: 'High-inertia surfaces lag behind the sun: they peak late and stay warm into the night.',
     scenes: ['parking'],
   },
+  // ---- block 7 (older high-rise estate) ---------------------------------------
+  sunlightRule: {
+    term: '大寒日 sunlight rule',
+    text: 'The Chinese planning rule that every home gets a minimum of direct sun at its ground-floor window on the Great Cold day (大寒, about 20 January), counted from 08:00 to 16:00 solar time at the sill.',
+    range: 'GB 50180-2018: at least 2 h on 大寒 in zones I, II, III and VII for cities of 500,000 or more (3 h in smaller ones); flats for the elderly 2 h on the winter solstice (冬至); new homes in old-area renovation 1 h on 大寒 (table values from memory, unverified). Draft Zhejiang rules: only stretches of 10 min or more count, steps of at most 5 min, the point 0.9 m above the floor.',
+    src: 'gb50180, db33',
+    why: 'It sets how far apart the slab rows stand, and it is written for the winter sun: the same spacing leaves the courtyards open to the high summer sun.',
+    scenes: ['estate'],
+  },
+  effectiveHeight: {
+    term: 'Effective height (H_eff)',
+    text: 'The height of the building that shades a window, measured from the window sill of the ground floor behind it: roof height minus (ground-floor level + 0.9 m).',
+    range: '18 floors of 2.9 m with the ground floor at grade: 52.2 − 0.9 = 51.3 m.',
+    src: 'brief7, db33',
+    why: 'The rule protects the lowest window, so the spacing scales with the height above that window, not with the height above the ground.',
+    scenes: ['estate'],
+  },
+  spacingCoefficient: {
+    term: 'Spacing coefficient (G / H_eff)',
+    text: 'The clear distance between two rows of east-west slabs divided by the effective height of the southern row: a quick way to meet the sunlight rule for long, parallel slabs.',
+    range: 'At 35° N for long slabs: 1.45 for 1 h, 1.47 for 2 h and 1.52 for 3 h of 大寒 sun; 1.64–1.74 on the winter solstice (calculated in the brief). The coefficient method is "no longer appropriate" for high-rises in the draft Zhejiang rules.',
+    src: 'brief7, db33',
+    why: 'At 1.47 the July noon shadow covers only about a sixth of the courtyard.',
+    scenes: ['estate'],
+  },
+  condenserHeat: {
+    term: 'Condenser heat rejection',
+    text: 'The heat an air conditioner\'s outdoor unit blows out: the heat taken from the flat plus the electricity used to move it, Q_rej = Q_cool (1 + 1/EER).',
+    range: 'A 3.5 kW split unit with EER 3.3 rejects about 4.6 kW; at 0.5–0.7 m³/s of fan air that is 5.5–7.5 K above the air (calculated in the brief). Measured in Changsha: exhaust 5.2 K above the air by day, 6.5 K at night (snippet, unverified).',
+    src: 'brief7, mu2025',
+    why: 'Stacked on a façade, hundreds of units put tens of watts per square metre of site into the air, most of it in the evening.',
+    scenes: ['estate'],
+  },
+  eer: {
+    term: 'EER (energy efficiency ratio)',
+    text: 'Cooling delivered per unit of electricity used, in W/W: an EER of 3.3 moves 3.3 kW of heat out of the flat for every 1 kW of power.',
+    range: 'Split air conditioners about 3–4; the brief uses 3.3.',
+    src: 'brief7',
+    why: 'A lower EER means more heat out of the condenser for the same cooling, and the hotter the air at the condenser, the lower the EER.',
+    scenes: ['estate'],
+  },
   // ---- block 2 (sponge-retrofit) --------------------------------------------
   permeablePaving: {
     term: 'Permeable paving',

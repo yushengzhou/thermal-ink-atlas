@@ -11,7 +11,7 @@ import { SOURCES, MATERIALS, GLASS } from '../engine/materials.js';
 import { GLOSSARY } from '../engine/glossary.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const MODULES = ['core', 'sun', 'materials', 'reflect', 'thermal', 'wind', 'world', 'pen', 'kit', 'life', 'render', 'glossary', 'retrofit', 'retroui', 'cbd', 'cbdui', 'waterfront', 'wfui', 'htkit', 'hutong', 'hutui', 'pkkit', 'parking', 'pkui', 'app'];
+const MODULES = ['core', 'sun', 'materials', 'reflect', 'thermal', 'wind', 'world', 'pen', 'kit', 'life', 'render', 'glossary', 'retrofit', 'retroui', 'cbd', 'cbdui', 'waterfront', 'wfui', 'htkit', 'hutong', 'hutui', 'pkkit', 'parking', 'pkui', 'eskit', 'estate', 'esui', 'app'];
 /** Block-specific modules, by the scene flag that selects them. */
 export const BLOCKS = [
   { flag: /retrofit: true/, modules: ['retrofit', 'retroui'] },
@@ -19,6 +19,7 @@ export const BLOCKS = [
   { flag: /windBlock: true/, modules: ['wind', 'waterfront', 'wfui'] },
   { flag: /hutongBlock: true/, modules: ['htkit', 'hutong', 'hutui'] },
   { flag: /parkingBlock: true/, modules: ['pkkit', 'parking', 'pkui'] },
+  { flag: /estateBlock: true/, modules: ['eskit', 'estate', 'esui'] },
 ];
 /** What a left-out module exposes: only the predicates the core calls (always false there). */
 export const STUBS = {
@@ -28,6 +29,7 @@ export const STUBS = {
   waterfront: '{ isWaterfront: () => false }',
   hutong: '{ isHutong: () => false }',
   parking: '{ isParking: () => false }',
+  estate: '{ isEstate: () => false }',
 };
 /** Modules a page needs, given its scene source. */
 export function modulesFor(scene) {
@@ -163,7 +165,7 @@ function build(city) {
 
   const meta = /title: '([^']+)'/.exec(scene)[1];
   const sub = /note: '([^']+)'/.exec(scene)[1];
-  const keys = /retrofit: true/.test(scene) ? '<kbd>B</kbd> before/after · ' : /glassBlock: true/.test(scene) ? '<kbd>G</kbd> glass · ' : /windBlock: true/.test(scene) ? '<kbd>W</kbd> wind · <kbd>A</kbd> air · ' : /hutongBlock: true/.test(scene) ? '<kbd>P</kbd> splash · ' : /parkingBlock: true/.test(scene) ? '<kbd>G</kbd> night release · ' : '';
+  const keys = /retrofit: true/.test(scene) ? '<kbd>B</kbd> before/after · ' : /glassBlock: true/.test(scene) ? '<kbd>G</kbd> glass · ' : /windBlock: true/.test(scene) ? '<kbd>W</kbd> wind · <kbd>A</kbd> air · ' : /hutongBlock: true/.test(scene) ? '<kbd>P</kbd> splash · ' : /parkingBlock: true/.test(scene) ? '<kbd>G</kbd> night release · ' : /estateBlock: true/.test(scene) ? '<kbd>S</kbd> 大寒 · <kbd>C</kbd> condensers · ' : '';
   const html = read('engine/shell.html')
     .replace(/__TITLE__/g, meta)
     .replace('__SUBTITLE__', sub)

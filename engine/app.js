@@ -26,6 +26,8 @@ import { isHutong, hutongSetup } from './hutong.js';
 import { htApp } from './hutui.js';
 import { isParking, parkingSetup } from './parking.js';
 import { pkApp } from './pkui.js';
+import { isEstate, estateSetup } from './estate.js';
+import { esApp } from './esui.js';
 
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
@@ -127,6 +129,9 @@ export function boot(scene, root = document) {
   // car park block (block 6): its page parts live in its own module (pkui.js pkApp: a block plugin, see blk below)
   const pkMode = isParking(scene);
   let pkSet = null;
+  // estate block (block 7): a block plugin too (esui.js esApp)
+  const esMode = isEstate(scene);
+  let esSet = null;
   if (!retro) {
     world = buildWorld(scene);
     t1 = performance.now();
@@ -157,6 +162,9 @@ export function boot(scene, root = document) {
     } else if (pkMode) {
       pkSet = parkingSetup(world);
       thermal = pkSet.model;
+    } else if (esMode) {
+      esSet = estateSetup(world);
+      thermal = esSet.model;
     } else thermal = runModel(world);
     t2 = performance.now();
     V = { main: makeView('main', scene, world, thermal, canvas, glassMode ? { type: () => glassNow.type } : null, wfMode ? { lines: wfSet.lines() } : null) };
@@ -309,7 +317,7 @@ export function boot(scene, root = document) {
       sunTmrt: w.shade.sunTmrt,
     };
   }
-  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode || pkMode ? null : block1Notes();
+  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode || pkMode || esMode ? null : block1Notes();
   function block1Notes() {
   const notesText = {
     asphalt: ['Kiln Street, old asphalt (albedo 0.12):', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
@@ -721,7 +729,7 @@ export function boot(scene, root = document) {
   // ---- a block plugin (blocks 5 and 6): its controls, cards, notes, heat-card rows, glossary numbers
   // and API live in its own module; app.js only calls these hooks
   const env = {
-    scene, world, thermal, root, card, R, S, main, query: q, setup: htSet ?? pkSet,
+    scene, world, thermal, root, card, R, S, main, query: q, setup: htSet ?? pkSet ?? esSet,
     hideCard: () => hideCard(),
     reopen: () => card.dataset.open === '1' && reopenCard(),
     redraw: () => S.paused && draw(),
@@ -733,7 +741,7 @@ export function boot(scene, root = document) {
     },
     setNotes: (n) => (notes = n),
   };
-  const blk = pkMode ? pkApp(env) : htMode ? htApp(env, htSplash0) : null;
+  const blk = pkMode ? pkApp(env) : htMode ? htApp(env, htSplash0) : esMode ? esApp(env) : null;
   if (blk) notes = blk.notes();
 
   const toggleThermal = () => {
@@ -1256,6 +1264,7 @@ export function boot(scene, root = document) {
       ...(wfSet ? wfSet.timing : {}),
       ...(htSet ? htSet.timing : {}),
       ...(pkSet ? pkSet.timing : {}),
+      ...(esSet ? esSet.timing : {}),
     },
     /** Pure seek: render frame N with an optional camera {z,cx,cy}; pauses the clock. */
     seek(frame, cam) {
@@ -1458,6 +1467,8 @@ export function boot(scene, root = document) {
     hutong: htMode ? blk.api : null,
     /** Car park block (block 6) only: its plugin's API (pkui.js pkApp). */
     parking: blk ? blk.api : null,
+    /** Estate block (block 7) only: its plugin's API (esui.js esApp). */
+    estate: esMode ? blk.api : null,
     retro: retro
       ? {
         state: () => ({ state: S.state, split: S.split, swap: S.swap, d: S.d, aged: S.aged }),
