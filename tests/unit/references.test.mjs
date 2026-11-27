@@ -26,7 +26,7 @@ test('every source key used by any block appears on the page', () => {
   for (const p of Object.values(MODEL)) used.add(p.source);
   for (const g of Object.values(GLOSSARY)) if (g.src) g.src.split(',').forEach((k) => used.add(k.trim()));
   for (const m of MEASURES) m.sources.forEach((k) => used.add(k));
-  for (const f of ['cbdui', 'wfui', 'retroui', 'hutui', 'pkui', 'esui']) {
+  for (const f of ['cbdui', 'wfui', 'retroui', 'hutui', 'pkui', 'esui', 'cpui']) {
     const src = readFileSync(new URL(`engine/${f}.js`, root), 'utf8');
     for (const m of src.matchAll(/srcLine\(\[([^\]]+)\]\)/g)) m[1].split(',').forEach((k) => used.add(k.trim().replace(/'/g, '')));
   }
@@ -44,7 +44,7 @@ test('every key in SOURCES and in the docs/sources.md key list appears, and only
 
 test('groups: model and methods first, then one group per block in order', () => {
   const ids = groups().map((g) => g.id).filter((id) => id !== 'other');
-  assert.deepEqual(ids, ['methods', 'asphalt-park', 'sponge-retrofit', 'glass-cbd', 'waterfront', 'hutong', 'parking', 'estate']);
+  assert.deepEqual(ids, ['methods', 'asphalt-park', 'sponge-retrofit', 'glass-cbd', 'waterfront', 'hutong', 'parking', 'estate', 'campus']);
   for (const id of ids) assert.ok(html.includes(`<section id="${id}">`), id);
   const methods = groups()[0].keys;
   for (const k of ['deardorff', 'noaa', 'brutsaert', 'meinel', 'oke', 'solweig', 'energyplus']) assert.ok(methods.includes(k), k);

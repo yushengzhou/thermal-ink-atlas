@@ -1,4 +1,4 @@
-// Every block page (1-7), as a reader clicks through it: every block-panel
+// Every block page (1-8), as a reader clicks through it: every block-panel
 // card, a grid of heat cards (ground, roofs and trees, whatever the click
 // hits) and every terms-panel footnote. Fails on "undefined", "NaN",
 // "[object", a source key with no text (a key built at runtime that the

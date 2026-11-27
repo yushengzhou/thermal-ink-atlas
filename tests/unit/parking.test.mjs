@@ -233,5 +233,5 @@ test('the PV canopy is drawn after every car beneath it (front flag); no object 
 
 test('blocks 1-5 keep their ground material indices; the new ground materials are appended', () => {
   assert.deepEqual(GROUND_MATS.slice(0, 12), ['concrete', 'asphalt', 'stone', 'grass', 'water', 'pavers', 'porousAsphalt', 'coolPave', 'raingarden', 'river', 'pond', 'greyBrick']);
-  assert.deepEqual(GROUND_MATS.slice(12), ['ballast', 'drySoil', 'scrub']);
+  assert.deepEqual(GROUND_MATS.slice(12, 15), ['ballast', 'drySoil', 'scrub']);
 });
