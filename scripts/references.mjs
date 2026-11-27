@@ -22,7 +22,7 @@ import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { MATERIALS, MODEL, GLASS } from '../engine/materials.js';
 import { GLOSSARY, termsFor } from '../engine/glossary.js';
-import { BLOCKS, modulesFor } from './build.mjs';
+import { BLOCKS, modulesFor, hrefProblems } from './build.mjs';
 import { REFS } from './references-data.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -245,10 +245,14 @@ ${body}
   return html;
 }
 
-/** The block pages' external-reference rule, except that relative links (href="path" with no scheme) are allowed. */
+/**
+ * The references page's rule: no URL with a host, no src=, @import or url()
+ * at all, and only allow-listed links (build.mjs hrefProblems: fragments and
+ * relative paths that stay inside the repository).
+ */
 export function externalRefs(html) {
-  const hits = html.match(/(?:https?:)?\/\/[a-z0-9.-]+\.[a-z]{2,}\/|\bsrc\s*=|@import|url\(|\bhref\s*=\s*["'](?:[a-z][a-z0-9+.-]*:|\/\/)/gi) ?? [];
-  return [...new Set(hits)];
+  const hits = html.match(/(?:https?:)?\/\/[a-z0-9.-]+\.[a-z]{2,}\/|\bsrc\s*=|@import|url\(/gi) ?? [];
+  return [...new Set([...hits, ...hrefProblems(html, 'references.html')])];
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

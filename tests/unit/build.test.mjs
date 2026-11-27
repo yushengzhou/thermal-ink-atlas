@@ -26,9 +26,8 @@ for (const c of CITIES) {
     const html = readFileSync(file(c), 'utf8');
     assert.ok(!/https?:\/\//i.test(html), 'contains a URL');
     assert.ok(!/<(script|link|img|iframe)[^>]+(src|href)=/i.test(html), 'references a resource');
-    assert.deepEqual(externalRefs(html), [], 'external reference');
-    // the only links are relative ones inside this repository
-    for (const m of html.matchAll(/\bhref\s*=\s*["']([^"']*)["']/g)) assert.ok(!/^[a-z][a-z0-9+.-]*:|^\//i.test(m[1]), m[1]);
+    // the same allow-list as the build: fragments and relative links that stay inside this repository
+    assert.deepEqual(externalRefs(html, `cities/${c}/index.html`), [], 'external reference');
     assert.ok(!/Math\.random\s*\(|Date\.now\s*\(|new Date\s*\(/.test(html), 'non-deterministic source in drawing code');
   });
 }
@@ -47,9 +46,31 @@ test('each page carries only its own block modules; left-out modules are predica
   }
 });
 
-test('external-reference rule: relative same-site links pass, any scheme, host or root path fails', () => {
-  for (const ok of ['<a href="../../references.html">r</a>', '<a href="#x">x</a>', '<a href="docs/sources.md">d</a>', "<a href='index.html'>i</a>", '<img src="data:image/png;base64,AA">'])
-    assert.deepEqual(externalRefs(ok), [], ok);
-  for (const bad of ['<a href="https://example.org/">x</a>', '<a href="http://x.y/">x</a>', '<a href="//cdn.example.com/a.js">x</a>', '<a href="/etc/passwd">x</a>', '<a href="file:///tmp/x">x</a>', '<a href="javascript:alert(1)">x</a>', '<a href="data:text/html,x">x</a>', '<script src="a.js"></script>', '<style>@import "x.css";</style>', '<div style="background:url(x.png)"></div>', 'fetch("//example.com/x")'])
-    assert.ok(externalRefs(bad).length > 0, bad);
+test('external-reference rule: allow-listed relative links pass; schemes, hosts, root paths, tricks and climbs out of the repo fail', () => {
+  const page = 'cities/hutong/index.html';
+  for (const ok of ['<a href="../../references.html">r</a>', '<a href="#x">x</a>', '<a href="../../docs/sources.md#block-5">d</a>', "<a href='index.html'>i</a>", '<img src="data:image/png;base64,AA">'])
+    assert.deepEqual(externalRefs(ok, page), [], ok);
+  const bad = [
+    '../../../x', // resolves above the repository (on Pages: another site)
+    ' javascript:alert(1)', // leading whitespace is stripped by browsers
+    '\\\\evil.example\\x', // backslashes are read as // on http(s) pages
+    '&#106;avascript:x', // entity-encoded scheme
+    'java\tscript:x', // browsers drop tabs from URLs
+    '//host/x',
+    '/abs',
+    'https://x',
+    'http://x.y/',
+    'file:///tmp/x',
+    'data:text/html,x',
+    'javascript:alert(1)',
+    '../../references.html extra',
+  ];
+  for (const v of bad) {
+    assert.ok(externalRefs(`<a href="${v}">x</a>`, page).length > 0, JSON.stringify(v));
+    assert.ok(externalRefs(`<a href='${v}'>x</a>`, page).length > 0, JSON.stringify(v));
+  }
+  assert.ok(externalRefs('<a href=javascript:x>x</a>', page).length > 0, 'unquoted');
+  assert.ok(externalRefs('<a href="../x">x</a>', 'references.html').length > 0, 'from the repo root, .. leaves it');
+  for (const other of ['<script src="a.js"></script>', '<style>@import "x.css";</style>', '<div style="background:url(x.png)"></div>', 'fetch("//example.com/x")'])
+    assert.ok(externalRefs(other, page).length > 0, other);
 });

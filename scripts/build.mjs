@@ -6,6 +6,7 @@
 // block" (STUBS), so app.js and world.js never enter their code paths.
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { posix } from 'node:path';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const MODULES = ['core', 'sun', 'materials', 'reflect', 'thermal', 'wind', 'world', 'pen', 'kit', 'life', 'render', 'glossary', 'retrofit', 'retroui', 'cbd', 'cbdui', 'waterfront', 'wfui', 'hutong', 'hutui', 'app'];
@@ -33,15 +34,37 @@ export function modulesFor(scene) {
 const LIMIT = 500 * 1024;
 
 /**
+ * Links (href) a page may carry, as an allow-list: a fragment (#id), or a
+ * relative path made only of [A-Za-z0-9._/-] (no whitespace, backslash,
+ * entity "&", colon or "//"), optionally with a #fragment, that stays inside
+ * the repository once resolved against the page's own directory. page is the
+ * page's path from the repo root (cities/<id>/index.html, references.html).
+ * Returns the offending href values (empty if all are allowed).
+ */
+export function hrefProblems(html, page) {
+  const out = [];
+  for (const m of html.matchAll(/\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/gi)) {
+    const v = m[1] ?? m[2] ?? m[3];
+    if (/^#[A-Za-z0-9._-]*$/.test(v)) continue;
+    if (/^[A-Za-z0-9._/-]+(?:#[A-Za-z0-9._-]*)?$/.test(v) && !v.startsWith('/') && !v.includes('//')) {
+      const target = posix.normalize(posix.join(posix.dirname(page), v.split('#')[0]));
+      if (target !== '..' && !target.startsWith('../') && !posix.isAbsolute(target)) continue;
+    }
+    out.push(`href="${v}"`);
+  }
+  return out;
+}
+
+/**
  * What a page may not reference: any URL with a host (//host/...), a src=
  * other than data: or #, @import, url() other than data: or #, and any href
- * with a scheme (http:, file:, javascript:, data: ...), a host (//) or a
- * root path (/...). Relative links inside this repository (href="../../references.html",
- * href="#x") are allowed: they open offline and fetch nothing on load.
+ * outside the allow-list of hrefProblems (so no scheme, host, root path,
+ * whitespace or entity tricks, and no relative path that climbs out of the
+ * repository). Allowed links open offline and fetch nothing on load.
  */
-export function externalRefs(html) {
-  const hits = html.match(/(?:https?:)?\/\/[a-z0-9.-]+\.[a-z]{2,}\/|\bsrc\s*=\s*["'](?!#|data:)|@import|url\((?!\s*["']?(?:data:|#))|\bhref\s*=\s*["'](?:[a-z][a-z0-9+.-]*:|\/)/gi) ?? [];
-  return [...new Set(hits)];
+export function externalRefs(html, page) {
+  const hits = html.match(/(?:https?:)?\/\/[a-z0-9.-]+\.[a-z]{2,}\/|\bsrc\s*=\s*["'](?!#|data:)|@import|url\((?!\s*["']?(?:data:|#))/gi) ?? [];
+  return [...new Set([...hits, ...hrefProblems(html, page)])];
 }
 
 // Each ES module becomes a function scope; imports become destructuring.
@@ -77,7 +100,7 @@ function build(city) {
     .replace('__KEYS__', keys)
     .replace('__BUNDLE__', () => bundle.replace(/<\/script/gi, '<\\/script'));
 
-  const external = externalRefs(html);
+  const external = externalRefs(html, `cities/${city}/index.html`);
   if (external.length) throw new Error(`${city}: external reference(s): ${external.join(', ')}`);
   const size = Buffer.byteLength(html);
   if (size > LIMIT) throw new Error(`${city}: built file is ${size} bytes, over the ${LIMIT} byte budget`);
