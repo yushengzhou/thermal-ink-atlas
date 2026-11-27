@@ -261,7 +261,7 @@ export function cpApp(env) {
   const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
   root.body.insertAdjacentHTML(
     'beforeend',
-    `<div id="campus" aria-label="Campus controls">
+    `<div id="campus" class="blockpanel" aria-label="Campus controls">
         <div class="seg">${btn('data-irrigate', '1', 'water the pitch at 14:00')}${btn('data-burn', '1', 'burn limits')}</div>
         <div class="measures"><div class="hand">Cards</div>${CP_CARDS.map(([id, label]) => btn('data-card', id, label)).join('')}</div>
       </div>`,

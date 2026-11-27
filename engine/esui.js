@@ -235,7 +235,7 @@ export function esApp(env) {
   const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
   root.body.insertAdjacentHTML(
     'beforeend',
-    `<div id="estate" aria-label="Estate controls">
+    `<div id="estate" class="blockpanel" aria-label="Estate controls">
         <div class="seg">${btn('data-season', 'jul', '20 July')}${btn('data-season', 'dajhan', '大寒 shadows')}</div>
         <div class="seg">${btn('data-ac', '1', 'condensers')}</div>
         <div class="measures"><div class="hand">Cards</div>${ES_CARDS.map(([id, label]) => btn('data-card', id, label)).join('')}</div>

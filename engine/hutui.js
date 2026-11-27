@@ -206,7 +206,7 @@ export function htApp(env, splash0) {
   const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
   root.body.insertAdjacentHTML(
     'beforeend',
-    `<div id="hutong" aria-label="Hutong controls">
+    `<div id="hutong" class="blockpanel" aria-label="Hutong controls">
         <div class="seg">${btn('data-splash', '1', 'splash at 19:00 (P)')}</div>
         <div class="measures"><div class="hand">Cards</div>${HT_CARDS.map(([id, label]) => btn('data-card', id, label)).join('')}</div>
       </div>`,

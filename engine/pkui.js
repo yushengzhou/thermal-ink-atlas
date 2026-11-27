@@ -206,7 +206,7 @@ export function pkApp(env) {
   const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
   root.body.insertAdjacentHTML(
     'beforeend',
-    `<div id="parking" aria-label="Car park controls">
+    `<div id="parking" class="blockpanel" aria-label="Car park controls">
         <div class="seg">${btn('data-flux', '1', 'night release G')}</div>
         <div class="measures"><div class="hand">Cards</div>${PK_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'car' ? 'class="warn"' : '')).join('')}</div>
       </div>`,

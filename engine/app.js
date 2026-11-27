@@ -480,7 +480,7 @@ export function boot(scene, root = document) {
     const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
     root.body.insertAdjacentHTML(
       'beforeend',
-      `<div id="retro" aria-label="Retrofit controls">
+      `<div id="retro" class="blockpanel" aria-label="Retrofit controls">
         <div class="seg" role="group" aria-label="Show Before, After or both">${btn('data-state', 'before', 'Before')}${btn('data-state', 'split', 'Split')}${btn('data-state', 'after', 'After')}</div>
         <div class="row"><label for="rain">${gl('daysSinceRain', 'days since rain')}</label><input id="rain" type="range" min="0" max="${D_MAX}" step="1" aria-label="days since rain"><span id="rainLabel" class="hand"></span></div>
         <div class="seg" role="group" aria-label="Materials aged or new"><span>${gl('albedoAgeing', 'materials')}:</span>${btn('data-aged', '1', 'aged')}${btn('data-aged', '0', 'new')}</div>
@@ -601,7 +601,7 @@ export function boot(scene, root = document) {
     const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
     root.body.insertAdjacentHTML(
       'beforeend',
-      `<div id="glass" aria-label="Glass controls">
+      `<div id="glass" class="blockpanel" aria-label="Glass controls">
         <div class="seg" role="group" aria-label="Glass type"><span>${gl('curtainWall', 'glass')}:</span>${GLASS_IDS.map((id) => btn('data-glass', id, { clear: 'clear', lowe: 'low-e', mirror: 'mirror' }[id])).join('')}</div>
         <div class="seg">${btn('data-ac', '1', 'AC heat overlay', 'aria-pressed="false"')}</div>
         <div class="measures"><div class="hand">Cards</div>${CBD_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'extreme' || id === 'spot' ? 'class="warn"' : '')).join('')}</div>
@@ -672,7 +672,7 @@ export function boot(scene, root = document) {
     const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
     root.body.insertAdjacentHTML(
       'beforeend',
-      `<div id="wind" aria-label="Wind controls">
+      `<div id="wind" class="blockpanel" aria-label="Wind controls">
         <div class="seg" role="group" aria-label="Wind speed"><span>${gl('windFactor', 'wind')}:</span>${btn('data-u', '1', 'calm 1 m/s')}${btn('data-u', '3', 'breezy 3 m/s')}</div>
         <div class="seg">${btn('data-lines', '1', 'wind lines (W)')}${btn('data-air', '1', 'air overlay (A)')}</div>
         <div class="measures"><div class="hand">Cards</div>${WF_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'shelter' ? 'class="warn"' : '')).join('')}</div>
