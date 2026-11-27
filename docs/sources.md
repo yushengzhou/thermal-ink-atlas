@@ -78,6 +78,7 @@ the sources listed below without checking them.
 | Arcade (covered walkway along the shops) (`arcadeRoof`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [brief11] *cited value*, unverified (an opaque roof (the brief's arcades, tunnels and overhangs)) |
 | Mesquite tree (Prosopis) (`mesquite`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.7 [brief] *cited range*, unverified (not used: leaf temperature is the shared canopy formula) | sun let through, tr 0.3 [middel2021] *calibrated to a measured value (by construction)*, unverified (the share of sun through the crown, calibrated (scripts/desert.mjs calibrateMesquite: bisection, 0.302, rounded) so that the mesquites' mean Tmrt at 15:00 is 16.7 K below open sun, as measured under Prosopis [middel2021]; no measured leaf area was found (brief). As exp(-0.5 LAI): LAI about 2.4) |
 | Palo verde tree (Parkinsonia) (`paloVerde`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.7 [brief] *cited range*, unverified (not used: leaf temperature is the shared canopy formula) | sun let through, tr 0.3 [brief11] *engine assumption (no source)*, unverified (taken as the mesquite's calibrated crown (0.3): no measured value was found; the brief groups the two native trees) |
+| Shop awning (canvas) (`marketAwning`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used: only the transmission of the canvas matters here) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [engine] *engine assumption (no source)*, unverified (taken as opaque (no value in the brief): no direct sun through it) |
 
 Not used by the grid model:
 
@@ -105,6 +106,7 @@ Not used by the grid model:
 - `arcadeRoof`: Not used by the grid model as a surface: a flat opaque screen 3.5 m up along the shopfronts; with the building beside it, the walkway sees little sky.
 - `mesquite`: Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.
 - `paloVerde`: Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.
+- `marketAwning`: Not used by the grid model as a surface: a flat opaque screen 3.2 m up in front of each shophouse; the cells under it count as fully covered for the sky view (crown factor), so the warm-wall term stands in for the canvas overhead.
 
 Shown on the heat cards as a caveat:
 
@@ -339,6 +341,23 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[erell2014]** Erell, Pearlmutter, Boneh & Kutiel (2014) Urban Climate 10, 367-386, doi 10.1016/j.uclim.2013.10.005, high-albedo materials can worsen pedestrian heat stress in street canyons (via the block-11 brief)
 - **[mcdph2025]** Maricopa County Department of Public Health, annual report on heat deaths in 2025 (April 2026), via the block-11 brief: heat-related deaths 339 (2021), 425 (2022), 645 (2023), 608 (2024), 430 (2025: 313 outdoors, 111 indoors); in 2024, 49% of those who died were homeless and substances were involved in 57%; news reports gave 427 for 2025; a preliminary 585 for 2026 is unverified
 - **[stull2011]** Stull (2011) J. Applied Meteorology and Climatology 50, 2267-2269, doi 10.1175/JAMC-D-11-0143.1, wet-bulb temperature from relative humidity and air temperature (via the block-11 brief: about 22 C at 43 C and 12 hPa)
+- **[brief12]** Research brief docs/research/nightmarket-brief.md (block 12; values compiled from the sources below; the stone night release, the crowd and stall heat, the grill radiation and the night Tmrt are the brief's own arithmetic; items marked unverified there are flagged here)
+- **[cwaTaipei]** Taiwan Central Weather Administration climate normals 1991-2020, Taipei station, July: mean daily maximum about 34 C, minimum about 27 C (not in the brief; from memory, unverified)
+- **[yang2016]** Yang & Zhao (2016, online December 2015) Buildings 6(1), 2, doi 10.3390/buildings6010002, diurnal thermal behaviour of pavements, vegetation and a water pond in a hot-humid city (Guangzhou, via the block-12 brief: granite and concrete warmed the air all day; full text not read, night numbers unverified)
+- **[doulos2004]** Doulos, Santamouris & Livada (2004) Solar Energy 77(2), 231-249, doi 10.1016/j.solener.2004.04.005, passive cooling of outdoor urban spaces: the role of materials (via the block-12 brief, which suggests checking it; not read)
+- **[coolPaveNight]** City of Phoenix and Arizona State University cool pavement pilot, night results (phoenix.gov, via the block-12 brief): treated surface 2.4 F cooler at sunrise, air at 1.8 m 0.5 F cooler at night (unverified)
+- **[ashrae55]** ASHRAE Standard 55 and ISO 8996 metabolic rates, via the block-12 brief: 1 met = 58.2 W m-2, a body of 1.8 m2 about 105 W; standing about 1.2 met (about 125 W), walking at 0.9 m/s about 2.0 met (about 210 W) (from memory in the brief, unverified)
+- **[ashraeRetail]** ASHRAE heat gain from people, retail, via the block-12 brief: 73 W sensible and 59 W latent at 25.6 C (secondary copies disagree; unverified)
+- **[sailorAms]** Sailor, anthropogenic heat (an AMS abstract, via the block-12 brief): metabolism about 2-3% of urban anthropogenic heat (unverified)
+- **[crowdLimits]** Crowd density guidance (G. Keith Still, crowd safety notes; NSW event factsheet), via the block-12 brief: critical density 2-3 people per m2, event limits about 2 (unverified)
+- **[wokVendor]** Vendor specifications of jet wok burners, via the block-12 brief: 28-37 kW per burner (unverified)
+- **[charcoalVendor]** A vendor listing of a charcoal roaster (archiexpo), via the block-12 brief: about 1.2 kg of charcoal an hour, 6 kW output; with about 29 MJ per kg, 1 kg an hour is about 8 kW of fuel (unverified)
+- **[taiwanNewsPm]** Taiwan News on night markets and air quality, via the block-12 brief: night markets raise fine particles (PM) nearby (unverified; no stall heat or air temperature measured)
+- **[nccuXimen]** A National Chengchi University thesis on thermal comfort in Ximending, Taipei, via the block-12 brief: uncomfortable before 16:00 (title not recorded; unverified)
+- **[ntuEnvimet]** A National Taiwan University ENVI-met study of a Taipei street, via the block-12 brief: evening PET depends on how wet the pavement is (title not recorded; unverified)
+- **[ftvFans]** Formosa TV news on night-market vendors and heat, via the block-12 brief: stalls use floor fans (unverified)
+- **[travelTaipei]** Taipei Travel (the city's tourism site), Shilin Night Market, via the block-12 brief: open about 16:00 to 00:00 (unverified)
+- **[shilinWiki]** Wikipedia, Shilin Night Market, and travel guides, via the block-12 brief: busiest 20:00-23:00 (guides: 19:00-22:00) (unverified)
 - **[ren2025]** Ren, Xu & Jiang (2025) Buildings 15(13), 2166, doi 10.3390/buildings15132166, thermal environment of public space in high-density old districts on Shenzhen's urban fringe (the brief cites it as a Baishizhou CFD study of wind shadows in the lanes; not checked)
 - **[noaa]** NOAA Global Monitoring Laboratory, General Solar Position Calculations (solareqns.PDF)
 - **[brutsaert]** Brutsaert (1975) Water Resources Research 11(5) 742-744, clear-sky emissivity
@@ -440,6 +459,10 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Ramada** (desert only): Typical: Sails, umbrellas and similar light shade lowered the radiant heat on a person by about 17 K in Tempe; arcades and overhangs by about 23–31 K. [middel2021, colter2019, brief11]
 - **Reference evapotranspiration (ET₀)** (desert only): Typical: Phoenix in July about 7–8 mm a day (up to 10); bermudagrass about 0.78 of it, so about 5–7 L per m² a day. [azmet, az1195, brief11]
 - **Vapour pressure (e_a)** (desert only): Typical: Desert summer air about 8–15 hPa (dew point 3–13 °C); a humid summer city 25–30 hPa. [ncei, azmet, brief11]
+- **Net longwave (infrared) loss** (nightmarket only): In this model: undefined [this model]
+- **Metabolic rate (met)** (nightmarket only): Typical: Standing about 1.2 met (about 125 W), walking slowly about 2 met (about 210 W). [ashrae55]
+- **Anthropogenic heat** (nightmarket only): Typical: Whole cities usually 20–70 W m⁻², more in dense centres; a night market's stalls about 60 W m⁻² over the street, several kW over a stall. [sailor2011, brief12]
+- **Sensible and latent heat** (nightmarket only): Typical: People at about 26 °C: about 73 W sensible and 59 W latent each in a shop; at 30 °C only about 40% of a body's heat is sensible. [ashraeRetail, brief12]
 
 ## Model vs literature targets
 
@@ -2960,3 +2983,260 @@ Misses:
 - **Thermal palette:** it tops out at 70 °C; the hottest surfaces here (the dark membrane roofs, up to 77.9 °C at 14:00) show in its top colour; the heat cards give the numbers.
 - **Health wording:** the heat-deaths card quotes the county's counts and its named risk factors, hedged, without advice beyond the
   county's; nothing on it is modelled.
+
+## Block 12: night market street
+
+The twelfth block (`cities/nightmarket`) is an invented 400 m street in the manner of a subtropical city like Taipei, at
+25.09° N, 121.52° E on 15 July: air 27–34 °C (warmest at 15:00), vapour pressure 30 hPa, wind 1 m/s, a clear sky.
+Lantern Street is 20 m of granite paving between three- and four-storey shophouses with canvas awnings (north) and one- and two-storey
+shops (south); from 16:00 to midnight it is a night market: 77 stalls (11 charcoal grills, 11 wok stalls, 34 gas griddles and steamers, 21 drinks stalls) in a row down the
+street and in a food court on Temple Square, which opens off the street to the north, string lights, and a crowd that peaks from
+20:00 to 23:00. Two 5 m alleys between three-storey walls lead off the street. The page opens at 21:00. `Q` (the panel button or `?heat=1`)
+shows the heat given off by source; `M` (or `?market=0`) closes the market. Its research brief is
+[`docs/research/nightmarket-brief.md`](research/nightmarket-brief.md).
+
+### Block 12 parameters
+
+The paving is the shared stone (α 0.3, ε 0.92, admittance 1500, EF 0.05): the brief gives no granite values. The shop awnings are
+the block's one material (`marketAwning`, opaque, in the parameter table above, `@page nightmarket`). Roofs are the shared grey tile,
+membrane, aged cool roof and (on the one-storey shops) metal; the back streets the shared aged asphalt; the lanes the shared concrete.
+The block's own values live in `engine/market.js` (`NM`):
+
+| Parameter | Value |
+|---|---|
+| `lat` | 25.09 [engine] *engine assumption (no source)*, unverified (site latitude, ° N, a subtropical city like Taipei (about 25.0–25.1); longitude 121.52, time zone UTC+8, 15 July) |
+| `taMin` | 27 [cwaTaipei] *interpretation of the source*, unverified (the design day's coolest air, °C: about the July normal minimum of Taipei (not in the brief; from memory)) |
+| `taMax` | 34 [cwaTaipei] *interpretation of the source*, unverified (the design day's warmest air, °C (at 15:00, the shared hour): about the July normal maximum of Taipei (not in the brief; from memory). With it the air is about 31 °C at 21:00, close to the brief's worked example of 30 °C) |
+| `vapour` | 30 [brief12] *cited value*, unverified (vapour pressure, hPa: the brief's e_a 30 hPa for the Brutsaert sky (a humid subtropical night; dew point about 24 °C)) |
+| `wind` | 1 [brief12] *cited value*, unverified (site wind, m/s, the h_c input: the brief's 1 m/s (h_c 9.5 W m⁻² K⁻¹ with the shared formula, issue #20)) |
+| `hour` | 21 [brief12] *cited value*, unverified (the bands' evening hour, 21:00 (the brief's "stone 21 h")) |
+| `late` | 23 [brief12] *cited value*, unverified (a later evening hour quoted on the cards, 23:00 (the brief's stone target at 23:00)) |
+| `day` | 15 [engine] *engine assumption (no source)*, unverified (the walkers' check hour, 15:00 (the shared hour of the other blocks; the market is closed)) |
+| `opens` | 16 [travelTaipei] *cited value*, unverified (the market opens, clock hour: Shilin Night Market 16:00 (Taipei Travel via the brief)) |
+| `closes` | 24 [travelTaipei] *cited value*, unverified (the market closes, clock hour: midnight (24:00)) |
+| `peakFrom` | 20 [shilinWiki] *cited value*, unverified (start of the busiest hours: 20:00 (Wikipedia; guides say 19:00)) |
+| `peakTo` | 23 [shilinWiki] *cited value*, unverified (end of the busiest hours: 23:00 (Wikipedia; guides say 22:00)) |
+| `peak` | 1 [brief12] *cited range*, unverified (crowd density at the peak in the busiest aisles, people per m²: the brief's 1.0 (0.3–2.0, an assumption: no night-market measurement found)) |
+| `cap` | 1.5 [engine] *engine assumption (no source)*, unverified (the largest density allowed anywhere, people per m²: the spec's 1.5 (below the event limit of about 2)) |
+| `walk` | 210 [ashrae55] *cited value*, unverified (heat of a person walking slowly (0.9 m/s, about 2.0 met), W (ASHRAE 55 / ISO 8996 via the brief, from memory)) |
+| `stand` | 125 [ashrae55] *cited value*, unverified (heat of a person standing (about 1.2 met), W (as above)) |
+| `walkShare` | 0.5 [engine] *engine assumption (no source)*, unverified (share of the crowd walking (the rest standing at stalls), engine assumption) |
+| `sensible` | 0.4 [brief12] *cited range*, unverified (the share of body heat that warms the air directly at 30 °C (0.3–0.55, an assumption of the brief); quoted on the cards only) |
+| `lpg` | 8 [brief12] *cited range*, unverified (heat of a gas stall (griddle, steamer, fryer), kW of fuel: the brief's 8 (5–15, unverified)) |
+| `wok` | 32.5 [wokVendor] *cited range*, unverified (heat of a jet wok burner, kW: 28–37 (vendor data via the brief), the middle) |
+| `charcoal` | 12 [brief12] *cited range*, unverified (heat of a charcoal grill, kW of fuel: 8–16 (the brief, partly vendor data), the middle) |
+| `duty` | 0.5 [brief12] *cited value*, unverified (share of the time a gas stall burns: the brief's 0.5 (unverified); woks take the same) |
+| `coalDuty` | 1 [engine] *engine assumption (no source)*, unverified (share of the time a charcoal bed burns while open: 1 (a bed glows all evening), engine assumption) |
+| `coalArea` | 0.2 [brief12] *engine assumption (no source)*, unverified (area of a grill's coal bed, m²: the brief's 0.2 (an assumption)) |
+| `coalTemp` | 600 [brief12] *engine assumption (no source)*, unverified (temperature of the coal bed, °C: the brief's 600 (an assumption)) |
+| `coalEps` | 0.95 [engine] *engine assumption (no source)*, unverified (emissivity of the coal bed: 0.95, which reproduces the brief's +490 W m⁻² at 1 m (engine assumption)) |
+| `grillMin` | 0.5 [brief12] *cited value*, unverified (nearest distance in the point-source formula, m (the brief: d ≥ 0.5 m)) |
+| `grillMax` | 3 [brief12] *cited value*, unverified (the term is added within this distance of an open grill, m (the spec: ≤ 3 m)) |
+| `keepAway` | 1.5 [engine] *engine assumption (no source)*, unverified (the crowd keeps at least this far from a grill's coals, m (engine assumption; the cooks stand nearer)) |
+| `vendorAt` | 0.9 [engine] *engine assumption (no source)*, unverified (where a cook stands, m from the stall's centre (engine assumption)) |
+| `lights` | 0.6 [brief12] *cited range*, unverified (heat of the string lights over the street and the square when on, W m⁻²: LED strings 0.2–1 (the brief, unverified), the middle) |
+| `figures` | 260 [engine] *engine assumption (no source)*, unverified (figures drawn for the market's crowd at its peak (each stands for many people; engine choice)) |
+| `warm` | 6 [engine] *engine assumption (no source)*, unverified (coarse 10-min spin-up days (block 3's opts.warm, with its stability guard); convergence is tested on 1-min days as everywhere) |
+
+### What is new in the engine (all other blocks pixel-identical)
+
+- **A scene's opening hour**, `scene.startHour` (default 15:00): this page opens at 21:00. No other scene sets it.
+- Nothing else in the shared engine is new. The model run keeps the ground heat flux G (block 6's `opts.flux`) to check the stone's
+  release against the model's own budget; the awnings are block 5's flat screens (the cells under them take the crown factor for the
+  sky view); the people near a grill carry a point Tmrt, as block 9's waiting people do; the crowd joins the walkers through the
+  block's plugin, as block 10's rooftop people do. The crowd, the stalls, the lights and the grills never enter the model.
+
+### Places (cell classes)
+
+By geometry only, defined before the first band run. Surface temperature (°C, and above the air, K), the stone's net release
+Q = ε(σT_s⁴ − L↓) + h_c(T_s − T_a) with L↓ = SVF·L_sky + (1 − SVF)·σT_w⁴ as in the model (W m⁻², radiated + to the air), the model's own −G,
+the gross emission εσT_s⁴ and Tmrt (°C, and against the air, K). Air 34.0 / 31.4 / 29.8 °C at 15:00 / 21:00 / 23:00.
+
+| Place | cells | SVF | 15:00 | 21:00 | 23:00 | Q 21:00 | −G 21:00 | εσT⁴ 21:00 | Tmrt 21:00 |
+|---|---|---|---|---|---|---|---|---|---|
+| the open square (sky view ≥ 0.85, outside the food court) | 71 | 0.90 | 58.7 | 34.7 (+3.3) | 33.3 (+3.4) | 95 (63 + 32) | 95 | 469 | 29.0 (−2.4) |
+| all of Temple Square | 320 | 0.77 | 56.1 | 34.6 (+3.3) | 33.2 (+3.4) | 86 (55 + 31) | 86 | 468 | 29.6 (−1.7) |
+| Lantern Street, open aisle (y 195–200) | 80 | 0.78 | 59.4 | 35.6 (+4.3) | 34.0 (+4.2) | 102 (61 + 41) | 102 | 474 | 30.1 (−1.3) |
+| under the awnings (y 185–190) | 63 | 0.14 | 35.2 | 32.4 (+1.1) | 31.5 (+1.6) | 13 (3 + 10) | 13 | 455 | 32.1 (+0.8) |
+| the stall row (y 190–195) | 80 | 0.76 | 59.3 | 35.4 (+4.0) | 33.9 (+4.0) | 96 (58 + 38) | 97 | 473 | 30.1 (−1.3) |
+| the south side (y 200–205) | 80 | 0.63 | 60.1 | 36.3 (+5.0) | 34.7 (+4.8) | 104 (57 + 47) | 104 | 479 | 31.3 (−0.1) |
+| all of Lantern Street | 320 | 0.62 | 54.7 | 35.1 (+3.7) | 33.6 (+3.8) | 83 (48 + 35) | 83 | 471 | 30.7 (−0.6) |
+| the narrow alleys (5 m, three-storey walls) | 30 | 0.23 | 42.0 | 33.7 (+2.3) | 32.6 (+2.8) | 38 (16 + 22) | 38 | 463 | 32.3 (+0.9) |
+
+The model's own budget agrees: at night the stone has no sun and no evaporation (EF acts only on a positive net radiation), so
+−G = Q; the stored surface temperature is a minute later than the step that gives G, hence the small gap (band 2's supplementary row).
+
+### Heat given off (the Q overlay)
+
+Shown, not felt: the air temperature is fixed, so none of this warms the air or changes a surface or a person's Tmrt here. Per 5 m
+cell: the stone (radiated and to the air, from the model), the crowd ρ_p·M (M = 0.5 × 210 + 0.5 × 125 = 167.5 W; ρ_p the peak
+1 m⁻² × the hour's share × the place's weight: busy aisles 1, the stall row 0.5, the south side 0.6, the food court 0.8, the rest of
+the square 0.3, the alleys 0.2; capped at 1.5), the stalls (P·duty over the 25 m² cell: gas 4.0 kW, woks 16.25 kW,
+charcoal 12.0 kW), the lights (0.6 W m⁻² over the street and the square from sunset to midnight). Means, W m⁻²:
+
+| Where | stone, radiated | stone, to the air | crowd | stalls | lights | total |
+|---|---|---|---|---|---|---|
+| Lantern Street, 21:00 | 48 | 35 | 130 | 45 | 0.6 | 258 |
+| Lantern Street, 23:00 | 47 | 36 | 130 | 45 | 0.6 | 258 |
+| Temple Square, 21:00 | 55 | 31 | 80 | 11 | 0.6 | 177 |
+
+The street's 358.25 kW of stalls over its 8000 m² come to 45 W m⁻² (the brief's estimate: about 60 W m⁻² for 60 stalls × 8 kW × 0.5
+over 400 m × 10 m). The crowd's sensible share (0.4) is quoted on the cards; the overlay shows the whole metabolic heat.
+
+### The crowd over the evening
+
+ρ_p in the busy aisles (weight 1), people per m², and their heat, W m⁻²:
+
+| Hour | 0:00 | 15:00 | 16:00 | 17:00 | 18:00 | 19:00 | 20:00 | 21:00 | 22:00 | 23:00 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| ρ_p | 0.00 | 0.00 | 0.00 | 0.15 | 0.50 | 0.85 | 1.00 | 1.00 | 1.00 | 1.00 |
+| ρ_p·M | 0 | 0 | 0 | 25 | 84 | 143 | 168 | 168 | 168 | 168 |
+
+260 figures are drawn at the peak (each stands for about 39 people): strollers on six lanes of the street,
+customers in front of a stall (a new stall every minute) and people walking the food court, plus one cook behind each stall,
+0.9 m from its centre. From 16:00 to midnight nobody but the cooks comes nearer than 2.12 m to a grill's coals (the rule:
+1.5 m); the cooks of the grill stalls stand 0.90–0.91 m from them, and every one of them (1760 of 1760 samples) carries a Tmrt
+of 65 °C or more, so they show the sweat cue. Walkers at 15:00 (the market closed): density in shade over density in sun 3.45;
+100% of the 12 people dwelling are in shade.
+
+### The grill's radiant term
+
+The brief's illustrative point source, added to the Tmrt of a point (a person drawn, a heat card's cell centre), never to the grid:
+ΔS = ε_c·σ·(T_c⁴ − T_b⁴)·A_c / (4πd²), d ≥ 0.5 m, summed over the open grills within 3 m, T_b the air, Tmrt' = (Tmrt⁴ + ΔS/σ)^¼.
+At 21:00 on the stall row (Tmrt 30.1 °C):
+
+| d, m | 0.5 | 0.9 | 1 | 1.5 | 2 | 2.5 | 3 | 3.01 |
+|---|---|---|---|---|---|---|---|---|
+| ΔS, W m⁻² | 1964 | 606 | 491 | 218 | 123 | 79 | 55 | 0 |
+| Tmrt, °C | 182.5 | 98.8 | 88.5 | 59.9 | 47.9 | 41.8 | 38.4 | 30.1 |
+| ΔTmrt, K | 152.4 | 68.7 | 58.5 | 29.8 | 17.8 | 11.7 | 8.3 | 0.0 |
+
+The brief: about +490 W m⁻² at 1 m (Tmrt about 88 °C) and about +120 at 2 m (about 48 °C). Without the cut-off the term would fall
+below 5 K at 3.89 m.
+
+### Sensitivity
+
+One change at a time (docs only; nothing shipped changes). The stone's cells run again (no lateral coupling); the drier sky runs the
+whole block. At 21:00: the open aisle's stone − air (K) and net release, the open square's and the alleys' net release (W m⁻²), Tmrt − air
+on the open square and in the alleys (K):
+
+| Case | aisle T_s − T_a | aisle Q | square Q | alleys Q | square Tmrt − T_a | alleys Tmrt − T_a |
+|---|---|---|---|---|---|---|
+| shipped | +4.3 | 102 | 95 | 38 | −2.4 | +0.9 |
+| stone α 0.2 (cited 0.20–0.40) | +5.1 | 115 | 107 | 41 | −2.0 | +1.0 |
+| stone α 0.4 (cited 0.20–0.40) | +3.4 | 89 | 82 | 35 | −2.8 | +0.8 |
+| stone admittance 1065 (brick) | +2.7 | 78 | 72 | 30 | −3.1 | +0.7 |
+| stone admittance 2220 (solid stone) | +6.2 | 132 | 122 | 47 | −1.5 | +1.2 |
+| site wind 1.5 m/s (h_c 11.4) | +3.4 | 95 | 88 | 36 | −2.8 | +0.7 |
+| direct sun 7% weaker (the engine's noon sun is likely a few per cent strong) | +3.9 | 96 | 89 | 37 | −2.6 | +0.9 |
+| vapour pressure 25 hPa (a drier sky) | +3.8 | 102 | 95 | 38 | −3.5 | +0.6 |
+
+The overlay over the street at 21:00 (W m⁻²; arithmetic on the shipped model):
+
+| Case | crowd | stalls | lights |
+|---|---|---|---|
+| shipped | 130 | 45 | 0.6 |
+| peak density 0.3 | 39 | 45 | 0.6 |
+| peak density 2.0 (capped at 1.5) | 218 | 45 | 0.6 |
+| gas stalls 5 kW | 130 | 40 | 0.6 |
+| gas stalls 15 kW | 130 | 56 | 0.6 |
+| charcoal 8 kW, woks 28 kW | 130 | 38 | 0.6 |
+| charcoal 16 kW, woks 37 kW | 130 | 52 | 0.6 |
+| filament lights 5 W m⁻² | 130 | 45 | 5.0 |
+
+The grill term (ΔTmrt, K, at 1 / 2 / 3 m; the brief gives no range for the coal bed, so these are illustrative):
+
+| Case | 1 m | 2 m | 3 m |
+|---|---|---|---|
+| shipped (0.2 m², 600 °C) | +58.5 | +17.8 | +8.3 |
+| coal bed 0.1 m² | +33.0 | +9.3 | +4.2 |
+| coal bed 500 °C | +39.1 | +11.2 | +5.1 |
+| coal bed 700 °C | +81.4 | +26.4 | +12.6 |
+
+### Causes of the misses (docs-only runs, after the first band run)
+
+Nothing shipped changes.
+
+- **Band 5** (the grill term at 3 m +8.3 K against < 5 K): the brief's own formula with its own coal bed (0.2 m² at 600 °C, ε 0.95) gives
+  491 W m⁻² at 1 m, its "about +490", and 55 W m⁻² at 3 m, +8.3 K on the stall row's Tmrt: the two statements of the brief do
+  not agree, and the term falls below 5 K only at 3.89 m. So the miss is the formula's (tested): an isotropic point source with
+  nothing in the way, an upper bound; a smaller or cooler bed would meet it (sensitivity above). Not tuned.
+- **The awnings' net release** (a supplementary row, 13 W m⁻² against 30–150): the brief's own formula at the awnings' sky view
+  (0.14) and surface (+1.1 K above the air), walls and canvas at air + 2 K, gives 13 W m⁻² (at a sky view of 0.4 and +2 K,
+  43: the brief's 42). With what the awning cells see overhead and around at the air temperature after dark, run again:
+  6 W m⁻² (surface +0.6 K above the air). The band is for an open street; under a canvas that hides most of the sky
+  the stone keeps its heat, as the brief's "lower at low SVF" says.
+
+### Acceptance bands
+
+At 21:00 (the brief's "stone 21 h"); the places as above.
+
+| Check (spec #15) | Model | Band | Source | |
+|---|---|---|---|---|
+| 1. Stone − air at 21:00, the open square (n 71), K | 3.34 K | 1 to 6 | brief12 | inside |
+| 1. Supplementary: the same, the street's open aisle (n 80), K | 4.28 K | 1 to 6 | brief12 | inside (supplementary, not counted) |
+| 1. Supplementary: the same, under the awnings (n 63), K | 1.06 K | 1 to 6 | brief12 | inside (supplementary, not counted) |
+| 1. Supplementary: the same, the narrow alleys (n 30), K | 2.35 K | 1 to 6 | brief12 | inside (supplementary, not counted) |
+| 1. Supplementary: the same, the stall row (n 80), K | 3.99 K | 1 to 6 | brief12 | inside (supplementary, not counted) |
+| 1. Supplementary: the same, the street's south side (n 80), K | 4.97 K | 1 to 6 | brief12 | inside (supplementary, not counted) |
+| 1. Supplementary: the same at 23:00, the street's open aisle, K | 4.18 K | 1 to 6 | brief12 | inside (supplementary, not counted) |
+| 2. Net release at 21:00, the open square, W m⁻² | 94.68 W m⁻² | 30 to 150 | brief12 | inside |
+| 2. Net release at 21:00, the street's open aisle, W m⁻² | 102.10 W m⁻² | 30 to 150 | brief12 | inside |
+| 2. Net release at 21:00, the narrow alleys, W m⁻² | 38.17 W m⁻² | 30 to 150 | brief12 | inside |
+| 2. Lower at a low sky view: the narrow alleys − the open square, W m⁻² | -56.51 W m⁻² | ≤ 0 | brief12 | inside |
+| 2. Supplementary: net release at 21:00, under the awnings, W m⁻² | 13.22 W m⁻² | 30 to 150 | brief12 | outside (supplementary, not counted) |
+| 2. Supplementary: net release at 23:00, the street's open aisle, W m⁻² | 99.24 W m⁻² | 30 to 150 | brief12 | inside (supplementary, not counted) |
+| 2. Supplementary: the model's own budget, −G − Q at 21:00 on the open square, W m⁻² | 0.25 W m⁻² | — (reported) | brief12 | reported (supplementary, not counted) |
+| 3. Gross emission at 21:00, the open square, W m⁻² | 468.63 W m⁻² | 430 to 500 | brief12 | inside |
+| 3. Gross emission at 21:00, the street's open aisle, W m⁻² | 474.34 W m⁻² | 430 to 500 | brief12 | inside |
+| 3. Supplementary: the stone's coolest surface at 21:00 (square and street), °C | 34.27 °C | 28 to 38 | brief12 | inside (supplementary, not counted) |
+| 3. Supplementary: the stone's warmest surface at 21:00 (square and street), °C | 35.99 °C | 28 to 38 | brief12 | inside (supplementary, not counted) |
+| 4. Tmrt − air at 21:00, the open square (sky view 0.90), K | -2.40 K | -6 to 2 | brief12 | inside |
+| 4. Tmrt − air at 21:00, the street's open aisle (sky view 0.78), K | -1.27 K | -6 to 2 | brief12 | inside |
+| 4. Tmrt − air at 21:00, under the awnings (sky view 0.14), K | 0.77 K | -6 to 2 | brief12 | inside |
+| 4. Tmrt − air at 21:00, the narrow alleys (sky view 0.23), K | 0.92 K | -6 to 2 | brief12 | inside |
+| 4. Higher at a low sky view: the narrow alleys − the open square, K | 3.32 K | ≥ 0 | brief12 | inside |
+| 4. Supplementary: under the awnings − the open square, K | 3.17 K | ≥ 0 | brief12 | inside (supplementary, not counted) |
+| 5. Grill term at 3 m (the stall row's Tmrt at 21:00), K | 8.28 K | ≤ 5 | brief12 | **outside** |
+| 5. ∝ 1/d² (by construction): the term at 1 m over the term at 2 m, W m⁻² over W m⁻² | 4.000 | 4 | brief12 | inside |
+| 5. Zero when closed (by construction): the largest term next to a grill outside the opening hours or with the market closed, W m⁻² | 0.00 W m⁻² | 0 | brief12 | inside |
+| 5. Zero beyond 3 m (by construction): the term at 3.01 m, W m⁻² | 0.00 W m⁻² | 0 | brief12 | inside |
+| 5. Supplementary: Tmrt 1 m from a grill at 21:00 (the brief: about 88 °C), °C | 88.53 °C | — (reported) | brief12 | reported (supplementary, not counted) |
+| 5. Supplementary: Tmrt 2 m from a grill at 21:00 (the brief: about 48 °C), °C | 47.86 °C | — (reported) | brief12 | reported (supplementary, not counted) |
+| 5. Supplementary: distance where the uncut term falls below 5 K, m | 3.89 m | — (reported) | brief12 | reported (supplementary, not counted) |
+| 6. Crowd heat = ρ_p × M (by construction): largest absolute difference over the market cells, every 15 min, W m⁻² | 0.00 W m⁻² | 0 to 1e-9 | brief12 | inside |
+| 7. Density ≤ 2 (by construction): largest anywhere, any time, people per m² | 1.00 m⁻² | 0 to 2 | crowdLimits | inside |
+| 7. Zero before 16:00 and after midnight (by construction): largest crowd, stall or light value outside the hours or closed | 0.000 | 0 | travelTaipei | inside |
+| 8. Overlays leave the model bit-identical (by construction): changed Ts, Tmrt or stored values | 0.000 | 0 | brief12 | inside |
+| 9. Overlay total = sum of its parts (by construction): largest absolute difference, W m⁻² | 0.00 W m⁻² | 0 to 1e-6 | brief12 | inside |
+| Walkers at 15:00: density in shade over density in sun | 3.453 | ≥ 2 | melnikov | inside |
+| People dwelling at 15:00 (n 12) whose place is in shade | 1.000 | ≥ 0.5 | melnikov | inside |
+| Supplementary (by construction): the crowd's nearest approach to a grill's coals, 16:00–24:00, m | 2.12 m | ≥ 1.5 | brief12 | inside (supplementary, not counted) |
+
+1 of 23 counted checks fall outside their band; 16 supplementary rows are not counted. By the brief's bands: 4 of 5 independent bands met (1, 2, 3, 4); missed: 5; bands 6–9 check the overlays' bookkeeping by construction (4 of 4 met). Band 5's ∝ 1/d², closed and beyond-3-m rows are by construction too; its 3 m row is the one that tests the brief's numbers. They are reported, not tuned away: every parameter value is the brief's central value (or the shared value the brief names), committed before the first band run.
+
+Misses:
+- **Band 5** (the grill term at 3 m +8.3 K): the brief's formula and coal bed give it (tested above); stated on the grill card with its number.
+- Supplementary, outside its band: the awnings' net release 13 W m⁻² (the sky view of 0.14, tested above); stated on the stone card.
+
+### Disclosures
+
+- **Invented place:** no real street, addresses, stalls or vendors; the names (Lantern Street, Temple Square, Well Alley, Lamp Alley)
+  are generic. The layout (plots, storeys, awnings, the stall row and the food court, the stall types, the alleys) and every parameter
+  value were committed (commit 9c2ad47) before any model run of the bands; the bands and places were committed (d3d1f47) before the first
+  band run.
+- **After the first band run:** drawing and wording only, with no geometry or model input changed: four margin notes' label offsets
+  were moved so the five labels stay on screen at the opening view, the crowd note was shortened, and the grill card names the tested
+  cause of band 5. A helper bug in the docs' crowd statistics (the cooks' distance counted under 0.6 m instead of under 1.2 m) was
+  fixed; it changes no band row. The docs-only runs of the misses' causes were added.
+- **Air fixed:** the crowd, the stalls and the lights are shown (Q), not felt: they do not warm the air, the stone or a person. Only the
+  grills' radiant term reaches a person, at points, illustrative and an upper bound. No smoke, no air quality, no food safety.
+- **The site** (taMin, taMax) is a Taipei-like July day from memory (not in the brief, unverified); every band is relative to the air.
+- **The paving** is the atlas's shared stone (no granite values in the brief; solid granite is denser, sensitivity above).
+- **Crowd density and timing** are invented (no night-market measurement found); the awnings, the stalls and the crowd's bodies are not
+  in the sky view (the brief: Tmrt likely 0.5–1 K too cool under them); stalls are drawn, not shade.
+- **Engine:** the shared warm-wall term (every wall and the awnings seen from below at air + 2 K at night; issue #28); a person sees only
+  their own cell's ground (issue #28); h_c from the 1 m/s site wind with the shared formula (issue #20); the stone's stored heat comes from
+  the engine's clear-sky sun, likely a few per cent strong at noon (sensitivity above).
+- **Engine sun** (`sun.js`, issue #24): against suncalc at this site the sun differs by +0.11° in altitude and +1.80° in azimuth at 12:00, −0.08° in altitude and +0.21° in azimuth at 15:00.
+- **No measured night data** for any real night-market street was found (the brief); the bands compare with the brief's physics.

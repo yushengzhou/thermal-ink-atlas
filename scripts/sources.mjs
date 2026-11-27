@@ -23,6 +23,7 @@ import { campusMarkdown } from './campus-docs.mjs';
 import { busstopMarkdown } from './busstop-docs.mjs';
 import { villageMarkdown } from './village-docs.mjs';
 import { desertMarkdown } from './desert-docs.mjs';
+import { nightmarketMarkdown } from './nightmarket-docs.mjs';
 
 const UNITS = { mu: ' J m⁻² s⁻½ K⁻¹', muWet: ' J m⁻² s⁻½ K⁻¹', thinC: ' J m⁻² K⁻¹', tau: ' d', storage: ' mm' };
 const cell = (p, k = '') =>
@@ -337,7 +338,8 @@ ${estateMarkdown()}
 ${campusMarkdown()}
 ${busstopMarkdown()}
 ${villageMarkdown()}
-${desertMarkdown()}`;
+${desertMarkdown()}
+${nightmarketMarkdown()}`;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
