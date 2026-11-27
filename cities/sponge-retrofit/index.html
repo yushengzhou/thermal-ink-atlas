@@ -65,11 +65,23 @@
   #retro .measures .hand { flex-basis: 100%; }
   #retro .measures button { font-size: 12px; padding: 2px 6px; }
   #retro .measures button.warn { border-color: #8a2f22; color: #8a2f22; }
+  #glass { position: fixed; left: 18px; bottom: 16px; width: 212px; padding: 8px 10px 9px; background: rgba(246,240,226,.93);
+    border: 1.5px solid #2b2621; border-radius: 4px 9px 5px 8px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); font-size: 13px; }
+  #glass .seg, #glass .row { display: flex; align-items: center; gap: 4px; margin: 0 0 6px; flex-wrap: wrap; }
+  #glass button { font: 12.5px/1.2 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; background: #fbf7ee; color: #2b2621;
+    border-radius: 4px 7px 3px 6px; cursor: pointer; }
+  #glass button[aria-pressed="true"] { background: #2b2621; color: #fbf7ee; }
+  #glass input[type=range] { width: 96px; accent-color: #3f6e6a; }
+  #glass #rainLabel { font-size: 12px; flex-basis: 100%; }
+  #glass .measures { display: flex; flex-wrap: wrap; gap: 4px; border-top: 1px dashed #6d6355; padding-top: 6px; }
+  #glass .measures .hand { flex-basis: 100%; }
+  #glass .measures button { font-size: 12px; padding: 2px 6px; }
+  #glass .measures button.warn { border-color: #8a2f22; color: #8a2f22; }
   #card table.cmp td { text-align: right; }
   #card table.cmp td:first-child, #card table.cmp td.sub { text-align: left; }
   #card .sub { font-size: 11.5px; opacity: .8; font-weight: normal; }
   #card .lit { margin: 4px 0; font-size: 12px; }
-  .noui #retro { display: none; }
+  .noui #retro, .noui #glass { display: none; }
   #card .x { position: absolute; right: 6px; top: 4px; border: 0; background: none; font-size: 18px; cursor: pointer; color: #2b2621; }
 </style>
 </head>
@@ -414,6 +426,24 @@ const SOURCES = {
   ko2022: 'Ko et al. (2022) Environ. Res. Lett. 17 044027, cool pavement at neighbourhood scale, albedo 0.26 -> 0.18 in one year',
   mccoll: 'McColl et al. (2017) Geophys. Res. Lett., doi 10.1002/2017GL072819, global soil-moisture drydown timescales',
   middel2021: 'Middel et al. (2021) Bull. Amer. Meteor. Soc., doi 10.1175/BAMS-D-20-0193.1, shade and Tmrt in Phoenix',
+  brief3: 'Research brief docs/research/cbd-brief.md (block 3; values compiled from the sources below, items marked unverified there are flagged here)',
+  fresnel: 'Fresnel equations for uncoated float glass, n = 1.52, two surfaces (computed); LBNL (Furler; Rubin et al.): ASHRAE-style angular fit within 1.5% for clear glass, coated glass up to about 8% off at 60 deg',
+  igdb: 'LBNL International Glazing Database (IGDB) suggested for product reflectances; no datasheet was checked for the low-e or mirror values',
+  bca: 'Singapore BCA Approved Document, Section P: glass daylight reflectance at most 20% (via the block-3 brief)',
+  en673: 'EN 673 glass outer-surface emissivity about 0.84 (via the block-3 brief)',
+  iso6946: 'EN ISO 6946 internal surface resistance 0.13 m2 K W-1, i.e. about 7.7 W m-2 K-1 (from memory)',
+  oke1981: 'Oke (1981) J. Climatol. 1, 237-254, doi 10.1002/joc.3370010304: max nocturnal UHI = 7.45 + 3.97 ln(H/W) (coefficients via a secondary source, redalyc 283230157011)',
+  theeuwes2014: 'Theeuwes et al. (2014) Q. J. R. Meteorol. Soc., doi 10.1002/qj.2289: the Oke relation breaks down at high H/W',
+  johansson2006: 'Johansson (2006) Building and Environment, doi 10.1016/j.buildenv.2005.05.022: Fez deep canyon (H/W about 10) about 6 K, up to 10 K, cooler by day',
+  zhu2018: 'Zhu, Jahn & Rein (2018) J. Building Performance Simulation, doi 10.1080/19401493.2018.1538389: 20 Fenchurch St simulated peak 3,384 W m-2 (worst 4,176)',
+  vdara: 'Vdara hotel, Las Vegas, 2010 pool-deck hot zone (NBC News; Architectural Record): anecdotal',
+  speroni2022: 'Speroni et al. (2022) Sustainability 14, 5781, doi 10.3390/su14105781 (abstract only): scale models, diffuse façades <= +30%, flat mirror > +100%, concave > +300% at pedestrian level',
+  du2025: 'Du et al. (2025) J. Harbin Inst. Tech. 57(9), doi 10.11918/202406062: Chengdu Chunxi Road, Aug 2023, reflection zones Tmrt +4 to +13 C, air +1-2 C, UTCI +2-5 C, peak Tmrt 73.9 C',
+  chen2024: 'Chen et al. (2024) Energy and Buildings, doi 10.1016/j.enbuild.2024.114926: reflective façades lower cooling energy but raise canyon UTCI',
+  sanagar2025: 'Sanagar Darbani et al. (2025) Developments in the Built Environment, doi 10.1016/j.dibe.2025.100758: low-emissivity glass cuts Tmrt by up to 5 K (simulation)',
+  wallenberg2026: 'Wallenberg et al. (2026) Geosci. Model Dev. 19, 1321, doi 10.5194/gmd-19-1321-2026: SOLWEIG wall albedo 0.5 with reflected shortwave; highest Tmrt in front of sunlit façades',
+  xie2016: 'Xie et al. (2016) Atmos. Chem. Phys. 16, 6071, doi 10.5194/acp-16-6071-2016: dense urban anthropogenic heat 20-70 W m-2 of ground area, occasionally > 100',
+  sailor2011: 'Sailor (2011) Int. J. Climatol., doi 10.1002/joc.2106, anthropogenic heat review; Sailor et al. (2015) citing Ichinose (1999): central Tokyo > 400 W m-2 by day',
   sponge2015: 'State Council General Office (2015) Guiding Opinions on Promoting Sponge City Construction, Guo Ban Fa [2015] No. 75 (English notice, gov.cn, 2015-10-16; reprint waizi.org.cn/law/6860.html; MOHURD interpretation via cs.com.cn; the primary Chinese text was not located)',
 };
 
@@ -607,6 +637,36 @@ Object.assign(MATERIALS, {
   },
 });
 
+// ---- block 3: glass presets ---------------------------------------------------
+// rho0: normal-incidence solar reflectance (the angular shape is Fresnel, see
+// reflect.js); absorb: solar absorptance of the pane (glass temperature);
+// eps: outer-surface longwave emissivity.
+const GLASS = {
+  clear: {
+    name: 'Clear float glass',
+    rho0: v(0.08, 'fresnel', 'cited', true, 'Fresnel calculation, n = 1.52, two surfaces: 0.082'),
+    absorb: v(0.1, 'brief3', 'cited', false, 'brief: a_g 0.1 for clear glass, marked an assumption'),
+    eps: v(0.84, 'en673', 'cited', false),
+    note: 'Ordinary clear glass reflects only about 8% of the sun head-on, but far more at a glancing angle (Fresnel).',
+  },
+  lowe: {
+    name: 'Solar-control low-e glass',
+    rho0: v(0.2, 'brief3', 'range', false, 'brief range 0.15-0.35; no datasheet checked (LBNL IGDB) [igdb]'),
+    absorb: v(0.3, 'brief3', 'edge', false, 'brief: 0.3-0.45 for coated glass, marked an assumption'),
+    eps: v(0.84, 'en673', 'cited', false, 'outer surface; the low-e coating faces the cavity'),
+    note: 'A coated glass that turns away much of the sun; at 0.20 it sits at the Singapore cap for daylight reflectance.',
+  },
+  mirror: {
+    name: 'Reflective (mirror) glass',
+    rho0: v(0.35, 'brief3', 'range', false, 'brief range 0.25-0.45; no datasheet checked (LBNL IGDB) [igdb]'),
+    absorb: v(0.4, 'brief3', 'range', false, 'brief: 0.3-0.45 for coated glass, marked an assumption'),
+    eps: v(0.84, 'en673', 'cited', false),
+    note: 'A metallic coating makes the tower a mirror: it keeps sun out of the offices and throws more of it onto the street.',
+  },
+};
+const GLASS_IDS = ['clear', 'lowe', 'mirror'];
+const GLASS_DEFAULT = 'lowe';
+
 /** Model constants shared by thermal.js and life.js. */
 const MODEL = {
   hc: v('5.7 + 3.8 u', 'oke', 'cited'),
@@ -620,13 +680,294 @@ const MODEL = {
   youngTreeTransmission: v(0.47, 'brief2', 'interp', false, 'exp(-0.5 LAI) with LAI 1.5; brief range 0.37-0.61 for LAI 1-2'),
   youngTreeCrown: v('crown radius 2.6 m, crown centre 4.4 m', 'engine', 'engine', false, 'scene assumption for newly planted street trees (cities/sponge-retrofit/scene.js)'),
   latentHeat: v('2.45e6 J kg-1', 'brief2', 'cited', true, 'evaporated depth = sum of EF x max(Q*, 0) x dt / 2.45e6'),
+  wallAlbedo: v(0.3, 'brief3', 'range', false, 'opaque walls; brief: 0.3 (0.2-0.5, Oke range unverified); SOLWEIG uses 0.5 [wallenberg2026]'),
+  wallLit: v(0.5, 'engine', 'engine', false, 'share of a wall in sun, f_lit, for the wall-reflection and glass-temperature terms'),
+  wallReflection: v('K_wr = a_w (1 - SVF) K_wall', 'brief3', 'interp', false, 'K_wall = f_lit I cos(beta)/pi + 0.5 D + 0.5 a_g G; SOLWEIG form a_w G (1 - psi) recalled from memory in the brief'),
+  glassHo: v(20, 'brief3', 'range', false, 'outside film coefficient h_o, brief 15-25 W m-2 K-1'),
+  glassHi: v(7.7, 'iso6946', 'interp', false, 'inside film coefficient h_i,eff, W m-2 K-1, read as 1 / 0.13'),
   sweatCue: v('Tmrt 65 -> 70 C', 'engine', 'engine', false, 'visual cue only: droplets on people in sun, strength rising from Tmrt 65 C to full at 70 C (separates sunlit pavement from sunlit lawn in this model); no physiological model'),
 };
 
 /** Parameter keys a material uses (for cards and docs). */
 const paramKeys = (m) => ['alpha', 'eps', m.thinC ? 'thinC' : 'mu', 'muWet', 'ef', 'efWet', 'tau', 'storage'].filter((k) => m[k]);
 
-return { SOURCES, BASIS, MATERIALS, MODEL, paramKeys };
+return { SOURCES, BASIS, MATERIALS, GLASS, GLASS_IDS, GLASS_DEFAULT, MODEL, paramKeys };
+})();
+
+__m['reflect'] = (() => {
+// reflect: glass optics and the specular single bounce of the direct beam off
+// vertical glass façades (block 3).
+//
+// Fresnel reflectance of uncoated float glass (n = 1.52, two surfaces,
+// non-absorbing, multiple reflections between the surfaces): each
+// polarisation reflects r at one surface and 2r / (1 + r) for the pane;
+// unpolarised sunlight takes the mean. That gives 0.082 at normal incidence and
+// 0.41 at 75° (research brief). A product with normal-incidence reflectance
+// rho0 keeps the Fresnel angular shape, scaled so that rho(0) = rho0 and
+// rho(90°) = 1:
+//   rho(theta) = rho0 + (1 - rho0) g(theta),  g = (R(theta) - R(0)) / (1 - R(0)).
+//
+// Specular bounce (brief): the mirrored sun vector s' = s - 2 (s.n) n has the
+// sun's altitude and a mirrored azimuth. A ground point p is lit by façade f if
+// the ray from p along s' first hits f's glass at a point that is itself in
+// sun. It then receives rho(theta) I sin(beta) on the ground, and a person
+// there an extra beam rho(theta) I from the mirrored direction. Second bounces
+// (rho^2) are ignored. Every façade here is flat and vertical, so nothing is
+// focused: no point can receive more than the sum of rho I sin(beta) over the
+// façades that face it.
+//
+// Fields are stored as two numbers per cell so the glass type can be changed
+// without redoing the geometry: A = sum of hit fractions, B = sum of hit
+// fraction x g(theta). For a glass with rho0 the reflected fraction of the
+// beam on the ground is r = rho0 A + (1 - rho0) B.
+const { DEG } = __m['core'];
+const { sunVector, rasterise } = __m['sun'];
+const { MODEL } = __m['materials'];
+
+const N_GLASS = 1.52;
+
+/** Fresnel reflectance of a clear float-glass pane (two surfaces) at incidence theta (deg). */
+function fresnelPane(thetaDeg, n = N_GLASS) {
+  if (thetaDeg >= 90) return 1;
+  const ci = Math.cos(thetaDeg * DEG);
+  const si = Math.sin(thetaDeg * DEG);
+  const ct = Math.sqrt(1 - (si / n) ** 2);
+  const rs = ((ci - n * ct) / (ci + n * ct)) ** 2;
+  const rp = ((n * ci - ct) / (n * ci + ct)) ** 2;
+  const pane = (r) => (2 * r) / (1 + r);
+  return (pane(rs) + pane(rp)) / 2;
+}
+
+const R0 = fresnelPane(0);
+/** Normalised Fresnel shape: 0 at normal incidence, 1 at grazing. */
+const fresnelShape = (thetaDeg) => (fresnelPane(thetaDeg) - R0) / (1 - R0);
+/** Reflectance of a glass with normal-incidence reflectance rho0 at incidence theta (deg). */
+const glassRho = (rho0, thetaDeg) => rho0 + (1 - rho0) * fresnelShape(thetaDeg);
+
+/** Outward normals of the four façades of a box (x east, y south). */
+const FACE_N = { S: [0, 1], N: [0, -1], E: [1, 0], W: [-1, 0] };
+const FACES = ['S', 'N', 'E', 'W'];
+
+/** Glass façades of a world: {b, face, n, c0 (plane offset along n), u: [lo, hi] along the face, z: [lo, hi]}. */
+function glassFacades(world) {
+  const out = [];
+  for (const B of world.buildings) {
+    if (!B.glass) continue;
+    const faces = B.glass === true ? FACES : B.glass;
+    for (const face of faces) {
+      const n = FACE_N[face];
+      const c0 = face === 'S' ? B.y1 : face === 'N' ? -B.y0 : face === 'E' ? B.x1 : -B.x0;
+      const u = face === 'S' || face === 'N' ? [B.x0, B.x1] : [B.y0, B.y1];
+      out.push({ b: B.index, face, n, c0, u, z: [B.glassFrom ?? 0, B.h] });
+    }
+  }
+  return out;
+}
+
+/** Ray o + t d against an axis-aligned box: entry t in (tmin, tmax), or Infinity. */
+function rayBox(ox, oy, oz, dx, dy, dz, x0, y0, z0, x1, y1, z1, tmin, tmax) {
+  let lo = tmin;
+  let hi = tmax;
+  if (Math.abs(dx) < 1e-12) {
+    if (ox < x0 || ox > x1) return Infinity;
+  } else {
+    let a = (x0 - ox) / dx;
+    let b = (x1 - ox) / dx;
+    if (a > b) [a, b] = [b, a];
+    if (a > lo) lo = a;
+    if (b < hi) hi = b;
+    if (lo > hi) return Infinity;
+  }
+  if (Math.abs(dy) < 1e-12) {
+    if (oy < y0 || oy > y1) return Infinity;
+  } else {
+    let a = (y0 - oy) / dy;
+    let b = (y1 - oy) / dy;
+    if (a > b) [a, b] = [b, a];
+    if (a > lo) lo = a;
+    if (b < hi) hi = b;
+    if (lo > hi) return Infinity;
+  }
+  if (Math.abs(dz) < 1e-12) {
+    if (oz < z0 || oz > z1) return Infinity;
+  } else {
+    let a = (z0 - oz) / dz;
+    let b = (z1 - oz) / dz;
+    if (a > b) [a, b] = [b, a];
+    if (a > lo) lo = a;
+    if (b < hi) hi = b;
+    if (lo > hi) return Infinity;
+  }
+  return lo;
+}
+
+/** Transmission of a ray segment through tree crowns (spheres), at most three deep. */
+function crownTransmission(trees, ox, oy, oz, dx, dy, dz, tmax) {
+  let tr = 1;
+  let deep = 0;
+  for (const T of trees) {
+    const cx = T.x - ox;
+    const cy = T.y - oy;
+    const cz = T.zc - oz;
+    const t = cx * dx + cy * dy + cz * dz;
+    if (t < 0 || t > tmax + T.r) continue;
+    const d2 = cx * cx + cy * cy + cz * cz - t * t;
+    if (d2 < T.r * T.r && deep < 3) {
+      tr *= T.tr ?? MODEL.canopyTransmission.value;
+      deep++;
+    }
+  }
+  return tr;
+}
+
+/**
+ * Specular reflection field for one sun position.
+ * grid: {n, cell, S} (S x S samples per cell); ground(i): true for cells that
+ * can receive reflections (ground cells; roofs are not included).
+ * Returns {A, B} (Float32Array n*n, see the header) or null if the sun is down
+ * or no glass faces it. With opts.facades a subset of façades is used; with
+ * opts.trace every lit sample is reported to trace(i, x, y, facade, rhoShape).
+ */
+function reflectField(world, sun, grid, ground, opts = {}) {
+  if (sun.alt <= 0.5) return null;
+  const facades = opts.facades ?? world.glassFacades ?? glassFacades(world);
+  if (!facades.length) return null;
+  const { n, cell } = grid;
+  const S = grid.S ?? 2;
+  const sv = sunVector(sun.alt, sun.az);
+  const tanb = Math.tan(sun.alt * DEG);
+  let A = null;
+  let Bf = null;
+  const w = 1 / (S * S);
+  for (const f of facades) {
+    const [nx, ny] = f.n;
+    const cosT = sv[0] * nx + sv[1] * ny; // cos(theta) = cos(beta) cos(delta az)
+    if (cosT <= 1e-4) continue;
+    const theta = Math.acos(Math.min(1, cosT)) / DEG;
+    const g = fresnelShape(theta);
+    // mirrored sun vector (same altitude)
+    const rx = sv[0] - 2 * cosT * nx;
+    const ry = sv[1] - 2 * cosT * ny;
+    const rz = sv[2];
+    // façade corners -> ground along -s' (the reflected beam's travel)
+    const along = f.face === 'S' || f.face === 'N';
+    const corner = (u, z) => {
+      const px = along ? u : f.face === 'E' ? f.c0 : -f.c0;
+      const py = along ? (f.face === 'S' ? f.c0 : -f.c0) : u;
+      return [px - (z / rz) * rx, py - (z / rz) * ry];
+    };
+    const pts = [];
+    for (const u of f.u) for (const z of f.z) pts.push(...corner(u, z));
+    // blockers: other buildings, clipped to the half-space in front of the
+    // façade (both the sun ray to the glass and the reflected ray from it lie there)
+    const blk = [];
+    for (const B of world.buildings) {
+      if (B.index === f.b) continue;
+      let { x0, y0, x1, y1 } = B;
+      if (f.face === 'S') y0 = Math.max(y0, f.c0);
+      else if (f.face === 'N') y1 = Math.min(y1, -f.c0);
+      else if (f.face === 'E') x0 = Math.max(x0, f.c0);
+      else x1 = Math.min(x1, -f.c0);
+      if (x1 > x0 && y1 > y0) blk.push([x0, y0, 0, x1, y1, B.h]);
+    }
+    const front = (x, y) => x * nx + y * ny > f.c0;
+    const trees = world.trees.filter((T) => front(T.x, T.y));
+    const polys = [hullFlat(pts)];
+    rasterise(polys, { nx: n, ny: n, cell }, (i, p, s) => {
+      if (!ground(i)) return;
+      const x = ((i % n) + ((s % S) + 0.5) / S) * cell;
+      const y = (Math.floor(i / n) + (Math.floor(s / S) + 0.5) / S) * cell;
+      // distance along s' to the façade plane
+      const pn = x * nx + y * ny;
+      const sn = rx * nx + ry * ny; // < 0
+      const t = (f.c0 - pn) / sn;
+      if (!(t > 0)) return;
+      const hx = x + t * rx;
+      const hy = y + t * ry;
+      const hz = t * rz;
+      const hu = along ? hx : hy;
+      if (hu < f.u[0] || hu > f.u[1] || hz < f.z[0] || hz > f.z[1]) return;
+      // reflected path p -> glass, then glass -> sun
+      for (const q of blk) if (rayBox(x, y, 0, rx, ry, rz, q[0], q[1], q[2], q[3], q[4], q[5], 1e-6, t - 1e-6) < Infinity) return;
+      for (const q of blk) if (rayBox(hx, hy, hz, sv[0], sv[1], sv[2], q[0], q[1], q[2], q[3], q[4], q[5], 1e-6, 1e5) < Infinity) return;
+      const tr = trees.length ? crownTransmission(trees, x, y, 0, rx, ry, rz, t) : 1;
+      if (!A) {
+        A = new Float32Array(n * n);
+        Bf = new Float32Array(n * n);
+      }
+      A[i] += w * tr;
+      Bf[i] += w * tr * g;
+      if (opts.trace) opts.trace(i, x, y, f, g, tr);
+    }, S);
+  }
+  return A ? { A, B: Bf } : null;
+}
+
+/** Flat polygon of the convex hull of a flat point list. */
+function hullFlat(flat) {
+  const p = [];
+  for (let i = 0; i < flat.length; i += 2) p.push([flat[i], flat[i + 1]]);
+  p.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lo = [];
+  for (const q of p) {
+    while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop();
+    lo.push(q);
+  }
+  const up = [];
+  for (let i = p.length - 1; i >= 0; i--) {
+    while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p[i]) <= 0) up.pop();
+    up.push(p[i]);
+  }
+  return lo.slice(0, -1).concat(up.slice(0, -1)).flat();
+}
+
+/** Ground cells of the model grid (reflections land on ground only). */
+const groundCells = (world) => (i) => world.bld[i] < 0;
+
+/**
+ * Reflection fields for every 10-min sun slot of a world (model grid, 2 x 2
+ * samples). Slots where no glass is sunlit are null; the pass only visits the
+ * ground under each sunlit façade's reflected beam.
+ */
+function reflectSlots(world, slots) {
+  const grid = { n: world.n, cell: world.cell, S: 2 };
+  const ground = groundCells(world);
+  const A = [];
+  const B = [];
+  let any = false;
+  for (let k = 0; k < slots.suns.length; k++) {
+    const r = reflectField(world, slots.suns[k], grid, ground);
+    A.push(r ? r.A : null);
+    B.push(r ? r.B : null);
+    if (r) any = true;
+  }
+  return any ? { A, B } : null;
+}
+
+/** Per-slot reflected beam fraction r = rho0 A + (1 - rho0) B for a glass (rho0), or null. */
+function reflectFor(rs, rho0) {
+  if (!rs) return null;
+  return rs.A.map((a, k) => {
+    if (!a) return null;
+    const b = rs.B[k];
+    const out = new Float32Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = rho0 * a[i] + (1 - rho0) * b[i];
+    return out;
+  });
+}
+
+/**
+ * Glass outer-surface temperature (deg C) for one façade orientation:
+ * Tg = Ta + a_g I_f / (h_o + h_i), I_f = f_lit I max(0, cos theta) + 0.5 D
+ * (brief equation; f_lit as for the wall term; an assumption, no measurement found).
+ */
+function glassTemp(ta, beam, diffuse, cosT, absorb) {
+  const If = MODEL.wallLit.value * beam * Math.max(0, cosT) + 0.5 * diffuse;
+  return ta + (absorb * If) / (MODEL.glassHo.value + MODEL.glassHi.value);
+}
+
+return { N_GLASS, fresnelPane, fresnelShape, glassRho, FACE_N, FACES, glassFacades, reflectField, groundCells, reflectSlots, reflectFor, glassTemp };
 })();
 
 __m['thermal'] = (() => {
@@ -637,9 +978,21 @@ __m['thermal'] = (() => {
 // Computed once at load with 1-min steps, repeating the design day until the
 // deep temperature Td converges (max change < 0.05 K, at least 3 days), and
 // stored at 15-min resolution for the last day; seek() only looks values up.
-const { MATERIALS, MODEL } = __m['materials'];
-const { solarPosition, boxShadow, canopyShadow, rasterise } = __m['sun'];
+//
+// Shortwave on a cell: K = sunlit I sin(beta) + SVF D + K_wr + r I sin(beta).
+//   K_wr = a_w (1 - SVF_open) c K_wall is sunlight reflected diffusely by the
+//   opaque walls the cell sees (all blocks; a_w = MODEL.wallAlbedo, c the
+//   crown cover factor, glass walls excluded), with
+//   K_wall = f_lit I cos(beta) / pi + 0.5 D + 0.5 a_g G (a_g the cell's albedo,
+//   G = I sin(beta) + D unshaded);
+//   r is the specular reflection off sunlit glass (block 3, reflect.js).
+// Longwave from the walls: opaque walls at T_wall (engine assumption below),
+// glass walls at T_g (reflect.js glassTemp) with emissivity eps_g, reflecting
+// the air temperature for the rest.
+const { MATERIALS, MODEL, GLASS } = __m['materials'];
+const { solarPosition, boxShadow, canopyShadow, rasterise, sunVector } = __m['sun'];
 const { lerp, hexRgb, DEG } = __m['core'];
+const { glassTemp, FACE_N, FACES } = __m['reflect'];
 
 const SIGMA = 5.670374e-8;
 const TAU = 86400;
@@ -689,22 +1042,29 @@ const skyEmissivity = (eaHpa, taK) => 1.24 * Math.pow(eaHpa / taK, 1 / 7);
 /**
  * Sky view factor at (x, y, z0) by horizon scan: SVF = mean over azimuths of
  * cos^2(horizon elevation). heightAt(x, y) returns obstacle height (m).
+ * onDir(dx, dy, tanHorizon, dist) is called per direction with the sample
+ * that sets the horizon (dist 0 if the horizon is open).
  */
-function svfAt(heightAt, x, y, z0, nDirs = 16, maxDist = 160, step = 2.5) {
+function svfAt(heightAt, x, y, z0, nDirs = 16, maxDist = 160, step = 2.5, onDir = null) {
   let sum = 0;
   for (let k = 0; k < nDirs; k++) {
     const a = ((k + 0.5) / nDirs) * 2 * Math.PI;
     const dx = Math.cos(a);
     const dy = Math.sin(a);
     let best = 0; // tan of horizon angle
+    let bestD = 0;
     for (let d = step; d <= maxDist; d += step) {
       const h = heightAt(x + dx * d, y + dy * d) - z0;
       if (h > 0) {
         const t = h / d;
-        if (t > best) best = t;
+        if (t > best) {
+          best = t;
+          bestD = d;
+        }
       }
     }
     sum += 1 / (1 + best * best); // cos^2(atan(best))
+    if (onDir) onDir(dx, dy, best, bestD);
   }
   return sum / nDirs;
 }
@@ -872,6 +1232,9 @@ function runModel(world, opts = {}) {
   const hc = 5.7 + 3.8 * site.wind;
   const tauFac = (2 * Math.PI) / TAU;
   const sqrtTau = Math.sqrt(TAU);
+  // block 3: specular reflection fields per slot (reflect.js reflectFor) and the glass type
+  const reflFull = opts.refl ?? null;
+  const glass = opts.glass ?? null;
 
   // optional subset of cells (opts.cells): the model runs on a compact copy
   // of their inputs and the result is scattered back (other cells stay 0;
@@ -880,6 +1243,7 @@ function runModel(world, opts = {}) {
   const NF = N;
   const NN = idx ? idx.length : N;
   const fields = idx ? slots.fields.map((f) => Float32Array.from(idx, (i) => f[i])) : slots.fields;
+  const refl = reflFull ? (idx ? reflFull.map((f) => (f ? Float32Array.from(idx, (i) => f[i]) : null)) : reflFull) : null;
   // per-cell parameters
   const alpha = new Float32Array(NN);
   const eps = new Float32Array(NN);
@@ -904,12 +1268,35 @@ function runModel(world, opts = {}) {
     } else throw new Error(`material ${id} has neither mu > 0 nor thinC`);
   }
   const svf = idx ? Float32Array.from(idx, (i) => world.svf[i]) : world.svf;
+  // wall reflection coefficients: K_wr = cw kw0 + cwa kwG (see the header)
+  const cw = new Float32Array(NN);
+  const cwa = new Float32Array(NN);
+  // glass share of the wall view per orientation (block 3): g0..g3 (S, N, E, W), gOpaque = 1 - sum
+  const gv = world.gview ? [0, 1, 2, 3].map(() => new Float64Array(NN)) : null;
+  const gOpaque = gv ? new Float64Array(NN) : null;
+  for (let i = 0; i < NN; i++) {
+    const c = idx ? idx[i] : i;
+    let g = 0;
+    if (gv) {
+      for (let o = 0; o < 4; o++) {
+        gv[o][i] = world.gview[c * 4 + o];
+        g += gv[o][i];
+      }
+      gOpaque[i] = 1 - g;
+    }
+    cw[i] = wallReflectCoef(world, c) * (1 - g);
+    cwa[i] = cw[i] * alpha[i];
+  }
+  const [g0, g1, g2, g3] = gv ?? [];
 
   // per-minute forcing
   const M = 1440;
   const ta = new Float32Array(M);
   const beamH = new Float32Array(M); // beam on horizontal
   const dif = new Float32Array(M);
+  const kw0 = new Float32Array(M); // K_wall without the ground-reflected part
+  const kwG = new Float32Array(M); // 0.5 G (times the cell albedo)
+  const lglass = gv ? new Float32Array(M * 4) : null; // L from glass walls per orientation
   let taSum = 0;
   for (let m = 0; m < M; m++) {
     const h = m / 60;
@@ -919,6 +1306,10 @@ function runModel(world, opts = {}) {
     const ir = irradiance(s.alt);
     beamH[m] = ir.beam * Math.max(0, Math.sin(s.alt * DEG));
     dif[m] = ir.diffuse;
+    const w = wallShortwave(ir, s);
+    kw0[m] = w.k0;
+    kwG[m] = w.kG;
+    if (lglass) for (let o = 0; o < 4; o++) lglass[m * 4 + o] = glassLongwave(glass, ta[m], ir, s, FACES[o]);
   }
   const taMean = taSum / M;
 
@@ -928,18 +1319,22 @@ function runModel(world, opts = {}) {
   let store = new Float32Array(NN * STORE);
   const stepsPerStore = M / STORE;
 
+  // per-cell inputs and state for the step functions (one minute, all cells)
+  const C = { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, dt, gOpaque, g0, g1, g2, g3 };
   let days = 0;
   let maxDelta = Infinity;
-  while (days < maxDays && (days < minDays || maxDelta >= tol)) {
+  /** One design day with steps of stepMin minutes; returns max |change of Td| over cells. */
+  const runDay = (stepMin, keep) => {
     sumDay.fill(0);
-    for (let m = 0; m < M; m += dt / 60) {
+    C.dt = stepMin * 60;
+    for (let m = 0; m < M; m += stepMin) {
       const h = m / 60;
       const taK = ta[m] + K0;
       const ta4 = taK * taK * taK * taK;
       // walls seen from the ground: air + 2 K plus a sun term by day that
       // peaks at midday (engine assumption; ignores wall orientation; the peak
       // value is computed in docs/sources.md)
-      const tw = taK + 2 + (6 * (beamH[m] + dif[m])) / 900;
+      const tw = wallTemp(taK, beamH[m] + dif[m]);
       const tw4 = tw * tw * tw * tw;
       const lsky = skyEmissivity(site.vapourHpa, taK) * SIGMA * ta4;
       const lwall = SIGMA * tw4;
@@ -947,37 +1342,35 @@ function runModel(world, opts = {}) {
       const st = (m % 10) / 10;
       const f0 = fields[sf];
       const f1 = fields[(sf + 1) % SLOTS];
+      const r0 = refl ? refl[sf] : null;
+      const r1 = refl ? refl[(sf + 1) % SLOTS] : null;
       const bh = beamH[m];
       const df = dif[m];
+      const k0 = kw0[m];
+      const kg = kwG[m];
       const waterT = taMean - 1 + Math.sin((2 * Math.PI * (h - 9)) / 24) + K0;
-      for (let i = 0; i < NN; i++) {
-        if (water[i]) {
-          Ts[i] = waterT;
-        } else {
-          const sl = f0[i] + (f1[i] - f0[i]) * st;
-          const v = svf[i];
-          const K = sl * bh + v * df;
-          const L = v * lsky + (1 - v) * lwall;
-          const t = Ts[i];
-          const t4 = t * t * t * t;
-          const qstar = (1 - alpha[i]) * K + eps[i] * L - eps[i] * SIGMA * t4;
-          const G = qstar - hc * (t - taK) - (qstar > 0 ? ef[i] * qstar : 0);
-          Ts[i] = t + dt * (cap[i] * G - restore[i] * (t - Td[i]));
-        }
-        sumDay[i] += Ts[i];
-      }
-      if (m % stepsPerStore === 0) {
+      if (gv) stepGlass(C, f0, f1, st, r0, r1, bh, df, k0, kg, lsky, lwall, lglass[m * 4], lglass[m * 4 + 1], lglass[m * 4 + 2], lglass[m * 4 + 3], taK, waterT);
+      else stepPlain(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT);
+      if (keep && m % stepsPerStore === 0) {
         const k = m / stepsPerStore;
         for (let i = 0; i < NN; i++) store[i * STORE + k] = Ts[i] - K0;
       }
     }
-    const steps = M / (dt / 60);
-    maxDelta = 0;
+    const steps = M / stepMin;
+    let md = 0;
     for (let i = 0; i < NN; i++) {
       const next = sumDay[i] / steps;
-      if (!water[i]) maxDelta = Math.max(maxDelta, Math.abs(next - Td[i]));
+      if (!water[i]) md = Math.max(md, Math.abs(next - Td[i]));
       Td[i] = next;
     }
+    return md;
+  };
+  // opts.warm (block 3): this many coarse days (10-min steps) first, to bring
+  // the deep temperature close before the 1-min days; the convergence test
+  // below is unchanged and counts only 1-min days (still at least minDays).
+  for (let k = 0; k < (opts.warm ?? 0); k++) runDay(10, false);
+  while (days < maxDays && (days < minDays || maxDelta >= tol)) {
+    maxDelta = runDay(dt / 60, true);
     days++;
   }
   if (idx) {
@@ -985,7 +1378,91 @@ function runModel(world, opts = {}) {
     idx.forEach((i, c) => full.set(store.subarray(c * STORE, (c + 1) * STORE), i * STORE));
     store = full;
   }
-  return new Thermal(world, store, slots, { rise, taMean, hc, site, ta, days, maxDelta, mats, cells: idx });
+  return new Thermal(world, store, slots, { rise, taMean, hc, site, ta, days, maxDelta, mats, cells: idx, refl: reflFull, glass, warm: opts.warm ?? 0 });
+}
+
+/** One model minute for every cell (blocks without glass). */
+function stepPlain(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT) {
+  const { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, dt } = C;
+  for (let i = 0; i < NN; i++) {
+    if (water[i]) {
+      Ts[i] = waterT;
+    } else {
+      const sl = f0[i] + (f1[i] - f0[i]) * st;
+      const v = svf[i];
+      const K = sl * bh + v * df + cw[i] * k0 + cwa[i] * kg;
+      const L = v * lsky + (1 - v) * lwall;
+      const t = Ts[i];
+      const t4 = t * t * t * t;
+      const qstar = (1 - alpha[i]) * K + eps[i] * L - eps[i] * SIGMA * t4;
+      const G = qstar - hc * (t - taK) - (qstar > 0 ? ef[i] * qstar : 0);
+      Ts[i] = t + dt * (cap[i] * G - restore[i] * (t - Td[i]));
+    }
+    sumDay[i] += Ts[i];
+  }
+}
+
+/** One model minute for every cell of a glass block: adds the specular term and glass walls. */
+function stepGlass(C, f0, f1, st, r0, r1, bh, df, k0, kg, lsky, lwall, L0, L1, L2, L3, taK, waterT) {
+  const { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, dt, gOpaque, g0, g1, g2, g3 } = C;
+  const a0 = r0 ? (1 - st) * bh : 0;
+  const a1 = r1 ? st * bh : 0;
+  for (let i = 0; i < NN; i++) {
+    if (water[i]) {
+      Ts[i] = waterT;
+    } else {
+      const sl = f0[i] + (f1[i] - f0[i]) * st;
+      const v = svf[i];
+      let K = sl * bh + v * df + cw[i] * k0 + cwa[i] * kg;
+      if (r0) K += r0[i] * a0;
+      if (r1) K += r1[i] * a1;
+      const lw = gOpaque[i] * lwall + g0[i] * L0 + g1[i] * L1 + g2[i] * L2 + g3[i] * L3;
+      const L = v * lsky + (1 - v) * lw;
+      const t = Ts[i];
+      const t4 = t * t * t * t;
+      const qstar = (1 - alpha[i]) * K + eps[i] * L - eps[i] * SIGMA * t4;
+      const G = qstar - hc * (t - taK) - (qstar > 0 ? ef[i] * qstar : 0);
+      Ts[i] = t + dt * (cap[i] * G - restore[i] * (t - Td[i]));
+    }
+    sumDay[i] += Ts[i];
+  }
+}
+
+/** Opaque wall temperature seen from the ground (engine assumption): Ta + 2 K + 6 K x (K/900). taK in K. */
+const wallTemp = (taK, kGlobal) => taK + 2 + (6 * kGlobal) / 900;
+
+/**
+ * Wall-reflection coefficient of cell i: a_w (1 - SVF_open), times the crown
+ * factor (1 - 0.75 cover) under trees as for the sky. Glass walls are taken
+ * out by the caller (they reflect specularly, see reflect.js).
+ */
+function wallReflectCoef(world, i) {
+  const open = world.svfOpen ? world.svfOpen[i] : world.svf[i];
+  const crown = world.bld[i] < 0 ? 1 - 0.75 * world.canopy[i] : 1;
+  return MODEL.wallAlbedo.value * Math.max(0, 1 - open) * crown;
+}
+
+/** Shortwave on a wall (azimuth mean): k0 = f_lit I cos(beta) / pi + 0.5 D; kG = 0.5 G (times ground albedo). */
+function wallShortwave(ir, sun) {
+  if (sun.alt <= 0) return { k0: 0, kG: 0 };
+  const sinb = Math.sin(sun.alt * DEG);
+  const cosb = Math.cos(sun.alt * DEG);
+  return { k0: (MODEL.wallLit.value * ir.beam * cosb) / Math.PI + 0.5 * ir.diffuse, kG: 0.5 * (ir.beam * sinb + ir.diffuse) };
+}
+
+/** Longwave from a glass wall of one orientation: eps_g sigma Tg^4 + (1 - eps_g) sigma Ta^4 (W m-2). */
+function glassLongwave(glass, ta, ir, sun, face) {
+  const g = GLASS[glass ?? 'lowe'];
+  let cosT = 0;
+  if (sun.alt > 0) {
+    const sv = sunVector(sun.alt, sun.az);
+    const nn = FACE_N[face];
+    cosT = sv[0] * nn[0] + sv[1] * nn[1];
+  }
+  const tg = glassTemp(ta, ir.beam, ir.diffuse, cosT, g.absorb.value) + K0;
+  const e = g.eps.value;
+  const taK = ta + K0;
+  return e * SIGMA * tg ** 4 + (1 - e) * SIGMA * taK ** 4;
 }
 
 class Thermal {
@@ -1036,11 +1513,74 @@ class Thermal {
     return lerp(this.slots.fields[k][i], this.slots.fields[(k + 1) % SLOTS][i], f);
   }
 
+  /** Specular reflected beam fraction r at cell i, hour h (block 3; 0 elsewhere). */
+  refl(i, h) {
+    const R = this.info.refl;
+    if (!R) return 0;
+    const x = ((((h % 24) + 24) % 24) * SLOTS) / 24;
+    const k = Math.floor(x) % SLOTS;
+    const f = x - Math.floor(x);
+    const a = R[k] ? R[k][i] : 0;
+    const b = R[(k + 1) % SLOTS] ? R[(k + 1) % SLOTS][i] : 0;
+    return a + (b - a) * f;
+  }
+
+  /** Glass share of the walls cell i sees (all orientations). */
+  glassShare(i) {
+    const g = this.world.gview;
+    return g ? g[i * 4] + g[i * 4 + 1] + g[i * 4 + 2] + g[i * 4 + 3] : 0;
+  }
+
+  /**
+   * Shortwave parts on cell i at hour h, W m-2: direct (sunlit beam), sky
+   * (diffuse), walls (diffuse wall reflection K_wr), glass (specular
+   * reflection), and their sum K, as in runModel.
+   */
+  shortwave(i, h) {
+    const s = this.sun(h);
+    const ir = irradiance(s.alt);
+    const bh = ir.beam * Math.max(0, Math.sin(s.alt * DEG));
+    const w = wallShortwave(ir, s);
+    const mat = (this.info.mats ?? MATERIALS)[cellMat(this.world, i)];
+    const c = wallReflectCoef(this.world, i) * (1 - this.glassShare(i));
+    const direct = this.sunlit(i, h) * bh;
+    const sky = this.world.svf[i] * ir.diffuse;
+    const walls = c * (w.k0 + mat.alpha.value * w.kG);
+    const r = this.refl(i, h);
+    const glass = r * bh;
+    return { direct, sky, walls, glass, r, K: direct + sky + walls + glass, beam: ir.beam, diffuse: ir.diffuse, sun: s };
+  }
+
+  /** Longwave from the walls cell i sees (W m-2), as in runModel. */
+  lwall(i, h) {
+    const taK = this.air(h) + K0;
+    const s = this.sun(h);
+    const ir = irradiance(s.alt);
+    const opaque = SIGMA * wallTemp(taK, ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + ir.diffuse) ** 4;
+    const g = this.world.gview;
+    if (!g) return opaque;
+    let out = (1 - this.glassShare(i)) * opaque;
+    for (let o = 0; o < 4; o++) if (g[i * 4 + o] > 0) out += g[i * 4 + o] * glassLongwave(this.info.glass, this.air(h), ir, s, FACES[o]);
+    return out;
+  }
+
+  /** Glass outer-surface temperature (deg C) of a façade orientation at hour h. */
+  glassTemp(face, h) {
+    const s = this.sun(h);
+    const ir = irradiance(s.alt);
+    let cosT = 0;
+    if (s.alt > 0) {
+      const sv = sunVector(s.alt, s.az);
+      cosT = sv[0] * FACE_N[face][0] + sv[1] * FACE_N[face][1];
+    }
+    return glassTemp(this.air(h), ir.beam, ir.diffuse, cosT, GLASS[this.info.glass ?? 'lowe'].absorb.value);
+  }
+
   /**
    * Water evaporated from cell i over the design day, mm (= kg m-2):
    * sum of EF x max(Q*, 0) x dt / 2.45e6 J kg-1, evaluated on the stored
    * 15-min surface temperatures (a 15-min sum, not the model's 1-min one)
-   * with the model's radiation terms, including its wall term (driven by the
+   * with the model's radiation terms, including its wall terms (driven by the
    * unshaded sun, as in runModel).
    */
   evaporation(i) {
@@ -1051,12 +1591,9 @@ class Thermal {
     let sum = 0;
     for (let k = 0; k < STORE; k++) {
       const h = (k * 24) / STORE;
-      const s = this.sun(h);
-      const ir = irradiance(s.alt);
-      const K = this.sunlit(i, h) * ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + v * ir.diffuse;
+      const K = this.shortwave(i, h).K;
       const taK = this.air(h) + K0;
-      const tw = taK + 2 + (6 * (ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + ir.diffuse)) / 900;
-      const L = v * skyEmissivity(site.vapourHpa, taK) * SIGMA * taK ** 4 + (1 - v) * SIGMA * tw ** 4;
+      const L = v * skyEmissivity(site.vapourHpa, taK) * SIGMA * taK ** 4 + (1 - v) * this.lwall(i, h);
       const t = this.ts(i, h) + K0;
       const q = (1 - m.alpha.value) * K + m.eps.value * L - m.eps.value * SIGMA * t ** 4;
       if (q > 0) sum += m.ef.value * q * (86400 / STORE);
@@ -1075,29 +1612,32 @@ class Thermal {
   /**
    * Mean radiant temperature (deg C) for a standing person on a ground cell,
    * SOLWEIG-style six-direction sum (Lindberg et al. 2008), simplified:
-   * walls are treated as air + 2 K plus the same sun term as above, and reflect no shortwave.
+   * opaque walls are treated as air + 2 K plus the same sun term as above and
+   * reflect sunlight diffusely (K_wr: onto the ground, and half of it onto the
+   * person's sides); glass walls reflect the beam specularly (an extra beam
+   * r I from the mirrored direction, same altitude, so the same f_p) and emit
+   * at the glass temperature.
    */
   tmrt(i, h) {
     const site = this.info.site;
-    const s = this.sun(h);
-    const ir = irradiance(s.alt);
+    const sw = this.shortwave(i, h);
+    const s = sw.sun;
     const sl = this.sunlit(i, h);
     const v = this.world.svf[i];
     const taK = this.air(h) + K0;
     const mat = (this.info.mats ?? MATERIALS)[cellMat(this.world, i)];
     const tg = this.ts(i, h) + K0;
-    const Kh = sl * ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + v * ir.diffuse;
+    const Kh = sw.K; // everything that reaches the ground
     const b = Math.max(0, s.alt);
     const fp = 0.308 * Math.cos(b * (1 - (b * b) / 48402) * DEG);
     const ak = 0.7;
     const ap = 0.97;
-    const Ksky = v * ir.diffuse; // onto the upward-facing side (direct beam via fp)
+    const Ksky = v * sw.diffuse; // onto the upward-facing side (direct beam via fp)
     const Kground = mat.alpha.value * Kh; // reflected up from the ground
-    const Klat = 0.5 * Ksky + 0.5 * Kground;
-    const S = ak * (0.06 * Ksky + 0.06 * Kground + 0.88 * Klat + fp * ir.beam * sl);
+    const Klat = 0.5 * Ksky + 0.5 * Kground + 0.5 * sw.walls;
+    const S = ak * (0.06 * Ksky + 0.06 * Kground + 0.88 * Klat + fp * sw.beam * (sl + sw.r));
     const lsky = skyEmissivity(site.vapourHpa, taK) * SIGMA * taK ** 4;
-    const tw = taK + 2 + (6 * (ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + ir.diffuse)) / 900;
-    const Ldown = v * lsky + (1 - v) * SIGMA * tw ** 4;
+    const Ldown = v * lsky + (1 - v) * this.lwall(i, h);
     const Lg = mat.eps.value * SIGMA * tg ** 4 + (1 - mat.eps.value) * Ldown; // emitted + reflected
     const Llat = 0.5 * Ldown + 0.5 * Lg;
     const L = ap * (0.06 * Ldown + 0.06 * Lg + 0.88 * Llat);
@@ -1147,7 +1687,7 @@ function paletteLut() {
 }
 
 
-return { SIGMA, SLOTS, STORE, LATENT, daylight, airTemp, irradiance, skyEmissivity, svfAt, shadowPolys, buildingMask, sunlitField, shadeClassField, sunSlots, cellMat, runModel, Thermal, PALETTE_STOPS, heatRgb, paletteLut };
+return { SIGMA, SLOTS, STORE, LATENT, daylight, airTemp, irradiance, skyEmissivity, svfAt, shadowPolys, buildingMask, sunlitField, shadeClassField, sunSlots, cellMat, runModel, wallTemp, wallReflectCoef, wallShortwave, glassLongwave, Thermal, PALETTE_STOPS, heatRgb, paletteLut };
 })();
 
 __m['world'] = (() => {
@@ -1173,6 +1713,16 @@ function shopSegments(B, face) {
 function awningsOf(B) {
   if (!B.shops) return [];
   return shopSegments(B, 'S').map(([a, b]) => ({ x0: B.x0 + a, y0: B.y1, x1: B.x0 + b, y1: B.y1 + 1.6, z0: 2.6, z1: 3.2, b: B.index }));
+}
+
+const FACE_INDEX = { S: 0, N: 1, E: 2, W: 3 };
+
+/** Face of box B that a ray from (x, y) along (dx, dy) enters ('S', 'N', 'E' or 'W'). */
+function entryFace(B, x, y, dx, dy) {
+  const tx = Math.abs(dx) < 1e-12 ? -Infinity : ((dx > 0 ? B.x0 : B.x1) - x) / dx;
+  const ty = Math.abs(dy) < 1e-12 ? -Infinity : ((dy > 0 ? B.y0 : B.y1) - y) / dy;
+  if (tx >= ty) return dx > 0 ? 'W' : 'E';
+  return dy > 0 ? 'N' : 'S';
 }
 
 function buildWorld(scene, opts = {}) {
@@ -1237,14 +1787,37 @@ function buildWorld(scene, opts = {}) {
   // canopies block most of the sky directly beneath them.
   // opts.svfFrom: a world with the same buildings (Before / After states)
   // whose open-sky horizon scan is reused.
+  // Glass scenes (block 3) also record, per cell, which share of the walls it
+  // sees is glass of each orientation (gview, 4 per cell: S, N, E, W): in each
+  // scan direction the building that sets the horizon takes that direction's
+  // wall view sin^2(horizon elevation), through the face the ray enters.
   const svf = new Float32Array(N);
   const svfOpen = opts.svfFrom ? opts.svfFrom.svfOpen : new Float32Array(N);
+  const hasGlass = buildings.some((b) => b.glass);
+  const gview = hasGlass ? (opts.svfFrom ? opts.svfFrom.gview : new Float32Array(N * 4)) : null;
+  const nDirs = scene.svfDirs ?? 16;
   if (opts.svf !== false) {
     for (let k = 0; k < N; k++) {
       const x = ((k % n) + 0.5) * cell;
       const y = (Math.floor(k / n) + 0.5) * cell;
       const z0 = height[k];
-      let v = opts.svfFrom ? svfOpen[k] : svfAt(heightAt, x, y, z0 + 0.01, 16, 160, cell / 2);
+      let onDir = null;
+      let v0 = 0;
+      if (hasGlass && !opts.svfFrom) {
+        const g = [0, 0, 0, 0];
+        onDir = (dx, dy, t, d) => {
+          if (!d) return;
+          const b = bld[cellIndex(x + dx * d, y + dy * d)];
+          if (b < 0 || !buildings[b].glass) return;
+          const face = entryFace(buildings[b], x, y, dx, dy);
+          const faces = buildings[b].glass === true ? ['S', 'N', 'E', 'W'] : buildings[b].glass;
+          if (faces.includes(face)) g[FACE_INDEX[face]] += (t * t) / (1 + t * t) / nDirs;
+        };
+        v0 = svfAt(heightAt, x, y, z0 + 0.01, nDirs, 160, cell / 2, onDir);
+        const wall = 1 - v0;
+        for (let o = 0; o < 4; o++) gview[k * 4 + o] = wall > 1e-6 ? g[o] / wall : 0;
+      }
+      let v = opts.svfFrom ? svfOpen[k] : onDir ? v0 : svfAt(heightAt, x, y, z0 + 0.01, nDirs, 160, cell / 2);
       svfOpen[k] = v;
       if (bld[k] < 0) v *= 1 - 0.75 * canopy[k];
       svf[k] = v;
@@ -1279,6 +1852,7 @@ function buildWorld(scene, opts = {}) {
     canopy,
     svf,
     svfOpen,
+    gview,
     buildings,
     trees,
     awnings,
@@ -1326,7 +1900,7 @@ function depthOrder(boxes) {
   return out;
 }
 
-return { GROUND_MATS, shopSegments, awningsOf, buildWorld, depthOrder };
+return { GROUND_MATS, shopSegments, awningsOf, entryFace, buildWorld, depthOrder };
 })();
 
 __m['pen'] = (() => {
@@ -1729,6 +2303,7 @@ function drawDecor(pen, world, D) {
     else if (m === 'coolPave') speckle(pen, x0, y0, x1, y1, Math.round(((x1 - x0) * (y1 - y0)) / 16), 43, hexRgb('#e9e4d8'));
     else if (m === 'raingarden') plants(pen, x0, y0, x1, y1, g.id.length * 5 + 1);
   }
+  for (const [x0, y0, x1, y1] of D.paving ?? []) stonePaving(pen, x0, y0, x1, y1);
   for (const c of D.cracks ?? []) cracks(pen, ...c);
   for (const p of D.patches ?? []) patches(pen, ...p);
   for (const d of D.dashes ?? []) centreDashes(pen, ...d);
@@ -1772,6 +2347,16 @@ function bboxOf(p) {
     y1 = Math.max(y1, p[i + 1]);
   }
   return [x0, y0, x1, y1];
+}
+
+/** Large stone flags: a 3 m grid of joints, offset every other row. */
+function stonePaving(pen, x0, y0, x1, y1) {
+  pen.tag = 'gm';
+  const ink = hexRgb('#9d8f76');
+  for (let y = y0 + 3; y < y1; y += 3) pen.line([[x0, y], [x1, y]], { lw: 0.35, stroke: ink, a: 0.35, over: 0 });
+  for (let y = y0, row = 0; y < y1; y += 3, row++) {
+    for (let x = x0 + (row % 2 ? 1.5 : 3); x < x1; x += 3) pen.line([[x, y], [x, Math.min(y1, y + 3)]], { lw: 0.35, stroke: ink, a: 0.3, over: 0 });
+  }
 }
 
 /** Permeable pavers: a running-bond grid of joints (gravel-filled, drawn light). */
@@ -1854,19 +2439,52 @@ function windowsOnFace(pen, B, face, k0) {
   }
 }
 
+/** True if face ('S', 'N', 'E', 'W') of building B is a glass curtain wall. */
+const isGlassFace = (B, face) => !!B.glass && (B.glass === true || B.glass.includes(face));
+
+/**
+ * Glass curtain wall: mullions every 3 m, a floor band every 4 m, and a few
+ * pale sky streaks; the pane colour depends on the glass type and is resolved
+ * when the face is painted (render.js fillOf, fill kind 'glass').
+ */
+function curtainWall(pen, B, face, k0) {
+  const along = face === 'S' ? B.x1 - B.x0 : B.y1 - B.y0;
+  const pt = (s, z) => (face === 'S' ? [B.x0 + s, B.y1, z] : [B.x1, B.y1 - s, z]);
+  pen.tag = 'mull';
+  const nm = Math.max(1, Math.round(along / 3));
+  for (let i = 1; i < nm; i++) pen.line([pt((i * along) / nm, 0), pt((i * along) / nm, B.h - 0.6)], { lw: i % 4 === 0 ? 0.5 : 0.3, a: i % 4 === 0 ? 0.55 : 0.32, over: 0.05, t: 'mull' });
+  for (let z = 4; z < B.h - 1; z += 4) pen.line([pt(0, z), pt(along, z)], { lw: 0.35, a: 0.4, over: 0.05, t: 'mull' });
+  // sky streaks: short diagonal highlights on the panes
+  for (let k = 0; k < Math.round(along / 9); k++) {
+    const s = along * hash3(k0, k, 21);
+    const z = (B.h - 8) * hash3(k0, k, 22) + 3;
+    const l = 2 + 4 * hash3(k0, k, 23);
+    if (s + l > along) continue;
+    pen.line([pt(s, z), pt(s + l, z + l * 0.8)], { lw: 0.8, stroke: hexRgb('#f4f7f6'), a: 0.45, over: 0, t: 'glint' });
+  }
+  // lobby doors at street level on the south face
+  if (face === 'S') {
+    const s = along * (0.35 + 0.3 * hash3(k0, 5));
+    pen.shape([pt(s, 0), pt(s + 3, 0), pt(s + 3, 3.2), pt(s, 3.2)], scaleRgb(hexRgb('#4e5a61'), 1), { lw: 0.6, t: 'win' });
+  }
+}
+
 function building(pen, B, world = null) {
   pen.b = B.index;
   const { x0, y0, x1, y1, h } = B;
   const wall = jitter(hexRgb(B.wall), B.index * 3, 0.05);
   const roof = jitter(ROOF_RGB[world ? colourId(world, B.roof) : B.roof], B.index * 5, 0.06);
+  const gS = isGlassFace(B, 'S');
+  const gE = isGlassFace(B, 'E');
   pen.tag = 'w';
-  pen.shape([[x0, y1, 0], [x1, y1, 0], [x1, y1, h], [x0, y1, h]], { k: 'wall', c: wall, n: [0, 1] }, { lw: 1.15, t: 'w' });
-  pen.shape([[x1, y1, 0], [x1, y0, 0], [x1, y0, h], [x1, y1, h]], { k: 'wall', c: wall, n: [1, 0] }, { lw: 1.15, t: 'w' });
+  pen.shape([[x0, y1, 0], [x1, y1, 0], [x1, y1, h], [x0, y1, h]], gS ? { k: 'glass', c: wall, n: [0, 1] } : { k: 'wall', c: wall, n: [0, 1] }, { lw: 1.15, t: 'w' });
+  pen.shape([[x1, y1, 0], [x1, y0, 0], [x1, y0, h], [x1, y1, h]], gE ? { k: 'glass', c: wall, n: [1, 0] } : { k: 'wall', c: wall, n: [1, 0] }, { lw: 1.15, t: 'w' });
   // shade hatching, drawn only when the face is turned from the sun
   pen.tag = 'hatch';
   for (const face of ['S', 'E']) {
     const len = face === 'S' ? x1 - x0 : y1 - y0;
-    for (let s = 1.2; s < len + h; s += 1.6) {
+    const step = h > 45 ? 3.2 : 1.6; // tall towers: sparser hatching
+    for (let s = 1.2; s < len + h; s += step) {
       const a = Math.max(0, s - h);
       const b = Math.min(len, s);
       if (b - a < 0.5) continue;
@@ -1874,8 +2492,10 @@ function building(pen, B, world = null) {
       pen.line([P(a, s - a), P(b, s - b)], { lw: 0.4, a: 0.28, over: 0.1, t: face === 'S' ? 'hatchS' : 'hatchE' });
     }
   }
-  windowsOnFace(pen, B, 'S', B.index * 2);
-  windowsOnFace(pen, B, 'E', B.index * 2 + 1);
+  if (gS) curtainWall(pen, B, 'S', B.index * 2);
+  else windowsOnFace(pen, B, 'S', B.index * 2);
+  if (gE) curtainWall(pen, B, 'E', B.index * 2 + 1);
+  else windowsOnFace(pen, B, 'E', B.index * 2 + 1);
   // cornice line
   pen.tag = 'w';
   pen.line([[x0, y1, h - 0.6], [x1, y1, h - 0.6], [x1, y0, h - 0.6]], { lw: 0.5, a: 0.6, t: 'w' });
@@ -2050,7 +2670,7 @@ function drawWorld(world, seed = 1) {
 }
 
 
-return { GROUND_RGB, ROOF_RGB, drawGround, drawDecor, box, building, tree, car, bench, lamp, drawWorld };
+return { GROUND_RGB, ROOF_RGB, drawGround, drawDecor, box, isGlassFace, building, tree, car, bench, lamp, drawWorld };
 })();
 
 __m['life'] = (() => {
@@ -2079,7 +2699,11 @@ function shadeWeights(air) {
 
 const SHIRTS = ['#b5533c', '#3f6e6a', '#c9973f', '#5b6b8c', '#e8e1d0', '#8e4b5e', '#2f3e52', '#d07a5a', '#6f8c52'].map(hexRgb);
 
-/** Shade class (0 sun, 1 building, 2 tree) at a world point. */
+/**
+ * Shade class at a world point: 0 sun, 1 building shade, 2 tree shade; glass
+ * blocks add 3 (reflection spot in shade) and 4 (reflection spot in sun),
+ * whose route weights are Tmrt-based (cbd.js spotWeights, shade.spotW).
+ */
 function shadeAt(shade, x, y) {
   const i = Math.floor(x / shade.cell);
   const j = Math.floor(y / shade.cell);
@@ -2170,7 +2794,8 @@ class Life {
     if (this.plans.has(hq)) return this.plans.get(hq);
     const shade = this.shadeFor(hq);
     const air = this.airFor(hq);
-    const weight = shade.night ? [1, 1, 1] : shadeWeights(air);
+    let weight = shade.night ? [1, 1, 1] : shadeWeights(air);
+    if (shade.spotW && !shade.night) weight = [...weight, ...shade.spotW];
     const costs = this.scene.routes.map((r) => r.variants.map((v) => routeCost(v, shade, 1, weight)));
     const choice = this.walkers.map((w) => {
       const c = costs[w.route];
@@ -2255,6 +2880,9 @@ class Life {
   }
 }
 
+/** Classes that count as shade (a reflection spot in shade is still out of the sun). */
+const isShade = (c) => c === 1 || c === 2 || c === 3;
+
 /**
  * People per m2 in shade vs in sun, over walkable ground (pavements, paths,
  * lawn) of the fine grid.
@@ -2267,14 +2895,14 @@ function shadeDensity(world, agents, shade) {
     for (let i = 0; i < f.n; i++) {
       if (!f.walk[j * f.n + i]) continue;
       const c = shadeAt(shade, (i + 0.5) * f.cell, (j + 0.5) * f.cell);
-      if (c) aShade += f.cell * f.cell;
+      if (isShade(c)) aShade += f.cell * f.cell;
       else aSun += f.cell * f.cell;
     }
   }
   let nShade = 0;
   let nSun = 0;
   for (const a of agents) {
-    if (shadeAt(shade, a.x, a.y)) nShade++;
+    if (isShade(shadeAt(shade, a.x, a.y))) nShade++;
     else nSun++;
   }
   const dShade = nShade / Math.max(1, aShade);
@@ -2326,7 +2954,25 @@ function sweatState(k, t, tmrt, sunlit) {
   return { s, drops, fan };
 }
 
-return { W_SUN, W_BUILDING, W_TREE, shadeWeights, shadeAt, polyLength, routeCost, pointAt, presence, Life, shadeDensity, SWEAT_TMRT, sweatStrength, sweatState };
+/**
+ * People per m2 by shade class over walkable ground (glass block): plain
+ * shade (1, 2), reflection spot in shade (3), sun (0), spot in sun (4).
+ */
+function classDensity(world, agents, shade) {
+  const f = world.fine;
+  const area = [0, 0, 0, 0, 0];
+  const count = [0, 0, 0, 0, 0];
+  for (let j = 0; j < f.n; j++) {
+    for (let i = 0; i < f.n; i++) {
+      if (f.walk[j * f.n + i]) area[shadeAt(shade, (i + 0.5) * f.cell, (j + 0.5) * f.cell)] += f.cell * f.cell;
+    }
+  }
+  for (const a of agents) count[shadeAt(shade, a.x, a.y)]++;
+  const d = (ks) => ks.reduce((s, k) => s + count[k], 0) / Math.max(1, ks.reduce((s, k) => s + area[k], 0));
+  return { area, count, plainShade: d([1, 2]), spotShade: d([3]), spots: d([3, 4]), sun: d([0]), spotSun: d([4]) };
+}
+
+return { W_SUN, W_BUILDING, W_TREE, shadeWeights, shadeAt, polyLength, routeCost, pointAt, presence, Life, shadeDensity, SWEAT_TMRT, sweatStrength, sweatState, classDensity };
 })();
 
 __m['render'] = (() => {
@@ -2351,6 +2997,10 @@ const THERMAL_WALL = hexRgb('#e7dfcd');
 const NIGHT_RGB = hexRgb('#27355a');
 const LIT = hexRgb('#f4cf7a');
 const SWEAT_CSS = 'rgba(143,182,207,0.95)';
+// glass pane colours by type (day view), and the reflection-spot glint
+const GLASS_RGB = { clear: hexRgb('#7d9ea6'), lowe: hexRgb('#8ea4b8'), mirror: hexRgb('#b9c3c6') };
+const GLINT = [255, 246, 214];
+const AC_INK = hexRgb('#8a2f22');
 
 function makeCanvas(w, h) {
   if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(w, h);
@@ -2431,6 +3081,20 @@ class Renderer {
     this.shown = {};
     this.pins = {}; // mode -> Set of `z|hour|dpr` the scrub preview needs
     this.clip = null; // [x0, x1] device px: draw only this vertical band (split view)
+    this.glass = 'lowe'; // glass type (block 3): pane colours
+    this.spotFor = null; // (hq) -> reflection spot field on the 2 m grid, or null (block 3)
+    const hs = Math.max(0, ...world.buildings.map((b) => b.h + (b.chimney ? b.chimney[2] - b.h : 0)));
+    this.topMargin = Math.max(40, hs + 8); // m above ground that tiles must cover
+  }
+
+  /** New glass type (block 3): pane colours, spots and heat change, so drop every cached bake. */
+  setGlass(g, thermal) {
+    this.glass = g;
+    if (thermal) this.thermal = thermal;
+    this.tiles.clear();
+    this.hourCache.clear();
+    this.tmrtCache = null;
+    this.scaffold = null;
   }
 
   /** New model results (days since rain changed): drop heat-dependent caches. */
@@ -2492,6 +3156,8 @@ class Renderer {
       lightE: light([1, 0]),
       canopyT: this.thermal.canopyTemp(hq),
       heatImg: null,
+      spot: up && this.spotFor ? this.spotFor(hq) : null,
+      spotImg: null,
     };
     this.hourCache.set(hq, ctxh);
     if (this.hourCache.size > 40) this.hourCache.delete(this.hourCache.keys().next().value);
@@ -2595,6 +3261,71 @@ class Renderer {
     return hc.heatImg;
   }
 
+  /** Reflection spots as an alpha image (2 m pixels, world-aligned): alpha grows with r up to r = 0.4. */
+  spotImage(hc) {
+    if (hc.spotImg || !hc.spot) return hc.spotImg;
+    const { n, r } = hc.spot;
+    const img = makeCanvas(n, n);
+    const g = img.getContext('2d');
+    const d = g.createImageData(n, n);
+    for (let i = 0; i < n * n; i++) {
+      const a = clamp(r[i] / 0.4, 0, 1);
+      d.data[i * 4] = GLINT[0];
+      d.data[i * 4 + 1] = GLINT[1];
+      d.data[i * 4 + 2] = GLINT[2];
+      d.data[i * 4 + 3] = Math.round(255 * (a > 0 ? 0.25 + 0.75 * a : 0));
+    }
+    g.putImageData(d, 0, 0);
+    hc.spotImg = { img, R: hc.spot.cell };
+    return hc.spotImg;
+  }
+
+  /** Day view: pale glint wash over the reflection spots, with a fine ink hatch. */
+  drawSpots(g, hc, Z, ox, oy) {
+    const si = this.spotImage(hc);
+    if (!si) return;
+    if (!this.spotScratch) {
+      this.spotScratch = makeCanvas(TILE, TILE);
+      this.hatchScratch = makeCanvas(TILE, TILE);
+      const p = makeCanvas(8, 8);
+      const pc = p.getContext('2d');
+      pc.strokeStyle = rgbCss(INK);
+      pc.lineWidth = 0.8;
+      pc.beginPath();
+      pc.moveTo(-1, 9);
+      pc.lineTo(9, -1);
+      pc.stroke();
+      this.hatchTile = p;
+    }
+    const s = this.spotScratch.getContext('2d');
+    s.setTransform(1, 0, 0, 1, 0, 0);
+    s.clearRect(0, 0, TILE, TILE);
+    const R = si.R;
+    s.setTransform(Z * ISO_C * R, Z * ISO_S * R, -Z * ISO_C * R, Z * ISO_S * R, ox, oy);
+    s.imageSmoothingEnabled = true;
+    s.imageSmoothingQuality = 'high';
+    s.drawImage(si.img, 0, 0);
+    const k = clamp(hc.sun.alt / 10, 0, 1);
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.globalCompositeOperation = 'screen';
+    g.globalAlpha = 0.75 * k;
+    g.drawImage(this.spotScratch, 0, 0);
+    g.globalCompositeOperation = 'source-over';
+    // ink hatch, clipped to the spot by its alpha
+    const hz = this.hatchScratch.getContext('2d');
+    hz.setTransform(1, 0, 0, 1, 0, 0);
+    hz.globalCompositeOperation = 'source-over';
+    hz.clearRect(0, 0, TILE, TILE);
+    hz.fillStyle = hz.createPattern(this.hatchTile, 'repeat');
+    hz.fillRect(0, 0, TILE, TILE);
+    hz.globalCompositeOperation = 'destination-in';
+    hz.drawImage(this.spotScratch, 0, 0);
+    hz.globalCompositeOperation = 'source-over';
+    g.globalAlpha = 0.3 * k;
+    g.drawImage(this.hatchScratch, 0, 0);
+    g.globalAlpha = 1;
+  }
+
   // ---- display-list replay -------------------------------------------------------
 
   /** Resolve an item's fill colour for a mode; returns rgb array or null. */
@@ -2613,6 +3344,7 @@ class Renderer {
     }
     if (Array.isArray(f)) return f;
     if (f.k === 'wall') return scaleRgb(f.c, hc.light(f.n));
+    if (f.k === 'glass') return scaleRgb(mixRgb(GLASS_RGB[this.glass] ?? GLASS_RGB.lowe, f.c, 0.15), hc.light(f.n) * 1.02);
     if (f.k === 'win') return f.c;
     return null;
   }
@@ -2627,6 +3359,7 @@ class Renderer {
       const b = it.bb;
       if (bb && (b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3])) continue;
       const t = it.t;
+      if (t === 'glint' && mode === 'thermal') continue;
       if (t === 'hatchS' || t === 'hatchE') {
         if (mode !== 'day') continue;
         const L = t === 'hatchS' ? hc.lightS : hc.lightE;
@@ -2752,6 +3485,7 @@ class Renderer {
     } else {
       this.replay(g, ground, 'day', hc, Z, ox, oy, bb, lw);
       if (hc.shadows.length) this.drawShadows(g, hc, Z, ox, oy);
+      if (hc.spot) this.drawSpots(g, hc, Z, ox, oy);
       this.replay(g, objects, 'day', hc, Z, ox, oy, bb, lw);
       if (hc.night > 0) {
         g.setTransform(1, 0, 0, 1, 0, 0);
@@ -2819,7 +3553,7 @@ class Renderer {
     // world extent on the drawing plane (with margin for tall buildings)
     const minX = -S * ISO_C * Z;
     const maxX = S * ISO_C * Z;
-    const minY = -40 * ISO_Z * Z;
+    const minY = -this.topMargin * ISO_Z * Z;
     const maxY = (S + 8) * Z;
     const tx0 = Math.floor(Math.max(minX, -ox) / TILE);
     const tx1 = Math.floor(Math.min(maxX, W - ox) / TILE);
@@ -3030,6 +3764,7 @@ class Renderer {
     this.stats.sweatGlyphPx = 0;
     this.noteHits = [];
     if (lifeA > 0) {
+      if (look.ac) this.drawAc(ctx, f, cam, W, H, lifeA);
       if (look.people !== false) this.drawPeople(ctx, f, cam, hq, W, H, lifeA, look.thermalMix ?? 0);
       if (look.notes) this.drawNotes(ctx, cam, W, H, look.notes, lifeA);
     }
@@ -3114,11 +3849,78 @@ class Renderer {
     return { tmrt: c[i], sunlit: this.thermal.sunlit(i, hq) };
   }
 
-  /** Sweat cue: hot cell (Tmrt) and the person in sun on the fine shade raster. */
+  /**
+   * Sweat cue: hot cell (Tmrt) and the person in sun on the fine shade raster.
+   * In a glass block a reflection spot counts as lit, so the cue follows Tmrt
+   * there too (class 3: spot in shade, class 4: spot in sun).
+   */
   sweatAt(a, t, hq) {
     const h = this.heatAt(a.x, a.y, hq);
-    const inSun = shadeAt(this.life.plan(hq).shade, a.x, a.y) === 0 && !this.life.plan(hq).shade.night;
-    return sweatState(a.k, t, h.tmrt, inSun ? h.sunlit : 0);
+    const sh = this.life.plan(hq).shade;
+    const c = sh.night ? -1 : shadeAt(sh, a.x, a.y);
+    const lit = c === 0 || c === 4 ? h.sunlit : c === 3 ? 1 : 0;
+    return sweatState(a.k, t, h.tmrt, lit);
+  }
+
+  /**
+   * AC overlay (block 3, information only): rooftop plant on each tall
+   * building with a rising heat plume, and one label saying the model does not
+   * feel this heat. Pure function of (frame, camera).
+   */
+  drawAc(ctx, f, cam, W, H, alpha) {
+    const [ox, oy, Z] = this.origin(cam, W, H);
+    const d = this.dpr;
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.lineCap = 'round';
+    let label = null;
+    for (const B of this.world.buildings) {
+      if (B.h < 25) continue;
+      const units = 1 + Math.floor(((B.x1 - B.x0) * (B.y1 - B.y0)) / 2500);
+      for (let u = 0; u < Math.min(3, units); u++) {
+        const x = B.x0 + (B.x1 - B.x0) * (0.25 + 0.5 * hash3(B.index, u, 61));
+        const y = B.y0 + (B.y1 - B.y0) * (0.25 + 0.5 * hash3(B.index, u, 62));
+        const p = iso(x, y, B.h + 1.5);
+        const X = ox + p[0] * Z;
+        const Y = oy + p[1] * Z;
+        if (X < -40 || X > W + 40 || Y < -80 || Y > H + 40) continue;
+        if (this.clip && (X < this.clip[0] || X > this.clip[1])) continue;
+        ctx.globalAlpha = alpha * 0.8;
+        ctx.strokeStyle = rgbCss(AC_INK);
+        ctx.lineWidth = 1.1 * d;
+        for (let k = 0; k < 3; k++) {
+          ctx.beginPath();
+          const x0 = X + (k - 1) * 4 * d;
+          for (let i = 0; i <= 10; i++) {
+            const v = i / 10;
+            const yy = Y - v * 26 * d;
+            const xx = x0 + Math.sin(v * 7 + f * 0.08 + k * 1.7 + u) * 2.2 * d * (0.4 + v);
+            if (i) ctx.lineTo(xx, yy);
+            else ctx.moveTo(xx, yy);
+          }
+          ctx.stroke();
+        }
+        if (!label || Y < label[1]) label = [X, Y - 30 * d];
+      }
+    }
+    if (label) {
+      ctx.globalAlpha = alpha;
+      ctx.font = `${Math.round(14 * d)}px "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive`;
+      ctx.textBaseline = 'bottom';
+      const text = 'AC rejected heat — not felt in this model';
+      const w = ctx.measureText(text).width;
+      const bx = clamp(label[0] - w / 2, 8 * d, W - w - 8 * d);
+      const by = Math.max(24 * d, label[1]);
+      ctx.fillStyle = 'rgba(248,243,231,0.94)';
+      ctx.fillRect(bx - 5 * d, by - 19 * d, w + 10 * d, 23 * d);
+      ctx.strokeStyle = 'rgba(138,47,34,0.7)';
+      ctx.lineWidth = 0.9 * d;
+      ctx.strokeRect(bx - 5 * d, by - 19 * d, w + 10 * d, 23 * d);
+      ctx.fillStyle = rgbCss(AC_INK);
+      ctx.fillText(text, bx, by);
+    }
+    ctx.restore();
+    this.stats.ac = !!label;
   }
 
   /**
@@ -3322,7 +4124,7 @@ class Renderer {
 }
 
 
-return { TILE, HOUR_STEP, INTRO, PREVIEW_BUDGET, quantHour, Renderer };
+return { TILE, HOUR_STEP, INTRO, PREVIEW_BUDGET, quantHour, GLASS_RGB, Renderer };
 })();
 
 __m['glossary'] = (() => {
@@ -3375,7 +4177,7 @@ const GLOSSARY = {
   svf: {
     term: 'Sky view factor (SVF)',
     text: 'How much of the sky a spot can see, from 1 (open field) to 0 (fully enclosed).',
-    model: (S) => `Open lawn ${S.svfLawn}; paved ground near buildings ${S.svfPave}.`,
+    model: (S) => S.svfLine,
     why: 'A low sky view traps heat at night, because surfaces cannot radiate it away to the cold sky.',
   },
   surfaceTemp: {
@@ -3400,7 +4202,7 @@ const GLOSSARY = {
   nightLag: {
     term: 'Thermal inertia / night lag',
     text: 'Heavy materials store heat during the day and release it after sunset, so they stay warm into the night.',
-    model: (S) => `At 11 pm asphalt is ${S.lagAsphalt} °C and concrete ${S.lagConcrete} °C warmer than the open lawn.`,
+    model: (S) => S.lagLine,
     why: 'Night lag keeps cities warm at night, when people most need to cool down.',
   },
   coolRoof: {
@@ -3417,6 +4219,69 @@ const GLOSSARY = {
     src: 'brief',
     why: 'Water evaporating from wet paving cools it, but only while there is water left to evaporate.',
     scenes: ['asphalt-park'],
+  },
+  wallReflection: {
+    term: 'Wall reflection',
+    text: 'Sunlight that building walls bounce back onto the street and onto people. Opaque walls scatter it in all directions (diffuse); glass reflects it like a mirror (specular).',
+    range: 'Opaque wall albedo about 0.2–0.5 (this model: 0.3); SOLWEIG uses 0.5.',
+    src: 'brief3, wallenberg2026',
+    why: 'In a street with tall walls, the walls add sunshine to the pavement even where the sky is hidden.',
+  },
+  // ---- block 3 (glass-cbd) ---------------------------------------------------
+  curtainWall: {
+    term: 'Glass curtain wall',
+    text: 'A non-structural outer wall of glass panes in a metal frame, hung on the front of an office tower.',
+    range: 'Normal-incidence solar reflectance: clear float glass about 0.08, solar-control low-e 0.15–0.35, reflective (mirror) glass 0.25–0.45; outer-surface emissivity about 0.84.',
+    src: 'fresnel, brief3, en673',
+    why: 'Flat glass reflects the sun like a mirror, so a tower can throw a patch of sunshine onto a street it does not shade.',
+    scenes: ['glass-cbd'],
+  },
+  specular: {
+    term: 'Specular reflection',
+    text: 'Mirror-like reflection: light leaves at the same angle it arrived, so a flat façade sends a bright copy of the sun in one direction.',
+    range: 'Scale models: flat mirror façades more than double the sunshine at pedestrian level; diffuse façades add at most about 30%; concave façades more than 300%.',
+    src: 'speroni2022',
+    why: 'It concentrates the extra heat into a sharp spot, instead of spreading it thinly as an opaque wall does.',
+    scenes: ['glass-cbd'],
+  },
+  fresnel: {
+    term: 'Fresnel reflection',
+    text: 'Glass reflects more the more glancing the sunlight is (the Fresnel equations): clear glass reflects about 8% head-on and over half at a grazing angle.',
+    range: 'Clear float glass (n = 1.52, two surfaces): 0.082 at 0°, 0.10 at 45°, 0.17 at 60°, 0.30 at 70°, 0.41 at 75°, 0.56 at 80°.',
+    src: 'fresnel',
+    why: 'A façade lit at a grazing angle can glare onto the street even with ordinary clear glass.',
+    scenes: ['glass-cbd'],
+  },
+  reflectionSpot: {
+    term: 'Reflection spot',
+    text: 'The patch of ground where a sunlit glass façade sends its reflected sunshine. It moves through the day and can fall in the shade of other buildings.',
+    model: (S) => S.spotLine,
+    why: 'Someone standing in a spot is out of the sun and still feels much of its heat.',
+    scenes: ['glass-cbd'],
+  },
+  canyon: {
+    term: 'Street canyon (H/W)',
+    text: 'A street lined by buildings on both sides. Its aspect ratio H/W is the building height divided by the street width.',
+    range: 'Sky view factor at the centre of a long canyon: 1/√(1 + (2H/W)²), i.e. 0.45 at H/W 1, 0.24 at 2, 0.16 at 3, 0.10 at 5. Oke (1981): calm-night urban–rural air difference about 7.45 + 3.97 ln(H/W) K (secondary source).',
+    src: 'brief3, oke1981',
+    why: 'Deep canyons shade the street by day but see little cold sky at night, so they cool slowly after dark.',
+    scenes: ['glass-cbd'],
+  },
+  lowE: {
+    term: 'Low-e glass',
+    text: 'Glass with a thin metal-oxide coating that keeps out much of the sun’s heat (solar control) and holds in indoor heat (low emissivity on the coated face).',
+    range: 'Solar reflectance about 0.15–0.35 head-on; Singapore caps glass daylight reflectance at 20%.',
+    src: 'brief3, bca',
+    why: 'What keeps heat out of the offices goes somewhere: more of it is reflected onto the street.',
+    scenes: ['glass-cbd'],
+  },
+  acHeat: {
+    term: 'AC waste heat',
+    text: 'Air conditioners move heat from inside to outside and add their own electricity: rejected heat = cooling × (1 + 1/COP).',
+    range: 'Dense urban areas 20–70 W m⁻² of ground area, sometimes over 100; central Tokyo over 400 W m⁻² by day.',
+    src: 'xie2016, sailor2011',
+    why: 'It warms the street air; this model holds the air temperature fixed, so the heat is shown but not felt.',
+    scenes: ['glass-cbd'],
   },
   // ---- block 2 (sponge-retrofit) --------------------------------------------
   permeablePaving: {
@@ -3487,7 +4352,7 @@ const q = (a, p) => {
 const mean = (a) => a.reduce((x, y) => x + y, 0) / a.length;
 
 /** Model-derived numbers quoted in the glossary (computed at load and in docs). */
-function glossaryStats(world, thermal) {
+function glossaryStats(world, thermal, extra = {}) {
   const N = world.n * world.n;
   const sun = [];
   const shade = [];
@@ -3512,15 +4377,32 @@ function glossaryStats(world, thermal) {
   const r0 = (x) => Math.round(x);
   const r1 = (x) => x.toFixed(1);
   const r2 = (x) => x.toFixed(2);
-  return {
+  const out = {
     tmrtSun: `${r0(q(sun, 0.05))}–${r0(q(sun, 0.95))}`,
     tmrtShade: `${r0(q(shade, 0.05))}–${r0(q(shade, 0.95))}`,
-    svfLawn: `about ${r2(q(lawn, 0.5))}`,
-    svfPave: `${r2(q(pave, 0.1))}–${r2(q(pave, 0.9))}`,
-    lagAsphalt: r1(mean(a23) - mean(l23)),
-    lagConcrete: r1(mean(c23) - mean(l23)),
     days: thermal.info.days,
   };
+  if (lawn.length && l23.length) {
+    out.svfLawn = `about ${r2(q(lawn, 0.5))}`;
+    out.svfPave = `${r2(q(pave, 0.1))}–${r2(q(pave, 0.9))}`;
+    out.lagAsphalt = r1(mean(a23) - mean(l23));
+    out.lagConcrete = r1(mean(c23) - mean(l23));
+    out.svfLine = `Open lawn ${out.svfLawn}; paved ground near buildings ${out.svfPave}.`;
+    out.lagLine = `At 11 pm asphalt is ${out.lagAsphalt} °C and concrete ${out.lagConcrete} °C warmer than the open lawn.`;
+  }
+  // a glass block (no lawn): canyon numbers passed in by the caller
+  if (extra.canyon) {
+    const c = extra.canyon;
+    const ground = [];
+    for (let i = 0; i < N; i++) if (world.bld[i] < 0) ground.push(world.svf[i]);
+    out.svfLine = `Street-level ground ${r2(q(ground, 0.1))}–${r2(q(ground, 0.9))}; Silk Lane floor ${r2(c.svf)} (an endless canyon of the same H/W: ${r2(c.svfCanyon)}).`;
+    out.lagLine = `At 5 am the Silk Lane floor is ${r1(c.lag05)} °C warmer than an open stone surface (walls fixed at air + 2 K at night, an engine assumption).`;
+  }
+  if (extra.spot) {
+    const s = extra.spot;
+    out.spotLine = `At 3 pm with ${s.glassName}: Tmrt ${r0(s.tmrtSpotShade)} °C in shaded spots vs ${r0(s.tmrtShade)} °C in plain shade and ${r0(s.tmrtSun)} °C in sun.`;
+  }
+  return out;
 }
 
 /** Footnote "range" line: literature range or model-derived numbers. */
@@ -3706,7 +4588,7 @@ const MEASURES = [
     young: true,
     name: 'Young street trees',
     line: 'New trees along Canal Street, Willow Lane, Market Road, Bridge Road and on the square. Their crowns are small and thin for now (about half the sun gets through), but walkers already use the patchy shade.',
-    lesson: 'Shade is what cools people. In this model the drop in sweating walkers After comes entirely from these young trees: the roofs do not touch pedestrians, and the sponge measures and reflective paving alone leave walkers as hot or slightly hotter (the lighter pavers add about +3.6 K Tmrt at noon).',
+    lesson: 'Shade is what cools people. In this model the drop in sweating walkers After comes entirely from these young trees: the roofs do not touch pedestrians, and the sponge measures and reflective paving alone leave walkers as hot or slightly hotter (the lighter pavers add about +3.7 K Tmrt at noon).',
     lit: 'Literature: modelled −7 K Tmrt under trees in Phoenix; block cooling grows strongly above about 40% canopy cover.',
     sources: ['middel2021', 'brief2'],
   },
@@ -3868,7 +4750,7 @@ function tradeoffCard(st, matsNew, matsAged) {
     </table>
     <p class="note">The light coating sends more sunshine back up, and part of it lands on people. The road gets cooler; a person standing on it gets more radiant heat at midday. Pair reflective paving with shade, such as trees or awnings.</p>
     <p class="lit">Literature (Los Angeles): road −4 to −6 K, pedestrian Tmrt about +4 K at midday, with +118 W m⁻² more reflected sunshine (Middel et al. 2020). Neighbourhood scale: surface up to −5 K in the afternoon, air only −0.2 K (Ko et al. 2022).</p>
-    <p class="caveat">Known under-estimate: walls reflect no sunlight in this model, so light bounced onto the pavements from building faces is missing (Middel saw +20–30 W m⁻² on sidewalks in the evening). Coating albedos are <span class="unv">unverified</span></p>
+    <p class="caveat">Walls bounce sunlight onto the pavements here only in a simple, street-averaged way (${gl('wallReflection', 'diffuse wall reflection')}, wall albedo 0.3, an unverified mid-range value), so the effect next to bright walls can be larger (Middel saw +20–30 W m⁻² on sidewalks in the evening). Coating albedos are <span class="unv">unverified</span></p>
     ${srcLine(['middel2020', 'ko2022'])}`;
 }
 
@@ -3955,6 +4837,437 @@ function drawDivider(ctx, x, H, dpr, left, right) {
 return { retrofitNotes, measureCard, tradeoffCard, spongeCard, drawDivider };
 })();
 
+__m['cbd'] = (() => {
+// cbd: block 3 (glass CBD) model runs and statistics: one model per glass
+// type, the "reflection off" comparison runs, reflection spots on the fine
+// grid (drawing and walkers), spot and canyon numbers for the cards, an open
+// reference cell for the night-lag comparison, and the AC rejected-heat
+// figures (information only: the air temperature is fixed, so the model
+// cannot feel waste heat).
+const { GLASS } = __m['materials'];
+const { runModel, cellMat, SLOTS, Thermal, STORE, airTemp, daylight, shadeClassField } = __m['thermal'];
+const { reflectSlots, reflectFor, reflectField, glassFacades } = __m['reflect'];
+const { solarPosition } = __m['sun'];
+const { GROUND_MATS } = __m['world'];
+const { shadeWeights } = __m['life'];
+
+/** Coarse 10-min spin-up days before the 1-min days (thermal.js opts.warm). */
+const WARM = 6;
+
+/** Reflected share of the direct beam (r) from which a cell counts as being in a reflection spot. */
+const SPOT_MIN = 0.05;
+const SUN_FULL = 0.95;
+const SHADE = 0.05;
+
+/** True if a scene is a glass block. */
+const isGlass = (scene) => !!scene.glassBlock;
+
+/**
+ * Glass set-up for a world: façades, reflection fields per sun slot, and
+ * lazily computed models: model(g) for g in clear / lowe / mirror, and
+ * off(g), the same glass with the specular bounce removed (run on the cells
+ * that ever receive a reflection; every other cell is copied from model(g),
+ * where it has no reflection either). Each result depends only on g, never on
+ * the order the glass types were visited.
+ */
+function glassSetup(world, slots) {
+  world.glassFacades = glassFacades(world);
+  const rs = reflectSlots(world, slots);
+  const N = world.n * world.n;
+  const spot = [];
+  for (let i = 0; i < N; i++) if (rs && rs.A.some((f) => f && f[i] > 0)) spot.push(i);
+  const spotCells = Int32Array.from(spot);
+  const models = new Map();
+  const offs = new Map();
+  const model = (g) => {
+    if (!models.has(g)) models.set(g, runModel(world, { slots, refl: reflectFor(rs, GLASS[g].rho0.value), glass: g, warm: WARM }));
+    return models.get(g);
+  };
+  const off = (g) => {
+    if (!offs.has(g)) {
+      const full = model(g);
+      const sub = runModel(world, { slots, glass: g, cells: spotCells, warm: WARM });
+      const store = new Float32Array(full.store);
+      for (const i of spotCells) store.set(sub.store.subarray(i * STORE, (i + 1) * STORE), i * STORE);
+      offs.set(g, new Thermal(world, store, slots, { ...sub.info, refl: null, glass: g, cells: null, off: true }));
+    }
+    return offs.get(g);
+  };
+  return { rs, spotCells, model, off, cached: () => [...models.keys()] };
+}
+
+/**
+ * Reflection spot field at one sun position on a fine grid (default 2 m, one
+ * sample per cell) for glass g: Float32Array of r, or null.
+ */
+function spotField(world, sun, g, cell = 2) {
+  const n = Math.round(world.size / cell);
+  const ground = (i) => world.buildingAt(((i % n) + 0.5) * cell, (Math.floor(i / n) + 0.5) * cell) < 0;
+  const f = reflectField(world, sun, { n, cell, S: 1 }, ground);
+  if (!f) return null;
+  const rho0 = GLASS[g].rho0.value;
+  const out = new Float32Array(n * n);
+  for (let i = 0; i < out.length; i++) out[i] = rho0 * f.A[i] + (1 - rho0) * f.B[i];
+  return { n, cell, r: out };
+}
+
+const mean = (a) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : NaN);
+
+/**
+ * Ground cells by heat class at hour h (model grid): plain shade (building
+ * shade, no crown, no reflection), plain sun, and reflection-spot cells in
+ * shade and in sun.
+ */
+function spotClasses(world, T, h) {
+  const N = world.n * world.n;
+  const out = { shade: [], sun: [], spotShade: [], spotSun: [] };
+  for (let i = 0; i < N; i++) {
+    if (world.bld[i] >= 0 || cellMat(world, i) === 'water') continue;
+    const s = T.sunlit(i, h);
+    const r = T.refl(i, h);
+    if (r >= SPOT_MIN) {
+      if (s < SHADE) out.spotShade.push(i);
+      else if (s > SUN_FULL) out.spotSun.push(i);
+    } else if (r === 0 && world.canopy[i] === 0) {
+      if (s < SHADE) out.shade.push(i);
+      else if (s > SUN_FULL) out.sun.push(i);
+    }
+  }
+  return out;
+}
+
+/**
+ * Spot numbers for glass g at hour h: mean Tmrt in plain shade, plain sun,
+ * shaded and sunlit spots; mean and max ΔTmrt in spots against the same glass
+ * with reflection off; mean r.
+ */
+function spotStats(setup, world, g, h) {
+  const T = setup.model(g);
+  const O = setup.off(g);
+  const c = spotClasses(world, T, h);
+  const spots = c.spotShade.concat(c.spotSun);
+  const all = [];
+  for (let i = 0; i < world.n * world.n; i++) if (world.bld[i] < 0 && cellMat(world, i) !== 'water' && T.refl(i, h) >= SPOT_MIN) all.push(i);
+  const d = all.map((i) => T.tmrt(i, h) - O.tmrt(i, h));
+  const dShade = c.spotShade.map((i) => T.tmrt(i, h) - O.tmrt(i, h));
+  return {
+    g,
+    h,
+    n: all.length,
+    nShade: c.spotShade.length,
+    nSun: c.spotSun.length,
+    tmrtShade: mean(c.shade.map((i) => T.tmrt(i, h))),
+    tmrtSun: mean(c.sun.map((i) => T.tmrt(i, h))),
+    tmrtSpotShade: mean(c.spotShade.map((i) => T.tmrt(i, h))),
+    tmrtSpotSun: mean(c.spotSun.map((i) => T.tmrt(i, h))),
+    dTmrt: mean(d),
+    dTmrtMax: d.length ? Math.max(...d) : NaN,
+    dTmrtShade: mean(dShade),
+    tsSpotShade: mean(c.spotShade.map((i) => T.ts(i, h))),
+    tsSpotShadeOff: mean(c.spotShade.map((i) => O.ts(i, h))),
+    r: mean(all.map((i) => T.refl(i, h))),
+    spots,
+  };
+}
+
+/**
+ * Tmrt-based route weights for walkers at hour h (Melnikov weights scaled by
+ * heat, see life.js): a class sits between building shade (w_b) and sun (1) in
+ * proportion to where its mean Tmrt sits between plain shade and plain sun:
+ * w = w_b + (1 - w_b) (Tmrt - Tmrt_shade) / (Tmrt_sun - Tmrt_shade).
+ * Returns [w_spotInShade, w_spotInSun] (sun-lit spots weigh more than 1).
+ */
+function spotWeights(world, T, h) {
+  const c = spotClasses(world, T, h);
+  const ts = mean(c.shade.map((i) => T.tmrt(i, h)));
+  const tu = mean(c.sun.map((i) => T.tmrt(i, h)));
+  const wb = shadeWeights(T.air(h))[1];
+  const w = (t) => (Number.isFinite(t) && tu - ts > 1 ? wb + ((1 - wb) * (t - ts)) / (tu - ts) : null);
+  const a = w(mean(c.spotShade.map((i) => T.tmrt(i, h))));
+  const b = w(mean(c.spotSun.map((i) => T.tmrt(i, h))));
+  return [a ?? wb + (1 - wb) * 0.5, b ?? 1 + (1 - wb) * 0.5];
+}
+
+/**
+ * An open reference cell (sky view factor 1, never shaded, no walls) of
+ * material mat on the scene's design day, for the canyon night-lag check.
+ */
+function openReference(scene, mat, mats) {
+  const w = {
+    scene,
+    size: 5,
+    cell: 5,
+    n: 1,
+    mat: Uint8Array.of(GROUND_MATS.indexOf(mat)),
+    matIds: GROUND_MATS,
+    bld: Int16Array.of(-1),
+    height: Float32Array.of(0),
+    canopy: Float32Array.of(0),
+    svf: Float32Array.of(1),
+    svfOpen: Float32Array.of(1),
+    gview: null,
+    buildings: [],
+    trees: [],
+    cellIndex: () => 0,
+  };
+  const suns = [];
+  const fields = [];
+  for (let k = 0; k < SLOTS; k++) {
+    const s = solarPosition(scene.site, (k * 24) / SLOTS);
+    suns.push(s);
+    fields.push(Float32Array.of(s.alt > 0 ? 1 : 0));
+  }
+  return runModel(w, { slots: { suns, fields }, materials: mats, warm: WARM });
+}
+
+/**
+ * Canyon numbers for a street segment {x0, y0, x1, y1, mat, h, w}: engine SVF
+ * vs the infinite-canyon value 1 / sqrt(1 + (2H/W)^2), the floor at 15:00 in
+ * shade vs the open reference, and the night lag at 05:00 (canyon floor minus
+ * the open reference cell of the same material).
+ */
+function canyonStats(world, T, seg, ref) {
+  const cells = [];
+  for (let i = 0; i < world.n * world.n; i++) {
+    if (world.bld[i] >= 0 || cellMat(world, i) !== seg.mat) continue;
+    const x = ((i % world.n) + 0.5) * world.cell;
+    const y = (Math.floor(i / world.n) + 0.5) * world.cell;
+    if (x > seg.x0 && x < seg.x1 && y > seg.y0 && y < seg.y1) cells.push(i);
+  }
+  const shaded = cells.filter((i) => T.sunlit(i, 15) < SHADE);
+  const m = (a, h) => mean(a.map((i) => T.ts(i, h)));
+  return {
+    n: cells.length,
+    hw: seg.h / seg.w,
+    svf: mean(cells.map((i) => world.svf[i])),
+    svfCanyon: 1 / Math.sqrt(1 + (2 * seg.h / seg.w) ** 2),
+    ts15: m(cells, 15),
+    ts15Shade: m(shaded, 15),
+    nShade15: shaded.length,
+    ts05: m(cells, 5),
+    open15: ref.ts(0, 15),
+    open05: ref.ts(0, 5),
+    lag05: m(cells, 5) - ref.ts(0, 5),
+    tmrt15Shade: mean(shaded.map((i) => T.tmrt(i, 15))),
+    air05: T.air(5),
+    cells,
+  };
+}
+
+/**
+ * AC rejected heat (information only). Rejected = Q_cool (1 + 1 / COP); dense
+ * urban anthropogenic heat 20-70 W m-2 of ground area, occasionally > 100;
+ * central Tokyo > 400 W m-2 by day (brief). Not added to any temperature here.
+ */
+const AC = {
+  cop: 3,
+  rejected: (qCool, cop = 3) => qCool * (1 + 1 / cop),
+  dense: [20, 70],
+  tokyo: 400,
+};
+
+/** Air temperature helper for cards (fixed forcing). */
+const airAt = (scene, h) => airTemp(scene.site, h, daylight(scene.site).rise);
+
+
+/**
+ * Cached spot and shade-class rasters for a glass block (2 m grid), used by
+ * the walkers, the sweat cue and the day-view glint. thermalOf() and glassOf()
+ * return the current model and glass type. shadeFor(hq) adds class 3 (spot in
+ * shade) and 4 (spot in sun) to the shade classes, with Tmrt-based weights.
+ */
+function glassShade(world, thermalOf, glassOf) {
+  const shadeCache = new Map();
+  const spotCache = new Map();
+  const spotFor = (hq) => {
+    const key = `${hq}|${glassOf()}`;
+    if (!spotCache.has(key)) {
+      if (spotCache.size > 60) spotCache.delete(spotCache.keys().next().value);
+      spotCache.set(key, spotField(world, thermalOf().sun(hq), glassOf()));
+    }
+    return spotCache.get(key);
+  };
+  const shadeFor = (hq) => {
+    if (!shadeCache.has(hq)) {
+      const sh = shadeClassField(world, thermalOf().sun(hq));
+      const sp = sh.night ? null : spotFor(hq);
+      if (sp) {
+        let any = false;
+        for (let k = 0; k < sh.cls.length; k++) {
+          if (sp.r[k] >= SPOT_MIN) {
+            sh.cls[k] = sh.cls[k] === 0 ? 4 : 3;
+            any = true;
+          }
+        }
+        if (any) sh.spotW = spotWeights(world, thermalOf(), hq);
+      }
+      shadeCache.set(hq, sh);
+    }
+    return shadeCache.get(hq);
+  };
+  const reset = () => {
+    shadeCache.clear();
+    spotCache.clear();
+  };
+  return { spotFor, shadeFor, reset };
+}
+
+return { WARM, SPOT_MIN, isGlass, glassSetup, spotField, spotClasses, spotStats, spotWeights, openReference, canyonStats, AC, airAt, glassShade };
+})();
+
+__m['cbdui'] = (() => {
+// cbdui: the overlay of the glass CBD block (block 3): margin-note text and
+// the cards (street canyon, each glass type, the reflection spot, AC rejected
+// heat, the concave-façade extreme case).
+const { SOURCES, BASIS, GLASS, GLASS_IDS } = __m['materials'];
+const { gl } = __m['glossary'];
+const { glassRho } = __m['reflect'];
+const { AC } = __m['cbd'];
+
+const fmt = (v) => (Math.round(v * 10) / 10).toFixed(1);
+const f2 = (v) => v.toFixed(2);
+const sgn = (v) => `${v < 0 ? '−' : '+'}${fmt(Math.abs(v))}`;
+const K = (v) => `${sgn(v)} K`;
+const tag = (v) => (v.basis !== 'cited' ? ` <span class="basis">${BASIS[v.basis]}</span>` : '') + (v.verified ? '' : ' <span class="unv" title="value not yet checked against the primary source">unverified</span>');
+const srcLine = (keys) => `<p class="src">Sources: ${keys.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: ${gl('forceRestore', 'force-restore')}, simulated; air temperature is fixed, so no canyon air heating, wind or AC heat is felt.</p>`;
+const close = '<button class="x" aria-label="close">×</button>';
+
+/** Margin notes (at most 5). d: numbers from the app (see app.js cbdNoteData). */
+function cbdNotes(scene, d) {
+  const g = GLASS[d.glass];
+  const text = {
+    spot: [`Reflection spot: Tmrt ${fmt(d.spotTmrt)} °C at 3 pm,`, `out of the sun (plain shade ${fmt(d.shadeTmrt)} °C)`],
+    glass: [`${d.towerName}, ${g.name.toLowerCase()} (ρ₀ ${g.rho0.value}):`, `reflects ${Math.round(d.rhoNow * 100)}% of the sun at 3 pm`],
+    lane: [`Silk Lane (H/W ${fmt(d.laneHw)}): ${fmt(d.lane05)} °C at 5 am,`, `${sgn(d.lag05)} K vs open stone`],
+    plaza: [`Plaza paving ${fmt(d.plaza15)} °C at 3 pm`],
+  };
+  const terms = {
+    spot: [['reflectionSpot', 'Reflection spot'], ['tmrt', 'Tmrt']],
+    glass: [['fresnel', `reflects ${Math.round(d.rhoNow * 100)}% of the sun`]],
+    lane: [['canyon', `H/W ${fmt(d.laneHw)}`], ['nightLag', `${fmt(d.lane05)} °C at 5 am`]],
+    plaza: [['surfaceTemp', 'Plaza paving']],
+  };
+  return scene.notes.slice(0, 5).map((n) => ({ ...n, text: text[n.key], terms: terms[n.key] }));
+}
+
+/** Street-canyon card. c: {lane, deep} canyonStats() results. */
+function canyonCard(c) {
+  const L = c.lane;
+  const D = c.deep;
+  return `
+    ${close}
+    <h3>${gl('canyon', 'Street canyon')}: shade by day, slow to cool at night</h3>
+    <div class="mat">Silk Lane (stone, 12 m wide) and Exchange Street between the towers, simulated</div>
+    <table class="cmp">
+      <tr><td></td><td>model</td><td>open / endless canyon</td></tr>
+      <tr><td>Silk Lane H/W</td><td>${fmt(L.hw)}</td><td></td></tr>
+      <tr><td>${gl('svf', 'sky view factor')}, lane floor</td><td>${f2(L.svf)}</td><td>${f2(L.svfCanyon)}</td></tr>
+      <tr class="t"><td>Exchange St. floor in shade, 15:00</td><td>${fmt(D.ts15Shade)} °C</td><td>${fmt(D.open15)} °C open asphalt</td></tr>
+      <tr><td>${gl('tmrt', 'Tmrt')} there, 15:00</td><td>${fmt(D.tmrt15Shade)} °C</td><td></td></tr>
+      <tr class="t"><td>Silk Lane floor, 05:00</td><td>${fmt(L.ts05)} °C</td><td>${fmt(L.open05)} °C open stone</td></tr>
+      <tr><td>${gl('nightLag', 'night lag')}, 05:00</td><td>${K(L.lag05)}</td><td>air ${fmt(L.air05)} °C</td></tr>
+    </table>
+    <p class="note">Tall walls hide the street from the sun for most of the day, so its floor stays far cooler than open paving. At night the same walls hide the cold sky: the floor loses heat more slowly than open ground.</p>
+    <p class="lit">Literature: Oke (1981) found calm-night city–country air differences of about 7.45 + 3.97 ln(H/W) K, i.e. about 11.6 K at H/W 2.8 (air, not surface; coefficients from a secondary source; the relation breaks down at high H/W, Theeuwes et al. 2014). In Fez a canyon with H/W about 10 was about 6 K, up to 10 K, cooler by day (Johansson 2006).</p>
+    <p class="caveat">The night lag here is an engine result: walls are held at air + 2 K at night (they do not store heat), and the air temperature is fixed, so the canyon's warmer air is not modelled. One wind speed for the whole block: no channelling, vortices or tower downdraughts. Sky view factor from a 32-direction horizon scan on the 5 m grid. <span class="unv">unverified</span></p>
+    ${srcLine(['oke1981', 'theeuwes2014', 'johansson2006', 'brief3'])}`;
+}
+
+/**
+ * Glass card for one type. st: {h12, h15} spotStats() for that glass;
+ * face: {name, theta15} the façade quoted.
+ */
+function glassCard(id, st, face) {
+  const g = GLASS[id];
+  const row = (r) => (r.n ? `<tr class="t"><td>${r.h}:00</td><td>${K(r.dTmrt)}</td><td>${K(r.dTmrtMax)}</td></tr><tr><td></td><td class="sub" colspan="2">${r.n} spot cells, mean reflected share ${f2(r.r)} of the beam; shaded spots ${fmt(r.tmrtSpotShade)} °C vs plain shade ${fmt(r.tmrtShade)} °C</td></tr>` : `<tr><td>${r.h}:00</td><td colspan="2">no reflection spots</td></tr>`);
+  const rhoAt = (th) => f2(glassRho(g.rho0.value, th));
+  return `
+    ${close}
+    <h3>${g.name}</h3>
+    <div class="mat">${gl('curtainWall', 'curtain wall')} glass · simulated</div>
+    <table>
+      <tr><td>reflectance ρ₀, head-on</td><td>${g.rho0.value}${tag(g.rho0)}</td></tr>
+      <tr><td>${gl('fresnel', 'at 45° / 70° / 80°')}</td><td>${rhoAt(45)} / ${rhoAt(70)} / ${rhoAt(80)}</td></tr>
+      <tr><td>${face.name}, 15:00 (θ ${Math.round(face.theta15)}°)</td><td>${rhoAt(face.theta15)}</td></tr>
+      <tr><td>solar absorptance</td><td>${g.absorb.value}${tag(g.absorb)}</td></tr>
+      <tr><td>${gl('emissivity', 'emissivity ε')}</td><td>${g.eps.value}${tag(g.eps)}</td></tr>
+      <tr><td>glass surface, 15:00 (${face.face} face)</td><td>${fmt(face.tg15)} °C</td></tr>
+    </table>
+    <table class="cmp">
+      <tr><td></td><td>spot ΔTmrt mean</td><td>max</td></tr>
+      ${row(st.h12)}
+      ${row(st.h15)}
+    </table>
+    <p class="sub">ΔTmrt: the same glass with its mirror reflection switched off, same cells.</p>
+    <p class="note">${g.note}</p>
+    ${id === 'lowe' ? `<p class="lit">Singapore caps the daylight reflectance of façade glass at 20% (BCA Approved Document, Section P).</p>` : ''}
+    <p class="caveat">Low-e and mirror reflectances are mid-range values from the brief; no product datasheet was checked (see the LBNL IGDB). The angular shape is Fresnel for clear glass; coated glass can differ by up to about 8% at 60°. Glass surface temperature is the brief's simple balance, Ta + a_g I_f / (h_o + h_i), with no measurement behind it. <span class="unv">unverified</span></p>
+    ${srcLine(['fresnel', 'igdb', 'bca', 'en673', 'brief3'])}`;
+}
+
+/** The reflection-spot card: out of the sun, still hot. st: spotStats() at 15:00 for the current glass. */
+function spotCard(st, id) {
+  const g = GLASS[id];
+  return `
+    ${close}
+    <h3>${gl('reflectionSpot', 'Reflection spot')}: out of the sun, still hot</h3>
+    <div class="mat">${g.name}, 15:00, person standing (${gl('tmrt', 'Tmrt')}), simulated</div>
+    <table class="cmp">
+      <tr><td></td><td>Tmrt</td></tr>
+      <tr><td>plain building shade</td><td>${fmt(st.tmrtShade)} °C</td></tr>
+      <tr class="t"><td>reflection spot in shade</td><td>${fmt(st.tmrtSpotShade)} °C</td></tr>
+      <tr><td>full sun</td><td>${fmt(st.tmrtSun)} °C</td></tr>
+      <tr class="t"><td>reflection spot in sun</td><td>${fmt(st.tmrtSpotSun)} °C</td></tr>
+      <tr><td>spot vs reflection off, mean / max</td><td>${K(st.dTmrt)} / ${K(st.dTmrtMax)}</td></tr>
+      <tr><td>shaded spot paving vs off</td><td>${K(st.tsSpotShade - st.tsSpotShadeOff)}</td></tr>
+    </table>
+    <p class="note">A flat glass façade in sun acts as a second, dimmer sun low in the sky. Its ${gl('specular', 'mirror reflection')} lands as a moving patch on the street, often in the shade of another building: people there are out of the sun but still take in much of its heat. Walkers here treat a spot as partly sunny and keep out of it when they can.</p>
+    <p class="lit">Field data (Chengdu, Chunxi Road, August 2023): reflection zones Tmrt +4 to +13 °C, air +1–2 °C, UTCI +2–5 °C, peak Tmrt 73.9 °C (Du et al. 2025). SOLWEIG with reflective walls also puts the highest Tmrt in front of sunlit façades (Wallenberg et al. 2026).</p>
+    <p class="caveat">${st.dTmrtMax > 13 ? `The largest rise here (${K(st.dTmrtMax)}) is above the field range. ` : ''}Glass here is ideally flat and frameless, and Fresnel reflectance climbs steeply at grazing angles (over 0.5 beyond 80°), so façades lit edge-on send strong, thin spots; mullions and pane distortion that break these up are not modelled. The ground under a spot also warms, which adds to Tmrt. Single bounce only (a second bounce off the opposite façade, ρ² of the beam, is ignored); air temperature is fixed (the measured air warming is not modelled). <span class="unv">unverified</span></p>
+    ${srcLine(['du2025', 'wallenberg2026', 'fresnel', 'brief3'])}`;
+}
+
+/** AC rejected-heat card (information overlay only). */
+function acCard() {
+  const q = 100;
+  return `
+    ${close}
+    <h3>${gl('acHeat', 'AC rejected heat')}: shown, not felt</h3>
+    <div class="mat">Information overlay · not part of the model</div>
+    <p>An air conditioner pumps the heat out of the offices and adds its own electricity: rejected heat = cooling × (1 + 1/COP). At COP ${AC.cop}, every ${q} W of cooling puts about ${Math.round(AC.rejected(q, AC.cop))} W into the street air.</p>
+    <table class="cmp">
+      <tr><td>dense urban areas</td><td>${AC.dense[0]}–${AC.dense[1]} W m⁻² of ground, sometimes > 100</td></tr>
+      <tr><td>central Tokyo, daytime</td><td>> ${AC.tokyo} W m⁻²</td></tr>
+    </table>
+    <p class="note">The plumes on the roofs mark where this heat leaves the towers.</p>
+    <p class="caveat"><b>Not felt in this model:</b> the air temperature is a fixed design-day curve, so waste heat cannot warm the street or anyone in it, and it is not added to any surface or Tmrt value. No figure per m² of office floor was found for a CBD like this one.</p>
+    ${srcLine(['xie2016', 'sailor2011'])}`;
+}
+
+/** Extreme case: concave façades (out of scope). */
+function extremeCard() {
+  return `
+    ${close}
+    <h3>The extreme case: concave glass</h3>
+    <div class="mat">Not modelled in this block</div>
+    <p>A <b>flat</b> façade sends back a copy of the sun no stronger than the sun itself times its reflectance: in this block no spot ever gets more than the sum of ρ I sinβ over the façades that face it.</p>
+    <p>A <b>concave</b> façade focuses the reflection. 20 Fenchurch Street in London ("the Walkie-Talkie", 2013) concentrated sunlight onto the street opposite; a later simulation put the peak at 3,384 W m⁻² (worst case 4,176), several times direct sunshine (Zhu, Jahn &amp; Rein 2018). The curved Vdara hotel in Las Vegas made a hot zone on its pool deck in 2010 (press reports, anecdotal). Scale models: concave façades raised pedestrian-level sunshine by more than 300%, flat mirrors by more than 100%, diffuse façades by at most 30% (Speroni et al. 2022).</p>
+    <p class="caveat">Concave and curved façades are out of scope here: every tower in this block has flat faces.</p>
+    ${srcLine(['zhu2018', 'vdara', 'speroni2022'])}`;
+}
+
+/** Button labels for the glass panel cards. */
+const CBD_CARDS = [
+  ['canyon', 'Street canyon'],
+  ...GLASS_IDS.map((id) => [`glass-${id}`, GLASS[id].name]),
+  ['spot', 'Reflection spot'],
+  ['ac', 'AC rejected heat'],
+  ['extreme', 'Extreme case: concave glass'],
+];
+
+return { cbdNotes, canyonCard, glassCard, spotCard, acCard, extremeCard, CBD_CARDS };
+})();
+
 __m['app'] = (() => {
 // app: boot, clock, keys, seek(), query modes, overlay (slider, notes, heat
 // card) and a small window.atlas API used by the checks.
@@ -3969,6 +5282,13 @@ const { GLOSSARY, gl, glossaryStats, rangeLine, termsFor } = __m['glossary'];
 const { isRetrofit, sceneState, stateMaterials, runShared, resolveId, MEASURES, measureStats, waterBudget, ALIASES, D_MAX, D_DEFAULT } = __m['retrofit'];
 const { retrofitNotes, measureCard, tradeoffCard, spongeCard, drawDivider } = __m['retroui'];
 const { sunSlots } = __m['thermal'];
+const { GLASS, GLASS_IDS, GLASS_DEFAULT } = __m['materials'];
+const { isGlass, glassSetup, glassShade, spotStats, spotClasses, openReference, canyonStats } = __m['cbd'];
+const { cbdNotes, canyonCard, glassCard, spotCard, acCard, extremeCard, CBD_CARDS } = __m['cbdui'];
+const { classDensity } = __m['life'];
+const { glassRho, FACE_N } = __m['reflect'];
+const { sunVector } = __m['sun'];
+const { isGlassFace } = __m['kit'];
 
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
@@ -3993,16 +5313,30 @@ function hashCanvas(ctx, w, h) {
  * A view: one drawn state of a scene (block 1 has one; a retrofit block has
  * Before and After) with its world, model, display list, walkers and renderer.
  */
-function makeView(id, sc, world, thermal, canvas) {
+function makeView(id, sc, world, thermal, canvas, glass = null) {
   const display = drawWorld(world, sc.seed);
   const shadeCache = new Map();
-  const shadeFor = (hq) => {
-    if (!shadeCache.has(hq)) shadeCache.set(hq, shadeClassField(world, thermal.sun(hq)));
-    return shadeCache.get(hq);
-  };
-  const life = new Life(sc, shadeFor, (h) => thermal.air(h));
+  const view = { id, scene: sc, world, thermal, display };
+  // glass block: reflection spots (2 m grid) join the shade classes (cbd.js glassShade)
+  const gs = glass ? glassShade(world, () => view.thermal, glass.type) : null;
+  const shadeFor = gs
+    ? gs.shadeFor
+    : (hq) => {
+      if (!shadeCache.has(hq)) shadeCache.set(hq, shadeClassField(world, view.thermal.sun(hq)));
+      return shadeCache.get(hq);
+    };
+  const life = new Life(sc, shadeFor, (h) => view.thermal.air(h));
   const R = new Renderer(canvas, world, display, thermal, life);
-  return { id, scene: sc, world, thermal, display, shadeFor, life, R };
+  if (gs) {
+    R.spotFor = gs.spotFor;
+    R.glass = glass.type();
+  }
+  /** Glass type changed: drop spot, shade and walker caches. */
+  view.resetGlass = () => {
+    if (gs) gs.reset();
+    life.plans.clear();
+  };
+  return Object.assign(view, { shadeFor, spotFor: gs ? gs.spotFor : null, life, R });
 }
 
 function boot(scene, root = document) {
@@ -4023,12 +5357,25 @@ function boot(scene, root = document) {
     aged: q.get('materials') !== 'new',
     swap: q.get('swap') === '1',
   };
+  // glass block (block 3): glass type from ?glass=, default low-e
+  const glassMode = isGlass(scene);
+  let glassSet = null;
+  const glassQ = { type: GLASS_IDS.includes(q.get('glass')) ? q.get('glass') : GLASS_DEFAULT, ac: q.get('ac') === '1' };
+  const glassNow = { type: glassQ.type }; // read by the view's spot field
   if (!retro) {
     world = buildWorld(scene);
     t1 = performance.now();
-    thermal = runModel(world);
+    if (glassMode) {
+      const ta = performance.now();
+      const slots = sunSlots(world);
+      const tb = performance.now();
+      glassSet = glassSetup(world, slots);
+      const tc = performance.now();
+      thermal = glassSet.model(glassQ.type);
+      glassSet.timing = { slotsMs: tb - ta, reflMs: tc - tb, runMs: performance.now() - tc };
+    } else thermal = runModel(world);
     t2 = performance.now();
-    V = { main: makeView('main', scene, world, thermal, canvas) };
+    V = { main: makeView('main', scene, world, thermal, canvas, glassMode ? { type: () => glassNow.type } : null) };
   } else {
     // Before and After share buildings: the After world reuses the horizon
     // scan and building shade masks, and its model reuses every Before cell
@@ -4080,6 +5427,8 @@ function boot(scene, root = document) {
     // retrofit only: which state is drawn, divider position (share of width),
     // sides swapped (After on the left), days since rain, aged materials
     ...(retro ? retroQ : {}),
+    // glass block only: glass type, AC overlay
+    ...(glassMode ? { glass: glassQ.type, ac: glassQ.ac } : {}),
   };
   if (q.get('ui') === '0') root.body.classList.add('noui');
   if (q.has('hour')) S.hour = Math.round(clamp(parseFloat(q.get('hour')) || 0, 0, 23.75) / 0.25) * 0.25;
@@ -4096,7 +5445,46 @@ function boot(scene, root = document) {
   // model values used in notes and cards
   const P = scene.probes;
   const at = (k, h) => thermal.tsAt(P[k][0], P[k][1], h);
-  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : block1Notes();
+  // glass block: canyon segments for the cards, notes and glossary
+  const CANYONS = glassMode ? scene.canyons : null;
+  const openRefs = new Map();
+  const openRef = (mat) => {
+    if (!openRefs.has(mat)) openRefs.set(mat, openReference(scene, mat));
+    return openRefs.get(mat);
+  };
+  const canyons = () => ({ lane: canyonStats(world, thermal, CANYONS.lane, openRef('stone')), deep: canyonStats(world, thermal, CANYONS.deep, openRef('asphalt')) });
+  /** Incidence angle (deg) on a face of a building at hour h, or 90 if the face is turned away. */
+  const incidence = (face, h) => {
+    const s = thermal.sun(h);
+    if (s.alt <= 0) return 90;
+    const sv = sunVector(s.alt, s.az);
+    const c = sv[0] * FACE_N[face][0] + sv[1] * FACE_N[face][1];
+    return c > 0 ? Math.acos(c) / (Math.PI / 180) : 90;
+  };
+  /** Tmrt means at 15:00 by class (no reflection-off run needed). */
+  const spotTmrt = (h = 15) => {
+    const c = spotClasses(world, thermal, h);
+    const m = (a) => a.reduce((x, i) => x + thermal.tmrt(i, h), 0) / Math.max(1, a.length);
+    return { tmrtShade: m(c.shade), tmrtSun: m(c.sun), tmrtSpotShade: m(c.spotShade), tmrtSpotSun: m(c.spotSun), nSpotShade: c.spotShade.length, glassName: GLASS[S.glass].name.toLowerCase() };
+  };
+  function cbdNoteData() {
+    const lane = canyonStats(world, thermal, CANYONS.lane, openRef('stone'));
+    const st = spotTmrt(15);
+    const tower = world.buildings.find((b) => b.id === 't3');
+    const sp = world.cellIndex(P.spotStreet[0], P.spotStreet[1]);
+    return {
+      glass: S.glass,
+      spotTmrt: thermal.tmrt(sp, 15),
+      shadeTmrt: st.tmrtShade,
+      towerName: tower.name,
+      rhoNow: glassRho(GLASS[S.glass].rho0.value, incidence('S', 15)),
+      laneHw: lane.hw,
+      lane05: lane.ts05,
+      lag05: lane.lag05,
+      plaza15: at('plaza', 15),
+    };
+  }
+  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : block1Notes();
   function block1Notes() {
   const notesText = {
     asphalt: ['Kiln Street, old asphalt (albedo 0.12):', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
@@ -4120,7 +5508,7 @@ function boot(scene, root = document) {
     const k = clamp((f - S.since) / FADE, 0, 1);
     return S.thermal ? k : 1 - k;
   };
-  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people, scrub: S.scrub });
+  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people, scrub: S.scrub, ac: !!S.ac });
 
   // ---- sizing ------------------------------------------------------------------------------
   const resize = () => {
@@ -4342,10 +5730,84 @@ function boot(scene, root = document) {
     card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
   }
   function reopenCard() {
-    if (card._measure) {
+    if (card._measure && card._measure.startsWith('cbd:')) {
+      card.innerHTML = cbdCardHtml(card._measure.slice(4));
+      card.querySelector('.x').onclick = hideCard;
+    } else if (card._measure) {
       card.innerHTML = measureHtml(card._measure);
       card.querySelector('.x').onclick = hideCard;
     } else if (card._pick) showCard(card._pick);
+  }
+
+  // ---- glass controls (block 3): glass type, AC overlay, cards ---------------------------
+  const glassUi = glassMode ? buildGlassUi() : null;
+  function buildGlassUi() {
+    const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
+    root.body.insertAdjacentHTML(
+      'beforeend',
+      `<div id="glass" aria-label="Glass controls">
+        <div class="seg" role="group" aria-label="Glass type"><span>${gl('curtainWall', 'glass')}:</span>${GLASS_IDS.map((id) => btn('data-glass', id, { clear: 'clear', lowe: 'low-e', mirror: 'mirror' }[id])).join('')}</div>
+        <div class="seg">${btn('data-ac', '1', 'AC heat overlay', 'aria-pressed="false"')}</div>
+        <div class="measures"><div class="hand">Cards</div>${CBD_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'extreme' || id === 'spot' ? 'class="warn"' : '')).join('')}</div>
+      </div>`,
+    );
+    const el = root.getElementById('glass');
+    el.addEventListener('click', (e) => {
+      const b = e.target.closest ? e.target.closest('button') : null;
+      if (!b) return;
+      if (b.dataset.glass) setGlass(b.dataset.glass);
+      else if (b.dataset.ac) setAc(!S.ac);
+      else if (b.dataset.card) showCbdCard(b.dataset.card, b);
+    });
+    return { el };
+  }
+  function syncGlass() {
+    if (!glassUi) return;
+    for (const b of glassUi.el.querySelectorAll('[data-glass]')) b.setAttribute('aria-pressed', String(b.dataset.glass === S.glass));
+    glassUi.el.querySelector('[data-ac]').setAttribute('aria-pressed', String(!!S.ac));
+    root.body.dataset.glass = S.glass;
+  }
+  function setGlass(g) {
+    if (!GLASS_IDS.includes(g) || g === S.glass) return;
+    S.glass = g;
+    glassNow.type = g;
+    thermal = glassSet.model(g);
+    main.thermal = thermal;
+    main.resetGlass();
+    R.setGlass(g, thermal);
+    notes = cbdNotes(scene, cbdNoteData());
+    syncGlass();
+    if (card.dataset.open === '1') reopenCard();
+    if (S.paused) draw();
+  }
+  function setAc(on) {
+    S.ac = !!on;
+    syncGlass();
+    if (S.paused) draw();
+  }
+  function cbdCardHtml(id) {
+    if (id === 'canyon') return canyonCard(canyons());
+    if (id === 'spot') return spotCard(spotStats(glassSet, world, S.glass, 15), S.glass);
+    if (id === 'ac') return acCard();
+    if (id === 'extreme') return extremeCard();
+    const g = id.slice(6);
+    const tower = world.buildings.find((b) => b.id === 't3');
+    const face = { name: `${tower.name}, south face`, face: 'S', theta15: incidence('S', 15), tg15: glassSet.model(g).glassTemp('S', 15) };
+    return glassCard(g, { h12: spotStats(glassSet, world, g, 12), h15: spotStats(glassSet, world, g, 15) }, face);
+  }
+  function showCbdCard(id, anchor) {
+    if (id === 'ac') setAc(true);
+    card.innerHTML = cbdCardHtml(id);
+    card.querySelector('.x').onclick = hideCard;
+    card._pick = null;
+    card._measure = `cbd:${id}`;
+    card.dataset.open = '1';
+    card.dataset.kind = id;
+    card.style.display = 'block';
+    const r = anchor ? anchor.getBoundingClientRect() : { top: 120 };
+    const panel = glassUi.el.getBoundingClientRect();
+    card.style.left = `${Math.min(window.innerWidth - card.offsetWidth - 10, panel.right + 12)}px`;
+    card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
   }
 
   const toggleThermal = () => {
@@ -4360,6 +5822,7 @@ function boot(scene, root = document) {
     const k = e.key;
     if (k === 't' || k === 'T') toggleThermal();
     else if (retro && (k === 'b' || k === 'B')) swapStates();
+    else if (glassMode && (k === 'g' || k === 'G')) setGlass(GLASS_IDS[(GLASS_IDS.indexOf(S.glass) + (k === 'g' ? 1 : GLASS_IDS.length - 1)) % GLASS_IDS.length]);
     else if (k === 'h') setHour(S.hour + 1);
     else if (k === 'H') setHour(S.hour - 1);
     else if (k === 'n' || k === 'N') S.notes = !S.notes;
@@ -4529,10 +5992,24 @@ function boot(scene, root = document) {
         };
       }
     }
+    // shortwave parts on the ground cell now (wall reflection, all blocks; glass, block 3)
+    const sw = tmrtCell !== null ? thermal.shortwave(tmrtCell, h) : null;
+    let glassInfo = null;
+    if (p.kind === 'building' && p.B.glass) {
+      const g = GLASS[S.glass];
+      const faces = ['S', 'E', 'W', 'N'].filter((f) => isGlassFace(p.B, f)).map((f) => {
+        const th = incidence(f, h);
+        return { face: f, theta: th, rho: th < 90 ? glassRho(g.rho0.value, th) : null, tg: thermal.glassTemp(f, h) };
+      });
+      glassInfo = { id: S.glass, name: g.name, rho0: g.rho0, absorb: g.absorb, eps: g.eps, faces };
+    }
     return {
       title,
       state: view.id,
       compare,
+      glass: glassInfo,
+      wallsNow: sw ? sw.walls : null,
+      glassNow: sw ? sw.glass : null,
       matId: resolveId(mat, S.aged),
       material: m.name,
       params: Object.fromEntries(paramKeys(m).map((k) => [k, m[k]])),
@@ -4565,7 +6042,7 @@ function boot(scene, root = document) {
       : P.mu
         ? `<tr><td>${gl('admittance', 'admittance μ')}</td><td>${P.mu.value} J m⁻² s⁻½ K⁻¹${tag(P.mu)}</td></tr>`
         : '';
-    const srcs = [...new Set(Object.values(d.params).map((v) => v.source))];
+    const srcs = [...new Set(Object.values(d.params).map((v) => v.source).concat(d.glass ? [d.glass.rho0.source, d.glass.absorb.source, d.glass.eps.source] : []))];
     // wetted materials: value at the current days since rain, with the wet / dry ends and τ
     const efCell = P.ef.atD !== undefined ? `${P.ef.value.toFixed(2)} at ${gl('daysSinceRain', `d = ${P.ef.atD}`)}${tag(P.ef)}` : `${P.ef.value}${tag(P.ef)}`;
     const wet = [
@@ -4594,9 +6071,17 @@ function boot(scene, root = document) {
         <tr class="t"><td>surface 15:00 / ${gl('nightLag', '23:00')}</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
         ${d.groundNow !== null ? `<tr><td>ground beneath now</td><td>${fmt(d.groundNow)} °C</td></tr>` : ''}
         ${d.tmrtNow !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} (person) now / 15:00</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
+        ${d.wallsNow !== null ? `<tr><td>sun off the ${gl('wallReflection', 'walls')} now</td><td>${Math.round(d.wallsNow)} W m⁻²</td></tr>` : ''}
+        ${d.glassNow !== null && glassMode ? `<tr><td>sun off the ${gl('specular', 'glass')} now</td><td>${Math.round(d.glassNow)} W m⁻²</td></tr>` : ''}
         <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
         ${cmp}
       </table>
+      ${d.glass ? `<table>
+        <tr><td colspan="2" class="sub">${gl('curtainWall', 'Curtain wall')}: ${d.glass.name}</td></tr>
+        <tr><td>reflectance ρ₀ head-on</td><td>${d.glass.rho0.value}${tag(d.glass.rho0)}</td></tr>
+        ${d.glass.faces.map((f) => `<tr><td>${f.face} face now</td><td>${f.rho !== null ? `${gl('fresnel', `ρ ${f.rho.toFixed(2)}`)} at θ ${Math.round(f.theta)}°` : 'not in sun'} · glass ${fmt(f.tg)} °C</td></tr>`).join('')}
+        <tr><td>glass ${gl('emissivity', 'ε')} / absorptance</td><td>${d.glass.eps.value}${tag(d.glass.eps)} / ${d.glass.absorb.value}${tag(d.glass.absorb)}</td></tr>
+      </table>` : ''}
       <p class="note">${d.note}</p>
       ${d.caveat ? `<p class="caveat">${d.caveat}</p>` : ''}
       ${d.prescribed ? `<p class="caveat">${d.prescribed}</p>` : ''}
@@ -4628,7 +6113,7 @@ function boot(scene, root = document) {
   const terms = $('terms');
   const termsBtn = $('termsBtn');
   // retrofit: footnote numbers come from the Before state (the old block)
-  const gstats = retro ? glossaryStats(V.before.world, V.before.thermal) : glossaryStats(world, thermal);
+  const gstats = retro ? glossaryStats(V.before.world, V.before.thermal) : glassMode ? glossaryStats(world, thermal, { canyon: canyonStats(world, thermal, CANYONS.lane, openRef('stone')), spot: spotTmrt(15) }) : glossaryStats(world, thermal);
   let fnPinned = false;
   let fnByFocus = false;
   let fnTrigger = null;
@@ -4787,6 +6272,7 @@ function boot(scene, root = document) {
   };
   syncUi();
   syncRetro();
+  syncGlass();
   draw();
   requestAnimationFrame(loop);
 
@@ -4804,6 +6290,7 @@ function boot(scene, root = document) {
       intro: INTRO,
       views: Object.keys(V),
       changedCells: retro ? V.after.thermal.info.changed : 0,
+      ...(glassSet ? glassSet.timing : {}),
     },
     /** Pure seek: render frame N with an optional camera {z,cx,cy}; pauses the clock. */
     seek(frame, cam) {
@@ -4937,6 +6424,37 @@ function boot(scene, root = document) {
      * of them (as the controls do); measures with Before / After numbers;
      * card HTML; daily evaporated water per wetted material and d.
      */
+    /**
+     * Glass block (block 3) only: state {glass, ac}; set() them; spot numbers
+     * (with the reflection-off comparison); card HTML; walker density by class.
+     */
+    glass: glassMode
+      ? {
+        state: () => ({ glass: S.glass, ac: !!S.ac }),
+        set(o) {
+          if (o.glass !== undefined) setGlass(o.glass);
+          if (o.ac !== undefined) setAc(o.ac);
+        },
+        spot: (h = 15, g = S.glass) => {
+          const st = spotStats(glassSet, world, g, h);
+          delete st.spots;
+          return st;
+        },
+        canyons: () => {
+          const c = canyons();
+          for (const v of Object.values(c)) delete v.cells;
+          return c;
+        },
+        html: (id) => cbdCardHtml(id),
+        show: (id) => showCbdCard(id, root.querySelector(`#glass [data-card="${id}"]`)),
+        density: (frame = S.frame, hour = S.hour) => {
+          const hq = quantHour(hour);
+          return classDensity(world, main.life.at(frame / 60, hq), main.shadeFor(hq));
+        },
+        models: () => glassSet.cached(),
+        reflAt: (x, y, h = S.hour) => thermal.refl(world.cellIndex(x, y), h),
+      }
+      : null,
     retro: retro
       ? {
         state: () => ({ state: S.state, split: S.split, swap: S.swap, d: S.d, aged: S.aged }),
