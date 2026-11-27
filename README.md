@@ -29,6 +29,13 @@ Hand-inked isometric city blocks that show urban heat through one heat-wave day:
   the AC condensers stacked on the façades put about 43 W/m² over the site
   into the air on a summer evening, shown as plumes (`C`), not felt by the
   model's fixed air.
+- Block 8, `campus`: a school campus on a summer day-camp day. The
+  artificial-turf pitch reaches about 75 °C, some 30 K above the grass field
+  next to it, and cools to the grass's temperature by dawn; the rubber of
+  the playground is 22 K cooler under the shade sails. Watering the pitch at
+  14:00 (`I`) helps for minutes, and only a little in this model; `U`
+  hatches every surface above its 1-min contact-burn limit (ISO 13732-1).
+  Children come out at play times and look for shade.
 
 Live: https://yushengzhou.github.io/thermal-ink-atlas/
 
@@ -42,7 +49,8 @@ modelled with a simple surface energy-balance model, not measured.
 - Double-click `cities/asphalt-park/index.html`,
   `cities/sponge-retrofit/index.html`, `cities/glass-cbd/index.html`,
   `cities/waterfront/index.html`, `cities/hutong/index.html`,
-  `cities/parking/index.html` or `cities/estate/index.html`.
+  `cities/parking/index.html`, `cities/estate/index.html` or
+  `cities/campus/index.html`.
   Each is one offline file.
 - Or serve the folder and open <http://localhost:8000/>:
 
@@ -66,6 +74,7 @@ modelled with a simple surface energy-balance model, not measured.
 | `P` (block 5) | evening splash at 19:00 on or off |
 | `G` (block 6) | night-release strokes (ground heat flux) on or off |
 | `S` / `C` (block 7) | 大寒 (20 January) shadows and sill tallies / condenser plumes on or off |
+| `I` / `U` (block 8) | water the pitch at 14:00 / contact-burn hatching on or off |
 
 ## Build and test
 
@@ -111,6 +120,11 @@ Key sources per block:
   unverified); Lai, Maing & Ng 2017 (Tmrt and sky view in shade, Hong Kong);
   Cai & Hu 2017 (paving vs grass, Wuhan); Mu et al. 2025 (condenser exhaust,
   Changsha); Bruelisauer et al. 2014 (condenser stacks, Singapore).
+- Block 8, `campus`: Jim 2016 and 2017 (turf vs grass, Hong Kong); Singh
+  et al. 2024 (review of 23 turf studies); Vanos et al. 2016 and 2017
+  (playgrounds, shade sails); Pfautsch et al. 2020 (school shade, New South
+  Wales); McNitt et al. 2008 (watering turf); ISO 13732-1 via CENELEC Guide
+  29 (contact-burn limits; unverified).
 
 ## Licence
 

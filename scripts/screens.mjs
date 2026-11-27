@@ -17,6 +17,7 @@ const WF = 'waterfront';
 const HT = 'hutong';
 const PK = 'parking';
 const ES = 'estate';
+const CPS = 'campus';
 const shots = [
   [AP, 'docs/media/day-1500.jpg', 'hour=15&f=400', { width: 1280, height: 800 }],
   [AP, 'docs/media/thermal-1500.jpg', 'thermal&hour=15&f=400', { width: 1280, height: 800 }],
@@ -131,6 +132,22 @@ const shots = [
     },
   ],
   [ES, 'thumbs/estate.jpg', 'hour=15&f=400&notes=0&ui=0&cam=2.5,215,215', { width: 640, height: 400 }],
+  // block 8: day and thermal at 15:00, the burn hatching, the watered pitch at 14:15, children at play under the sails, the watering card
+  [CPS, 'docs/media/cp-day-1500.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
+  [CPS, 'docs/media/cp-thermal-1500.jpg', 'thermal&hour=15&f=640', { width: 1280, height: 800 }],
+  [CPS, 'docs/media/cp-burn-1500.jpg', 'hour=15&f=640&burn=1&notes=0', { width: 1280, height: 800 }],
+  [CPS, 'docs/media/cp-water-1415.jpg', 'thermal&hour=14.25&f=640&irrigate=1&notes=0&cam=3,160,130', { width: 1280, height: 800 }],
+  [CPS, 'docs/media/cp-kids-1500.jpg', 'hour=15&f=640&notes=0&cam=5.5,325,205', { width: 1280, height: 800 }],
+  [
+    CPS,
+    'docs/media/cp-water-card.jpg',
+    'thermal&hour=14.25&f=640&irrigate=1&notes=0',
+    { width: 1280, height: 800 },
+    async (page) => {
+      await page.click('#campus [data-card="water"]');
+    },
+  ],
+  [CPS, 'thumbs/campus.jpg', 'hour=15&f=400&notes=0&ui=0&cam=2.5,250,170', { width: 640, height: 400 }],
 ];
 const browser = await chromium.launch();
 for (const [city, out, q, viewport, act] of shots) {
