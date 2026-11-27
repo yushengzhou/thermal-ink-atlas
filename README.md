@@ -22,6 +22,13 @@ Hand-inked isometric city blocks that show urban heat through one heat-wave day:
   give it back all night (press `G` for the night-release strokes); the sheds
   and the bare soil cool much sooner. A hot-car card quotes measured cabin
   temperatures (information only, not modelled).
+- Block 7, `estate`: an older high-rise housing estate. The 18-floor slab rows
+  stand far enough apart for two hours of sun at every ground-floor window on
+  the Great Cold day (大寒), yet in July their shadows cover only a sixth of
+  the courtyards at noon (press `S` for the 大寒 shadows and the sill tallies);
+  the AC condensers stacked on the façades put about 43 W/m² over the site
+  into the air on a summer evening, shown as plumes (`C`), not felt by the
+  model's fixed air.
 
 Live: https://yushengzhou.github.io/thermal-ink-atlas/
 
@@ -34,8 +41,8 @@ modelled with a simple surface energy-balance model, not measured.
 
 - Double-click `cities/asphalt-park/index.html`,
   `cities/sponge-retrofit/index.html`, `cities/glass-cbd/index.html`,
-  `cities/waterfront/index.html`, `cities/hutong/index.html` or
-  `cities/parking/index.html`.
+  `cities/waterfront/index.html`, `cities/hutong/index.html`,
+  `cities/parking/index.html` or `cities/estate/index.html`.
   Each is one offline file.
 - Or serve the folder and open <http://localhost:8000/>:
 
@@ -58,6 +65,7 @@ modelled with a simple surface energy-balance model, not measured.
 | `W` / `A` (block 4) | wind lines / water's air overlay on or off |
 | `P` (block 5) | evening splash at 19:00 on or off |
 | `G` (block 6) | night-release strokes (ground heat flux) on or off |
+| `S` / `C` (block 7) | 大寒 (20 January) shadows and sill tallies / condenser plumes on or off |
 
 ## Build and test
 
@@ -99,6 +107,10 @@ Key sources per block:
   al. 2012 (pavement thickness); Takebayashi & Moriyama 2009 (grass parking);
   Scott, Simpson & McPherson 1999 (lot trees); Vanos et al. 2018 and McLaren,
   Null & Quinn 2005 (hot cars).
+- Block 7, `estate`: GB 50180-2018 (the 大寒 sunlight rule; table values
+  unverified); Lai, Maing & Ng 2017 (Tmrt and sky view in shade, Hong Kong);
+  Cai & Hu 2017 (paving vs grass, Wuhan); Mu et al. 2025 (condenser exhaust,
+  Changsha); Bruelisauer et al. 2014 (condenser stacks, Singapore).
 
 ## Licence
 
