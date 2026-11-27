@@ -4954,7 +4954,7 @@ const GLOSSARY = {
     text: 'The surface temperature at which touching it with bare skin starts to burn, for a material and a contact time (ISO 13732-1). Metal conducts heat into the skin fastest, so its limit is lowest.',
     range: '1 min of contact: metal 51 °C, stone, concrete and glass 56 °C, plastics and wood 60 °C; 10 min: 48 °C; bare metal burns in about 1 s at 65–70 °C (unverified).',
     src: 'iso13732, brief9',
-    why: 'A hand on a sunlit handrail or bare legs on a metal bench meet the hottest metal of the street; older people and children pull away more slowly.',
+    why: 'A hand on a sunlit handrail or bare legs on a metal bench meet the hottest metal of the street; the brief advises reading at least 4 s of contact for older people and children.',
     scenes: ['busstop'],
   },
   // ---- block 2 (sponge-retrofit) --------------------------------------------
@@ -6231,7 +6231,7 @@ function glassCard(d) {
       <tr><td>outside by the kerb</td><td>${fmt(E.open[12].tmrt)}</td><td>${fmt(E.open[15].tmrt)}</td><td>${fmt(E.open[17].tmrt)}</td></tr>
       <tr><td>metal bench inside, surface</td><td>${fmt(E.bench[12].ts)}</td><td>${fmt(E.bench[15].ts)}</td><td>${fmt(E.bench[17].ts)}</td></tr>
     </table>
-    <p class="note">The glass takes off only a fifth of the sun, from every side, so people inside get nearly what they would get outside: ${fmt(E.open[15].tmrt - E.centre[15].tmrt)} K less Tmrt at 3 pm. Without a breeze the air inside a sunlit box also warms up; this model holds the air fixed, so it shows only the radiation.</p>
+    <p class="note">The glass takes off only a fifth of the sun, from every side, so people inside get nearly what they would get outside: ${fmt(E.open[15].tmrt - E.centre[15].tmrt)} K less Tmrt at 3 pm, far from the 20–35 K an opaque roof gives (the brief's band 1 is for opaque shelters; this row is supplementary in docs/sources.md). Without a breeze the air inside a sunlit box also warms up; this model holds the air fixed, so it shows only the radiation.</p>
     <p class="lit">Houston, 17 stops: enclosed shelters without overhead shade were more than 3 °C (WBGT) hotter than standing in the open sun; tree shade was 3.2 °C cooler (Lanza et al. 2025).</p>
     <p class="caveat">Air fixed: no heat trap, no greenhouse effect inside the box; the glass transmission is the block-3 clear glass at normal incidence (less at a glancing angle, not modelled); the glass reflects no sunlight here.</p>
     ${srcLine(['lanza2025', 'brief3', 'brief9'])}`;
@@ -6296,7 +6296,7 @@ function burnCard(d) {
       <tr><td>surface at 15:00</td><td>model</td><td>1-min limit</td><td>flag</td></tr>
       ${rows}
     </table>
-    <p class="note">Press <kbd>U</kbd>: every bench seat, handrail and deck point above its 1-min limit at this hour carries a flag, "1 s" where metal passes about ${BS.burn1s.value} °C. A hand on a rail or a bare leg on a bench stays in contact for seconds to minutes.</p>
+    <p class="note">Press <kbd>U</kbd>: every bench seat, handrail and deck point above its 1-min limit at this hour carries a flag, "1 s" where metal passes about ${BS.burn1s.value} °C. A hand on a rail or a bare leg on a bench can stay in contact for seconds or longer.</p>
     <p class="lit">Bare metal burns in about 1 s at 65–70 °C (unverified); the brief advises reading at least 4 s of contact for older people and children. The US Consumer Product Safety Commission warns that sunlit steel decks can burn in seconds; sunlit metal reached 62 °C in Las Vegas.</p>
     <p class="caveat">The ISO values are for healthy adult skin; the limits depend on the material and the contact time, and the model gives surface temperatures, not skin. Rails and decks are thin plates heated from above only, so their temperatures are upper bounds.</p>
     ${srcLine(['iso13732', 'brief9', 'cpsc', 'lasVegas'])}`;

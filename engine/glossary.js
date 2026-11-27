@@ -364,7 +364,7 @@ export const GLOSSARY = {
     text: 'The surface temperature at which touching it with bare skin starts to burn, for a material and a contact time (ISO 13732-1). Metal conducts heat into the skin fastest, so its limit is lowest.',
     range: '1 min of contact: metal 51 °C, stone, concrete and glass 56 °C, plastics and wood 60 °C; 10 min: 48 °C; bare metal burns in about 1 s at 65–70 °C (unverified).',
     src: 'iso13732, brief9',
-    why: 'A hand on a sunlit handrail or bare legs on a metal bench meet the hottest metal of the street; older people and children pull away more slowly.',
+    why: 'A hand on a sunlit handrail or bare legs on a metal bench meet the hottest metal of the street; the brief advises reading at least 4 s of contact for older people and children.',
     scenes: ['busstop'],
   },
   // ---- block 2 (sponge-retrofit) --------------------------------------------
