@@ -87,3 +87,74 @@ export function calibrateMesquite(lo = 0.02, hi = 0.8, tol = 0.02) {
   const last = steps[steps.length - 1];
   return { tr: last.tr, d: last.d, steps };
 }
+
+/** Walkers and the people dwelling at hour h: walkers' shade density ratio; dwellers in shade. */
+export function walkers11(hour = 15) {
+  const { world, T } = base11();
+  const cacheShade = new Map();
+  const shadeFor = (hq) => {
+    if (!cacheShade.has(hq)) cacheShade.set(hq, shadeClassField(world, T.sun(hq)));
+    return cacheShade.get(hq);
+  };
+  const life = new Life(SCENE, shadeFor, (h) => T.air(h));
+  const sh = shadeFor(hour);
+  const frames = [400, 1600, 2800, 4000];
+  const dens = frames.map((f) => shadeDensity(world, life.at(f / 60, hour).filter((a) => !a.sit), sh));
+  const P = life.plan(hour);
+  const spots = P.dwell.map(([s]) => SCENE.spots[s]);
+  const inShade = spots.filter((s) => shadeAt(sh, s.x, s.y) !== 0).length;
+  return { ratio: dens.reduce((a, x) => a + x.ratio, 0) / dens.length, dwellers: spots.length, shade: inShade / spots.length, choice: P.choice };
+}
+
+/**
+ * Block 11 acceptance bands (spec #17, the brief's bands at 15:00).
+ * Rows: {label, value, lo, hi, unit, src, inside, supp}; supplementary rows
+ * are reported and not counted. Defined before the first band run.
+ */
+export function bands11() {
+  const { st } = base11();
+  const rows = [];
+  const add = (label, value, lo, hi, src, unit = '', o = {}) => rows.push({ label, value: Math.round(value * 1000) / 1000, lo, hi, unit, src, supp: !!o.supp, inside: (lo === null || value >= lo - 1e-9) && (hi === null || value <= hi + 1e-9) });
+  const h = DS.hour.value;
+  const nn = DS.noon.value;
+  const ni = DS.night.value;
+  const S = st.shade;
+  add(`1. Sunlit open gravel at 15:00 (n ${st.gravel.n}), °C`, st.gravel.ts15, 55, 63, 'middel2021', '°C');
+  add(`1. Supplementary: the plaza's open gravel in full sun at 15:00 (n ${st.ref[h].n}), °C`, st.ref[h].ts, 55, 63, 'middel2021', '°C', { supp: true });
+  const c = st.coat[h];
+  add(`2. Main Street coated − the same street bare at 15:00 (n ${c.n} sunlit cells), K`, c.dTs, null, -5, 'coolPave2024', 'K');
+  add('2. Supplementary: the same at 12:00, K', st.coat[nn].dTs, null, -5, 'coolPave2024', 'K', { supp: true });
+  add(`2. Supplementary: Main Street coated − the cross street's bare asphalt at 15:00 (n ${st.cross.n}), K`, c.ts - st.cross.ts15, null, -5, 'coolPave2024', 'K', { supp: true });
+  add(`3. Irrigated lawn in full sun at 15:00 (n ${st.lawn.n}): surface − air, K`, st.lawn.ts15 - st.air[h], null, 2, 'middel2021', 'K');
+  add(`4. Irrigated lawn: water evaporated over the day, mean of ${st.lawn.n ? 'the open lawn' : ''} cells, mm (= L m⁻²)`, st.lawn.evap, 5, 7, 'az1195', 'mm');
+  add('4. Supplementary: the same, lowest cell, mm', st.lawn.evapMin, 5, 7, 'az1195', 'mm', { supp: true });
+  add('4. Supplementary: the same, highest cell, mm', st.lawn.evapMax, 5, 7, 'az1195', 'mm', { supp: true });
+  add(`5. The plaza's open gravel in full sun at 15:00 (n ${st.ref[h].n}): Tmrt, °C`, st.ref[h].tmrt, 65, 76, 'middel2021', '°C');
+  add(`5. Supplementary: all sunlit open gravel at 15:00 (n ${st.gravel.n}): Tmrt, °C`, st.gravel.tmrt15, 65, 76, 'middel2021', '°C', { supp: true });
+  add(`5. Supplementary: the cross street's sunlit asphalt at 15:00: Tmrt, °C`, st.cross.tmrt15, 65, 76, 'middel2021', '°C', { supp: true });
+  add(`6. Under the shade sails at 15:00 (n ${S.sail[h].n}): Tmrt − open sun, K`, S.sail[h].d, -20, -14, 'middel2021', 'K');
+  add(`6. Under the ramada at 15:00 (n ${S.ramada[h].n}): Tmrt − open sun, K`, S.ramada[h].d, -20, -14, 'middel2021', 'K');
+  add(`6. Supplementary: under the café patio roof at 15:00 (n ${S.patio[h].n}, concrete): Tmrt − open sun, K`, S.patio[h].d, -20, -14, 'middel2021', 'K', { supp: true });
+  add(`7. Supplementary (by construction: the crown is calibrated to it): under the mesquites at 15:00 (n ${S.mesquite[h].n}): Tmrt − open sun, K`, S.mesquite[h].d, -20, -14, 'middel2021', 'K', { supp: true });
+  add(`7. Under the palo verdes at 15:00 (n ${S.paloVerde[h].n}; semi-constructed: the mesquite's calibrated crown): Tmrt − open sun, K`, S.paloVerde[h].d, -20, -14, 'middel2021', 'K');
+  add(`8. Under the arcade at 15:00 (n ${S.arcade[h].n}): Tmrt − open sun, K`, S.arcade[h].d, -31, -20, 'middel2021', 'K');
+  for (const k of ['sail', 'ramada', 'arcade', 'mesquite']) add(`9. After sunset (${ni}:00), under ${k === 'sail' ? 'the sails' : k === 'ramada' ? 'the ramada' : k === 'arcade' ? 'the arcade' : 'the mesquites'} (n ${S[k][ni].n}): Tmrt − the open plaza, K`, S[k][ni].d, 0, 5, 'middel2021', 'K');
+  add(`9. Supplementary: after sunset, under the palo verdes (n ${S.paloVerde[ni].n}), K`, S.paloVerde[ni].d, 0, 5, 'middel2021', 'K', { supp: true });
+  add(`10. A person on Main Street at 15:00: Tmrt coated − bare, K`, c.dTmrt, 2.5, 3.2, 'coolPave2024', 'K');
+  add('10. Supplementary: the same at 12:00, K', st.coat[nn].dTmrt, 2.5, 3.2, 'coolPave2024', 'K', { supp: true });
+  const wk = walkers11(h);
+  add('Walkers at 15:00: density in shade over density in sun', wk.ratio, 2, null, 'melnikov');
+  add(`People dwelling at 15:00 (n ${wk.dwellers}) whose place is in shade`, wk.shade, 0.5, null, 'melnikov');
+  return rows;
+}
+
+/** Band verdicts 1-10: met if every counted row of the band is inside. */
+export function bandVerdicts(rows) {
+  const out = {};
+  for (const r of rows) {
+    const m = /^(\d+)\. /.exec(r.label);
+    if (!m || r.supp) continue;
+    out[m[1]] = (out[m[1]] ?? true) && r.inside;
+  }
+  return out;
+}
