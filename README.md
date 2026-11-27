@@ -3,6 +3,8 @@
 A hand-inked isometric city block that shows urban heat: an old asphalt street
 next to a shady pocket park, through one heat-wave day.
 
+Live: https://yushengzhou.github.io/thermal-ink-atlas/
+
 The block is simulated and invented (not a real address). Temperatures are
 modelled with a simple surface energy-balance model, not measured.
 
