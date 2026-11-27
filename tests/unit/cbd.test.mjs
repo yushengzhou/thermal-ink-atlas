@@ -248,3 +248,9 @@ test('glass block spot stats are reproducible', () => {
   const b = spotStats(setup, world, 'clear', 15);
   assert.equal(a.dTmrt, b.dTmrt);
 });
+
+test('glass façades must be axis-aligned (the coverage clipping assumes it)', () => {
+  const { world } = B;
+  const bad = [{ ...glassFacades(world)[0], n: [Math.SQRT1_2, Math.SQRT1_2] }];
+  assert.throws(() => reflectField(world, solarPosition(SCENE.site, 15), { n: world.n, cell: world.cell, S: 2 }, () => true, { facades: bad }), /axis-aligned/);
+});

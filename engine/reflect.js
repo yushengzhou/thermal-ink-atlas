@@ -144,6 +144,10 @@ export function reflectField(world, sun, grid, ground, opts = {}) {
   const w = 1 / (S * S);
   for (const f of facades) {
     const [nx, ny] = f.n;
+    // The coverage clipping below measures distance in front of the façade
+    // along one grid axis, so it assumes axis-aligned boxes (normals S, N, E
+    // or W). Rotated façades would need a different footprint overlap.
+    if (!((Math.abs(nx) === 1 && ny === 0) || (nx === 0 && Math.abs(ny) === 1))) throw new Error(`glass façade ${f.face} of building ${f.b}: normal must be axis-aligned`);
     const cosT = sv[0] * nx + sv[1] * ny; // cos(theta) = cos(beta) cos(delta az)
     if (cosT <= 1e-4) continue;
     const theta = Math.acos(Math.min(1, cosT)) / DEG;

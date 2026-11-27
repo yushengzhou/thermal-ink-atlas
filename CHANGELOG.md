@@ -29,7 +29,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions: [Sem
 - Third block, `glass-cbd`: an invented CBD block with glass curtain-wall towers, street canyons (H/W about 2.3–2.6) and a small plaza, as one offline HTML file (#8).
 - Specular reflection of the sun off glass façades: a single bounce with Fresnel reflectance (n = 1.52) scaled to each glass type, landing as reflection spots on the street; flat façades never focus (#8).
 - Glass types clear (ρ₀ 0.08), solar-control low-e (0.20, the default) and mirror (0.35), with buttons, `G` / `Shift+G` and `?glass=clear|lowe|mirror` (#8).
-- Glass wall temperature (Ta + a_g I_f / (h_o + h_i)) and glass emissivity in the longwave the street sees (#8).
+- Glass wall temperature (Ta + a_g I_f / (h_o + h_i), I_f = I cos θ + 0.5 D, as in the brief) and glass emissivity in the longwave the street sees (#8).
 - Reflection spots in the day view (a pale glint wash with a fine ink hatch) and in the thermal view (#8).
 - Walkers weigh reflection spots by their Tmrt, so they avoid glare even in shade; the sweat cue follows Tmrt in spots too (#8).
 - Cards: street canyon (sky view, day shade, night lag), each glass type (ρ₀, spot ΔTmrt), the reflection spot ("out of the sun, still hot"), AC rejected heat (an overlay, not felt in the model) and the concave-façade extreme case (#8).
@@ -45,4 +45,5 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions: [Sem
 - Engine: the model's per-minute step is a separate function (same arithmetic); block 3 starts each run with six coarse 10-min days before the 1-min days (the convergence test is unchanged) and uses a 32-direction horizon scan. Each block loads in under 1.5 s locally (#8).
 
 ### Fixed
+- The glossary entry "Reflection spot" in `docs/sources.md` no longer reads "In this model: undefined"; block-3-only terms are quoted with block 3's numbers (#8).
 - Dragging the hour slider no longer stutters: frames stay at 60 fps while new hours are baked a few tiles per frame and pre-baked in idle time; the exact frame is restored on release (#3).
