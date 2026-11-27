@@ -18,7 +18,7 @@ const close = '<button class="x" aria-label="close">×</button>';
 export function htNotes(scene, d) {
   const text = {
     lane: [`Jujube Lane, 5 m wide, 4 m walls (H/W ${f2(d.laneHw)}):`, `at noon ${pct(d.laneNoon)} of the floor is in sun`],
-    roofs: [`Grey tile roofs ${fmt(d.roof15)} °C at 3 pm`],
+    roofs: [`Grey tile roofs ${fmt(d.roof15)} °C at 3 pm,`, "above the brief's 50–62 °C (see docs/sources.md)"],
     awning: ['Under the mat awning (天棚):', `Tmrt ${fmt(d.awningTmrt)} °C; open courtyard sun ${fmt(d.sunTmrt)} °C`],
     splash: [`Splash at 19:00 (P): Lantern Lane ${sgn(d.d20)} K by 20:00,`, `${sgn(d.d23)} K at 23:00`],
     tree: ['Pagoda trees on the main lane:', `Tmrt ${fmt(d.treeTmrt)} °C beneath, ${fmt(d.laneSunTmrt)} °C in the sun`],
@@ -79,9 +79,9 @@ export function tianpengCard(d) {
   return `
     ${close}
     <h3>天棚 · The summer mat awning</h3>
-    <div class="mat">天棚鱼缸石榴树 · "tianpeng, fish bowl, pomegranate tree"</div>
-    <p lang="zh-Hans">老北京夏天在院里搭天棚：芦席棚顶高出屋檐，四周席子可卷起通风；李滨声以“天棚鱼缸石榴树”描绘四合院夏景（邓云乡《天棚遮阴》）。院中多种枣树、槐树，石榴寓意多子。傍晚往地上泼水降温，与日本江户时代以来的“打水”（打ち水）同理。</p>
-    <p lang="en">In old Beijing summers a family built a tianpeng over the courtyard: a roof of reed mats on poles, higher than the eaves, with side mats that roll up to let the air through. The cartoonist Li Binsheng summed up a courtyard summer as "tianpeng, fish bowl, pomegranate tree" (Deng Yunxiang, "Tianpeng zheyin"). Courtyards were planted with jujube and pagoda trees, and the pomegranate stands for many children. Splashing water on the ground in the evening cools it, the same idea as Japan's uchimizu, practised since the Edo period.</p>
+    <div class="mat">天棚鱼缸石榴树 · an old Beijing saying: "tianpeng, fish bowl, pomegranate tree"</div>
+    <p lang="zh-Hans">老北京夏天在院里搭天棚：芦席棚顶高出屋檐，四周席子可卷起通风。老北京俗语“天棚鱼缸石榴树”说的就是四合院的夏景，漫画家李滨声曾以此作画（见邓云乡《天棚遮阴》）。院中多种枣树、槐树，石榴寓意多子。傍晚往地上洒水降温，与日本江户时代以来的“打ち水”（洒水）同理。</p>
+    <p lang="en">In old Beijing summers a family built a tianpeng over the courtyard: a roof of reed mats on poles, higher than the eaves, with side mats that roll up to let the air through. An old Beijing saying sums up a courtyard summer as "tianpeng, fish bowl, pomegranate tree"; the cartoonist Li Binsheng drew it (as recorded by Deng Yunxiang, "Tianpeng zheyin"). Courtyards were planted with jujube and pagoda trees, and the pomegranate stands for many children. Sprinkling water on the ground in the evening cools it, the same idea as Japan's uchimizu (打ち水), practised since the Edo period.</p>
     <table class="cmp">
       <tr><td></td><td>${gl('tmrt', 'Tmrt')} 15:00</td></tr>
       <tr class="t"><td>under the awning (lets through ${pct(a.tr.value)} of the sun${tag(a.tr)})</td><td>${fmt(c.awning.tmrt)} °C</td></tr>

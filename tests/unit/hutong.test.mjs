@@ -11,7 +11,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { base5, extras5, bands5, walkers5 } from '../../scripts/hutong.mjs';
 import { bands5Markdown } from '../../scripts/hutong-docs.mjs';
-import { satVapour, specificHumidity, qSat, qSatTable, wetBulb, runModel, sunSlots, svfGridAt, svfAt, buildingMaskRay, SIGMA } from '../../engine/thermal.js';
+import { satVapour, specificHumidity, qSat, qSatTable, wetBulb, runModel, sunSlots, svfGridAt, svfAt, buildingMaskRay, buildingMaskPoly, stepSplash, CP_AIR, LATENT, SLOTS, SIGMA } from '../../engine/thermal.js';
 import { rasterise, rasteriseScan, solarPosition, boxShadow } from '../../engine/sun.js';
 import { buildWorld } from '../../engine/world.js';
 import { MATERIALS, MODEL, SOURCES, BASIS, paramKeys } from '../../engine/materials.js';
@@ -51,6 +51,56 @@ test('the water store: never negative, mass balance closes, one splash evaporate
   const set = new Set(setup.cells);
   for (let i = 0; i < 6400; i++) if (!set.has(i)) assert.equal(wet.water(i, 21), 0);
   assert.equal(setup.base().water(setup.cells[0], 21), 0, 'the dry model has no store');
+});
+
+/** One wet cell for stepSplash: a sunlit open patch of grey brick (no restore term, so Ts follows G only). */
+function oneCell(W, beta, wc, Ts) {
+  const m = MATERIALS.greyBrick;
+  return {
+    NN: 1, water: Uint8Array.of(0), svf: Float32Array.of(1), alpha: Float32Array.of(m.alpha.value), eps: Float32Array.of(m.eps.value),
+    cap: Float32Array.of(1e-5), restore: Float32Array.of(0), ef: Float32Array.of(0), cw: Float32Array.of(0), cwa: Float32Array.of(0),
+    Ts: Float32Array.of(Ts), Td: Float32Array.of(Ts), sumDay: new Float64Array(1), hc: 9.5, hcA: null, dt: 60, wt: new Float64Array(4),
+    WS: { wet: Uint8Array.of(1), W: Float64Array.of(W), evap: new Float64Array(1), qa: specificHumidity(25), beta, wc, efOn: false, efWet: 1 },
+  };
+}
+const ONE = [Float32Array.of(1), Float32Array.of(1)];
+
+test('water store, step by step: W follows an independent integration of the bulk flux from W0', () => {
+  const C = oneCell(1.0, 0.5, 0.2, 273.15 + 40);
+  const taK = 273.15 + 32;
+  const lsky = 400;
+  let W = 1.0;
+  let evap = 0;
+  for (let k = 0; k < 600; k++) {
+    // the flux restated here from the formula, with the exact q_sat (the model reads a table)
+    const T = C.Ts[0];
+    const dq = qSat(T - 273.15) - C.WS.qa;
+    let E = dq > 0 ? 0.5 * Math.min(1, W / 0.2) * (9.5 / CP_AIR) * dq : 0;
+    if (E * 60 > W) E = W / 60;
+    W -= E * 60;
+    evap += E * 60;
+    stepSplash(C, ONE[0], ONE[1], 0, 300, 50, 0, 0, lsky, 0, taK);
+    assert.ok(Math.abs(C.WS.W[0] - W) < 1e-6, `step ${k}: model W ${C.WS.W[0]} vs integrated ${W}`);
+  }
+  assert.ok(W < 0.95, `the patch dries: W ${W}`);
+  assert.ok(Math.abs(C.WS.evap[0] - evap) < 1e-6 && Math.abs(1.0 - C.WS.W[0] - C.WS.evap[0]) < 1e-12, 'W0 = W + evaporated');
+  assert.ok(C.WS.evap[0] * LATENT > 0);
+});
+
+test('water store, cap: a step that would evaporate more than is left empties the store exactly, never below 0', () => {
+  // a hot, wet-looking patch with almost no water: beta 1, tiny W_c, so E dt >> W
+  const C = oneCell(1e-5, 1, 1e-9, 273.15 + 60);
+  const before = C.Ts[0];
+  stepSplash(C, ONE[0], ONE[1], 0, 800, 100, 0, 0, 450, 0, 273.15 + 35);
+  assert.equal(C.WS.W[0], 0, 'store emptied exactly');
+  assert.equal(C.WS.evap[0], 1e-5, 'evaporated what was there');
+  const D = oneCell(0, 1, 1e-9, 273.15 + 60);
+  stepSplash(D, ONE[0], ONE[1], 0, 800, 100, 0, 0, 450, 0, 273.15 + 35);
+  // the capped latent heat is the difference between the two cells' warming: L x 1e-5 kg over the step
+  const dT = (D.Ts[0] - before) - (C.Ts[0] - before);
+  assert.ok(Math.abs(dT - 1e-5 * 1e-5 * LATENT) < 1e-3, `latent cooling ${dT}`);
+  for (let k = 0; k < 10; k++) stepSplash(C, ONE[0], ONE[1], 0, 800, 100, 0, 0, 450, 0, 273.15 + 35);
+  assert.equal(C.WS.W[0], 0);
 });
 
 test('splash bands (spec #10): peak −3 to −8 K within 1 h, −1 to −6 K at 23:00, |ΔTs| ≤ 1.5 K the next afternoon, Tmrt −0.5 to −3.5 K', () => {
@@ -93,8 +143,9 @@ test('an empty water store reproduces the dry model bit for bit (block 1 world, 
   assert.equal(diff, 0, 'W0 = 0 must give the dry model exactly');
   const { world, slots: sl, dry } = base5();
   const cells = splashCells(world).slice(0, 60);
-  const c = runModel(world, { slots: sl, warm: 6, cells });
-  const d = runModel(world, { slots: sl, warm: 6, cells, splash: { cells, ...splashParams(), w0: 0 } });
+  // no coarse spin-up on either side (the guard turns it off for wet runs: latent coupling at 340 K)
+  const c = runModel(world, { slots: sl, cells, minDays: 3, maxDays: 3 });
+  const d = runModel(world, { slots: sl, cells, minDays: 3, maxDays: 3, splash: { cells, ...splashParams(), w0: 0 } });
   for (const i of cells) for (let k = 0; k < 96; k++) assert.equal(d.store[i * 96 + k], c.store[i * 96 + k]);
   assert.ok(dry.info.days >= 3);
 });
@@ -144,22 +195,43 @@ test('lane geometry (spec #10): noon sunlit share within ±0.05 of 1 − (H/tan 
   assert.deepEqual(laneInterior(world, { y0: 65, y1: 70 }).length, lanes.find((l) => l.id === 'jujube').n);
 });
 
-test('fine shade samples: the ray-marched building mask and the scanline rasteriser equal the polygon rasteriser', () => {
+test('fine shade samples: the ray-marched building mask equals the cast-shadow polygons on every ground and roof sample, every daylight slot', () => {
   const { world } = base5();
   const S = world.shadeS;
   assert.equal(S, 4);
-  for (const h of [6.5, 9, 12.27, 15, 18.5]) {
-    const sun = solarPosition(SCENE.site, h);
-    const polys = world.buildings.map((B) => boxShadow(B.x0, B.y0, B.x1, B.y1, B.h, sun));
-    const a = new Uint8Array(world.n * world.n * S * S);
-    rasterise(polys, { nx: world.n, ny: world.n, cell: world.cell }, (i, p, s) => {
-      if (world.bld[i] < 0) a[i * S * S + s] = 1;
-    }, S);
-    const r = buildingMaskRay(world, sun);
+  const same = (w, sun) => {
+    const a = buildingMaskPoly(w, sun);
+    const r = buildingMaskRay(w, sun);
     let diff = 0;
-    for (let k = 0; k < a.length; k++) if (world.bld[Math.floor(k / (S * S))] < 0 && a[k] !== r[k]) diff++;
-    assert.equal(diff, 0, `${h} h: ${diff} samples differ`);
+    for (let k = 0; k < a.length; k++) if (a[k] !== r[k]) diff++;
+    return diff;
+  };
+  let slots = 0;
+  for (let k = 0; k < SLOTS; k++) {
+    const sun = solarPosition(SCENE.site, (k * 24) / SLOTS);
+    if (sun.alt <= 0) continue;
+    slots++;
+    assert.equal(same(world, sun), 0, `slot ${k}`);
   }
+  assert.ok(slots > 80, `${slots} daylight slots`);
+  // a test block with houses of 4, 7 and 12 m: lower roofs are shaded by taller neighbours
+  const rect = (x0, y0, x1, y1) => [x0, y0, x1, y0, x1, y1, x0, y1];
+  const test = buildWorld({ size: 100, seed: 1, shadeSamples: 4, ground: [{ id: 'g', name: 'g', mat: 'greyBrick', poly: rect(0, 0, 100, 100) }], trees: [], buildings: [
+    { id: 'a', x0: 20, y0: 20, x1: 40, y1: 30, h: 12, roof: 'greyTile' },
+    { id: 'b', x0: 20, y0: 30, x1: 40, y1: 45, h: 4, roof: 'greyTile' },
+    { id: 'c', x0: 45, y0: 20, x1: 55, y1: 60, h: 7, roof: 'greyTile' },
+    { id: 'd', x0: 55, y0: 20, x1: 70, y1: 60, h: 4, roof: 'greyTile' },
+  ] }, { svf: false });
+  let roofShaded = 0;
+  for (let k = 0; k < SLOTS; k++) {
+    const sun = solarPosition(SCENE.site, (k * 24) / SLOTS);
+    if (sun.alt <= 0) continue;
+    assert.equal(same(test, sun), 0, `test block, slot ${k}`);
+    const r = buildingMaskRay(test, sun);
+    for (let c = 0; c < test.n * test.n; c++) if (test.bld[c] >= 0) for (let q = 0; q < 16; q++) roofShaded += r[c * 16 + q];
+  }
+  assert.ok(roofShaded > 100, 'roof samples are exercised');
+  // and the scanline rasteriser equals the per-sample one on random (also self-intersecting) polygons
   const rng = makeRng(7);
   for (let t = 0; t < 40; t++) {
     const pts = [];

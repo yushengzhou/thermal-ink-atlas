@@ -99,7 +99,7 @@ export function bands5() {
   add(`Water evaporated from one splash before the next, largest over the wet-able cells (n ${setup.cells.length}), minus W0`, s.perSplash - s.w0, null, 0, 'brief5', 'mm');
   add('Water store: mass balance error, |evaporated − (start − before the splash + W0 − end)|, largest cell', s.balanceErr, null, 1e-9, 'engine', 'mm');
   add('Water store: smallest W over the day (never negative)', s.wMin, 0, null, 'engine', 'mm');
-  add('Wet paving minus the wet-bulb temperature of the air, smallest while water is left', s.margin, 0, null, 'brief5', 'K');
+  add('Wet paving minus the wet-bulb temperature of the air, smallest at any model minute (last model day) while water is left', s.margin, 0, null, 'brief5', 'K');
   add('The old evaporation term alone (EF := 1 from 19:00, no water store): largest |ΔTs| on the splashed lanes, 19:00–24:00', ex.ef.max, null, 0.5 - 1e-9, 'brief5', 'K');
   add('Splashed lanes: ΔTmrt at 20:00', s.tmrt20, -3.5, -0.5, 'brief5', 'K');
   add('Splashed lanes: ΔTmrt at 21:00', s.tmrt21, -3.5, -0.5, 'brief5', 'K');

@@ -149,28 +149,19 @@ export function splashLaneCells(world) {
  * splash (18:45) and the next afternoon (15:00 of the repeated day), mean
  * ΔTmrt, water left; and over all wet-able cells: the largest evaporated
  * depth and the smallest Ts minus the air's wet-bulb temperature while water
- * is left.
+ * is left (every model minute, from the model run).
  */
 export function splashStats(world, dry, wet, cells, all) {
   const p = splashParams();
-  const e = world.scene.site.vapourHpa;
   const d = (h) => mean(cells.map((i) => wet.ts(i, h) - dry.ts(i, h)));
   const dm = (h) => mean(cells.map((i) => wet.tmrt(i, h) - dry.tmrt(i, h)));
   const curve = [];
   for (let h = p.hour; h <= 24; h += 0.25) curve.push({ h, dTs: d(h % 24), w: mean(cells.map((i) => wet.water(i, h % 24))) });
   let peak = curve[0];
   for (const c of curve) if (c.h <= p.hour + 1 && c.dTs < peak.dTs) peak = c;
-  let margin = Infinity;
-  let marginAt = null;
-  const tw = Array.from({ length: STORE }, (_, k) => wetBulb(wet.air((k * 24) / STORE), e));
-  for (const i of all) {
-    for (let k = 0; k < STORE; k++) {
-      const h = (k * 24) / STORE;
-      if (wet.water(i, h) <= 1e-6) continue;
-      const m = wet.ts(i, h) - tw[k];
-      if (m < margin) [margin, marginAt] = [m, { i, h }];
-    }
-  }
+  // the wet-bulb check runs inside the model, every minute of the last model day (thermal.js)
+  const margin = wet.info.wet.margin;
+  const marginAt = wet.info.wet.marginAt;
   const tm = [];
   for (let h = p.hour + 0.5; h <= 22; h += 0.25) tm.push(dm(h));
   return {

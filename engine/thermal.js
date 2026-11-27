@@ -189,6 +189,11 @@ const rasterFor = (world) => (world.shadeS ? rasteriseScan : rasterOne);
  */
 export function buildingMask(world, sun) {
   if (world.shadeS && !(world.awnings && world.awnings.length)) return buildingMaskRay(world, sun);
+  return buildingMaskPoly(world, sun);
+}
+
+/** The cast-shadow polygon version of buildingMask (blocks 1-4; block 5's ray mask is checked against it). */
+export function buildingMaskPoly(world, sun) {
   const { n, cell } = world;
   const N = n * n;
   const S = samplesOf(world);
@@ -228,7 +233,8 @@ export function buildingMaskRay(world, sun) {
   const N = n * n;
   const S = samplesOf(world);
   const bmask = new Uint8Array(N * S * S);
-  if (sun.alt <= 0) return bmask;
+  // as the cast-shadow polygons (sun.js shadowOffset): no building shadows below 0.5 deg
+  if (sun.alt <= 0.5) return bmask;
   const tanA = Math.tan(sun.alt * DEG);
   const b = sun.az * DEG;
   const dx = Math.sin(b); // toward the sun: x east, y south
@@ -519,6 +525,8 @@ export function runModel(world, opts = {}) {
       efOnly: !!sp.efOnly, // the old path alone: EF := efWet from the splash hour to midnight, no store
       efWet: sp.efWet ?? 1,
       efOn: false,
+      margin: Infinity, // smallest Ts - wet-bulb of the air over wet cells holding water, every model minute (last day)
+      marginAt: null,
     };
   }
 
@@ -545,6 +553,8 @@ export function runModel(world, opts = {}) {
     if (lglass) for (let o = 0; o < 4; o++) lglass[m * 4 + o] = glassLongwave(glass, ta[m], ir, s, FACES[o]);
   }
   const taMean = taSum / M;
+  // block 5: the air's wet-bulb temperature per minute (K), for the wet-surface check
+  const twK = WS ? Float64Array.from(ta, (t) => wetBulb(t, site.vapourHpa) + K0) : null;
 
   const Ts = new Float32Array(NN).fill(taMean + K0);
   const Td = new Float32Array(NN).fill(taMean + K0);
@@ -564,6 +574,8 @@ export function runModel(world, opts = {}) {
       WS.evap.fill(0);
       WS.start.set(WS.W);
       WS.efOn = false;
+      WS.margin = Infinity;
+      WS.marginAt = null;
     }
     for (let m = 0; m < M; m += stepMin) {
       if (WS && m === WS.at) {
@@ -601,6 +613,14 @@ export function runModel(world, opts = {}) {
         for (let k = 1; k <= 3; k++) C.wt[k] = waterTemp(k, taMean, h) + K0;
         stepWind(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK);
       } else stepPlain(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT);
+      if (WS && keep) {
+        for (let i = 0; i < NN; i++) {
+          if (WS.wet[i] && WS.W[i] > 0 && Ts[i] - twK[m] < WS.margin) {
+            WS.margin = Ts[i] - twK[m];
+            WS.marginAt = { i: idx ? idx[i] : i, h };
+          }
+        }
+      }
       if (keep && m % stepsPerStore === 0) {
         const k = m / stepsPerStore;
         for (let i = 0; i < NN; i++) store[i * STORE + k] = Ts[i] - K0;
@@ -647,7 +667,7 @@ export function runModel(world, opts = {}) {
     }
     // per cell, last day: evaporated, and the store at the start, just before the splash and at the end
     // (mass balance: evap = start - before + w0 - end on wet cells)
-    wetInfo = { store: wst, evap: full(WS.evap), start: full(WS.start), before: full(WS.before), end: full(WS.end), wet: full(WS.wet), w0: WS.w0, beta: WS.beta, wc: WS.wc, hour: sp.hour, efOnly: WS.efOnly, qa: WS.qa };
+    wetInfo = { margin: WS.margin, marginAt: WS.marginAt, store: wst, evap: full(WS.evap), start: full(WS.start), before: full(WS.before), end: full(WS.end), wet: full(WS.wet), w0: WS.w0, beta: WS.beta, wc: WS.wc, hour: sp.hour, efOnly: WS.efOnly, qa: WS.qa };
   }
   if (idx) {
     const full = new Float32Array(NF * STORE);
@@ -701,12 +721,13 @@ export function wetBulb(ta, e) {
 
 /**
  * Upper bound of the latent term's coupling dLE/dTs (W m-2 K-1) on wet cells
- * for the coarse-step guard: L beta (h_c / c_p) dq_sat/dT at 313 K (40 C,
- * warmer than any wet surface at the evening splash on the design day).
+ * for the coarse-step guard: L beta (h_c / c_p) dq_sat/dT at 340 K, the same
+ * bound coarseStability uses for the other terms (so it holds for any splash
+ * hour, not only the evening one).
  */
 function latentCoupling(WS, C) {
-  const t = 40;
-  const dq = qSat(t) * ((17.67 * 243.5) / (t + 243.5) ** 2);
+  const t = 340 - K0;
+  const dq = (qSat(t + 0.01) - qSat(t - 0.01)) / 0.02;
   const out = new Float64Array(C.NN);
   for (let i = 0; i < C.NN; i++) if (WS.wet[i]) out[i] = LATENT * WS.beta * ((C.hcA ? C.hcA[i] : C.hc) / CP_AIR) * dq;
   return out;
@@ -717,7 +738,7 @@ function latentCoupling(WS, C) {
  * arithmetic as stepWind, minus LE on wet cells while they hold water.
  * Evaporation is explicit and capped so W never goes below 0.
  */
-function stepSplash(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK) {
+export function stepSplash(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK) {
   const { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, hcA, dt, wt, WS } = C;
   const { wet, W, evap, qa, beta, wc, efOn, efWet } = WS;
   for (let i = 0; i < NN; i++) {

@@ -76,7 +76,10 @@ way, so the sky view here does **not** ignore trees (it is a crude crown factor,
 
 ### Lanes
 
-Lane geometry, from the model's grid (interior cells: walls on both sides, nothing overhead). Sky view: the model,
+Lane geometry, from the model's grid (interior cells: walls on both sides, nothing overhead). n is small (5–14 cells
+per east–west lane) because a cell counts only if the cells just outside both lane edges, and their neighbours along
+the lane, are all walls: gates every 25–35 m and the side lanes break the walls. The cells are picked by geometry
+alone, before any result, and are near-identical. Sky view: the model,
 the endless canyon at the same cell centres (0.5/√(1 + (H/d₁)²) + 0.5/√(1 + (H/d₂)²)) and on the centre line
 (cos(atan(2H/W))). Noon: the model's sunlit share at solar noon (${hhmm(noon.h)}, sun ${f1(noon.alt)}° high) vs 1 − (H/tan β)/W.
 
@@ -89,7 +92,8 @@ Two grid changes make 5 m lanes come out right; both are used only by this block
 - **Shade sampled every 1.25 m** (4 × 4 per 5 m cell instead of 2 × 2): at noon a 4 m wall casts ${f2(lanes.find((l) => l.id === 'jujube').noon.shadow)} m of shadow, which
   the 2.5 m samples of blocks 1–4 miss entirely. The building shade is found by marching each sample's ray toward the
   sun over the height grid (\`buildingMaskRay\`), which gives the same samples as the cast-shadow polygons (checked on
-  every ground sample of the block for 48 sun positions) without visiting the footprints; the crown and screen shadows
+  every ground and roof sample of the block for every daylight 10-min sun slot of the design day, and on a test block
+  with houses of 4, 7 and 12 m, where roofs are shaded too; \`tests/unit/hutong.test.mjs\`) without visiting the footprints; the crown and screen shadows
   use a scanline version of the polygon rasteriser with the same inside rule (\`rasteriseScan\`).
 - **Exact horizon scan** (\`svfGridAt\`): the 2.5 m horizon-scan step of blocks 1–4, started from the cell centre, lands
   exactly on a 5 m lane's wall line and sees the wall at 5 m on one side instead of 2.5 m (sky view 0.71 for the 5 m
@@ -113,9 +117,11 @@ their pages render the same pixels as before, \`tests/e2e/regression.test.mjs\`)
   1-min step q_sat comes from a ${QSAT_DT} K table of the same formula (linear between entries, within 2e-7 kg kg⁻¹; Math.exp per
   cell and minute was the slow part). The wet-bulb check uses the formula itself.
 - Evaporation is explicit and capped so W never goes below 0. The splash model runs the wet-able cells (n ${setup.cells.length}) again
-  with the store (${WARM_HT} coarse spin-up days, the coarse-step guard including the latent coupling at 40 °C; this run:
-  ${wet.info.splashRun.days} 1-min days, max |ΔTd| ${wet.info.splashRun.maxDelta.toFixed(3)} K); the other cells are those of the dry model (no lateral
-  coupling in this model).
+  with the store; the coarse-step guard includes the latent coupling at the same 340 K bound as the other terms, which
+  turns the ${WARM_HT} coarse spin-up days off for wet runs (this run: ${wet.info.splashRun.warm} coarse days, ${wet.info.splashRun.days} 1-min days, max |ΔTd|
+  ${wet.info.splashRun.maxDelta.toFixed(3)} K). The other cells are those of the dry model (no lateral coupling in this model). The dry model and
+  the wet runs each stop when the deep temperature changes by less than 0.05 K a day, so differences between them carry
+  a few hundredths of a kelvin of convergence noise (it is all of the old EF path's ${f2(ex.ef.max)} K).
 - The design day repeats with a splash **every evening**, so the paving's daily mean is lower and the splashed lanes
   are ${f2(Math.abs(s.before))} K cooler even at 18:45, before the splash, and ${f2(Math.abs(s.next15))} K the next afternoon.
 
@@ -133,7 +139,8 @@ ${curve.join('\n')}
 - Water: one splash evaporates at most ${f2(s.perSplash)} of its ${s.w0} mm before the next (what is left at ${p.hour}:00 is topped up, not
   added); the day's evaporation balances the store to ${s.balanceErr.toExponential(1)} mm; the store's day-to-day drift is
   ${s.drift.toExponential(1)} mm (the model day is not exactly periodic). W is never negative.
-- The wet paving stays at least ${f2(s.margin)} K above the air's wet-bulb temperature while water is left.
+- The wet paving stays at least ${f2(s.margin)} K above the air's wet-bulb temperature while water is left (checked
+  inside the model at every 1-min step of the last model day, over all ${setup.cells.length} wet-able cells).
 - Literature: Paris, about 1 L m⁻² per cycle, surface −7.5 K at 19:30 and −6 K at 20:30, lasting several hours
   [hendel2015]; air −0.79 K at most and Tmrt −1.76 K [hendel2016]; Kobe, 0.025 mm per pass, −2 to −4 K at once, gone
   within 30 min in sun, evening recommended [takebayashi2023]; a road 50 → 40 °C in about 60 min [kato2008].

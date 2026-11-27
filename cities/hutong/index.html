@@ -563,7 +563,7 @@ const SOURCES = {
   miller2007: 'Miller (2007), Oak Ridge National Laboratory, via the block-5 brief: ventilated tile roofs run cooler; does not apply to mud-backed, unventilated roofs',
   ucdavis: 'UC Davis guidance, via the block-5 brief: overhead vine arbours give more than 90% cover',
   jjshs: 'J. Japan. Soc. Hort. Sci. 54(3) 293, via the block-5 brief: pergola vines need LAI 2 or more, ideally 3',
-  deng: 'Deng Yunxiang, Tianpeng zheyin (The Paper, newsDetail_forward_18319465), via the block-5 brief: summer mat awnings over Beijing courtyards; Li Binsheng\'s "tianpeng, fish bowl, pomegranate tree"',
+  deng: 'Deng Yunxiang, Tianpeng zheyin (The Paper, newsDetail_forward_18319465), via the block-5 brief: summer mat awnings over Beijing courtyards; the old Beijing saying "tianpeng, fish bowl, pomegranate tree", which the cartoonist Li Binsheng drew',
   visitBeijing: 'Visit Beijing (official tourism site), via the block-5 brief: jujube and pagoda trees in courtyards; the pomegranate stands for many children',
   bolton1980: 'Bolton (1980) Monthly Weather Review 108, 1046-1053: saturation vapour pressure e_s = 6.112 exp(17.67 T / (T + 243.5)) hPa (formula from memory, not checked)',
 };
@@ -1401,6 +1401,11 @@ const rasterFor = (world) => (world.shadeS ? rasteriseScan : rasterOne);
  */
 function buildingMask(world, sun) {
   if (world.shadeS && !(world.awnings && world.awnings.length)) return buildingMaskRay(world, sun);
+  return buildingMaskPoly(world, sun);
+}
+
+/** The cast-shadow polygon version of buildingMask (blocks 1-4; block 5's ray mask is checked against it). */
+function buildingMaskPoly(world, sun) {
   const { n, cell } = world;
   const N = n * n;
   const S = samplesOf(world);
@@ -1440,7 +1445,8 @@ function buildingMaskRay(world, sun) {
   const N = n * n;
   const S = samplesOf(world);
   const bmask = new Uint8Array(N * S * S);
-  if (sun.alt <= 0) return bmask;
+  // as the cast-shadow polygons (sun.js shadowOffset): no building shadows below 0.5 deg
+  if (sun.alt <= 0.5) return bmask;
   const tanA = Math.tan(sun.alt * DEG);
   const b = sun.az * DEG;
   const dx = Math.sin(b); // toward the sun: x east, y south
@@ -1731,6 +1737,8 @@ function runModel(world, opts = {}) {
       efOnly: !!sp.efOnly, // the old path alone: EF := efWet from the splash hour to midnight, no store
       efWet: sp.efWet ?? 1,
       efOn: false,
+      margin: Infinity, // smallest Ts - wet-bulb of the air over wet cells holding water, every model minute (last day)
+      marginAt: null,
     };
   }
 
@@ -1757,6 +1765,8 @@ function runModel(world, opts = {}) {
     if (lglass) for (let o = 0; o < 4; o++) lglass[m * 4 + o] = glassLongwave(glass, ta[m], ir, s, FACES[o]);
   }
   const taMean = taSum / M;
+  // block 5: the air's wet-bulb temperature per minute (K), for the wet-surface check
+  const twK = WS ? Float64Array.from(ta, (t) => wetBulb(t, site.vapourHpa) + K0) : null;
 
   const Ts = new Float32Array(NN).fill(taMean + K0);
   const Td = new Float32Array(NN).fill(taMean + K0);
@@ -1776,6 +1786,8 @@ function runModel(world, opts = {}) {
       WS.evap.fill(0);
       WS.start.set(WS.W);
       WS.efOn = false;
+      WS.margin = Infinity;
+      WS.marginAt = null;
     }
     for (let m = 0; m < M; m += stepMin) {
       if (WS && m === WS.at) {
@@ -1813,6 +1825,14 @@ function runModel(world, opts = {}) {
         for (let k = 1; k <= 3; k++) C.wt[k] = waterTemp(k, taMean, h) + K0;
         stepWind(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK);
       } else stepPlain(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT);
+      if (WS && keep) {
+        for (let i = 0; i < NN; i++) {
+          if (WS.wet[i] && WS.W[i] > 0 && Ts[i] - twK[m] < WS.margin) {
+            WS.margin = Ts[i] - twK[m];
+            WS.marginAt = { i: idx ? idx[i] : i, h };
+          }
+        }
+      }
       if (keep && m % stepsPerStore === 0) {
         const k = m / stepsPerStore;
         for (let i = 0; i < NN; i++) store[i * STORE + k] = Ts[i] - K0;
@@ -1859,7 +1879,7 @@ function runModel(world, opts = {}) {
     }
     // per cell, last day: evaporated, and the store at the start, just before the splash and at the end
     // (mass balance: evap = start - before + w0 - end on wet cells)
-    wetInfo = { store: wst, evap: full(WS.evap), start: full(WS.start), before: full(WS.before), end: full(WS.end), wet: full(WS.wet), w0: WS.w0, beta: WS.beta, wc: WS.wc, hour: sp.hour, efOnly: WS.efOnly, qa: WS.qa };
+    wetInfo = { margin: WS.margin, marginAt: WS.marginAt, store: wst, evap: full(WS.evap), start: full(WS.start), before: full(WS.before), end: full(WS.end), wet: full(WS.wet), w0: WS.w0, beta: WS.beta, wc: WS.wc, hour: sp.hour, efOnly: WS.efOnly, qa: WS.qa };
   }
   if (idx) {
     const full = new Float32Array(NF * STORE);
@@ -1913,12 +1933,13 @@ function wetBulb(ta, e) {
 
 /**
  * Upper bound of the latent term's coupling dLE/dTs (W m-2 K-1) on wet cells
- * for the coarse-step guard: L beta (h_c / c_p) dq_sat/dT at 313 K (40 C,
- * warmer than any wet surface at the evening splash on the design day).
+ * for the coarse-step guard: L beta (h_c / c_p) dq_sat/dT at 340 K, the same
+ * bound coarseStability uses for the other terms (so it holds for any splash
+ * hour, not only the evening one).
  */
 function latentCoupling(WS, C) {
-  const t = 40;
-  const dq = qSat(t) * ((17.67 * 243.5) / (t + 243.5) ** 2);
+  const t = 340 - K0;
+  const dq = (qSat(t + 0.01) - qSat(t - 0.01)) / 0.02;
   const out = new Float64Array(C.NN);
   for (let i = 0; i < C.NN; i++) if (WS.wet[i]) out[i] = LATENT * WS.beta * ((C.hcA ? C.hcA[i] : C.hc) / CP_AIR) * dq;
   return out;
@@ -2359,7 +2380,7 @@ function paletteLut() {
 }
 
 
-return { SIGMA, SLOTS, STORE, LATENT, WATER_KIND, isWater, waterTemp, daylight, airTemp, irradiance, skyEmissivity, svfAt, svfGridAt, shadowPolys, screenShadow, buildingMask, buildingMaskRay, sunlitField, shadeClassField, sunSlots, cellMat, runModel, CP_AIR, P_AIR, satVapour, specificHumidity, qSat, QSAT_T0, QSAT_DT, qSatTable, wetBulb, coarseStability, wallTemp, wallReflectCoef, wallShortwave, glassLongwave, Thermal, PALETTE_STOPS, heatRgb, paletteLut };
+return { SIGMA, SLOTS, STORE, LATENT, WATER_KIND, isWater, waterTemp, daylight, airTemp, irradiance, skyEmissivity, svfAt, svfGridAt, shadowPolys, screenShadow, buildingMask, buildingMaskPoly, buildingMaskRay, sunlitField, shadeClassField, sunSlots, cellMat, runModel, CP_AIR, P_AIR, satVapour, specificHumidity, qSat, QSAT_T0, QSAT_DT, qSatTable, wetBulb, stepSplash, coarseStability, wallTemp, wallReflectCoef, wallShortwave, glassLongwave, Thermal, PALETTE_STOPS, heatRgb, paletteLut };
 })();
 
 __m['wind'] = { isWindBlock: () => false };
@@ -5887,28 +5908,19 @@ function splashLaneCells(world) {
  * splash (18:45) and the next afternoon (15:00 of the repeated day), mean
  * ΔTmrt, water left; and over all wet-able cells: the largest evaporated
  * depth and the smallest Ts minus the air's wet-bulb temperature while water
- * is left.
+ * is left (every model minute, from the model run).
  */
 function splashStats(world, dry, wet, cells, all) {
   const p = splashParams();
-  const e = world.scene.site.vapourHpa;
   const d = (h) => mean(cells.map((i) => wet.ts(i, h) - dry.ts(i, h)));
   const dm = (h) => mean(cells.map((i) => wet.tmrt(i, h) - dry.tmrt(i, h)));
   const curve = [];
   for (let h = p.hour; h <= 24; h += 0.25) curve.push({ h, dTs: d(h % 24), w: mean(cells.map((i) => wet.water(i, h % 24))) });
   let peak = curve[0];
   for (const c of curve) if (c.h <= p.hour + 1 && c.dTs < peak.dTs) peak = c;
-  let margin = Infinity;
-  let marginAt = null;
-  const tw = Array.from({ length: STORE }, (_, k) => wetBulb(wet.air((k * 24) / STORE), e));
-  for (const i of all) {
-    for (let k = 0; k < STORE; k++) {
-      const h = (k * 24) / STORE;
-      if (wet.water(i, h) <= 1e-6) continue;
-      const m = wet.ts(i, h) - tw[k];
-      if (m < margin) [margin, marginAt] = [m, { i, h }];
-    }
-  }
+  // the wet-bulb check runs inside the model, every minute of the last model day (thermal.js)
+  const margin = wet.info.wet.margin;
+  const marginAt = wet.info.wet.marginAt;
   const tm = [];
   for (let h = p.hour + 0.5; h <= 22; h += 0.25) tm.push(dm(h));
   return {
@@ -6098,7 +6110,7 @@ const close = '<button class="x" aria-label="close">×</button>';
 function htNotes(scene, d) {
   const text = {
     lane: [`Jujube Lane, 5 m wide, 4 m walls (H/W ${f2(d.laneHw)}):`, `at noon ${pct(d.laneNoon)} of the floor is in sun`],
-    roofs: [`Grey tile roofs ${fmt(d.roof15)} °C at 3 pm`],
+    roofs: [`Grey tile roofs ${fmt(d.roof15)} °C at 3 pm,`, "above the brief's 50–62 °C (see docs/sources.md)"],
     awning: ['Under the mat awning (天棚):', `Tmrt ${fmt(d.awningTmrt)} °C; open courtyard sun ${fmt(d.sunTmrt)} °C`],
     splash: [`Splash at 19:00 (P): Lantern Lane ${sgn(d.d20)} K by 20:00,`, `${sgn(d.d23)} K at 23:00`],
     tree: ['Pagoda trees on the main lane:', `Tmrt ${fmt(d.treeTmrt)} °C beneath, ${fmt(d.laneSunTmrt)} °C in the sun`],
@@ -6159,9 +6171,9 @@ function tianpengCard(d) {
   return `
     ${close}
     <h3>天棚 · The summer mat awning</h3>
-    <div class="mat">天棚鱼缸石榴树 · "tianpeng, fish bowl, pomegranate tree"</div>
-    <p lang="zh-Hans">老北京夏天在院里搭天棚：芦席棚顶高出屋檐，四周席子可卷起通风；李滨声以“天棚鱼缸石榴树”描绘四合院夏景（邓云乡《天棚遮阴》）。院中多种枣树、槐树，石榴寓意多子。傍晚往地上泼水降温，与日本江户时代以来的“打水”（打ち水）同理。</p>
-    <p lang="en">In old Beijing summers a family built a tianpeng over the courtyard: a roof of reed mats on poles, higher than the eaves, with side mats that roll up to let the air through. The cartoonist Li Binsheng summed up a courtyard summer as "tianpeng, fish bowl, pomegranate tree" (Deng Yunxiang, "Tianpeng zheyin"). Courtyards were planted with jujube and pagoda trees, and the pomegranate stands for many children. Splashing water on the ground in the evening cools it, the same idea as Japan's uchimizu, practised since the Edo period.</p>
+    <div class="mat">天棚鱼缸石榴树 · an old Beijing saying: "tianpeng, fish bowl, pomegranate tree"</div>
+    <p lang="zh-Hans">老北京夏天在院里搭天棚：芦席棚顶高出屋檐，四周席子可卷起通风。老北京俗语“天棚鱼缸石榴树”说的就是四合院的夏景，漫画家李滨声曾以此作画（见邓云乡《天棚遮阴》）。院中多种枣树、槐树，石榴寓意多子。傍晚往地上洒水降温，与日本江户时代以来的“打ち水”（洒水）同理。</p>
+    <p lang="en">In old Beijing summers a family built a tianpeng over the courtyard: a roof of reed mats on poles, higher than the eaves, with side mats that roll up to let the air through. An old Beijing saying sums up a courtyard summer as "tianpeng, fish bowl, pomegranate tree"; the cartoonist Li Binsheng drew it (as recorded by Deng Yunxiang, "Tianpeng zheyin"). Courtyards were planted with jujube and pagoda trees, and the pomegranate stands for many children. Sprinkling water on the ground in the evening cools it, the same idea as Japan's uchimizu (打ち水), practised since the Edo period.</p>
     <table class="cmp">
       <tr><td></td><td>${gl('tmrt', 'Tmrt')} 15:00</td></tr>
       <tr class="t"><td>under the awning (lets through ${pct(a.tr.value)} of the sun${tag(a.tr)})</td><td>${fmt(c.awning.tmrt)} °C</td></tr>

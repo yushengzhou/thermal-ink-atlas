@@ -75,7 +75,7 @@ export const SOURCES = {
   miller2007: 'Miller (2007), Oak Ridge National Laboratory, via the block-5 brief: ventilated tile roofs run cooler; does not apply to mud-backed, unventilated roofs',
   ucdavis: 'UC Davis guidance, via the block-5 brief: overhead vine arbours give more than 90% cover',
   jjshs: 'J. Japan. Soc. Hort. Sci. 54(3) 293, via the block-5 brief: pergola vines need LAI 2 or more, ideally 3',
-  deng: 'Deng Yunxiang, Tianpeng zheyin (The Paper, newsDetail_forward_18319465), via the block-5 brief: summer mat awnings over Beijing courtyards; Li Binsheng\'s "tianpeng, fish bowl, pomegranate tree"',
+  deng: 'Deng Yunxiang, Tianpeng zheyin (The Paper, newsDetail_forward_18319465), via the block-5 brief: summer mat awnings over Beijing courtyards; the old Beijing saying "tianpeng, fish bowl, pomegranate tree", which the cartoonist Li Binsheng drew',
   visitBeijing: 'Visit Beijing (official tourism site), via the block-5 brief: jujube and pagoda trees in courtyards; the pomegranate stands for many children',
   bolton1980: 'Bolton (1980) Monthly Weather Review 108, 1046-1053: saturation vapour pressure e_s = 6.112 exp(17.67 T / (T + 243.5)) hPa (formula from memory, not checked)',
 };

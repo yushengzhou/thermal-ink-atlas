@@ -183,7 +183,7 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[miller2007]** Miller (2007), Oak Ridge National Laboratory, via the block-5 brief: ventilated tile roofs run cooler; does not apply to mud-backed, unventilated roofs
 - **[ucdavis]** UC Davis guidance, via the block-5 brief: overhead vine arbours give more than 90% cover
 - **[jjshs]** J. Japan. Soc. Hort. Sci. 54(3) 293, via the block-5 brief: pergola vines need LAI 2 or more, ideally 3
-- **[deng]** Deng Yunxiang, Tianpeng zheyin (The Paper, newsDetail_forward_18319465), via the block-5 brief: summer mat awnings over Beijing courtyards; Li Binsheng's "tianpeng, fish bowl, pomegranate tree"
+- **[deng]** Deng Yunxiang, Tianpeng zheyin (The Paper, newsDetail_forward_18319465), via the block-5 brief: summer mat awnings over Beijing courtyards; the old Beijing saying "tianpeng, fish bowl, pomegranate tree", which the cartoonist Li Binsheng drew
 - **[visitBeijing]** Visit Beijing (official tourism site), via the block-5 brief: jujube and pagoda trees in courtyards; the pomegranate stands for many children
 - **[bolton1980]** Bolton (1980) Monthly Weather Review 108, 1046-1053: saturation vapour pressure e_s = 6.112 exp(17.67 T / (T + 243.5)) hPa (formula from memory, not checked)
 - **[noaa]** NOAA Global Monitoring Laboratory, General Solar Position Calculations (solareqns.PDF)
@@ -931,7 +931,10 @@ way, so the sky view here does **not** ignore trees (it is a crude crown factor,
 
 ### Lanes
 
-Lane geometry, from the model's grid (interior cells: walls on both sides, nothing overhead). Sky view: the model,
+Lane geometry, from the model's grid (interior cells: walls on both sides, nothing overhead). n is small (5–14 cells
+per east–west lane) because a cell counts only if the cells just outside both lane edges, and their neighbours along
+the lane, are all walls: gates every 25–35 m and the side lanes break the walls. The cells are picked by geometry
+alone, before any result, and are near-identical. Sky view: the model,
 the endless canyon at the same cell centres (0.5/√(1 + (H/d₁)²) + 0.5/√(1 + (H/d₂)²)) and on the centre line
 (cos(atan(2H/W))). Noon: the model's sunlit share at solar noon (12:16, sun 73.5° high) vs 1 − (H/tan β)/W.
 
@@ -949,7 +952,8 @@ Two grid changes make 5 m lanes come out right; both are used only by this block
 - **Shade sampled every 1.25 m** (4 × 4 per 5 m cell instead of 2 × 2): at noon a 4 m wall casts 1.18 m of shadow, which
   the 2.5 m samples of blocks 1–4 miss entirely. The building shade is found by marching each sample's ray toward the
   sun over the height grid (`buildingMaskRay`), which gives the same samples as the cast-shadow polygons (checked on
-  every ground sample of the block for 48 sun positions) without visiting the footprints; the crown and screen shadows
+  every ground and roof sample of the block for every daylight 10-min sun slot of the design day, and on a test block
+  with houses of 4, 7 and 12 m, where roofs are shaded too; `tests/unit/hutong.test.mjs`) without visiting the footprints; the crown and screen shadows
   use a scanline version of the polygon rasteriser with the same inside rule (`rasteriseScan`).
 - **Exact horizon scan** (`svfGridAt`): the 2.5 m horizon-scan step of blocks 1–4, started from the cell centre, lands
   exactly on a 5 m lane's wall line and sees the wall at 5 m on one side instead of 2.5 m (sky view 0.71 for the 5 m
@@ -963,7 +967,7 @@ Two grid changes make 5 m lanes come out right; both are used only by this block
 ### Evening splash: the surface water store
 
 The model's evaporation term EF·max(Q*, 0) needs positive net radiation, which is gone after sunset: switched on
-at 19:00 (EF := 1 on the splashed lanes, no store) it changes the lane paving by at most 0.00 K. So block 5
+at 19:00 (EF := 1 on the splashed lanes, no store) it changes the lane paving by at most 0.04 K. So block 5
 adds a per-cell water store W, engine-wide but empty unless a block asks for it (blocks 1–4 never enter the step;
 their pages render the same pixels as before, `tests/e2e/regression.test.mjs`):
 
@@ -973,11 +977,13 @@ their pages render the same pixels as before, `tests/e2e/regression.test.mjs`):
   1-min step q_sat comes from a 0.02 K table of the same formula (linear between entries, within 2e-7 kg kg⁻¹; Math.exp per
   cell and minute was the slow part). The wet-bulb check uses the formula itself.
 - Evaporation is explicit and capped so W never goes below 0. The splash model runs the wet-able cells (n 1138) again
-  with the store (6 coarse spin-up days, the coarse-step guard including the latent coupling at 40 °C; this run:
-  3 1-min days, max |ΔTd| 0.001 K); the other cells are those of the dry model (no lateral
-  coupling in this model).
+  with the store; the coarse-step guard includes the latent coupling at the same 340 K bound as the other terms, which
+  turns the 6 coarse spin-up days off for wet runs (this run: 0 coarse days, 6 1-min days, max |ΔTd|
+  0.034 K). The other cells are those of the dry model (no lateral coupling in this model). The dry model and
+  the wet runs each stop when the deep temperature changes by less than 0.05 K a day, so differences between them carry
+  a few hundredths of a kelvin of convergence noise (it is all of the old EF path's 0.04 K).
 - The design day repeats with a splash **every evening**, so the paving's daily mean is lower and the splashed lanes
-  are 0.52 K cooler even at 18:45, before the splash, and 0.51 K the next afternoon.
+  are 0.54 K cooler even at 18:45, before the splash, and 0.52 K the next afternoon.
 
 | Constant | Value |
 |---|---|
@@ -994,23 +1000,24 @@ The splashed lanes (n 10, sky view 0.54), dry vs splash, °C:
 
 | Time | dry | splash | ΔTs | W mm | air | wet-bulb |
 |---|---|---|---|---|---|---|
-| 19:00 | 40.7 | 40.0 | −0.77 | 0.99 | 33.1 | 24.4 |
-| 19:30 | 38.6 | 33.7 | −4.88 | 0.79 | 32.6 | 24.3 |
-| 20:00 | 37.0 | 31.0 | −6.02 | 0.67 | 32.1 | 24.2 |
-| 20:30 | 35.9 | 29.7 | −6.19 | 0.57 | 31.6 | 24.1 |
-| 21:00 | 35.0 | 29.0 | −6.03 | 0.49 | 31.0 | 23.9 |
-| 21:30 | 34.3 | 28.6 | −5.79 | 0.41 | 30.5 | 23.8 |
-| 22:00 | 33.8 | 28.2 | −5.53 | 0.34 | 29.9 | 23.6 |
-| 22:30 | 33.3 | 28.0 | −5.29 | 0.27 | 29.3 | 23.5 |
+| 19:00 | 40.7 | 40.0 | −0.78 | 0.99 | 33.1 | 24.4 |
+| 19:30 | 38.6 | 33.7 | −4.89 | 0.79 | 32.6 | 24.3 |
+| 20:00 | 37.0 | 31.0 | −6.03 | 0.67 | 32.1 | 24.2 |
+| 20:30 | 35.9 | 29.7 | −6.20 | 0.57 | 31.6 | 24.1 |
+| 21:00 | 35.0 | 29.0 | −6.04 | 0.49 | 31.0 | 23.9 |
+| 21:30 | 34.3 | 28.5 | −5.80 | 0.41 | 30.5 | 23.8 |
+| 22:00 | 33.8 | 28.2 | −5.54 | 0.34 | 29.9 | 23.6 |
+| 22:30 | 33.3 | 28.0 | −5.30 | 0.27 | 29.3 | 23.5 |
 | 23:00 | 32.8 | 27.7 | −5.08 | 0.20 | 28.8 | 23.3 |
-| 23:30 | 32.4 | 27.7 | −4.68 | 0.14 | 28.3 | 23.1 |
-| 00:00 | 32.0 | 27.9 | −4.10 | 0.10 | 27.7 | 23.0 |
+| 23:30 | 32.4 | 27.7 | −4.70 | 0.15 | 28.3 | 23.1 |
+| 00:00 | 32.0 | 27.8 | −4.15 | 0.11 | 27.7 | 23.0 |
 
-- Largest ΔTs within 1 h: −6.02 K at 20:00; −5.08 K at 23:00; ΔTmrt −2.87 K at 20:00 and −2.86 K at 21:00.
+- Largest ΔTs within 1 h: −6.03 K at 20:00; −5.08 K at 23:00; ΔTmrt −2.87 K at 20:00 and −2.86 K at 21:00.
 - Water: one splash evaporates at most 1.00 of its 1 mm before the next (what is left at 19:00 is topped up, not
-  added); the day's evaporation balances the store to 2.0e-15 mm; the store's day-to-day drift is
-  1.8e-4 mm (the model day is not exactly periodic). W is never negative.
-- The wet paving stays at least 2.71 K above the air's wet-bulb temperature while water is left.
+  added); the day's evaporation balances the store to 2.2e-15 mm; the store's day-to-day drift is
+  1.9e-3 mm (the model day is not exactly periodic). W is never negative.
+- The wet paving stays at least 2.70 K above the air's wet-bulb temperature while water is left (checked
+  inside the model at every 1-min step of the last model day, over all 1138 wet-able cells).
 - Literature: Paris, about 1 L m⁻² per cycle, surface −7.5 K at 19:30 and −6 K at 20:30, lasting several hours
   [hendel2015]; air −0.79 K at most and Tmrt −1.76 K [hendel2016]; Kobe, 0.025 mm per pass, −2 to −4 K at once, gone
   within 30 min in sun, evening recommended [takebayashi2023]; a road 50 → 40 °C in about 60 min [kato2008].
@@ -1019,8 +1026,8 @@ The splashed lanes (n 10, sky view 0.54), dry vs splash, °C:
 
 | β_wet | largest ΔTs within 1 h | ΔTs 23:00 | ΔTmrt 20:00 |
 |---|---|---|---|
-| 0.5 (shipped) | −6.02 K | −5.08 K | −2.87 K |
-| 0.3 | −4.31 K | −3.87 K | −2.06 K |
+| 0.5 (shipped) | −6.03 K | −5.08 K | −2.87 K |
+| 0.3 | −4.32 K | −3.88 K | −2.06 K |
 | 1 | −8.84 K | −4.09 K | −4.18 K |
 
 At β_wet 1 the largest ΔTs (−8.84 K) and ΔTmrt (−4.18 K) fall outside the spec's bands;
@@ -1066,14 +1073,14 @@ Walkers use the lanes with the shade weights of blocks 1–3 [melnikov]; pergola
 
 | Check (spec #10) | Model | Band | Source | |
 |---|---|---|---|---|
-| Splashed lanes (n 10, SVF 0.54), W0 1 mm: largest ΔTs within 1 h of the splash (at 20.00 h) | −6.02 K | -8 to -3 | brief5 | inside |
+| Splashed lanes (n 10, SVF 0.54), W0 1 mm: largest ΔTs within 1 h of the splash (at 20.00 h) | −6.03 K | -8 to -3 | brief5 | inside |
 | Splashed lanes: ΔTs at 23:00 | −5.08 K | -6 to -1 | brief5 | inside |
-| Splashed lanes: |ΔTs| the next afternoon (15:00 of the repeated day) | +0.51 K | ≤ 1.5 | brief5 | inside |
+| Splashed lanes: |ΔTs| the next afternoon (15:00 of the repeated day) | +0.52 K | ≤ 1.5 | brief5 | inside |
 | Water evaporated from one splash before the next, largest over the wet-able cells (n 1138), minus W0 | 0 mm | ≤ 0 | brief5 | inside |
 | Water store: mass balance error, |evaporated − (start − before the splash + W0 − end)|, largest cell | 0 mm | ≤ 0 | engine | inside |
 | Water store: smallest W over the day (never negative) | 0 mm | ≥ 0 | engine | inside |
-| Wet paving minus the wet-bulb temperature of the air, smallest while water is left | +2.71 K | ≥ 0 | brief5 | inside |
-| The old evaporation term alone (EF := 1 from 19:00, no water store): largest |ΔTs| on the splashed lanes, 19:00–24:00 | 0 K | ≤ 0.5 | brief5 | inside |
+| Wet paving minus the wet-bulb temperature of the air, smallest at any model minute (last model day) while water is left | +2.71 K | ≥ 0 | brief5 | inside |
+| The old evaporation term alone (EF := 1 from 19:00, no water store): largest |ΔTs| on the splashed lanes, 19:00–24:00 | +0.04 K | ≤ 0.5 | brief5 | inside |
 | Splashed lanes: ΔTmrt at 20:00 | −2.87 K | -3.5 to -0.5 | brief5 | inside |
 | Splashed lanes: ΔTmrt at 21:00 | −2.86 K | -3.5 to -0.5 | brief5 | inside |
 | Jujube Lane (W 5 m, H 4 m, n 5): noon sunlit share minus 1 − (H/tan β)/W = 0.764 | -0.014 | -0.05 to 0.05 | brief5 | inside |
