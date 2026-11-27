@@ -79,6 +79,21 @@ export const SOURCES = {
   deng: 'Deng Yunxiang, Tianpeng zheyin (The Paper, newsDetail_forward_18319465), via the block-5 brief: summer mat awnings over Beijing courtyards; the old Beijing saying "tianpeng, fish bowl, pomegranate tree", which the cartoonist Li Binsheng drew',
   visitBeijing: 'Visit Beijing (official tourism site), via the block-5 brief: jujube and pagoda trees in courtyards; the pomegranate stands for many children',
   bolton1980: 'Bolton (1980) Monthly Weather Review 108, 1046-1053: saturation vapour pressure e_s = 6.112 exp(17.67 T / (T + 243.5)) hPa (formula from memory, not checked)',
+  brief6: 'Research brief docs/research/parking-brief.md (block 6; values compiled from the sources below, items marked unverified there are flagged here; brownfield values are mostly its assumptions)',
+  golden2007: 'Golden et al. (2007) Solar Energy 81, 872, doi 10.1016/j.solener.2006.11.007: Phoenix, 17 June 2004 (air max 41.0 C, wind 0.86 m/s): exposed asphalt (SVF 0.90) max 63.5 / min 28.5 / mean 43.6 C, under a PV canopy (SVF 0.11) 37.0 / 27.7 / 32.1 C; the paper has internal inconsistencies',
+  stempihar2012: 'Stempihar et al. (2012) Transportation Research Record 2293, doi 10.3141/2293-15: modelled Phoenix pavements, max 53-69 C, min 29-35 C; HMA k 1.2, rho 2238, c 921; PCC k 1.5, rho 2350, c 1000; eps 0.91; surface temperatures asymptotic above about 203 mm thickness',
+  takebayashi2009: 'Takebayashi & Moriyama (2009) Solar Energy 83, 1211, doi 10.1016/j.solener.2009.01.019: grass parking vs asphalt, sensible heat about 100-150 W m-2 lower by day and about 50 W m-2 lower at night',
+  asaeda1996: 'Asaeda, Ca & Wake (1996), via the block-6 brief: asphalt emits about 150 W m-2 more infrared than bare soil at its maximum (extra sensible heat 50 vs 200 W m-2 across abstracts, unverified)',
+  zhu2022: 'Zhu et al. (2022) Frontiers in Environmental Science, doi 10.3389/fenvs.2021.795474, ECOSTRESS Phoenix: roads the only class warming at night; a 100% road pixel about 4.5 K warmer than grass at night (interpretation, unverified)',
+  hoehne2020: 'Hoehne et al. (2020/2022) Sustainable and Resilient Infrastructure, doi 10.1080/23789689.2020.1773013: Phoenix pavement and vehicle sensible heat, 67% roads, 29% parking, 3.9% vehicles (snippet only, unverified)',
+  matias2025: 'Matias et al. (2025), Lisbon parked cars (abstract and press, unverified): black roofs about 71 C vs white about 45 C; air 2.5-3.8 K warmer next to black cars',
+  levinson2011: 'Levinson et al. (2011) Applied Energy, doi 10.1016/j.apenergy.2011.05.006: black vs silver car roof up to 25 K hotter; cabin soak air 5-6 K',
+  vanos2018: 'Vanos et al. (2018) Temperature, doi 10.1080/23328940.2018.1468205: Tempe, after 1 h: cabin air 46 C in sun vs 38 C in shade, dashboard 69 vs 48 C',
+  mclaren2005: 'McLaren, Null & Quinn (2005) Pediatrics (PMID 15995010): parked-car cabin +1.8 K per 5 min, 80% of the rise in the first 30 min, 47 C at 22 C ambient; cracking the windows did not help',
+  nsc: 'US National Safety Council, child hot-car deaths (via the block-6 brief): 1,010 US children 1998-2024, 39 in 2024',
+  scott1999: 'Scott, Simpson & McPherson (1999) Journal of Arboriculture 25, 129: parking-lot tree shade, asphalt -20 K, air at 0.5 m -1.3 K, car cabins -26 K',
+  onishi2010: 'Onishi et al. (2010) Urban Forestry & Urban Greening, doi 10.1016/j.ufug.2010.06.002: parking-lot greening, surface temperature up to -7.26 K',
+  optris: 'Optris and Fluke emissivity tables, via the block-6 brief: rusty or oxidised steel about 0.69-0.88 (unverified)',
 };
 
 /** How a value relates to its source. */
@@ -336,6 +351,53 @@ Object.assign(MATERIALS, {
   },
 });
 
+// ---- block 6: car park and industrial brownfield ------------------------------
+// The thick asphalt of the car park and the concrete loading yard are the
+// shared asphalt and concrete (Oke values, inside the brief's ranges).
+Object.assign(MATERIALS, {
+  ballast: {
+    name: 'Rail ballast (gravel)',
+    alpha: v(0.2, 'brief6', 'engine', false, 'brief assumption 0.20 (0.10-0.30)'),
+    eps: v(0.92, 'brief6', 'engine', false, 'brief assumption'),
+    mu: v(700, 'brief6', 'engine', false, 'effective admittance of a loose, airy layer; brief assumption 700 (600-900)'),
+    ef: v(0, 'brief6', 'engine', false, 'dry, drains at once'),
+    note: 'Loose crushed stone under the rails: full of air, so it heats fast in the sun and lets go of the heat soon after dark.',
+  },
+  drySoil: {
+    name: 'Bare compacted soil',
+    alpha: v(0.25, 'brief6', 'engine', false, 'brief assumption 0.25 (0.20-0.35)'),
+    eps: v(0.93, 'brief6', 'engine', false, 'brief assumption'),
+    mu: v(800, 'brief6', 'interp', false, 'dry soil about 600 [oke], read up to 800 for compacted ground (brief assumption)'),
+    ef: v(0.05, 'brief6', 'engine', false, 'dry, a little moisture left deep down (brief assumption)'),
+    note: 'Dry, compacted ground of the old works: lighter than asphalt and with less heat store, so it cools sooner after dark.',
+  },
+  scrub: {
+    name: 'Scrubby dry vegetation',
+    alpha: v(0.22, 'brief6', 'engine', false, 'brief assumption'),
+    eps: v(0.95, 'brief6', 'engine', false, 'brief assumption'),
+    mu: v(800, 'brief6', 'engine', false, 'the dry soil beneath (brief assumption)'),
+    ef: v(0.2, 'brief6', 'engine', false, 'sparse, drought-stressed plants: little water to spend (brief assumption)'),
+    note: 'Weeds and dry grass that took over the brownfield: a little evaporation, not much shade.',
+  },
+  rustShed: {
+    name: 'Rusty corrugated steel shed roof',
+    alpha: v(0.2, 'brief6', 'engine', false, 'brief assumption for rusted steel'),
+    eps: v(0.75, 'optris', 'range', false, 'oxidised steel 0.69-0.88 [optris]'),
+    thinC: v(3000, 'brief6', 'interp', false, 'one corrugated sheet about 0.7 mm of steel, rho c about 3.6 MJ m-3 K-1 (calculation in the brief); range 2-5 kJ m-2 K-1'),
+    ef: v(0, 'brief6', 'cited', false, 'dry'),
+    note: 'A single sheet of rusty steel over an open shed: almost no heat store, so it follows the sun up and drops below the air within minutes of sunset.',
+  },
+  pvCanopy: {
+    name: 'Solar (PV) canopy over the bays',
+    alpha: v(0.1, 'engine', 'engine', false, 'not used: the panels are a screen here'),
+    eps: v(0.9, 'engine', 'engine', false, 'not used'),
+    ef: v(0, 'engine', 'engine', false, 'not used'),
+    tr: v(0, 'golden2007', 'interp', false, 'opaque panels: no direct sun through them'),
+    prescribed: 'Not used by the grid model as a surface: a flat opaque screen 4.2 m up; the ground beneath sees the sky with SVF 0.11 [golden2007] and the panel undersides as warm walls (engine assumption).',
+    note: 'Rows of solar panels on steel posts over the parking bays: shade for the cars by day and a lid on the night sky.',
+  },
+});
+
 // ---- block 3: glass presets ---------------------------------------------------
 // rho0: normal-incidence solar reflectance (the angular shape is Fresnel, see
 // reflect.js); absorb: solar absorptance of the pane (glass temperature);
@@ -412,6 +474,13 @@ export const MODEL = {
   splashHour: v(19, 'brief5', 'cited', false, 'the evening splash, every evening of the repeated design day (evening watering recommended [takebayashi2023]; the uchimizu custom [nippon])'),
   shadeSamples: v('4 x 4 per 5 m cell', 'engine', 'engine', false, 'block 5 only: shade sampled every 1.25 m, so the 1.2 m wall shadow of a 5 m lane at noon registers (blocks 1-4: 2 x 2)'),
   screenCover: v('SVF x (1 - 0.75)', 'engine', 'engine', false, 'cells under a pergola or awning take the crown factor of a full tree crown for the sky view and wall reflection, as cells under trees do'),
+  // ---- block 6 (car park and brownfield): ground heat flux, cars, PV canopy ----
+  groundFlux: v('G = (1 - a) K + eps L - eps sigma Ts^4 - h_c (Ts - Ta) - EF max(Q*, 0)', 'deardorff', 'cited', false, 'the force-restore surface flux into the ground (thin layers: C dTs/dt), stored every 15 min; negative = the ground gives stored heat back'),
+  dampingDepth: v('d = sqrt(kappa tau / pi)', 'brief6', 'cited', false, 'kappa = k / (rho c); HMA 0.126 m, PCC 0.133 m from the Stempihar inputs [stempihar2012]; force-restore holds for slabs thicker than about 1.5 d (about 0.2 m)'),
+  pvSvf: v(0.11, 'golden2007', 'cited', false, 'sky view factor of the ground under the PV canopy, as measured by Golden et al.; set on the cells whose centre is under a panel row'),
+  carShade: v('sunlit x (1 - car share)', 'engine', 'engine', false, 'parked cars as a sub-grid shade: each cell loses the share of its area under car footprints from its direct sun, all day (the lot is taken as full; shadows are not offset with the sun angle)'),
+  carSky: v('SVF x (1 - car share)', 'engine', 'engine', false, 'at night the ground under a car sees the car underside, taken as the warm-wall term (air + 2 K), instead of the sky'),
+  thinPaving: v(600, 'brief6', 'interp', false, 'effective admittance of thin (< 0.2 m) asphalt over a loose base, for the thin-layer check only (not in the scene); brief: thin paving needs a lower effective mu'),
 };
 
 /** Parameter keys a material uses (for cards and docs). */

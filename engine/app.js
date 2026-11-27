@@ -6,7 +6,7 @@ import { drawWorld } from './kit.js';
 import { runModel, shadeClassField, paletteLut, PALETTE_STOPS, heatRgb } from './thermal.js';
 import { Life, shadeDensity, shadeAt } from './life.js';
 import { Renderer, INTRO, quantHour } from './render.js';
-import { MATERIALS, SOURCES, BASIS, paramKeys } from './materials.js';
+import { MATERIALS, SOURCES, BASIS, MODEL, paramKeys } from './materials.js';
 import { GLOSSARY, gl, glossaryStats, rangeLine, termsFor } from './glossary.js';
 import { isRetrofit, sceneState, stateMaterials, runShared, resolveId, MEASURES, measureStats, waterBudget, ALIASES, D_MAX, D_DEFAULT } from './retrofit.js';
 import { retrofitNotes, measureCard, tradeoffCard, spongeCard, drawDivider } from './retroui.js';
@@ -24,6 +24,8 @@ import { penLines, SPEEDS, apparentTemp } from './wind.js';
 import { Pen } from './pen.js';
 import { isHutong, hutongSetup, lanesOf, solarNoon, splashStats, efPathRun, efPathStats, splashSensitivity, roofStats, courtyardStats, treeStats, shadedLanes, hutongGlossary, dwellShade } from './hutong.js';
 import { htNotes, lanesCard, courtyardCard, tianpengCard, splashCard, treesCard, HT_CARDS } from './hutui.js';
+import { isParking, parkingSetup, parkingStats, parkingGlossary, fluxSamples, pvCompare, slab, STEMPIHAR, tsMean, fluxMean, shedTau } from './parking.js';
+import { pkNotes, storageCard, pvCard, lotTreesCard, shedCard, soilCard, hotCarCard, PK_CARDS } from './pkui.js';
 
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
@@ -120,6 +122,10 @@ export function boot(scene, root = document) {
   const htMode = isHutong(scene);
   let htSet = null;
   const htQ = htMode ? { splash: q.get('splash') !== '0' } : null;
+  // car park block (block 6): the night-release overlay, ?flux=0|1 (default off)
+  const pkMode = isParking(scene);
+  let pkSet = null;
+  const pkQ = pkMode ? { flux: q.get('flux') === '1' } : null;
   if (!retro) {
     world = buildWorld(scene);
     t1 = performance.now();
@@ -147,6 +153,9 @@ export function boot(scene, root = document) {
       const tc = performance.now();
       thermal = htSet.model(htQ.splash);
       htSet.timing = { slotsMs: tb - ta, runMs: tc - tb, splashMs: performance.now() - tc };
+    } else if (pkMode) {
+      pkSet = parkingSetup(world);
+      thermal = pkSet.model;
     } else thermal = runModel(world);
     t2 = performance.now();
     V = { main: makeView('main', scene, world, thermal, canvas, glassMode ? { type: () => glassNow.type } : null, wfMode ? { lines: wfSet.lines() } : null) };
@@ -186,6 +195,17 @@ export function boot(scene, root = document) {
   // ?spotskip=0 (checks): draw the glint on every tile, without the bounding-box skip
   if (glassMode && q.get('spotskip') === '0') main.R.spotSkip = false;
   const R = main.R;
+  // car park block: ground heat flux samples for the night-release overlay, per quantised hour
+  if (pkMode) {
+    const fc = new Map();
+    R.flux = (hq) => {
+      if (!fc.has(hq)) {
+        if (fc.size >= 24) fc.delete(fc.keys().next().value);
+        fc.set(hq, fluxSamples(world, thermal, hq));
+      }
+      return fc.get(hq);
+    };
+  }
   const display = main.display;
   const t3 = performance.now();
 
@@ -211,6 +231,8 @@ export function boot(scene, root = document) {
     ...(wfMode ? wfQ : {}),
     // hutong only: the evening splash on or off
     ...(htMode ? htQ : {}),
+    // car park only: the night-release overlay
+    ...(pkMode ? pkQ : {}),
   };
   if (q.get('ui') === '0') root.body.classList.add('noui');
   if (q.has('hour')) S.hour = Math.round(clamp(parseFloat(q.get('hour')) || 0, 0, 23.75) / 0.25) * 0.25;
@@ -344,7 +366,16 @@ export function boot(scene, root = document) {
       laneSunTmrt: m(mc.filter((i) => thermal.sunlit(i, 15) > 0.95)),
     };
   }
-  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode ? htNotes(scene, htNoteData()) : block1Notes();
+  // car park block: numbers for notes, cards and glossary (one model, computed once)
+  let pkFixed = null;
+  const pk = () => (pkFixed ??= { st: parkingStats(world, thermal), pv: null });
+  /** Lazily: the PV comparison with an empty bay under the canopy (a run without cars on those cells). */
+  const pkPv = () => (pk().pv ??= pvCompare(world, thermal, pk().st.C));
+  function pkNoteData() {
+    const t = pk().st.table;
+    return { asphalt15: t.openAsphalt.t15, asphalt23: t.openAsphalt.t23, asphaltG23: t.openAsphalt.g23, shed15: t.shed.t15, shed23: t.shed.t23, air23: thermal.air(23), pv15: t.pvBays.t15, soil23: t.soil.t23, yard15: t.yard.t15, yard23: t.yard.t23 };
+  }
+  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode ? htNotes(scene, htNoteData()) : pkMode ? pkNotes(scene, pkNoteData()) : block1Notes();
   function block1Notes() {
   const notesText = {
     asphalt: ['Kiln Street, old asphalt (albedo 0.12):', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
@@ -371,7 +402,7 @@ export function boot(scene, root = document) {
   // glass block: its tall façades make a day tile slower to bake (about 7 ms),
   // so a slider drag bakes one tile per frame instead of two; the hutong block
   // likewise (hundreds of small tiled roofs and crowns per tile)
-  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people, scrub: S.scrub, ac: !!S.ac, budget: glassMode || htMode ? 1 : undefined, ...(wfMode ? { wind: S.wind, air: S.air, u: S.u } : {}) });
+  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people, scrub: S.scrub, ac: !!S.ac, budget: glassMode || htMode ? 1 : undefined, ...(wfMode ? { wind: S.wind, air: S.air, u: S.u } : {}), ...(pkMode ? { flux: !!S.flux } : {}) });
 
   // ---- sizing ------------------------------------------------------------------------------
   const resize = () => {
@@ -593,7 +624,10 @@ export function boot(scene, root = document) {
     card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
   }
   function reopenCard() {
-    if (card._measure && card._measure.startsWith('ht:')) {
+    if (card._measure && card._measure.startsWith('pk:')) {
+      card.innerHTML = pkCardHtml(card._measure.slice(3));
+      card.querySelector('.x').onclick = hideCard;
+    } else if (card._measure && card._measure.startsWith('ht:')) {
       card.innerHTML = htCardHtml(card._measure.slice(3));
       card.querySelector('.x').onclick = hideCard;
     } else if (card._measure && card._measure.startsWith('wf:')) {
@@ -811,6 +845,65 @@ export function boot(scene, root = document) {
     card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
   }
 
+  // ---- car park controls (block 6): the night-release overlay, cards -------------------------
+  const pkUi = pkMode ? buildPkUi() : null;
+  function buildPkUi() {
+    const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
+    root.body.insertAdjacentHTML(
+      'beforeend',
+      `<div id="parking" aria-label="Car park controls">
+        <div class="seg">${btn('data-flux', '1', 'night release G')}</div>
+        <div class="measures"><div class="hand">Cards</div>${PK_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'car' ? 'class="warn"' : '')).join('')}</div>
+      </div>`,
+    );
+    const el = root.getElementById('parking');
+    el.addEventListener('click', (e) => {
+      const b = e.target.closest ? e.target.closest('button') : null;
+      if (!b) return;
+      if (b.dataset.flux) setFlux(!S.flux);
+      else if (b.dataset.card) showPkCard(b.dataset.card, b);
+    });
+    return { el };
+  }
+  function syncPk() {
+    if (!pkUi) return;
+    pkUi.el.querySelector('[data-flux]').setAttribute('aria-pressed', String(!!S.flux));
+    root.body.dataset.flux = S.flux ? '1' : '0';
+  }
+  function setFlux(on) {
+    S.flux = !!on;
+    syncPk();
+    if (card.dataset.open === '1') reopenCard();
+    if (S.paused) draw();
+  }
+  function pkCardHtml(id) {
+    const P = pk();
+    const st = P.st;
+    if (id === 'storage') {
+      const C = st.C;
+      const curve = [9, 12, 15, 18, 20, 23, 2, 5].map((h) => ({ h, asphalt: tsMean(thermal, C.openAsphalt, h), gA: fluxMean(thermal, C.openAsphalt, h), concrete: tsMean(thermal, C.yard, h), gC: fluxMean(thermal, C.yard, h), soil: tsMean(thermal, C.soil, h), gS: fluxMean(thermal, C.soil, h), shed: tsMean(thermal, C.shed, h), gSh: fluxMean(thermal, C.shed, h), air: thermal.air(h) }));
+      return storageCard({ st, curve, slabs: { hma: slab(STEMPIHAR.hma.k, STEMPIHAR.hma.rho, STEMPIHAR.hma.c), pcc: slab(STEMPIHAR.pcc.k, STEMPIHAR.pcc.rho, STEMPIHAR.pcc.c) }, flux: !!S.flux });
+    }
+    if (id === 'pv') return pvCard({ pv: pkPv() });
+    if (id === 'trees') return lotTreesCard({ trees: st.table.treeBays, openBays: st.table.openBays, share: (st.table.openBays.share + st.table.treeBays.share) / 2 });
+    if (id === 'shed') return shedCard({ shed: st.table.shed, cool: st.cool.shed, tau: shedTau(thermal.air(st.set), thermal.info.hc), air: st.air, set: st.set });
+    if (id === 'soil') return soilCard({ st });
+    return hotCarCard({ openBay15: st.table.openBays.t15, openAsphalt15: st.table.openAsphalt.t15 });
+  }
+  function showPkCard(id, anchor) {
+    card.innerHTML = pkCardHtml(id);
+    card.querySelector('.x').onclick = hideCard;
+    card._pick = null;
+    card._measure = `pk:${id}`;
+    card.dataset.open = '1';
+    card.dataset.kind = id;
+    card.style.display = 'block';
+    const r = anchor ? anchor.getBoundingClientRect() : { top: 120 };
+    const panel = pkUi.el.getBoundingClientRect();
+    card.style.left = `${Math.min(window.innerWidth - card.offsetWidth - 10, panel.right + 12)}px`;
+    card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
+  }
+
   const toggleThermal = () => {
     const m = thermalMix(S.frame);
     S.thermal = !S.thermal;
@@ -827,6 +920,7 @@ export function boot(scene, root = document) {
     else if (wfMode && (k === 'w' || k === 'W')) setWindLines(!S.wind);
     else if (wfMode && (k === 'a' || k === 'A')) setAir(!S.air);
     else if (htMode && (k === 'p' || k === 'P')) setSplash(!S.splash);
+    else if (pkMode && (k === 'g' || k === 'G')) setFlux(!S.flux);
     else if (k === 'h') setHour(S.hour + 1);
     else if (k === 'H') setHour(S.hour - 1);
     else if (k === 'n' || k === 'N') S.notes = !S.notes;
@@ -1019,12 +1113,17 @@ export function boot(scene, root = document) {
       : null;
     // hutong: water on a splashed cell now
     const waterInfo = htMode && tmrtCell !== null && htSplashSet().has(tmrtCell) ? { now: thermal.water(tmrtCell, h), on: !!S.splash } : null;
+    // car park: ground heat flux G of the cells now and at 23:00; the share of a ground cell under cars
+    const fluxInfo = pkMode && cells.length && !leaf
+      ? { now: cells.reduce((a, i) => a + thermal.flux(i, h), 0) / cells.length, g23: cells.reduce((a, i) => a + thermal.flux(i, 23), 0) / cells.length, cars: tmrtCell !== null ? world.parking.share[tmrtCell] : 0, pv: tmrtCell !== null ? !!world.parking.pv[tmrtCell] : false }
+      : null;
     return {
       title,
       state: view.id,
       compare,
       wind: windInfo,
       water: waterInfo,
+      flux: fluxInfo,
       glass: glassInfo,
       wallsNow: sw ? sw.walls : null,
       glassNow: sw ? sw.glass : null,
@@ -1097,6 +1196,7 @@ export function boot(scene, root = document) {
         ${d.wallsNow !== null ? `<tr><td>sun off the ${gl('wallReflection', 'walls')} now</td><td>${Math.round(d.wallsNow)} W m⁻²</td></tr>` : ''}
         ${d.glassNow !== null && glassMode ? `<tr><td>sun off the ${gl('specular', 'glass')} now</td><td>${Math.round(d.glassNow)} W m⁻²</td></tr>` : ''}
         <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
+        ${d.flux ? `<tr class="t"><td>${gl('groundFlux', 'ground heat flux G')} now / 23:00</td><td>${Math.round(d.flux.now)} / ${Math.round(d.flux.g23)} W m⁻² (${d.flux.now < 0 ? 'giving heat back' : 'taking heat in'})</td></tr>${d.flux.cars > 0 ? `<tr><td>share of the cell under cars</td><td>${Math.round(d.flux.cars * 100)}% (shade and night sky, sub-grid)</td></tr>` : ''}${d.flux.pv ? `<tr><td>under the PV canopy</td><td>yes (sky view ${MODEL.pvSvf.value} before cars, Golden et al. 2007)</td></tr>` : ''}` : ''}
         ${d.water ? `<tr><td>${gl('waterStore', 'water on the paving')} now</td><td>${d.water.now.toFixed(2)} mm${d.water.on ? ' (splashed at 19:00)' : ' (splash off: P)'}</td></tr>` : ''}
         ${d.wind ? `<tr><td>${gl('windFactor', 'wind factor f_w')}</td><td>${d.wind.fw.toFixed(2)} · ${fmt(d.wind.u)} of ${d.wind.site} m/s</td></tr>
         <tr><td>convection h_c</td><td>${fmt(d.wind.hc)} W m⁻² K⁻¹</td></tr>
@@ -1148,7 +1248,9 @@ export function boot(scene, root = document) {
         ? glossaryStats(world, thermal, { wind: { river: wf().st.river.mean, corridor: wf().st.corridorMean, shelter: wf().st.shelterMean, lee: wf().st.lee01.mean } })
         : htMode
           ? glossaryStats(world, thermal, { hutong: hutongGlossary(world, thermal, ht()) })
-          : glossaryStats(world, thermal);
+          : pkMode
+            ? glossaryStats(world, thermal, { parking: parkingGlossary(pk().st) })
+            : glossaryStats(world, thermal);
   let fnPinned = false;
   let fnByFocus = false;
   let fnTrigger = null;
@@ -1310,6 +1412,7 @@ export function boot(scene, root = document) {
   syncGlass();
   syncWf();
   syncHt();
+  syncPk();
   draw();
   requestAnimationFrame(loop);
 
@@ -1330,6 +1433,7 @@ export function boot(scene, root = document) {
       ...(glassSet ? glassSet.timing : {}),
       ...(wfSet ? wfSet.timing : {}),
       ...(htSet ? htSet.timing : {}),
+      ...(pkSet ? pkSet.timing : {}),
     },
     /** Pure seek: render frame N with an optional camera {z,cx,cy}; pauses the clock. */
     seek(frame, cam) {
@@ -1553,6 +1657,27 @@ export function boot(scene, root = document) {
           return dwellShade(main.life, main.shadeFor(hq), hq);
         },
         models: () => htSet.cached(),
+      }
+      : null,
+    /**
+     * Car park block (block 6) only: state {flux}; set() it; numbers for the
+     * bands and cards; card HTML; G at a point; the overlay's samples.
+     */
+    parking: pkMode
+      ? {
+        state: () => ({ flux: !!S.flux }),
+        set(o) {
+          if (o.flux !== undefined) setFlux(!!o.flux);
+        },
+        stats: () => {
+          const st = pk().st;
+          return { table: st.table, cool: st.cool, ranges: st.ranges, gap: st.gap, set: st.set, peakG: st.peakG, air: st.air, lotShare: st.lotShare, n: Object.fromEntries(Object.entries(st.C).map(([k, v]) => [k, v.length])) };
+        },
+        pv: () => pkPv(),
+        html: (id) => pkCardHtml(id),
+        show: (id) => showPkCard(id, root.querySelector(`#parking [data-card="${id}"]`)),
+        flux: (x, y, h = S.hour) => thermal.flux(world.cellIndex(x, y), h),
+        samples: (h = S.hour) => R.flux(quantHour(h)).length,
       }
       : null,
     retro: retro

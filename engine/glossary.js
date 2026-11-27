@@ -223,6 +223,35 @@ export const GLOSSARY = {
     why: 'Splashed paving cannot get colder than this by evaporating, so it bounds how much a splash can cool.',
     scenes: ['hutong'],
   },
+  // ---- block 6 (car park and brownfield) -------------------------------------
+  heatStorage: {
+    term: 'Heat storage',
+    text: 'Heat a surface soaks down into its own material by day and gives back after dark. Thick, dense paving stores a lot; a thin metal sheet almost none.',
+    model: (S) => S.storageLine,
+    why: 'Stored heat is why a car park stays warm long after sunset, while a tin roof is cold within the hour.',
+    scenes: ['parking'],
+  },
+  dampingDepth: {
+    term: 'Damping depth (d)',
+    text: 'How deep the daily swing of the surface temperature reaches into the ground: at depth d it is down to about a third, at 3d to a twentieth. d = √(κτ/π), κ the thermal diffusivity and τ one day.',
+    model: (S) => S.dampingLine,
+    why: 'A slab much thicker than d holds a full day\'s heat; thin paving over loose stone holds less, so it runs hotter by day and cooler at night.',
+    scenes: ['parking'],
+  },
+  groundFlux: {
+    term: 'Ground heat flux (G)',
+    text: 'The heat going into the ground through its surface (positive) or coming back out (negative), in watts per square metre. The night-release strokes (G) draw it.',
+    model: (S) => S.fluxLine,
+    why: 'At night G is the heat the pavement keeps feeding to its surface, so the surface cannot cool down to the air.',
+    scenes: ['parking'],
+  },
+  thermalInertia: {
+    term: 'Thermal inertia',
+    text: 'How slowly a surface changes temperature when its heating changes: high for thick, dense materials (asphalt, concrete), low for loose or thin ones (soil, ballast, sheet metal). Measured here by the admittance μ.',
+    model: (S) => S.inertiaLine,
+    why: 'High-inertia surfaces lag behind the sun: they peak late and stay warm into the night.',
+    scenes: ['parking'],
+  },
   // ---- block 2 (sponge-retrofit) --------------------------------------------
   permeablePaving: {
     term: 'Permeable paving',
@@ -343,6 +372,7 @@ export function glossaryStats(world, thermal, extra = {}) {
     out.windLine = `Over the river ${r2(w.river)}; along Quay Street ${r2(w.corridor)}; Rope Walk, behind the warehouses, ${r2(w.shelter)} (mean), ${r2(w.lee)} within one building height of the wall.`;
   }
   if (extra.hutong) Object.assign(out, extra.hutong);
+  if (extra.parking) Object.assign(out, extra.parking);
   if (extra.spot) {
     const s = extra.spot;
     out.spotLine = `At 3 pm with ${s.glassName}: Tmrt ${r0(s.tmrtSpotShade)} °C in shaded spots vs ${r0(s.tmrtShade)} °C in plain shade and ${r0(s.tmrtSun)} °C in sun.`;

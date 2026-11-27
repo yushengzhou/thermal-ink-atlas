@@ -9,13 +9,14 @@ import { fileURLToPath } from 'node:url';
 import { posix } from 'node:path';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const MODULES = ['core', 'sun', 'materials', 'reflect', 'thermal', 'wind', 'world', 'pen', 'kit', 'life', 'render', 'glossary', 'retrofit', 'retroui', 'cbd', 'cbdui', 'waterfront', 'wfui', 'hutong', 'hutui', 'app'];
+const MODULES = ['core', 'sun', 'materials', 'reflect', 'thermal', 'wind', 'world', 'pen', 'kit', 'life', 'render', 'glossary', 'retrofit', 'retroui', 'cbd', 'cbdui', 'waterfront', 'wfui', 'hutong', 'hutui', 'parking', 'pkui', 'app'];
 /** Block-specific modules, by the scene flag that selects them. */
 export const BLOCKS = [
   { flag: /retrofit: true/, modules: ['retrofit', 'retroui'] },
   { flag: /glassBlock: true/, modules: ['cbd', 'cbdui'] },
   { flag: /windBlock: true/, modules: ['wind', 'waterfront', 'wfui'] },
   { flag: /hutongBlock: true/, modules: ['hutong', 'hutui'] },
+  { flag: /parkingBlock: true/, modules: ['parking', 'pkui'] },
 ];
 /** What a left-out module exposes: only the predicates the core calls (always false there). */
 export const STUBS = {
@@ -24,6 +25,7 @@ export const STUBS = {
   wind: '{ isWindBlock: () => false }',
   waterfront: '{ isWaterfront: () => false }',
   hutong: '{ isHutong: () => false }',
+  parking: '{ isParking: () => false }',
 };
 /** Modules a page needs, given its scene source. */
 export function modulesFor(scene) {
@@ -93,7 +95,7 @@ function build(city) {
 
   const meta = /title: '([^']+)'/.exec(scene)[1];
   const sub = /note: '([^']+)'/.exec(scene)[1];
-  const keys = /retrofit: true/.test(scene) ? '<kbd>B</kbd> before/after · ' : /glassBlock: true/.test(scene) ? '<kbd>G</kbd> glass · ' : /windBlock: true/.test(scene) ? '<kbd>W</kbd> wind · <kbd>A</kbd> air · ' : /hutongBlock: true/.test(scene) ? '<kbd>P</kbd> splash · ' : '';
+  const keys = /retrofit: true/.test(scene) ? '<kbd>B</kbd> before/after · ' : /glassBlock: true/.test(scene) ? '<kbd>G</kbd> glass · ' : /windBlock: true/.test(scene) ? '<kbd>W</kbd> wind · <kbd>A</kbd> air · ' : /hutongBlock: true/.test(scene) ? '<kbd>P</kbd> splash · ' : /parkingBlock: true/.test(scene) ? '<kbd>G</kbd> night release · ' : '';
   const html = read('engine/shell.html')
     .replace(/__TITLE__/g, meta)
     .replace('__SUBTITLE__', sub)
