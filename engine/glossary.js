@@ -293,6 +293,39 @@ export const GLOSSARY = {
     why: 'A lower EER means more heat out of the condenser for the same cooling, and the hotter the air at the condenser, the lower the EER.',
     scenes: ['estate'],
   },
+  // ---- block 8 (campus) -------------------------------------------------------
+  artificialTurf: {
+    term: 'Artificial turf',
+    text: 'A pitch of green plastic blades standing in a bed of loose infill, usually black crumb rubber (SBR) and sand, on a shock pad. It needs no water or mowing and can be played on all year.',
+    range: 'In summer sun 65–80 °C, at times over 85 °C: 9.4–34 K hotter than natural grass at the surface, but only 0.5–1.2 K warmer in the air above (review of 23 studies); at night it cools to about the grass temperature.',
+    src: 'singh2024, jim2016',
+    why: 'Grass spends sunshine on evaporating water; dry plastic and rubber cannot, and they hold little heat, so they get very hot by day and cool fast at night.',
+    scenes: ['campus'],
+  },
+  crumbRubber: {
+    term: 'Crumb-rubber infill',
+    text: 'Black granules ground from old tyres (styrene-butadiene rubber, SBR), spread between the turf blades to cushion and steady them; some pitches use paler TPE or cork instead.',
+    range: 'Lab tests: SBR 53.5 °C against TPE 45.6 °C under the same lamp; a shock pad adds about 1.8 K, the blade colour 1–2 K.',
+    src: 'singh2024',
+    why: 'It is the darkest part of the pitch and it is dry: most of the heat of artificial turf sits in it.',
+    scenes: ['campus'],
+  },
+  contactBurn: {
+    term: 'Contact-burn threshold',
+    text: 'The surface temperature at which touching a hot surface with bare skin starts to burn it, for a given material and contact time (ISO 13732-1). Metal conducts heat into the skin fastest, so its limit is lowest.',
+    range: '1 min of contact: metal 51 °C, stone and concrete 56 °C, plastics and wood 60 °C; 10 min: 48 °C for all of them; 8 h: 43 °C. The lower end for children (unverified, via CENELEC Guide 29).',
+    src: 'iso13732',
+    why: 'Children sit, kneel and slide on play surfaces for longer than a minute and pull away more slowly, so a surface "only" at 60 °C can burn them.',
+    scenes: ['campus'],
+  },
+  shadeSail: {
+    term: 'Shade sail',
+    text: 'A sheet of knitted plastic cloth (HDPE) stretched between posts a few metres above a play area or a seating area.',
+    range: 'Lets through about 10–30% of the sun (unverified); Gilbert, Arizona at noon: rubber 46.7 °C under a sail against 87.2 °C in sun; Lubbock: 168 W m⁻² less radiation absorbed by a child.',
+    src: 'brief8, vanos2016, vanos2017',
+    why: 'It is the quickest shade a school can add; unlike a tree it does not cool the air by evaporation, and after sunset it holds a little warmth over the ground.',
+    scenes: ['campus'],
+  },
   // ---- block 2 (sponge-retrofit) --------------------------------------------
   permeablePaving: {
     term: 'Permeable paving',
