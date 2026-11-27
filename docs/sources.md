@@ -27,6 +27,8 @@ the sources listed below without checking them.
 | Dark metal roof (`metal`) | 0.15 [oke] *cited range*, unverified (cited 0.10-0.25) | 0.9 [brief] *cited value*, unverified (~0.9 painted) | C 12000 J m⁻² K⁻¹ [brief] *cited range*, unverified (thin layers 5-20 kJ m-2 K-1) | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Cool (white) roof (`coolroof`) | 0.8 [epa] *edge of cited range*, unverified (cited >=0.65 new, 0.5-0.6 aged; 0.80 is a new, clean white roof) | 0.88 [epa] *cited range*, unverified (cited 0.85-0.90) | μ 450 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (same build-up as the dark membrane) | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Tree canopy (`canopy`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.7 [brief] *cited range*, unverified (cited 0.6-0.8) | — |
+| River (open water) (`river`) | 0.06 [oke] *cited range*, unverified (cited 0.03-0.10) | 0.96 [oke] *cited range*, unverified (cited 0.92-0.97) | μ 1545 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 1 [engine] *engine assumption (no source)*, unverified | — |
+| Still pond (shallow) (`pond`) | 0.06 [oke] *cited range*, unverified (cited 0.03-0.10) | 0.96 [oke] *cited range*, unverified (cited 0.92-0.97) | μ 1545 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 1 [engine] *engine assumption (no source)*, unverified | — |
 | Cool roof, aged (`coolroofAged`) | 0.6 [brief2] *cited range*, unverified (brief: aged cool roofs 0.50-0.70, of which 0.60-0.70 unverified; Chicago code floor: 3-year aged >= 0.50 [chicago]) | 0.88 [lbnlRoof] *cited value*, unverified | μ 450 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (same build-up as the dark membrane) | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Cool roof, new (`coolroofNew`) | 0.8 [lbnlRoof] *cited value*, unverified (new white roof about 0.80; read second-hand via the compendium, so unverified as in block 1) | 0.88 [lbnlRoof] *cited value*, unverified | μ 450 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (same build-up as the dark membrane) | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Extensive green roof (`greenroof`) | 0.2 [brief2] *cited range*, unverified (cited 0.15-0.25) | 0.95 [brief2] *cited value*, unverified | μ 600 J m⁻² s⁻½ K⁻¹ [brief2] *cited value*, unverified (dry substrate; wet 1200, decays with tau) | dry 0.25 [brief2] *interpretation of the source*, unverified (dry; the brief's value. Heusinger & Weber report Bowen ratio <1-2) | EF wet 0.5 [heusinger] *interpretation of the source*, unverified (wet; Bowen ratio about 1 (Heusinger & Weber: <1-2)); μ wet 1200 J m⁻² s⁻½ K⁻¹ [brief2] *cited value*, unverified (wet substrate); τ 4 d [brief2] *cited value*, unverified (substrate drying time, days); storage 30 mm [brief2] *cited range*, unverified (100 mm substrate holds 20-40 mm) |
@@ -41,6 +43,8 @@ Not used by the grid model:
 
 - `water`: Not used by the grid model: the pond is held at daily mean air - 1 K, +-1 K (research brief).
 - `canopy`: Not used by the grid model: leaf temperature = air + 2.5 K x (K/900 W m-2) by day, air - 0.5 K at night (engine assumption; brief: air +0-3 K).
+- `river`: Not used by the grid model: the river is held at daily mean air - 2 K, +-0.5 K (peak at 15:00), so it stays below the air all afternoon (research brief, block 4; offset and amplitude are assumptions).
+- `pond`: Not used by the grid model: the pond is held at daily mean air - 0.5 K, +-2 K (peak at 16:00): cooler than the afternoon air, warmer than the air before dawn (research brief, block 4; numbers are assumptions, the warm night is cited).
 - `youngCanopy`: Not used by the grid model: leaf temperature as for mature trees. Its thin crown lets through exp(-0.5 x 1.5) = 0.47 of the sun (see youngTreeTransmission).
 
 Shown on the heat cards as a caveat:
@@ -69,6 +73,23 @@ Shown on the heat cards as a caveat:
 | `glassHo` | 20 [brief3] *cited range*, unverified (outside film coefficient h_o, brief 15-25 W m-2 K-1) |
 | `glassHi` | 7.7 [iso6946] *interpretation of the source*, unverified (inside film coefficient h_i,eff, W m-2 K-1, read as 1 / 0.13) |
 | `sweatCue` | Tmrt 65 -> 70 C [engine] *engine assumption (no source)*, unverified (visual cue only: droplets on people in sun, strength rising from Tmrt 65 C to full at 70 C (separates sunlit pavement from sunlit lawn in this model); no physiological model) |
+| `windFmin` | 0.3 [brief4] *engine assumption (no source)*, unverified (f_min: wind factor right behind an obstacle (leeward face); also the lower clamp of f_w) |
+| `shelterReach` | 5 H [brief4] *engine assumption (no source)*, unverified (shelter recovers linearly to 1 at 5 building heights downwind ("5H recovery" is an assumption in the brief; wake recirculation 1.6-2.6 x building width is cited [wake])) |
+| `channelC` | 0.2 [brief4] *engine assumption (no source)*, unverified (c_ch: channelling gain in streets aligned with the wind, C = 1 + c_ch max(0, cos 3 delta)) |
+| `windFmax` | 1.2 [brief4] *engine assumption (no source)*, unverified (f_max: upper clamp of f_w) |
+| `alignCut` | 30 deg [corridor] *cited value*, unverified (channelling only in streets whose axis is within 30 deg of the wind) |
+| `channelHw` | 0.4 [oke1988] *interpretation of the source*, unverified (channelling only where the street H/W > 0.4 (read from the Oke 1988 regime thresholds, about 0.3-0.4, unverified)) |
+| `windHc` | h_c = 5.7 + 3.8 u_site f_w [brief4] *interpretation of the source*, unverified (the same h_c formula [oke] with the local wind u_i = u_site f_w per cell (roofs and blocks without a wind direction: f_w = 1)) |
+| `riverCurve` | Ta_mean - 2 K + 0.5 K sin(2 pi (h - 9) / 24) [brief4] *engine assumption (no source)*, unverified (prescribed river surface; range 1 K (large rivers: smallest daily range [webb2008]); the -2 K offset and 0.5 K amplitude are assumptions) |
+| `pondCurve` | Ta_mean - 0.5 K + 2 K sin(2 pi (h - 10) / 24) [brief4] *engine assumption (no source)*, unverified (prescribed shallow pond surface; range 4 K; warmer than the air at night is cited [solcerova2019], the numbers are assumptions) |
+| `airDay` | 1 [brief4] *cited range*, unverified (overlay only: dTa at the bank by day, -1.0 K (cited range 0.2-1.5 K [hathway2012, cheonggyecheon, jacobs2020])) |
+| `airL` | 30 [brief4] *cited range*, unverified (overlay only: decay length L, m (cited 30-80 m [hathway2012, cheonggyecheon], unverified)) |
+| `airLaligned` | 60 [brief4] *interpretation of the source*, unverified (overlay only: decay length in streets aligned with the wind, m, chosen so the effect is below 0.2 K by 150 m (the brief reads the Ota River 150-500 m [ota] as at most 150 m here)) |
+| `airNight` | 0.3 [brief4] *engine assumption (no source)*, unverified (overlay only: dTa at the bank at night, +0.3 K (range 0-1 K assumed; the sign is cited [steeneveld2014, solcerova2019])) |
+| `airPond` | 0.2 [jacobs2020] *cited value*, unverified (overlay only: dTa next to the small pond by day, -0.2 K (Jacobs et al. typical afternoon value)) |
+| `apparentTemp` | AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25 [steadman1994] *cited value*, unverified (comfort for the walkers in block 4 (a stand-in for UTCI, which is not implemented); ws = u_10 f_w clamped to 0.5-17 m/s as the brief gives for UTCI) |
+| `atRadiation` | Q = 6.1 W m-2 K-1 x (Tmrt - Ta) [steadman1994] *interpretation of the source*, unverified (extra radiation absorbed by a person, linearised: 4 eps sigma T^3 with eps 0.97 and T 303 K) |
+| `windLines` | seeds every 20 m upwind, RK2 2.5 m steps, slide along buildings [brief4] *engine assumption (no source)*, unverified (drawing only: assumed direction x shelter factor, not computed flow; dash spacing and speed proportional to u_i (speed drawn 4x)) |
 
 The wall term's daytime part peaks at 6.8 K on the design day (total wall excess up to 8.8 K above air).
 
@@ -112,6 +133,20 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[xie2016]** Xie et al. (2016) Atmos. Chem. Phys. 16, 6071, doi 10.5194/acp-16-6071-2016: dense urban anthropogenic heat 20-70 W m-2 of ground area, occasionally > 100
 - **[sailor2011]** Sailor (2011) Int. J. Climatol., doi 10.1002/joc.2106, anthropogenic heat review; Sailor et al. (2015) citing Ichinose (1999): central Tokyo > 400 W m-2 by day
 - **[sponge2015]** State Council General Office (2015) Guiding Opinions on Promoting Sponge City Construction, Guo Ban Fa [2015] No. 75 (English notice, gov.cn, 2015-10-16; reprint waizi.org.cn/law/6860.html; MOHURD interpretation via cs.com.cn; the primary Chinese text was not located)
+- **[brief4]** Research brief docs/research/waterfront-brief.md (block 4; values compiled from the sources below, items marked unverified there are flagged here)
+- **[volker2013]** Völker et al. (2013) Erdkunde 67(4), review of 27 studies: urban blue space about 2.5 K (95% CI 1.9-3.2) cooler May-October, inflated by remote-sensing surface temperatures
+- **[hathway2012]** Hathway & Sharples (2012) Building and Environment, River Don, Sheffield: river about 1 K cooler than the city reference, vegetated banks about 2 K cooler than paved, reach about 30 m with open banks (via secondary sources, unverified)
+- **[steeneveld2014]** Steeneveld et al. (2014) Landscape and Urban Planning, doi 10.1016/j.landurbplan.2013.09.001: in Rotterdam, water bodies raise the 95th percentile of the daily maximum UHI (warm after sunset)
+- **[theeuwes2013]** Theeuwes et al. (2013) J. Geophys. Res. Atmos., doi 10.1002/jgrd.50704 (WRF): water warmer than the air at night worsens night-time comfort
+- **[jacobs2020]** Jacobs et al. (2020) Are urban water bodies really cooling? Urban Climate (ENVI-met, small Dutch water bodies): afternoon air -0.2 K typical, -0.6 K at most; PET -0.6 typical, -1.9 at most; shade gives PET -1 to -7 K
+- **[cheonggyecheon]** Cheonggyecheon, Seoul (TMU repository; AMS abstract): more than 1 K cooler to 70-80 m (north side), about 0.5 K to 30-50 m (south side); before / after -0.1 to -0.9 K
+- **[ota]** Murakawa group, Ota River, Hiroshima (AIJ papers, J-STAGE aijax 415): river cooling detectable 150-500 m inland along streets perpendicular to the river, more with wind, wider streets and lower density (unverified)
+- **[corridor]** Ventilation-corridor planning criteria: corridors within 30 deg of the prevailing wind (Chinese planning criteria and Givoni 20-30 deg, via Ren et al. 2018 (CUHK) and MDPI Buildings 14(2):348)
+- **[oke1988]** Oke (1988) Energy and Buildings 11, street-canyon flow regimes, thresholds about 0.3-0.4 and 0.65-0.7 H/W (unverified)
+- **[wake]** Building Simulation (Springer), doi 10.1007/s12273-024-1103-z: building wake recirculation length about 1.6-2.6 x building width
+- **[solcerova2019]** Solcerova et al. (2019) Frontiers in Earth Science 7, 156, doi 10.3389/feart.2019.00156: a Delft pond is warmer than the air at night and releases about 2.7 MJ m-2 per night (43% longwave, 39% latent, 11% sensible)
+- **[webb2008]** Webb et al. (2008) Hydrological Processes, river water temperature review: large deep rivers have the smallest daily range ("< 1 K" unverified)
+- **[steadman1994]** Steadman (1994) Australian Meteorological Magazine 43, apparent temperature with radiation: AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25 (as used by the Australian Bureau of Meteorology; coefficients from memory, not checked)
 - **[noaa]** NOAA Global Monitoring Laboratory, General Solar Position Calculations (solareqns.PDF)
 - **[brutsaert]** Brutsaert (1975) Water Resources Research 11(5) 742-744, clear-sky emissivity
 - **[meinel]** Meinel & Meinel (1976) Applied Solar Energy, clear-sky beam irradiance
@@ -128,7 +163,8 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - Shortwave: K↓ = sunlit·I_b·sinβ + SVF·D + K_wr (+ r·I_b·sinβ off glass, block 3), I_b = 1361·0.7^(AM^0.678) [meinel], D = 0.12·I_b·sinβ [brief]; tree shade transmits exp(−0.5·LAI) ≈ 0.17 (LAI 3.5 is an *engine assumption*).
 - Longwave: L↓ = SVF·ε_sky·σTa⁴ + (1−SVF)·L_wall, L_wall = σT_wall⁴ for opaque walls (glass walls: block 3), ε_sky = 1.24·(e_a/Ta)^(1/7) [brutsaert], T_wall = Ta + 2 K + 6 K·(K↓/900) (*engine assumption*, peaks at 6.8 K + 2 K, ignores wall orientation).
 - Convection: h_c = 5.7 + 3.8·u [oke], the same for roofs and ground.
-- Water: Ts = daily mean Ta − 1 K + 1 K·sin(2π(t − 9 h)/24) [brief].
+- Water: Ts = daily mean Ta − 1 K + 1 K·sin(2π(t − 9 h)/24) [brief] (blocks 1–3; block 4's river and pond: see Block 4).
+- Convection, block 4: h_c = 5.7 + 3.8·u_site·f_w per cell, f_w the wind factor (see Block 4); blocks 1–3 have f_w = 1.
 - Tree leaves: air + 2.5 K·(K↓/900) by day, air − 0.5 K at night (*engine assumption*; brief: air +0–3 K).
 - Air temperature [brief]: sinusoid with Ta,min at sunrise and Ta,max at 15:00, implemented as two half-cosines (rise and fall).
 - Sky view factor: horizon scan, SVF = mean over 16 azimuths of cos²(horizon elevation); canyon check against cos(arctan(2H/W)).
@@ -167,6 +203,11 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Street canyon (H/W)** (glass-cbd only): Typical: Sky view factor at the centre of a long canyon: 1/√(1 + (2H/W)²), i.e. 0.45 at H/W 1, 0.24 at 2, 0.16 at 3, 0.10 at 5. Oke (1981): calm-night urban–rural air difference about 7.45 + 3.97 ln(H/W) K (secondary source). [brief3, oke1981]
 - **Low-e glass** (glass-cbd only): Typical: Solar reflectance about 0.15–0.35 head-on; Singapore caps glass daylight reflectance at 20%. [brief3, bca]
 - **AC waste heat** (glass-cbd only): Typical: Dense urban areas 20–70 W m⁻² of ground area, sometimes over 100; central Tokyo over 400 W m⁻² by day. [xie2016, sailor2011]
+- **Wind factor (f_w)** (waterfront only): In this model: Over the river 1.00; along Quay Street 1.20; Rope Walk, behind the warehouses, 0.46 (mean), 0.37 within one building height of the wall. [this model]
+- **Ventilation corridor** (waterfront only): Typical: Planning guides ask for corridors within about 30° of the prevailing wind; along the Ota River (Hiroshima) river cooling was detected 150–500 m inland along streets perpendicular to the river (unverified). [corridor, ota]
+- **Fetch** (waterfront only): Typical: River Don, Sheffield: about 30 m with open banks; Cheonggyecheon, Seoul: 30–80 m; small water bodies: −0.2 K typical in the afternoon. [hathway2012, cheonggyecheon, jacobs2020]
+- **Sheltering (lee)** (waterfront only): Typical: Recirculation behind a building about 1.6–2.6 times its width; recovery to the open wind after about 5 building heights is an assumption of this model. [wake, brief4]
+- **Apparent temperature** (waterfront only): Typical: AT = Ta + 0.348 e − 0.70 ws + 0.70 Q/(ws + 10) − 4.25 (e in hPa, ws the 10 m wind in m/s, Q in W m⁻²; coefficients from memory, not checked). [steadman1994]
 - **Permeable paving** (sponge-retrofit only): Typical: Wetted permeable pavement 15–35 °C cooler than dense asphalt in the early afternoon, 2–7 °C cooler about a day later; dry porous asphalt about 5 °C warmer. [li2013]
 - **Green roof** (sponge-retrofit only): Typical: Albedo about 0.15–0.25; up to 18 °C cooler than a black roof in a New York case; Bowen ratio about 1–2. [brief2, noaaGreen, heusinger]
 - **Rain garden** (sponge-retrofit only): Typical: No measured cooling figure in our sources; this block uses engine assumptions (evaporative fraction 0.8 wet, 0.35 dry, 3-day drying). [engine, mccoll]
@@ -608,3 +649,189 @@ Notes on the rows outside:
   diffuse part is ignored) and opaque walls only diffusely.
 - Low-e and mirror reflectances, all absorptances, glass emissivity and the glass temperature balance are unverified
   (no datasheet or measurement was found).
+
+## Block 4: waterfront and wind corridors
+
+The fourth block (`cities/waterfront`) is an invented 400 m block on the south bank of a river: a stone promenade
+with a row of riverside trees, two wide streets running south from the river along the prevailing wind (Quay Street
+and Willow Street, the ventilation corridors), two narrower streets across it (Rope Walk and Tannery Lane, in the lee
+of the building rows upwind of them) and a garden with a small still pond. The wind blows from the river (north) at a
+calm (1 m/s) or breezy (3 m/s, default) preset; buttons, `?u=1|3`. Its research brief is
+[`docs/research/waterfront-brief.md`](research/waterfront-brief.md).
+
+### Wind factor
+
+Each 5 m ground cell gets a wind factor f_w = clamp(S·C, 0.3, 1.2) (`engine/wind.js`):
+
+- **Shelter S** = min over upwind buildings b within 5·H_b of f_min + (1 − f_min)·d_b/(5·H_b), 1 if none;
+  d_b is the distance from the cell centre, straight upwind, to b's footprint (an exact ray–box distance).
+- **Channelling C** = 1 + c_ch·max(0, cos 3δ) in a street within 30° of the wind (δ the angle between its axis
+  and the wind) whose H/W > 0.4; else 1. A street here is its carriageway and pavements out to the facing walls;
+  H is the mean height of the walls facing it within 15 m of the kerb and W the mean wall-to-wall width, both
+  sampled every 5 m where walls face it on both sides.
+- **Roofs** keep f_w = 1 (*engine assumption*: above the street-level shelter). Trees are not obstacles (porous; not
+  modelled).
+- The local wind u_i = u_site·f_w sets the convective coefficient of the cell, h_c = 5.7 + 3.8·u_i [oke], in the
+  force-restore model, and the wind a walker feels. **Blocks 1–3 declare no wind direction, have no f_w and keep the
+  scalar h_c = 5.7 + 3.8·u_site**: their model runs, drawings and pixels are unchanged (checked against the pages
+  built before this block, `tests/e2e/regression.test.mjs`).
+- Block 4 runs one model per preset, each with 6 coarse (10-min) spin-up days before the 1-min days (as block 3,
+  with the same stability guard); this run converges after 3 1-min days at 3 m/s
+  (max |ΔTd| 0.010 K) and 3 at 1 m/s.
+
+| Street | Axis | δ | H m | W m | H/W | C |
+|---|---|---|---|---|---|---|
+| Quay Street (`quay`) | N–S | 0° | 17.4 | 30.0 | 0.58 | 1.20 |
+| Willow Street (`willow`) | N–S | 0° | 16.6 | 30.0 | 0.55 | 1.20 |
+| Rope Walk (`rope`) | E–W | 90° | 19.0 | 22.0 | 0.86 | 1.00 |
+| Rope Walk (`rope2`) | E–W | 90° | – | – | no facing walls | 1.00 |
+| Rope Walk (`rope3`) | E–W | 90° | 22.0 | 22.0 | 1.00 | 1.00 |
+| Tannery Lane (`tannery`) | E–W | 90° | 18.5 | 20.0 | 0.93 | 1.00 |
+| Tannery Lane (`tannery2`) | E–W | 90° | – | – | no facing walls | 1.00 |
+| Tannery Lane (`tannery3`) | E–W | 90° | 21.0 | 20.0 | 1.05 | 1.00 |
+
+Isolated-building check (H 20 m, wind from the north, centre line): upwind f_w 1.00; at the leeward wall
+0.30; mean over 0–1 H 0.37, 0.44 at 1 H; 1.00 at 5–6 H. In the block: over the
+river f_w = 1.00–1.00; Quay and Willow Streets 1.20 (mean); the streets across the wind
+0.53; Rope Walk 0.46; 0–1 H behind the Wharf Warehouses 0.37 (mean), 0.41 (largest).
+
+### Block 4 parameters
+
+| Constant | Value |
+|---|---|
+| `windFmin` | 0.3 [brief4] *engine assumption (no source)*, unverified (f_min: wind factor right behind an obstacle (leeward face); also the lower clamp of f_w) |
+| `shelterReach` | 5 H [brief4] *engine assumption (no source)*, unverified (shelter recovers linearly to 1 at 5 building heights downwind ("5H recovery" is an assumption in the brief; wake recirculation 1.6-2.6 x building width is cited [wake])) |
+| `channelC` | 0.2 [brief4] *engine assumption (no source)*, unverified (c_ch: channelling gain in streets aligned with the wind, C = 1 + c_ch max(0, cos 3 delta)) |
+| `windFmax` | 1.2 [brief4] *engine assumption (no source)*, unverified (f_max: upper clamp of f_w) |
+| `alignCut` | 30 deg [corridor] *cited value*, unverified (channelling only in streets whose axis is within 30 deg of the wind) |
+| `channelHw` | 0.4 [oke1988] *interpretation of the source*, unverified (channelling only where the street H/W > 0.4 (read from the Oke 1988 regime thresholds, about 0.3-0.4, unverified)) |
+| `windHc` | h_c = 5.7 + 3.8 u_site f_w [brief4] *interpretation of the source*, unverified (the same h_c formula [oke] with the local wind u_i = u_site f_w per cell (roofs and blocks without a wind direction: f_w = 1)) |
+| `riverCurve` | Ta_mean - 2 K + 0.5 K sin(2 pi (h - 9) / 24) [brief4] *engine assumption (no source)*, unverified (prescribed river surface; range 1 K (large rivers: smallest daily range [webb2008]); the -2 K offset and 0.5 K amplitude are assumptions) |
+| `pondCurve` | Ta_mean - 0.5 K + 2 K sin(2 pi (h - 10) / 24) [brief4] *engine assumption (no source)*, unverified (prescribed shallow pond surface; range 4 K; warmer than the air at night is cited [solcerova2019], the numbers are assumptions) |
+| `airDay` | 1 [brief4] *cited range*, unverified (overlay only: dTa at the bank by day, -1.0 K (cited range 0.2-1.5 K [hathway2012, cheonggyecheon, jacobs2020])) |
+| `airL` | 30 [brief4] *cited range*, unverified (overlay only: decay length L, m (cited 30-80 m [hathway2012, cheonggyecheon], unverified)) |
+| `airLaligned` | 60 [brief4] *interpretation of the source*, unverified (overlay only: decay length in streets aligned with the wind, m, chosen so the effect is below 0.2 K by 150 m (the brief reads the Ota River 150-500 m [ota] as at most 150 m here)) |
+| `airNight` | 0.3 [brief4] *engine assumption (no source)*, unverified (overlay only: dTa at the bank at night, +0.3 K (range 0-1 K assumed; the sign is cited [steeneveld2014, solcerova2019])) |
+| `airPond` | 0.2 [jacobs2020] *cited value*, unverified (overlay only: dTa next to the small pond by day, -0.2 K (Jacobs et al. typical afternoon value)) |
+| `apparentTemp` | AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25 [steadman1994] *cited value*, unverified (comfort for the walkers in block 4 (a stand-in for UTCI, which is not implemented); ws = u_10 f_w clamped to 0.5-17 m/s as the brief gives for UTCI) |
+| `atRadiation` | Q = 6.1 W m-2 K-1 x (Tmrt - Ta) [steadman1994] *interpretation of the source*, unverified (extra radiation absorbed by a person, linearised: 4 eps sigma T^3 with eps 0.97 and T 303 K) |
+| `windLines` | seeds every 20 m upwind, RK2 2.5 m steps, slide along buildings [brief4] *engine assumption (no source)*, unverified (drawing only: assumed direction x shelter factor, not computed flow; dash spacing and speed proportional to u_i (speed drawn 4x)) |
+
+### Water
+
+River and pond are prescribed (`engine/thermal.js` waterTemp), not computed; the pond of blocks 1–3 keeps its curve.
+
+- River: Ts = daily mean Ta − 2 K + 0.5 K·sin(2π(t − 9 h)/24): 27.5–28.5 °C (range 1.0 K),
+  28.5 °C at 15:00 against 35.0 °C air. Large deep rivers have the smallest daily range [webb2008].
+- Pond: Ts = daily mean Ta − 0.5 K + 2 K·sin(2π(t − 10 h)/24): 27.5–31.5 °C (range 4.0 K),
+  31.4 °C at 15:00 (air 35.0 °C) and 27.5 °C at 04:00 (air 25.1 °C). A pond warmer than the
+  air at night is cited [solcerova2019, steeneveld2014]; the offsets and amplitudes are assumptions.
+
+### Air overlay (information only)
+
+The air temperature stays a fixed forcing. The water's effect on the air is drawn as an overlay along the wind lines
+(`A`, `?air=1`), labelled "illustrative, from literature, not simulated", and never enters a temperature, Tmrt or
+comfort value. Along a line, λ = ∫ds/L(s) from where it leaves the water, L = 30 m (60 m in streets along the
+wind); by day ΔTa = −1 K·exp(−λ), at night +0.3 K·exp(−λ) (day weight from the sun altitude, full above
+10°). The pond uses the river's numbers ×0.20 (−0.2 K by day [jacobs2020]; at night the same ratio,
+an *engine assumption*). By day: −1.00 K at the bank, −0.39 K at 30 m, −0.13 K at 80 m.
+
+### Wind lines (drawing only)
+
+Seeds every 20 m across the wind on the upwind edge (seeded jitter ±3 m); RK2 steps of 2.5 m along the wind, or,
+where a step would enter a building (grown by 1.5 m), along the wall: the side the wind leans toward, head-on the
+side of the wall's centre the line is on. A line ends at the block edge or where it meets an earlier line (on a
+1.5 m grid), so no path is drawn twice. Lines are recorded once through the pen recorder (a slow seeded wobble) and
+dashed every frame: dash period 4 m per m/s of local wind (∝ u_i), moving at 4·u_i (drawn faster than life);
+the phase is a pure function of the frame. Label on the page: "assumed direction × shelter factor, not computed flow".
+This run: 20 lines, 1723 vertices, 0 inside a building, hash `65d58117`. Toggle `W`, `?wind=0|1`.
+
+### Comfort and walkers
+
+Walkers use the block 1 route rule (Melnikov shade weights, scaled by heat) with a wind term
+(`engine/waterfront.js` comfortShade): per 2 m pixel, w = w_class + (1 − w_b)·(AT(u·f_w) − AT(u))/(AT_sun − AT_shade),
+with AT the apparent temperature with radiation [steadman1994] from the pixel's Tmrt (sun, building shade or tree shade
+of its 5 m cell) and the local wind (u_10·f_w clamped to 0.5–17 m/s as the brief gives for UTCI), and AT_sun − AT_shade
+the mean gap between sunlit and building-shaded walkable ground at f_w = 1 (8.2 K at 15:00, 3 m/s). At f_w = 1 the
+weights are exactly those of blocks 1–3; a breezier pixel weighs less, a sheltered one more. UTCI is not implemented;
+apparent temperature is a simpler stand-in (coefficients from memory, unverified). The sweat cue is unchanged (Tmrt only).
+
+At 15:00 (3 m/s) all 14 walkers on the stroll route take the tree-shaded, breezy riverside (cost 373.8) over sunny,
+sheltered Rope Walk (423.1). Across all routes the wind term moves walkers only a little: mean f_w where people walk
+1.00 vs 0.99 with the wind ignored (walkable ground 0.87). Shade dominates: under the riverside trees
+Tmrt is 42.4 °C vs 68.4 °C in the sun beside them (apparent temperature 38.0 vs 46.6 °C), against
+the overlay's −1 K at the bank.
+
+### Acceptance bands (block 4)
+
+| Check (spec #9) | Model | Band | Source | |
+|---|---|---|---|---|
+| Isolated building, open ground upwind: f_w | 1 | 0.99 to 1.01 | brief4 | inside |
+| Isolated building (H 20 m), 0–1 H leeward on the centre line: mean f_w | 0.370 | ≤ 0.4 | brief4 | inside |
+| Isolated building, 0–1 H leeward: largest f_w (at 1 H: f_min + (1 − f_min)/5) | 0.438 | ≤ 0.4 | brief4 | **outside** |
+| Isolated building, 5–6 H leeward: smallest f_w | 1 | ≥ 0.95 | brief4 | inside |
+| Over the river: smallest f_w (n 720) | 1 | 0.99 to 1.01 | brief4 | inside |
+| Over the river: largest f_w | 1 | 0.99 to 1.01 | brief4 | inside |
+| Wharf Warehouses (H 16 m), ground 0–1 H leeward: mean f_w (n 63) | 0.366 | ≤ 0.4 | brief4 | inside |
+| Wharf Warehouses, ground 0–1 H leeward: largest f_w (cell centres 2.5–13.5 m behind the wall) | 0.409 | ≤ 0.4 | brief4 | **outside** |
+| Customs Terrace (H 20 m), ground 5–6.5 H straight downwind: smallest f_w (n 132) | 1 | ≥ 0.95 | brief4 | inside |
+| Streets along the wind (quay, willow): mean f_w | 1.200 | ≥ 1 | brief4 | inside |
+| Along minus across the wind (rope, rope2, rope3, tannery, tannery2, tannery3, mean 0.533) | 0.667 | ≥ 0.3 | brief4 | inside |
+| h_c at 3 m/s, ground: smallest (bound 5.7 + 3.8 u f_min = 9.12) | 9.151 W m⁻² K⁻¹ | ≥ 9.12 | brief4 | inside |
+| h_c at 3 m/s, ground: largest (bound 5.7 + 3.8 u f_max = 19.38) | 19.380 W m⁻² K⁻¹ | ≤ 19.38 | brief4 | inside |
+| h_c at 3 m/s, roofs minus 5.7 + 3.8 u = 17.10 (f_w = 1) | 0 W m⁻² K⁻¹ | 0 to 0 | brief4 | inside |
+| h_c at 1 m/s, ground: smallest (bound 5.7 + 3.8 u f_min = 6.84) | 6.850 W m⁻² K⁻¹ | ≥ 6.84 | brief4 | inside |
+| h_c at 1 m/s, ground: largest (bound 5.7 + 3.8 u f_max = 10.26) | 10.260 W m⁻² K⁻¹ | ≤ 10.26 | brief4 | inside |
+| h_c at 1 m/s, roofs minus 5.7 + 3.8 u = 9.50 (f_w = 1) | 0 W m⁻² K⁻¹ | 0 to 0 | brief4 | inside |
+| Sunlit asphalt at 15:00, 3 m/s: sheltered (f_w ≤ 0.45, n 212, SVF 0.58) minus exposed (f_w ≥ 0.95, n 394, SVF 0.76) | +11.13 K | 2 to 8 | engine | **outside** |
+| The same at 1 m/s (calm), read against the same band | +7.13 K | 2 to 8 | engine | inside |
+| Open asphalt (SVF 1, no walls) at f_w 0.37 minus f_w 1.16, 15:00, 3 m/s: the wind alone | +9.57 K | 2 to 8 | engine | **outside** |
+| Tmrt at 15:00, 1 m/s minus 3 m/s: largest change over ground cells | +4.50 K | ≤ 2 | brief4 | **outside** |
+| Tmrt at 15:00, 1 m/s minus 3 m/s: mean over sunlit ground | +2.17 K | ≤ 2 | brief4 | **outside** |
+| River: daily range | 1 K | ≤ 1.5 | brief4 | inside |
+| Pond: daily range | 4 K | 3 to 5 | brief4 | inside |
+| River minus air at 15:00 | −6.50 K | ≤ 0 | brief4 | inside |
+| Pond minus air at 15:00 | −3.57 K | ≤ 0 | brief4 | inside |
+| Pond minus air at 04:00 | +2.35 K | ≥ 0 | solcerova2019 | inside |
+| Air overlay by day: size of ΔTa at the bank (20 lines) | 1 K | 0.5 to 1.5 | brief4 | inside |
+| Air overlay by day: largest size of ΔTa more than 80 m from the water, outside streets along the wind | +0.09 K | ≤ 0.2 | brief4 | inside |
+| Air overlay by day: largest size of ΔTa more than 150 m from the water, in streets along the wind | +0.06 K | ≤ 0.2 | brief4 | inside |
+| Air overlay at night: smallest ΔTa | 0 K | ≥ 0 | brief4 | inside |
+| Wind lines (20 lines, 1723 vertices): vertices inside a building | 0 | ≤ 0 | brief4 | inside |
+| Walkers at 15:00: share of the stroll route (n 14) on the tree-shaded, breezy riverside rather than sunny, sheltered Rope Walk | 1 | ≥ 0.5 | melnikov | inside |
+| Walkers at 15:00: mean f_w where people walk minus the same walkers with wind ignored | 0.002 | ≥ 0 | melnikov | inside |
+
+6 of 34 checks fall outside their band. They are reported, not tuned away: no input was moved to pass a band.
+
+Notes on the rows outside:
+
+- **0–1 H leeward, largest f_w.** S rises linearly from f_min = 0.3 at the wall, so at exactly 1 H it is
+  0.3 + 0.70/5 = 0.44 > 0.4: the band holds for the mean over 0–1 H (0.37 isolated, 0.37 in the block) but
+  not for the far end of the zone. f_min and the 5 H recovery are assumptions with no cited range; they were not changed.
+- **Sheltered minus exposed asphalt at 15:00, 3 m/s: +11.1 K, above the 2–8 K band.** The brief marks this band as an
+  engine plausibility band to be calibrated from a run. This is that run: sheltered sunlit asphalt (mean f_w 0.37, h_c
+  9.9 W m⁻² K⁻¹, 67.6 °C) against exposed sunlit asphalt (f_w 1.16, h_c 18.9, 56.5 °C). Doubling h_c removes
+  that much heat; part of the gap is the narrower streets (SVF 0.58 vs 0.76), but an open cell with no walls still
+  gives +9.6 K. At 1 m/s the gap is +7.1 K (inside). The band was **not** widened to fit, and no
+  parameter was moved; the result is reported as an engine finding: with h_c = 5.7 + 3.8 u and a 3 m/s site wind, the
+  wind factor's 0.3–1.2 range makes a larger surface contrast than the brief expected. No measurement of this contrast
+  was found.
+- **Tmrt change with u: 4.5 K at most, 2.2 K on average in sun (band ≤ 2 K).** Wind does not enter Tmrt directly;
+  at 1 m/s the ground runs hotter and its longwave raises Tmrt. The largest change is on sunlit asphalt.
+
+### Disclosures (block 4)
+
+- **Air fixed:** the air temperature is the same design-day curve as in blocks 1–3; the water's air effect is an overlay
+  only. Measured urban water cools the air only a little and over a short distance (about 0.2–1.5 K by day, mostly
+  within 30–80 m [hathway2012, cheonggyecheon, jacobs2020]; reviews that report about 2.5 K are inflated by remote-sensing
+  surface temperatures [volker2013]) and can warm the night [steeneveld2014, theeuwes2013, solcerova2019].
+- **One wind direction and speed; a geometric heuristic, not CFD:** no vortices, downdraughts, corner jets, river or sea
+  breezes, gusts or humidity. Wakes are straight shadows of the footprint along the wind; oblique winds would also
+  shelter the corridors' edges. Trees do not slow the wind. Roofs keep f_w = 1.
+- **Prescribed water curves** for the river and pond (not a water energy balance).
+- **Shade is the biggest comfort lever near water** [jacobs2020: PET −1 to −7 K for shade vs −0.6 K typical next to small
+  water bodies]; the riverside-shade card says so.
+- **Comfort** uses apparent temperature [steadman1994] (from memory, unverified), not UTCI.
+- Unverified: the Hathway & Sharples numbers (secondary sources), the Ota River reach, the Oke (1988) thresholds, the decay
+  length 30–80 m, the "< 1 K" river range; f_min, c_ch, f_max, the 5 H recovery, the water curves and the night overlay
+  are assumptions.

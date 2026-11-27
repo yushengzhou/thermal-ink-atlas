@@ -13,6 +13,7 @@ import { GLOSSARY, glossaryStats, rangeLine } from '../engine/glossary.js';
 import { base2, bandRows, water, sensitivity2, diagnostics } from './retrofit.mjs';
 import { MEASURES, D_DEFAULT, D_MAX, decay } from '../engine/retrofit.js';
 import { cbdMarkdown, cbdGlossaryStats } from './cbd-docs.mjs';
+import { waterfrontMarkdown, wfGlossaryStats } from './waterfront-docs.mjs';
 
 const UNITS = { mu: ' J m⁻² s⁻½ K⁻¹', muWet: ' J m⁻² s⁻½ K⁻¹', thinC: ' J m⁻² K⁻¹', tau: ' d', storage: ' mm' };
 const cell = (p, k = '') =>
@@ -59,8 +60,11 @@ export function glossaryMarkdown(world, model) {
   const st = glossaryStats(world, model);
   // block-3-only terms computed from the model are quoted with block 3's numbers (as on that page)
   const st3 = cbdGlossaryStats();
+  // block-4-only terms likewise with block 4's numbers
+  const st4 = wfGlossaryStats();
+  const statsFor = (g) => (g.model && g.scenes && g.scenes.includes('glass-cbd') ? st3 : g.model && g.scenes && g.scenes.includes('waterfront') ? st4 : st);
   return Object.entries(GLOSSARY)
-    .map(([k, g]) => `- **${g.term}**${g.scenes ? ` (${g.scenes.join(', ')} only)` : ''}: ${rangeLine(k, g.model && g.scenes && g.scenes.includes('glass-cbd') ? st3 : st)} ${g.model ? '[this model]' : `[${g.src}]`}`)
+    .map(([k, g]) => `- **${g.term}**${g.scenes ? ` (${g.scenes.join(', ')} only)` : ''}: ${rangeLine(k, statsFor(g))} ${g.model ? '[this model]' : `[${g.src}]`}`)
     .join('\n');
 }
 
@@ -275,7 +279,8 @@ ${Object.entries(SOURCES).map(([k, v]) => `- **[${k}]** ${v}`).join('\n')}
 - Shortwave: K↓ = sunlit·I_b·sinβ + SVF·D + K_wr (+ r·I_b·sinβ off glass, block 3), I_b = 1361·0.7^(AM^0.678) [meinel], D = 0.12·I_b·sinβ [brief]; tree shade transmits exp(−0.5·LAI) ≈ 0.17 (LAI 3.5 is an *engine assumption*).
 - Longwave: L↓ = SVF·ε_sky·σTa⁴ + (1−SVF)·L_wall, L_wall = σT_wall⁴ for opaque walls (glass walls: block 3), ε_sky = 1.24·(e_a/Ta)^(1/7) [brutsaert], T_wall = Ta + 2 K + 6 K·(K↓/900) (*engine assumption*, peaks at ${f1(wmax)} K + 2 K, ignores wall orientation).
 - Convection: h_c = 5.7 + 3.8·u [oke], the same for roofs and ground.
-- Water: Ts = daily mean Ta − 1 K + 1 K·sin(2π(t − 9 h)/24) [brief].
+- Water: Ts = daily mean Ta − 1 K + 1 K·sin(2π(t − 9 h)/24) [brief] (blocks 1–3; block 4's river and pond: see Block 4).
+- Convection, block 4: h_c = 5.7 + 3.8·u_site·f_w per cell, f_w the wind factor (see Block 4); blocks 1–3 have f_w = 1.
 - Tree leaves: air + 2.5 K·(K↓/900) by day, air − 0.5 K at night (*engine assumption*; brief: air +0–3 K).
 - Air temperature [brief]: sinusoid with Ta,min at sunrise and Ta,max at 15:00, implemented as two half-cosines (rise and fall).
 - Sky view factor: horizon scan, SVF = mean over 16 azimuths of cos²(horizon elevation); canyon check against cos(arctan(2H/W)).
@@ -309,7 +314,8 @@ Moving any one of them toward the middle of its cited range breaks it. Region me
 ${sensitivityMarkdown(sensitivity())}
 
 ${retrofitMarkdown()}
-${cbdMarkdown()}`;
+${cbdMarkdown()}
+${waterfrontMarkdown()}`;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
