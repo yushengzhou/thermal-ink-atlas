@@ -1,8 +1,9 @@
-// Blocks 1-3 are unchanged by block 4: every page renders the same pixels,
-// notes and probe values as the page built before block 4 (main at 8e76f7a,
-// kept gzipped in tests/fixtures/base-pages). Both pages run in the same
-// browser here, so the comparison does not depend on the platform.
-// A deliberate change to blocks 1-3 must refresh the fixtures: commit the
+// Blocks 1-4 are unchanged by later blocks: every page renders the same
+// pixels, notes and probe values as its fixture page, kept gzipped in
+// tests/fixtures/base-pages: blocks 1-3 as built before block 4 (main at
+// 8e76f7a), block 4 as built before block 5 (189b7e1). Both pages run in the
+// same browser here, so the comparison does not depend on the platform.
+// A deliberate change to these blocks must refresh the fixtures: commit the
 // rebuilt pages, then `npm run fixtures` (gzips them from HEAD) and commit.
 import { test, after, before } from 'node:test';
 import assert from 'node:assert/strict';
@@ -17,7 +18,10 @@ const CASES = {
   'asphalt-park': ['hour=15&f=400', 'thermal&hour=15&f=400', 'thermal&hour=23&f=777&cam=5.5,190,340', 'f=120', 'f=200&hour=9', 'hour=15&f=640&notes=0'],
   'sponge-retrofit': ['hour=15&f=640', 'thermal&hour=15&f=640', 'thermal&hour=15&f=640&state=split&split=0.42&d=0&cam=3.5,300,250', 'state=before&hour=12&f=400', 'state=after&thermal&hour=23&f=400&materials=new'],
   'glass-cbd': ['hour=15&f=640', 'thermal&hour=15&f=640&glass=clear', 'thermal&hour=5&f=640&cam=4.5,150,280', 'hour=12&f=400&glass=mirror&ac=1', 'hour=9&f=400&cam=5.5,160,222&glass=lowe'],
+  waterfront: ['hour=15&f=640', 'thermal&hour=15&f=640', 'thermal&hour=4&f=640&cam=3.5,205,212&u=1', 'hour=15&f=640&air=1&notes=0&cam=3.5,200,95', 'hour=9&f=777&wind=0&cam=4.5,130,160', 'thermal&hour=23&f=400&u=1&air=1'],
 };
+// which page each fixture is (for messages)
+const BEFORE = { 'asphalt-park': 'block 4', 'sponge-retrofit': 'block 4', 'glass-cbd': 'block 4', waterfront: 'block 5' };
 
 let browser;
 let dir;
@@ -44,14 +48,14 @@ async function snap(url) {
 }
 
 for (const [city, queries] of Object.entries(CASES)) {
-  test(`${city}: same pixels, notes and probe values as before block 4`, async () => {
+  test(`${city}: same pixels, notes and probe values as before ${BEFORE[city]}`, async () => {
     const base = join(dir, `${city}.html`);
     writeFileSync(base, gunzipSync(readFileSync(new URL(`../fixtures/base-pages/${city}.html.gz`, import.meta.url))));
     for (const q of queries) {
       const a = await snap(`${pathToFileURL(base).href}?${q}`);
       const b = await snap(`${pageFor(city)}?${q}`);
       assert.deepEqual(b.errors, [], q);
-      assert.equal(b.hash, a.hash, `${city} ?${q}: pixels differ from the page before block 4`);
+      assert.equal(b.hash, a.hash, `${city} ?${q}: pixels differ from the page before ${BEFORE[city]}`);
       assert.deepEqual(b.notes, a.notes, `${city} ?${q}: notes differ`);
       assert.deepEqual(b.probes, a.probes, `${city} ?${q}: probe values differ`);
     }
