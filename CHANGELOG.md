@@ -76,6 +76,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions: [Sem
 - `docs/sources.md`: block 7 section (parameters, sun and shadow geometry, the sill rule and a check on long slabs, the July courtyard, condensers and the plume term, sensitivity, walkers, acceptance bands with the soft miss disclosed, disclosures); research brief in `docs/research/estate-brief.md` (#13).
 - Gallery card for block 7 (#13).
 - Check that every block page (1–7) reads cleanly: every block-panel card, a grid of heat cards and every terms-panel footnote, failing on "undefined", "NaN", a source key without its text, an empty source line or a page error (`tests/e2e/cards.test.mjs`) (#13).
+- `docs/sources.md`, block 7: the engine's sun (`sun.js`, NOAA's fractional-year declination) is about 0.2° off the full NOAA algorithm on the design days; the brief's noon altitudes agree with the full algorithm, and with it two long slabs at the brief's 1.47 H_eff give exactly 2 h (1.5 h with the engine's sun). Documented, not changed (it would move every block's pixels) (#13).
 
 ### Changed
 - Engine: faster shadow masks (same results), per-tree crown transmission, a model run over a subset of cells, and a renderer that can draw into one band of a shared canvas. Block 1 renders the same pixels and loads faster (#5).
@@ -90,7 +91,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions: [Sem
 - Pages are 339–382 KB (block 5: 368 KB), up from 288–331 KB, because the shared engine carries the new code paths (#10).
 - Engine: the model can keep the ground heat flux G (`opts.flux`), the depth sort takes an opt-in `front` flag for overhead screens over overlapping objects, three ground materials are appended (ballast, dry soil, scrub), and the renderer draws lot cars and PV canopies and the night-release overlay. Only block 6 uses them; blocks 1–5 render the same pixels as before (#11).
 - Build: a smaller shared core on every page. Each page now carries only the source keys it can show, no parameter notes (they are for `docs/sources.md`) and only its own block's glossary terms; block-only drawing and controls moved into block modules (block 5 and 6 drawing in `htkit.js` / `pkkit.js`, the AC, wind / air and night-release overlays in their block UI modules, blocks 5 and 6 page parts as plugins, `reflect.js` on the glass page only, one CSS rule set for the block panels). The shared core is 279–283 KB, budgeted at 290,000 B by a test; pages are 282–335 KB (block 6: 330 KB), down from 369–412 KB, and blocks 1–6 render the same pixels as before (#11).
-- Engine: blocks 1–6 carry 720 B more shared core each (the block-7 hooks in `app.js`, its stubs and panel CSS); block 7's drawing, overlays and page parts are in its own modules (`eskit.js`, `estate.js`, `esui.js`). The shared core is 280–286 KB (block 7: 285.7 KB); blocks 1–6 render the same pixels as before. Block 7's page is 348 KB (#13).
+- `window.atlas.parking` is set on the car park page only (it was the loaded block plugin's API on blocks 5 and 7) (#13).
+- Engine: blocks 1–6 carry 723 B more shared core each (the block-7 hooks in `app.js`, its stubs and panel CSS); block 7's drawing, overlays and page parts are in its own modules (`eskit.js`, `estate.js`, `esui.js`). The shared core is 280–286 KB (block 7: 285.7 KB); blocks 1–6 render the same pixels as before. Block 7's page is 348 KB (#13).
 
 ### Fixed
 - The glossary entry "Reflection spot" in `docs/sources.md` no longer reads "In this model: undefined"; block-3-only terms are quoted with block 3's numbers (#8).
