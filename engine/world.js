@@ -3,8 +3,8 @@
 import { inPoly } from './core.js';
 import { svfAt } from './thermal.js';
 
-export const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water'];
-const WALKABLE = { concrete: 1, stone: 1, grass: 1 };
+export const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water', 'pavers', 'porousAsphalt', 'coolPave', 'raingarden'];
+const WALKABLE = { concrete: 1, stone: 1, grass: 1, pavers: 1 };
 
 /** Shopfront segments [s0, s1] (metres along a face) for a shop building. */
 export function shopSegments(B, face) {
@@ -82,13 +82,17 @@ export function buildWorld(scene, opts = {}) {
 
   // sky view factor: horizon scan from roof level for roofs, ground otherwise;
   // canopies block most of the sky directly beneath them.
+  // opts.svfFrom: a world with the same buildings (Before / After states)
+  // whose open-sky horizon scan is reused.
   const svf = new Float32Array(N);
+  const svfOpen = opts.svfFrom ? opts.svfFrom.svfOpen : new Float32Array(N);
   if (opts.svf !== false) {
     for (let k = 0; k < N; k++) {
       const x = ((k % n) + 0.5) * cell;
       const y = (Math.floor(k / n) + 0.5) * cell;
       const z0 = height[k];
-      let v = svfAt(heightAt, x, y, z0 + 0.01, 16, 160, cell / 2);
+      let v = opts.svfFrom ? svfOpen[k] : svfAt(heightAt, x, y, z0 + 0.01, 16, 160, cell / 2);
+      svfOpen[k] = v;
       if (bld[k] < 0) v *= 1 - 0.75 * canopy[k];
       svf[k] = v;
     }
@@ -121,6 +125,7 @@ export function buildWorld(scene, opts = {}) {
     height,
     canopy,
     svf,
+    svfOpen,
     buildings,
     trees,
     awnings,

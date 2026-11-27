@@ -5,7 +5,7 @@ import { test, after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { launch, open } from './helpers.mjs';
-import { GLOSSARY } from '../../engine/glossary.js';
+import { GLOSSARY, termsFor } from '../../engine/glossary.js';
 
 let browser;
 before(async () => {
@@ -18,7 +18,8 @@ const fnKey = (page) => page.evaluate(() => (document.getElementById('fn').hidde
 test('every glossary term opens its footnote from the terms panel; Esc closes it', async () => {
   const { page, context, errors } = await open(browser, 'hour=15&f=400');
   await page.click('#termsBtn');
-  for (const [key, g] of Object.entries(GLOSSARY)) {
+  for (const key of termsFor('asphalt-park')) {
+    const g = GLOSSARY[key];
     await page.locator(`#termsList .gl[data-gl="${key}"]`).click();
     assert.equal(await fnKey(page), key);
     const text = await page.locator('#fn').textContent();

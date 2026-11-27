@@ -93,10 +93,16 @@ export function canopyShadow(cx, cy, zc, r, sun, n = 18) {
 
 /**
  * Rasterise polygons onto a grid. For every grid sample point inside a
- * polygon, calls visit(index, polyIndex). Samples: s x s per cell.
+ * polygon, calls visit(index, polyIndex). Samples: s x s per cell; win
+ * limits the visit to a window of cells.
  */
-export function rasterise(polys, grid, visit, s = 1) {
+export function rasterise(polys, grid, visit, s = 1, win = null) {
   const { nx, ny, cell } = grid;
+  // optional cell window [i0, j0, i1, j1]: only cells inside it are visited
+  const wi0 = win ? win[0] : 0;
+  const wj0 = win ? win[1] : 0;
+  const wi1 = win ? win[2] : nx - 1;
+  const wj1 = win ? win[3] : ny - 1;
   for (let p = 0; p < polys.length; p++) {
     const poly = polys[p];
     if (!poly) continue;
@@ -110,10 +116,10 @@ export function rasterise(polys, grid, visit, s = 1) {
       y0 = Math.min(y0, poly[i + 1]);
       y1 = Math.max(y1, poly[i + 1]);
     }
-    const i0 = Math.max(0, Math.floor(x0 / cell));
-    const i1 = Math.min(nx - 1, Math.floor(x1 / cell));
-    const j0 = Math.max(0, Math.floor(y0 / cell));
-    const j1 = Math.min(ny - 1, Math.floor(y1 / cell));
+    const i0 = Math.max(wi0, Math.floor(x0 / cell));
+    const i1 = Math.min(wi1, Math.floor(x1 / cell));
+    const j0 = Math.max(wj0, Math.floor(y0 / cell));
+    const j1 = Math.min(wj1, Math.floor(y1 / cell));
     for (let j = j0; j <= j1; j++) {
       for (let i = i0; i <= i1; i++) {
         for (let sj = 0; sj < s; sj++) {

@@ -88,8 +88,69 @@ export const GLOSSARY = {
     range: 'Albedo 0.15–0.30; 5–10 °C cooler than concrete while wet (not modelled in this block).',
     src: 'brief',
     why: 'Water evaporating from wet paving cools it, but only while there is water left to evaporate.',
+    scenes: ['asphalt-park'],
+  },
+  // ---- block 2 (sponge-retrofit) --------------------------------------------
+  permeablePaving: {
+    term: 'Permeable paving',
+    text: 'Pavers with open joints, or porous asphalt, that let rain soak through instead of running off.',
+    range: 'Wetted permeable pavement 15–35 °C cooler than dense asphalt in the early afternoon, 2–7 °C cooler about a day later; dry porous asphalt about 5 °C warmer.',
+    src: 'li2013',
+    why: 'It cools only while there is water in it to evaporate; dry, it can be as hot as the asphalt it replaced, or hotter.',
+    scenes: ['sponge-retrofit'],
+  },
+  greenRoof: {
+    term: 'Green roof',
+    text: 'A roof covered with a thin layer of soil-like substrate and hardy plants such as sedum (an “extensive” green roof).',
+    range: 'Albedo about 0.15–0.25; up to 18 °C cooler than a black roof in a New York case; Bowen ratio about 1–2.',
+    src: 'brief2, noaaGreen, heusinger',
+    why: 'Plants and damp substrate turn sunshine into evaporation instead of heat, and the roof also holds back rain.',
+    scenes: ['sponge-retrofit'],
+  },
+  rainGarden: {
+    term: 'Rain garden',
+    text: 'A shallow planted hollow that collects rain running off streets and roofs and lets it soak away.',
+    range: 'No measured cooling figure in our sources; this block uses engine assumptions (evaporative fraction 0.8 wet, 0.35 dry, 3-day drying).',
+    src: 'engine, mccoll',
+    why: 'It manages rain where it falls, and its damp soil stays cooler than paving for days after rain.',
+    scenes: ['sponge-retrofit'],
+  },
+  daysSinceRain: {
+    term: 'Days since rain (d)',
+    text: 'How many clear days have passed since the last soaking rain. d = 0 is the best case: a clear day after overnight rain.',
+    range: 'Wet surfaces dry with a time scale τ: pavers about 1 day, soils about 3 days, green-roof substrate about 4 days.',
+    src: 'brief2, mccoll',
+    why: 'Wet-surface cooling fades as the stored water evaporates, so a sponge-city street is coolest just after rain.',
+    scenes: ['sponge-retrofit'],
+  },
+  bowen: {
+    term: 'Bowen ratio and evaporative fraction',
+    text: 'Two ways to describe how much of a surface’s energy goes into evaporating water. In this model the evaporative fraction (EF) is the share of the positive net radiation spent on evaporation (EF × max(Q*, 0)). The Bowen ratio, used in field studies, is sensible heat ÷ latent heat; if heat stored in the ground is ignored, EF ≈ 1 ÷ (1 + Bowen ratio).',
+    range: 'Green roofs: Bowen ratio below 1 to about 2 in field data; this block uses EF 0.5 for a wet and 0.25 for a dry green roof (the brief’s values); dry paving EF near 0.',
+    src: 'heusinger, brief2',
+    why: 'The more energy goes into evaporation, the less is left to heat the surface.',
+    scenes: ['sponge-retrofit'],
+  },
+  spongeCity: {
+    term: 'Sponge city (海绵城市)',
+    text: 'China’s national programme (State Council guideline, 2015) to manage rain where it falls: let it soak in, slow it, store it, clean it, use it, and only then drain it (渗、滞、蓄、净、用、排).',
+    range: 'Target: absorb and use 70% of rainfall on site; 20% of built-up area by 2020, 80% by 2030.',
+    src: 'sponge2015',
+    why: 'Its goals are flooding and water supply; cooler streets are a side benefit, and no robust measured block-scale cooling figure was found.',
+    scenes: ['sponge-retrofit'],
+  },
+  albedoAgeing: {
+    term: 'Ageing (aged vs new)',
+    text: 'Reflective coatings get dirty and weathered, so they reflect less sun as they age.',
+    range: 'Cool pavement coating 0.26 → 0.18 within a year; cool roofs must reach 0.72 new or 0.50 after 3 years (Chicago code).',
+    src: 'ko2022, chicago',
+    why: 'A retrofit judged by its brand-new albedo overstates the cooling people will get over its life.',
+    scenes: ['sponge-retrofit'],
   },
 };
+
+/** Glossary keys shown for a scene (shared terms plus the scene's own). */
+export const termsFor = (sceneId) => Object.keys(GLOSSARY).filter((k) => !GLOSSARY[k].scenes || GLOSSARY[k].scenes.includes(sceneId));
 
 const q = (a, p) => {
   const s = [...a].sort((x, y) => x - y);

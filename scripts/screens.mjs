@@ -1,22 +1,26 @@
-// Review screenshots: day view, thermal 15:00, thermal 23:00 (docs/media) and
-// the gallery thumbnail (thumbs/). Usage: npm run screens
+// Review screenshots (docs/media) and gallery thumbnails (thumbs/).
+// Usage: npm run screens [-- city-id]   (default: every city)
 import { chromium } from 'playwright';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { mkdirSync } from 'node:fs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const page0 = pathToFileURL(`${root}cities/asphalt-park/index.html`).href;
+const pageOf = (city) => pathToFileURL(`${root}cities/${city}/index.html`).href;
+const only = process.argv[2];
 mkdirSync(`${root}docs/media`, { recursive: true });
 mkdirSync(`${root}thumbs`, { recursive: true });
 
+const AP = 'asphalt-park';
+const SR = 'sponge-retrofit';
 const shots = [
-  ['docs/media/day-1500.jpg', 'hour=15&f=400', { width: 1280, height: 800 }],
-  ['docs/media/thermal-1500.jpg', 'thermal&hour=15&f=400', { width: 1280, height: 800 }],
-  ['docs/media/thermal-2300.jpg', 'thermal&hour=23&f=400', { width: 1280, height: 800 }],
-  ['docs/media/sweat-default.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
-  ['docs/media/sweat-default-2x.jpg', 'hour=15&f=640', { width: 1280, height: 800, dpr: 2 }],
-  ['docs/media/intro-pen.jpg', 'hour=15&f=110', { width: 1280, height: 800 }],
+  [AP, 'docs/media/day-1500.jpg', 'hour=15&f=400', { width: 1280, height: 800 }],
+  [AP, 'docs/media/thermal-1500.jpg', 'thermal&hour=15&f=400', { width: 1280, height: 800 }],
+  [AP, 'docs/media/thermal-2300.jpg', 'thermal&hour=23&f=400', { width: 1280, height: 800 }],
+  [AP, 'docs/media/sweat-default.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
+  [AP, 'docs/media/sweat-default-2x.jpg', 'hour=15&f=640', { width: 1280, height: 800, dpr: 2 }],
+  [AP, 'docs/media/intro-pen.jpg', 'hour=15&f=110', { width: 1280, height: 800 }],
   [
+    AP,
     'docs/media/footnote.jpg',
     'thermal&hour=15&f=400',
     { width: 1280, height: 800 },
@@ -27,14 +31,30 @@ const shots = [
       await page.locator('#card .gl[data-gl="albedo"]').click();
     },
   ],
-  ['thumbs/asphalt-park.jpg', 'hour=15&f=400&notes=0&ui=0&cam=3,215,300', { width: 640, height: 400 }],
+  [AP, 'thumbs/asphalt-park.jpg', 'hour=15&f=400&notes=0&ui=0&cam=3,215,300', { width: 640, height: 400 }],
+  // block 2: split view, d = 0 vs d = 3, the reflective-pavement card
+  [SR, 'docs/media/retrofit-split-day-1500.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
+  [SR, 'docs/media/retrofit-split-thermal-1500.jpg', 'thermal&hour=15&f=640', { width: 1280, height: 800 }],
+  [SR, 'docs/media/retrofit-d0-thermal-1500.jpg', 'thermal&hour=15&f=640&state=split&split=0.42&d=0&cam=3.5,300,250&notes=0', { width: 1280, height: 800 }],
+  [SR, 'docs/media/retrofit-d3-thermal-1500.jpg', 'thermal&hour=15&f=640&state=split&split=0.42&d=3&cam=3.5,300,250&notes=0', { width: 1280, height: 800 }],
+  [
+    SR,
+    'docs/media/retrofit-tradeoff-card.jpg',
+    'hour=12&f=640',
+    { width: 1280, height: 800 },
+    async (page) => {
+      await page.click('#retro [data-measure="tradeoff"]');
+    },
+  ],
+  [SR, 'thumbs/sponge-retrofit.jpg', 'hour=15&f=400&notes=0&ui=0&cam=3,260,215', { width: 640, height: 400 }],
 ];
 const browser = await chromium.launch();
-for (const [out, q, viewport, act] of shots) {
+for (const [city, out, q, viewport, act] of shots) {
+  if (only && city !== only) continue;
   const ctx = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height }, deviceScaleFactor: viewport.dpr ?? 1 });
   await ctx.setOffline(true);
   const page = await ctx.newPage();
-  await page.goto(`${page0}?${q}`);
+  await page.goto(`${pageOf(city)}?${q}`);
   await page.waitForFunction(() => window.atlas && window.atlas.ready);
   await page.waitForTimeout(800); // let the legend fade in
   if (act) await act(page);

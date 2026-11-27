@@ -14,6 +14,7 @@ const TAU = 86400;
 const K0 = 273.15;
 export const SLOTS = 144; // sun / shade samples per day (10 min)
 export const STORE = 96; // stored temperature samples per day (15 min)
+export const LATENT = 2.45e6; // latent heat of vaporisation, J kg-1
 
 /** Sunrise and sunset clock hours for the site (scan at 1-min steps). */
 export function daylight(site) {
@@ -90,26 +91,19 @@ export function shadowPolys(world, sun, zFloor = 0) {
 }
 
 /**
- * Sunlit fraction per grid cell for one sun position (1 = full sun).
- * Building shade is opaque; canopy shade transmits MODEL.canopyTransmission.
+ * Building shade mask for one sun position: 2x2 samples per cell, 1 where a
+ * building (or awning) shades the ground or a taller building shades a roof.
  */
-export function sunlitField(world, sun) {
+export function buildingMask(world, sun) {
   const { n, cell } = world;
   const N = n * n;
-  const out = new Float32Array(N);
-  if (sun.alt <= 0) return out;
-  out.fill(1);
-  const S = 2; // 2x2 samples per cell
+  const S = 2;
   const grid = { nx: n, ny: n, cell };
   const bmask = new Uint8Array(N * S * S);
-  const tcount = new Uint8Array(N * S * S);
-  const { b, t } = shadowPolys(world, sun);
+  const { b } = shadowPolys(world, sun);
   rasterise(b, grid, (i, p, s) => {
     const bi = world.bld[i];
     if (bi < 0) bmask[i * S * S + s] = 1; // ground cells only
-  }, S);
-  rasterise(t, grid, (i, p, s) => {
-    if (world.bld[i] < 0 && tcount[i * S * S + s] < 3) tcount[i * S * S + s]++;
   }, S);
   // roofs shaded by taller neighbours
   for (let r = 0; r < world.buildings.length; r++) {
@@ -119,16 +113,63 @@ export function sunlitField(world, sun) {
       if (B.h > R.h + 0.5) polys.push(boxShadow(B.x0, B.y0, B.x1, B.y1, B.h - R.h, sun));
     }
     if (!polys.length) continue;
+    // only the roof's own cells can be marked: visit just its cell window
+    const win = [Math.floor(R.x0 / cell), Math.floor(R.y0 / cell), Math.min(n - 1, Math.floor(R.x1 / cell)), Math.min(n - 1, Math.floor(R.y1 / cell))];
     rasterise(polys, grid, (i, p, s) => {
       if (world.bld[i] === r) bmask[i * S * S + s] = 1;
-    }, S);
+    }, S, win);
   }
+  return bmask;
+}
+
+/**
+ * Sunlit fraction per grid cell for one sun position (1 = full sun).
+ * Building shade is opaque; canopy shade transmits MODEL.canopyTransmission,
+ * or the tree's own `tr` (young street trees). `bmask` may be passed in from
+ * another world with the same buildings (Before / After states).
+ */
+export function sunlitField(world, sun, bmask = null) {
+  const { n, cell } = world;
+  const N = n * n;
+  const out = new Float32Array(N);
+  if (sun.alt <= 0) return out;
+  out.fill(1);
+  const S = 2; // 2x2 samples per cell
+  const grid = { nx: n, ny: n, cell };
+  const bm = bmask ?? buildingMask(world, sun);
+  const t = world.trees.map((T) => canopyShadow(T.x, T.y, T.zc, T.r, sun));
   const tr = MODEL.canopyTransmission.value;
+  if (world.trees.some((T) => T.tr !== undefined)) {
+    // per-tree transmission: multiply per sample, at most three crowns deep
+    // as for the uniform case
+    const trans = new Float64Array(N * S * S).fill(1);
+    const deep = new Uint8Array(N * S * S);
+    rasterise(t, grid, (i, p, s) => {
+      const k = i * S * S + s;
+      if (world.bld[i] < 0 && deep[k] < 3) {
+        deep[k]++;
+        trans[k] *= world.trees[p].tr ?? tr;
+      }
+    }, S);
+    for (let i = 0; i < N; i++) {
+      let f = 0;
+      for (let s = 0; s < S * S; s++) {
+        const k = i * S * S + s;
+        if (!bm[k]) f += trans[k];
+      }
+      out[i] = f / (S * S);
+    }
+    return out;
+  }
+  const tcount = new Uint8Array(N * S * S);
+  rasterise(t, grid, (i, p, s) => {
+    if (world.bld[i] < 0 && tcount[i * S * S + s] < 3) tcount[i * S * S + s]++;
+  }, S);
   for (let i = 0; i < N; i++) {
     let f = 0;
     for (let s = 0; s < S * S; s++) {
       const k = i * S * S + s;
-      if (!bmask[k]) f += Math.pow(tr, tcount[k]);
+      if (!bm[k]) f += Math.pow(tr, tcount[k]);
     }
     out[i] = f / (S * S);
   }
@@ -151,18 +192,25 @@ export function shadeClassField(world, sun, cell = 2) {
   return { n, cell, cls: out, night: false };
 }
 
-/** Precompute sun positions and sunlit fields for every 10-min slot. */
-export function sunSlots(world) {
+/**
+ * Precompute sun positions and sunlit fields for every 10-min slot. With
+ * keepMasks the building masks are kept (slots.masks) so a second world with
+ * the same buildings can reuse them: sunSlots(worldB, { masksFrom: slotsA }).
+ */
+export function sunSlots(world, opts = {}) {
   const site = world.scene.site;
   const suns = [];
   const fields = [];
+  const masks = opts.keepMasks ? [] : null;
   for (let k = 0; k < SLOTS; k++) {
     const h = (k * 24) / SLOTS;
     const s = solarPosition(site, h);
     suns.push(s);
-    fields.push(sunlitField(world, s));
+    const bm = s.alt <= 0 ? null : opts.masksFrom ? opts.masksFrom.masks[k] : opts.keepMasks ? buildingMask(world, s) : null;
+    if (masks) masks.push(bm);
+    fields.push(sunlitField(world, s, bm));
   }
-  return { suns, fields };
+  return masks ? { suns, fields, masks } : { suns, fields };
 }
 
 /** Effective material for a cell: roof material for building cells. */
@@ -193,15 +241,22 @@ export function runModel(world, opts = {}) {
   const tauFac = (2 * Math.PI) / TAU;
   const sqrtTau = Math.sqrt(TAU);
 
+  // optional subset of cells (opts.cells): the model runs on a compact copy
+  // of their inputs and the result is scattered back (other cells stay 0;
+  // see retrofit.js). The arithmetic per cell is the same either way.
+  const idx = opts.cells ?? null;
+  const NF = N;
+  const NN = idx ? idx.length : N;
+  const fields = idx ? slots.fields.map((f) => Float32Array.from(idx, (i) => f[i])) : slots.fields;
   // per-cell parameters
-  const alpha = new Float32Array(N);
-  const eps = new Float32Array(N);
-  const cap = new Float32Array(N); // 2 sqrt(pi) / (mu sqrt(tau)), or 1 / C for thin layers
-  const restore = new Float32Array(N); // 2 pi / tau, or 0 for thin layers
-  const ef = new Float32Array(N);
-  const water = new Uint8Array(N);
-  for (let i = 0; i < N; i++) {
-    const id = cellMat(world, i);
+  const alpha = new Float32Array(NN);
+  const eps = new Float32Array(NN);
+  const cap = new Float32Array(NN); // 2 sqrt(pi) / (mu sqrt(tau)), or 1 / C for thin layers
+  const restore = new Float32Array(NN); // 2 pi / tau, or 0 for thin layers
+  const ef = new Float32Array(NN);
+  const water = new Uint8Array(NN);
+  for (let i = 0; i < NN; i++) {
+    const id = cellMat(world, idx ? idx[i] : i);
     const m = mats[id];
     water[i] = id === 'water' ? 1 : 0;
     if (water[i]) continue; // prescribed temperature
@@ -216,7 +271,7 @@ export function runModel(world, opts = {}) {
       restore[i] = tauFac;
     } else throw new Error(`material ${id} has neither mu > 0 nor thinC`);
   }
-  const svf = world.svf;
+  const svf = idx ? Float32Array.from(idx, (i) => world.svf[i]) : world.svf;
 
   // per-minute forcing
   const M = 1440;
@@ -235,10 +290,10 @@ export function runModel(world, opts = {}) {
   }
   const taMean = taSum / M;
 
-  const Ts = new Float32Array(N).fill(taMean + K0);
-  const Td = new Float32Array(N).fill(taMean + K0);
-  const sumDay = new Float64Array(N);
-  const store = new Float32Array(N * STORE);
+  const Ts = new Float32Array(NN).fill(taMean + K0);
+  const Td = new Float32Array(NN).fill(taMean + K0);
+  const sumDay = new Float64Array(NN);
+  let store = new Float32Array(NN * STORE);
   const stepsPerStore = M / STORE;
 
   let days = 0;
@@ -258,12 +313,12 @@ export function runModel(world, opts = {}) {
       const lwall = SIGMA * tw4;
       const sf = (m / 10) | 0; // slot index
       const st = (m % 10) / 10;
-      const f0 = slots.fields[sf];
-      const f1 = slots.fields[(sf + 1) % SLOTS];
+      const f0 = fields[sf];
+      const f1 = fields[(sf + 1) % SLOTS];
       const bh = beamH[m];
       const df = dif[m];
       const waterT = taMean - 1 + Math.sin((2 * Math.PI * (h - 9)) / 24) + K0;
-      for (let i = 0; i < N; i++) {
+      for (let i = 0; i < NN; i++) {
         if (water[i]) {
           Ts[i] = waterT;
         } else {
@@ -281,19 +336,24 @@ export function runModel(world, opts = {}) {
       }
       if (m % stepsPerStore === 0) {
         const k = m / stepsPerStore;
-        for (let i = 0; i < N; i++) store[i * STORE + k] = Ts[i] - K0;
+        for (let i = 0; i < NN; i++) store[i * STORE + k] = Ts[i] - K0;
       }
     }
     const steps = M / (dt / 60);
     maxDelta = 0;
-    for (let i = 0; i < N; i++) {
+    for (let i = 0; i < NN; i++) {
       const next = sumDay[i] / steps;
       if (!water[i]) maxDelta = Math.max(maxDelta, Math.abs(next - Td[i]));
       Td[i] = next;
     }
     days++;
   }
-  return new Thermal(world, store, slots, { rise, taMean, hc, site, ta, days, maxDelta, mats });
+  if (idx) {
+    const full = new Float32Array(NF * STORE);
+    idx.forEach((i, c) => full.set(store.subarray(c * STORE, (c + 1) * STORE), i * STORE));
+    store = full;
+  }
+  return new Thermal(world, store, slots, { rise, taMean, hc, site, ta, days, maxDelta, mats, cells: idx });
 }
 
 export class Thermal {
@@ -342,6 +402,34 @@ export class Thermal {
     const k = Math.floor(x) % SLOTS;
     const f = x - Math.floor(x);
     return lerp(this.slots.fields[k][i], this.slots.fields[(k + 1) % SLOTS][i], f);
+  }
+
+  /**
+   * Water evaporated from cell i over the design day, mm (= kg m-2):
+   * sum of EF x max(Q*, 0) x dt / 2.45e6 J kg-1, evaluated on the stored
+   * 15-min surface temperatures (a 15-min sum, not the model's 1-min one)
+   * with the model's radiation terms, including its wall term (driven by the
+   * unshaded sun, as in runModel).
+   */
+  evaporation(i) {
+    const site = this.info.site;
+    const m = (this.info.mats ?? MATERIALS)[cellMat(this.world, i)];
+    if (!m || !m.ef || cellMat(this.world, i) === 'water') return 0;
+    const v = this.world.svf[i];
+    let sum = 0;
+    for (let k = 0; k < STORE; k++) {
+      const h = (k * 24) / STORE;
+      const s = this.sun(h);
+      const ir = irradiance(s.alt);
+      const K = this.sunlit(i, h) * ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + v * ir.diffuse;
+      const taK = this.air(h) + K0;
+      const tw = taK + 2 + (6 * (ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + ir.diffuse)) / 900;
+      const L = v * skyEmissivity(site.vapourHpa, taK) * SIGMA * taK ** 4 + (1 - v) * SIGMA * tw ** 4;
+      const t = this.ts(i, h) + K0;
+      const q = (1 - m.alpha.value) * K + m.eps.value * L - m.eps.value * SIGMA * t ** 4;
+      if (q > 0) sum += m.ef.value * q * (86400 / STORE);
+    }
+    return sum / LATENT;
   }
 
   /** Mean leaf temperature of a canopy (simple: air + absorbed-sun term). */

@@ -16,22 +16,32 @@ the sources listed below without checking them.
 
 ## Surface parameters
 
-| Material | albedo α | emissivity ε | heat storage (μ, or thin-layer C) | evaporative fraction |
-|---|---|---|---|---|
-| Aged asphalt (`asphalt`) | 0.12 [lbnl] *cited value* (LBNL aged asphalt 0.12-0.15) | 0.95 [oke] *cited value*, unverified | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 0 [brief] *cited value*, unverified (dry impervious) |
-| Concrete paving (`concrete`) | 0.3 [oke] *cited range*, unverified (cited 0.10-0.35) | 0.9 [oke] *edge of cited range*, unverified (cited 0.71-0.90) | μ 1785 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 0 [brief] *cited value*, unverified (dry impervious) |
-| Stone paving / gravel path (`stone`) | 0.3 [oke] *cited range*, unverified (cited 0.20-0.40) | 0.92 [oke] *cited range*, unverified (cited 0.85-0.95) | μ 1500 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (between brick 1065 and stone 2220) | 0.05 [engine] *engine assumption (no source)*, unverified |
-| Irrigated lawn (`grass`) | 0.25 [oke] *edge of cited range*, unverified (cited 0.16-0.26) | 0.95 [oke] *edge of cited range*, unverified (cited 0.90-0.95) | μ 1400 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (soil 600-2200) | 0.8 [brief] *edge of cited range*, unverified (cited 0.6-0.8) |
-| Pond (open water) (`water`) | 0.06 [oke] *cited range*, unverified (cited 0.03-0.10) | 0.96 [oke] *cited range*, unverified (cited 0.92-0.97) | μ 1545 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 1 [engine] *engine assumption (no source)*, unverified |
-| Dark membrane roof (`membrane`) | 0.1 [oke] *cited range*, unverified (cited 0.08-0.18) | 0.92 [oke] *cited value*, unverified | μ 450 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (brief assumes 300-500) | 0 [brief] *cited value*, unverified (dry impervious) |
-| Dark metal roof (`metal`) | 0.15 [oke] *cited range*, unverified (cited 0.10-0.25) | 0.9 [brief] *cited value*, unverified (~0.9 painted) | C 12000 J m⁻² K⁻¹ [brief] *cited range*, unverified (thin layers 5-20 kJ m-2 K-1) | 0 [brief] *cited value*, unverified (dry impervious) |
-| Cool (white) roof (`coolroof`) | 0.8 [epa] *edge of cited range*, unverified (cited >=0.65 new, 0.5-0.6 aged; 0.80 is a new, clean white roof) | 0.88 [epa] *cited range*, unverified (cited 0.85-0.90) | μ 450 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (same build-up as the dark membrane) | 0 [brief] *cited value*, unverified (dry impervious) |
-| Tree canopy (`canopy`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.7 [brief] *cited range*, unverified (cited 0.6-0.8) |
+| Material | albedo α | emissivity ε | heat storage (μ, or thin-layer C) | evaporative fraction | wet after rain, drying time, water held (block 2) |
+|---|---|---|---|---|---|
+| Aged asphalt (`asphalt`) | 0.12 [lbnl] *cited value* (LBNL aged asphalt 0.12-0.15) | 0.95 [oke] *cited value*, unverified | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 0 [brief] *cited value*, unverified (dry impervious) | — |
+| Concrete paving (`concrete`) | 0.3 [oke] *cited range*, unverified (cited 0.10-0.35) | 0.9 [oke] *edge of cited range*, unverified (cited 0.71-0.90) | μ 1785 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 0 [brief] *cited value*, unverified (dry impervious) | — |
+| Stone paving / gravel path (`stone`) | 0.3 [oke] *cited range*, unverified (cited 0.20-0.40) | 0.92 [oke] *cited range*, unverified (cited 0.85-0.95) | μ 1500 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (between brick 1065 and stone 2220) | 0.05 [engine] *engine assumption (no source)*, unverified | — |
+| Irrigated lawn (`grass`) | 0.25 [oke] *edge of cited range*, unverified (cited 0.16-0.26) | 0.95 [oke] *edge of cited range*, unverified (cited 0.90-0.95) | μ 1400 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (soil 600-2200) | 0.8 [brief] *edge of cited range*, unverified (cited 0.6-0.8) | — |
+| Pond (open water) (`water`) | 0.06 [oke] *cited range*, unverified (cited 0.03-0.10) | 0.96 [oke] *cited range*, unverified (cited 0.92-0.97) | μ 1545 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 1 [engine] *engine assumption (no source)*, unverified | — |
+| Dark membrane roof (`membrane`) | 0.1 [oke] *cited range*, unverified (cited 0.08-0.18) | 0.92 [oke] *cited value*, unverified | μ 450 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (brief assumes 300-500) | 0 [brief] *cited value*, unverified (dry impervious) | — |
+| Dark metal roof (`metal`) | 0.15 [oke] *cited range*, unverified (cited 0.10-0.25) | 0.9 [brief] *cited value*, unverified (~0.9 painted) | C 12000 J m⁻² K⁻¹ [brief] *cited range*, unverified (thin layers 5-20 kJ m-2 K-1) | 0 [brief] *cited value*, unverified (dry impervious) | — |
+| Cool (white) roof (`coolroof`) | 0.8 [epa] *edge of cited range*, unverified (cited >=0.65 new, 0.5-0.6 aged; 0.80 is a new, clean white roof) | 0.88 [epa] *cited range*, unverified (cited 0.85-0.90) | μ 450 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (same build-up as the dark membrane) | 0 [brief] *cited value*, unverified (dry impervious) | — |
+| Tree canopy (`canopy`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.7 [brief] *cited range*, unverified (cited 0.6-0.8) | — |
+| Cool roof, aged (`coolroofAged`) | 0.6 [brief2] *cited range*, unverified (brief: aged cool roofs 0.50-0.70, of which 0.60-0.70 unverified; Chicago code floor: 3-year aged >= 0.50 [chicago]) | 0.88 [lbnlRoof] *cited value*, unverified | μ 450 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (same build-up as the dark membrane) | 0 [brief] *cited value*, unverified (dry impervious) | — |
+| Cool roof, new (`coolroofNew`) | 0.8 [lbnlRoof] *cited value*, unverified (new white roof about 0.80; read second-hand via the compendium, so unverified as in block 1) | 0.88 [lbnlRoof] *cited value*, unverified | μ 450 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (same build-up as the dark membrane) | 0 [brief] *cited value*, unverified (dry impervious) | — |
+| Extensive green roof (`greenroof`) | 0.2 [brief2] *cited range*, unverified (cited 0.15-0.25) | 0.95 [brief2] *cited value*, unverified | μ 600 J m⁻² s⁻½ K⁻¹ [brief2] *cited value*, unverified (dry substrate; wet 1200, decays with tau) | dry 0.25 [brief2] *interpretation of the source*, unverified (dry; the brief's value. Heusinger & Weber report Bowen ratio <1-2) | EF wet 0.5 [heusinger] *interpretation of the source*, unverified (wet; Bowen ratio about 1 (Heusinger & Weber: <1-2)); μ wet 1200 J m⁻² s⁻½ K⁻¹ [brief2] *cited value*, unverified (wet substrate); τ 4 d [brief2] *cited value*, unverified (substrate drying time, days); storage 30 mm [brief2] *cited range*, unverified (100 mm substrate holds 20-40 mm) |
+| Permeable pavers (`pavers`) | 0.26 [li2013] *cited value* | 0.92 [brief2] *cited value*, unverified | μ 870 J m⁻² s⁻½ K⁻¹ [engine] *engine assumption (no source)*, unverified (dry, assumed) | dry 0.02 [brief2] *interpretation of the source*, unverified (dry; brief value) | EF wet 0.5 [brief2] *interpretation of the source*, unverified (wet; brief value); τ 1 d [brief2] *interpretation of the source*, unverified (days; the brief calls it calibrated to Li 2013, but in this model it does not reproduce Li at d = 1 (see docs/sources.md)); storage 5 mm [brief2] *interpretation of the source*, unverified (brief: "a few mm", read as 5 mm; the daily water check needs >= 4.1 mm) |
+| Porous asphalt (`porousAsphalt`) | 0.08 [li2013] *cited value* | 0.95 [brief2] *cited value*, unverified | μ 800 J m⁻² s⁻½ K⁻¹ [engine] *engine assumption (no source)*, unverified (dry, assumed) | dry 0.02 [brief2] *interpretation of the source*, unverified (dry; as pavers) | EF wet 0.5 [brief2] *interpretation of the source*, unverified (wet; as pavers); τ 1 d [brief2] *interpretation of the source*, unverified (days; as pavers); storage 5 mm [brief2] *interpretation of the source*, unverified (brief: "a few mm", read as 5 mm; the daily water check needs >= 4.1 mm) |
+| Cool pavement coating, 1 year old (`coolPaveAged`) | 0.18 [ko2022] *cited value*, unverified (0.26 -> 0.18 after one year) | 0.92 [brief2] *cited value*, unverified | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified (the asphalt underneath) | 0 [brief] *cited value*, unverified (dry impervious) | — |
+| Cool pavement coating, new (`coolPaveNew`) | 0.25 [middel2020] *cited value*, unverified | 0.92 [brief2] *cited value*, unverified | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified (the asphalt underneath) | 0 [brief] *cited value*, unverified (dry impervious) | — |
+| Rain garden (`raingarden`) | 0.2 [engine] *engine assumption (no source)*, unverified | 0.95 [engine] *engine assumption (no source)*, unverified | μ 1400 J m⁻² s⁻½ K⁻¹ [engine] *engine assumption (no source)*, unverified | dry 0.35 [engine] *engine assumption (no source)*, unverified (dry) | EF wet 0.8 [engine] *engine assumption (no source)*, unverified (wet); τ 3 d [mccoll] *interpretation of the source*, unverified (soil drydown, days; median not checked); storage 40 mm [engine] *engine assumption (no source)*, unverified (ponding and soil, assumed) |
+| Young street tree (`youngCanopy`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.7 [brief] *cited range*, unverified (cited 0.6-0.8) | — |
 
 Not used by the grid model:
 
 - `water`: Not used by the grid model: the pond is held at daily mean air - 1 K, +-1 K (research brief).
 - `canopy`: Not used by the grid model: leaf temperature = air + 2.5 K x (K/900 W m-2) by day, air - 0.5 K at night (engine assumption; brief: air +0-3 K).
+- `youngCanopy`: Not used by the grid model: leaf temperature as for mature trees. Its thin crown lets through exp(-0.5 x 1.5) = 0.47 of the sun (see youngTreeTransmission).
 
 Shown on the heat cards as a caveat:
 
@@ -50,6 +60,9 @@ Shown on the heat cards as a caveat:
 | `buildingShadeWeight` | 0.84 [melnikov] *cited value*, unverified (shade walking perceived ~16% shorter) |
 | `treeShadeWeight` | 0.92 [melnikov] *interpretation of the source*, unverified (tree shade ~half as effective as building shade, read as half the 16% benefit) |
 | `shadeHeatRamp` | 26 -> 32 C [engine] *engine assumption (no source)*, unverified (shade benefit scales linearly from none at air <= 26 C to full at >= 32 C) |
+| `youngTreeTransmission` | 0.47 [brief2] *interpretation of the source*, unverified (exp(-0.5 LAI) with LAI 1.5; brief range 0.37-0.61 for LAI 1-2) |
+| `youngTreeCrown` | crown radius 2.6 m, crown centre 4.4 m [engine] *engine assumption (no source)*, unverified (scene assumption for newly planted street trees (cities/sponge-retrofit/scene.js)) |
+| `latentHeat` | 2.45e6 J kg-1 [brief2] *cited value* (evaporated depth = sum of EF x max(Q*, 0) x dt / 2.45e6) |
 | `sweatCue` | Tmrt 65 -> 70 C [engine] *engine assumption (no source)*, unverified (visual cue only: droplets on people in sun, strength rising from Tmrt 65 C to full at 70 C (separates sunlit pavement from sunlit lawn in this model); no physiological model) |
 
 The wall term's daytime part peaks at 6.8 K on the design day (total wall excess up to 8.8 K above air).
@@ -63,6 +76,18 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[deardorff]** Deardorff (1978) J. Geophys. Res. 83(C4) 1889-1903, force-restore method (NASA NTRS 19780019748)
 - **[melnikov]** Melnikov et al. (2022) Scientific Reports 12, 2617, doi 10.1038/s41598-022-06383-5
 - **[engine]** Engine assumption: no literature source
+- **[brief2]** Research brief docs/research/retrofit-brief.md (block 2; values compiled from the sources below, items marked unverified there are flagged here)
+- **[lbnlRoof]** US EPA Cool Roofs compendium with ENERGY STAR / LBNL roof data: new white roof albedo about 0.80; LBNL-6714E: in-service roofs often below their CRRC aged rating
+- **[chicago]** Chicago energy code via the block-2 brief: low-slope roofs need initial albedo >= 0.72 or 3-year aged >= 0.50
+- **[santamouris]** Santamouris (2014) Solar Energy 103, 682-703, doi 10.1016/j.solener.2012.07.003, cool roofs and pavements review
+- **[noaaGreen]** NOAA Institutional Repository noaa_57843: Javits Center green roof, NYC, up to 18.4 K cooler than a black roof
+- **[heusinger]** Heusinger & Weber (2017) Science of the Total Environment, doi 10.1016/j.scitotenv.2016.10.168, extensive green roof energy balance (Bowen ratio about <1 to 2)
+- **[li2013]** Li, Harvey et al. (2013) Environ. Res. Lett. 8 015023, permeable pavements (corrigendum not checked)
+- **[middel2020]** Middel et al. (2020) Environ. Res. Lett., doi 10.1088/1748-9326/ab87d4, reflective coating on Los Angeles streets
+- **[ko2022]** Ko et al. (2022) Environ. Res. Lett. 17 044027, cool pavement at neighbourhood scale, albedo 0.26 -> 0.18 in one year
+- **[mccoll]** McColl et al. (2017) Geophys. Res. Lett., doi 10.1002/2017GL072819, global soil-moisture drydown timescales
+- **[middel2021]** Middel et al. (2021) Bull. Amer. Meteor. Soc., doi 10.1175/BAMS-D-20-0193.1, shade and Tmrt in Phoenix
+- **[sponge2015]** State Council General Office (2015) Guiding Opinions on Promoting Sponge City Construction, Guo Ban Fa [2015] No. 75 (English notice, gov.cn, 2015-10-16; reprint waizi.org.cn/law/6860.html; MOHURD interpretation via cs.com.cn; the primary Chinese text was not located)
 - **[noaa]** NOAA Global Monitoring Laboratory, General Solar Position Calculations (solareqns.PDF)
 - **[brutsaert]** Brutsaert (1975) Water Resources Research 11(5) 742-744, clear-sky emissivity
 - **[meinel]** Meinel & Meinel (1976) Applied Solar Energy, clear-sky beam irradiance
@@ -103,7 +128,14 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Force-restore model (simulation)**: In this model: 5 m grid, 1-minute steps, the design day repeated 7 times until it settles. [this model]
 - **Thermal inertia / night lag**: In this model: At 11 pm asphalt is 3.6 °C and concrete 4.3 °C warmer than the open lawn. [this model]
 - **Cool roof**: Typical: Albedo 0.65 or more when new, about 0.5–0.6 after weathering. [brief]
-- **Permeable paving**: Typical: Albedo 0.15–0.30; 5–10 °C cooler than concrete while wet (not modelled in this block). [brief]
+- **Permeable paving** (asphalt-park only): Typical: Albedo 0.15–0.30; 5–10 °C cooler than concrete while wet (not modelled in this block). [brief]
+- **Permeable paving** (sponge-retrofit only): Typical: Wetted permeable pavement 15–35 °C cooler than dense asphalt in the early afternoon, 2–7 °C cooler about a day later; dry porous asphalt about 5 °C warmer. [li2013]
+- **Green roof** (sponge-retrofit only): Typical: Albedo about 0.15–0.25; up to 18 °C cooler than a black roof in a New York case; Bowen ratio about 1–2. [brief2, noaaGreen, heusinger]
+- **Rain garden** (sponge-retrofit only): Typical: No measured cooling figure in our sources; this block uses engine assumptions (evaporative fraction 0.8 wet, 0.35 dry, 3-day drying). [engine, mccoll]
+- **Days since rain (d)** (sponge-retrofit only): Typical: Wet surfaces dry with a time scale τ: pavers about 1 day, soils about 3 days, green-roof substrate about 4 days. [brief2, mccoll]
+- **Bowen ratio and evaporative fraction** (sponge-retrofit only): Typical: Green roofs: Bowen ratio below 1 to about 2 in field data; this block uses EF 0.5 for a wet and 0.25 for a dry green roof (the brief’s values); dry paving EF near 0. [heusinger, brief2]
+- **Sponge city (海绵城市)** (sponge-retrofit only): Typical: Target: absorb and use 70% of rainfall on site; 20% of built-up area by 2020, 80% by 2030. [sponge2015]
+- **Ageing (aged vs new)** (sponge-retrofit only): Typical: Cool pavement coating 0.26 → 0.18 within a year; cool roofs must reach 0.72 new or 0.50 after 3 years (Chicago code). [ko2022, chicago]
 
 ## Model vs literature targets
 
@@ -146,3 +178,144 @@ Moving any one of them toward the middle of its cited range breaks it. Region me
 | cool roof albedo 0.70 | 35.0 | 30.0 | 38.3 | 43.2 | 40.6 | 63.7 | 67.2 | coolRoof ≥ shadedPaving |
 | cool roof albedo 0.65 (cited minimum, new) | 35.0 | 30.0 | 38.3 | 45.4 | 40.6 | 63.7 | 67.2 | coolRoof ≥ shadedPaving |
 | grass mu 600 (bottom of cited soil range) | 36.1 | 30.0 | 40.9 | 38.9 | 40.6 | 63.7 | 67.2 | grass ≥ shadedPaving |
+
+## Block 2: retrofit parameters
+
+The second block (`cities/sponge-retrofit`) shows one invented 400 m block twice: **Before** (dark membrane
+roofs, dense asphalt, few trees) and **After** a sponge-city and cool-roof retrofit. Its materials are in the
+parameter table above (`coolroofAged`, `coolroofNew`, `greenroof`, `pavers`, `porousAsphalt`,
+`coolPaveAged`, `coolPaveNew`, `raingarden`, `youngCanopy`); its research brief is
+[`docs/research/retrofit-brief.md`](research/retrofit-brief.md).
+
+- **Aged / new.** The page defaults to aged materials (cool roof α 0.60, coating α 0.18); "new" switches to
+  α 0.80 and 0.25. Aged cool-roof albedo 0.60 sits in the aged range 0.50–0.70, of which 0.60–0.70 is unverified.
+- **Days since rain d** (0–7, default 3; d = 0 is a clear day after overnight rain). Wetted materials
+  decay from wet to dry: X(d) = X_dry + (X_wet − X_dry)·exp(−d/τ), for the evaporative fraction and, for the green
+  roof, the substrate admittance μ (600 dry → 1200 wet). τ = 1 d for pavers and porous asphalt (calibrated to
+  Li 2013 in the brief), 3 d for rain-garden soil (McColl 2017 drydown; median not checked), 4 d for green-roof
+  substrate (unverified). Irrigated lawn does not decay. For example the pavers' evaporative fraction is
+  0.50 at d = 0, 0.20 at d = 1 and 0.04 at d = 3. EF(d) is held for the whole day.
+- **Young street trees** transmit exp(−0.5·LAI) = 0.47 of the sun with LAI 1.5 (brief range 0.37–0.61 for LAI 1–2,
+  unverified); mature trees keep 0.17.
+- **Shared run.** Before is run in full. After reuses every Before cell whose inputs (material parameters, sky view
+  factor, sunlit share in all 144 sun slots) are identical, and runs the other 2937 cells with the same
+  force-restore scheme and convergence test (this run: 7 days, final max |ΔTd| = 0.027 K).
+  After is always derived from the same Before run, so a state does not depend on the order the controls were used.
+- **Air temperature is a fixed forcing**, identical in both states: the model cannot show air cooling, and the
+  page does not claim any. Air-temperature effects on the cards are quoted from the literature and labelled so.
+
+### Measures
+
+Each card compares the same cells Before and After: cells with the measure's After material in full sun (> 95%)
+in both states at that hour; for young trees, ground cells their crowns shade at that hour. Tmrt is for a
+person standing on those cells (roofs have none).
+
+| Measure | Sources | Card literature line |
+|---|---|---|
+| Cool roofs | [lbnlRoof] [chicago] [santamouris] | Literature: white (0.80) vs grey (0.20) roof about −28 K at summer peak; −28 to −33 K in the EPA compendium. Aged roofs often sit below their rating. |
+| Green roofs | [heusinger] [noaaGreen] [epa] | Literature: up to −18.4 K vs a black roof (Javits Center, NYC); EPA up to −31 K. |
+| Permeable pavers | [li2013] | Literature: wetted permeable pavement −15 to −35 K early afternoon; −2 to −7 K about 25 h later (Li et al. 2013). |
+| Porous asphalt (car park) | [li2013] | Literature: dry porous asphalt about +5 K vs dense asphalt (Li et al. 2013). |
+| Cool pavement coating | [middel2020] [ko2022] | Literature (Los Angeles): road −4 to −6 K, pedestrian Tmrt +4 K at midday (Middel et al. 2020); coating albedo 0.26 -> 0.18 in a year (Ko et al. 2022). |
+| Rain gardens | [engine] [mccoll] | No measured cooling figure for rain gardens in the brief; the values here are engine assumptions. |
+| Young street trees | [middel2021] [brief2] | Literature: modelled −7 K Tmrt under trees in Phoenix; block cooling grows strongly above about 40% canopy cover. |
+
+### Model vs literature (block 2)
+
+| Comparison (After minus Before, same cells) | Model K | Band K | Use | Source | |
+|---|---|---|---|---|---|
+| Cool roof, aged (α 0.60) vs dark membrane, ΔTs at 15:00 | −19.7 | −30.0 to −15.0 | acceptance | brief2 target | inside |
+| Cool roof, new (α 0.80) vs dark membrane, ΔTs at 15:00 | −28.3 | −33.0 to −28.0 | literature | lbnlRoof (white 0.80 vs grey 0.20 −28 K; EPA −28 to −33 K) | inside |
+| Cool pavement coating, new (α 0.25), ΔTs at 12:00 | −4.9 | −6.0 to −4.0 | acceptance | middel2020 | inside |
+| Cool pavement coating, new (α 0.25), pedestrian ΔTmrt at 12:00 | +2.6 | +3.0 to +5.0 | acceptance | middel2020 | **outside** |
+| Cool pavement coating, 1 year (α 0.18), ΔTs at 12:00 | −2.1 | −6.0 to −4.0 | literature | middel2020 band for a fresh coating; ko2022 ageing | **outside** |
+| Cool pavement coating, 1 year (α 0.18), pedestrian ΔTmrt at 12:00 | +1.0 | +3.0 to +5.0 | literature | middel2020 band for a fresh coating | **outside** |
+| Permeable pavers vs dense asphalt, ΔTs at 15:00, d = 0 | −14.6 | −35.0 to −15.0 | acceptance | li2013 | **outside** |
+| Permeable pavers vs dense asphalt, ΔTs at 15:00, d = 1 | −7.5 | −7.0 to −2.0 | acceptance | li2013 | **outside** |
+| Dry porous asphalt (d = 7) vs dense asphalt, ΔTs at 15:00 (> 0) | +2.5 | > +0.0 | acceptance | li2013 (about +5 K) | inside |
+| Green roof vs dark membrane, ΔTs at 15:00, d = 3 | −13.4 | −18.4 to +0.0 | literature | noaaGreen (up to −18.4 K) | inside |
+
+3 of 6 acceptance bands and 2 of 4 literature comparisons fall outside. They are reported, not tuned away: every input stays at its cited value or inside its cited range.
+
+Notes on the rows outside:
+
+- **Coating, pedestrian Tmrt — a structural limit of this model.** No single coating albedo meets both Middel bands
+  here. The new coating (α 0.25) gives ΔTs −4.9 K (inside) but ΔTmrt +2.6 K (short);
+  α 0.30, the brief's step, gives ΔTmrt +3.8 K (inside) but ΔTs −6.9 K (beyond −6 K).
+  The model raises Tmrt by about 0.54 K per K of surface cooling, against about 0.8 in Middel's
+  measurements (+4 K Tmrt for −4 to −6 K surface). The likely reason is that walls reflect no shortwave in this
+  model, so sunshine bounced off building faces onto people is missing.
+- **Permeable pavers.** At d = 0 the model is just short of the −15 K end of Li 2013's range (−14.6 K);
+  at d = 1 it is just beyond the −7 K end (−7.5 K). Two things drive the d = 1 miss:
+  (1) the albedo step 0.12 → 0.26 alone makes dry pavers (d = 7) −4.2 K cooler than asphalt, so most of the
+  d = 1 difference is the albedo floor and only the rest is moisture; (2) τ = 1 d, which the brief describes as
+  "calibrated to Li 2013", does not reproduce Li in this model: τ ≈ 0.8 d would (d = 0 −14.6 K, d = 1 −6.7 K).
+  τ = 1 d is the approved brief value and is kept; it is not re-calibrated. The pavers' μ (870, an engine assumption
+  with no cited range) is a second lever, also left alone (see the sensitivity table).
+- **Aged coating rows** compare a one-year-old coating with a band measured on a fresh one; they are expected to
+  fall short and are shown to make the ageing visible.
+
+### Who cools the walkers
+
+At 15:00 the share of route sample points (every 2 m along both pavements of every walker route) where a person's
+Tmrt is 65 °C or more — the sweat-cue threshold — is 67.9% Before, 63.7% After, and
+67.9% for After **without the young street trees** (mean Tmrt 63.9, 63.4 and 64.0 °C).
+**The drop in sweating walkers After comes entirely from the young trees.** The roofs do not touch pedestrians, nobody
+walks on the coated road, and the sponge measures and reflective paving alone leave walkers as hot or slightly hotter
+(the lighter pavers add +3.6 K Tmrt at noon). Shade is what cools people; the young-trees card says so.
+The trees' crown size (radius 2.6 m, centre 4.4 m) is an engine (scene) assumption, their transmission 0.47 the
+brief's mid value, and their kerb-side placement a design choice of this invented block.
+
+### Water budget
+
+Daily evaporated depth = Σ EF·max(Q*, 0)·Δt / 2.45·10⁶ J kg⁻¹, from the stored 15-min surface temperatures, maximum
+over each material's cells, in mm, for each d (aged materials). The check is that no single day evaporates more
+water than the material holds after rain (storage values: brief, or engine assumptions where marked).
+
+| Material | storage mm | d = 0 | d = 1 | d = 2 | d = 3 | d = 4 | d = 5 | d = 6 | d = 7 | sum d = 0–7 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `greenroof` | 30 | 3.5 | 3.0 | 2.7 | 2.4 | 2.2 | 2.1 | 1.9 | 1.8 | 19.7 |
+| `pavers` | 5 | 3.3 | 1.1 | 0.5 | 0.2 | 0.2 | 0.1 | 0.1 | 0.1 | 5.6 |
+| `porousAsphalt` | 5 | 4.1 | 1.4 | 0.6 | 0.3 | 0.2 | 0.2 | 0.1 | 0.1 | 7.0 |
+| `raingarden` | 40 | 6.3 | 5.1 | 4.2 | 3.7 | 3.3 | 3.0 | 2.8 | 2.7 | 31.2 |
+
+The daily check holds, but only because the brief's "a few mm" for pavers and porous asphalt is read as 5 mm: porous
+asphalt evaporates up to 4.07 mm and pavers 3.26 mm at d = 0, so a storage of 4 mm would fail for porous
+asphalt and 3 mm for both. Summed over a whole dry week, `pavers` (5.6 mm vs 5 mm) and `porousAsphalt` (7.0 mm vs 5 mm) evaporate more than they hold: the decay rule does not stop when the stored water runs out, and the dry evaporative fraction (0.02) keeps drawing a little water. The excess is small and comes after the surfaces are effectively dry, but it is a known inconsistency of the simple rule.
+
+### Sensitivity (block 2)
+
+| Case (one change, within the cited range) | Measure, hour, d | shipped ΔTs K | changed ΔTs K |
+|---|---|---|---|
+| aged cool roof α 0.50 (bottom of aged range) | coolRoof, 15:00, d = 3 | −19.7 | −15.5 |
+| aged cool roof α 0.70 (top of aged range) | coolRoof, 15:00, d = 3 | −19.7 | −24.0 |
+| green roof α 0.15 | greenRoof, 15:00, d = 3 | −13.4 | −11.9 |
+| green roof α 0.25 | greenRoof, 15:00, d = 3 | −13.4 | −14.8 |
+| pavers μ 1200 (as asphalt; μ is an engine assumption) | pavers, 15:00, d = 0 | −14.6 | −15.8 |
+| pavers μ 1200, d = 1 | pavers, 15:00, d = 1 | −7.5 | −8.7 |
+| young-tree transmission 0.37 (LAI 2) | trees, 15:00, d = 3 | −5.7 | −6.6 |
+| young-tree transmission 0.61 (LAI 1) | trees, 15:00, d = 3 | −5.7 | −4.5 |
+
+## Sponge city
+
+The sponge-city card follows the State Council General Office guideline of October 2015 (国办发〔2015〕75号) [sponge2015]:
+manage rain where it falls — let it soak in, slow it, store it, clean it, use it, then drain it (渗、滞、蓄、净、用、排) — with
+green roofs, permeable paving, rain gardens and wetlands; absorb and use 70% of rainfall on site, applied as a
+control rate for total annual runoff (年径流总量控制率); 20% of built-up area by 2020 and 80% by 2030. Flooding and water
+supply come first; cooling is a co-benefit. **No robust measured block-scale cooling figure for sponge-city retrofits was
+found, so the page quotes none.** The primary Chinese text was not located; the summary follows the English notice
+(gov.cn, 2015-10-16), a reprint (waizi.org.cn/law/6860.html) and a MOHURD interpretation (cs.com.cn), so it is marked
+unverified on the card. Rain, runoff and flooding are not modelled.
+
+## Trade-offs
+
+- **Reflective (cool) pavement cools the road, not the person.** The model's Tmrt already includes sunshine reflected
+  up from the ground, so a lighter street raises a pedestrian's midday Tmrt while its surface cools (Middel et al.
+  2020 measured about +4 K Tmrt and −4 to −6 K surface in Los Angeles). The card says so and pairs it with shade.
+  Walls reflect no shortwave in this model, so the real effect on pavements next to buildings is under-estimated
+  (Middel saw +20–30 W m⁻² on sidewalks in the evening).
+- **Porous asphalt is hotter when dry.** It is darker (α 0.08) and lighter-weight than dense asphalt, so it only
+  cools in the first day or two after rain (Li et al. 2013: dry porous asphalt about +5 K).
+- **Pavers are lighter, so they also reflect more sun onto people** at midday once dry; the pavers card shows ΔTmrt.
+- **Ageing:** a coating that starts at 0.26 is about 0.18 after a year (Ko et al. 2022); in-service cool roofs often sit
+  below their aged rating (LBNL-6714E). The page defaults to aged values.
