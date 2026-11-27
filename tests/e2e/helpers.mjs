@@ -51,9 +51,9 @@ export const pct = (a, p) => {
  * pixel is read back through the palette; ink-like pixels are dropped.
  * Returns {key: {n, mean, inkShare}}.
  */
-export function regionPixelMeans(page, spec, band, inkRes, which) {
+export function regionPixelMeans(page, spec, band, inkRes, which, lum = false) {
   return page.evaluate(
-    ([spec, band, inkRes, which]) => {
+    ([spec, band, inkRes, which, lum]) => {
       const A = window.atlas;
       const c = document.getElementById('atlas');
       const Wd = c.width;
@@ -145,6 +145,12 @@ export function regionPixelMeans(page, spec, band, inkRes, which) {
           const r = img[i * 4];
           const gg = img[i * 4 + 1];
           const bb = img[i * 4 + 2];
+          if (lum) {
+            // day view: mean luminance (0-255) instead of a temperature
+            sum += 0.299 * r + 0.587 * gg + 0.114 * bb;
+            n++;
+            continue;
+          }
           let best = 0;
           let be = Infinity;
           for (const [tt, col] of lut) {
@@ -165,6 +171,6 @@ export function regionPixelMeans(page, spec, band, inkRes, which) {
       }
       return out;
     },
-    [spec, band, inkRes, which ?? null],
+    [spec, band, inkRes, which ?? null, lum],
   );
 }
