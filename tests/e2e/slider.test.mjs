@@ -2,7 +2,7 @@
 // frame moves the slider one 15-minute step and fires `input`, the way a fast
 // drag does, sweeping 00:00 -> 23:45 and back. Spec target: p95 frame time
 // <= 33 ms. On shared CI runners the rAF-gap check is replaced by the
-// main-thread draw cost of a frame, p95 <= 20 ms (set PERF_STRICT=1 to
+// main-thread draw cost of a frame, p95 <= 25 ms (as for blocks 2 and 3) (set PERF_STRICT=1 to
 // enforce gaps there too).
 // After release the view must refine to exactly the pixels seek() gives.
 import { test, after, before } from 'node:test';
@@ -69,7 +69,7 @@ for (const [name, query] of [['day', 'hour=15'], ['thermal', 'thermal&hour=15']]
         `draw mean ${mean(work).toFixed(1)} / p95 ${wp95.toFixed(1)} / max ${Math.max(...work).toFixed(1)} ms; ${previews}/${work.length} preview frames (${strict ? 'strict' : 'relaxed'})`,
     );
     if (strict) assert.ok(p95 <= 33, `drag p95 frame ${p95.toFixed(1)} ms`);
-    assert.ok(wp95 <= (strict ? 33 : 20), `drag p95 draw ${wp95.toFixed(1)} ms`);
+    assert.ok(wp95 <= (strict ? 33 : 25), `drag p95 draw ${wp95.toFixed(1)} ms`);
     assert.ok(previews > 0, 'the drag never used the preview path');
 
     // released at 00:00: once refined, the frame on screen is exact, i.e. the

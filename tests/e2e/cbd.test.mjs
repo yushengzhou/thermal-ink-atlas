@@ -400,3 +400,15 @@ test('switching glass and back returns the exact frame of a fresh page', async (
   assert.equal(await f.page.evaluate(() => window.atlas.hash()), h);
   await f.context.close();
 });
+
+test('the glint tile skip (bounding box) gives exactly the same pixels as drawing the glint on every tile', async () => {
+  for (const q of ['hour=15&f=400', 'hour=9&f=400&cam=4,160,222', 'hour=12&f=400&cam=1.75,200,200', 'hour=17.5&f=400&glass=mirror']) {
+    const a = await go(q);
+    const ha = await a.page.evaluate(() => window.atlas.hash());
+    await a.context.close();
+    const b = await go(`${q}&spotskip=0`);
+    const hb = await b.page.evaluate(() => window.atlas.hash());
+    await b.context.close();
+    assert.equal(ha, hb, q);
+  }
+});

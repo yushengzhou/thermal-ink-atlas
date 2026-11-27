@@ -10,7 +10,7 @@ import { GLASS, GLASS_IDS, GLASS_DEFAULT, MODEL, SOURCES, BASIS } from '../../en
 import { runModel, cellMat } from '../../engine/thermal.js';
 import { glassSetup, spotStats, SPOT_MIN, WARM } from '../../engine/cbd.js';
 import { solarPosition, sunVector } from '../../engine/sun.js';
-import { base3, canyonSvfRows, specularCheck, SPECULAR_CASES, bands3, wallBound, canyons, walkers, spotRows } from '../../scripts/cbd.mjs';
+import { base3, canyonSvfRows, specularCheck, SPECULAR_CASES, bands3, wallBound, canyons, walkers, spotRows, litAreaRatio, epClearShapeDiff } from '../../scripts/cbd.mjs';
 import { bands3Markdown } from '../../scripts/cbd-docs.mjs';
 import { SCENE } from '../../cities/glass-cbd/scene.js';
 
@@ -38,6 +38,10 @@ test('Fresnel: clear glass ρ(0°) = 0.082 ± 0.005, ρ(75°) = 0.41 ± 0.03; sc
     prev = r;
   }
   assert.equal(fresnelShape(0), 0);
+  // the coated-glass form is EnergyPlus's; its clear-glass curve is a polynomial fit close to exact Fresnel
+  const ep = epClearShapeDiff();
+  console.log(`normalised Fresnel vs EnergyPlus clear polynomial: max |difference| ${ep.max.toFixed(3)} at ${ep.at}°`);
+  assert.ok(ep.max < 0.05);
   assert.equal(fresnelPane(90), 1);
   for (const id of GLASS_IDS) {
     const r0 = GLASS[id].rho0.value;
@@ -56,8 +60,15 @@ test('specular spot on flat ground: lit cells get ρ(θ) I sinβ (±1%), far edg
     assert.ok(Math.abs(s.farPlane - s.farPlaneExpect) <= s.cell, 'far edge within one cell');
     assert.ok(Math.abs(s.closure - 1) <= 0.03, 'energy closure');
     assert.ok(Math.abs(grid.closure - 1) <= 0.03, 'energy closure at page sampling');
+    assert.ok(Math.abs(specularCheck({ hour, face, cell: 5 }).closure - 1) <= 0.03, 'energy closure even at 5 m sampling');
     assert.ok(s.max <= s.bound * (1 + 1e-6), 'a flat façade never focuses (Float32 sums)');
   }
+});
+
+test('in the block, no glass façade lights more ground than its unobstructed area A cosθ / sinβ (thin grazing strips clipped)', () => {
+  const la = litAreaRatio();
+  console.log(`largest lit-area ratio ${la.max.toFixed(6)} (${JSON.stringify(la.worst)})`);
+  assert.ok(la.max <= 1 + 1e-6);
 });
 
 test('in the block, no cell receives more than the sum of ρ(θ) I sinβ over the glass façades facing the sun', () => {
@@ -131,6 +142,22 @@ test(`warm start (${WARM} coarse days) lands at least as close to a 30-day run a
   console.log(`max |ΔTs| vs 30 days: plain ${ep.toFixed(3)} K (${plain.info.days} days), warm ${ew.toFixed(3)} K (${warm.info.days} 1-min days)`);
   assert.ok(ew <= ep + 1e-6 && ew < 0.05);
   assert.ok(warm.info.days >= 3 && warm.info.maxDelta < 0.05);
+  assert.equal(warm.info.warm, WARM, 'block 3 uses the warm start');
+  assert.ok(warm.info.warmFactor < 0.5, `stability factor ${warm.info.warmFactor}`);
+});
+
+test('the coarse warm-up falls back to the plain start when a material would be near its stability limit (thin metal roofs)', async () => {
+  const { SCENE: S1 } = await import('../../cities/asphalt-park/scene.js');
+  const { buildWorld } = await import('../../engine/world.js');
+  const w = buildWorld(S1, { svf: false });
+  const m = runModel(w, { warm: WARM, minDays: 3, maxDays: 3 });
+  console.log(`block 1 (metal roofs): stability factor at 600 s ${m.info.warmFactor.toFixed(2)}, warm used: ${m.info.warm}`);
+  assert.ok(m.info.warmFactor > 0.9 && m.info.warmFactor < 1);
+  assert.equal(m.info.warm, 0, 'no coarse days with metal roofs');
+});
+
+test('every tower in block 3 is fine for the coarse step', () => {
+  assert.ok(!SCENE.buildings.some((b) => b.roof === 'metal'));
 });
 
 test('diffuse wall term raises the canyon-floor shortwave by at most 30% with a_w at 0.5', () => {
@@ -162,13 +189,19 @@ test('walkers at 15:00: people per m2 in reflection spots lower than in plain sh
 // either way) and disclosed in docs/sources.md. Never tune an input outside its
 // cited range to pass.
 const PINNED_OUTSIDE = {
-  'Solar-control low-e glass, 15:00: mean ΔTmrt in spot cells with r 0.1–0.3': 6.6,
-  'Reflective (mirror) glass, 12:00: mean ΔTmrt in spot cells with r 0.1–0.3': 6.9,
-  'Reflective (mirror) glass, 15:00: mean ΔTmrt in spot cells with r 0.1–0.3': 6.3,
-  'Largest ΔTmrt in any spot cell, any glass, 12:00 or 15:00': 27.1,
-  'Exchange Street (H/W 2.6) floor in shade at 15:00 (°C)': 48.4,
+  'Solar-control low-e glass, 15:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n)': 6.6,
+  'Reflective (mirror) glass, 12:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n)': 6.9,
+  'Reflective (mirror) glass, 15:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n)': 6.3,
+  'Clear float glass, 12:00: mean ΔTmrt over all spot cells (r ≥ 0.05, n), read against the same band': 9.7,
+  'Clear float glass, 15:00: mean ΔTmrt over all spot cells (r ≥ 0.05, n), read against the same band': 6.6,
+  'Solar-control low-e glass, 12:00: mean ΔTmrt over all spot cells (r ≥ 0.05, n), read against the same band': 11.1,
+  'Solar-control low-e glass, 15:00: mean ΔTmrt over all spot cells (r ≥ 0.05, n), read against the same band': 8.9,
+  'Reflective (mirror) glass, 12:00: mean ΔTmrt over all spot cells (r ≥ 0.05, n), read against the same band': 12.8,
+  'Reflective (mirror) glass, 15:00: mean ΔTmrt over all spot cells (r ≥ 0.05, n), read against the same band': 11.7,
+  'Largest ΔTmrt in any spot cell, any glass, 12:00 or 15:00': 26.8,
+  'Exchange Street (H/W 2.6) floor in shade at 15:00 (°C)': 48.6,
 };
-const key = (label) => label.replace(/ \(n \d+\)/, '');
+const key = (label) => label.replace(/n \d+/, 'n');
 
 test('acceptance bands: values, pinned deviations, docs table in sync', () => {
   const rows = bands3();
