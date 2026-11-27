@@ -18,7 +18,7 @@
 //   air (illustrative): dT = h_ci (T_roof - Ta) / (h_ci + rho c_p n h / 3600),
 //   n calibrated (as the brief says) so the bare rusty-iron rooms peak at +3 K,
 //   never shown beyond +-5 K.
-// The residents' white roofs (R) repaint the marked bare sheets (paint: true)
+// The residents' white roofs (W) repaint the marked bare sheets (paint: true)
 // and run those roof cells again. The air temperature is fixed.
 import { runModel, Thermal, sunSlots, cellMat, STORE, SIGMA, coarseStability } from './thermal.js';
 import { DEG, clamp } from './core.js';

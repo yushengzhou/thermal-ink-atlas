@@ -30,7 +30,7 @@ export const VG_NOTES = {
   rhoCp: 'rho c_p of air, J m-3 K-1 (1.2 kg m-3 x 1005 J kg-1 K-1)',
   airTarget: 'the air proxy is calibrated (as the brief says: "calibrate n to +2-4 K peak under bare tin") so the bare rusty-iron rooms peak at this many K above the outdoor air, the middle of 2-4 K; the band on it therefore holds by construction and is not counted',
   airCap: 'the air proxy is never shown beyond +-5 K (the brief)',
-  paint: 'what the residents\' white-roof toggle (R) paints the marked bare iron and galvanised roofs with: white-painted tin, new paint (albedo 0.65)',
+  paint: 'what the residents\' white-roof toggle (W) paints the marked bare iron and galvanised roofs with: white-painted tin, new paint (albedo 0.65)',
 };
 
 /** Words the brief rules out of the block's UI text ("slum" only in source titles): returns the words found. */
@@ -126,7 +126,9 @@ export function sensitivity10() {
   // lane width at the village's mean wall height (the canyon formula)
   const H = st.lanes.village.H;
   const lane = [1, 1.5, 2, 3].map((W) => ({ label: `lane ${W} m, walls ${H.toFixed(1)} m`, svf: laneSvf(H, H, W), centre: centreSvf(H, W) }));
-  sens = { rust, asb, white, proxy, hci, lane, shipped: { rust15: st.edge.rustTin.ts15, rustPeak: st.edge.rustTin.peak, asb15: st.edge.asbestosRoof.ts15, radiant15: st.edge.rustTin.radiant15 } };
+  // band 7 over the brief's calibration targets: n is set so bare tin peaks at the target, so the change scales with it
+  const target = [2, 3, 4].map((t) => ({ t, dAir: (rr.dAirPeak * t) / VG.airTarget.value, rel: rr.dAirPeak / VG.airTarget.value }));
+  sens = { rust, asb, white, proxy, hci, lane, target, shipped: { rust15: st.edge.rustTin.ts15, rustPeak: st.edge.rustTin.peak, asb15: st.edge.asbestosRoof.ts15, radiant15: st.edge.rustTin.radiant15 } };
   return sens;
 }
 
@@ -248,7 +250,8 @@ export function bands10() {
   add(`6. Village lanes − the open square, Tmrt at ${ni}:00, K`, L.tmrt[ni] - st.square.tmrt[ni], 2, 6, 'brief10', 'K');
   add(`6. Supplementary: the edge's alleys − the open square, Tmrt at ${ni}:00, K`, st.lanes.edge.tmrt[ni] - st.square.tmrt[ni], 2, 6, 'brief10', 'K', { supp: true });
   add(`7. Supplementary (by construction: n calibrated to it): illustrative room air under bare rusty iron, day's peak, K above the outdoor air (n ${n.toFixed(1)} per hour)`, rr ? st.edge.rustTin.airPeak : NaN, 2, 4, 'brief10', 'K', { supp: true });
-  add(`7. White paint on the painted rusty-iron rooms (n ${rr.n}): change of the illustrative room air's day's peak, K`, rr.dAirPeak, -2.5, -1, 'vellingiri2020', 'K');
+  add(`7. White paint on the painted rusty-iron rooms (n ${rr.n}): change of the illustrative room air's day's peak, K (semi-constructed: the +${VG.airTarget.value} K calibration target × the roofs' relative cooling)`, rr.dAirPeak, -2.5, -1, 'vellingiri2020', 'K');
+  for (const t of [2, 4]) add(`7. Supplementary: the same with the calibration target at the brief's +${t} K (the change scales with the target), K`, (rr.dAirPeak * t) / VG.airTarget.value, -2.5, -1, 'vellingiri2020', 'K', { supp: true });
   // band 8: every air-proxy value a card can show (each sheet roof, every 15 min, base and white roofs) within +-5 K
   let beyond = 0;
   let rawMax = 0;

@@ -189,7 +189,7 @@ function build(city) {
 
   const meta = /title: '([^']+)'/.exec(scene)[1];
   const sub = /note: '([^']+)'/.exec(scene)[1];
-  const keys = /retrofit: true/.test(scene) ? '<kbd>B</kbd> before/after · ' : /glassBlock: true/.test(scene) ? '<kbd>G</kbd> glass · ' : /windBlock: true/.test(scene) ? '<kbd>W</kbd> wind · <kbd>A</kbd> air · ' : /hutongBlock: true/.test(scene) ? '<kbd>P</kbd> splash · ' : /parkingBlock: true/.test(scene) ? '<kbd>G</kbd> night release · ' : /estateBlock: true/.test(scene) ? '<kbd>S</kbd> 大寒 · <kbd>C</kbd> condensers · ' : /campusBlock: true/.test(scene) ? '<kbd>I</kbd> water the pitch · <kbd>U</kbd> burn limits · ' : /busBlock: true/.test(scene) ? '<kbd>K</kbd> waiting places · <kbd>U</kbd> burn flags · ' : /villageBlock: true/.test(scene) ? '<kbd>R</kbd> white roofs · <kbd>O</kbd> under the roof · ' : '';
+  const keys = /retrofit: true/.test(scene) ? '<kbd>B</kbd> before/after · ' : /glassBlock: true/.test(scene) ? '<kbd>G</kbd> glass · ' : /windBlock: true/.test(scene) ? '<kbd>W</kbd> wind · <kbd>A</kbd> air · ' : /hutongBlock: true/.test(scene) ? '<kbd>P</kbd> splash · ' : /parkingBlock: true/.test(scene) ? '<kbd>G</kbd> night release · ' : /estateBlock: true/.test(scene) ? '<kbd>S</kbd> 大寒 · <kbd>C</kbd> condensers · ' : /campusBlock: true/.test(scene) ? '<kbd>I</kbd> water the pitch · <kbd>U</kbd> burn limits · ' : /busBlock: true/.test(scene) ? '<kbd>K</kbd> waiting places · <kbd>U</kbd> burn flags · ' : /villageBlock: true/.test(scene) ? '<kbd>W</kbd> white roofs · <kbd>O</kbd> under the roof · ' : '';
   const html = read('engine/shell.html')
     .replace(/__TITLE__/g, meta)
     .replace('__SUBTITLE__', sub)

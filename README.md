@@ -53,7 +53,7 @@ Hand-inked isometric city blocks that show urban heat through one heat-wave day:
   tarpaulin roofs. The lanes are narrower than the model grid, so their sky
   view (about 0.05) and sun come from each lane's own width and walls; a
   person in a lane stays about 5 K warmer in Tmrt than one on the open square
-  at 22:00. Bare rusty iron reaches about 71 °C at 15:00; `R` paints the
+  at 22:00. Bare rusty iron reaches about 71 °C at 15:00; `W` paints the
   residents' white roofs (about 21 K cooler), `O` shows a proxy of the room
   under each sheet roof (not a simulation). Cards on who is most at risk
   quote the studies, not the model.
@@ -98,7 +98,7 @@ modelled with a simple surface energy-balance model, not measured.
 | `S` / `C` (block 7) | 大寒 (20 January) shadows and sill tallies / condenser plumes on or off |
 | `I` / `U` (block 8) | water the pitch at 14:00 / contact-burn hatching on or off |
 | `K` / `U` (block 9) | waiting places (head in sun or shade) / contact-burn flags on or off |
-| `R` / `O` (block 10) | the residents' white roofs / the room under the roof (proxy) on or off |
+| `W` / `O` (block 10) | the residents' white roofs / the room under the roof (proxy) on or off |
 
 ## Build and test
 

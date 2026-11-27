@@ -28,7 +28,7 @@ after(() => browser.close());
 
 const go = (q, opts = {}) => open(browser, q, { ...CITY, ...opts });
 
-test('white roofs and under the roof: default off, ?coolroof=1 and ?under=1, keys R and O, the buttons; the marked roofs repainted and re-modelled; the wash and its label', async () => {
+test('white roofs and under the roof: default off, ?coolroof=1 and ?under=1, keys W and O, the buttons; R still restarts the intro; the marked roofs repainted and re-modelled; the wash and its label', async () => {
   const painted = B.world.buildings.find((x) => x.paint && x.style === 'room');
   for (const [q, cool, under] of [['', false, false], ['coolroof=1', true, false], ['under=1', false, true], ['coolroof=1&under=1', true, true]]) {
     const { page, context, errors } = await go(`hour=15&f=400&${q}`);
@@ -52,12 +52,18 @@ test('white roofs and under the roof: default off, ?coolroof=1 and ?under=1, key
   }
   const { page, context, errors } = await go('hour=15&f=400');
   const h0 = await page.evaluate(() => window.atlas.hash());
-  await page.keyboard.press('r');
+  await page.keyboard.press('w');
   await page.keyboard.press('o');
   assert.deepEqual(await page.evaluate(() => window.atlas.village.state()), { cool: true, under: true });
-  await page.keyboard.press('R');
+  await page.keyboard.press('W');
   await page.click('#village [data-under]');
   assert.deepEqual(await page.evaluate(() => window.atlas.village.state()), { cool: false, under: false });
+  // R restarts the intro on this page as everywhere (the white roofs are W)
+  await page.evaluate(() => window.atlas.seek(400));
+  await page.keyboard.press('r');
+  const rs = await page.evaluate(() => ({ frame: window.atlas.state().frame, ...window.atlas.village.state() }));
+  assert.ok(rs.frame < 30 && !rs.cool, JSON.stringify(rs));
+  await page.evaluate(() => window.atlas.seek(400));
   // toggled on and off again: the same pixels as before
   assert.equal(await page.evaluate(() => {
     window.atlas.seek(400);
@@ -69,7 +75,7 @@ test('white roofs and under the roof: default off, ?coolroof=1 and ?under=1, key
     return window.atlas.hash();
   });
   const fresh = await go('hour=15&f=400&coolroof=1');
-  assert.equal(await fresh.page.evaluate(() => window.atlas.hash()), hc, 'R pressed = ?coolroof=1');
+  assert.equal(await fresh.page.evaluate(() => window.atlas.hash()), hc, 'W pressed = ?coolroof=1');
   await fresh.context.close();
   assert.deepEqual(errors, []);
   await context.close();
@@ -137,7 +143,7 @@ test('deterministic in every mode (white roofs, under the roof, residents on the
   }
 });
 
-test('thermal 16:00 (below the palette\'s 70 °C top): bare rusty-iron roofs read far hotter than weathered white ones, both close to the model; with R the painted roofs read as white roofs', async () => {
+test('thermal 16:00 (below the palette\'s 70 °C top): bare rusty-iron roofs read far hotter than weathered white ones, both close to the model; with W the painted roofs read as white roofs', async () => {
   const cam = '3.5,130,345';
   const { world, T, C } = B;
   const roofs = (f) => world.buildings.filter((x) => x.style === 'room' && f(x)).flatMap((x) => {
@@ -283,7 +289,7 @@ test('single file < 500 KB, offline, zero external requests; loads in < 1.5 s', 
   console.log(`load: world ${info.worldMs.toFixed(0)} ms, slots ${info.slotsMs.toFixed(0)} ms, model ${info.runMs.toFixed(0)} ms, drawing ${info.drawMs.toFixed(0)} ms, total ${info.totalMs.toFixed(0)} ms`);
   assert.ok(info.totalMs < (strict ? 1500 : 3000), `load ${info.totalMs} ms`);
   await page.keyboard.press('t');
-  await page.keyboard.press('r');
+  await page.keyboard.press('w');
   await page.keyboard.press('o');
   await page.click('#village [data-card="white"]');
   await page.mouse.click(900, 420);
