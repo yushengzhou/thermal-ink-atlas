@@ -8,7 +8,8 @@
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "node --test tests/unit/",
     "test:e2e": "node --test --test-concurrency=1 tests/e2e/",
-    "screens": "node scripts/screens.mjs"
+    "screens": "node scripts/screens.mjs",
+    "fixtures": "node scripts/fixtures.mjs"
   },
   "devDependencies": {
     "playwright": "1.65.1",

@@ -2,7 +2,8 @@
 // notes and probe values as the page built before block 4 (main at 8e76f7a,
 // kept gzipped in tests/fixtures/base-pages). Both pages run in the same
 // browser here, so the comparison does not depend on the platform.
-// A deliberate change to blocks 1-3 must refresh the fixtures.
+// A deliberate change to blocks 1-3 must refresh the fixtures: commit the
+// rebuilt pages, then `npm run fixtures` (gzips them from HEAD) and commit.
 import { test, after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
