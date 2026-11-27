@@ -221,11 +221,11 @@ export const SCENE = {
   },
   // Margin notes (at most 5).
   notes: [
-    { at: [120, 112.5, 0], dx: -180, dy: -60, key: 'lane' },
-    { at: [335, 120, 0], dx: 140, dy: -80, key: 'square' },
-    { at: [100, 340, 2.7], dx: -150, dy: 90, key: 'tin' },
-    { at: [180, 360, 2.7], dx: 120, dy: 110, key: 'white' },
-    { at: [60, 320, 2.7], dx: -60, dy: 170, key: 'under' },
+    { at: [120, 112.5, 0], dx: 200, dy: -40, key: 'lane' },
+    { at: [335, 120, 0], dx: -70, dy: -125, key: 'square' },
+    { at: [100, 340, 2.7], dx: -30, dy: 165, key: 'tin' },
+    { at: [180, 360, 2.7], dx: 130, dy: 90, key: 'white' },
+    { at: [60, 320, 2.7], dx: 170, dy: -120, key: 'under' },
   ],
   startCam: { z: 2, cx: 215, cy: 250 },
 };
