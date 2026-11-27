@@ -56,7 +56,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions: [Sem
   - Block 2: the new cool-pavement coating's pedestrian ΔTmrt at noon rose from +2.6 to +2.9 K, toward Middel's +3 to +5 K but still 0.1 K short; its road ΔTs went from −4.9 to −4.8 K (still inside). The other disclosed misses barely moved: permeable pavers −14.6 K at d = 0 and −7.5 K at d = 1 (unchanged), the one-year coating −2.1 → −2.0 K (ΔTs) and +1.0 → +1.1 K (ΔTmrt). The trade-off card now describes the wall reflection instead of calling it missing.
 - Engine: the model's per-minute step is a separate function (same arithmetic); block 3 starts each run with six coarse 10-min days before the 1-min days (the convergence test is unchanged) and uses a 32-direction horizon scan. Each block loads in under 1.5 s locally (#8).
 - Engine: routes may carry a per-pixel weight field (block 4 only), `tmrt` takes an optional sunlit share for a 2 m pixel, and the model accepts a per-cell wind factor and the river / still-pond water kinds. Blocks 1–3 do not use any of these; their pages render the same pixels as before (#9).
-- Build: each page now carries only the engine core and its own block's modules (other blocks' modules become small stubs); pages are 287–330 KB instead of about 372 KB, and blocks 1–3 render the same pixels (#9).
+- Build: each page now carries only the engine core and its own block's modules (other blocks' modules become small stubs); pages are 288–331 KB instead of about 372 KB, and blocks 1–3 render the same pixels (#9).
 
 ### Fixed
 - The glossary entry "Reflection spot" in `docs/sources.md` no longer reads "In this model: undefined"; block-3-only terms are quoted with block 3's numbers (#8).
