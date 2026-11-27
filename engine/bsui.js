@@ -150,7 +150,7 @@ export function stopCard(d) {
     </table>
     <p class="note">${note}</p>
     <p class="lit">${STOP_LIT[s.id]}</p>
-    <p class="caveat">Conditions while waiting, for an adult at the heights given: the model does not follow how a body heats up over a wait, and the dose is this page's own measure, not a health threshold. ${s.id === 'E' ? 'The warm air trapped in a glass box is not modelled (the air is fixed), so inside is understated. ' : ''}${d.misses && s.id === 'A' && d.misses.groundMiss ? `The shaded concrete under this roof comes out ${fmt(d.misses.groundShade)} K from the air at 3 pm, outside the brief's 0–8 K above it (band missed, see docs/sources.md); not tuned. ` : ''}Panels and walls reflect no sunlight here.</p>
+    <p class="caveat">Conditions while waiting, for an adult at the heights given: the model does not follow how a body heats up over a wait, and the dose is this page's own measure, not a health threshold. ${s.id === 'E' ? 'The warm air trapped in a glass box is not modelled (the air is fixed), so inside is understated. ' : ''}${d.misses && s.id === 'A' && d.misses.groundMiss ? `The shaded concrete under this roof comes out ${fmt(d.misses.groundShade)} K from the air at 3 pm, outside the brief's 0–8 K above it (band missed, see docs/sources.md): likely because the roof's underside is taken at the shared warm-wall temperature (a sunlit metal roof is far hotter underneath) and a 2 m strip at a point gets no heat from the sunlit slab around it; not tuned. ` : ''}Panels and walls reflect no sunlight here.</p>
     ${srcLine(['brief9', ...STOP_SRC[s.id]])}`;
 }
 
@@ -169,7 +169,7 @@ export function kerbCard(d) {
       <tr><td>west kerb, standing under the roof</td>${H.map((h) => `<td>${fmt(k.west[h].standing)}</td>`).join('')}</tr>
       <tr><td>east kerb, standing under the roof</td>${H.map((h) => `<td>${fmt(k.east[h].standing)}</td>`).join('')}</tr>
     </table>
-    <p class="note">On a north–south street the afternoon sun comes from across the road. A shelter on the west kerb turns its back panel to it; on the east kerb its open front faces it, and the roof alone cannot keep the sun off: at 4 pm the seated places are ${fmt(k.east[16].seated - k.west[16].seated)} K warmer in Tmrt on the east kerb.</p>
+    <p class="note">On a north–south street the afternoon sun comes from across the road. A shelter on the west kerb turns its back panel to it; on the east kerb its open front faces it, and the roof alone cannot keep the sun off: at 4 pm the seated places are ${fmt(k.east[16].seated - k.west[16].seated)} K warmer in Tmrt on the east kerb. Standing under the roof at 3 pm, against the open 6 m away, the roof takes ${fmt(k.west[15].open - k.west[15].standing)} K off on the west kerb and ${fmt(k.east[15].open - k.east[15].standing)} K on the east kerb: the east kerb is far outside the 20–35 K an opaque roof gives in the brief's band 1 (a supplementary row in docs/sources.md), because there the sun comes in under it.</p>
     <p class="lit">The brief: on a north–south arterial the west-kerb stop's back blocks the afternoon sun and the east-kerb stop's open front takes it; check every design with a sun-shadow analysis (Hong Kong Highways Department BS/GN/047).</p>
     <p class="caveat">A comparison computed for this card only (the east-kerb shelter is not drawn). Panels reflect no sunlight; the air is fixed.</p>
     ${srcLine(['brief9', 'hyd047'])}`;
@@ -192,7 +192,7 @@ export function phoenixCard(d) {
       <tr><td>this model: concrete</td><td>${fmt(A.open[15].ts)} °C</td><td>${fmt(A.centre[15].ts)} °C</td></tr>
     </table>
     <p class="note">Shade cut PET by 19 °C on average; metal roofs (20.6 °C) and ad panels (20.3 °C) did a little better than polycarbonate (18.2 °C), sparse vines made no significant difference, and stops without side panels did worse. Most riders arrived less than 5 min before their bus.</p>
-    <p class="caveat">${d.misses.groundMiss ? `The shaded concrete here is ${fmt(d.misses.groundShade)} K from the air at 3 pm, outside the brief's 0–8 K above it (Phoenix: 41.3 °C at 41.2 °C air): band missed, see docs/sources.md; likely because a 2 m strip of shade at a point gets no heat from the sunlit slab around it; not tuned. ` : ''}Phoenix is hotter and drier than this design day (air 35 °C here), and globe temperature and PET are not Tmrt, so the rows compare only the direction and the rough size of the effect.</p>
+    <p class="caveat">${d.misses.groundMiss ? `The shaded concrete here is ${fmt(d.misses.groundShade)} K from the air at 3 pm, outside the brief's 0–8 K above it (Phoenix: 41.3 °C at 41.2 °C air): band missed, see docs/sources.md; likely because the roof's underside is taken at the shared warm-wall temperature (a sunlit metal roof is far hotter underneath) and a 2 m strip of shade at a point gets no heat from the sunlit slab around it; not tuned. ` : ''}Phoenix is hotter and drier than this design day (air 35 °C here), and globe temperature and PET are not Tmrt, so the rows compare only the direction and the rough size of the effect.</p>
     ${srcLine(['dzyuban2022', 'brief9'])}`;
 }
 
@@ -465,7 +465,7 @@ export function bsApp(env) {
   const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
   root.body.insertAdjacentHTML(
     'beforeend',
-    `<div id="busstop" aria-label="Bus stop controls">
+    `<div id="busstop" class="blockpanel" aria-label="Bus stop controls">
         <div class="seg">${btn('data-spots', '1', 'waiting places')}${btn('data-burn', '1', 'burn flags')}</div>
         <div class="measures"><div class="hand">Cards (stops A–E)</div>${BS_CARDS.map(([id, label]) => btn('data-card', id, label, id.startsWith('stop') ? `aria-label="Stop ${id.slice(4)}"` : '')).join('')}</div>
       </div>`,

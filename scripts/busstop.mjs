@@ -6,7 +6,7 @@
 // materials.js).
 import { SCENE } from '../cities/busstop/scene.js';
 import { buildWorld } from '../engine/world.js';
-import { shadeClassField } from '../engine/thermal.js';
+import { shadeClassField, wallTemp, cellMat } from '../engine/thermal.js';
 import { shadowOffset } from '../engine/sun.js';
 import { MATERIALS } from '../engine/materials.js';
 import { BS, busSetup, riderBook, busStats, screenCompare, kerbCompare, roofSwap, meanWait, daySchedule, contactFlags, burnLimit, pointModel, geometry, prepWorld } from '../engine/busstop.js';
@@ -146,6 +146,38 @@ export function sensitivity9() {
   return sens;
 }
 
+let under = null;
+/**
+ * Band 3 sensitivity (docs only; nothing shipped changes): the concrete under
+ * stop A's roof with the roof underside at the temperature of this model's own
+ * dark metal roofs (the mean of the grid's metal roof cells, minute by minute;
+ * a thin layer, so its underside is about its top) instead of the shared
+ * warm-wall term (air + 2 K + 6 K x K/900). The roof's share of the point's
+ * view (svfOpen - svf) takes that temperature, the building walls (1 -
+ * svfOpen) keep the shared term, blended as sigma T^4.
+ */
+export function roofUnderside3() {
+  if (under) return under;
+  const { world, T } = base9();
+  const A = SCENE.stops.find((s) => s.id === 'A');
+  const pt = [{ x: (A.roof.x0 + A.roof.x1) / 2, y: (A.roof.y0 + A.roof.y1) / 2, z: 0, mat: 'concrete', head: 0 }];
+  const G = geometry(world);
+  const metal = [...Array(world.n * world.n).keys()].filter((i) => world.bld[i] >= 0 && cellMat(world, i) === 'metal');
+  const roofAt = (m) => metal.reduce((a, i) => a + T.ts(i, m / 60), 0) / metal.length + 273.15;
+  const base = pointModel(world, G, pt, { suns: T.slots.suns });
+  const { open, svf } = base.sky[0];
+  let calls = 0;
+  const wall = (taK, k) => {
+    const m = calls++ % 1440; // runModel calls this once per model minute, in order (1-min days)
+    const tw = wallTemp(taK, k);
+    const tr = roofAt(m);
+    return ((((1 - open) * tw ** 4) + (open - svf) * tr ** 4) / (1 - svf)) ** 0.25;
+  };
+  const P = pointModel(world, G, pt, { suns: T.slots.suns }, null, { wallTemp: wall });
+  under = { roof15: roofAt(900) - 273.15, ts: P.ts(0, 15), above: P.ts(0, 15) - T.air(15), shipped: base.ts(0, 15) - T.air(15), share: open - svf, wall15: wallTemp(T.air(15) + 273.15, T.shortwave(0, 15).beam * Math.sin(T.sun(15).alt * Math.PI / 180) + T.shortwave(0, 15).diffuse) - 273.15 };
+  return under;
+}
+
 /** The brief's table: cot beta and the shadow shift per m (east, north) at 14-17 h (NOAA via the brief). */
 export const BRIEF_SUN = { 14: { cot: 0.55, e: 0.51, n: 0.21 }, 15: { cot: 0.86, e: 0.85, n: 0.13 }, 16: { cot: 1.32, e: 1.32, n: -0.02 }, 17: { cot: 2.15, e: 2.12, n: -0.33 } };
 
@@ -180,6 +212,8 @@ export function bands9() {
   const a15 = T.air(15);
   add('1. Opaque shelter (stop A) at 15:00, standing: Tmrt at the kerb − under the roof (centre), K', A.open[15].tmrt - A.centre[15].tmrt, 20, 35, 'middel2021', 'K');
   add('1. The same: Tmrt under the roof − air, K', A.centre[15].tmrt - a15, 0, 15, 'brief9', 'K');
+  const { kerb } = compare9();
+  for (const k of ['west', 'east']) add(`1. Supplementary: an opaque roof on the avenue's ${k} kerb (stop B's shelter${k === 'east' ? ', mirrored: open front to the west' : ''}) at 15:00, standing: Tmrt at the kerb − under the roof, K`, kerb[k][15].open - kerb[k][15].standing, 20, 35, 'middel2021', 'K', { supp: true });
   for (const id of ['B', 'D', 'E']) {
     const S = by(id);
     const c = S.centre ?? S.seat;

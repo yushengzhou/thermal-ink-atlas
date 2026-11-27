@@ -8,7 +8,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { base9, compare9, bands9, bandVerdicts, waits9, walkers9, flags9, BS_NOTES } from '../../scripts/busstop.mjs';
+import { base9, compare9, bands9, bandVerdicts, waits9, walkers9, flags9, roofUnderside3, BS_NOTES } from '../../scripts/busstop.mjs';
 import { bands9Markdown } from '../../scripts/busstop-docs.mjs';
 import { BS, transmit, viewRect, pointSky, geometry, pointModel, daySchedule, meanWait, seatRiders, waitDose, apparentTemp, contactFlags, burnLimit, clockAt, isBus } from '../../engine/busstop.js';
 import { busAt } from '../../engine/bskit.js';
@@ -176,6 +176,9 @@ test('the headline: the west screen beats a bigger roof at stop C from 15 to 17 
     assert.ok(cmp.variants.built[h].tmrt < cmp.variants.noScreen[h].tmrt - 1, `${h}`);
   }
   for (const h of [15, 16, 17]) assert.ok(kerb.east[h].seated > kerb.west[h].seated + 15, `${h}`);
+  // band 1 depends on the kerb: the west-kerb opaque shelter is inside 20-35 K, the east-kerb one far outside
+  const cut = (k) => kerb[k][15].open - kerb[k][15].standing;
+  assert.ok(cut('west') >= 20 && cut('west') <= 35 && cut('east') < 5, `${cut('west')} ${cut('east')}`);
 });
 
 test('riders crossing the footbridges: pure function of t, on the deck at its height with its heat, on the stairs in between', () => {
@@ -197,6 +200,7 @@ const PINNED_OUTSIDE = {
   '1. Supplementary: stop E (glass box, centre) at 15:00, Tmrt at the kerb − under the roof, K': [3.997, 0.05],
   '5. Supplementary: stop C (n riders)': [0.897, 0.005],
   '7. Supplementary: open steel deck, daily peak (mean of the deck points), °C': [76.207, 0.05],
+  '1. Supplementary: an opaque roof on the avenue\'s east kerb (stop B\'s shelter, mirrored: open front to the west) at 15:00, standing: Tmrt at the kerb − under the roof, K': [0.022, 0.05],
 };
 const key = (label) => label.replace(/\(\d+ riders\)/g, '(n riders)').replace(/\bn \d+\b/g, 'n');
 
@@ -214,7 +218,14 @@ test('acceptance bands: values, pinned misses, verdicts, docs table in sync', ()
   assert.ok(Math.abs(b6.value - 31.65) < 0.05, `${b6.value}`);
   assert.ok(rows.filter((r) => r.supp).every((r) => /Supplementary/.test(r.label)));
   assert.ok(md.includes(bands9Markdown(rows)), 'run `node scripts/sources.mjs` to refresh the table');
-  for (const s of ['**Air fixed:**', '**Panels and glass:**', '**Sub-cell shade check:**', '**Conditions while waiting:**', '**Thin plates:**', '**Burn limits depend on the material and the contact time:**', '**Misses:**', '**Engine sun:**', 'Not tuned', 'set before the first model run', 'issue #24']) assert.ok(md.includes(s), `disclosure missing: ${s}`);
+  for (const s of ['**Air fixed:**', '**Panels and glass:**', '**Sub-cell shade check:**', '**Conditions while waiting:**', '**Thin plates:**', '**Burn limits depend on the material and the contact time:**', '**Misses:**', '**Engine sun:**', 'Not tuned', 'every parameter value', 'set before the first model run', '**Stop A\'s placement.**', 'after model runs', 'issue #24']) assert.ok(md.includes(s), `disclosure missing: ${s}`);
+});
+
+test('band 3 sensitivity (docs only): the roof underside at the model\'s own metal-roof temperature brings the shaded concrete inside 0-8 K', () => {
+  const r = roofUnderside3();
+  assert.ok(r.roof15 > 55 && r.wall15 < 45, JSON.stringify(r));
+  assert.ok(r.shipped < 0 && r.above >= 0 && r.above <= 8, JSON.stringify(r));
+  assert.ok(/Band 3, roof underside/.test(md) && /roof underside taken at the shared warm-wall temperature/.test(md));
 });
 
 test('every band of the brief is checked: 1-7, each with at least one counted row', () => {

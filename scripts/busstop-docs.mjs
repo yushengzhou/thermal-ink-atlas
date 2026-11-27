@@ -2,7 +2,7 @@
 // generated from the code and model runs (scripts/busstop.mjs).
 import { BASIS, MATERIALS } from '../engine/materials.js';
 import { BS, meanWait } from '../engine/busstop.js';
-import { base9, compare9, bands9, bandVerdicts, sensitivity9, walkers9, waits9, flags9, BS_NOTES } from './busstop.mjs';
+import { base9, compare9, bands9, bandVerdicts, sensitivity9, walkers9, waits9, flags9, roofUnderside3, BS_NOTES } from './busstop.mjs';
 
 const f1 = (x) => (Math.round(x * 10) / 10).toFixed(1);
 const f2 = (x) => x.toFixed(2);
@@ -28,7 +28,7 @@ export function bands9Markdown(rows) {
 |---|---|---|---|---|
 ${lines.join('\n')}
 
-${out} of ${counted.length} counted checks fall outside their band; ${rows.length - counted.length} supplementary rows are not counted. By the brief's bands: ${met.length} of ${met.length + missed.length} met (${met.join(', ')})${missed.length ? `; missed: ${missed.join(', ')}` : ''}. They are reported, not tuned away: every input is the brief's central value (or the shared value the brief names), set before the first model run.`;
+${out} of ${counted.length} counted checks fall outside their band; ${rows.length - counted.length} supplementary rows are not counted. By the brief's bands: ${met.length} of ${met.length + missed.length} met (${met.join(', ')})${missed.length ? `; missed: ${missed.join(', ')}` : ''}. They are reported, not tuned away: every parameter value is the brief's central value (or the shared value the brief names), set before the first model run. The layout is a design choice, and one placement was made after model runs (stop A, see Stops).`;
 }
 
 export function busstopMarkdown() {
@@ -52,6 +52,8 @@ export function busstopMarkdown() {
   const sw = [['roofMetal', 'opaque metal (τ 0)'], ['polyClear', 'clear polycarbonate (τ 0.80)'], ['polyOpal', 'opal polycarbonate (τ 0.47)'], [0.43, 'bronze polycarbonate (τ 0.43, not in the scene)']].map(([k, name]) => `| ${name} | ${f1(swap[k].centre)} | ${f1(swap[k].benefit)} | ${f2(swap[k].benefit / swap.roofMetal.benefit)} | ${f1(swap[k].ts)} |`);
   const flagRows = fl.rows.filter((r) => r.p.kind !== 'deck' || r.p.x === world.bus.pts.filter((q) => q.kind === 'deck' && q.bridge === r.p.bridge)[3].x).map((r) => `| ${r.p.kind === 'bench' ? `bench seat, stop ${r.p.stop}` : r.p.kind === 'rail' ? `handrail, ${r.p.bridge} footbridge` : `deck, mid-span, ${r.p.bridge} footbridge`} (${r.p.mat}) | ${f1(r.ts)} | ${r.limit} | ${r.min1 ? 'yes' : 'no'} | ${r.s1 ? 'yes' : 'no'} |`);
   const g15 = A.centre[15].ts - T.air(15);
+  const ru = roofUnderside3();
+  const kc = (k) => kerb[k][15].open - kerb[k][15].standing;
   return `## Block 9: bus stops and footbridges
 
 The ninth block (\`cities/busstop\`) is an invented 400 m stretch of a north–south arterial (Station Avenue: 40 m of asphalt
@@ -121,6 +123,14 @@ the side. The trees of stop D cut ${f1(by('D').open[15].tmrt - by('D').seat[15].
 ${MATERIALS.glassBox.tr.value} of the sun from above and the sides (Houston: enclosed shelters without overhead shade more than 3 °C WBGT hotter than
 the open sun [lanza2025], mostly from the trapped air, which is not modelled).
 
+**Stop A's placement.** The opaque stop was first placed on the avenue's east kerb (open front to the west, the brief's
+"east-kerb stop"). Model runs during development showed that there the low afternoon sun reaches most of a standing body
+under the roof at 15:00, so band 1 would have measured the kerb rather than the roof; the stop was then moved to Market
+Street (east–west, back panel to the south). This happened after model runs, while the scene was being built; no parameter
+value changed. Band 1 is therefore a property of an opaque roof **and** of where it stands: on the avenue the kerb decides
+(see Which kerb: the same opaque shelter cuts ${f1(kc('west'))} K at 15:00 on the west kerb, inside band 1, and ${f1(kc('east'))} K on the east kerb, far
+outside it; both are supplementary rows of the band table).
+
 ### West screen against a bigger roof
 
 Stop C's four bench places (seated heads), Tmrt (°C) and, in brackets, the share of heads with more than half the sun on
@@ -138,7 +148,9 @@ roof.
 ### Which kerb
 
 Stop B's shelter with an opaque roof, as built on the west kerb and mirrored onto the east kerb (open front to the west),
-Tmrt seated / standing under the roof (°C):
+Tmrt seated / standing under the roof (°C); the reference in the open stands 6 m north of the shelter (Tmrt at 15:00:
+${f1(kerb.west[15].open)} °C west, ${f1(kerb.east[15].open)} °C east), so the cut at 15:00 for a standing person is ${f1(kc('west'))} K on the west kerb and ${f1(kc('east'))} K on the
+east kerb:
 
 | Shelter | ${kerb.hours.map((h) => hm(h)).join(' | ')} |
 |---|${kerb.hours.map(() => '---').join('|')}|
@@ -237,7 +249,16 @@ ${sens.thin.map((x) => `| ${x.label} | ${f1(x.open15)} °C | ${f1(x.openPeak)} �
 ${sens.deck.map((x) => `| ${x.label} | ${signed(x.gap)} K |`).join('\n')}
 
 Band 2 (opal) closes with the bronze sheet (τ 0.43, its own datasheet value, not in the scene); no shelter height or depth in
-the brief's ranges brings the shaded concrete (band 3) up to the air. The deck's peak barely moves with C: a thin layer in
+the brief's ranges brings the shaded concrete (band 3) up to the air.
+
+**Band 3, roof underside (docs only, not shipped, not tuned).** The point under stop A's roof sees the roof (${f2(ru.share)} of its view)
+as the shared warm-wall term, ${f1(ru.wall15)} °C at 15:00 (air + 2 K + 6 K·K/900). A sunlit dark metal roof is far hotter underneath: this
+model's own dark metal roofs (the grid's \`metal\` roof cells, a thin layer, so the underside is about the top) reach ${f1(ru.roof15)} °C at 15:00.
+With the roof's share of the view at that temperature, minute by minute (the building walls keep the shared term), the
+concrete under the roof comes out ${signed(ru.above)} K from the air at 15:00 (${signed(ru.shipped)} K in the same run with the shared term), inside
+the brief's 0–8 K. So the shared wall term is a likely cause of the miss; the missing lateral conduction from the sunlit slab
+around the 2 m strip is another, not tested. It stays as shipped: the wall term is shared by every block, as for block 6's
+PV undersides. The deck's peak barely moves with C: a thin layer in
 full sun sits near its radiative balance whatever its heat capacity.
 
 ### Acceptance bands (block 9)
@@ -267,11 +288,12 @@ ${bands9Markdown(rows)}
 - **Burn limits depend on the material and the contact time:** the 1-min ISO limits are for healthy adult skin; the 1-s value
   for bare metal is unverified; flags are display only.
 - **Misses:** band 2 (opal ${f2(swap.polyOpal.benefit / swap.roofMetal.benefit)} of the opaque cut, against 0.50–0.65), band 3 (concrete under stop A's roof ${signed(g15)} K from the air at
-  15:00, against 0–8 K above it; likely the missing lateral conduction from the sunlit slab around a 2 m strip) and the
+  15:00, against 0–8 K above it; likely the roof underside taken at the shared warm-wall temperature, which the sensitivity run
+  above supports, and the missing lateral conduction from the sunlit slab around a 2 m strip, not tested) and the
   walkers' shade ratio (${f2(wk.ratio)}, against 2) are outside; each card that states the number says so. Reported, not tuned.
 - **Engine sun:** \`sun.js\` uses NOAA's fractional-year approximation (about 0.2° off at noon, issue #24); against the brief's
   table the shadow shifts at 14–17 h differ by at most ${f2(Math.max(...rows.filter((r) => /^4\. Roof/.test(r.label)).map((r) => Math.abs(r.value - (r.lo + 0.25)))))} m.
-- **Invented street:** layout, the stops' places, the rider rate, the bus clock and the bigger roof of the comparison are
+- **Invented street:** layout, the stops' places (stop A moved after model runs, see Stops), the rider rate, the bus clock and the bigger roof of the comparison are
   assumptions.
 `;
 }

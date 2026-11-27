@@ -178,9 +178,10 @@ const POINT_MATS = ['concrete', 'metal', 'asphalt', 'grass'];
  * (person's head above the surface, 0: a surface only)}]. Each point is a
  * cell of a one-row "world" with its own sun share (at the surface) and sky
  * view; the person's Tmrt takes the body's sun share and the sky view at
- * mid-body. Returns {pts, T (surface), TB (person), ts, tmrt, body, head, sky}.
+ * mid-body. mats, extra: other materials and runModel options (docs sensitivity
+ * runs only). Returns {pts, T (surface), TB (person), ts, tmrt, body, head, sky}.
  */
-export function pointModel(world, G, pts, slots0 = null, mats = null) {
+export function pointModel(world, G, pts, slots0 = null, mats = null, extra = null) {
   const NP = pts.length;
   const n = Math.max(1, Math.ceil(Math.sqrt(NP)));
   const N = n * n;
@@ -223,7 +224,7 @@ export function pointModel(world, G, pts, slots0 = null, mats = null) {
     buildings: [],
   };
   const slots = { suns, fields: ground };
-  const T = runModel(pw, { slots, cells: [...Array(NP).keys()], ...(mats ? { materials: mats } : {}) });
+  const T = runModel(pw, { slots, cells: [...Array(NP).keys()], ...(mats ? { materials: mats } : {}), ...extra });
   const TB = new Thermal({ ...pw, svf: F32((i) => (skyB[i] ? skyB[i].svf : sky[i].svf)) }, T.store, T.slots, T.info);
   const lerpSlot = (arr, i, h) => {
     const x = ((((h % 24) + 24) % 24) * SLOTS) / 24;
@@ -565,9 +566,12 @@ export function kerbCompare(world, base, hours = [12, 14, 15, 16, 17]) {
   for (const [k, m] of [['west', false], ['east', true]]) {
     const V = { stop: 'B', roofs: [{ id: 'roofB', ...r, x0: m ? mx(r.x1) : r.x0, x1: m ? mx(r.x0) : r.x1, tr }], panels: B.panels.map((P) => panel(P, m)) };
     const pts = B.slots.filter(([x]) => x >= r.x0 && x <= r.x1).map(([x, y, seated]) => ({ x: m ? mx(x) : x, y, z: 0, mat: 'concrete', head: seated ? BS.headSeat.value : BS.headStand.value, seated: !!seated }));
+    const o = pts.length; // an open reference, standing, 6 m north of the shelter on its line (clear of its shadow)
+    const xo = (r.x0 + r.x1) / 2;
+    pts.push({ x: m ? mx(xo) : xo, y: r.y0 - 6, z: 0, mat: 'concrete', head: BS.headStand.value, seated: null });
     const P = pointModel(world, geometry(world, V), pts, { suns: base.slots.suns });
     const avg = (h, s) => mean(pts.map((p, i) => [p, i]).filter(([p]) => p.seated === s).map(([, i]) => P.tmrt(i, h)));
-    out[k] = Object.fromEntries(hours.map((h) => [h, { seated: avg(h, true), standing: avg(h, false), lit: mean(pts.map((_, i) => (P.head(i, h) >= 0.5 ? 1 : 0))) }]));
+    out[k] = Object.fromEntries(hours.map((h) => [h, { seated: avg(h, true), standing: avg(h, false), open: P.tmrt(o, h), lit: mean(pts.slice(0, o).map((_, i) => (P.head(i, h) >= 0.5 ? 1 : 0))) }]));
   }
   return { hours, ...out };
 }

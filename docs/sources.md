@@ -2076,6 +2076,14 @@ the side. The trees of stop D cut 25.5 K on the bench. The glass box (stop E) cu
 0.82 of the sun from above and the sides (Houston: enclosed shelters without overhead shade more than 3 °C WBGT hotter than
 the open sun [lanza2025], mostly from the trapped air, which is not modelled).
 
+**Stop A's placement.** The opaque stop was first placed on the avenue's east kerb (open front to the west, the brief's
+"east-kerb stop"). Model runs during development showed that there the low afternoon sun reaches most of a standing body
+under the roof at 15:00, so band 1 would have measured the kerb rather than the roof; the stop was then moved to Market
+Street (east–west, back panel to the south). This happened after model runs, while the scene was being built; no parameter
+value changed. Band 1 is therefore a property of an opaque roof **and** of where it stands: on the avenue the kerb decides
+(see Which kerb: the same opaque shelter cuts 23.5 K at 15:00 on the west kerb, inside band 1, and 0.0 K on the east kerb, far
+outside it; both are supplementary rows of the band table).
+
 ### West screen against a bigger roof
 
 Stop C's four bench places (seated heads), Tmrt (°C) and, in brackets, the share of heads with more than half the sun on
@@ -2095,7 +2103,9 @@ roof.
 ### Which kerb
 
 Stop B's shelter with an opaque roof, as built on the west kerb and mirrored onto the east kerb (open front to the west),
-Tmrt seated / standing under the roof (°C):
+Tmrt seated / standing under the roof (°C); the reference in the open stands 6 m north of the shelter (Tmrt at 15:00:
+69.4 °C west, 68.8 °C east), so the cut at 15:00 for a standing person is 23.5 K on the west kerb and 0.0 K on the
+east kerb:
 
 | Shelter | 12:00 | 14:00 | 15:00 | 16:00 | 17:00 |
 |---|---|---|---|---|---|
@@ -2214,7 +2224,16 @@ One value at a time, within the brief's ranges:
 | deck 6.5 m | +31.7 K |
 
 Band 2 (opal) closes with the bronze sheet (τ 0.43, its own datasheet value, not in the scene); no shelter height or depth in
-the brief's ranges brings the shaded concrete (band 3) up to the air. The deck's peak barely moves with C: a thin layer in
+the brief's ranges brings the shaded concrete (band 3) up to the air.
+
+**Band 3, roof underside (docs only, not shipped, not tuned).** The point under stop A's roof sees the roof (0.30 of its view)
+as the shared warm-wall term, 42.0 °C at 15:00 (air + 2 K + 6 K·K/900). A sunlit dark metal roof is far hotter underneath: this
+model's own dark metal roofs (the grid's `metal` roof cells, a thin layer, so the underside is about the top) reach 67.1 °C at 15:00.
+With the roof's share of the view at that temperature, minute by minute (the building walls keep the shared term), the
+concrete under the roof comes out +1.3 K from the air at 15:00 (−1.4 K in the same run with the shared term), inside
+the brief's 0–8 K. So the shared wall term is a likely cause of the miss; the missing lateral conduction from the sunlit slab
+around the 2 m strip is another, not tested. It stays as shipped: the wall term is shared by every block, as for block 6's
+PV undersides. The deck's peak barely moves with C: a thin layer in
 full sun sits near its radiative balance whatever its heat capacity.
 
 ### Acceptance bands (block 9)
@@ -2228,6 +2247,8 @@ form) against the brief's NOAA table: the gap is the engine approximation (about
 |---|---|---|---|---|
 | 1. Opaque shelter (stop A) at 15:00, standing: Tmrt at the kerb − under the roof (centre), K | 33.91 K | 20 to 35 | middel2021 | inside |
 | 1. The same: Tmrt under the roof − air, K | 1.25 K | 0 to 15 | brief9 | inside |
+| 1. Supplementary: an opaque roof on the avenue's west kerb (stop B's shelter) at 15:00, standing: Tmrt at the kerb − under the roof, K | 23.52 K | 20 to 35 | middel2021 | inside (supplementary, not counted) |
+| 1. Supplementary: an opaque roof on the avenue's east kerb (stop B's shelter, mirrored: open front to the west) at 15:00, standing: Tmrt at the kerb − under the roof, K | 0.02 K | 20 to 35 | middel2021 | outside (supplementary, not counted) |
 | 1. Supplementary: stop B (clear roof, centre) at 15:00, Tmrt at the kerb − under the roof, K | 21.16 K | 20 to 35 | middel2021 | inside (supplementary, not counted) |
 | 1. Supplementary: stop D (trees, on the bench) at 15:00, Tmrt at the kerb − on the bench, K | 25.47 K | 20 to 35 | middel2021 | inside (supplementary, not counted) |
 | 1. Supplementary: stop E (glass box, centre) at 15:00, Tmrt at the kerb − under the roof, K | 4.00 K | 20 to 35 | middel2021 | outside (supplementary, not counted) |
@@ -2258,7 +2279,7 @@ form) against the brief's NOAA table: the gap is the engine approximation (about
 | Riders arriving 15:00–16:00 (n 125) waiting with their head in shade | 0.736 | ≥ 0.5 | melnikov | inside |
 | Walkers at 15:00: density in shade over density in sun | 1.162 | ≥ 2 | melnikov | **outside** |
 
-3 of 16 counted checks fall outside their band; 15 supplementary rows are not counted. By the brief's bands: 5 of 7 met (1, 4, 5, 6, 7); missed: 2, 3. They are reported, not tuned away: every input is the brief's central value (or the shared value the brief names), set before the first model run.
+3 of 16 counted checks fall outside their band; 17 supplementary rows are not counted. By the brief's bands: 5 of 7 met (1, 4, 5, 6, 7); missed: 2, 3. They are reported, not tuned away: every parameter value is the brief's central value (or the shared value the brief names), set before the first model run. The layout is a design choice, and one placement was made after model runs (stop A, see Stops).
 
 ### Disclosures (block 9)
 
@@ -2278,9 +2299,10 @@ form) against the brief's NOAA table: the gap is the engine approximation (about
 - **Burn limits depend on the material and the contact time:** the 1-min ISO limits are for healthy adult skin; the 1-s value
   for bare metal is unverified; flags are display only.
 - **Misses:** band 2 (opal 0.47 of the opaque cut, against 0.50–0.65), band 3 (concrete under stop A's roof −1.4 K from the air at
-  15:00, against 0–8 K above it; likely the missing lateral conduction from the sunlit slab around a 2 m strip) and the
+  15:00, against 0–8 K above it; likely the roof underside taken at the shared warm-wall temperature, which the sensitivity run
+  above supports, and the missing lateral conduction from the sunlit slab around a 2 m strip, not tested) and the
   walkers' shade ratio (1.16, against 2) are outside; each card that states the number says so. Reported, not tuned.
 - **Engine sun:** `sun.js` uses NOAA's fractional-year approximation (about 0.2° off at noon, issue #24); against the brief's
   table the shadow shifts at 14–17 h differ by at most 0.01 m.
-- **Invented street:** layout, the stops' places, the rider rate, the bus clock and the bigger roof of the comparison are
+- **Invented street:** layout, the stops' places (stop A moved after model runs, see Stops), the rider rate, the bus clock and the bigger roof of the comparison are
   assumptions.
