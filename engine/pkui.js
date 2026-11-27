@@ -76,8 +76,8 @@ export function pvCard(d) {
       <tr><td>open bays, with the cars</td><td>${fmt(p.openBays.t15)} °C</td><td>${fmt(p.openBays.max)} / ${fmt(p.openBays.min)}</td><td>${fmt(p.openBays.range)} K</td></tr>
     </table>
     <p class="note">The panels take the sun off the bays all day, so the asphalt beneath stays near the air temperature; at night they hide the cold sky, so it cools a little less than the open lot. Cars under the canopy are out of the sun too.</p>
-    <p class="lit">Phoenix, 17 June 2004 (air up to 41 °C): exposed asphalt 63.5 / 28.5 °C (max / min), under a PV canopy 37.0 / 27.7 °C, the daily range 70% smaller (Golden et al. 2007; the paper has internal inconsistencies).</p>
-    <p class="caveat">Here the range shrinks by ${red(p.empty)}, more than Golden's 70% and outside the spec's −60 to −75% band (see docs/sources.md): the panel undersides are taken as the warm-wall term (air + 2 K, more by day), while real panels run hotter than that and warm the ground beneath by day. Not tuned. The panels' own heat, their electricity and the air under them are not modelled.</p>
+    <p class="lit">Phoenix, 17 June 2004 (air up to 41 °C): exposed asphalt 63.5 / 28.5 °C (max / min), under a PV canopy 37.0 / 27.7 °C, the daily range about 70% smaller (Golden et al. 2007; the paper has internal inconsistencies).</p>
+    <p class="caveat">Here the range shrinks by ${red(p.empty)}, more than in Phoenix and outside the spec's −60 to −75% band (see docs/sources.md): the open asphalt swings ${fmt(p.open.range)} K here against 35.0 K there, the bay under the canopy ${fmt(p.empty.range)} K against 9.3 K, on a cooler day. Not tuned. The panel undersides count as warm walls (air + 2 K, more by day); the panels' own heat, their electricity and the air under them are not modelled.</p>
     ${srcLine(['golden2007', 'brief6'])}`;
 }
 

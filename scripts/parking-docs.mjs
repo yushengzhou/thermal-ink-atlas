@@ -113,8 +113,8 @@ The day, Ts °C / G W m⁻² (class means):
 |---|---|---|---|---|---|---|---|
 ${curve.join('\n')}
 
-- Thick asphalt and concrete take in up to about ${r0(st.peakG.g)}–${r0(t.yard.g12)} W m⁻² at midday and give back ${r0(-t.openAsphalt.g23)}–${r0(-t.yard.g23)} W m⁻² at
-  23:00; the soil, scrub and ballast about ${r0(-t.scrub.g23)}–${r0(-t.ballast.g23)}; the lawn ${r0(-t.lawn.g23)}; the shed roofs ${r0(Math.abs(t.shed.g23))} (nothing to give).
+- Open asphalt takes in up to ${r0(st.peakG.g)} W m⁻² (at ${hhmm(st.peakG.h)}), the concrete yard ${r0(t.yard.g12)} at noon; at 23:00 they give back ${r0(-t.openAsphalt.g23)} and
+  ${r0(-t.yard.g23)} W m⁻²; the soil, scrub and ballast ${r0(-t.scrub.g23)}–${r0(-t.soil.g23)}; the lawn ${r0(-t.lawn.g23)}; the shed roofs ${r0(Math.abs(t.shed.g23))} (nothing to give).
 - Sensible heat to the air at night (h_c(Ts − Ta), h_c ${st.hc.toFixed(1)} W m⁻² K⁻¹), asphalt minus lawn:
   ${st.gap.map((g) => `${hhmm(g.h)} ${r0(g.gap)}`).join(', ')} W m⁻²; grass parking vs asphalt measured about 50 W m⁻² at night and
   100–150 by day [takebayashi2009]. **No measured night-time W m⁻² for a car park was found** (the brief): the night
@@ -138,11 +138,13 @@ block's model. And, as shipped, the bay rows with their cars:
 | open bay rows, with cars | ${f1(P.openBays.t15)} | ${f1(P.openBays.max)} | ${f1(P.openBays.min)} | ${f1(P.openBays.range)} | ${signed((P.openBays.range / P.open.range - 1) * 100, 0)}% |
 
 Golden et al., Phoenix, 17 June 2004 (air max 41.0 °C, wind 0.86 m/s): exposed asphalt 63.5 / 28.5 °C (max / min), under
-the canopy 37.0 / 27.7 °C, range −70% (the paper has internal inconsistencies). Here the empty bay's range shrinks by
-${r0(Math.abs((P.empty.range / P.open.range - 1) * 100))}%, **outside** the spec's −60 to −75% band. The panel undersides are the warm-wall term (air + 2 K + 6 K·K↓/900):
-real panels run hotter than that by day and would warm the ground beneath more, so the model's daytime maximum under
-the canopy is probably too low (our reading, not tested). Not tuned: SVF 0.11 is the measured value and the wall term is
-shared by every block. The panels' own temperature, their electricity and the air beneath are not modelled.
+the canopy 37.0 / 27.7 °C: the brief quotes the range as −70% (−73% from these max / min; the paper has internal
+inconsistencies). Here the empty bay's range shrinks by ${r0(Math.abs((P.empty.range / P.open.range - 1) * 100))}%, **outside** the spec's −60 to −75% band. Both ranges
+differ from Phoenix: the open asphalt swings ${f1(P.open.range)} K here vs 35.0 K there, the bay under the canopy ${f1(P.empty.range)} K vs 9.3 K
+(a different day: air 25–35 °C here, up to 41 °C there). Which model term causes the miss was not established. The
+panel undersides are the shared warm-wall term (air + 2 K + 6 K·K↓/900); measured under-canopy maxima below the air
+(37.0 °C at 41.0 °C air) suggest this is not too cold by day. Not tuned: SVF 0.11 is the measured value and the wall term
+is shared by every block. The panels' own temperature, their electricity and the air beneath are not modelled.
 
 ### Lot trees, cars and the hot-car card
 
