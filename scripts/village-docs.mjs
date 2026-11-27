@@ -29,7 +29,7 @@ export function bands10Markdown(rows) {
 |---|---|---|---|---|
 ${lines.join('\n')}
 
-${out} of ${counted.length} counted checks fall outside their band; ${rows.length - counted.length} supplementary rows are not counted. By the brief's bands: ${met.length} of ${met.length + missed.length} met (${met.join(', ')})${missed.length ? `; missed: ${missed.join(', ')}` : ''}. They are reported, not tuned away: every parameter value is the brief's central value (or the shared value the brief names), and the layout and every value were committed before the first model run of these bands; nothing in the scene changed after it.`;
+${out} of ${counted.length} counted checks fall outside their band; ${rows.length - counted.length} supplementary rows are not counted. By the brief's bands: ${met.length} of ${met.length + missed.length} met (${met.join(', ')})${missed.length ? `; missed: ${missed.join(', ')}` : ''}. They are reported, not tuned away: every parameter value is the brief's central value (or the shared value the brief names), and the layout and every value were committed before the first model run of these bands; nothing in the scene's geometry or inputs changed after it (only the margin notes' label offsets, see Disclosures).`;
 }
 
 export function villageMarkdown() {
@@ -261,7 +261,8 @@ Misses:
 
 - **Invented place:** no real village, addresses or people; the layout (plots, storeys, lane widths, roofs, which roofs are painted)
   is a design choice inside the brief's ranges, and it was committed before the first model run of the bands; nothing in the
-  scene changed after it.
+  scene's geometry or inputs changed after it. Afterwards only the margin notes' label offsets (\`notes[].dx, dy\`) were moved, so
+  the labels stay on screen at the opening view (drawing only).
 - **Air fixed:** no warm air held in the lanes at night, no wind in the lanes (Ren et al. 2025, cited by the brief for the lanes'
   wind shadows, is not used), no heat from people, cooking or appliances.
 - **Lanes:** an endless straight-walled canyon per lane cell (no balconies, air-conditioner boxes, overhangs or washing); a crossing
@@ -273,6 +274,8 @@ Misses:
   floor; no measured albedo for rusty iron, asbestos cement or tarpaulin (the brief's assumptions).
 - **Indoor values are proxies:** the radiant proxy treats the ceiling as black at the roof's temperature; the air figure is
   illustrative, calibrated to the brief's band (so that band is by construction) and capped at ±5 K; the room under a concrete slab is not computed.
+- **Thermal palette:** it tops out at 70 °C, so rusty iron at 15:00 (${f1(st.edge.rustTin.ts15)} °C) and every sheet's daily peak (up to
+  ${f1(Math.max(...Object.values(st.edge).filter(Boolean).map((r) => r.peak)))} °C) show in the top colour; the heat cards give the numbers.
 - **Engine sun** (\`sun.js\`, issue #24): against suncalc at this site, the altitude differs by ${sc.map((x) => `${signed(x.dAlt, 2)}° at ${x.h}:00`).join(' and ')} (azimuth ${sc.map((x) => `${signed(x.dAz, 2)}°`).join(', ')}); the village lanes' sunlit floor is ${sc.map((x) => `${Math.round(x.lit * 1000) / 10}% against ${Math.round(x.litRef * 1000) / 10}%`).join(' and ')} with the reference sun: too small to move band 5.
 - **Language:** "urban village (城中村)", "informal settlement", "residents"; vulnerability is described as exposure plus a lack of
   resources, with cited and hedged figures only; asbestos cement is named a health hazard in one line, without advice. The block's

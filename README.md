@@ -47,6 +47,16 @@ Hand-inked isometric city blocks that show urban heat through one heat-wave day:
   head, `U` flags benches, handrails and decks above their contact-burn
   limit. The open steel deck is about 30 K hotter in Tmrt than the
   covered one.
+- Block 10, `village`: an urban village (城中村) of six- to eight-storey
+  "handshake buildings" (握手楼) with lanes 1.5–3 m wide, an old village
+  centre, and a low-rise edge of rooms under iron, asbestos-cement and
+  tarpaulin roofs. The lanes are narrower than the model grid, so their sky
+  view (about 0.05) and sun come from each lane's own width and walls; a
+  person in a lane stays about 5 K warmer in Tmrt than one on the open square
+  at 22:00. Bare rusty iron reaches about 71 °C at 15:00; `R` paints the
+  residents' white roofs (about 21 K cooler), `O` shows a proxy of the room
+  under each sheet roof (not a simulation). Cards on who is most at risk
+  quote the studies, not the model.
 
 Live: https://yushengzhou.github.io/thermal-ink-atlas/
 
@@ -61,7 +71,8 @@ modelled with a simple surface energy-balance model, not measured.
   `cities/sponge-retrofit/index.html`, `cities/glass-cbd/index.html`,
   `cities/waterfront/index.html`, `cities/hutong/index.html`,
   `cities/parking/index.html`, `cities/estate/index.html`,
-  `cities/campus/index.html` or `cities/busstop/index.html`.
+  `cities/campus/index.html`, `cities/busstop/index.html` or
+  `cities/village/index.html`.
   Each is one offline file.
 - Or serve the folder and open <http://localhost:8000/>:
 
@@ -87,6 +98,7 @@ modelled with a simple surface energy-balance model, not measured.
 | `S` / `C` (block 7) | 大寒 (20 January) shadows and sill tallies / condenser plumes on or off |
 | `I` / `U` (block 8) | water the pitch at 14:00 / contact-burn hatching on or off |
 | `K` / `U` (block 9) | waiting places (head in sun or shade) / contact-burn flags on or off |
+| `R` / `O` (block 10) | the residents' white roofs / the room under the roof (proxy) on or off |
 
 ## Build and test
 
@@ -143,6 +155,13 @@ Key sources per block:
   Highways Department BS/GN/047 (shelter guidance); a polycarbonate
   datasheet (transmission); ISO 13732-1 via CENELEC Guide 29. Most were read
   through the research brief and are flagged unverified.
+- Block 10, `village`: Guo et al. (Pingshan traverses, Shenzhen); Wu et al.
+  2015/2017 and Yi et al. 2022 (Shenzhen urban villages); Deng et al. 2023
+  (Guangzhou old blocks); Scott et al. 2017 (Nairobi); Tasgaonkar et al. 2022,
+  Vellingiri et al. 2020 and Wilby et al. 2021 (rooms under metal roofs, cool
+  roofs); Nutkiewicz et al. 2022; Ma et al. 2015 and Hess et al. 2018 (heat
+  and mortality). Most were read through the research brief and are flagged
+  unverified.
 
 ## Licence
 

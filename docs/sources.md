@@ -2605,7 +2605,7 @@ At an air of 35 °C at 15:00 (the brief's bands for Ta 35, clear), "noon" 12:00 
 | Walkers at 15:00: density in shade over density in sun | 4.890 | ≥ 2 | melnikov | inside |
 | People dwelling at 15:00 (n 14) whose place is in shade | 1.000 | ≥ 0.5 | melnikov | inside |
 
-2 of 13 counted checks fall outside their band; 12 supplementary rows are not counted. By the brief's bands: 6 of 8 met (1, 2, 4, 6, 7, 8); missed: 3, 5. They are reported, not tuned away: every parameter value is the brief's central value (or the shared value the brief names), and the layout and every value were committed before the first model run of these bands; nothing in the scene changed after it.
+2 of 13 counted checks fall outside their band; 12 supplementary rows are not counted. By the brief's bands: 6 of 8 met (1, 2, 4, 6, 7, 8); missed: 3, 5. They are reported, not tuned away: every parameter value is the brief's central value (or the shared value the brief names), and the layout and every value were committed before the first model run of these bands; nothing in the scene's geometry or inputs changed after it (only the margin notes' label offsets, see Disclosures).
 
 Misses:
 - **Band 3** (asbestos cement 67.8 °C at 15:00 against 50–62 °C): the thin layer here has no loss through its underside to the room
@@ -2618,7 +2618,8 @@ Misses:
 
 - **Invented place:** no real village, addresses or people; the layout (plots, storeys, lane widths, roofs, which roofs are painted)
   is a design choice inside the brief's ranges, and it was committed before the first model run of the bands; nothing in the
-  scene changed after it.
+  scene's geometry or inputs changed after it. Afterwards only the margin notes' label offsets (`notes[].dx, dy`) were moved, so
+  the labels stay on screen at the opening view (drawing only).
 - **Air fixed:** no warm air held in the lanes at night, no wind in the lanes (Ren et al. 2025, cited by the brief for the lanes'
   wind shadows, is not used), no heat from people, cooking or appliances.
 - **Lanes:** an endless straight-walled canyon per lane cell (no balconies, air-conditioner boxes, overhangs or washing); a crossing
@@ -2630,6 +2631,8 @@ Misses:
   floor; no measured albedo for rusty iron, asbestos cement or tarpaulin (the brief's assumptions).
 - **Indoor values are proxies:** the radiant proxy treats the ceiling as black at the roof's temperature; the air figure is
   illustrative, calibrated to the brief's band (so that band is by construction) and capped at ±5 K; the room under a concrete slab is not computed.
+- **Thermal palette:** it tops out at 70 °C, so rusty iron at 15:00 (71.2 °C) and every sheet's daily peak (up to
+  79.9 °C) show in the top colour; the heat cards give the numbers.
 - **Engine sun** (`sun.js`, issue #24): against suncalc at this site, the altitude differs by +0.12° at 12:00 and −0.06° at 15:00 (azimuth −0.83°, +0.25°); the village lanes' sunlit floor is 36.9% against 35.7% and 20.9% against 22.5% with the reference sun: too small to move band 5.
 - **Language:** "urban village (城中村)", "informal settlement", "residents"; vulnerability is described as exposure plus a lack of
   resources, with cited and hedged figures only; asbestos cement is named a health hazard in one line, without advice. The block's

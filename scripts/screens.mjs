@@ -19,6 +19,7 @@ const PK = 'parking';
 const ES = 'estate';
 const CPS = 'campus';
 const BSS = 'busstop';
+const UV = 'village';
 const shots = [
   [AP, 'docs/media/day-1500.jpg', 'hour=15&f=400', { width: 1280, height: 800 }],
   [AP, 'docs/media/thermal-1500.jpg', 'thermal&hour=15&f=400', { width: 1280, height: 800 }],
@@ -165,6 +166,22 @@ const shots = [
     },
   ],
   [BSS, 'thumbs/busstop.jpg', 'hour=15&f=1650&notes=0&ui=0&cam=3,250,200', { width: 640, height: 400 }],
+  // block 10: day and thermal at 15:00, the lanes at 22:00 (thermal), the residents' white roofs and the room under the roof, the lanes card
+  [UV, 'docs/media/uv-day-1500.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
+  [UV, 'docs/media/uv-thermal-1500.jpg', 'thermal&hour=15&f=640', { width: 1280, height: 800 }],
+  [UV, 'docs/media/uv-thermal-2200.jpg', 'thermal&hour=22&f=640&notes=0&cam=4,150,200', { width: 1280, height: 800 }],
+  [UV, 'docs/media/uv-under-1500.jpg', 'hour=15&f=640&under=1&notes=0&cam=4,130,340', { width: 1280, height: 800 }],
+  [UV, 'docs/media/uv-white-1500.jpg', 'thermal&hour=15&f=640&coolroof=1&notes=0&cam=4,130,340', { width: 1280, height: 800 }],
+  [
+    UV,
+    'docs/media/uv-lanes-card.jpg',
+    'hour=15&f=640&notes=0&cam=4,150,200',
+    { width: 1280, height: 800 },
+    async (page) => {
+      await page.click('#village [data-card="lanes"]');
+    },
+  ],
+  [UV, 'thumbs/village.jpg', 'hour=15&f=640&notes=0&ui=0&cam=2.5,200,260', { width: 640, height: 400 }],
 ];
 const browser = await chromium.launch();
 for (const [city, out, q, viewport, act] of shots) {
