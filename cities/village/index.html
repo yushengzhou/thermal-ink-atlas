@@ -5664,7 +5664,7 @@ function laneGroups(world) {
   return {
     village: L.filter((c) => c.zone === 'village' && c.kind === 'lane' && c.W <= 3),
     market: L.filter((c) => c.lane === 'market' && c.kind === 'lane'),
-    cross: L.filter((c) => c.kind === 'cross'),
+    cross: L.filter((c) => c.kind === 'cross' && c.zone === 'village'),
     edge: L.filter((c) => c.zone === 'edge' && c.kind === 'lane'),
   };
 }
@@ -5852,7 +5852,7 @@ function lanesCard(d) {
     </table>
     <p class="note">A lane two metres wide between walls twenty metres high sees only a few per cent of the sky. By day the walls keep most of the sun off the floor; after sunset the same walls keep the floor and the people in it from losing their heat to the sky, so the lanes stay warm into the night while the open square cools.</p>
     <p class="lit">An urban village in Pingshan, Shenzhen, was warmest against its surroundings between 20:00 and 24:00 (mean 1.71 K over 18–24 h, at most 3.95 K), and its thermal-humidity index was worse than a green reference, especially at night (unverified). In old blocks of Guangzhou the pedestrian Tmrt peaked at 43.7 °C with the air at 41.3 °C (Deng et al. 2023). No measured Tmrt for lanes 1–3 m wide was found.</p>
-    <p class="caveat">The lanes are narrower than the 5 m grid: their sky view and sun come from an endless canyon of the lane's width and its two walls (the grid's own value is shown for comparison); a crossing of two lanes is taken as the east–west lane. Walls are straight: no balconies, air-conditioner boxes, overhangs or washing over the lane, which would shade it more by day. Every wall is the engine's shared warm wall (air + 2 K, more in the sun), so a lane floor that sees almost only walls cannot be cooler than about that. The air is fixed: the heat held in the lanes' air at night, and the lack of wind, are not modelled.</p>
+    <p class="caveat">The lanes are narrower than the 5 m grid: their sky view and sun come from an endless canyon of the lane's width and its two walls (the grid's own value is shown for comparison); a crossing of two lanes is taken as the east–west lane. Walls are straight: no balconies, air-conditioner boxes, overhangs or washing over the lane, so at noon, with the sun ${fmt(d.noonAlt)}° high, ${pct(L.village.sun[nn])} of a lane floor is in the sun. Every wall is the engine's shared warm wall (air + 2 K, more in the sun), so a lane that sees almost only walls cannot be much cooler than that.${noonMiss ? ` Both are tested in docs/sources.md (Block 10, docs-only runs): without the direct sun in the lanes and with their walls at air + 2 K the lanes come inside the brief's band; each alone does not.` : ''} The air is fixed: the heat held in the lanes' air at night, and the lack of wind, are not modelled.</p>
     ${srcLine(['pingshan', 'deng2023', 'brief10'])}`;
 }
 
@@ -5876,11 +5876,11 @@ function roofsCard(d) {
       <tr><td></td><td>${gl('albedo', 'α')} / ${gl('emissivity', 'ε')}</td><td>C kJ m⁻² K⁻¹</td><td>15:00 / day's peak / 03:00</td></tr>
       ${rows}
       <tr><td>flat concrete roofs of the village houses</td><td>${MATERIALS.slabRoof.alpha.value} / ${MATERIALS.slabRoof.eps.value}</td><td>μ ${MATERIALS.slabRoof.mu.value}</td><td>${fmt(d.st.slab.ts15)} / — / ${fmt(d.st.slab.ts03)} °C</td></tr>
-      <tr><td colspan="4" class="sub">Brief at an air of 35 °C: rusty iron 60–75 °C at 15:00${rustMiss ? MISS : ''}; asbestos cement 50–62 °C${asbMiss ? MISS : ''}.</td></tr>
+      <tr><td colspan="4" class="sub">Brief at an air of 35 °C: rusty iron 60–75 °C at 15:00${rustMiss ? MISS : ''}; asbestos cement 50–62 °C${asbMiss ? `${MISS}: likely because the sheet here loses no heat through its underside to the room (a docs-only run with that loss, docs/sources.md, puts it inside the band, and rusty iron just below its band)` : ''}.</td></tr>
     </table>
     <p class="note">A sheet of iron holds almost no heat, so it follows the sun: rust turns it dark, it bakes in the afternoon and cools fast after sunset. Bright galvanised sheet reflects more of the sun but gives off little heat, so it is not much cooler. Asbestos-cement sheet is a recognised health hazard.</p>
     <p class="lit">Measured rooms: in Delhi in April, tin-roofed rooms were 33.4 °C against 32.8 °C outdoors, in Yavatmal 3–4 K above outdoors in May and June, and warmer than outdoors at night (Tasgaonkar et al. 2022); in Ahmedabad, tin-roofed homes 34.6–35.8 °C, asbestos 32.5–36.8 °C, concrete 31.6–33.8 °C (Vellingiri et al. 2020); in Ghana, metal-roofed rooms 4.5 K warmer by day than mud or thatch and 1.5 K cooler at night (Wilby et al. 2021). In Bangkok at an air of 37 °C a roof was 68.1 °C and its ceiling 49.2 °C (unverified).</p>
-    <p class="caveat">No measured albedo was found for rusty iron, asbestos cement or tarpaulin: the brief's assumptions. The model's sheet loses heat from its top only: nothing goes through it into the room below, which likely makes the sheets in this model run hotter than real roofs over rooms. A real tarpaulin stores about 0.4 kJ m⁻² K⁻¹; here it is held at 2 kJ, the smallest the 60 s model step can take without going unstable.</p>
+    <p class="caveat">No measured albedo was found for rusty iron, asbestos cement or tarpaulin: the brief's assumptions. The model's sheet loses heat from its top only: nothing goes through it into the room below, which likely makes every sheet here run hotter than a real roof over a room. A real tarpaulin stores about 0.4 kJ m⁻² K⁻¹; here it is held at 2 kJ, the smallest the 60 s model step can take without going unstable.</p>
     ${srcLine(['tasgaonkar2022', 'vellingiri2020', 'wilby2021', 'khlongToey', 'emissTables', 'energyStarRoof', 'brief10'])}`;
 }
 
@@ -6102,7 +6102,7 @@ function vgApp(env) {
   }
   function html(id) {
     const s = stats();
-    if (id === 'lanes') return lanesCard({ st: s });
+    if (id === 'lanes') return lanesCard({ st: s, noonAlt: base.sun(VG.noon.value).alt });
     if (id === 'roofs') return roofsCard({ st: s });
     if (id === 'under') return underCard({ st: s });
     if (id === 'white') return whiteCard({ st: s, cool: cool(), on: st.cool });

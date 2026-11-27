@@ -280,7 +280,7 @@ export function laneGroups(world) {
   return {
     village: L.filter((c) => c.zone === 'village' && c.kind === 'lane' && c.W <= 3),
     market: L.filter((c) => c.lane === 'market' && c.kind === 'lane'),
-    cross: L.filter((c) => c.kind === 'cross'),
+    cross: L.filter((c) => c.kind === 'cross' && c.zone === 'village'),
     edge: L.filter((c) => c.zone === 'edge' && c.kind === 'lane'),
   };
 }
