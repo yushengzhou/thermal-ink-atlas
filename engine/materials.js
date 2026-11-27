@@ -140,6 +140,26 @@ export const SOURCES = {
   cpsc: 'US Consumer Product Safety Commission, via the block-9 brief: sunlit steel decks can burn bare skin in seconds (unverified)',
   deckSteel: 'Steel bridge deck surfacing, Materials 18(13) 3109, doi 10.3390/ma18133109 (via the block-9 brief): steel deck surfacing 60-70 C in summer sun (unverified)',
   lasVegas: 'Las Vegas surface measurements, via the block-9 brief: sunlit metal up to 62 C (unverified)',
+  brief10: 'Research brief docs/research/village-brief.md (block 10; values compiled from the sources below, items marked unverified there are flagged here; the roof albedos for rusty iron, asbestos cement and tarpaulin are assumptions of the brief, no measured value was found; the indoor proxies and their coefficients are assumptions of the brief)',
+  pingshan: 'Guo, Zou, Li & Qiu, mobile traverses in an urban village in Pingshan, Shenzhen, 2011-12 (journal not confirmed; via the block-10 brief): heat island largest 20:00-24:00, mean 1.71 K over 18-24 h, peak 3.95 K; thermal-humidity index worse than a green reference, especially at night (unverified)',
+  wu2015: 'Wu et al. (2015 / 2017) Journal of Harbin Institute of Technology, satellite surface heat island in Shenzhen by housing type (via the block-10 brief): high-density urban village 3.53 K, multi-storey 2.62 K, high-rise 1.60 K (unverified)',
+  yi2022: 'Yi et al. (2022) Science of the Total Environment 853, 158283, doi 10.1016/j.scitotenv.2022.158283, Thermal comfort differences between urban villages and formal settlements in Chinese developing cities: a case study in Shenzhen (via the block-10 brief): urban villages the worst summer thermal-humidity index; density worsens it, vegetation (NDVI) mitigates (unverified)',
+  deng2023: 'Deng et al. (2023) Building and Environment 234, 110133, doi 10.1016/j.buildenv.2023.110133, new and old urban blocks in Guangzhou (via the block-10 brief): pedestrian Tmrt peak 43.7 C with air 41.3 C at 14:00; sky view factor and building coverage the main predictors (unverified)',
+  scott2017: 'Scott et al. (2017) PLoS ONE 12, e0187300, doi 10.1371/journal.pone.0187300, Temperature and heat in informal settlements in Nairobi (via the block-10 brief): +3.1 K daily maximum and +1.83 K daily minimum against the weather station; Mukuru +4.8 K maximum; sites with vegetation 0.7 K cooler (unverified)',
+  tasgaonkar2022: 'Tasgaonkar et al. (2022) Scientific Data 9, 285, doi 10.1038/s41597-022-01314-5, indoor heat data from 206 loggers in low-income homes in South Asia (via the block-10 brief): Delhi in April, tin-roof rooms 33.4 C indoors vs 32.8 C outdoors; Yavatmal tin-roof rooms 3-4 K above outdoors in May-June; indoors above outdoors at night (unverified)',
+  wilby2021: 'Wilby et al. (2021) Environmental Research Letters 16, 024033, doi 10.1088/1748-9326/abdbf2, 47 rooms in low-income communities in Ghana (via the block-10 brief): metal-roofed concrete rooms 4.5 K warmer by day than mud or thatch, 1.5 K cooler at night (unverified)',
+  khlongToey: 'Bangkok, Khlong Toey, roof and room surfaces at 37 C air (a snippet from a Stockholm Environment Institute page, via the block-10 brief): roof 68.1, ceiling 49.2, wall 45.7, floor 41.1 C (unverified; the page was not read)',
+  vellingiri2020: 'Vellingiri et al. (2020) Indian Journal of Occupational and Environmental Medicine 24(1), doi 10.4103/ijoem.IJOEM_120_19, cool roofs and indoor temperature in 16 homes in Ahmedabad, October 2017 (MHT and IIPH; via the block-10 brief): indoor tin 34.6-35.8, asbestos 32.5-36.8, concrete 31.6-33.8 C; white paint on tin -1.1 K, Modroof -2.0 K, thermocol under asbestos -2.4 K (from the reported means); "4.5 K at peak" in the discussion only; a "5-6 C" press figure unverified',
+  nutkiewicz2022: 'Nutkiewicz et al. (2022) Renewable and Sustainable Energy Reviews 159, 112183, doi 10.1016/j.rser.2022.112183, Cool roofs can mitigate cooling energy demand for informal settlement dwellers (via the block-10 brief): up to 91% less annual heat-stress exposure, simulated for 17 cities (unverified)',
+  bunker2024: 'Bunker et al. (2024) Trials 25, 59, doi 10.1186/s13063-023-07804-0, study protocol of a cluster randomised trial of cool roofs in rural Burkina Faso (via the block-10 brief): results reported by the press only (unverified)',
+  emissTables: 'Emissivity tables (Engineering Toolbox, Optris), via the block-10 brief: galvanised steel 0.23-0.28 new, about 0.88 old; oxidised galvanised iron 0.85; rusted iron 0.69-0.96 (unverified)',
+  energyStarRoof: 'ENERGY STAR roof product list, via the block-10 brief: bare metal solar reflectance 0.78 new, 0.58 after 3 years (unverified)',
+  ma2015: 'Ma et al. (2015) Environment International 75, 103-109, doi 10.1016/j.envint.2014.11.004, heat waves and mortality in 66 communities in China (via the block-10 brief): +5.0% deaths (2.9-7.2%) on heat-wave days, larger for older people, women, deaths out of hospital and dense communities (unverified)',
+  natMed2024: 'A 2024 study in Nature Medicine on heat and older adults (via the block-10 brief): people aged 65 and over at hazard ratio 1.78-1.98; decline in daily functioning predicts risk (details and title not recorded by the brief; unverified)',
+  hess2018: 'Hess et al. (2018) Journal of Environmental and Public Health, 7973519, doi 10.1155/2018/7973519, pilot evaluation of Ahmedabad\'s Heat Action Plan (via the block-10 brief): the May 2010 heat wave about 1,344 excess deaths (+43.1%); about 1,190 deaths avoided per year after the plan (unverified)',
+  carbonBriefAc: 'Carbon Brief on air conditioning in India (via the block-10 brief): 4.9% of households owned an air conditioner in 2020-21, about 8% in 2024 (unverified)',
+  dialogueEarth: 'Dialogue Earth on outdoor workers and heat in China (via the block-10 brief): about 100 million outdoor workers (unverified)',
+  ren2025: 'Ren, Xu & Jiang (2025) Buildings 15(13), 2166, doi 10.3390/buildings15132166, thermal environment of public space in high-density old districts on Shenzhen\'s urban fringe (the brief cites it as a Baishizhou CFD study of wind shadows in the lanes; not checked)',
 };
 
 /** How a value relates to its source. */
@@ -558,6 +578,70 @@ Object.assign(MATERIALS, {
     tr: v(0, 'brief9', 'cited', false, 'opaque metal cover'),
     prescribed: 'A flat opaque screen 2.65 m above the deck.',
     note: 'A roof over the footbridge: shade for the people crossing and for the steel under their feet.',
+  },
+});
+
+// ---- block 10: urban village and informal edge (@page village: cut from the other pages at build time) ----
+// Sheet roofs are thin layers (dTs/dt = G / C, no restore term) with the brief's
+// central values; every thin layer on the page has C >= 2 kJ m-2 K-1, the floor
+// below which the explicit 60 s step would not be stable (engine/village.js
+// checkThin). The village lanes and paths are the shared concrete.
+Object.assign(MATERIALS, {
+  rustTin: {
+    name: 'Rusty corrugated iron roof',
+    alpha: v(0.25, 'brief10', 'range', false, 'an assumption of the brief, 0.20-0.30 (no measured albedo of rusty iron was found); the middle value'),
+    eps: v(0.825, 'emissTables', 'range', false, 'brief 0.75-0.90 from emissivity tables (rusted iron 0.69-0.96); the middle value'),
+    thinC: v(3000, 'brief10', 'range', false, 'one corrugated sheet, brief 2-4 kJ m-2 K-1; the middle value'),
+    ef: v(0, 'brief10', 'cited', false, 'dry'),
+    note: 'Old corrugated iron, rusted brown: it soaks up most of the sun and, being one thin sheet, heats within minutes; the room beneath has it for a ceiling.',
+  },
+  galvTin: {
+    name: 'Galvanised (zinc-coated) iron sheet roof',
+    alpha: v(0.6, 'energyStarRoof', 'range', false, 'brief 0.55-0.65 (bare metal 0.78 new, 0.58 after 3 years on the ENERGY STAR list); the middle value'),
+    eps: v(0.25, 'emissTables', 'range', false, 'brief 0.25 for new galvanised steel (tables 0.23-0.28); old galvanised sheet about 0.88'),
+    thinC: v(3000, 'brief10', 'range', false, 'one sheet, brief 2-4 kJ m-2 K-1; the middle value'),
+    ef: v(0, 'brief10', 'cited', false, 'dry'),
+    note: 'Bright zinc-coated sheet: it reflects more sun than rusty iron, but its shiny surface gives off little heat, so it still gets very hot.',
+  },
+  asbestosRoof: {
+    name: 'Asbestos-cement sheet roof (aged)',
+    alpha: v(0.3, 'brief10', 'range', false, 'an assumption of the brief, 0.25-0.35 (no measured albedo found); the middle value'),
+    eps: v(0.9, 'brief10', 'cited', false, 'an assumption of the brief'),
+    thinC: v(8000, 'brief10', 'cited', false, 'about 8 kJ m-2 K-1 for a corrugated cement sheet (an assumption of the brief)'),
+    ef: v(0, 'brief10', 'cited', false, 'dry'),
+    note: 'Grey corrugated cement sheet, weathered: a little heavier than iron, so it warms and cools a little more slowly. Asbestos cement is a recognised health hazard.',
+  },
+  tarpRoof: {
+    name: 'Tarpaulin roof',
+    alpha: v(0.3, 'brief10', 'cited', false, 'an assumption of the brief (no measured value found)'),
+    eps: v(0.9, 'brief10', 'cited', false, 'an assumption of the brief'),
+    thinC: v(2000, 'brief10', 'cited', false, 'the brief\'s floor: a real sheet holds about 0.4 kJ m-2 K-1, which makes the explicit 60 s step unstable (time constant about 20 s), so C is set to 2 kJ (time constant about 110 s); on the 15-min output the floor changes little'),
+    ef: v(0, 'brief10', 'cited', false, 'dry'),
+    note: 'A plastic tarpaulin stretched over a frame: almost no heat store at all, so it follows the sun and the sky from minute to minute.',
+  },
+  whiteTin: {
+    name: 'Corrugated iron, newly painted white',
+    alpha: v(0.65, 'brief10', 'cited', false, 'white-painted tin 0.65 new (brief, from the earlier briefs)'),
+    eps: v(0.88, 'brief10', 'cited', false, 'white paint'),
+    thinC: v(3000, 'brief10', 'range', false, 'the same sheet as the bare roof, brief 2-4 kJ m-2 K-1'),
+    ef: v(0, 'brief10', 'cited', false, 'dry'),
+    note: 'The same iron sheet with a fresh coat of white paint, as residents paint them: it turns back most of the sun.',
+  },
+  whiteTinAged: {
+    name: 'Corrugated iron painted white (weathered paint)',
+    alpha: v(0.5, 'brief10', 'cited', false, 'white-painted tin 0.50 aged (brief, from the earlier briefs)'),
+    eps: v(0.88, 'brief10', 'cited', false, 'white paint'),
+    thinC: v(3000, 'brief10', 'range', false, 'the same sheet as the bare roof, brief 2-4 kJ m-2 K-1'),
+    ef: v(0, 'brief10', 'cited', false, 'dry'),
+    note: 'Iron sheet the residents painted white some years ago: dustier and less bright than new paint, still far cooler than bare iron.',
+  },
+  slabRoof: {
+    name: 'Flat concrete roof slab',
+    alpha: v(0.25, 'oke', 'cited', false, 'concrete roof slab 0.25 (via the block-10 brief)'),
+    eps: v(0.9, 'oke', 'cited', false, 'via the block-10 brief'),
+    mu: v(1785, 'oke', 'cited', false, 'concrete, as the shared concrete paving'),
+    ef: v(0, 'brief10', 'cited', false, 'dry'),
+    note: 'The flat concrete roof of a village house: grey, heavy and slow, warm in the afternoon and still warm late in the evening.',
   },
 });
 

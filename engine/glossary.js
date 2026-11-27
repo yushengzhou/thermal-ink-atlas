@@ -367,6 +367,39 @@ export const GLOSSARY = {
     why: 'A hand on a sunlit handrail or bare legs on a metal bench meet the hottest metal of the street; the brief advises reading at least 4 s of contact for older people and children.',
     scenes: ['busstop'],
   },
+  // ---- block 10 (village) ------------------------------------------------------
+  urbanVillage: {
+    term: 'Urban village (城中村)',
+    text: 'A former farming village that a growing city has surrounded. The villagers kept their housing plots and built them up into rooms and flats to rent, often to people who have moved to the city for work.',
+    range: 'In Shenzhen, satellite surface heat islands of about 3.5 K over high-density urban villages, against 2.6 K for multi-storey and 1.6 K for high-rise housing; urban villages had the worst summer thermal-humidity index in one Shenzhen study.',
+    src: 'wu2015, yi2022, brief10',
+    why: 'Dense, low-cost housing close to work: the lanes keep out much of the sun, but the heat that gets in stays late into the night.',
+    scenes: ['village'],
+  },
+  handshakeBuilding: {
+    term: 'Handshake building (握手楼)',
+    text: 'A house built to the very edge of its plot, so close to the next one that neighbours could almost shake hands from window to window across the lane.',
+    range: 'Lanes about 1–3 m wide between walls 18–25 m high: a sky view of about 0.04–0.16 at the lane floor (canyon formula).',
+    src: 'brief10',
+    why: 'Such deep, narrow lanes are shaded for most of the day but see little sky, so they cool slowly after sunset.',
+    scenes: ['village'],
+  },
+  indoorRadiant: {
+    term: 'Indoor radiant temperature (proxy)',
+    text: 'How warm a room under a sheet roof feels from its surfaces: the ceiling, which is the roof itself, takes a share F_r of the view, the walls the rest. Here it is a proxy computed from the roof\'s temperature, not a simulation of the room.',
+    range: 'Measured rooms under tin roofs: 0.6–4 K above the outdoor air (Delhi, Yavatmal, Ahmedabad); white paint on tin cooled the room by about 1 K, other cool roofs 2.0–2.4 K.',
+    src: 'tasgaonkar2022, vellingiri2020, brief10',
+    why: 'A hot ceiling radiates onto the people below it even when the room\'s air is only a little warmer than outside.',
+    scenes: ['village'],
+  },
+  heatVulnerability: {
+    term: 'Heat vulnerability',
+    text: 'Who is most likely to be harmed by heat: it comes from exposure (a hot room, outdoor work) together with what people have to cope with it (cooling, rest, care, health), not from who they are.',
+    range: 'China, 66 communities: +5.0% deaths on heat-wave days (2.9–7.2%), more among older people, women and in dense communities; in India about 5–8% of households had an air conditioner (2020–24).',
+    src: 'ma2015, carbonBriefAc, brief10',
+    why: 'The same heat wave weighs most on people whose rooms are hottest and who can least afford to cool them.',
+    scenes: ['village'],
+  },
   // ---- block 2 (sponge-retrofit) --------------------------------------------
   permeablePaving: {
     term: 'Permeable paving',
