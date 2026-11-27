@@ -14,6 +14,7 @@ const AP = 'asphalt-park';
 const SR = 'sponge-retrofit';
 const GC = 'glass-cbd';
 const WF = 'waterfront';
+const HT = 'hutong';
 const shots = [
   [AP, 'docs/media/day-1500.jpg', 'hour=15&f=400', { width: 1280, height: 800 }],
   [AP, 'docs/media/thermal-1500.jpg', 'thermal&hour=15&f=400', { width: 1280, height: 800 }],
@@ -80,6 +81,22 @@ const shots = [
     },
   ],
   [WF, 'thumbs/waterfront.jpg', 'hour=15&f=400&notes=0&ui=0&cam=2.5,170,150', { width: 640, height: 400 }],
+  // block 5: lanes and courtyards by day, thermal at 15:00, thermal 21:00 with and without the splash, the tianpeng card
+  [HT, 'docs/media/ht-day-1500.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
+  [HT, 'docs/media/ht-day-1500-lanes.jpg', 'hour=15&f=640&notes=0&cam=5,125,245', { width: 1280, height: 800 }],
+  [HT, 'docs/media/ht-thermal-1500.jpg', 'thermal&hour=15&f=640', { width: 1280, height: 800 }],
+  [HT, 'docs/media/ht-thermal-2100-splash.jpg', 'thermal&hour=21&f=640&notes=0&cam=3.5,120,240&splash=1', { width: 1280, height: 800 }],
+  [HT, 'docs/media/ht-thermal-2100-nosplash.jpg', 'thermal&hour=21&f=640&notes=0&cam=3.5,120,240&splash=0', { width: 1280, height: 800 }],
+  [
+    HT,
+    'docs/media/ht-tianpeng-card.jpg',
+    'hour=15&f=640&cam=5,125,245&notes=0',
+    { width: 1280, height: 800 },
+    async (page) => {
+      await page.click('#hutong [data-card="tianpeng"]');
+    },
+  ],
+  [HT, 'thumbs/hutong.jpg', 'hour=15&f=400&notes=0&ui=0&cam=3.5,125,245', { width: 640, height: 400 }],
 ];
 const browser = await chromium.launch();
 for (const [city, out, q, viewport, act] of shots) {

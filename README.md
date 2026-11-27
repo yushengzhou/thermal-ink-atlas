@@ -12,6 +12,10 @@ Hand-inked isometric city blocks that show urban heat through one heat-wave day:
   river wind stay breezier (cooler pavement), streets across it are sheltered;
   the river cools the air only a short way and the still pond is warm at night.
   Wind lines show the assumed wind, not computed flow.
+- Block 5, `hutong`: single-storey courtyard houses between narrow lanes. The
+  low lanes stay in the sun at noon; trees, vine pergolas and the summer mat
+  awning (天棚) give the shade, and a splash of water at 19:00 cools the paving
+  for a few hours (a bilingual card tells the custom).
 
 Live: https://yushengzhou.github.io/thermal-ink-atlas/
 
@@ -23,8 +27,8 @@ modelled with a simple surface energy-balance model, not measured.
 ## Open it
 
 - Double-click `cities/asphalt-park/index.html`,
-  `cities/sponge-retrofit/index.html`, `cities/glass-cbd/index.html` or
-  `cities/waterfront/index.html`.
+  `cities/sponge-retrofit/index.html`, `cities/glass-cbd/index.html`,
+  `cities/waterfront/index.html` or `cities/hutong/index.html`.
   Each is one offline file.
 - Or serve the folder and open <http://localhost:8000/>:
 
@@ -45,6 +49,7 @@ modelled with a simple surface energy-balance model, not measured.
 | `B` (block 2) | swap Before / After |
 | `G` / `Shift+G` (block 3) | next / previous glass type |
 | `W` / `A` (block 4) | wind lines / water's air overlay on or off |
+| `P` (block 5) | evening splash at 19:00 on or off |
 
 ## Build and test
 
@@ -79,6 +84,9 @@ Key sources per block:
 - Block 4, `waterfront`: Völker et al. 2013; Hathway & Sharples 2012
   (secondary); Jacobs et al. 2020; Solcerova et al. 2019 (night pond);
   BoM apparent temperature (Steadman 1994).
+- Block 5, `hutong`: Hendel et al. 2015 and 2016 (pavement watering, Paris);
+  Takebayashi et al. 2023 (Kobe); Lin et al. 2019 (Harbin courtyards);
+  Johansson 2006 (Fez); Deng Yunxiang, 天棚遮阴 (the mat awning).
 
 ## Licence
 
