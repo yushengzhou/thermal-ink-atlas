@@ -477,6 +477,7 @@ const BASIS = {
   edge: 'edge of cited range',
   interp: 'interpretation of the source',
   engine: 'engine assumption (no source)',
+  calib: 'calibrated to a measured value (by construction)',
 };
 
 const v = (value, source, basis, verified = false, note = '') => ({ value, source, basis, verified, note });
@@ -937,14 +938,15 @@ function daylight(site) {
 
 /**
  * Air temperature (deg C): cosine rise from taMin at sunrise to taMax at
- * 15:00, cosine fall to the next sunrise.
+ * site.tmaxHour (default 15:00), cosine fall to the next sunrise.
  */
 function airTemp(site, hour, rise) {
   const { taMin, taMax } = site;
+  const x = site.tmaxHour ?? 15;
   const h = ((hour % 24) + 24) % 24;
-  if (h >= rise && h <= 15) return taMin + ((taMax - taMin) * (1 - Math.cos((Math.PI * (h - rise)) / (15 - rise)))) / 2;
+  if (h >= rise && h <= x) return taMin + ((taMax - taMin) * (1 - Math.cos((Math.PI * (h - rise)) / (x - rise)))) / 2;
   const hh = h < rise ? h + 24 : h;
-  return taMax - ((taMax - taMin) * (1 - Math.cos((Math.PI * (hh - 15)) / (rise + 24 - 15)))) / 2;
+  return taMax - ((taMax - taMin) * (1 - Math.cos((Math.PI * (hh - x)) / (rise + 24 - x)))) / 2;
 }
 
 /** Clear-sky beam (normal) and diffuse (horizontal) irradiance, W m-2. */
@@ -1778,13 +1780,14 @@ const wallTemp = (taK, kGlobal) => taK + 2 + (6 * kGlobal) / 900;
 
 /**
  * Wall-reflection coefficient of cell i: a_w (1 - SVF_open), times the crown
- * factor (1 - 0.75 cover) under trees as for the sky. Glass walls are taken
+ * factor (1 - 0.75 cover) under trees as for the sky (a_w: world.wallAlbedo
+ * if set, block 11). Glass walls are taken
  * out by the caller (they reflect specularly, see reflect.js).
  */
 function wallReflectCoef(world, i) {
   const open = world.svfOpen ? world.svfOpen[i] : world.svf[i];
   const crown = world.bld[i] < 0 ? 1 - 0.75 * world.canopy[i] : 1;
-  return MODEL.wallAlbedo.value * Math.max(0, 1 - open) * crown;
+  return (world.wallAlbedo ?? MODEL.wallAlbedo.value) * Math.max(0, 1 - open) * crown;
 }
 
 /** Shortwave on a wall (azimuth mean): k0 = f_lit I cos(beta) / pi + 0.5 D; kG = 0.5 G (times ground albedo). */
@@ -2107,8 +2110,8 @@ const { svfAt, svfGridAt } = __m['thermal'];
 const { windField, isWindBlock } = __m['wind'];
 const { MATERIALS } = __m['materials'];
 
-const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water', 'pavers', 'porousAsphalt', 'coolPave', 'raingarden', 'river', 'pond', 'greyBrick', 'ballast', 'drySoil', 'scrub', 'turf', 'track', 'acrylic', 'rubber'];
-const WALKABLE = { concrete: 1, stone: 1, grass: 1, pavers: 1, greyBrick: 1, turf: 1, track: 1, acrylic: 1, rubber: 1 };
+const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water', 'pavers', 'porousAsphalt', 'coolPave', 'raingarden', 'river', 'pond', 'greyBrick', 'ballast', 'drySoil', 'scrub', 'turf', 'track', 'acrylic', 'rubber', 'gravel', 'desertLawn', 'coolCoat'];
+const WALKABLE = { concrete: 1, stone: 1, grass: 1, pavers: 1, greyBrick: 1, turf: 1, track: 1, acrylic: 1, rubber: 1, gravel: 1, desertLawn: 1 };
 
 /** Shopfront segments [s0, s1] (metres along a face) for a shop building. */
 function shopSegments(B, face) {
@@ -4988,6 +4991,12 @@ __m['village'] = { isVillage: () => false };
 
 __m['vgui'] = {};
 
+__m['dskit'] = {};
+
+__m['desert'] = { isDesert: () => false };
+
+__m['dsui'] = {};
+
 __m['app'] = (() => {
 // app: boot, clock, keys, seek(), query modes, overlay (slider, notes, heat
 // card) and a small window.atlas API used by the checks.
@@ -5025,6 +5034,8 @@ const { isBus, busSetup } = __m['busstop'];
 const { bsApp } = __m['bsui'];
 const { isVillage, villageSetup } = __m['village'];
 const { vgApp } = __m['vgui'];
+const { isDesert, desertSetup } = __m['desert'];
+const { dsApp } = __m['dsui'];
 
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
@@ -5135,6 +5146,8 @@ function boot(scene, root = document) {
   let bsSet = null;
   const vgMode = isVillage(scene); // block 10 plugin (vgui.js vgApp)
   let vgSet = null;
+  const dsMode = isDesert(scene); // block 11 plugin (dsui.js dsApp)
+  let dsSet = null;
   if (!retro) {
     world = buildWorld(scene);
     t1 = performance.now();
@@ -5177,6 +5190,9 @@ function boot(scene, root = document) {
     } else if (vgMode) {
       vgSet = villageSetup(world);
       thermal = vgSet.base;
+    } else if (dsMode) {
+      dsSet = desertSetup(world);
+      thermal = dsSet.base;
     } else thermal = runModel(world);
     t2 = performance.now();
     V = { main: makeView('main', scene, world, thermal, canvas, glassMode ? { type: () => glassNow.type } : null, wfMode ? { lines: wfSet.lines() } : null) };
@@ -5329,7 +5345,7 @@ function boot(scene, root = document) {
       sunTmrt: w.shade.sunTmrt,
     };
   }
-  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode || pkMode || esMode || cpMode || bsMode || vgMode ? null : block1Notes();
+  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode || pkMode || esMode || cpMode || bsMode || vgMode || dsMode ? null : block1Notes();
   function block1Notes() {
   const notesText = {
     asphalt: ['Kiln Street, old asphalt (albedo 0.12):', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
@@ -5741,7 +5757,7 @@ function boot(scene, root = document) {
   // ---- a block plugin (blocks 5 and 6): its controls, cards, notes, heat-card rows, glossary numbers
   // and API live in its own module; app.js only calls these hooks
   const env = {
-    scene, world, thermal, root, card, R, S, main, query: q, setup: htSet ?? pkSet ?? esSet ?? cpSet ?? bsSet ?? vgSet,
+    scene, world, thermal, root, card, R, S, main, query: q, setup: htSet ?? pkSet ?? esSet ?? cpSet ?? bsSet ?? vgSet ?? dsSet,
     hideCard: () => hideCard(),
     reopen: () => card.dataset.open === '1' && reopenCard(),
     redraw: () => S.paused && draw(),
@@ -5753,7 +5769,7 @@ function boot(scene, root = document) {
     },
     setNotes: (n) => (notes = n),
   };
-  const blk = pkMode ? pkApp(env) : htMode ? htApp(env, htSplash0) : esMode ? esApp(env) : cpMode ? cpApp(env) : bsMode ? bsApp(env) : vgMode ? vgApp(env) : null;
+  const blk = pkMode ? pkApp(env) : htMode ? htApp(env, htSplash0) : esMode ? esApp(env) : cpMode ? cpApp(env) : bsMode ? bsApp(env) : vgMode ? vgApp(env) : dsMode ? dsApp(env) : null;
   if (blk) notes = blk.notes();
 
   const toggleThermal = () => {
@@ -6280,6 +6296,7 @@ function boot(scene, root = document) {
       ...(cpSet ? cpSet.timing : {}),
       ...(bsSet ? bsSet.timing : {}),
       ...(vgSet ? vgSet.timing : {}),
+      ...(dsSet ? dsSet.timing : {}),
     },
     /** Pure seek: render frame N with an optional camera {z,cx,cy}; pauses the clock. */
     seek(frame, cam) {
@@ -6487,6 +6504,7 @@ function boot(scene, root = document) {
     campus: cpMode ? blk.api : null,
     busstop: bsMode ? blk.api : null,
     village: vgMode ? blk.api : null,
+    desert: dsMode ? blk.api : null,
     retro: retro
       ? {
         state: () => ({ state: S.state, split: S.split, swap: S.swap, d: S.d, aged: S.aged }),

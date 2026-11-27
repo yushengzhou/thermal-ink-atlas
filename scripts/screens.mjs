@@ -20,6 +20,7 @@ const ES = 'estate';
 const CPS = 'campus';
 const BSS = 'busstop';
 const UV = 'village';
+const DC = 'desert';
 const shots = [
   [AP, 'docs/media/day-1500.jpg', 'hour=15&f=400', { width: 1280, height: 800 }],
   [AP, 'docs/media/thermal-1500.jpg', 'thermal&hour=15&f=400', { width: 1280, height: 800 }],
@@ -182,6 +183,23 @@ const shots = [
     },
   ],
   [UV, 'thumbs/village.jpg', 'hour=15&f=640&notes=0&ui=0&cam=2.5,200,260', { width: 640, height: 400 }],
+  // block 11: day and thermal at 15:00, the plaza after sunset (thermal), the street coating off, the water used, the intro hint, the sails card
+  [DC, 'docs/media/dc-day-1500.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
+  [DC, 'docs/media/dc-thermal-1500.jpg', 'thermal&hour=15&f=640', { width: 1280, height: 800 }],
+  [DC, 'docs/media/dc-thermal-2100.jpg', 'thermal&hour=21&f=640&notes=0&cam=4,290,60', { width: 1280, height: 800 }],
+  [DC, 'docs/media/dc-bare-thermal-1500.jpg', 'thermal&hour=15&f=640&coat=0&notes=0&cam=3.5,240,190', { width: 1280, height: 800 }],
+  [DC, 'docs/media/dc-water-1500.jpg', 'hour=15&f=640&water=1&notes=0', { width: 1280, height: 800 }],
+  [DC, 'docs/media/dc-intro-hint.jpg', 'hour=15&f=60', { width: 1280, height: 800 }],
+  [
+    DC,
+    'docs/media/dc-sails-card.jpg',
+    'hour=15&f=640&notes=0&cam=5,280,60',
+    { width: 1280, height: 800 },
+    async (page) => {
+      await page.click('#desert [data-card="sails"]');
+    },
+  ],
+  [DC, 'thumbs/desert.jpg', 'hour=15&f=640&notes=0&ui=0&cam=2.2,215,110', { width: 640, height: 400 }],
 ];
 const browser = await chromium.launch();
 for (const [city, out, q, viewport, act] of shots) {

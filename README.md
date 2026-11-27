@@ -57,6 +57,18 @@ Hand-inked isometric city blocks that show urban heat through one heat-wave day:
   residents' white roofs (about 21 K cooler), `O` shows a proxy of the room
   under each sheet roof (not a simulation). Cards on who is most at risk
   quote the studies, not the model.
+- Block 11, `desert`: a desert neighbourhood like Phoenix on a clear July
+  day (air 30–43 °C, warmest at 4:30 pm, very dry): light stucco houses
+  around small courtyards, gravel yards with mesquite and palo verde, a
+  plaza with shade sails and a ramada, shops with an arcade, a misted café
+  patio, a watered lawn park and a Main Street with a light coating. At
+  3 pm standing under a sail feels about 23 K cooler in Tmrt than the open
+  sun and the arcade about 27 K; the lawn stays near the air but
+  evaporates about 6.5 L per m² a day; the coating takes about 9 K off the
+  road and adds about 3 K to the people on it (`C` takes it off, `L` shows
+  the water each surface uses). Five of the brief's ten bands are missed
+  and stated on the cards with their likely causes. Its cards follow the
+  outside evaluation's plain-words layout (#29) from the start.
 
 Live: https://yushengzhou.github.io/thermal-ink-atlas/
 
@@ -71,8 +83,8 @@ modelled with a simple surface energy-balance model, not measured.
   `cities/sponge-retrofit/index.html`, `cities/glass-cbd/index.html`,
   `cities/waterfront/index.html`, `cities/hutong/index.html`,
   `cities/parking/index.html`, `cities/estate/index.html`,
-  `cities/campus/index.html`, `cities/busstop/index.html` or
-  `cities/village/index.html`.
+  `cities/campus/index.html`, `cities/busstop/index.html`,
+  `cities/village/index.html` or `cities/desert/index.html`.
   Each is one offline file.
 - Or serve the folder and open <http://localhost:8000/>:
 
@@ -162,6 +174,14 @@ Key sources per block:
   roofs); Nutkiewicz et al. 2022; Ma et al. 2015 and Hess et al. 2018 (heat
   and mortality). Most were read through the research brief and are flagged
   unverified.
+- Block 11, `desert`: NOAA NCEI climate normals and AZMET (the design day);
+  Middel et al. 2021 and Middel & Krayenhoff 2019 (shade and Tmrt, Tempe);
+  Colter et al. 2019 (ramadas and trees); the Phoenix cool-pavement pilot
+  (2024) and Erell et al. 2014 (light paving); AZ1195 and AMWUA (lawn and
+  tree water); Gober et al. 2010, Middel et al. 2014 and 2015 (water,
+  landscaping, canopy); Vanos et al. 2022 and Huang et al. 2025 (misters);
+  Maricopa County public health (heat deaths). Most were read through the
+  research brief and are flagged unverified.
 
 ## Licence
 
