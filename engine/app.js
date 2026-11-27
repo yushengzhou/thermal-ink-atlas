@@ -119,7 +119,10 @@ export function boot(scene, root = document) {
     lastStats = R.frame(S.frame, S.cam, look(S.frame));
     dirty = false;
     // a released scrub ends once the frame is exact again
-    if (S.scrub && S.released && !lastStats.preview) S.scrub = false;
+    if (S.scrub && S.released && !lastStats.preview) {
+      S.scrub = false;
+      R.endScrub(); // unpin now, even if the clock is paused and nothing else draws
+    }
     return lastStats;
   };
 
@@ -623,6 +626,8 @@ export function boot(scene, root = document) {
     stats: () => ({ ...lastStats }),
     /** False while a slider drag is showing (or refining) preview frames. */
     settled: () => !S.scrub,
+    /** Tile cache size and cap. */
+    cache: () => ({ size: R.tiles.size, cap: R.maxTiles }),
     /** Glossary keys, and the on-canvas note term hit boxes (CSS px). */
     glossaryKeys: () => Object.keys(GLOSSARY),
     glossaryStats: () => ({ ...gstats }),

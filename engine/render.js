@@ -97,7 +97,7 @@ export class Renderer {
     this.budget = Infinity;
     this.pending = {};
     this.shown = {};
-    this.pins = {}; // mode -> Set of hours whose tiles the scrub preview needs
+    this.pins = {}; // mode -> Set of `z|hour|dpr` the scrub preview needs
   }
 
   // ---- hour context ------------------------------------------------------
@@ -486,18 +486,31 @@ export class Renderer {
     return { ox, oy, tiles: out };
   }
 
-  /** True if a tile key belongs to an hour the scrub preview has pinned. */
+  /** True if a tile key belongs to a (zoom, hour, DPR) the scrub preview pinned. */
   pinned(key) {
-    const [mode, , hq] = key.split('|');
+    const [mode, z, hq, , , dpr] = key.split('|');
     const set = this.pins[mode];
-    return !!set && set.has(Number(hq));
+    return !!set && set.has(`${z}|${hq}|${dpr}`);
+  }
+
+  pinSet(z, hours) {
+    return new Set(hours.filter((h) => h !== undefined).map((h) => `${z}|${h}|${this.dpr}`));
+  }
+
+  /** Scrub over: unpin and shrink the cache back to its cap. */
+  endScrub() {
+    this.pending = {};
+    this.shown = {};
+    this.pins = {};
+    this.evict();
   }
 
   /**
    * Drop least recently used tiles down to the cap, skipping pinned ones: the
    * scrub preview's pending and shown hours stay cached even when they alone
-   * exceed the cap, so a preview always finishes (bounded by 3 hours x modes
-   * of visible tiles).
+   * exceed the cap, so a preview always finishes (bounded by 4 hours x modes
+   * of visible tiles: pending, target and the two shown hours). Pins match
+   * zoom and DPR, so tiles of other zooms can still be evicted.
    */
   evict() {
     if (this.tiles.size <= this.maxTiles) return;
@@ -586,7 +599,7 @@ export class Renderer {
       if (p === undefined || dist(p, hq) > 1 || this.baked(mode, z, p, tiles)) p = hq;
       this.pending[mode] = p;
       // keep what is on screen and what is being baked
-      this.pins[mode] = new Set([p, ...(this.shown[mode] ?? [])]);
+      this.pins[mode] = this.pinSet(z, [p, hq, ...(this.shown[mode] ?? [])]);
       this.budget -= this.bakeSome(mode, cam, p, W, H, Math.max(0, this.budget));
     }
     if (this.baked(mode, z, hq, tiles)) return null;
@@ -603,7 +616,7 @@ export class Renderer {
     let out = [h0, h1, lo / (lo + hi)];
     if (h0 === h1 || lo + hi > 4 / HOUR_STEP) out = lo <= hi ? [h0, h0, 0] : [h1, h1, 0];
     this.shown[mode] = [out[0], out[1]];
-    this.pins[mode] = new Set([this.pending[mode], hq, out[0], out[1]].filter((h) => h !== undefined));
+    this.pins[mode] = this.pinSet(z, [this.pending[mode], hq, out[0], out[1]]);
     return out;
   }
 
@@ -625,11 +638,7 @@ export class Renderer {
     // not a clock; what a preview frame shows still depends on the cache)
     this.scrub = !!look.scrub;
     this.budget = this.scrub ? PREVIEW_BUDGET : Infinity;
-    if (!this.scrub) {
-      this.pending = {};
-      this.shown = {};
-      this.pins = {};
-    }
+    if (!this.scrub && (Object.keys(this.pins).length || Object.keys(this.pending).length)) this.endScrub();
     this.stats.preview = false;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = 1;

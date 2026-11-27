@@ -118,6 +118,9 @@ for (const [w, h] of [[2560, 1440], [3008, 1692]]) {
     console.log(`${w}x${h}@2: settled ${Date.now() - t0} ms after release`);
     const st = await page.evaluate(() => ({ hour: window.atlas.state().hour, preview: window.atlas.stats().preview }));
     assert.deepEqual(st, { hour: 14.75, preview: false });
+    // pins are dropped on release: the cache is back under its cap within two frames
+    const cache = await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(window.atlas.cache())))));
+    assert.ok(cache.size <= cache.cap, `tile cache ${cache.size} > cap ${cache.cap} after release`);
     assert.deepEqual(errors, []);
     await context.close();
   });
