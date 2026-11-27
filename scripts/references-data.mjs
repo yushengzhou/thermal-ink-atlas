@@ -706,4 +706,75 @@ export const REFS = {
     authors: null, year: null, title: null,
     venue: 'Press coverage of Vanos\'s playground studies (skin-burn times; standard not named)',
   },
+  // ---- block 9: bus stops and footbridges ----
+  brief9: {
+    authors: 'This project', year: 2026, title: 'Research brief: arterial with bus stops and footbridge — shade for people waiting (block 9)',
+    venue: 'docs/research/busstop-brief.md', link: 'docs/research/busstop-brief.md',
+  },
+  dzyuban2022: {
+    authors: 'Dzyuban, Y., Hondula, D. M., Coseo, P. J. & Redman, C. L.', year: 2022,
+    title: 'Public transit infrastructure and heat perceptions in hot and dry climates',
+    venue: 'International Journal of Biometeorology 66, 345–356',
+    doi: '10.1007/s00484-021-02074-4',
+    flags: ['title from memory'],
+  },
+  lanza2025: {
+    authors: 'Lanza et al.', year: 2025, title: null,
+    venue: 'Transportation Research Part D: Transport and Environment 140, 104653 (Houston bus stops)',
+    doi: '10.1016/j.trd.2025.104653',
+  },
+  chenWalk2024: {
+    authors: 'Chen et al.', year: 2024, title: null,
+    venue: 'Sustainable Cities and Society 100, 105048 (Hong Kong covered walkway)',
+    doi: '10.1016/j.scs.2023.105048',
+  },
+  hyd047: {
+    authors: 'Highways Department, Hong Kong SAR Government', year: 2018, title: null,
+    venue: 'Guidance Note BS/GN/047 (November 2018; via the block-9 brief)',
+  },
+  brettMartin: {
+    authors: 'Brett Martin', year: null, title: null,
+    venue: 'Polycarbonate sheet datasheet, 10 mm twinwall (via the block-9 brief)',
+  },
+  asuFilm: {
+    authors: 'Arizona State University', year: null, title: null,
+    venue: 'Radiative-cooling film on a bus shelter roof (not peer reviewed; via the block-9 brief)',
+  },
+  sgWalkway: {
+    authors: null, year: null, title: null,
+    venue: 'Singapore covered walkways, heat stress (secondary; via the block-9 brief)',
+  },
+  ucla: {
+    authors: 'UCLA', year: null, title: null,
+    venue: 'Study of shelters at Los Angeles Metro bus stops (via the block-9 brief)',
+  },
+  fan2002: {
+    authors: 'Fan, W. & Machemehl, R. B.', year: 2002,
+    title: 'Characterizing bus transit passenger waiting times',
+    venue: 'Southwest Region University Transportation Center, University of Texas at Austin (via the block-9 brief, with a City University review)',
+    flags: ['title from memory'],
+  },
+  fraser2017: {
+    authors: 'Fraser, A. M. & Chester, M. V.', year: 2017,
+    title: 'Transit system design and vulnerability of riders to heat',
+    venue: 'Journal of Transport & Health 4, 216–225',
+    flags: ['title from memory'],
+  },
+  liu2025: {
+    authors: 'Liu et al.', year: 2025, title: null,
+    venue: 'Journal of Transport Geography 128, 104383',
+  },
+  cpsc: {
+    authors: 'US Consumer Product Safety Commission', year: null, title: null,
+    venue: 'Safety guidance on hot metal surfaces (via the block-9 brief)',
+  },
+  deckSteel: {
+    authors: null, year: 2025, title: null,
+    venue: 'Materials 18(13), 3109 (steel deck surfacing temperatures)',
+    doi: '10.3390/ma18133109',
+  },
+  lasVegas: {
+    authors: null, year: null, title: null,
+    venue: 'Las Vegas surface temperature measurements (via the block-9 brief)',
+  },
 };

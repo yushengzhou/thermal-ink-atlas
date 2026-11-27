@@ -16,7 +16,7 @@ the sources listed below without checking them.
 
 ## Surface parameters
 
-| Material | albedo α | emissivity ε | heat storage (μ, or thin-layer C) | evaporative fraction | wet after rain, drying time, water held (block 2); crown or screen transmission (blocks 5, 6, 8) |
+| Material | albedo α | emissivity ε | heat storage (μ, or thin-layer C) | evaporative fraction | wet after rain, drying time, water held (block 2); crown or screen transmission (blocks 5, 6, 8, 9) |
 |---|---|---|---|---|---|
 | Aged asphalt (`asphalt`) | 0.12 [lbnl] *cited value* (LBNL-43442: about 0.12 +- 0.03 after about 5 years) | 0.95 [oke] *cited value*, unverified | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Concrete paving (`concrete`) | 0.3 [oke] *cited range*, unverified (cited 0.10-0.35) | 0.9 [oke] *edge of cited range*, unverified (cited 0.71-0.90) | μ 1785 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 0 [brief] *cited value*, unverified (dry impervious) | — |
@@ -55,6 +55,13 @@ the sources listed below without checking them.
 | Acrylic court coating on asphalt (`acrylic`) | 0.2 [brief8] *cited range*, unverified (brief 0.20 (0.15-0.30); an asphalt court measured 0.24 [vanos2017]) | 0.92 [brief8] *engine assumption (no source)*, unverified (an assumption of the brief) | μ 1200 J m⁻² s⁻½ K⁻¹ [brief8] *interpretation of the source*, unverified (brief: the asphalt underneath (a coat a few millimetres thick)) | 0 [brief8] *cited value*, unverified (dry) | — |
 | Poured rubber play surface (`rubber`) | 0.12 [brief8] *interpretation of the source*, unverified (the brief has no row for play-surface rubber; its PU / EPDM track value 0.12 (0.10-0.20) is used) | 0.92 [brief8] *engine assumption (no source)*, unverified (as the track (an assumption of the brief)) | μ 950 J m⁻² s⁻½ K⁻¹ [brief8] *interpretation of the source*, unverified (as the track: EPDM granules over an SBR base on a hard bed) | 0 [brief8] *cited value*, unverified (dry) | — |
 | Shade sail (knitted HDPE) (`shadeSail`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used: only the transmission of the fabric matters here) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0.2 [brief8] *cited range*, unverified (brief 0.10-0.30 for knitted HDPE shade cloth (unverified); the middle value) |
+| Opaque metal shelter roof (`roofMetal`) | 0.15 [engine] *engine assumption (no source)*, unverified (not used: the roof is a screen; its underside is the warm-wall term) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [brief9] *cited value*, unverified (opaque metal, PV or ad panel: no direct sun through it) |
+| Clear polycarbonate shelter roof (`polyClear`) | 0.1 [engine] *engine assumption (no source)*, unverified (not used) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0.8 [brettMartin] *cited value*, unverified (10 mm twinwall, clear: solar transmission 0.80 (datasheet via the brief)) |
+| Opal polycarbonate shelter roof (`polyOpal`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0.47 [brettMartin] *cited value*, unverified (10 mm twinwall, opal: solar transmission 0.47 (bronze 0.43, not used) (datasheet via the brief)) |
+| Clear glass shelter (roof and walls) (`glassBox`) | 0.08 [engine] *engine assumption (no source)*, unverified (not used) | 0.84 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0.82 [brief3] *interpretation of the source*, unverified (1 - rho0 - a_g of clear float glass at normal incidence (block 3: 0.08 and 0.10); the brief gives no glass value; less at a glancing angle (not modelled)) |
+| Opaque shelter panel (advertising panel or sheet) (`adPanel`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [brief9] *cited value*, unverified (opaque ad panel: no direct sun through it) |
+| Footbridge deck (steel) (`bridgeDeck`) | 0.15 [engine] *engine assumption (no source)*, unverified (not used for the screen: the deck surface is the shared thin metal layer (metal)) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [engine] *engine assumption (no source)*, unverified (the deck shades the road beneath it) |
+| Footbridge cover (opaque metal) (`bridgeRoof`) | 0.15 [engine] *engine assumption (no source)*, unverified (not used) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [brief9] *cited value*, unverified (opaque metal cover) |
 
 Not used by the grid model:
 
@@ -70,6 +77,13 @@ Not used by the grid model:
 - `awning`: Not used by the grid model as a surface: a flat screen above the eaves that lets through tr of the sun; the cells under it count as fully covered for the sky view (crown factor).
 - `pvCanopy`: Not used by the grid model as a surface: a flat opaque screen 4.2 m up; the ground beneath sees the sky with SVF 0.11 [golden2007] and the panel undersides as warm walls (engine assumption).
 - `shadeSail`: Not used by the grid model as a surface: a flat screen 3.5 m up that lets through tr of the sun; the cells under it count as fully covered for the sky view (crown factor), so their walls term stands in for the warm fabric overhead.
+- `roofMetal`: Not used by the grid model as a surface: a flat opaque screen 2.65 m up; at the waiting points (point model) its underside is seen as the warm-wall term (air + 2 K, more by day).
+- `polyClear`: Not used by the grid model as a surface: a flat screen that lets through tr of the direct sun; its diffuse light is not counted (the sky view counts it as cover).
+- `polyOpal`: As the clear sheet: a flat screen that lets through tr of the direct sun.
+- `glassBox`: A flat glass roof (screen) and glass walls that let through tr of the direct sun; the air trapped inside is not modelled.
+- `adPanel`: A vertical panel: it blocks the direct sun on the 5 m grid (as a thin opaque box) and at the waiting points; it reflects no sunlight and its own temperature is not computed.
+- `bridgeDeck`: Over the road a flat opaque screen 6 m up; its walking surface is computed at points as the shared dark metal thin layer (metal).
+- `bridgeRoof`: A flat opaque screen 2.65 m above the deck.
 
 Shown on the heat cards as a caveat:
 
@@ -251,6 +265,21 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[courtVendor]** Acrylic court coating makers (CoolTop; Laykold), via the block-8 brief: a standard acrylic court about 52 C at air about 30 C (vendor claims, unverified)
 - **[iso13732]** ISO 13732-1:2006, hot surfaces, via CENELEC Guide 29 Table A.1 (via the block-8 brief): burn thresholds for 1 min / 10 min / 8 h of contact, metal 51 / 48 / 43 C, stone and concrete 56 / 48 / 43 C, plastics and wood 60 / 48 / 43 C; the low end for children (unverified)
 - **[vanosPress]** Press coverage of Vanos's playground studies, via the block-8 brief: 60 C burns skin in 1 min, 74 C in 5 s, 77 C in 3 s (the standard behind it not named; unverified)
+- **[brief9]** Research brief docs/research/busstop-brief.md (block 9; values compiled from the sources below, items marked unverified there are flagged here; the shelter, footbridge and headway dimensions are assumptions of the brief; the 1 s contact-burn value for bare metal, about 65-70 C, is unverified)
+- **[dzyuban2022]** Dzyuban et al. (2022) International Journal of Biometeorology 66, 345, doi 10.1007/s00484-021-02074-4, Phoenix bus stops, June-July 2018 (via the block-9 brief): air 41.8 / 41.2 C, globe 52.0 / 44.3 C, PET 68.2 / 49.5 C in sun / shade; shade 19 C PET cooler on average (maximum PET 81.6 C); metal roof 20.6, ad panel 20.3, polycarbonate 18.2 C PET cooler, sparse vine not significant; stops without side panels worse; concrete 57.4 / 41.3 C, metal bench 47.7 / 40.4 C; most riders arrive less than 5 min before the bus (unverified)
+- **[lanza2025]** Lanza et al. (2025) Transportation Research Part D 140, 104653, doi 10.1016/j.trd.2025.104653, 17 bus stops in Houston (via the block-9 brief): tree shade 3.2 C WBGT cooler; enclosed shelters without overhead shade more than 3 C hotter than open sun (unverified)
+- **[chenWalk2024]** Chen et al. (2024) Sustainable Cities and Society 100, 105048, doi 10.1016/j.scs.2023.105048, a covered walkway in Hong Kong (via the block-9 brief): Tmrt 53.5-68.0 C on the open sidewalk vs 19.9-39.6 C under the cover (gap 19.8-34.8 K); PET 32.6-37.3 and 45.8-51.1 C (in that order in the brief); air -0.4 to 1.5 K; a footbridge raised street PET by up to 2.7 K (simulated) (unverified)
+- **[hyd047]** Highways Department, Hong Kong, Guidance Note BS/GN/047 (November 2018), via the block-9 brief: bus shelters opaque, translucent materials avoided; walkway covers translucent on at most 1/3 of the width at the sides; low headroom or wider covers and fascias; flat covers better than upward-sloped ones; check with a sun-shadow analysis (unverified)
+- **[brettMartin]** Brett Martin polycarbonate datasheet, 10 mm twinwall sheet (via the block-9 brief): solar transmission clear 0.80, opal 0.47, bronze 0.43; the solar heat gain coefficient is not the transmittance (unverified)
+- **[asuFilm]** Arizona State University radiative-cooling film on a bus shelter roof (via the block-9 brief): Tmrt 1-2 K lower, roof 10-20 F cooler (not peer reviewed, unverified)
+- **[sgWalkway]** Singapore covered walkways (secondary, via the block-9 brief): strong heat stress more than 77% of the time (unverified)
+- **[ucla]** UCLA study of Los Angeles Metro bus stops (via the block-9 brief): 26% of 10,526 stops sheltered (unverified)
+- **[fan2002]** Fan & Machemehl (2002) and a City University review, via the block-9 brief: passengers arrive at random for headways up to about 10-12 min, the mean wait is about half the headway (unverified)
+- **[fraser2017]** Fraser & Chester (2017) Journal of Transport & Health 4, 216 (via the block-9 brief): heat exposure and vulnerability of transit riders (unverified)
+- **[liu2025]** Liu et al. (2025) Journal of Transport Geography 128, 104383 (via the block-9 brief): walking to the stop adds more heat exposure than waiting at it (unverified)
+- **[cpsc]** US Consumer Product Safety Commission, via the block-9 brief: sunlit steel decks can burn bare skin in seconds (unverified)
+- **[deckSteel]** Steel bridge deck surfacing, Materials 18(13) 3109, doi 10.3390/ma18133109 (via the block-9 brief): steel deck surfacing 60-70 C in summer sun (unverified)
+- **[lasVegas]** Las Vegas surface measurements, via the block-9 brief: sunlit metal up to 62 C (unverified)
 - **[noaa]** NOAA Global Monitoring Laboratory, General Solar Position Calculations (solareqns.PDF)
 - **[brutsaert]** Brutsaert (1975) Water Resources Research 11(5) 742-744, clear-sky emissivity
 - **[meinel]** Meinel & Meinel (1976) Applied Solar Energy, clear-sky beam irradiance
@@ -331,6 +360,11 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Crumb-rubber infill** (campus only): Typical: Lab tests: SBR 53.5 °C against TPE 45.6 °C under the same lamp; a shock pad adds about 1.8 K, the blade colour 1–2 K. [singh2024]
 - **Contact-burn threshold** (campus only): Typical: 1 min of contact: metal 51 °C, stone and concrete 56 °C, plastics and wood 60 °C; 10 min: 48 °C for all of them; 8 h: 43 °C. The lower end for children (unverified, via CENELEC Guide 29). [iso13732]
 - **Shade sail** (campus only): Typical: Lets through about 10–30% of the sun (unverified); Gilbert, Arizona at noon: rubber 46.7 °C under a sail against 87.2 °C in sun; Lubbock: 168 W m⁻² less radiation absorbed by a child. [brief8, vanos2016, vanos2017]
+- **Solar transmittance (τ)** (busstop only): Typical: 10 mm twinwall polycarbonate: clear 0.80, opal 0.47, bronze 0.43 (a datasheet, unverified); opaque metal, PV and ad panels 0; the solar heat gain coefficient of a window is a different number. [brettMartin, brief9]
+- **Profile angle (φ)** (busstop only): Typical: At 35° N on 20 July the sun stands 61° high at 14:00 and 25° at 17:00, from the west-south-west to the west; a roof 1.45 m above a seated head must reach (that height) / tan φ past the head to shade it. [brief9]
+- **Headway** (busstop only): Typical: Here 10 min (an assumption of the brief, 5–15 min), with gaps spread by a coefficient of variation of 0.4 (0.3–0.5, unverified); riders who arrive at random then wait (h / 2)(1 + cv²) on average. [brief9, fan2002]
+- **Heat dose of a wait** (busstop only): Typical: No standard dose exists for a few minutes of waiting; the brief defines it on UTCI, which this engine does not compute, so the apparent temperature stands in. [brief9, bom]
+- **Contact-burn threshold (benches, rails, decks)** (busstop only): Typical: 1 min of contact: metal 51 °C, stone, concrete and glass 56 °C, plastics and wood 60 °C; 10 min: 48 °C; bare metal burns in about 1 s at 65–70 °C (unverified). [iso13732, brief9]
 - **Permeable paving** (sponge-retrofit only): Typical: Wetted permeable pavement 15–35 °C cooler than dense asphalt in the early afternoon, 2–7 °C cooler about a day later; dry porous asphalt about 5 °C warmer. [li2013]
 - **Green roof** (sponge-retrofit only): Typical: Albedo about 0.15–0.25; up to 18 °C cooler than a black roof in a New York case; Bowen ratio about 1–2. [brief2, noaaGreen, heusinger]
 - **Rain garden** (sponge-retrofit only): Typical: No measured cooling figure in our sources; this block uses engine assumptions (evaporative fraction 0.8 wet, 0.35 dry, 3-day drying). [engine, mccoll]
@@ -1943,3 +1977,310 @@ at 14–15 h, the night at 05:00, the irrigation from 14:00, Tmrt at noon.
   ≤ 5 K) are outside; each card that states the number says so. Reported, not tuned.
 - **Invented campus:** layout, the sail height, the play times and the play spots are assumptions; 20 July is a holiday,
   so the children are at a day camp.
+
+## Block 9: bus stops and footbridges
+
+The ninth block (`cities/busstop`) is an invented 400 m stretch of a north–south arterial (Station Avenue: 40 m of asphalt
+between 12 m concrete sidewalks) crossed by an east–west street (Market Street), with five bus stops of different designs
+and two steel footbridges 6 m up, on block 1's design day (35° N, 20 July, air 25–35 °C, wind 1.5 m/s, vapour pressure
+20 hPa). The stops: **A** an opaque metal roof on Market Street (back panel to the south), **B** a clear polycarbonate roof
+on the avenue's west kerb (back panel to the west), **C** an opal polycarbonate roof with a west end screen on Market
+Street, **D** no shelter, a bench under three street trees on the west kerb, **E** an enclosed glass box with a glass roof
+on Market Street. One footbridge is covered by an opaque roof, the other is open. Buses come to every stop on a headway
+schedule and riders wait for them; others cross the footbridges. The waiting places are `K`, the panel button or
+`?spots=1` (default off); the contact-burn flags are `U`, the panel button or `?burn=1` (default off). Its research
+brief is [`docs/research/busstop-brief.md`](research/busstop-brief.md).
+
+### Block 9 parameters
+
+The block's materials (`roofMetal`, `polyClear`, `polyOpal`, `glassBox`, `adPanel`, `bridgeDeck`, `bridgeRoof`)
+are in the parameter table above; they are cut from the other pages at build time (`@page busstop` in
+`engine/materials.js`). Only their transmission of direct sun (τ) is used. The sidewalks are the shared `concrete`, the
+roads `asphalt`, the park `grass`; the footbridge decks, the handrails and the metal bench seats are the shared dark
+metal thin layer `metal` (C 12 kJ m⁻² K⁻¹, inside the brief's 5–20 kJ), stop D's bench `concrete`. The glass of stop E
+has no value in the brief: 1 − ρ₀ − a_g of the block-3 clear float glass (0.82) is used, an *interpretation*. The block's
+own values live in `engine/busstop.js` (`BS`):
+
+| Parameter | Value |
+|---|---|
+| `shelterH` | 2.65 [brief9] *engine assumption (no source)*, unverified (roof height of the shelters, m; an assumption of the brief, 2.5-2.8 m, the middle value (the brief's worked example uses 2.7 m)) |
+| `shelterDepth` | 2 [brief9] *engine assumption (no source)*, unverified (shelter depth, m; an assumption of the brief, 1.5-2.5 m, the middle value) |
+| `shelterLength` | 7 [brief9] *engine assumption (no source)*, unverified (shelter length, m; an assumption of the brief, 4-10 m, the middle value) |
+| `deckH` | 6 [brief9] *cited range*, unverified (footbridge deck height, m; brief 5.5-6.5 m (unverified), the middle value; the cover is a shelter height above the deck) |
+| `headStand` | 1.7 [brief9] *cited value*, unverified (head height of a standing adult, m (the brief's geometry)) |
+| `headSeat` | 1.2 [brief9] *cited value*, unverified (head height of a seated adult, m (the brief's geometry)) |
+| `bodySamples` | 0.35, 0.65 and 1.0 of the head height [engine] *engine assumption (no source)*, unverified (the direct sun on the body for Tmrt is the mean of the sun shares at these heights (the head alone gives the shade check)) |
+| `skyAt` | 0.65 of the head height [engine] *engine assumption (no source)*, unverified (the sky view of a person under a roof is taken at this height (the roof's view factor from an upward-facing point)) |
+| `westScreen` | 2.2 [brief9] *cited value*, unverified (top of stop C's west end screen, m (the brief's worked example: a screen to 2.2 m)) |
+| `biggerRoof` | 1 [engine] *engine assumption (no source)*, unverified (the bigger roof of the headline comparison: 1 m more on every side of stop C's roof) |
+| `headway` | 10 [brief9] *engine assumption (no source)*, unverified (mean time between buses, min; an assumption of the brief, 5-15 min, the middle value) |
+| `cv` | 0.4 [brief9] *cited range*, unverified (coefficient of variation of the gaps between buses; brief 0.3-0.5 (unverified), the middle value; gaps h (1 + a (2u - 1)), a = cv sqrt(3)) |
+| `riders` | 0.4 [engine] *engine assumption (no source)*, unverified (riders arriving at each stop per minute (Poisson); engine assumption) |
+| `service` | 06:00-23:00 [engine] *engine assumption (no source)*, unverified (buses run from 06:00 to 23:00; engine assumption) |
+| `clock` | 12 [engine] *engine assumption (no source)*, unverified (the bus clock runs this many times faster than the animation, over the 15 min after the hour shown (drawing only; the statistics use the real clock)) |
+| `doseBase` | 32 [brief9] *interpretation of the source*, unverified (heat dose D = sum max(0, AT - 32) dt: the brief defines it on UTCI (engine definition); this engine has no UTCI, so the apparent temperature with radiation (block 4, [bom]) stands in, an interpretation) |
+| `burnMetal` | 51 [iso13732] *cited value*, unverified (1-min contact-burn threshold for bare metal (ISO 13732-1 via CENELEC Guide 29, via the briefs)) |
+| `burnStone` | 56 [iso13732] *cited value*, unverified (1-min threshold for stone, concrete, glass and ceramics (as above); the concrete bench of stop D) |
+| `burnPlastic` | 60 [iso13732] *cited value*, unverified (1-min threshold for plastics and wood (as above); quoted on the card, no plastic surface is modelled) |
+| `burn1s` | 65 [brief9] *edge of cited range*, unverified (about 1 s of contact for bare metal at 65-70 C (unverified, via the brief); the low end, as the brief's band 7 names it, so the flag errs early) |
+| `benchZ` | 0.45 [engine] *engine assumption (no source)*, unverified (bench seat height, m; engine assumption) |
+| `railZ` | 1.1 [engine] *engine assumption (no source)*, unverified (handrail height above the deck, m; engine assumption) |
+
+### The waiting-point model
+
+Shelters are 2 m deep on a 5 m grid, so a grid cell cannot tell a seat under the roof from the kerb in front of it [brief9].
+The grid model runs as everywhere else (the roofs and decks are flat screens with their τ, the opaque panels thin opaque
+boxes for the ground shade), and every waiting place, each stop's centre and a reference point in the open, the bench
+seats, 7 points along each deck and a handrail point per bridge (83 points) are computed again at points (`engine/busstop.js`):
+
+- **Direct sun at a point** (x, y, z): the ray toward the sun is tested against the buildings (boxes), the tree crowns (the
+  grid's crown shadow ellipse, seen from z; transmission 0.17, at most three crowns), every flat roof above the point (it
+  passes τ where the ray crosses the roof plane inside the roof) and every vertical panel (τ where it crosses the panel).
+  For a person, the share of the sun on the body is the mean at 0.35, 0.65 and 1.0 of the head height; the head alone gives the
+  shade check (heads 1.7 m standing, 1.2 m seated).
+- **Sky view at a point**: the buildings' horizon (`svfAt` from the point's height) × (1 − 0.75 crown cover) × (1 − F),
+  F the view factor of the roofs above from an upward-facing point (rectangle corner formula). A roof counts as full cover
+  whatever its τ, as the sails and PV canopies of blocks 6 and 8: its underside is the engine's warm wall (air + 2 K, more
+  by day).
+- **Ground and Tmrt**: the points run the same force-restore model as a grid cell (a one-row "world" of points, each with
+  its own sun share and sky view, `runModel` with `opts.cells`); Tmrt is the engine's six-direction sum (`Thermal.tmrt`)
+  with the body's sun share and the sky view at 0.65 of the head height.
+
+### Stops
+
+Tmrt of an adult (°C; standing at the centre and in the open, seated on the bench) at 12:00 / 15:00 / 17:00, the concrete
+under the centre and in the open and the bench seat at 15:00 (°C), and the sky view (centre / open):
+
+| Stop | centre | bench | open | concrete 15:00 | bench 15:00 | SVF |
+|---|---|---|---|---|---|---|
+| A | 36.0 / 36.3 / 47.0 | 40.8 / 66.8 / 61.1 | 67.5 / 70.2 / 61.8 | 33.6 / 56.0 | 37.3 (metal) | 0.65 / 0.82 |
+| B | 62.8 / 45.4 / 35.1 | 62.1 / 38.0 / 39.5 | 67.1 / 66.6 / 46.6 | 42.9 / 54.0 | 36.0 (metal) | 0.66 / 0.85 |
+| C | 52.8 / 54.6 / 50.2 | 51.8 / 44.7 / 33.8 | 67.8 / 70.5 / 62.1 | 44.5 / 56.2 | 51.9 (metal) | 0.60 / 0.78 |
+| D | — | 48.8 / 43.6 / 38.4 | 66.6 / 69.1 / 39.4 | — / 55.1 | 40.8 (concrete) | — / 0.98 |
+| E | 63.4 / 66.1 / 59.1 | 62.8 / 65.3 / 58.1 | 67.4 / 70.1 / 61.7 | 52.3 / 55.9 | 62.6 (metal) | 0.62 / 0.80 |
+
+Riders arriving 15:00–16:00 and 12:00–13:00 (mean wait in min, mean Tmrt while waiting in °C, mean heat dose in K·min, share
+of the waits with the head in direct sun):
+
+| Stop | n 15–16 h | wait | Tmrt | dose | head in sun | n 12–13 h | Tmrt | dose |
+|---|---|---|---|---|---|---|---|---|
+| A | 25 | 4.9 | 41.8 | 30.5 | 12% | 28 | 38.6 | 27.1 |
+| B | 22 | 5.8 | 38.9 | 32.9 | 14% | 23 | 62.1 | 69.9 |
+| C | 30 | 4.9 | 50.9 | 47.0 | 10% | 23 | 55.3 | 57.9 |
+| D | 24 | 5.4 | 37.4 | 29.2 | 0% | 24 | 56.1 | 89.4 |
+| E | 24 | 6.0 | 64.6 | 92.6 | 100% | 18 | 63.8 | 97.7 |
+
+At 15:00 the opaque roof of stop A takes 33.9 K of Tmrt off a person standing under it (Tempe: building shade −28.8 K,
+tree −28.1 K [middel2021]; Phoenix: shade −19 °C PET [dzyuban2022]), but its seat at the open west end gets the low sun from
+the side. The trees of stop D cut 25.5 K on the bench. The glass box (stop E) cuts only 4.0 K: its glass passes
+0.82 of the sun from above and the sides (Houston: enclosed shelters without overhead shade more than 3 °C WBGT hotter than
+the open sun [lanza2025], mostly from the trapped air, which is not modelled).
+
+### West screen against a bigger roof
+
+Stop C's four bench places (seated heads), Tmrt (°C) and, in brackets, the share of heads with more than half the sun on
+them (point model):
+
+| Stop C | 14:00 | 15:00 | 16:00 | 17:00 |
+|---|---|---|---|---|
+| as built: opal roof and the west screen | 53.8 (0%) | 51.9 (25%) | 48.4 (0%) | 42.8 (25%) |
+| the same roof, no screen | 57.0 (0%) | 58.1 (25%) | 58.2 (25%) | 54.7 (50%) |
+| a roof 1 m bigger on every side, no screen | 55.8 (0%) | 56.8 (0%) | 56.6 (0%) | 53.3 (25%) |
+
+The screen to 2.2 m is cooler than the bigger roof at 14:00, 15:00, 16:00, 17:00; at 17:00 by 10.6 K. The brief:
+between 14 and 17 h the low western sun gets under any roof, so the west side needs a vertical screen [brief9]; Hong Kong's
+guidance asks for fascias and a sun-shadow check [hyd047]. A band of sun still passes between the top of the screen and the
+roof.
+
+### Which kerb
+
+Stop B's shelter with an opaque roof, as built on the west kerb and mirrored onto the east kerb (open front to the west),
+Tmrt seated / standing under the roof (°C):
+
+| Shelter | 12:00 | 14:00 | 15:00 | 16:00 | 17:00 |
+|---|---|---|---|---|---|
+| west kerb | 37.1 / 47.2 | 36.7 / 46.0 | 35.9 / 45.9 | 34.5 / 43.6 | 38.6 / 45.9 |
+| east kerb | 36.3 / 43.8 | 36.5 / 64.5 | 60.3 / 68.8 | 65.2 / 66.9 | 60.8 / 61.7 |
+
+On a north–south street the west-kerb stop's back panel blocks the afternoon sun and the east-kerb stop's open front takes
+it [brief9].
+
+### Roofs: transmittance
+
+Stop A's shelter with each roof (the same panel, the same place), Tmrt at its centre at 15:00 (standing), the cut against
+the open reference (70.2 °C), the share of the opaque roof's cut, and the concrete under the centre:
+
+| Roof | Tmrt °C | cut K | share | concrete °C |
+|---|---|---|---|---|
+| opaque metal (τ 0) | 36.3 | 33.9 | 1.00 | 33.6 |
+| clear polycarbonate (τ 0.80) | 65.4 | 4.8 | 0.14 | 52.1 |
+| opal polycarbonate (τ 0.47) | 54.2 | 16.0 | 0.47 | 44.6 |
+| bronze polycarbonate (τ 0.43, not in the scene) | 52.8 | 17.4 | 0.51 | 43.6 |
+
+The datasheet transmissions [brettMartin] are used as a share of the **direct** beam; the sheet's diffuse light is not
+counted (the roof counts as cover for the sky view). An opal sheet scatters what it lets through, so less of it reaches a
+standing body's sides than the model's beam gives: likely why opal comes out at 0.47 of the opaque cut, just under the
+brief's 0.50–0.65 (band 2 **missed**); bronze (τ 0.43) is inside.
+
+### Buses, riders and the heat dose
+
+Buses come every 10 min with gaps h (1 + a (2u − 1)), u uniform, a = cv √3 (cv 0.4), from 06:00 to 23:00; riders
+arrive at random (exponential gaps, 0.4 a minute at each stop) and board the next bus (`daySchedule`, a pure function of the
+seed and the stop). For random arrivals E[W] = (h / 2)(1 + cv²) = 5.80 min [brief9], [fan2002]; simulated: 5.74 min over
+2082 riders (A 5.85, B 5.51, C 5.20, D 6.19, E 5.95). When it is hot (air above 28 °C, by day) a rider takes the free waiting place with
+the lowest Tmrt at that moment, else the first free one (the bench first). On the page the bus clock runs 12 times faster than the
+animation over the 15 min after the hour shown, looping.
+
+The heat dose of a wait is the engine's definition [brief9]: D = Σ max(0, AT − 32) Δt, in 1-min steps (K·min). The brief writes it
+on UTCI, which this engine does not compute; the apparent temperature with radiation of block 4 stands in for it
+(AT = Ta + 0.348 e − 0.70 ws + 0.70 Q / (ws + 10) − 4.25, Q = 6.1 (Tmrt − Ta) [bom], ws the site wind 1.5 m/s), an *interpretation*.
+No standard heat dose exists for a few minutes of waiting [brief9]; it compares stops, it is not a measure of risk.
+
+### Footbridges
+
+| | 12:00 | 15:00 | 17:00 | daily peak |
+|---|---|---|---|---|
+| Tmrt, open deck (mean of 7 points), °C | 70.0 | 69.6 | 58.3 | |
+| Tmrt, covered deck, °C | 37.5 | 37.9 | 37.1 | |
+| steel deck, open, °C | 75.7 | 67.1 | 48.5 | 76.2 |
+| steel deck, covered, °C | 34.9 | 36.3 | 36.6 | 40.9 |
+| handrail, open bridge, °C | 75.7 | 67.1 | 48.5 | 76.2 |
+| handrail, covered bridge (south edge), °C | 76.4 | 68.2 | 34.2 | 77.0 |
+
+At 15:00 the cover takes 31.7 K of Tmrt off a person on the deck (Hong Kong covered walkway: 19.8–34.8 K [chenWalk2024]). The open
+steel deck peaks at 76.2 °C, above the 60–70 °C measured for steel deck surfacing [deckSteel] (supplementary, not counted): likely
+because the plate is heated from above and loses no heat from below in this thin-layer model, so deck and rail temperatures
+are upper bounds. The covered bridge's south handrail still gets the sun under the eaves.
+
+### Contact burns
+
+ISO 13732-1 via CENELEC Guide 29 [iso13732], 1 min of contact: metal 51 °C, stone, concrete and glass 56 °C, plastics and wood
+60 °C; bare metal in about 1 s at 65–70 °C (unverified [brief9]; the flag at 65 °C, the low end). Display only. At 15:00:
+
+| Surface | °C | 1-min limit | above it | 1-s flag |
+|---|---|---|---|---|
+| bench seat, stop A (metal) | 37.3 | 51 | no | no |
+| bench seat, stop B (metal) | 36.0 | 51 | no | no |
+| bench seat, stop C (metal) | 51.9 | 51 | yes | no |
+| bench seat, stop D (concrete) | 40.8 | 56 | no | no |
+| bench seat, stop E (metal) | 62.6 | 51 | yes | no |
+| deck, mid-span, covered footbridge (metal) | 36.2 | 51 | no | no |
+| handrail, covered footbridge (metal) | 68.2 | 51 | yes | yes |
+| deck, mid-span, open footbridge (metal) | 67.1 | 51 | yes | yes |
+| handrail, open footbridge (metal) | 67.1 | 51 | yes | yes |
+
+11 of 21 bench, rail and deck points carry the 1-min flag at 15:00, 9 the 1-s flag. Sunlit steel decks can burn in seconds
+[cpsc]; sunlit metal reached 62 °C in Las Vegas [lasVegas]; the brief advises reading at least 4 s of contact for older
+people and children.
+
+### Walkers and riders
+
+Walkers use the shade weights of blocks 1–8 on two sidewalk variants per route [melnikov]; at 15:00 their density in shade is
+1.16 times that in sun, short of the 2 the other blocks reach: likely because both sidewalks of each street have the same rows
+of street trees and little building shade in the afternoon, so the choice between them changes little. Riders choose their
+waiting place by Tmrt: 74% of the 125 riders arriving 15:00–16:00 wait with the head in shade. Riders crossing the
+footbridges carry the deck's point-model heat. The sweat cue is as before (Tmrt 65–70 °C in sun).
+
+### Sensitivity
+
+One value at a time, within the brief's ranges:
+
+| Stop A's shelter | Tmrt cut at 15:00 | under the roof − air | concrete under it − air |
+|---|---|---|---|
+| shipped (H 2.65 m, depth 2 m) | +33.9 K | +1.3 K | −1.4 K |
+| roof height 2.5 m | +33.7 K | +1.5 K | −1.4 K |
+| roof height 2.8 m | +34.1 K | +1.1 K | −1.4 K |
+| depth 1.5 m | +34.3 K | +0.6 K | −1.7 K |
+| depth 2.5 m | +33.9 K | +1.7 K | −1.2 K |
+
+| Buses | simulated mean wait | formula | ratio |
+|---|---|---|---|
+| shipped (h 10 min, cv 0.4) | 5.74 min | 5.80 min | 0.99 |
+| headway 5 | 2.88 min | 2.90 min | 0.99 |
+| headway 15 | 8.56 min | 8.70 min | 0.98 |
+| cv 0.3 | 5.36 min | 5.45 min | 0.98 |
+| cv 0.5 | 6.12 min | 6.25 min | 0.98 |
+
+| Steel (open bridge) | deck 15:00 | deck daily peak | handrail peak |
+|---|---|---|---|
+| shipped, C 12 kJ m⁻² K⁻¹ | 67.1 °C | 76.2 °C | 76.2 °C |
+| thin metal C 5 kJ m⁻² K⁻¹ | 66.4 °C | 76.2 °C | 76.2 °C |
+| thin metal C 20 kJ m⁻² K⁻¹ | 67.8 °C | 76.1 °C | 76.1 °C |
+
+| Deck height | Tmrt open − covered at 15:00 |
+|---|---|
+| shipped, 6 m | +31.7 K |
+| deck 5.5 m | +31.6 K |
+| deck 6.5 m | +31.7 K |
+
+Band 2 (opal) closes with the bronze sheet (τ 0.43, its own datasheet value, not in the scene); no shelter height or depth in
+the brief's ranges brings the shaded concrete (band 3) up to the air. The deck's peak barely moves with C: a thin layer in
+full sun sits near its radiative balance whatever its heat capacity.
+
+### Acceptance bands (block 9)
+
+Evaluated at 15:00, the air's peak (the brief's bands are for Ta peak 35 °C), unless the band names its hours: the shadow
+shift at 14–17 h, the wait over the whole service day. Band 4 checks the engine's sun (`sun.js`, NOAA's fractional-year
+form) against the brief's NOAA table: the gap is the engine approximation (about 0.2° at noon, issue #24), well inside
+0.25 m here.
+
+| Check (spec #14) | Model | Band | Source | |
+|---|---|---|---|---|
+| 1. Opaque shelter (stop A) at 15:00, standing: Tmrt at the kerb − under the roof (centre), K | 33.91 K | 20 to 35 | middel2021 | inside |
+| 1. The same: Tmrt under the roof − air, K | 1.25 K | 0 to 15 | brief9 | inside |
+| 1. Supplementary: stop B (clear roof, centre) at 15:00, Tmrt at the kerb − under the roof, K | 21.16 K | 20 to 35 | middel2021 | inside (supplementary, not counted) |
+| 1. Supplementary: stop D (trees, on the bench) at 15:00, Tmrt at the kerb − on the bench, K | 25.47 K | 20 to 35 | middel2021 | inside (supplementary, not counted) |
+| 1. Supplementary: stop E (glass box, centre) at 15:00, Tmrt at the kerb − under the roof, K | 4.00 K | 20 to 35 | middel2021 | outside (supplementary, not counted) |
+| 2. Stop A's shelter with a clear polycarbonate roof (τ 0.80): share of the opaque roof's Tmrt cut at 15:00 | 0.140 | ≤ 0.3 | brief9 | inside |
+| 2. The same with an opal roof (τ 0.47): share | 0.471 | 0.5 to 0.65 | brief9 | **outside** |
+| 2. Supplementary: the same with a bronze roof (τ 0.43, not in the scene): share | 0.513 | 0.5 to 0.65 | brief9 | inside (supplementary, not counted) |
+| 3. Concrete at 15:00: at the kerb − under stop A's roof, K | 22.46 K | ≥ 10 | dzyuban2022 | inside |
+| 3. Concrete under stop A's roof − air at 15:00, K | -1.42 K | 0 to 8 | dzyuban2022 | **outside** |
+| 4. Roof shadow shift at 14:00 (H 2.65 m, sun.js), m (H·cot β 1.458 m from the brief's NOAA table) | 1.45 m | 1.208 to 1.708 | noaa | inside |
+| 4. Roof shadow shift at 15:00 (H 2.65 m, sun.js), m (H·cot β 2.279 m from the brief's NOAA table) | 2.27 m | 2.029 to 2.529 | noaa | inside |
+| 4. Roof shadow shift at 16:00 (H 2.65 m, sun.js), m (H·cot β 3.498 m from the brief's NOAA table) | 3.49 m | 3.248 to 3.748 | noaa | inside |
+| 4. Roof shadow shift at 17:00 (H 2.65 m, sun.js), m (H·cot β 5.697 m from the brief's NOAA table) | 5.69 m | 5.447 to 5.947 | noaa | inside |
+| 4. Supplementary: shadow shift per m at 14:00, east (brief 0.51), m | 0.51 m | 0.49 to 0.53 | noaa | inside (supplementary, not counted) |
+| 4. Supplementary: shadow shift per m at 14:00, north (brief 0.21), m | 0.20 m | 0.19 to 0.23 | noaa | inside (supplementary, not counted) |
+| 4. Supplementary: shadow shift per m at 17:00, east (brief 2.12), m | 2.12 m | 2.1 to 2.14 | noaa | inside (supplementary, not counted) |
+| 4. Supplementary: shadow shift per m at 17:00, north (brief -0.33), m | -0.33 m | -0.35 to -0.31 | noaa | inside (supplementary, not counted) |
+| 5. Simulated mean wait (2082 riders, all stops, the whole day) over (h / 2)(1 + cv²) = 5.80 min | 0.990 | 0.9 to 1.1 | fan2002 | inside |
+| 5. Supplementary: stop A (428 riders) | 1.009 | 0.9 to 1.1 | fan2002 | inside (supplementary, not counted) |
+| 5. Supplementary: stop B (428 riders) | 0.950 | 0.9 to 1.1 | fan2002 | inside (supplementary, not counted) |
+| 5. Supplementary: stop C (415 riders) | 0.897 | 0.9 to 1.1 | fan2002 | outside (supplementary, not counted) |
+| 5. Supplementary: stop D (430 riders) | 1.067 | 0.9 to 1.1 | fan2002 | inside (supplementary, not counted) |
+| 5. Supplementary: stop E (381 riders) | 1.025 | 0.9 to 1.1 | fan2002 | inside (supplementary, not counted) |
+| 6. Footbridge decks at 15:00: Tmrt on the open − the covered deck (mean of 7 points each), K | 31.65 K | 20 to 35 | chenWalk2024 | inside |
+| 6. Supplementary: the same at mid-span, K | 31.75 K | 20 to 35 | chenWalk2024 | inside (supplementary, not counted) |
+| 7. Surfaces at 15:00 (21 bench, rail and deck points) whose 1-min flag disagrees with its ISO 13732-1 limit | 0.000 | 0 | iso13732 | inside |
+| 7. Metal surfaces at 15:00 whose 1-s flag disagrees with ≈65 °C | 0.000 | 0 | brief9 | inside |
+| 7. Supplementary: open steel deck, daily peak (mean of the deck points), °C | 76.21 °C | 60 to 70 | deckSteel | outside (supplementary, not counted) |
+| Riders arriving 15:00–16:00 (n 125) waiting with their head in shade | 0.736 | ≥ 0.5 | melnikov | inside |
+| Walkers at 15:00: density in shade over density in sun | 1.162 | ≥ 2 | melnikov | **outside** |
+
+3 of 16 counted checks fall outside their band; 15 supplementary rows are not counted. By the brief's bands: 5 of 7 met (1, 4, 5, 6, 7); missed: 2, 3. They are reported, not tuned away: every input is the brief's central value (or the shared value the brief names), set before the first model run.
+
+### Disclosures (block 9)
+
+- **Air fixed:** no warm air trapped in the glass box (Lanza et al. found enclosed shelters without overhead shade more than
+  3 °C WBGT hotter than the open sun [lanza2025]), no bus exhaust, no misting, no wind shelter; inside stop E is understated.
+- **Panels and glass:** walls and panels reflect no sunlight; their own temperature is not computed; no greenhouse effect;
+  the glass passes 0.82 of the beam at every angle (less at a glancing angle). Translucent roofs pass their τ as direct beam
+  and their diffuse light is not counted (the roof counts as cover for the sky view).
+- **Sub-cell shade check:** the waiting places, decks, rails and benches are points; the 5 m grid around them sees only the
+  roofs, the decks and the opaque panels (not the glass walls). The ground under a point has no lateral heat exchange with
+  the sunlit slab around it.
+- **Conditions while waiting:** Tmrt is a steady-state value for an adult (head 1.7 m standing, 1.2 m seated); the model does
+  not follow a body heating up over a wait. The heat dose is the engine's own measure, on the apparent temperature (UTCI is
+  not implemented), not a health threshold; the stairs' extra effort is not modelled.
+- **Thin plates:** decks, handrails and bench seats are horizontal thin layers heated from above only (no cooling from below
+  or round a tube), so their temperatures are upper bounds; the open deck's peak (76.2 °C) is above the measured 60–70 °C.
+- **Burn limits depend on the material and the contact time:** the 1-min ISO limits are for healthy adult skin; the 1-s value
+  for bare metal is unverified; flags are display only.
+- **Misses:** band 2 (opal 0.47 of the opaque cut, against 0.50–0.65), band 3 (concrete under stop A's roof −1.4 K from the air at
+  15:00, against 0–8 K above it; likely the missing lateral conduction from the sunlit slab around a 2 m strip) and the
+  walkers' shade ratio (1.16, against 2) are outside; each card that states the number says so. Reported, not tuned.
+- **Engine sun:** `sun.js` uses NOAA's fractional-year approximation (about 0.2° off at noon, issue #24); against the brief's
+  table the shadow shifts at 14–17 h differ by at most 0.01 m.
+- **Invented street:** layout, the stops' places, the rider rate, the bus clock and the bigger roof of the comparison are
+  assumptions.
