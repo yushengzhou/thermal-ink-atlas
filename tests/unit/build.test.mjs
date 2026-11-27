@@ -74,3 +74,52 @@ test('external-reference rule: allow-listed relative links pass; schemes, hosts,
   for (const other of ['<script src="a.js"></script>', '<style>@import "x.css";</style>', '<div style="background:url(x.png)"></div>', 'fetch("//example.com/x")'])
     assert.ok(externalRefs(other, page).length > 0, other);
 });
+
+// ---- the shared core's budget, and the per-page SOURCES cut ------------------------
+// Every page carries the shared core (engine modules that are not a block's
+// own, the shell, the stubs, and the per-page cut of materials.js and
+// glossary.js). Blocks 7-12 must still fit under 500 KB, so the core may not
+// grow past this budget; a block's own code belongs in its own modules.
+const CORE_BUDGET = 290000; // bytes; largest core at the time of setting: 283,013 B (waterfront)
+
+test(`the shared core stays under its budget (${CORE_BUDGET} bytes on every page)`, async () => {
+  const { coreBytes } = await import('../../scripts/build.mjs');
+  for (const c of CITIES) {
+    const b = coreBytes(c);
+    console.log(`${c}: shared core ${b} B`);
+    assert.ok(b <= CORE_BUDGET, `${c}: shared core ${b} B over the ${CORE_BUDGET} B budget (move block-only code into the block's modules)`);
+  }
+});
+
+test('every page bundles each source key its heat cards and cards can show (and drops the rest)', async () => {
+  const { SOURCES, MATERIALS, GLASS } = await import('../../engine/materials.js');
+  const { buildWorld } = await import('../../engine/world.js');
+  const { cellMat } = await import('../../engine/thermal.js');
+  const { sceneState, stateMaterials } = await import('../../engine/retrofit.js');
+  const src = (o) => Object.values(o).filter((p) => p && typeof p === 'object' && 'source' in p).map((p) => p.source);
+  for (const c of CITIES) {
+    const html = readFileSync(file(c), 'utf8');
+    const block = /const SOURCES = \{\n([\s\S]*?)\n\};/.exec(html)[1];
+    const bundled = new Set([...block.matchAll(/^ {2}(\w+): /gm)].map((m) => m[1]));
+    const { SCENE } = await import(`../../cities/${c}/scene.js`);
+    const need = new Set();
+    // heat cards: every ground cell, roof and tree of each drawn state, with that state's material table
+    const states = SCENE.retrofit ? ['before', 'after'].map((w) => sceneState(SCENE, w)) : [SCENE];
+    const tables = SCENE.retrofit ? [0, 3, 7].flatMap((d) => [stateMaterials(d, true), stateMaterials(d, false)]) : [MATERIALS];
+    for (const S of states) {
+      const w = buildWorld(S, { svf: false });
+      const ids = new Set();
+      for (let i = 0; i < w.n * w.n; i++) ids.add(cellMat(w, i));
+      for (const t of w.trees) ids.add(t.species ?? (t.young ? 'youngCanopy' : 'canopy'));
+      for (const id of ids) for (const T of tables) if (T[id]) src(T[id]).forEach((k) => need.add(k));
+    }
+    if (SCENE.glassBlock) Object.values(GLASS).forEach((g) => src(g).forEach((k) => need.add(k)));
+    // card source lines: srcLine([...]) in the page's own modules
+    for (const m of html.matchAll(/srcLine\(\[([^\]]*)\]\)/g)) for (const k of m[1].matchAll(/'(\w+)'/g)) need.add(k[1]);
+    const missing = [...need].filter((k) => k in SOURCES && !bundled.has(k));
+    assert.deepEqual(missing, [], `${c}: source keys a card can show but the page does not carry`);
+    assert.ok(bundled.size < Object.keys(SOURCES).length, `${c}: carries every source key`);
+    // and no parameter notes: v(value, source, basis, verified) only
+    assert.ok(!/\bv\([^()\n]*,\s*(?:true|false),\s*'/.test(html), `${c}: a parameter note was bundled`);
+  }
+});
