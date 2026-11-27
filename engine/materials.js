@@ -133,7 +133,7 @@ export const MATERIALS = {
 Object.assign(MATERIALS, {
   coolroofAged: {
     name: 'Cool roof, aged',
-    alpha: v(0.6, 'chicago', 'range', false, 'aged cool roofs 0.50-0.70; 0.60-0.70 unverified (brief)'),
+    alpha: v(0.6, 'brief2', 'range', false, 'brief: aged cool roofs 0.50-0.70, of which 0.60-0.70 unverified; Chicago code floor: 3-year aged >= 0.50 [chicago]'),
     eps: v(0.88, 'lbnlRoof', 'cited', false),
     mu: v(450, 'brief', 'range', false, 'same build-up as the dark membrane'),
     ef: v(0, 'brief', 'cited', false, 'dry impervious'),
@@ -141,7 +141,7 @@ Object.assign(MATERIALS, {
   },
   coolroofNew: {
     name: 'Cool roof, new',
-    alpha: v(0.8, 'lbnlRoof', 'cited', true, 'new white roof about 0.80'),
+    alpha: v(0.8, 'lbnlRoof', 'cited', false, 'new white roof about 0.80; read second-hand via the compendium, so unverified as in block 1'),
     eps: v(0.88, 'lbnlRoof', 'cited', false),
     mu: v(450, 'brief', 'range', false, 'same build-up as the dark membrane'),
     ef: v(0, 'brief', 'cited', false, 'dry impervious'),
@@ -153,8 +153,8 @@ Object.assign(MATERIALS, {
     eps: v(0.95, 'brief2', 'cited', false),
     mu: v(600, 'brief2', 'cited', false, 'dry substrate; wet 1200, decays with tau'),
     muWet: v(1200, 'brief2', 'cited', false, 'wet substrate'),
-    ef: v(0.25, 'heusinger', 'interp', false, 'dry; Bowen ratio up to about 2-3'),
-    efWet: v(0.5, 'heusinger', 'interp', false, 'wet; Bowen ratio about 1'),
+    ef: v(0.25, 'brief2', 'interp', false, 'dry; the brief\'s value. Heusinger & Weber report Bowen ratio <1-2'),
+    efWet: v(0.5, 'heusinger', 'interp', false, 'wet; Bowen ratio about 1 (Heusinger & Weber: <1-2)'),
     tau: v(4, 'brief2', 'cited', false, 'substrate drying time, days'),
     storage: v(30, 'brief2', 'range', false, '100 mm substrate holds 20-40 mm'),
     note: 'Sedum and thin soil over the roof: plants and wet substrate spend sunshine on evaporation, more so soon after rain.',
@@ -164,10 +164,10 @@ Object.assign(MATERIALS, {
     alpha: v(0.26, 'li2013', 'cited', true),
     eps: v(0.92, 'brief2', 'cited', false),
     mu: v(870, 'engine', 'engine', false, 'dry, assumed'),
-    ef: v(0.02, 'brief2', 'interp', false, 'dry; calibrated to Li 2013'),
-    efWet: v(0.5, 'brief2', 'interp', false, 'wet; calibrated to Li 2013'),
-    tau: v(1, 'brief2', 'interp', false, 'days; calibrated to Li 2013'),
-    storage: v(5, 'brief2', 'interp', false, 'brief: "a few mm"'),
+    ef: v(0.02, 'brief2', 'interp', false, 'dry; brief value'),
+    efWet: v(0.5, 'brief2', 'interp', false, 'wet; brief value'),
+    tau: v(1, 'brief2', 'interp', false, 'days; the brief calls it calibrated to Li 2013, but in this model it does not reproduce Li at d = 1 (see docs/sources.md)'),
+    storage: v(5, 'brief2', 'interp', false, 'brief: "a few mm", read as 5 mm; the daily water check needs >= 4.1 mm'),
     note: 'Pavers with open joints let rain soak in; the water evaporates over the next day or two and cools them while it lasts.',
   },
   porousAsphalt: {
@@ -178,7 +178,7 @@ Object.assign(MATERIALS, {
     ef: v(0.02, 'brief2', 'interp', false, 'dry; as pavers'),
     efWet: v(0.5, 'brief2', 'interp', false, 'wet; as pavers'),
     tau: v(1, 'brief2', 'interp', false, 'days; as pavers'),
-    storage: v(5, 'brief2', 'interp', false, 'brief: "a few mm"'),
+    storage: v(5, 'brief2', 'interp', false, 'brief: "a few mm", read as 5 mm; the daily water check needs >= 4.1 mm'),
     note: 'Open-graded asphalt that drains rain: cooler while wet, but once dry it is darker and lighter-weight than dense asphalt, so it runs hotter.',
   },
   coolPaveAged: {
@@ -229,6 +229,7 @@ export const MODEL = {
   treeShadeWeight: v(0.92, 'melnikov', 'interp', false, 'tree shade ~half as effective as building shade, read as half the 16% benefit'),
   shadeHeatRamp: v('26 -> 32 C', 'engine', 'engine', false, 'shade benefit scales linearly from none at air <= 26 C to full at >= 32 C'),
   youngTreeTransmission: v(0.47, 'brief2', 'interp', false, 'exp(-0.5 LAI) with LAI 1.5; brief range 0.37-0.61 for LAI 1-2'),
+  youngTreeCrown: v('crown radius 2.6 m, crown centre 4.4 m', 'engine', 'engine', false, 'scene assumption for newly planted street trees (cities/sponge-retrofit/scene.js)'),
   latentHeat: v('2.45e6 J kg-1', 'brief2', 'cited', true, 'evaporated depth = sum of EF x max(Q*, 0) x dt / 2.45e6'),
   sweatCue: v('Tmrt 65 -> 70 C', 'engine', 'engine', false, 'visual cue only: droplets on people in sun, strength rising from Tmrt 65 C to full at 70 C (separates sunlit pavement from sunlit lawn in this model); no physiological model'),
 };

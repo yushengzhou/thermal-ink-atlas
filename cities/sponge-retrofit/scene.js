@@ -18,6 +18,8 @@ function ellipse(cx, cy, rx, ry, n = 24) {
   return p;
 }
 
+// Young street trees: crown radius 2.6 m and centre height 4.4 m are scene
+// (engine) assumptions; tr 0.47 is MODEL.youngTreeTransmission (brief, LAI 1.5).
 const YOUNG = { r: 2.6, zc: 4.4, tr: 0.47, young: true, after: true };
 
 export const SCENE = {

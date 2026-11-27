@@ -27,11 +27,11 @@ the sources listed below without checking them.
 | Dark metal roof (`metal`) | 0.15 [oke] *cited range*, unverified (cited 0.10-0.25) | 0.9 [brief] *cited value*, unverified (~0.9 painted) | C 12000 J m⁻² K⁻¹ [brief] *cited range*, unverified (thin layers 5-20 kJ m-2 K-1) | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Cool (white) roof (`coolroof`) | 0.8 [epa] *edge of cited range*, unverified (cited >=0.65 new, 0.5-0.6 aged; 0.80 is a new, clean white roof) | 0.88 [epa] *cited range*, unverified (cited 0.85-0.90) | μ 450 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (same build-up as the dark membrane) | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Tree canopy (`canopy`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.7 [brief] *cited range*, unverified (cited 0.6-0.8) | — |
-| Cool roof, aged (`coolroofAged`) | 0.6 [chicago] *cited range*, unverified (aged cool roofs 0.50-0.70; 0.60-0.70 unverified (brief)) | 0.88 [lbnlRoof] *cited value*, unverified | μ 450 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (same build-up as the dark membrane) | 0 [brief] *cited value*, unverified (dry impervious) | — |
-| Cool roof, new (`coolroofNew`) | 0.8 [lbnlRoof] *cited value* (new white roof about 0.80) | 0.88 [lbnlRoof] *cited value*, unverified | μ 450 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (same build-up as the dark membrane) | 0 [brief] *cited value*, unverified (dry impervious) | — |
-| Extensive green roof (`greenroof`) | 0.2 [brief2] *cited range*, unverified (cited 0.15-0.25) | 0.95 [brief2] *cited value*, unverified | μ 600 J m⁻² s⁻½ K⁻¹ [brief2] *cited value*, unverified (dry substrate; wet 1200, decays with tau) | dry 0.25 [heusinger] *interpretation of the source*, unverified (dry; Bowen ratio up to about 2-3) | EF wet 0.5 [heusinger] *interpretation of the source*, unverified (wet; Bowen ratio about 1); μ wet 1200 J m⁻² s⁻½ K⁻¹ [brief2] *cited value*, unverified (wet substrate); τ 4 d [brief2] *cited value*, unverified (substrate drying time, days); storage 30 mm [brief2] *cited range*, unverified (100 mm substrate holds 20-40 mm) |
-| Permeable pavers (`pavers`) | 0.26 [li2013] *cited value* | 0.92 [brief2] *cited value*, unverified | μ 870 J m⁻² s⁻½ K⁻¹ [engine] *engine assumption (no source)*, unverified (dry, assumed) | dry 0.02 [brief2] *interpretation of the source*, unverified (dry; calibrated to Li 2013) | EF wet 0.5 [brief2] *interpretation of the source*, unverified (wet; calibrated to Li 2013); τ 1 d [brief2] *interpretation of the source*, unverified (days; calibrated to Li 2013); storage 5 mm [brief2] *interpretation of the source*, unverified (brief: "a few mm") |
-| Porous asphalt (`porousAsphalt`) | 0.08 [li2013] *cited value* | 0.95 [brief2] *cited value*, unverified | μ 800 J m⁻² s⁻½ K⁻¹ [engine] *engine assumption (no source)*, unverified (dry, assumed) | dry 0.02 [brief2] *interpretation of the source*, unverified (dry; as pavers) | EF wet 0.5 [brief2] *interpretation of the source*, unverified (wet; as pavers); τ 1 d [brief2] *interpretation of the source*, unverified (days; as pavers); storage 5 mm [brief2] *interpretation of the source*, unverified (brief: "a few mm") |
+| Cool roof, aged (`coolroofAged`) | 0.6 [brief2] *cited range*, unverified (brief: aged cool roofs 0.50-0.70, of which 0.60-0.70 unverified; Chicago code floor: 3-year aged >= 0.50 [chicago]) | 0.88 [lbnlRoof] *cited value*, unverified | μ 450 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (same build-up as the dark membrane) | 0 [brief] *cited value*, unverified (dry impervious) | — |
+| Cool roof, new (`coolroofNew`) | 0.8 [lbnlRoof] *cited value*, unverified (new white roof about 0.80; read second-hand via the compendium, so unverified as in block 1) | 0.88 [lbnlRoof] *cited value*, unverified | μ 450 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (same build-up as the dark membrane) | 0 [brief] *cited value*, unverified (dry impervious) | — |
+| Extensive green roof (`greenroof`) | 0.2 [brief2] *cited range*, unverified (cited 0.15-0.25) | 0.95 [brief2] *cited value*, unverified | μ 600 J m⁻² s⁻½ K⁻¹ [brief2] *cited value*, unverified (dry substrate; wet 1200, decays with tau) | dry 0.25 [brief2] *interpretation of the source*, unverified (dry; the brief's value. Heusinger & Weber report Bowen ratio <1-2) | EF wet 0.5 [heusinger] *interpretation of the source*, unverified (wet; Bowen ratio about 1 (Heusinger & Weber: <1-2)); μ wet 1200 J m⁻² s⁻½ K⁻¹ [brief2] *cited value*, unverified (wet substrate); τ 4 d [brief2] *cited value*, unverified (substrate drying time, days); storage 30 mm [brief2] *cited range*, unverified (100 mm substrate holds 20-40 mm) |
+| Permeable pavers (`pavers`) | 0.26 [li2013] *cited value* | 0.92 [brief2] *cited value*, unverified | μ 870 J m⁻² s⁻½ K⁻¹ [engine] *engine assumption (no source)*, unverified (dry, assumed) | dry 0.02 [brief2] *interpretation of the source*, unverified (dry; brief value) | EF wet 0.5 [brief2] *interpretation of the source*, unverified (wet; brief value); τ 1 d [brief2] *interpretation of the source*, unverified (days; the brief calls it calibrated to Li 2013, but in this model it does not reproduce Li at d = 1 (see docs/sources.md)); storage 5 mm [brief2] *interpretation of the source*, unverified (brief: "a few mm", read as 5 mm; the daily water check needs >= 4.1 mm) |
+| Porous asphalt (`porousAsphalt`) | 0.08 [li2013] *cited value* | 0.95 [brief2] *cited value*, unverified | μ 800 J m⁻² s⁻½ K⁻¹ [engine] *engine assumption (no source)*, unverified (dry, assumed) | dry 0.02 [brief2] *interpretation of the source*, unverified (dry; as pavers) | EF wet 0.5 [brief2] *interpretation of the source*, unverified (wet; as pavers); τ 1 d [brief2] *interpretation of the source*, unverified (days; as pavers); storage 5 mm [brief2] *interpretation of the source*, unverified (brief: "a few mm", read as 5 mm; the daily water check needs >= 4.1 mm) |
 | Cool pavement coating, 1 year old (`coolPaveAged`) | 0.18 [ko2022] *cited value*, unverified (0.26 -> 0.18 after one year) | 0.92 [brief2] *cited value*, unverified | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified (the asphalt underneath) | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Cool pavement coating, new (`coolPaveNew`) | 0.25 [middel2020] *cited value*, unverified | 0.92 [brief2] *cited value*, unverified | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified (the asphalt underneath) | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Rain garden (`raingarden`) | 0.2 [engine] *engine assumption (no source)*, unverified | 0.95 [engine] *engine assumption (no source)*, unverified | μ 1400 J m⁻² s⁻½ K⁻¹ [engine] *engine assumption (no source)*, unverified | dry 0.35 [engine] *engine assumption (no source)*, unverified (dry) | EF wet 0.8 [engine] *engine assumption (no source)*, unverified (wet); τ 3 d [mccoll] *interpretation of the source*, unverified (soil drydown, days; median not checked); storage 40 mm [engine] *engine assumption (no source)*, unverified (ponding and soil, assumed) |
@@ -61,6 +61,7 @@ Shown on the heat cards as a caveat:
 | `treeShadeWeight` | 0.92 [melnikov] *interpretation of the source*, unverified (tree shade ~half as effective as building shade, read as half the 16% benefit) |
 | `shadeHeatRamp` | 26 -> 32 C [engine] *engine assumption (no source)*, unverified (shade benefit scales linearly from none at air <= 26 C to full at >= 32 C) |
 | `youngTreeTransmission` | 0.47 [brief2] *interpretation of the source*, unverified (exp(-0.5 LAI) with LAI 1.5; brief range 0.37-0.61 for LAI 1-2) |
+| `youngTreeCrown` | crown radius 2.6 m, crown centre 4.4 m [engine] *engine assumption (no source)*, unverified (scene assumption for newly planted street trees (cities/sponge-retrofit/scene.js)) |
 | `latentHeat` | 2.45e6 J kg-1 [brief2] *cited value* (evaporated depth = sum of EF x max(Q*, 0) x dt / 2.45e6) |
 | `sweatCue` | Tmrt 65 -> 70 C [engine] *engine assumption (no source)*, unverified (visual cue only: droplets on people in sun, strength rising from Tmrt 65 C to full at 70 C (separates sunlit pavement from sunlit lawn in this model); no physiological model) |
 
@@ -132,7 +133,7 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Green roof** (sponge-retrofit only): Typical: Albedo about 0.15–0.25; up to 18 °C cooler than a black roof in a New York case; Bowen ratio about 1–2. [brief2, noaaGreen, heusinger]
 - **Rain garden** (sponge-retrofit only): Typical: No measured cooling figure in our sources; this block uses engine assumptions (evaporative fraction 0.8 wet, 0.35 dry, 3-day drying). [engine, mccoll]
 - **Days since rain (d)** (sponge-retrofit only): Typical: Wet surfaces dry with a time scale τ: pavers about 1 day, soils about 3 days, green-roof substrate about 4 days. [brief2, mccoll]
-- **Bowen ratio and evaporative fraction** (sponge-retrofit only): Typical: Green roofs: Bowen ratio below 1 to about 2 (evaporative fraction about 0.33–0.5 and more); dry paving: evaporative fraction near 0. [heusinger]
+- **Bowen ratio and evaporative fraction** (sponge-retrofit only): Typical: Green roofs: Bowen ratio below 1 to about 2 in field data; this block uses EF 0.5 for a wet and 0.25 for a dry green roof (the brief’s values); dry paving EF near 0. [heusinger, brief2]
 - **Sponge city (海绵城市)** (sponge-retrofit only): Typical: Target: absorb and use 70% of rainfall on site; 20% of built-up area by 2020, 80% by 2030. [sponge2015]
 - **Ageing (aged vs new)** (sponge-retrofit only): Typical: Cool pavement coating 0.26 → 0.18 within a year; cool roofs must reach 0.72 new or 0.50 after 3 years (Chicago code). [ko2022, chicago]
 
@@ -238,14 +239,32 @@ person standing on those cells (roofs have none).
 
 Notes on the rows outside:
 
-- **Coating, pedestrian Tmrt:** the brief expected +4–5 K for an albedo step 0.12 → 0.30; the cited new-coating albedo
-  is 0.25 (step 0.13), which gives less. The surface band is met. Walls reflect no shortwave in this model, which
-  under-states reflected sun on people.
-- **Permeable pavers:** at d = 0 the model is just short of the −15 K end of Li 2013's range; at d = 1 it is just
-  beyond the −7 K end. The pavers' μ (870) is an engine assumption with no cited range, so it was not tuned;
-  the sensitivity table shows μ 1200 would move d = 0 inside and d = 1 further out.
+- **Coating, pedestrian Tmrt — a structural limit of this model.** No single coating albedo meets both Middel bands
+  here. The new coating (α 0.25) gives ΔTs −4.9 K (inside) but ΔTmrt +2.6 K (short);
+  α 0.30, the brief's step, gives ΔTmrt +3.8 K (inside) but ΔTs −6.9 K (beyond −6 K).
+  The model raises Tmrt by about 0.54 K per K of surface cooling, against about 0.8 in Middel's
+  measurements (+4 K Tmrt for −4 to −6 K surface). The likely reason is that walls reflect no shortwave in this
+  model, so sunshine bounced off building faces onto people is missing.
+- **Permeable pavers.** At d = 0 the model is just short of the −15 K end of Li 2013's range (−14.6 K);
+  at d = 1 it is just beyond the −7 K end (−7.5 K). Two things drive the d = 1 miss:
+  (1) the albedo step 0.12 → 0.26 alone makes dry pavers (d = 7) −4.2 K cooler than asphalt, so most of the
+  d = 1 difference is the albedo floor and only the rest is moisture; (2) τ = 1 d, which the brief describes as
+  "calibrated to Li 2013", does not reproduce Li in this model: τ ≈ 0.8 d would (d = 0 −14.6 K, d = 1 −6.7 K).
+  τ = 1 d is the approved brief value and is kept; it is not re-calibrated. The pavers' μ (870, an engine assumption
+  with no cited range) is a second lever, also left alone (see the sensitivity table).
 - **Aged coating rows** compare a one-year-old coating with a band measured on a fresh one; they are expected to
   fall short and are shown to make the ageing visible.
+
+### Who cools the walkers
+
+At 15:00 the share of route sample points (every 2 m along both pavements of every walker route) where a person's
+Tmrt is 65 °C or more — the sweat-cue threshold — is 67.9% Before, 63.7% After, and
+67.9% for After **without the young street trees** (mean Tmrt 63.9, 63.4 and 64.0 °C).
+**The drop in sweating walkers After comes entirely from the young trees.** The roofs do not touch pedestrians, nobody
+walks on the coated road, and the sponge measures and reflective paving alone leave walkers as hot or slightly hotter
+(the lighter pavers add +3.6 K Tmrt at noon). Shade is what cools people; the young-trees card says so.
+The trees' crown size (radius 2.6 m, centre 4.4 m) is an engine (scene) assumption, their transmission 0.47 the
+brief's mid value, and their kerb-side placement a design choice of this invented block.
 
 ### Water budget
 
@@ -258,9 +277,11 @@ water than the material holds after rain (storage values: brief, or engine assum
 | `greenroof` | 30 | 3.5 | 3.0 | 2.7 | 2.4 | 2.2 | 2.1 | 1.9 | 1.8 | 19.7 |
 | `pavers` | 5 | 3.3 | 1.1 | 0.5 | 0.2 | 0.2 | 0.1 | 0.1 | 0.1 | 5.6 |
 | `porousAsphalt` | 5 | 4.1 | 1.4 | 0.6 | 0.3 | 0.2 | 0.2 | 0.1 | 0.1 | 7.0 |
-| `raingarden` | 40 | 6.3 | 5.1 | 4.2 | 3.7 | 3.3 | 3.0 | 2.8 | 2.7 | 31.1 |
+| `raingarden` | 40 | 6.3 | 5.1 | 4.2 | 3.7 | 3.3 | 3.0 | 2.8 | 2.7 | 31.2 |
 
-The daily check holds. Summed over a whole dry week, `pavers` (5.6 mm vs 5 mm) and `porousAsphalt` (7.0 mm vs 5 mm) evaporate more than they hold: the decay rule does not stop when the stored water runs out, and the dry evaporative fraction (0.02) keeps drawing a little water. The excess is small and comes after the surfaces are effectively dry, but it is a known inconsistency of the simple rule.
+The daily check holds, but only because the brief's "a few mm" for pavers and porous asphalt is read as 5 mm: porous
+asphalt evaporates up to 4.07 mm and pavers 3.26 mm at d = 0, so a storage of 4 mm would fail for porous
+asphalt and 3 mm for both. Summed over a whole dry week, `pavers` (5.6 mm vs 5 mm) and `porousAsphalt` (7.0 mm vs 5 mm) evaporate more than they hold: the decay rule does not stop when the stored water runs out, and the dry evaporative fraction (0.02) keeps drawing a little water. The excess is small and comes after the surfaces are effectively dry, but it is a known inconsistency of the simple rule.
 
 ### Sensitivity (block 2)
 

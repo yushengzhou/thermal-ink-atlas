@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 import { MATERIALS, MODEL } from '../../engine/materials.js';
 import { decay, stateMaterials, resolveId, sceneState, ALIASES, D_MAX, MEASURES } from '../../engine/retrofit.js';
 import { runModel, cellMat } from '../../engine/thermal.js';
-import { base2, bandRows, water, stats } from '../../scripts/retrofit.mjs';
+import { base2, bandRows, water, stats, diagnostics } from '../../scripts/retrofit.mjs';
 import { bandsMarkdown } from '../../scripts/sources.mjs';
 import { SCENE } from '../../cities/sponge-retrofit/scene.js';
 
@@ -105,7 +105,7 @@ test('water budget: daily evaporated depth never exceeds the stated storage', ()
 });
 
 // Acceptance bands. Rows outside a band are known deviations: they are pinned
-// here (same rows, no further than pinned + 0.5 K) and disclosed in
+// here (same rows, within 0.1 K of the pinned distance, either way) and disclosed in
 // docs/sources.md. Never tune an input outside its cited range to pass.
 const PINNED_OUTSIDE = {
   'Cool pavement coating, new (α 0.25), pedestrian ΔTmrt at 12:00': 0.4,
@@ -121,7 +121,7 @@ test('acceptance bands: values, pinned deviations, docs table in sync', () => {
   const dist = (r) => (r.lo !== null && r.value < r.lo ? r.lo - r.value : r.hi !== null && r.value > r.hi ? r.value - r.hi : 0);
   const outside = Object.fromEntries(rows.filter((r) => !r.inside).map((r) => [r.label, +dist(r).toFixed(2)]));
   assert.deepEqual(Object.keys(outside).sort(), Object.keys(PINNED_OUTSIDE).sort(), 'the set of rows outside a band changed');
-  for (const [k, d] of Object.entries(outside)) assert.ok(d <= PINNED_OUTSIDE[k] + 0.5, `${k}: ${d} K beyond (pinned ${PINNED_OUTSIDE[k]})`);
+  for (const [k, d] of Object.entries(outside)) assert.ok(Math.abs(d - PINNED_OUTSIDE[k]) <= 0.1 + 1e-9, `${k}: ${d} K beyond (pinned ${PINNED_OUTSIDE[k]} ± 0.1); a deliberate change must update the pin and the docs`);
   const by = (s) => rows.find((r) => r.label.startsWith(s));
   // the bands that hold
   assert.ok(by('Cool roof, aged').inside, 'aged cool roof within -15..-30 K');
@@ -171,4 +171,19 @@ test('shared After run matches a full After run and does not depend on the order
   // recomputing from scratch gives bit-identical results
   const again = base2().after(3, true, stateMaterials(3, true), 'fresh-3-aged');
   for (let i = 0; i < wA.n * wA.n; i += 13) assert.equal(again.ts(i, 15), shared.ts(i, 15));
+});
+
+test('the walkers\' relief comes from the young trees (disclosed on the card and in the docs)', () => {
+  const D = diagnostics();
+  console.log(`route points with Tmrt >= 65 C at 15:00: Before ${D.walk.before.share.toFixed(3)}, After ${D.walk.after.share.toFixed(3)}, After without young trees ${D.walk.afterNoTrees.share.toFixed(3)}`);
+  assert.ok(D.walk.after.share < D.walk.before.share);
+  assert.ok(D.walk.afterNoTrees.share >= D.walk.before.share - 0.005, 'without the trees the retrofit does not cool walkers');
+  const trees = MEASURES.find((m) => m.id === 'trees');
+  assert.match(trees.lesson, /Shade is what cools people/);
+  // the card quotes the pavers' noon Tmrt rise; keep it in step with the model
+  assert.equal(`+${D.paversNoonTmrt.toFixed(1)} K`, trees.lesson.match(/\+\d\.\d K/)[0]);
+  // the coating's structural limit stated in the docs
+  assert.ok(D.ratio < 0.7 && D.coat030.dTmrt >= 3 && D.coat030.dTs < -6);
+  const md = readFileSync(new URL('../../docs/sources.md', import.meta.url), 'utf8');
+  for (const s of ['comes entirely from the young trees', 'No single coating albedo meets both Middel bands', 'τ ≈ 0.8 d', 'read as 5 mm']) assert.ok(md.includes(s), s);
 });

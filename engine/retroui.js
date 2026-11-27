@@ -17,12 +17,12 @@ export function retrofitNotes(scene, B, A, d, aged) {
   const cellOf = (k) => A.world.cellIndex(P[k][0], P[k][1]);
   const roofA = A.thermal.info.mats.coolroofR;
   const coat = measureStats(MEASURES.find((m) => m.id === 'coating'), B.world, B.thermal, A.world, A.thermal, [12]).h12;
-  const dLabel = d === 0 ? 'the morning after rain' : `${d} day${d === 1 ? '' : 's'} after rain`;
+  const dLabel = d === 0 ? 'a clear day after overnight rain' : `${d} day${d === 1 ? '' : 's'} after rain`;
   const text = {
     roofs: [`Cool roof (${aged ? 'aged' : 'new'}, albedo ${roofA.alpha.value.toFixed(2)}): ${fmt(at(A, 'coolRoof', 15))} °C at 3 pm,`, `was ${fmt(at(B, 'coolRoof', 15))} °C as a dark membrane`],
     coating: ['Coated Canal Street at noon: road', `${K(coat.dTs)}, but ${K(coat.dTmrt)} Tmrt for people on it`],
     square: [`Permeable pavers, ${dLabel}:`, `${fmt(A.thermal.ts(cellOf('square'), 15))} °C at 3 pm (asphalt was ${fmt(B.thermal.ts(cellOf('square'), 15))} °C)`],
-    trees: ['Young street trees: thin crowns,', 'patchy shade for now'],
+    trees: ['Young street trees: thin shade, but they', 'are what cools the walkers here'],
     green: [`Green roof ${fmt(at(A, 'greenRoof', 15))} °C at 3 pm,`, `was ${fmt(at(B, 'greenRoof', 15))} °C`],
   };
   const terms = {
@@ -43,7 +43,7 @@ function unverified(m, mats) {
   const keys = ['alpha', 'eps', 'mu', 'muWet', 'ef', 'efWet', 'tau'].filter((k) => mat[k] && !mat[k].verified);
   const names = { alpha: 'albedo', eps: 'emissivity', mu: 'admittance', muWet: 'wet admittance', ef: 'dry evaporative fraction', efWet: 'wet evaporative fraction', tau: 'drying time τ' };
   const out = keys.map((k) => names[k]);
-  if (m.young) out.push('crown transmission 0.47 (LAI 1.5)');
+  if (m.young) out.push('crown transmission 0.47 (LAI 1.5)', 'crown size r 2.6 m, height 4.4 m (engine assumption)');
   return out;
 }
 
@@ -70,6 +70,7 @@ export function measureCard(m, st, mats, d, aged) {
     </table>
     ${wet}${age}
     <p class="note">${m.line}</p>
+    ${m.lesson ? `<p class="caveat"><b>${m.lesson}</b></p>` : ''}
     <p class="lit">${m.lit}</p>
     ${unv.length ? `<p class="caveat">Unverified inputs: ${unv.join(', ')} <span class="unv">unverified</span></p>` : ''}
     ${srcLine(m.sources)}`;

@@ -10,7 +10,7 @@ import { irradiance } from '../engine/thermal.js';
 import { SCENE } from '../cities/asphalt-park/scene.js';
 import { base, targetRows, sensitivity, TIERS } from './regions.mjs';
 import { GLOSSARY, glossaryStats, rangeLine } from '../engine/glossary.js';
-import { base2, bandRows, water, sensitivity2 } from './retrofit.mjs';
+import { base2, bandRows, water, sensitivity2, diagnostics } from './retrofit.mjs';
 import { MEASURES, D_DEFAULT, D_MAX, decay } from '../engine/retrofit.js';
 
 const UNITS = { mu: ' J m⁻² s⁻½ K⁻¹', muWet: ' J m⁻² s⁻½ K⁻¹', thinC: ' J m⁻² K⁻¹', tau: ' d', storage: ' mm' };
@@ -89,6 +89,7 @@ ${cases.map((c) => `| ${c.label} | ${c.measure}, ${c.h}:00, d = ${c.d} | ${signe
 
 function retrofitMarkdown() {
   const { after } = base2();
+  const D = diagnostics();
   const a = after(D_DEFAULT, true);
   const w = water();
   const exceed = Object.entries(w).filter(([, v]) => v.total > v.storage).map(([id, v]) => `\`${id}\` (${v.total.toFixed(1)} mm vs ${v.storage} mm)`);
@@ -134,14 +135,32 @@ ${bandsMarkdown(bandRows())}
 
 Notes on the rows outside:
 
-- **Coating, pedestrian Tmrt:** the brief expected +4–5 K for an albedo step 0.12 → 0.30; the cited new-coating albedo
-  is 0.25 (step 0.13), which gives less. The surface band is met. Walls reflect no shortwave in this model, which
-  under-states reflected sun on people.
-- **Permeable pavers:** at d = 0 the model is just short of the −15 K end of Li 2013's range; at d = 1 it is just
-  beyond the −7 K end. The pavers' μ (870) is an engine assumption with no cited range, so it was not tuned;
-  the sensitivity table shows μ 1200 would move d = 0 inside and d = 1 further out.
+- **Coating, pedestrian Tmrt — a structural limit of this model.** No single coating albedo meets both Middel bands
+  here. The new coating (α 0.25) gives ΔTs ${signed(D.coatNew.dTs)} K (inside) but ΔTmrt ${signed(D.coatNew.dTmrt)} K (short);
+  α 0.30, the brief's step, gives ΔTmrt ${signed(D.coat030.dTmrt)} K (inside) but ΔTs ${signed(D.coat030.dTs)} K (beyond −6 K).
+  The model raises Tmrt by about ${D.ratio.toFixed(2)} K per K of surface cooling, against about 0.8 in Middel's
+  measurements (+4 K Tmrt for −4 to −6 K surface). The likely reason is that walls reflect no shortwave in this
+  model, so sunshine bounced off building faces onto people is missing.
+- **Permeable pavers.** At d = 0 the model is just short of the −15 K end of Li 2013's range (${signed(bandRows()[6].value)} K);
+  at d = 1 it is just beyond the −7 K end (${signed(bandRows()[7].value)} K). Two things drive the d = 1 miss:
+  (1) the albedo step 0.12 → 0.26 alone makes dry pavers (d = 7) ${signed(D.paversDry)} K cooler than asphalt, so most of the
+  d = 1 difference is the albedo floor and only the rest is moisture; (2) τ = 1 d, which the brief describes as
+  "calibrated to Li 2013", does not reproduce Li in this model: τ ≈ 0.8 d would (d = 0 ${signed(D.tau08d0)} K, d = 1 ${signed(D.tau08)} K).
+  τ = 1 d is the approved brief value and is kept; it is not re-calibrated. The pavers' μ (870, an engine assumption
+  with no cited range) is a second lever, also left alone (see the sensitivity table).
 - **Aged coating rows** compare a one-year-old coating with a band measured on a fresh one; they are expected to
   fall short and are shown to make the ageing visible.
+
+### Who cools the walkers
+
+At 15:00 the share of route sample points (every 2 m along both pavements of every walker route) where a person's
+Tmrt is 65 °C or more — the sweat-cue threshold — is ${(D.walk.before.share * 100).toFixed(1)}% Before, ${(D.walk.after.share * 100).toFixed(1)}% After, and
+${(D.walk.afterNoTrees.share * 100).toFixed(1)}% for After **without the young street trees** (mean Tmrt ${f1(D.walk.before.mean)}, ${f1(D.walk.after.mean)} and ${f1(D.walk.afterNoTrees.mean)} °C).
+**The drop in sweating walkers After comes entirely from the young trees.** The roofs do not touch pedestrians, nobody
+walks on the coated road, and the sponge measures and reflective paving alone leave walkers as hot or slightly hotter
+(the lighter pavers add ${signed(D.paversNoonTmrt)} K Tmrt at noon). Shade is what cools people; the young-trees card says so.
+The trees' crown size (radius 2.6 m, centre 4.4 m) is an engine (scene) assumption, their transmission 0.47 the
+brief's mid value, and their kerb-side placement a design choice of this invented block.
 
 ### Water budget
 
@@ -151,7 +170,9 @@ water than the material holds after rain (storage values: brief, or engine assum
 
 ${waterMarkdown(w)}
 
-The daily check holds. ${exceed.length ? `Summed over a whole dry week, ${exceed.join(' and ')} evaporate more than they hold: the decay rule does not stop when the stored water runs out, and the dry evaporative fraction (0.02) keeps drawing a little water. The excess is small and comes after the surfaces are effectively dry, but it is a known inconsistency of the simple rule.` : 'Summed over a whole dry week, every material stays within its storage.'}
+The daily check holds, but only because the brief's "a few mm" for pavers and porous asphalt is read as 5 mm: porous
+asphalt evaporates up to ${w.porousAsphalt.days[0].max.toFixed(2)} mm and pavers ${w.pavers.days[0].max.toFixed(2)} mm at d = 0, so a storage of 4 mm would fail for porous
+asphalt and 3 mm for both. ${exceed.length ? `Summed over a whole dry week, ${exceed.join(' and ')} evaporate more than they hold: the decay rule does not stop when the stored water runs out, and the dry evaporative fraction (0.02) keeps drawing a little water. The excess is small and comes after the surfaces are effectively dry, but it is a known inconsistency of the simple rule.` : 'Summed over a whole dry week, every material stays within its storage.'}
 
 ### Sensitivity (block 2)
 

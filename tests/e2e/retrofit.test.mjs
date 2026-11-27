@@ -35,7 +35,7 @@ test('state query modes, buttons and the B key', async () => {
     const st = await page.evaluate(() => ({ ...window.atlas.retro.state(), sides: window.atlas.stats().sides, x: window.atlas.retro.divider() }));
     for (const [k, v] of Object.entries(want)) assert.deepEqual(st[k], v, `${q}: ${k}`);
     if (want.split) assert.ok(Math.abs(st.x - want.split * 1280) <= 1, `${q}: divider at ${st.x}`);
-    if (want.d === 0) assert.match((await page.evaluate(() => window.atlas.notes())).map((n) => n.text.join(' ')).join(' | '), /morning after rain/);
+    if (want.d === 0) assert.match((await page.evaluate(() => window.atlas.notes())).map((n) => n.text.join(' ')).join(' | '), /clear day after overnight rain/);
     assert.deepEqual(errors, []);
     await context.close();
   }

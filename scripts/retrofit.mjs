@@ -103,3 +103,57 @@ export function sensitivity2() {
     return { ...c, base: baseV, value: stats(c.measure, model, [c.h])[`h${c.h}`].dTs };
   });
 }
+
+/**
+ * Numbers behind the notes on the rows outside their bands (review of #7):
+ * the pavers' albedo floor and the tau that would reproduce Li 2013, the
+ * coating's Tmrt-per-surface-cooling ratio, and where the walkers' relief
+ * comes from (route sample points at 15:00, with and without young trees).
+ */
+export function diagnostics() {
+  const { after, wA, wB, slB, ref, before } = base2();
+  const withMat = (id, key, value, d) => {
+    const mats = { ...MATERIALS, [id]: { ...MATERIALS[id], [key]: { ...MATERIALS[id][key], value } } };
+    return after(d, true, stateMaterials(d, true, mats), `${id}.${key}=${value}@${d}`);
+  };
+  const paversDry = stats('pavers', after(7, true)).h15.dTs;
+  const tau08 = stats('pavers', withMat('pavers', 'tau', 0.8, 1)).h15.dTs;
+  const tau08d0 = stats('pavers', withMat('pavers', 'tau', 0.8, 0)).h15.dTs;
+  const coatNew = stats('coating', after(3, false)).h12;
+  const mats030 = { ...MATERIALS, coolPaveNew: { ...MATERIALS.coolPaveNew, alpha: { ...MATERIALS.coolPaveNew.alpha, value: 0.3 } } };
+  const coat030 = stats('coating', after(3, false, stateMaterials(3, false, mats030), 'coat0.30')).h12;
+  // walkers: share of route sample points (every 2 m, both variants) with Tmrt >= 65 C at 15:00
+  const sA0 = { ...wA.scene, trees: wA.scene.trees.filter((t) => !t.young) };
+  const w0 = buildWorld(sA0, { svfFrom: wB });
+  const m0 = runShared(ref, w0, sunSlots(w0, { masksFrom: slB }), stateMaterials(3, true));
+  const hot = (w, m) => {
+    let n = 0;
+    let k = 0;
+    let sum = 0;
+    for (const r of SCENE.routes) {
+      for (const v of r.variants) {
+        for (let i = 0; i + 3 < v.length; i += 2) {
+          const L = Math.hypot(v[i + 2] - v[i], v[i + 3] - v[i + 1]);
+          for (let s = 1; s < L; s += 2) {
+            const c = w.cellIndex(v[i] + ((v[i + 2] - v[i]) * s) / L, v[i + 1] + ((v[i + 3] - v[i + 1]) * s) / L);
+            const t = m.tmrt(c, 15);
+            k++;
+            sum += t;
+            if (t >= 65) n++;
+          }
+        }
+      }
+    }
+    return { share: n / k, mean: sum / k };
+  };
+  return {
+    paversDry,
+    tau08,
+    tau08d0,
+    coatNew,
+    coat030,
+    ratio: coatNew.dTmrt / -coatNew.dTs,
+    walk: { before: hot(wB, before), after: hot(wA, after(3, true)), afterNoTrees: hot(w0, m0) },
+    paversNoonTmrt: stats('pavers', after(3, true)).h12.dTmrt,
+  };
+}

@@ -407,7 +407,9 @@ export class Thermal {
   /**
    * Water evaporated from cell i over the design day, mm (= kg m-2):
    * sum of EF x max(Q*, 0) x dt / 2.45e6 J kg-1, evaluated on the stored
-   * 15-min surface temperatures with the same radiation terms as the model.
+   * 15-min surface temperatures (a 15-min sum, not the model's 1-min one)
+   * with the model's radiation terms, including its wall term (driven by the
+   * unshaded sun, as in runModel).
    */
   evaporation(i) {
     const site = this.info.site;
@@ -421,7 +423,7 @@ export class Thermal {
       const ir = irradiance(s.alt);
       const K = this.sunlit(i, h) * ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + v * ir.diffuse;
       const taK = this.air(h) + K0;
-      const tw = taK + 2 + (6 * K) / 900;
+      const tw = taK + 2 + (6 * (ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + ir.diffuse)) / 900;
       const L = v * skyEmissivity(site.vapourHpa, taK) * SIGMA * taK ** 4 + (1 - v) * SIGMA * tw ** 4;
       const t = this.ts(i, h) + K0;
       const q = (1 - m.alpha.value) * K + m.eps.value * L - m.eps.value * SIGMA * t ** 4;

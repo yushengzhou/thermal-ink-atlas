@@ -125,9 +125,9 @@ export const GLOSSARY = {
   },
   bowen: {
     term: 'Bowen ratio and evaporative fraction',
-    text: 'Two ways to say how a surface splits its energy between heating the air (sensible heat) and evaporating water (latent heat). Bowen ratio = sensible ÷ latent; evaporative fraction = latent ÷ (sensible + latent) = 1 ÷ (1 + Bowen ratio).',
-    range: 'Green roofs: Bowen ratio below 1 to about 2 (evaporative fraction about 0.33–0.5 and more); dry paving: evaporative fraction near 0.',
-    src: 'heusinger',
+    text: 'Two ways to describe how much of a surface’s energy goes into evaporating water. In this model the evaporative fraction (EF) is the share of the positive net radiation spent on evaporation (EF × max(Q*, 0)). The Bowen ratio, used in field studies, is sensible heat ÷ latent heat; if heat stored in the ground is ignored, EF ≈ 1 ÷ (1 + Bowen ratio).',
+    range: 'Green roofs: Bowen ratio below 1 to about 2 in field data; this block uses EF 0.5 for a wet and 0.25 for a dry green roof (the brief’s values); dry paving EF near 0.',
+    src: 'heusinger, brief2',
     why: 'The more energy goes into evaporation, the less is left to heat the surface.',
     scenes: ['sponge-retrofit'],
   },
@@ -136,7 +136,7 @@ export const GLOSSARY = {
     text: 'China’s national programme (State Council guideline, 2015) to manage rain where it falls: let it soak in, slow it, store it, clean it, use it, and only then drain it (渗、滞、蓄、净、用、排).',
     range: 'Target: absorb and use 70% of rainfall on site; 20% of built-up area by 2020, 80% by 2030.',
     src: 'sponge2015',
-    why: 'Its goals are flooding and water supply; cooler streets are a side benefit, and no robust measured block-scale cooling figure exists.',
+    why: 'Its goals are flooding and water supply; cooler streets are a side benefit, and no robust measured block-scale cooling figure was found.',
     scenes: ['sponge-retrofit'],
   },
   albedoAgeing: {

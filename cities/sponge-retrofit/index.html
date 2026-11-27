@@ -522,7 +522,7 @@ const MATERIALS = {
 Object.assign(MATERIALS, {
   coolroofAged: {
     name: 'Cool roof, aged',
-    alpha: v(0.6, 'chicago', 'range', false, 'aged cool roofs 0.50-0.70; 0.60-0.70 unverified (brief)'),
+    alpha: v(0.6, 'brief2', 'range', false, 'brief: aged cool roofs 0.50-0.70, of which 0.60-0.70 unverified; Chicago code floor: 3-year aged >= 0.50 [chicago]'),
     eps: v(0.88, 'lbnlRoof', 'cited', false),
     mu: v(450, 'brief', 'range', false, 'same build-up as the dark membrane'),
     ef: v(0, 'brief', 'cited', false, 'dry impervious'),
@@ -530,7 +530,7 @@ Object.assign(MATERIALS, {
   },
   coolroofNew: {
     name: 'Cool roof, new',
-    alpha: v(0.8, 'lbnlRoof', 'cited', true, 'new white roof about 0.80'),
+    alpha: v(0.8, 'lbnlRoof', 'cited', false, 'new white roof about 0.80; read second-hand via the compendium, so unverified as in block 1'),
     eps: v(0.88, 'lbnlRoof', 'cited', false),
     mu: v(450, 'brief', 'range', false, 'same build-up as the dark membrane'),
     ef: v(0, 'brief', 'cited', false, 'dry impervious'),
@@ -542,8 +542,8 @@ Object.assign(MATERIALS, {
     eps: v(0.95, 'brief2', 'cited', false),
     mu: v(600, 'brief2', 'cited', false, 'dry substrate; wet 1200, decays with tau'),
     muWet: v(1200, 'brief2', 'cited', false, 'wet substrate'),
-    ef: v(0.25, 'heusinger', 'interp', false, 'dry; Bowen ratio up to about 2-3'),
-    efWet: v(0.5, 'heusinger', 'interp', false, 'wet; Bowen ratio about 1'),
+    ef: v(0.25, 'brief2', 'interp', false, 'dry; the brief\'s value. Heusinger & Weber report Bowen ratio <1-2'),
+    efWet: v(0.5, 'heusinger', 'interp', false, 'wet; Bowen ratio about 1 (Heusinger & Weber: <1-2)'),
     tau: v(4, 'brief2', 'cited', false, 'substrate drying time, days'),
     storage: v(30, 'brief2', 'range', false, '100 mm substrate holds 20-40 mm'),
     note: 'Sedum and thin soil over the roof: plants and wet substrate spend sunshine on evaporation, more so soon after rain.',
@@ -553,10 +553,10 @@ Object.assign(MATERIALS, {
     alpha: v(0.26, 'li2013', 'cited', true),
     eps: v(0.92, 'brief2', 'cited', false),
     mu: v(870, 'engine', 'engine', false, 'dry, assumed'),
-    ef: v(0.02, 'brief2', 'interp', false, 'dry; calibrated to Li 2013'),
-    efWet: v(0.5, 'brief2', 'interp', false, 'wet; calibrated to Li 2013'),
-    tau: v(1, 'brief2', 'interp', false, 'days; calibrated to Li 2013'),
-    storage: v(5, 'brief2', 'interp', false, 'brief: "a few mm"'),
+    ef: v(0.02, 'brief2', 'interp', false, 'dry; brief value'),
+    efWet: v(0.5, 'brief2', 'interp', false, 'wet; brief value'),
+    tau: v(1, 'brief2', 'interp', false, 'days; the brief calls it calibrated to Li 2013, but in this model it does not reproduce Li at d = 1 (see docs/sources.md)'),
+    storage: v(5, 'brief2', 'interp', false, 'brief: "a few mm", read as 5 mm; the daily water check needs >= 4.1 mm'),
     note: 'Pavers with open joints let rain soak in; the water evaporates over the next day or two and cools them while it lasts.',
   },
   porousAsphalt: {
@@ -567,7 +567,7 @@ Object.assign(MATERIALS, {
     ef: v(0.02, 'brief2', 'interp', false, 'dry; as pavers'),
     efWet: v(0.5, 'brief2', 'interp', false, 'wet; as pavers'),
     tau: v(1, 'brief2', 'interp', false, 'days; as pavers'),
-    storage: v(5, 'brief2', 'interp', false, 'brief: "a few mm"'),
+    storage: v(5, 'brief2', 'interp', false, 'brief: "a few mm", read as 5 mm; the daily water check needs >= 4.1 mm'),
     note: 'Open-graded asphalt that drains rain: cooler while wet, but once dry it is darker and lighter-weight than dense asphalt, so it runs hotter.',
   },
   coolPaveAged: {
@@ -618,6 +618,7 @@ const MODEL = {
   treeShadeWeight: v(0.92, 'melnikov', 'interp', false, 'tree shade ~half as effective as building shade, read as half the 16% benefit'),
   shadeHeatRamp: v('26 -> 32 C', 'engine', 'engine', false, 'shade benefit scales linearly from none at air <= 26 C to full at >= 32 C'),
   youngTreeTransmission: v(0.47, 'brief2', 'interp', false, 'exp(-0.5 LAI) with LAI 1.5; brief range 0.37-0.61 for LAI 1-2'),
+  youngTreeCrown: v('crown radius 2.6 m, crown centre 4.4 m', 'engine', 'engine', false, 'scene assumption for newly planted street trees (cities/sponge-retrofit/scene.js)'),
   latentHeat: v('2.45e6 J kg-1', 'brief2', 'cited', true, 'evaporated depth = sum of EF x max(Q*, 0) x dt / 2.45e6'),
   sweatCue: v('Tmrt 65 -> 70 C', 'engine', 'engine', false, 'visual cue only: droplets on people in sun, strength rising from Tmrt 65 C to full at 70 C (separates sunlit pavement from sunlit lawn in this model); no physiological model'),
 };
@@ -1038,7 +1039,9 @@ class Thermal {
   /**
    * Water evaporated from cell i over the design day, mm (= kg m-2):
    * sum of EF x max(Q*, 0) x dt / 2.45e6 J kg-1, evaluated on the stored
-   * 15-min surface temperatures with the same radiation terms as the model.
+   * 15-min surface temperatures (a 15-min sum, not the model's 1-min one)
+   * with the model's radiation terms, including its wall term (driven by the
+   * unshaded sun, as in runModel).
    */
   evaporation(i) {
     const site = this.info.site;
@@ -1052,7 +1055,7 @@ class Thermal {
       const ir = irradiance(s.alt);
       const K = this.sunlit(i, h) * ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + v * ir.diffuse;
       const taK = this.air(h) + K0;
-      const tw = taK + 2 + (6 * K) / 900;
+      const tw = taK + 2 + (6 * (ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + ir.diffuse)) / 900;
       const L = v * skyEmissivity(site.vapourHpa, taK) * SIGMA * taK ** 4 + (1 - v) * SIGMA * tw ** 4;
       const t = this.ts(i, h) + K0;
       const q = (1 - m.alpha.value) * K + m.eps.value * L - m.eps.value * SIGMA * t ** 4;
@@ -3450,9 +3453,9 @@ const GLOSSARY = {
   },
   bowen: {
     term: 'Bowen ratio and evaporative fraction',
-    text: 'Two ways to say how a surface splits its energy between heating the air (sensible heat) and evaporating water (latent heat). Bowen ratio = sensible ÷ latent; evaporative fraction = latent ÷ (sensible + latent) = 1 ÷ (1 + Bowen ratio).',
-    range: 'Green roofs: Bowen ratio below 1 to about 2 (evaporative fraction about 0.33–0.5 and more); dry paving: evaporative fraction near 0.',
-    src: 'heusinger',
+    text: 'Two ways to describe how much of a surface’s energy goes into evaporating water. In this model the evaporative fraction (EF) is the share of the positive net radiation spent on evaporation (EF × max(Q*, 0)). The Bowen ratio, used in field studies, is sensible heat ÷ latent heat; if heat stored in the ground is ignored, EF ≈ 1 ÷ (1 + Bowen ratio).',
+    range: 'Green roofs: Bowen ratio below 1 to about 2 in field data; this block uses EF 0.5 for a wet and 0.25 for a dry green roof (the brief’s values); dry paving EF near 0.',
+    src: 'heusinger, brief2',
     why: 'The more energy goes into evaporation, the less is left to heat the surface.',
     scenes: ['sponge-retrofit'],
   },
@@ -3461,7 +3464,7 @@ const GLOSSARY = {
     text: 'China’s national programme (State Council guideline, 2015) to manage rain where it falls: let it soak in, slow it, store it, clean it, use it, and only then drain it (渗、滞、蓄、净、用、排).',
     range: 'Target: absorb and use 70% of rainfall on site; 20% of built-up area by 2020, 80% by 2030.',
     src: 'sponge2015',
-    why: 'Its goals are flooding and water supply; cooler streets are a side benefit, and no robust measured block-scale cooling figure exists.',
+    why: 'Its goals are flooding and water supply; cooler streets are a side benefit, and no robust measured block-scale cooling figure was found.',
     scenes: ['sponge-retrofit'],
   },
   albedoAgeing: {
@@ -3702,7 +3705,8 @@ const MEASURES = [
     id: 'trees',
     young: true,
     name: 'Young street trees',
-    line: 'New trees along Willow Lane, Market Road and Bridge Road. Their crowns are small and thin for now (about half the sun gets through), but walkers already use the patchy shade.',
+    line: 'New trees along Canal Street, Willow Lane, Market Road, Bridge Road and on the square. Their crowns are small and thin for now (about half the sun gets through), but walkers already use the patchy shade.',
+    lesson: 'Shade is what cools people. In this model the drop in sweating walkers After comes entirely from these young trees: the roofs do not touch pedestrians, and the sponge measures and reflective paving alone leave walkers as hot or slightly hotter (the lighter pavers add about +3.6 K Tmrt at noon).',
     lit: 'Literature: modelled −7 K Tmrt under trees in Phoenix; block cooling grows strongly above about 40% canopy cover.',
     sources: ['middel2021', 'brief2'],
   },
@@ -3788,12 +3792,12 @@ function retrofitNotes(scene, B, A, d, aged) {
   const cellOf = (k) => A.world.cellIndex(P[k][0], P[k][1]);
   const roofA = A.thermal.info.mats.coolroofR;
   const coat = measureStats(MEASURES.find((m) => m.id === 'coating'), B.world, B.thermal, A.world, A.thermal, [12]).h12;
-  const dLabel = d === 0 ? 'the morning after rain' : `${d} day${d === 1 ? '' : 's'} after rain`;
+  const dLabel = d === 0 ? 'a clear day after overnight rain' : `${d} day${d === 1 ? '' : 's'} after rain`;
   const text = {
     roofs: [`Cool roof (${aged ? 'aged' : 'new'}, albedo ${roofA.alpha.value.toFixed(2)}): ${fmt(at(A, 'coolRoof', 15))} °C at 3 pm,`, `was ${fmt(at(B, 'coolRoof', 15))} °C as a dark membrane`],
     coating: ['Coated Canal Street at noon: road', `${K(coat.dTs)}, but ${K(coat.dTmrt)} Tmrt for people on it`],
     square: [`Permeable pavers, ${dLabel}:`, `${fmt(A.thermal.ts(cellOf('square'), 15))} °C at 3 pm (asphalt was ${fmt(B.thermal.ts(cellOf('square'), 15))} °C)`],
-    trees: ['Young street trees: thin crowns,', 'patchy shade for now'],
+    trees: ['Young street trees: thin shade, but they', 'are what cools the walkers here'],
     green: [`Green roof ${fmt(at(A, 'greenRoof', 15))} °C at 3 pm,`, `was ${fmt(at(B, 'greenRoof', 15))} °C`],
   };
   const terms = {
@@ -3814,7 +3818,7 @@ function unverified(m, mats) {
   const keys = ['alpha', 'eps', 'mu', 'muWet', 'ef', 'efWet', 'tau'].filter((k) => mat[k] && !mat[k].verified);
   const names = { alpha: 'albedo', eps: 'emissivity', mu: 'admittance', muWet: 'wet admittance', ef: 'dry evaporative fraction', efWet: 'wet evaporative fraction', tau: 'drying time τ' };
   const out = keys.map((k) => names[k]);
-  if (m.young) out.push('crown transmission 0.47 (LAI 1.5)');
+  if (m.young) out.push('crown transmission 0.47 (LAI 1.5)', 'crown size r 2.6 m, height 4.4 m (engine assumption)');
   return out;
 }
 
@@ -3841,6 +3845,7 @@ function measureCard(m, st, mats, d, aged) {
     </table>
     ${wet}${age}
     <p class="note">${m.line}</p>
+    ${m.lesson ? `<p class="caveat"><b>${m.lesson}</b></p>` : ''}
     <p class="lit">${m.lit}</p>
     ${unv.length ? `<p class="caveat">Unverified inputs: ${unv.join(', ')} <span class="unv">unverified</span></p>` : ''}
     ${srcLine(m.sources)}`;
@@ -4980,6 +4985,8 @@ function ellipse(cx, cy, rx, ry, n = 24) {
   return p;
 }
 
+// Young street trees: crown radius 2.6 m and centre height 4.4 m are scene
+// (engine) assumptions; tr 0.47 is MODEL.youngTreeTransmission (brief, LAI 1.5).
 const YOUNG = { r: 2.6, zc: 4.4, tr: 0.47, young: true, after: true };
 
 const SCENE = {
