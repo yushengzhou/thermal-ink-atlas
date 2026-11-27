@@ -11,7 +11,7 @@ import { SOURCES, MATERIALS, GLASS } from '../engine/materials.js';
 import { GLOSSARY } from '../engine/glossary.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const MODULES = ['core', 'sun', 'materials', 'reflect', 'thermal', 'wind', 'world', 'pen', 'kit', 'life', 'render', 'glossary', 'retrofit', 'retroui', 'cbd', 'cbdui', 'waterfront', 'wfui', 'htkit', 'hutong', 'hutui', 'pkkit', 'parking', 'pkui', 'eskit', 'estate', 'esui', 'app'];
+const MODULES = ['core', 'sun', 'materials', 'reflect', 'thermal', 'wind', 'world', 'pen', 'kit', 'life', 'render', 'glossary', 'retrofit', 'retroui', 'cbd', 'cbdui', 'waterfront', 'wfui', 'htkit', 'hutong', 'hutui', 'pkkit', 'parking', 'pkui', 'eskit', 'estate', 'esui', 'cpkit', 'campus', 'cpui', 'app'];
 /** Block-specific modules, by the scene flag that selects them. */
 export const BLOCKS = [
   { flag: /retrofit: true/, modules: ['retrofit', 'retroui'] },
@@ -20,6 +20,7 @@ export const BLOCKS = [
   { flag: /hutongBlock: true/, modules: ['htkit', 'hutong', 'hutui'] },
   { flag: /parkingBlock: true/, modules: ['pkkit', 'parking', 'pkui'] },
   { flag: /estateBlock: true/, modules: ['eskit', 'estate', 'esui'] },
+  { flag: /campusBlock: true/, modules: ['cpkit', 'campus', 'cpui'] },
 ];
 /** What a left-out module exposes: only the predicates the core calls (always false there). */
 export const STUBS = {
@@ -30,6 +31,7 @@ export const STUBS = {
   hutong: '{ isHutong: () => false }',
   parking: '{ isParking: () => false }',
   estate: '{ isEstate: () => false }',
+  campus: '{ isCampus: () => false }',
 };
 /** Modules a page needs, given its scene source. */
 export function modulesFor(scene) {
@@ -110,8 +112,18 @@ export function pageSourceKeys(sceneText, ownText, coreText) {
   return keys;
 }
 
-/** materials.js for one page: SOURCES cut to keys, parameter notes dropped. */
-export function trimMaterials(src, keys) {
+/**
+ * Block-only material groups in materials.js: an Object.assign(MATERIALS, {...})
+ * block whose heading comment names its page ("@page <city>"). Returns
+ * [{city, text}] (text: the comment line through the closing "});" and its newline).
+ */
+export function pageMaterialGroups(src) {
+  return [...src.matchAll(/^\/\/ [^\n]*@page ([\w-]+)[^\n]*\n(?:\/\/[^\n]*\n)*Object\.assign\(MATERIALS, \{\n[\s\S]*?\n\}\);\n\n?/gm)].map((m) => ({ city: m[1], text: m[0] }));
+}
+
+/** materials.js for one page: other pages' material groups cut, SOURCES cut to keys, parameter notes dropped. */
+export function trimMaterials(src, keys, city = null) {
+  for (const g of pageMaterialGroups(src)) if (g.city !== city) src = src.replace(g.text, '');
   const a = src.indexOf('export const SOURCES = {');
   const b = src.indexOf('\n};\n', a);
   if (a < 0 || b < 0) throw new Error('materials.js: SOURCES block not found');
@@ -119,9 +131,11 @@ export function trimMaterials(src, keys) {
   const kept = lines.filter((l, i) => i === 0 || !/^  \w+: /.test(l) || keys.has(/^  (\w+): /.exec(l)[1]));
   if (lines.some((l, i) => i > 0 && !/^  \w+: '.*',$/.test(l))) throw new Error('materials.js: every SOURCES entry must be one line');
   const out = src.slice(0, a) + kept.join('\n') + src.slice(b);
-  // v(value, 'source', 'basis', verified, 'note') -> v(value, 'source', 'basis', verified)
-  return out.replace(/(\bv\((?:[^()'\n]|'(?:[^'\\\n]|\\.)*')*?,\s*(?:true|false)),\s*'(?:[^'\\\n]|\\.)*'\)/g, '$1)');
+  return dropNotes(out);
 }
+
+/** v(value, 'source', 'basis', verified, 'note') -> v(value, 'source', 'basis', verified). */
+export const dropNotes = (text) => text.replace(/(\bv\((?:[^()'\n]|'(?:[^'\\\n]|\\.)*')*?,\s*(?:true|false)),\s*'(?:[^'\\\n]|\\.)*'\)/g, '$1)');
 
 /** glossary.js for one page: other blocks' terms dropped unless named in the page's code. */
 export function trimGlossary(src, city, text) {
@@ -146,7 +160,7 @@ export function pageParts(city) {
   const coreText = mods.filter(({ m, stub }) => !stub && !own.has(m) && m !== 'materials' && m !== 'glossary').map(({ m }) => read(`engine/${m}.js`)).join('\n');
   const keys = pageSourceKeys(scene, ownText, coreText);
   const shell = read('engine/shell.html');
-  const source = (m) => (m === 'materials' ? trimMaterials(read('engine/materials.js'), keys) : m === 'glossary' ? trimGlossary(read('engine/glossary.js'), city, `${scene}\n${ownText}\n${coreText}\n${shell}`) : read(`engine/${m}.js`));
+  const source = (m) => (m === 'materials' ? trimMaterials(read('engine/materials.js'), keys, city) : m === 'glossary' ? trimGlossary(read('engine/glossary.js'), city, `${scene}\n${ownText}\n${coreText}\n${shell}`) : read(`engine/${m}.js`));
   const parts = mods.map(({ m, stub }) => ({ m, own: own.has(m) && !stub, text: stub ? `__m['${m}'] = ${STUBS[m] ?? '{}'};\n` : wrap(m, source(m)) }));
   const bundle = [
     "'use strict';",
@@ -157,15 +171,17 @@ export function pageParts(city) {
     "__m['app'].boot(__m['scene'].SCENE);",
     '})();',
   ].join('\n');
-  return { scene, keys, bundle, ownBytes: parts.filter((p) => p.own).reduce((a, p) => a + Buffer.byteLength(p.text), 0), sceneBytes: Buffer.byteLength(wrap('scene', scene)) };
+  // the page's own material group (kept only on this page), as it stands in the bundle
+  const own8 = pageMaterialGroups(read('engine/materials.js')).filter((g) => g.city === city).map((g) => dropNotes(g.text));
+  return { scene, keys, bundle, ownBytes: parts.filter((p) => p.own).reduce((a, p) => a + Buffer.byteLength(p.text), 0), sceneBytes: Buffer.byteLength(wrap('scene', scene)), matBytes: own8.reduce((a, t) => a + Buffer.byteLength(t), 0) };
 }
 
 function build(city) {
-  const { scene, keys: srcKeys, bundle, ownBytes, sceneBytes } = pageParts(city);
+  const { scene, keys: srcKeys, bundle, ownBytes, sceneBytes, matBytes } = pageParts(city);
 
   const meta = /title: '([^']+)'/.exec(scene)[1];
   const sub = /note: '([^']+)'/.exec(scene)[1];
-  const keys = /retrofit: true/.test(scene) ? '<kbd>B</kbd> before/after · ' : /glassBlock: true/.test(scene) ? '<kbd>G</kbd> glass · ' : /windBlock: true/.test(scene) ? '<kbd>W</kbd> wind · <kbd>A</kbd> air · ' : /hutongBlock: true/.test(scene) ? '<kbd>P</kbd> splash · ' : /parkingBlock: true/.test(scene) ? '<kbd>G</kbd> night release · ' : /estateBlock: true/.test(scene) ? '<kbd>S</kbd> 大寒 · <kbd>C</kbd> condensers · ' : '';
+  const keys = /retrofit: true/.test(scene) ? '<kbd>B</kbd> before/after · ' : /glassBlock: true/.test(scene) ? '<kbd>G</kbd> glass · ' : /windBlock: true/.test(scene) ? '<kbd>W</kbd> wind · <kbd>A</kbd> air · ' : /hutongBlock: true/.test(scene) ? '<kbd>P</kbd> splash · ' : /parkingBlock: true/.test(scene) ? '<kbd>G</kbd> night release · ' : /estateBlock: true/.test(scene) ? '<kbd>S</kbd> 大寒 · <kbd>C</kbd> condensers · ' : /campusBlock: true/.test(scene) ? '<kbd>I</kbd> water the pitch · <kbd>U</kbd> burn limits · ' : '';
   const html = read('engine/shell.html')
     .replace(/__TITLE__/g, meta)
     .replace('__SUBTITLE__', sub)
@@ -177,8 +193,8 @@ function build(city) {
   const size = Buffer.byteLength(html);
   if (size > LIMIT) throw new Error(`${city}: built file is ${size} bytes, over the ${LIMIT} byte budget`);
   writeFileSync(`${root}cities/${city}/index.html`, html);
-  const ownSrc = ownSources(city, srcKeys).bytes;
-  console.log(`cities/${city}/index.html  ${(size / 1024).toFixed(1)} KB (own modules ${(ownBytes / 1024).toFixed(1)} KB, scene ${(sceneBytes / 1024).toFixed(1)} KB, own sources ${(ownSrc / 1024).toFixed(1)} KB, shared core ${((size - ownBytes - sceneBytes - ownSrc) / 1024).toFixed(1)} KB)`);
+  const ownSrc = ownSources(city, srcKeys).bytes + matBytes;
+  console.log(`cities/${city}/index.html  ${(size / 1024).toFixed(1)} KB (own modules ${(ownBytes / 1024).toFixed(1)} KB, scene ${(sceneBytes / 1024).toFixed(1)} KB, own sources and materials ${(ownSrc / 1024).toFixed(1)} KB, shared core ${((size - ownBytes - sceneBytes - ownSrc) / 1024).toFixed(1)} KB)`);
 }
 
 const allCities = () => readdirSync(`${root}cities`).filter((c) => existsSync(`${root}cities/${c}/scene.js`)).sort();
@@ -197,13 +213,14 @@ export function ownSources(city, keys = pageParts(city).keys) {
 
 /**
  * Bytes of a built page that are not its own: not its block modules, not its
- * scene and not its own SOURCES keys (ownSources). The shared core as this
+ * scene, not its own SOURCES keys (ownSources) and not its own material group
+ * (pageMaterialGroups). The shared core as this
  * page carries it: what every page pays for.
  */
 export function coreBytes(city) {
   const size = Buffer.byteLength(read(`cities/${city}/index.html`));
   const p = pageParts(city);
-  return size - p.ownBytes - p.sceneBytes - ownSources(city, p.keys).bytes;
+  return size - p.ownBytes - p.sceneBytes - ownSources(city, p.keys).bytes - p.matBytes;
 }
 
 // run as a script (tests import modulesFor without building)

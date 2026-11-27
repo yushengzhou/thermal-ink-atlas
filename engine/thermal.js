@@ -6,6 +6,7 @@
 //   G = ... - EF max(Q*, 0) - LE,  LE = L beta(W) (h_c / c_p) max(0, q_sat(Ts) - q_a),
 //   beta(W) = beta_wet min(1, W / W_c),  dW/dt = -LE / L,  W := W0 at the splash hour.
 // Blocks without wet cells never enter that step (stepSplash below).
+// Block 8: efOnly with a pulse, EF = res + (ef0 - res) exp(-(t - hour) / tau).
 // Block 6 keeps G itself (opts.flux): on the stored 15-min steps the model
 // minute runs through stepFlux, the same arithmetic as stepPlain that also
 // writes G per cell; the other minutes and every other block are unchanged.
@@ -527,6 +528,7 @@ export function runModel(world, opts = {}) {
       at: Math.round(sp.hour * 60),
       efOnly: !!sp.efOnly, // the old path alone: EF := efWet from the splash hour to midnight, no store
       efWet: sp.efWet ?? 1,
+      pulse: sp.pulse ?? null, // block 8 (tau in minutes)
       efOn: false,
       margin: Infinity, // smallest Ts - wet-bulb of the air over wet cells holding water, every model minute (last day)
       marginAt: null,
@@ -591,6 +593,7 @@ export function runModel(world, opts = {}) {
         if (WS.efOnly) WS.efOn = true;
         else for (let i = 0; i < NN; i++) if (WS.wet[i]) WS.W[i] = WS.w0;
       }
+      if (WS && WS.pulse && WS.efOn) WS.efWet = WS.pulse.res + (WS.pulse.ef0 - WS.pulse.res) * Math.exp(-(m - WS.at) / WS.pulse.tau);
       const h = m / 60;
       const taK = ta[m] + K0;
       const ta4 = taK * taK * taK * taK;

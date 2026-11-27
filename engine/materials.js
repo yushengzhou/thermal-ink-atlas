@@ -109,6 +109,22 @@ export const SOURCES = {
   li2023: 'Li et al. (2023) Building and Environment, doi 10.1016/j.buildenv.2023.110225, Hong Kong: a sky view factor threshold near 0.4 (via the block-7 brief, unverified)',
   yang2010: 'Yang, Lau & Qian (2010) Building and Environment 45(1) 115, Shanghai high-rise housing quarters: vegetation matters more at night; the night heat island not explained by the site, so anthropogenic heat (via the block-7 brief, unverified)',
   cai2017: 'Cai & Hu (2017) Int. J. Environ. Sci. Dev. 8(5) 378-384, doi 10.18178/ijesd.2017.8.5.981, Wuhan, August 2015: under direct sun hard paving 9.87 K and open space 3.67 K hotter than grass (checked against the paper)',
+  brief8: 'Research brief docs/research/campus-brief.md (block 8; values compiled from the sources below, items marked unverified there are flagged here; the emissivities and admittances of the turf, track and court build-ups and the sail transmission are assumptions of the brief)',
+  jim2016: 'Jim (2016) Applied Energy 173, 520, via the block-8 brief and [singh2024]: artificial turf 74.6 C vs natural grass 36.9 C; air at 15 cm over the turf 54.2 C vs 36.0 C at 150 cm; daily minimum of the turf 23.1-23.4 C, about the grass 23.1 C (unverified)',
+  jim2017: 'Jim (2017) Landscape and Urban Planning 157, 561, via the block-8 brief: artificial turf 73.8 C vs grass 37.3 C at air 34.4 C; turf albedo 0.073 (0.05-0.15) (unverified)',
+  singh2024: 'Singh et al. (2024) International Journal of Biometeorology, doi 10.1007/s00484-024-02679-5, systematic review of 23 studies (via the block-8 brief): artificial turf 9.4-33.7 K hotter than natural grass at the surface and 0.5-1.2 K in the air; Tmrt and WBGT findings inconsistent; maxima 86.6 C (Twomey 2016), 80.1 vs 53.2 C (Petrass 2014), 71.5 C at air 30.6 C (McNitt 2008), 65.3 vs 40.4 C at air 34.8 C (Liu & Jim 2021); SBR infill 53.5 vs TPE 45.6 C in the lab (unverified)',
+  nydoh: 'New York State Department of Health fact sheet on crumb-rubber infilled synthetic turf, via the block-8 brief: Brigham Young University (2002) turf average 47 C vs grass 26 C and asphalt 43 C, maximum 93 C; watering cut the turf from 79 to 29 C, back to 49 C after 5 min and 73 C after 20 min; Penn State plots 49/54/63 C at air 26-29 C, turf 20-30 K hotter than grass (unverified)',
+  mcnitt2008: 'McNitt et al. (2008) Acta Horticulturae 783, 573, via the block-8 brief: irrigating synthetic turf at Penn State, 54-71 C down to 24 C, back to 32-49 C within 30 min, then about stable for 3 h (unverified)',
+  pfautsch2020: 'Pfautsch et al. (2020), school microclimate report for New South Wales, via the block-8 brief: sunlit artificial turf 51.7 / 56.1 / 59.2 C (max 67.5) on normal / hot / extreme days, asphalt 44.8 / 51.1 / 54.4 C (max 61.6); shaded turf 35 C vs 61 C sunlit; shade cooled black asphalt by about 25 K and the black-globe temperature by more than 10 K (unverified)',
+  vanos2016: 'Vanos et al. (2016) Landscape and Urban Planning 146, 29, doi 10.1016/j.landurbplan.2015.10.007, playgrounds in Gilbert, Arizona, at noon, air 41.6 C: rubber surface 87.2 C in sun, 42.2 C under a tree, 46.7 C under a shade sail; a slide 71.7 C in sun, 43.9 C in shade (via the block-8 brief, unverified)',
+  vanos2017: 'Vanos et al. (2017) Building and Environment 126, 119, playgrounds in Lubbock, Texas, via the block-8 brief: a shade sail cut the radiation a child absorbs by 168 W m-2; concrete in sun / shade 40.0 / 29.2, 43.8 / 32.7 and 44.4 / 34.1 C; grass albedo 0.22-0.26, an asphalt court 0.24; a child\'s body is nearer the hot ground (unverified)',
+  vanos2015: 'Vanos (2015) review of children\'s health and vulnerability in outdoor microclimates, via the block-8 brief (unverified)',
+  paolini: 'Paolini et al., ICUC12 extended abstract 249, via the block-8 brief: in weak wind the air at 0.3 m was up to 1 K warmer than at 1.5 m (unverified)',
+  kinmen: 'Kinmen school GLOBE report, via the block-8 brief: a PU running track more than 15 K above the air at noon (weak source, unverified)',
+  aoki2004: 'Aoki (2004), via the block-8 brief: running track 42.2 C vs artificial turf 67.0 C (unverified)',
+  courtVendor: 'Acrylic court coating makers (CoolTop; Laykold), via the block-8 brief: a standard acrylic court about 52 C at air about 30 C (vendor claims, unverified)',
+  iso13732: 'ISO 13732-1:2006, hot surfaces, via CENELEC Guide 29 Table A.1 (via the block-8 brief): burn thresholds for 1 min / 10 min / 8 h of contact, metal 51 / 48 / 43 C, stone and concrete 56 / 48 / 43 C, plastics and wood 60 / 48 / 43 C; the low end for children (unverified)',
+  vanosPress: 'Press coverage of Vanos\'s playground studies, via the block-8 brief: 60 C burns skin in 1 min, 74 C in 5 s, 77 C in 3 s (the standard behind it not named; unverified)',
 };
 
 /** How a value relates to its source. */
@@ -410,6 +426,53 @@ Object.assign(MATERIALS, {
     tr: v(0, 'golden2007', 'interp', false, 'opaque panels: no direct sun through them'),
     prescribed: 'Not used by the grid model as a surface: a flat opaque screen 4.2 m up; the ground beneath sees the sky with SVF 0.11 [golden2007] and the panel undersides as warm walls (engine assumption).',
     note: 'Rows of solar panels on steel posts over the parking bays: shade for the cars by day and a lid on the night sky.',
+  },
+});
+
+// ---- block 8: school campus playground (@page campus: cut from the other pages at build time) ----
+// The natural grass field is the shared irrigated lawn (grass); the sail is a
+// flat screen like the block-5 mat awning (its transmission tr is what counts).
+Object.assign(MATERIALS, {
+  turf: {
+    name: 'Artificial turf (crumb-rubber infill)',
+    alpha: v(0.08, 'brief8', 'range', false, 'brief 0.08 (0.05-0.15); Jim measured 0.073 [jim2017]; 0.10-0.12 (Loveday) and 0.069 (Wardenaar) via the brief'),
+    eps: v(0.93, 'brief8', 'engine', false, 'an assumption of the brief'),
+    mu: v(350, 'brief8', 'engine', false, 'an assumption of the brief, 350 (250-500): plastic fibres over loose black SBR crumb and a shock pad; damping depth about 6 cm in the infill'),
+    ef: v(0, 'brief8', 'cited', false, 'dry plastic: no water to spend (watering: the irrigation pulse in block 8)'),
+    note: 'Green plastic blades in a bed of black rubber crumb: dark, dry and light, so it bakes in the sun and cools as fast at night.',
+  },
+  track: {
+    name: 'Running track (PU / EPDM on asphalt)',
+    alpha: v(0.12, 'brief8', 'range', false, 'brief 0.12 (0.10-0.20), unverified'),
+    eps: v(0.92, 'brief8', 'engine', false, 'an assumption of the brief'),
+    mu: v(950, 'brief8', 'interp', false, 'brief: a blend of about 900-1000 for a thin rubber coat over asphalt, read as 950'),
+    ef: v(0, 'brief8', 'cited', false, 'dry'),
+    note: 'A thin rubber coat (red here) over asphalt: dark like the asphalt, with a little less heat store.',
+  },
+  acrylic: {
+    name: 'Acrylic court coating on asphalt',
+    alpha: v(0.2, 'brief8', 'range', false, 'brief 0.20 (0.15-0.30); an asphalt court measured 0.24 [vanos2017]'),
+    eps: v(0.92, 'brief8', 'engine', false, 'an assumption of the brief'),
+    mu: v(1200, 'brief8', 'interp', false, 'brief: the asphalt underneath (a coat a few millimetres thick)'),
+    ef: v(0, 'brief8', 'cited', false, 'dry'),
+    note: 'A painted acrylic coat on an asphalt slab: a little lighter than bare asphalt, with the asphalt\'s heat store.',
+  },
+  rubber: {
+    name: 'Poured rubber play surface',
+    alpha: v(0.12, 'brief8', 'interp', false, 'the brief has no row for play-surface rubber; its PU / EPDM track value 0.12 (0.10-0.20) is used'),
+    eps: v(0.92, 'brief8', 'engine', false, 'as the track (an assumption of the brief)'),
+    mu: v(950, 'brief8', 'interp', false, 'as the track: EPDM granules over an SBR base on a hard bed'),
+    ef: v(0, 'brief8', 'cited', false, 'dry'),
+    note: 'Soft rubber granules bound with glue under the swings and the slide: kind to a fall, but dark and dry, so it is among the hottest ground here.',
+  },
+  shadeSail: {
+    name: 'Shade sail (knitted HDPE)',
+    alpha: v(0.3, 'engine', 'engine', false, 'not used: only the transmission of the fabric matters here'),
+    eps: v(0.9, 'engine', 'engine', false, 'not used'),
+    ef: v(0, 'engine', 'engine', false, 'not used'),
+    tr: v(0.2, 'brief8', 'range', false, 'brief 0.10-0.30 for knitted HDPE shade cloth (unverified); the middle value'),
+    prescribed: 'Not used by the grid model as a surface: a flat screen 3.5 m up that lets through tr of the sun; the cells under it count as fully covered for the sky view (crown factor), so their walls term stands in for the warm fabric overhead.',
+    note: 'Knitted plastic cloth stretched between steel posts over the play area: most of the sun stops on it, but it holds some warmth after sunset.',
   },
 });
 

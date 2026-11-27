@@ -5,8 +5,8 @@ import { svfAt, svfGridAt } from './thermal.js';
 import { windField, isWindBlock } from './wind.js';
 import { MATERIALS } from './materials.js';
 
-export const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water', 'pavers', 'porousAsphalt', 'coolPave', 'raingarden', 'river', 'pond', 'greyBrick', 'ballast', 'drySoil', 'scrub'];
-const WALKABLE = { concrete: 1, stone: 1, grass: 1, pavers: 1, greyBrick: 1 };
+export const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water', 'pavers', 'porousAsphalt', 'coolPave', 'raingarden', 'river', 'pond', 'greyBrick', 'ballast', 'drySoil', 'scrub', 'turf', 'track', 'acrylic', 'rubber'];
+const WALKABLE = { concrete: 1, stone: 1, grass: 1, pavers: 1, greyBrick: 1, turf: 1, track: 1, acrylic: 1, rubber: 1 };
 
 /** Shopfront segments [s0, s1] (metres along a face) for a shop building. */
 export function shopSegments(B, face) {

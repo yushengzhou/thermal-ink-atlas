@@ -904,8 +904,8 @@ export class Renderer {
     ctx.drawImage(c, 0, 0);
   }
 
-  /** True if the person's hip at (x, y) is hidden behind a building (block 5: or under a pergola or awning). */
-  hidden(x, y) {
+  /** True if the person's hip at (x, y) is hidden behind a building (block 5: or under a pergola or awning; block 8: not children, seen through the sail mesh). */
+  hidden(x, y, mesh = false) {
     for (const B of this.world.buildings) {
       const dIn = Math.max(B.x0 - x, B.y0 - y, 0);
       const dOut = Math.min(B.x1 - x, B.y1 - y);
@@ -913,7 +913,7 @@ export class Renderer {
       const top = B.h + (B.gable ? 2 : 0);
       if (top > 0.9 + dIn / ISO_Z) return true;
     }
-    if (this.world.screens) {
+    if (this.world.screens && !mesh) {
       // a flat top at z hides the hip if the line of sight passes through it inside its footprint
       for (const P of this.world.screens) {
         const dIn = Math.max(P.x0 - x, P.y0 - y, 0);
@@ -1012,7 +1012,7 @@ export class Renderer {
     const shLen = hc.up ? Math.min(4, 1.7 / Math.tan(Math.max(8, hc.sun.alt) * DEG)) : 0;
     // people drawn a little larger than life, with a floor so they (and the
     // sweat cue) stay legible at the default overview zoom
-    const s = Math.max(Z * 1.25, 5.5 * this.dpr);
+    const s0 = Math.max(Z * 1.25, 5.5 * this.dpr);
     const lw = Math.max(0.8, this.lineBase(cam.z) * 0.8);
     const ink = rgbCss(INK);
     let count = 0;
@@ -1024,8 +1024,9 @@ export class Renderer {
       const Y = oy + p[1] * Z;
       if (X < -20 || Y < -20 || X > W + 20 || Y > H + 40) continue;
       if (this.clip && (X < this.clip[0] - 30 || X > this.clip[1] + 30)) continue;
-      if (this.hidden(a.x, a.y)) continue;
+      if (this.hidden(a.x, a.y, a.child)) continue;
       count++;
+      const s = a.child ? s0 * 0.7 : s0; // block 8: children
       ctx.globalAlpha = alpha;
       if (sh) {
         const q = iso(a.x + sh[0] * shLen * 0.5, a.y + sh[1] * shLen * 0.5, 0);
