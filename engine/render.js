@@ -1,7 +1,8 @@
 // render: replays the display list into per-tile bakes (keyed by mode, zoom,
 // quantised hour and tile index), composites cast shadows, the watercolour
 // heat wash and the live layer (people, margin notes). Every pixel is a pure
-// function of (frame, camera, look); caches only skip repeated work.
+// function of (frame, camera, look); caches only skip repeated work. The one
+// exception is the scrub preview during a slider drag (see previewHours).
 import { iso, hash3, noise2, clamp, smooth, rgbCss, mixRgb, scaleRgb, hexRgb, PAPER, INK, ISO_C, ISO_S, ISO_Z, DEG } from './core.js';
 import { shadowPolys, heatRgb } from './thermal.js';
 import { sweatState, shadeAt } from './life.js';
@@ -9,6 +10,7 @@ import { sweatState, shadeAt } from './life.js';
 export const TILE = 512;
 export const HOUR_STEP = 0.25;
 export const INTRO = { pen: 150, wash: 240, life: 300 };
+export const PREVIEW_BUDGET = 2;
 export const quantHour = (h) => (Math.round((((h % 24) + 24) % 24) / HOUR_STEP) * HOUR_STEP) % 24;
 
 const PAPER_CSS = rgbCss(PAPER);
@@ -88,8 +90,12 @@ export class Renderer {
     this.hourCache = new Map();
     this.tex = makeTextures();
     this.scaffold = null;
-    this.stats = { people: 0, tilesBaked: 0, frameMs: 0 };
+    this.stats = { people: 0, tilesBaked: 0, frameMs: 0, preview: false };
     this.dpr = 1;
+    this.maxTiles = 72;
+    this.scrub = false; // set per frame from look.scrub
+    this.budget = Infinity;
+    this.pending = {};
   }
 
   // ---- hour context ------------------------------------------------------
@@ -354,7 +360,7 @@ export class Renderer {
   // ---- tiles ---------------------------------------------------------------
 
   tile(mode, z, hq, tx, ty) {
-    const key = `${mode}|${z}|${hq}|${tx}|${ty}|${this.dpr}`;
+    const key = this.tileKey(mode, z, hq, tx, ty);
     let c = this.tiles.get(key);
     if (c) {
       this.tiles.delete(key);
@@ -415,7 +421,7 @@ export class Renderer {
     g.globalCompositeOperation = 'source-over';
     this.tiles.set(key, c);
     this.stats.tilesBaked++;
-    while (this.tiles.size > 72) this.tiles.delete(this.tiles.keys().next().value);
+    while (this.tiles.size > this.maxTiles) this.tiles.delete(this.tiles.keys().next().value);
     return c;
   }
 
@@ -455,7 +461,8 @@ export class Renderer {
     return [Math.round(W / 2 - p[0] * Z), Math.round(H / 2 - p[1] * Z), Z];
   }
 
-  drawTiles(ctx, mode, cam, hq, W, H, alpha = 1) {
+  /** Tile indices covering the viewport for a camera (in draw order). */
+  visibleTiles(cam, W, H) {
     const [ox, oy, Z] = this.origin(cam, W, H);
     const S = this.world.size;
     // world extent on the drawing plane (with margin for tall buildings)
@@ -467,19 +474,111 @@ export class Renderer {
     const tx1 = Math.floor(Math.min(maxX, W - ox) / TILE);
     const ty0 = Math.floor(Math.max(minY, -oy) / TILE);
     const ty1 = Math.floor(Math.min(maxY, H - oy) / TILE);
-    ctx.globalAlpha = alpha;
-    for (let ty = ty0; ty <= ty1; ty++) {
-      for (let tx = tx0; tx <= tx1; tx++) {
-        ctx.drawImage(this.tile(mode, cam.z, hq, tx, ty), ox + tx * TILE, oy + ty * TILE);
+    const out = [];
+    for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) out.push([tx, ty]);
+    this.maxTiles = clamp(out.length * 9, 72, 160);
+    return { ox, oy, tiles: out };
+  }
+
+  tileKey(mode, z, hq, tx, ty) {
+    return `${mode}|${z}|${hq}|${tx}|${ty}|${this.dpr}`;
+  }
+
+  /** True if every visible tile of (mode, hour) is already baked. */
+  baked(mode, z, hq, tiles) {
+    for (const [tx, ty] of tiles) if (!this.tiles.has(this.tileKey(mode, z, hq, tx, ty))) return false;
+    return true;
+  }
+
+  /**
+   * Bake up to `n` missing visible tiles of (mode, hour); a new heat image
+   * counts as one tile. Returns how many units were spent. Used for the
+   * scrub preview and for idle-time pre-baking; never changes what an exact
+   * frame looks like, only how soon its tiles are ready.
+   */
+  bakeSome(mode, cam, hq, W, H, n) {
+    const { tiles } = this.visibleTiles(cam, W, H);
+    let spent = 0;
+    if (mode === 'thermal') {
+      const hc = this.hourCtx(hq);
+      if (!hc.heatImg && spent < n) {
+        this.heatImage(hc);
+        spent++;
       }
     }
+    for (const [tx, ty] of tiles) {
+      if (spent >= n) break;
+      if (this.tiles.has(this.tileKey(mode, cam.z, hq, tx, ty))) continue;
+      this.tile(mode, cam.z, hq, tx, ty);
+      spent++;
+    }
+    return spent;
+  }
+
+  drawTiles(ctx, mode, cam, hq, W, H, alpha = 1) {
+    const { ox, oy, tiles } = this.visibleTiles(cam, W, H);
+    if (this.scrub) {
+      const shown = this.previewHours(mode, cam, hq, W, H, tiles);
+      if (shown) {
+        const [h0, h1, w] = shown;
+        this.blit(ctx, mode, cam.z, h0, tiles, ox, oy, alpha);
+        if (w > 0) this.blit(ctx, mode, cam.z, h1, tiles, ox, oy, alpha * w);
+        return;
+      }
+    }
+    this.blit(ctx, mode, cam.z, hq, tiles, ox, oy, alpha);
+  }
+
+  blit(ctx, mode, z, hq, tiles, ox, oy, alpha) {
+    ctx.globalAlpha = alpha;
+    for (const [tx, ty] of tiles) ctx.drawImage(this.tile(mode, z, hq, tx, ty), ox + tx * TILE, oy + ty * TILE);
     ctx.globalAlpha = 1;
+  }
+
+  /**
+   * Scrub preview (slider drag): spend this frame's small bake budget on a
+   * "pending" keyframe hour near the target, and show the nearest fully baked
+   * hours around the target, cross-faded by distance. Returns null when the
+   * target itself is baked (the frame is then exact) or nothing is baked.
+   * Preview frames depend on what is cached, so they exist only while
+   * scrubbing; seek() and ?f=N always take the exact path.
+   */
+  previewHours(mode, cam, hq, W, H, tiles) {
+    const z = cam.z;
+    const steps = Math.round(24 / HOUR_STEP);
+    const wrap = (h) => ((h % 24) + 24) % 24;
+    const dist = (a, b) => {
+      const d = Math.abs(wrap(a) - wrap(b));
+      return Math.min(d, 24 - d);
+    };
+    if (!this.baked(mode, z, hq, tiles)) {
+      let p = this.pending[mode];
+      if (p === undefined || dist(p, hq) > 1 || this.baked(mode, z, p, tiles)) p = hq;
+      this.pending[mode] = p;
+      this.budget -= this.bakeSome(mode, cam, p, W, H, Math.max(0, this.budget));
+    }
+    if (this.baked(mode, z, hq, tiles)) return null;
+    this.stats.preview = true;
+    // nearest baked hour before and after the target
+    let lo = null;
+    let hi = null;
+    for (let k = 1; k < steps && (lo === null || hi === null); k++) {
+      if (lo === null && this.baked(mode, z, quantHour(hq - k * HOUR_STEP), tiles)) lo = k;
+      if (hi === null && this.baked(mode, z, quantHour(hq + k * HOUR_STEP), tiles)) hi = k;
+    }
+    if (lo === null) return null; // nothing baked: fall back to an exact bake
+    const h0 = quantHour(hq - lo * HOUR_STEP);
+    const h1 = quantHour(hq + hi * HOUR_STEP);
+    if (h0 === h1 || lo + hi > 4 / HOUR_STEP) return lo <= hi ? [h0, h0, 0] : [h1, h1, 0];
+    return [h0, h1, lo / (lo + hi)];
   }
 
   // ---- frame -----------------------------------------------------------------
 
   /**
-   * Draw one frame. look: {hour, thermalMix (0..1), notes: [...], intro: bool}
+   * Draw one frame. look: {hour, thermalMix (0..1), notes: [...], intro: bool,
+   * scrub: bool}. With scrub set (slider drag) missing tiles are baked a few
+   * per frame and stats.preview tells whether the frame is still a preview.
    */
   frame(f, cam, look) {
     const t0 = performance.now();
@@ -488,6 +587,12 @@ export class Renderer {
     const H = this.canvas.height;
     const hq = quantHour(look.hour);
     const [ox, oy] = this.origin(cam, W, H);
+    // scrub preview: at most PREVIEW_BUDGET tile bakes per frame (a count, not
+    // a clock, so a given input sequence always previews the same way)
+    this.scrub = !!look.scrub;
+    this.budget = this.scrub ? PREVIEW_BUDGET : Infinity;
+    if (!this.scrub) this.pending = {};
+    this.stats.preview = false;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';

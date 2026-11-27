@@ -57,6 +57,8 @@ export function boot(scene, root = document) {
     notes: q.get('notes') !== '0',
     people: q.get('people') !== '0',
     intro: true,
+    scrub: false, // hour slider being dragged, or refining after release
+    released: true,
   };
   if (q.get('ui') === '0') root.body.classList.add('noui');
   if (q.has('hour')) S.hour = Math.round(clamp(parseFloat(q.get('hour')) || 0, 0, 23.75) / 0.25) * 0.25;
@@ -94,7 +96,7 @@ export function boot(scene, root = document) {
     const k = clamp((f - S.since) / FADE, 0, 1);
     return S.thermal ? k : 1 - k;
   };
-  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people });
+  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people, scrub: S.scrub });
 
   // ---- sizing ------------------------------------------------------------------------------
   const resize = () => {
@@ -112,8 +114,12 @@ export function boot(scene, root = document) {
   });
 
   let lastStats = null;
+  let dirty = false;
   const draw = () => {
     lastStats = R.frame(S.frame, S.cam, look(S.frame));
+    dirty = false;
+    // a released scrub ends once the frame is exact again
+    if (S.scrub && S.released && !lastStats.preview) S.scrub = false;
     return lastStats;
   };
 
@@ -139,13 +145,30 @@ export function boot(scene, root = document) {
   $('legendLo').textContent = `${lo} °C`;
   $('legendHi').textContent = `${hi} °C`;
 
-  const setHour = (h) => {
+  const setHour = (h, scrub = false) => {
     S.hour = ((Math.round(h / 0.25) * 0.25) % 24 + 24) % 24;
     syncUi();
     if (card.dataset.open === '1') showCard(card._pick);
-    draw();
+    if (scrub) {
+      // slider drag: draw once in the next animation frame, as a preview
+      S.scrub = true;
+      dirty = true;
+    } else {
+      S.scrub = false;
+      draw();
+    }
   };
-  slider.addEventListener('input', () => setHour(parseFloat(slider.value)));
+  slider.addEventListener('pointerdown', () => {
+    S.released = false;
+  });
+  const release = () => {
+    S.released = true;
+    if (S.scrub) dirty = true;
+  };
+  slider.addEventListener('pointerup', release);
+  slider.addEventListener('pointercancel', release);
+  slider.addEventListener('change', release);
+  slider.addEventListener('input', () => setHour(parseFloat(slider.value), true));
   const toggleThermal = () => {
     const m = thermalMix(S.frame);
     S.thermal = !S.thermal;
@@ -471,6 +494,41 @@ export function boot(scene, root = document) {
     }
   }, true);
 
+  // ---- idle pre-baking ------------------------------------------------------------------
+  // While nothing is moving, bake the neighbouring hours of the current view in
+  // idle slices so the first steps of a slider drag (or H) are already cached.
+  // This only fills caches: exact frames look the same with or without it.
+  const NEIGHBOURS = [0.25, -0.25, 0.5, -0.5, 1, -1];
+  const idle = {
+    queued: false,
+    kick() {
+      if (this.queued || typeof requestIdleCallback === 'undefined') return;
+      this.queued = true;
+      requestIdleCallback((d) => this.run(d), { timeout: 1000 });
+    },
+    run(d) {
+      this.queued = false;
+      if (S.scrub || (S.intro && S.frame < INTRO.pen)) return;
+      const m = thermalMix(S.frame);
+      const modes = m <= 0 ? ['day'] : m >= 1 ? ['thermal'] : ['day', 'thermal'];
+      const W = canvas.width;
+      const H = canvas.height;
+      const fit = Math.floor(R.maxTiles / Math.max(1, R.visibleTiles(S.cam, W, H).tiles.length)) - 2;
+      const hours = NEIGHBOURS.slice(0, Math.max(0, Math.floor(fit / modes.length) - 1)).map((dh) => quantHour(S.hour + dh));
+      for (const mode of modes) {
+        for (const h of hours) {
+          while (d.timeRemaining() > 12) {
+            if (!R.bakeSome(mode, S.cam, h, W, H, 1)) break;
+          }
+          if (d.timeRemaining() <= 12) {
+            this.kick();
+            return;
+          }
+        }
+      }
+    },
+  };
+
   // ---- loop ----------------------------------------------------------------------------------
   const frameTimes = [];
   let lastT = null;
@@ -480,7 +538,8 @@ export function boot(scene, root = document) {
     if (!S.paused) {
       S.frame++;
       draw();
-    }
+    } else if (dirty || S.scrub) draw();
+    if (!S.scrub) idle.kick();
     requestAnimationFrame(loop);
   };
   syncUi();
@@ -500,6 +559,7 @@ export function boot(scene, root = document) {
     /** Pure seek: render frame N with an optional camera {z,cx,cy}; pauses the clock. */
     seek(frame, cam) {
       S.paused = true;
+      S.scrub = false;
       S.frame = frame;
       if (cam) S.cam = { ...cam };
       return { ...draw() };
@@ -507,7 +567,10 @@ export function boot(scene, root = document) {
     hash: () => hashCanvas(R.ctx, canvas.width, canvas.height),
     /** Set the look: {hour, thermal (immediate), notes, intro}. */
     look(o) {
-      if (o.hour !== undefined) S.hour = o.hour;
+      if (o.hour !== undefined) {
+        S.hour = o.hour;
+        S.scrub = false;
+      }
       if (o.thermal !== undefined) {
         S.thermal = !!o.thermal;
         S.since = -1e9;
@@ -558,6 +621,8 @@ export function boot(scene, root = document) {
     },
     card: (kind, a, b) => cardData(kind === 'building' ? { kind, B: world.buildings.find((B) => B.id === a) } : { kind: 'ground', x: a, y: b, g: scene.ground[world.parcelAt(a, b)] }),
     stats: () => ({ ...lastStats }),
+    /** False while a slider drag is showing (or refining) preview frames. */
+    settled: () => !S.scrub,
     /** Glossary keys, and the on-canvas note term hit boxes (CSS px). */
     glossaryKeys: () => Object.keys(GLOSSARY),
     glossaryStats: () => ({ ...gstats }),
