@@ -330,7 +330,7 @@ export class Renderer {
     const k = clamp(hc.sun.alt / 10, 0, 1);
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.globalCompositeOperation = 'screen';
-    g.globalAlpha = 0.75 * k;
+    g.globalAlpha = 0.45 * k;
     g.drawImage(this.spotScratch, 0, 0);
     g.globalCompositeOperation = 'source-over';
     // ink hatch, clipped to the spot by its alpha
@@ -343,7 +343,7 @@ export class Renderer {
     hz.globalCompositeOperation = 'destination-in';
     hz.drawImage(this.spotScratch, 0, 0);
     hz.globalCompositeOperation = 'source-over';
-    g.globalAlpha = 0.3 * k;
+    g.globalAlpha = 0.4 * k;
     g.drawImage(this.hatchScratch, 0, 0);
     g.globalAlpha = 1;
   }
@@ -782,6 +782,7 @@ export class Renderer {
       if (intro) lifeA = clamp((f - INTRO.wash) / (INTRO.life - INTRO.wash), 0, 1);
     }
     this.stats.people = 0;
+    this.stats.ac = false;
     this.stats.sweating = 0;
     this.stats.sweatGlyphPx = 0;
     this.noteHits = [];

@@ -564,30 +564,54 @@ export class Thermal {
    * reflection), and their sum K, as in runModel.
    */
   shortwave(i, h) {
-    const s = this.sun(h);
-    const ir = irradiance(s.alt);
-    const bh = ir.beam * Math.max(0, Math.sin(s.alt * DEG));
-    const w = wallShortwave(ir, s);
+    const H = this.hourConst(h);
     const mat = (this.info.mats ?? MATERIALS)[cellMat(this.world, i)];
     const c = wallReflectCoef(this.world, i) * (1 - this.glassShare(i));
-    const direct = this.sunlit(i, h) * bh;
-    const sky = this.world.svf[i] * ir.diffuse;
-    const walls = c * (w.k0 + mat.alpha.value * w.kG);
+    const direct = this.sunlit(i, h) * H.bh;
+    const sky = this.world.svf[i] * H.ir.diffuse;
+    const walls = c * (H.w.k0 + mat.alpha.value * H.w.kG);
     const r = this.refl(i, h);
-    const glass = r * bh;
-    return { direct, sky, walls, glass, r, K: direct + sky + walls + glass, beam: ir.beam, diffuse: ir.diffuse, sun: s };
+    const glass = r * H.bh;
+    return { direct, sky, walls, glass, r, K: direct + sky + walls + glass, beam: H.ir.beam, diffuse: H.ir.diffuse, sun: H.sun };
+  }
+
+  /**
+   * Per-hour constants (sun, irradiance, wall shortwave, opaque and glass wall
+   * longwave, sky longwave), cached: the same arithmetic as before, done once
+   * per hour instead of once per cell.
+   */
+  hourConst(h) {
+    if (!this._hc) this._hc = new Map();
+    let H = this._hc.get(h);
+    if (H) return H;
+    const sun = this.sun(h);
+    const ir = irradiance(sun.alt);
+    const ta = this.air(h);
+    const taK = ta + K0;
+    const bh = ir.beam * Math.max(0, Math.sin(sun.alt * DEG));
+    H = {
+      sun,
+      ir,
+      ta,
+      taK,
+      bh,
+      w: wallShortwave(ir, sun),
+      opaque: SIGMA * wallTemp(taK, bh + ir.diffuse) ** 4,
+      lsky: skyEmissivity(this.info.site.vapourHpa, taK) * SIGMA * taK ** 4,
+      glassL: this.world.gview ? FACES.map((f) => glassLongwave(this.info.glass, ta, ir, sun, f)) : null,
+    };
+    if (this._hc.size > 200) this._hc.delete(this._hc.keys().next().value);
+    this._hc.set(h, H);
+    return H;
   }
 
   /** Longwave from the walls cell i sees (W m-2), as in runModel. */
   lwall(i, h) {
-    const taK = this.air(h) + K0;
-    const s = this.sun(h);
-    const ir = irradiance(s.alt);
-    const opaque = SIGMA * wallTemp(taK, ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + ir.diffuse) ** 4;
+    const H = this.hourConst(h);
     const g = this.world.gview;
-    if (!g) return opaque;
-    let out = (1 - this.glassShare(i)) * opaque;
-    for (let o = 0; o < 4; o++) if (g[i * 4 + o] > 0) out += g[i * 4 + o] * glassLongwave(this.info.glass, this.air(h), ir, s, FACES[o]);
+    if (!g) return H.opaque;
+    let out = (1 - this.glassShare(i)) * H.opaque;
+    for (let o = 0; o < 4; o++) if (g[i * 4 + o] > 0) out += g[i * 4 + o] * H.glassL[o];
     return out;
   }
 
@@ -646,12 +670,10 @@ export class Thermal {
    * at the glass temperature.
    */
   tmrt(i, h) {
-    const site = this.info.site;
     const sw = this.shortwave(i, h);
     const s = sw.sun;
     const sl = this.sunlit(i, h);
     const v = this.world.svf[i];
-    const taK = this.air(h) + K0;
     const mat = (this.info.mats ?? MATERIALS)[cellMat(this.world, i)];
     const tg = this.ts(i, h) + K0;
     const Kh = sw.K; // everything that reaches the ground
@@ -663,7 +685,7 @@ export class Thermal {
     const Kground = mat.alpha.value * Kh; // reflected up from the ground
     const Klat = 0.5 * Ksky + 0.5 * Kground + 0.5 * sw.walls;
     const S = ak * (0.06 * Ksky + 0.06 * Kground + 0.88 * Klat + fp * sw.beam * (sl + sw.r));
-    const lsky = skyEmissivity(site.vapourHpa, taK) * SIGMA * taK ** 4;
+    const lsky = this.hourConst(h).lsky;
     const Ldown = v * lsky + (1 - v) * this.lwall(i, h);
     const Lg = mat.eps.value * SIGMA * tg ** 4 + (1 - mat.eps.value) * Ldown; // emitted + reflected
     const Llat = 0.5 * Ldown + 0.5 * Lg;

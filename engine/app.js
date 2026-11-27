@@ -136,6 +136,8 @@ export function boot(scene, root = document) {
   }
   // the view the single-state code paths (notes, glossary, block 1) use
   const main = V.main ?? V.after;
+  // ?glint=0 (checks): no glint wash in the day view; spots still act on walkers
+  if (glassMode && q.get('glint') === '0') main.R.spotFor = null;
   const R = main.R;
   const display = main.display;
   const t3 = performance.now();
