@@ -2347,9 +2347,8 @@ stand 272 village houses of 6–8 storeys (18–24 m) built plot to plot, the "h
 sheeting. East of the road: the older village centre (an ancestral hall, its open square, a pond, three banyans). South of
 Bus Road: a low-rise edge of single-storey rooms in 193 runs, roofed with rusty corrugated iron, galvanised sheet,
 asbestos-cement sheet or tarpaulin, some painted white by the residents, between 2 m alleys. The residents' white roofs
-are `R`, the panel button or `?coolroof=1` (default off: they repaint the 65 bare roofs marked in the scene); the
-room under each sheet roof is `O`, the panel button or `?under=1`. On this page `R` paints the roofs; it does not
-restart the intro as it does elsewhere. Its research brief is [`docs/research/village-brief.md`](research/village-brief.md).
+are `W`, the panel button or `?coolroof=1` (default off: they repaint the 65 bare roofs marked in the scene); the
+room under each sheet roof is `O`, the panel button or `?under=1`. Its research brief is [`docs/research/village-brief.md`](research/village-brief.md).
 
 ### Block 10 parameters
 
@@ -2375,7 +2374,7 @@ hall `greyTile` (block 5). The block's own values live in `engine/village.js` (`
 | `rhoCp` | 1206 [engine] *engine assumption (no source)*, unverified (rho c_p of air, J m-3 K-1 (1.2 kg m-3 x 1005 J kg-1 K-1)) |
 | `airTarget` | 3 [brief10] *cited range*, unverified (the air proxy is calibrated (as the brief says: "calibrate n to +2-4 K peak under bare tin") so the bare rusty-iron rooms peak at this many K above the outdoor air, the middle of 2-4 K; the band on it therefore holds by construction and is not counted) |
 | `airCap` | 5 [brief10] *cited value*, unverified (the air proxy is never shown beyond +-5 K (the brief)) |
-| `paint` | whiteTin [brief10] *cited value*, unverified (what the residents' white-roof toggle (R) paints the marked bare iron and galvanised roofs with: white-painted tin, new paint (albedo 0.65)) |
+| `paint` | whiteTin [brief10] *cited value*, unverified (what the residents' white-roof toggle (W) paints the marked bare iron and galvanised roofs with: white-painted tin, new paint (albedo 0.65)) |
 
 ### The lanes (sub-grid)
 
@@ -2470,12 +2469,14 @@ Not a simulation of the room (the brief's option: a radiant proxy and an informa
 - air (illustrative only): ΔT = h_ci·(T_roof − Ta) / (h_ci + ρc_p·n·h/3600) with h_ci 1.25, h 2.5 m and
   n = 21.50 air changes per hour, **calibrated** as the brief says, so the mean of the 64 bare rusty-iron rooms' daily peaks is
   +3 K (the middle of the brief's +2 to +4 K): the share of (T_roof − Ta) that reaches the air is 0.065. Its band
-  (7, bare tin) therefore holds by construction and is not counted; the white-paint change is a prediction. A card never
+  (7, bare tin) therefore holds by construction and is not counted. The white-paint change (band 7) is **semi-constructed**: the proxy is
+  linear in T_roof − Ta, so the change is the target times the roofs' relative cooling (−0.561 per K of target); it tests the
+  model's roof-temperature ratio, not an independent indoor prediction (−1.12 K at +2 K, −1.68 K at +3 K, −2.24 K at +4 K). A card never
   shows it beyond ±5 K; the largest raw value in this model is 3.01 K, so the cap does not bind here.
 
 ### The residents' white roofs
 
-`R` repaints the 65 marked bare roofs (iron and galvanised) with new white paint (albedo 0.65) and runs those roof cells
+`W` repaints the 65 marked bare roofs (iron and galvanised) with new white paint (albedo 0.65) and runs those roof cells
 again (the other cells are unchanged: there is no lateral coupling). Surface at 15:00 bare → white (°C), its change (K), the radiant
 proxy at 15:00 (°C) and the illustrative air's day's peak (K above the outdoor air):
 
@@ -2534,6 +2535,16 @@ Radiant proxy under bare rusty iron at 15:00 (shipped 52.0 °C):
 
 h_ci 1 or 1.5: n is recalibrated (17.2 per hour and 25.8 per hour), the share reaching the air stays 0.065 and the
 white-paint change −1.68 K.
+
+Band 7 over the brief's calibration targets (bare tin peaking at +2 to +4 K): the white-paint change scales one for one with the target.
+
+| Target | white-paint change of the air peak |
+|---|---|
+| +2 K | −1.12 K |
+| +3 K (shipped) | −1.68 K |
+| +4 K | −2.24 K |
+
+Every target in the brief's range lands inside −1 to −2.5 K, so band 7 confirms only the model's roof-temperature ratio (semi-constructed).
 
 Lane width at the village's mean wall height (the canyon floor's mean and the brief's centre-line form):
 
@@ -2599,13 +2610,15 @@ At an air of 35 °C at 15:00 (the brief's bands for Ta 35, clear), "noon" 12:00 
 | 6. Village lanes − the open square, Tmrt at 22:00, K | 5.44 K | 2 to 6 | brief10 | inside |
 | 6. Supplementary: the edge's alleys − the open square, Tmrt at 22:00, K | 4.65 K | 2 to 6 | brief10 | inside (supplementary, not counted) |
 | 7. Supplementary (by construction: n calibrated to it): illustrative room air under bare rusty iron, day's peak, K above the outdoor air (n 21.5 per hour) | 3.00 K | 2 to 4 | brief10 | inside (supplementary, not counted) |
-| 7. White paint on the painted rusty-iron rooms (n 26): change of the illustrative room air's day's peak, K | -1.68 K | -2.5 to -1 | vellingiri2020 | inside |
+| 7. White paint on the painted rusty-iron rooms (n 26): change of the illustrative room air's day's peak, K (semi-constructed: the +3 K calibration target × the roofs' relative cooling) | -1.68 K | -2.5 to -1 | vellingiri2020 | inside |
+| 7. Supplementary: the same with the calibration target at the brief's +2 K (the change scales with the target), K | -1.12 K | -2.5 to -1 | vellingiri2020 | inside (supplementary, not counted) |
+| 7. Supplementary: the same with the calibration target at the brief's +4 K (the change scales with the target), K | -2.24 K | -2.5 to -1 | vellingiri2020 | inside (supplementary, not counted) |
 | 8. Illustrative room-air values shown beyond ±5 K (250 sheet roofs × 96 times × 2 roof states) | 0.000 | 0 | brief10 | inside |
 | 8. Supplementary: the largest raw value before the cap, K | 3.01 K | — (reported) | brief10 | reported (supplementary, not counted) |
 | Walkers at 15:00: density in shade over density in sun | 4.890 | ≥ 2 | melnikov | inside |
 | People dwelling at 15:00 (n 14) whose place is in shade | 1.000 | ≥ 0.5 | melnikov | inside |
 
-2 of 13 counted checks fall outside their band; 12 supplementary rows are not counted. By the brief's bands: 6 of 8 met (1, 2, 4, 6, 7, 8); missed: 3, 5. They are reported, not tuned away: every parameter value is the brief's central value (or the shared value the brief names), and the layout and every value were committed before the first model run of these bands; nothing in the scene's geometry or inputs changed after it (only the margin notes' label offsets, see Disclosures).
+2 of 13 counted checks fall outside their band; 14 supplementary rows are not counted. By the brief's bands: 6 of 8 met (1, 2, 4, 6, 7, 8); missed: 3, 5. Band 7 is counted as met but is semi-constructed (its size follows from the calibration target × the roofs' relative cooling; it holds for every target in the brief's +2 to +4 K), so only 5 met bands are independent of a calibration. They are reported, not tuned away: every parameter value is the brief's central value (or the shared value the brief names), and the layout and every value were committed before the first model run of these bands; nothing in the scene's geometry or inputs changed after it (only the margin notes' label offsets, see Disclosures).
 
 Misses:
 - **Band 3** (asbestos cement 67.8 °C at 15:00 against 50–62 °C): the thin layer here has no loss through its underside to the room

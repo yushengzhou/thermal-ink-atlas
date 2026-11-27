@@ -29,7 +29,7 @@ export function bands10Markdown(rows) {
 |---|---|---|---|---|
 ${lines.join('\n')}
 
-${out} of ${counted.length} counted checks fall outside their band; ${rows.length - counted.length} supplementary rows are not counted. By the brief's bands: ${met.length} of ${met.length + missed.length} met (${met.join(', ')})${missed.length ? `; missed: ${missed.join(', ')}` : ''}. They are reported, not tuned away: every parameter value is the brief's central value (or the shared value the brief names), and the layout and every value were committed before the first model run of these bands; nothing in the scene's geometry or inputs changed after it (only the margin notes' label offsets, see Disclosures).`;
+${out} of ${counted.length} counted checks fall outside their band; ${rows.length - counted.length} supplementary rows are not counted. By the brief's bands: ${met.length} of ${met.length + missed.length} met (${met.join(', ')})${missed.length ? `; missed: ${missed.join(', ')}` : ''}. Band 7 is counted as met but is semi-constructed (its size follows from the calibration target × the roofs' relative cooling; it holds for every target in the brief's +2 to +4 K), so only ${met.length - 1} met bands are independent of a calibration. They are reported, not tuned away: every parameter value is the brief's central value (or the shared value the brief names), and the layout and every value were committed before the first model run of these bands; nothing in the scene's geometry or inputs changed after it (only the margin notes' label offsets, see Disclosures).`;
 }
 
 export function villageMarkdown() {
@@ -73,9 +73,8 @@ stand ${world.buildings.filter((B) => B.style === 'village').length} village hou
 sheeting. East of the road: the older village centre (an ancestral hall, its open square, a pond, three banyans). South of
 Bus Road: a low-rise edge of single-storey rooms in ${world.buildings.filter((B) => B.style === 'room').length} runs, roofed with rusty corrugated iron, galvanised sheet,
 asbestos-cement sheet or tarpaulin, some painted white by the residents, between 2 m alleys. The residents' white roofs
-are \`R\`, the panel button or \`?coolroof=1\` (default off: they repaint the ${C.n} bare roofs marked in the scene); the
-room under each sheet roof is \`O\`, the panel button or \`?under=1\`. On this page \`R\` paints the roofs; it does not
-restart the intro as it does elsewhere. Its research brief is [\`docs/research/village-brief.md\`](research/village-brief.md).
+are \`W\`, the panel button or \`?coolroof=1\` (default off: they repaint the ${C.n} bare roofs marked in the scene); the
+room under each sheet roof is \`O\`, the panel button or \`?under=1\`. Its research brief is [\`docs/research/village-brief.md\`](research/village-brief.md).
 
 ### Block 10 parameters
 
@@ -162,12 +161,14 @@ Not a simulation of the room (the brief's option: a radiant proxy and an informa
 - air (illustrative only): ΔT = h_ci·(T_roof − Ta) / (h_ci + ρc_p·n·h/3600) with h_ci ${VG.hci.value}, h ${VG.roomH.value} m and
   n = ${f2(n)} air changes per hour, **calibrated** as the brief says, so the mean of the ${st.calib.n} bare rusty-iron rooms' daily peaks is
   +${VG.airTarget.value} K (the middle of the brief's +2 to +4 K): the share of (T_roof − Ta) that reaches the air is ${f3(st.share)}. Its band
-  (7, bare tin) therefore holds by construction and is not counted; the white-paint change is a prediction. A card never
+  (7, bare tin) therefore holds by construction and is not counted. The white-paint change (band 7) is **semi-constructed**: the proxy is
+  linear in T_roof − Ta, so the change is the target times the roofs' relative cooling (${signed(sens.target[1].rel, 3)} per K of target); it tests the
+  model's roof-temperature ratio, not an independent indoor prediction (${sens.target.map((x) => `${signed(x.dAir, 2)} K at +${x.t} K`).join(', ')}). A card never
   shows it beyond ±${VG.airCap.value} K; the largest raw value in this model is ${f2(rows.find((r) => r.label.startsWith('8. Supplementary')).value)} K, so the cap does not bind here.
 
 ### The residents' white roofs
 
-\`R\` repaints the ${C.n} marked bare roofs (iron and galvanised) with new white paint (albedo ${MATERIALS.whiteTin.alpha.value}) and runs those roof cells
+\`W\` repaints the ${C.n} marked bare roofs (iron and galvanised) with new white paint (albedo ${MATERIALS.whiteTin.alpha.value}) and runs those roof cells
 again (the other cells are unchanged: there is no lateral coupling). Surface at 15:00 bare → white (°C), its change (K), the radiant
 proxy at 15:00 (°C) and the illustrative air's day's peak (K above the outdoor air):
 
@@ -212,6 +213,14 @@ ${sensProxy.join('\n')}
 
 h_ci 1 or 1.5: n is recalibrated (${sens.hci.map((h) => h.label.replace(/^h_ci [\d.]+ \(n recalibrated: /, '').replace(')', '')).join(' and ')}), the share reaching the air stays ${f3(sens.hci[0].share)} and the
 white-paint change ${signed(sens.hci[0].dAir, 2)} K.
+
+Band 7 over the brief's calibration targets (bare tin peaking at +2 to +4 K): the white-paint change scales one for one with the target.
+
+| Target | white-paint change of the air peak |
+|---|---|
+${sens.target.map((x) => `| +${x.t} K${x.t === VG.airTarget.value ? ' (shipped)' : ''} | ${signed(x.dAir, 2)} K |`).join('\n')}
+
+Every target in the brief's range lands inside −1 to −2.5 K, so band 7 confirms only the model's roof-temperature ratio (semi-constructed).
 
 Lane width at the village's mean wall height (the canyon floor's mean and the brief's centre-line form):
 

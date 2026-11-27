@@ -159,6 +159,33 @@ const PINNED_OUTSIDE = {
   '5. Village lanes at 12:00': [21.484, 0.05],
 };
 
+// Supplementary rows outside their band, as shipped (reported, not counted): pinned too, so a change shows up here.
+const PINNED_SUPP_OUTSIDE = {
+  '2. Supplementary: rusty iron rooms − rooms the residents painted white years ago': [13.266, 0.05],
+  '4. Supplementary: the same cells on the 5 m grid': [0.199, 0.002],
+  '5. Supplementary: village lanes at solar noon': [31.509, 0.05],
+  '5. Supplementary: village lanes at 15:00': [19.229, 0.05],
+};
+
+test('supplementary rows: those outside their band are exactly the pinned ones; band 7 is semi-constructed and holds for every calibration target in the brief\'s 2-4 K', () => {
+  const rows = bands10();
+  const out = rows.filter((r) => r.supp && !r.inside && !(r.lo === null && r.hi === null));
+  assert.equal(out.length, Object.keys(PINNED_SUPP_OUTSIDE).length, out.map((r) => r.label).join('\n'));
+  for (const r of out) {
+    const k = Object.keys(PINNED_SUPP_OUTSIDE).find((p) => r.label.startsWith(p));
+    assert.ok(k, `unexpected supplementary miss: ${r.label} = ${r.value}`);
+    const [v, tol] = PINNED_SUPP_OUTSIDE[k];
+    assert.ok(Math.abs(r.value - v) < tol, `${k}: ${r.value}`);
+  }
+  const b7 = rows.find((r) => r.label.startsWith('7. White paint'));
+  assert.ok(/semi-constructed/.test(b7.label) && !b7.supp);
+  const t = rows.filter((r) => r.label.startsWith('7. Supplementary: the same with the calibration target'));
+  assert.equal(t.length, 2);
+  for (const r of t) assert.ok(r.inside, r.label);
+  assert.ok(Math.abs(t[0].value - (b7.value * 2) / 3) < 0.002 && Math.abs(t[1].value - (b7.value * 4) / 3) < 0.002);
+  assert.ok(md.includes('**semi-constructed**') && !md.includes('the white-paint change is a prediction'));
+});
+
 test('acceptance bands: values, pinned misses, verdicts, docs table in sync', () => {
   const rows = bands10();
   const counted = rows.filter((r) => !r.supp);
