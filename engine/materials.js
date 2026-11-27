@@ -159,6 +159,25 @@ export const SOURCES = {
   hess2018: 'Hess et al. (2018) Journal of Environmental and Public Health, 7973519, doi 10.1155/2018/7973519, pilot evaluation of Ahmedabad\'s Heat Action Plan (via the block-10 brief): the May 2010 heat wave about 1,344 excess deaths (+43.1%); about 1,190 deaths avoided per year after the plan (unverified)',
   carbonBriefAc: 'Carbon Brief on air conditioning in India (via the block-10 brief): 4.9% of households owned an air conditioner in 2020-21, about 8% in 2024 (unverified)',
   dialogueEarth: 'Dialogue Earth on outdoor workers and heat in China (via the block-10 brief): about 100 million outdoor workers (unverified)',
+  brief11: 'Research brief docs/research/desert-brief.md (block 11; values compiled from the sources below, items marked unverified there are flagged here; the sail transmittance, the stucco and gravel albedos, the mesquite crown and the lawn evaporative fraction are assumptions or ranges of the brief, no measured value was checked)',
+  ncei: 'NOAA NCEI U.S. Climate Normals 1991-2020, Phoenix Sky Harbor (USW00023183), via the block-11 brief: July mean maximum 41.4 C and minimum 29.2 C; hourly normals with the minimum near 06 MST, the maximum at 16-17 MST and a dew point of 11-14 C (unverified)',
+  azmet: 'Arizona Meteorological Network (AZMET), Phoenix Encanto station, hot days of 2023-25, via the block-11 brief: minimum 28.7 C, dew point 11-13 C, reference evapotranspiration 7.8-8.9 mm a day (July mean 7.1-7.8), wind 1.5-2.2 m/s, lowest relative humidity 12-14% (unverified)',
+  climateGov2023: 'NOAA Climate.gov and NWS Phoenix on July 2023 in Phoenix, via the block-11 brief: mean high 46.0 C, mean low 32.7 C, 31 days at or above 110 F (43.3 C), a record warm low of 97 F (36.1 C) (unverified)',
+  nwsPsr: 'NWS Phoenix (PSR) on summer 2024, via the block-11 brief: 70 days at or above 110 F (43.3 C); 118 F (47.8 C) on 5 and 8 July (unverified)',
+  middelKrayenhoff2019: 'Middel & Krayenhoff (2019) Science of the Total Environment 687, 137-151, doi 10.1016/j.scitotenv.2019.06.085, pedestrian thermal exposure in Tempe during record heat (MaRTy cart); the block-11 brief quotes it together with Middel et al. 2021: peak sunlit Tmrt 76.2 C, 76.4 C in a bright east-west canyon at an air of 48.5 C, pedestrian wind under 1 m/s on average (unverified)',
+  colter2019: 'Colter, Middel & Martin (2019) Urban Forestry & Urban Greening 44, 126429, doi 10.1016/j.ufug.2019.126429, natural and artificial shade (trees and ramadas) in Phoenix neighbourhood parks (the brief gives no numbers from it; unverified)',
+  az1195: 'University of Arizona Cooperative Extension publication AZ1195, via the block-11 brief: bermudagrass crop coefficient 0.78 in July (title not recorded; unverified)',
+  amwua: 'Arizona Municipal Water Users Association (AMWUA) landscape watering guidance, via the block-11 brief: a lawn watered every 3 days, about 6.4 mm a day applied; a desert tree with a 6.1 m canopy about 890 L every 7-21 days, i.e. about 1.4-4.3 L per m2 of canopy a day (unverified)',
+  templeton2018: 'Templeton, Vivoni et al. (2018) J. Geophys. Res. Atmospheres 123, 2111-2128, doi 10.1002/2017JD027845, water and energy fluxes over urban land covers in Phoenix (matched by a title search to the brief\'s "Templeton 2018: turf has the highest evaporative fraction"; unverified)',
+  gober2009: 'Gober, Brazel, Quay, Myint et al. (2010, online 2009) J. American Planning Association 76(1), 109-121, doi 10.1080/01944360903433113, watered landscapes and the Phoenix heat island (via the block-11 brief): 32.8% more outdoor water for 0.41-0.82 K per hour faster evening cooling (unverified)',
+  middel2014: 'Middel et al. (2014) Landscape and Urban Planning 122, 16-28, doi 10.1016/j.landurbplan.2013.11.004, urban form and landscaping in Phoenix local climate zones (via the block-11 brief): xeric yards warmest, then oasis, then mesic; by day the form matters more than the landscaping (unverified)',
+  middel2015: 'Middel, Chhetri & Quay (2015) Urban Forestry & Urban Greening 14, 178-186, doi 10.1016/j.ufug.2014.09.010, trees and cool roofs in Phoenix neighbourhoods (via the block-11 brief): about -0.14 K of air per 1% more tree canopy (unverified)',
+  vanos2022: 'Vanos, Wright, Kaiser et al. (2022) International Journal of Biometeorology 66, 357-369, doi 10.1007/s00484-020-02056-y, evaporative misters for cooling and comfort (via the block-11 brief): Tmrt -7.6 K, PET -6.5 K, UTCI -4.4 K (unverified)',
+  huang2025: 'Huang, Bou-Zeid, Vanos, Middel et al. (2025) Landscape and Urban Planning 256, 105290, doi 10.1016/j.landurbplan.2024.105290, misting as blue infrastructure (via the block-11 brief): up to -17.5 K of air in a model, 4.87 L per hour per nozzle, 0.3-0.7 nozzles per m2, i.e. 1.5-3.4 L per m2 an hour (unverified)',
+  coolPave2024: 'City of Phoenix and Arizona State University, cool pavement pilot, phase 2 report (October 2024; report not read), via the block-11 brief: coated road surface -6.7 K at noon and -5.8 K in the afternoon; pedestrian Tmrt +3.2 K at noon and +2.5 K in the afternoon; air -0.07 K on average, a little warmer at 8-9 pm; reflectance 0.30-0.39 coated against 0.036 (unverified)',
+  erell2014: 'Erell, Pearlmutter, Boneh & Kutiel (2014) Urban Climate 10, 367-386, doi 10.1016/j.uclim.2013.10.005, high-albedo materials can worsen pedestrian heat stress in street canyons (via the block-11 brief)',
+  mcdph2025: 'Maricopa County Department of Public Health, annual report on heat deaths in 2025 (April 2026), via the block-11 brief: heat-related deaths 339 (2021), 425 (2022), 645 (2023), 608 (2024), 430 (2025: 313 outdoors, 111 indoors); in 2024, 49% of those who died were homeless and substances were involved in 57%; news reports gave 427 for 2025; a preliminary 585 for 2026 is unverified',
+  stull2011: 'Stull (2011) J. Applied Meteorology and Climatology 50, 2267-2269, doi 10.1175/JAMC-D-11-0143.1, wet-bulb temperature from relative humidity and air temperature (via the block-11 brief: about 22 C at 43 C and 12 hPa)',
   ren2025: 'Ren, Xu & Jiang (2025) Buildings 15(13), 2166, doi 10.3390/buildings15132166, thermal environment of public space in high-density old districts on Shenzhen\'s urban fringe (the brief cites it as a Baishizhou CFD study of wind shadows in the lanes; not checked)',
 };
 
@@ -169,6 +188,7 @@ export const BASIS = {
   edge: 'edge of cited range',
   interp: 'interpretation of the source',
   engine: 'engine assumption (no source)',
+  calib: 'calibrated to a measured value (by construction)',
 };
 
 const v = (value, source, basis, verified = false, note = '') => ({ value, source, basis, verified, note });
@@ -642,6 +662,85 @@ Object.assign(MATERIALS, {
     mu: v(1785, 'oke', 'cited', false, 'concrete, as the shared concrete paving'),
     ef: v(0, 'brief10', 'cited', false, 'dry'),
     note: 'The flat concrete roof of a village house: grey, heavy and slow, warm in the afternoon and still warm late in the evening.',
+  },
+});
+
+// ---- block 11: desert courtyard neighbourhood (@page desert: cut from the other pages at build time) ----
+// Gravel, the watered lawn and the coated street are ground materials; sails,
+// the ramada and the arcade roof are flat screens (only their transmission tr
+// counts, as the block-5 mat awning); mesquite and palo verde are tree species
+// (their crown's tr). House walls are light stucco (engine/desert.js DS.wallAlbedo).
+Object.assign(MATERIALS, {
+  gravel: {
+    name: 'Decomposed granite and gravel (xeriscape)',
+    alpha: v(0.275, 'brief11', 'range', false, 'brief 0.16-0.39 for gravel and decomposed granite (unverified); the middle value'),
+    eps: v(0.92, 'oke', 'range', false, 'as the shared stone and gravel path, cited 0.85-0.95'),
+    mu: v(800, 'brief6', 'interp', false, 'a loose gravel layer on dry ground: the shared bare dry soil (block 6: dry soil about 600, read up to 800)'),
+    ef: v(0, 'brief11', 'interp', false, 'dry: a xeriscape yard is not watered'),
+    note: 'Crushed granite and gravel in place of a lawn: it needs no water and stays below asphalt, but it is hot in the sun.',
+  },
+  desertLawn: {
+    name: 'Irrigated lawn (bermudagrass)',
+    alpha: v(0.25, 'oke', 'edge', false, 'as the shared lawn, cited 0.16-0.26'),
+    eps: v(0.95, 'oke', 'edge', false, 'as the shared lawn, cited 0.90-0.95'),
+    mu: v(1400, 'brief', 'range', false, 'as the shared lawn, soil 600-2200'),
+    ef: v(0.9, 'brief11', 'range', false, 'an engine assumption of the brief, 0.85-0.95; the middle value (the spec\'s 0.9). A fixed share of net radiation: it does not react to the dry air'),
+    note: 'A watered park lawn: it stays near the air temperature even in the desert afternoon, because it spends the sun on evaporating water, a lot of it.',
+  },
+  coolCoat: {
+    name: 'Street with a light reflective coating',
+    alpha: v(0.345, 'coolPave2024', 'range', false, 'coated reflectance 0.30-0.39 [coolPave2024]; the middle value. Uncoated, the street is the shared aged asphalt (0.12), lighter than the 0.036 measured there'),
+    eps: v(0.95, 'oke', 'cited', false, 'as asphalt'),
+    mu: v(1200, 'oke', 'cited', false, 'the asphalt beneath'),
+    ef: v(0, 'brief', 'cited', false, 'dry impervious'),
+    note: 'An asphalt street sprayed with a pale grey coating: the road stays cooler, but more sunlight bounces up onto the people on it.',
+  },
+  desertSail: {
+    name: 'Shade sail (knitted HDPE)',
+    alpha: v(0.3, 'engine', 'engine', false, 'not used: only the transmission of the cloth matters here'),
+    eps: v(0.9, 'engine', 'engine', false, 'not used'),
+    ef: v(0, 'engine', 'engine', false, 'not used'),
+    tr: v(0.15, 'brief11', 'range', false, 'the spec\'s 0.15, inside the brief\'s suggested 0.10-0.25 (no measured value checked; unverified)'),
+    prescribed: 'Not used by the grid model as a surface: a flat screen 4 m up that lets through tr of the sun; the cells under it count as fully covered for the sky view (crown factor), so the warm-wall term stands in for the cloth overhead.',
+    note: 'Pale cloth stretched high between steel masts over the plaza: it stops most of the sun, and the air moves freely beneath it.',
+  },
+  ramada: {
+    name: 'Ramada (shade roof on posts)',
+    alpha: v(0.3, 'engine', 'engine', false, 'not used'),
+    eps: v(0.9, 'engine', 'engine', false, 'not used'),
+    ef: v(0, 'engine', 'engine', false, 'not used'),
+    tr: v(0, 'brief11', 'cited', false, 'an opaque roof: no direct sun through it (the spec)'),
+    prescribed: 'Not used by the grid model as a surface: a flat opaque screen 3.2 m up; the cells under it count as fully covered for the sky view (crown factor).',
+    note: 'An open-sided shelter with a solid roof on posts, the classic shade of desert parks: no walls, just a roof between people and the sun.',
+  },
+  arcadeRoof: {
+    name: 'Arcade (covered walkway along the shops)',
+    alpha: v(0.3, 'engine', 'engine', false, 'not used'),
+    eps: v(0.9, 'engine', 'engine', false, 'not used'),
+    ef: v(0, 'engine', 'engine', false, 'not used'),
+    tr: v(0, 'brief11', 'cited', false, 'an opaque roof (the brief\'s arcades, tunnels and overhangs)'),
+    prescribed: 'Not used by the grid model as a surface: a flat opaque screen 3.5 m up along the shopfronts; with the building beside it, the walkway sees little sky.',
+    note: 'A roofed walkway along the shopfronts, open to the street on one side: shade from the roof and from the building behind it.',
+  },
+  mesquite: {
+    name: 'Mesquite tree (Prosopis)',
+    alpha: v(0.18, 'oke', 'range', false, 'cited 0.15-0.20'),
+    eps: v(0.97, 'oke', 'range', false, 'cited 0.97-0.99'),
+    ef: v(0.7, 'brief', 'range', false, 'not used: leaf temperature is the shared canopy formula'),
+    tr: v(0.17, 'middel2021', 'calib', false, 'the share of sun through the crown, set so that standing under the mesquites at 15:00 feels as Middel et al. measured (Tmrt -16.7 K against open sun); no measured leaf area was found (brief)'),
+    tree: true,
+    prescribed: 'Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.',
+    note: 'A native desert tree with small leaves and a wide, low, airy crown: it lives on little water and casts a light, dappled shade.',
+  },
+  paloVerde: {
+    name: 'Palo verde tree (Parkinsonia)',
+    alpha: v(0.18, 'oke', 'range', false, 'cited 0.15-0.20'),
+    eps: v(0.97, 'oke', 'range', false, 'cited 0.97-0.99'),
+    ef: v(0.7, 'brief', 'range', false, 'not used: leaf temperature is the shared canopy formula'),
+    tr: v(0.17, 'brief11', 'engine', false, 'taken as the mesquite\'s calibrated crown: no measured value was found; the brief groups the two native trees'),
+    tree: true,
+    prescribed: 'Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.',
+    note: 'The desert tree with a green trunk and tiny leaves: its thin crown lets through more light than a shade tree from wetter places.',
   },
 });
 
