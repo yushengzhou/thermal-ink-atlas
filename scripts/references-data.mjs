@@ -982,4 +982,82 @@ export const REFS = {
     venue: 'Journal of Applied Meteorology and Climatology 50, 2267–2269',
     doi: '10.1175/JAMC-D-11-0143.1',
   },
+  // ---- block 12: night market street (titles with a DOI checked against Crossref) ----
+  brief12: {
+    authors: 'This project', year: 2026, title: 'Research brief: night market / pedestrian shopping street (block 12)',
+    venue: 'docs/research/nightmarket-brief.md', link: 'docs/research/nightmarket-brief.md',
+  },
+  cwaTaipei: {
+    authors: 'Central Weather Administration (Taiwan)', year: null, title: 'Climate normals 1991–2020, Taipei station',
+    venue: 'monthly normals, July (not in the brief)',
+    flags: ['title from memory'],
+  },
+  yang2016: {
+    authors: 'Yang, J. & Zhao, L.', year: 2016,
+    title: 'Diurnal Thermal Behavior of Pavements, Vegetation, and Water Pond in a Hot-Humid City',
+    venue: 'Buildings 6(1), 2 (online December 2015)',
+    doi: '10.3390/buildings6010002',
+  },
+  doulos2004: {
+    authors: 'Doulos, L., Santamouris, M. & Livada, I.', year: 2004,
+    title: 'Passive cooling of outdoor urban spaces. The role of materials',
+    venue: 'Solar Energy 77(2), 231–249',
+    doi: '10.1016/j.solener.2004.04.005',
+  },
+  coolPaveNight: {
+    authors: 'City of Phoenix & Arizona State University', year: null, title: null,
+    venue: 'Cool pavement pilot program, night results (phoenix.gov; via the block-12 brief)',
+  },
+  ashrae55: {
+    authors: 'ASHRAE; ISO', year: null,
+    title: 'ANSI/ASHRAE Standard 55, Thermal Environmental Conditions for Human Occupancy; ISO 8996, Ergonomics of the thermal environment: Determination of metabolic rate',
+    venue: 'metabolic rate tables (via the block-12 brief)',
+    flags: ['title from memory'],
+  },
+  ashraeRetail: {
+    authors: 'ASHRAE', year: null, title: null,
+    venue: 'Heat gain from occupants, retail (secondary copies; via the block-12 brief)',
+  },
+  sailorAms: {
+    authors: 'Sailor, D. J.', year: null, title: null,
+    venue: 'American Meteorological Society conference abstract on anthropogenic heat (via the block-12 brief)',
+  },
+  crowdLimits: {
+    authors: 'Still, G. K.; NSW Government', year: null, title: null,
+    venue: 'Crowd safety notes (gkstill) and an NSW event factsheet (via the block-12 brief)',
+  },
+  wokVendor: {
+    authors: 'Equipment vendors', year: null, title: null,
+    venue: 'Jet wok burner specifications (via the block-12 brief)',
+  },
+  charcoalVendor: {
+    authors: 'ArchiExpo listing', year: null, title: null,
+    venue: 'Charcoal roaster specification (via the block-12 brief)',
+  },
+  taiwanNewsPm: {
+    authors: 'Taiwan News', year: null, title: null,
+    venue: 'News report on night markets and fine particles (via the block-12 brief)',
+  },
+  nccuXimen: {
+    authors: 'National Chengchi University', year: null, title: null,
+    venue: 'Thesis on thermal comfort in Ximending, Taipei (via the block-12 brief)',
+  },
+  ntuEnvimet: {
+    authors: 'National Taiwan University', year: null, title: null,
+    venue: 'ENVI-met study of a Taipei street (via the block-12 brief)',
+  },
+  ftvFans: {
+    authors: 'Formosa TV (FTV) News', year: null, title: null,
+    venue: 'News report on night-market vendors in the heat (via the block-12 brief)',
+  },
+  travelTaipei: {
+    authors: 'Taipei City Government, Department of Information and Tourism', year: null, title: 'Shilin Night Market',
+    venue: 'Taipei Travel (travel.taipei; via the block-12 brief)',
+    flags: ['title from memory'],
+  },
+  shilinWiki: {
+    authors: 'Wikipedia contributors', year: null, title: 'Shilin Night Market',
+    venue: 'Wikipedia, and travel guides (via the block-12 brief)',
+    flags: ['title from memory'],
+  },
 };
