@@ -6,6 +6,9 @@
 //   G = ... - EF max(Q*, 0) - LE,  LE = L beta(W) (h_c / c_p) max(0, q_sat(Ts) - q_a),
 //   beta(W) = beta_wet min(1, W / W_c),  dW/dt = -LE / L,  W := W0 at the splash hour.
 // Blocks without wet cells never enter that step (stepSplash below).
+// Block 6 keeps G itself (opts.flux): on the stored 15-min steps the model
+// minute runs through stepFlux, the same arithmetic as stepPlain that also
+// writes G per cell; the other minutes and every other block are unchanged.
 // Computed once at load with 1-min steps, repeating the design day until the
 // deep temperature Td converges (max change < 0.05 K, at least 3 days), and
 // stored at 15-min resolution for the last day; seek() only looks values up.
@@ -561,6 +564,10 @@ export function runModel(world, opts = {}) {
   const sumDay = new Float64Array(NN);
   let store = new Float32Array(NN * STORE);
   const stepsPerStore = M / STORE;
+  // block 6: ground heat flux G (W m-2, into the surface) on the stored steps
+  const flux = opts.flux ? new Float32Array(NN * STORE) : null;
+  if (flux && (gv || WS || hcA || kinds)) throw new Error('opts.flux needs the plain step (no glass, wind factor, water kinds or water store)');
+  const Gnow = flux ? new Float64Array(NN) : null;
 
   // per-cell inputs and state for the step functions (one minute, all cells)
   const C = { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, hcA, dt, gOpaque, g0, g1, g2, g3, wt: new Float64Array(4), WS };
@@ -612,7 +619,8 @@ export function runModel(world, opts = {}) {
       } else if (hcA || kinds) {
         for (let k = 1; k <= 3; k++) C.wt[k] = waterTemp(k, taMean, h) + K0;
         stepWind(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK);
-      } else stepPlain(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT);
+      } else if (flux && keep && m % stepsPerStore === 0) stepFlux(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT, Gnow);
+      else stepPlain(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT);
       if (WS && keep) {
         for (let i = 0; i < NN; i++) {
           if (WS.wet[i] && WS.W[i] > 0 && Ts[i] - twK[m] < WS.margin) {
@@ -624,6 +632,7 @@ export function runModel(world, opts = {}) {
       if (keep && m % stepsPerStore === 0) {
         const k = m / stepsPerStore;
         for (let i = 0; i < NN; i++) store[i * STORE + k] = Ts[i] - K0;
+        if (flux) for (let i = 0; i < NN; i++) flux[i * STORE + k] = Gnow[i];
         if (WS) for (let i = 0; i < NN; i++) WS.store[i * STORE + k] = WS.W[i];
       }
     }
@@ -669,12 +678,17 @@ export function runModel(world, opts = {}) {
     // (mass balance: evap = start - before + w0 - end on wet cells)
     wetInfo = { margin: WS.margin, marginAt: WS.marginAt, store: wst, evap: full(WS.evap), start: full(WS.start), before: full(WS.before), end: full(WS.end), wet: full(WS.wet), w0: WS.w0, beta: WS.beta, wc: WS.wc, hour: sp.hour, efOnly: WS.efOnly, qa: WS.qa };
   }
+  let fluxFull = flux;
   if (idx) {
     const full = new Float32Array(NF * STORE);
     idx.forEach((i, c) => full.set(store.subarray(c * STORE, (c + 1) * STORE), i * STORE));
     store = full;
+    if (flux) {
+      fluxFull = new Float32Array(NF * STORE);
+      idx.forEach((i, c) => fluxFull.set(flux.subarray(c * STORE, (c + 1) * STORE), i * STORE));
+    }
   }
-  return new Thermal(world, store, slots, { rise, taMean, hc, fw: fwFull, wind: uSite, site, ta, days, maxDelta, mats, cells: idx, refl: reflFull, glass, warm: warmUsed ? opts.warm : 0, warmFactor, ...(wetInfo ? { wet: wetInfo } : {}) });
+  return new Thermal(world, store, slots, { ...(fluxFull ? { flux: fluxFull } : {}), rise, taMean, hc, fw: fwFull, wind: uSite, site, ta, days, maxDelta, mats, cells: idx, refl: reflFull, glass, warm: warmUsed ? opts.warm : 0, warmFactor, ...(wetInfo ? { wet: wetInfo } : {}) });
 }
 
 // ---- block 5: moist air and the surface water store --------------------------
@@ -808,6 +822,34 @@ function stepPlain(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT) {
 }
 
 /**
+ * One model minute for every cell, as stepPlain, that also writes the ground
+ * heat flux G (W m-2, positive into the surface) of each cell before its step
+ * to Gout (block 6, opts.flux; water cells 0). The arithmetic of Ts is the
+ * same statement as in stepPlain, so a flux run matches a plain run bit for bit.
+ */
+export function stepFlux(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT, Gout) {
+  const { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, dt } = C;
+  for (let i = 0; i < NN; i++) {
+    if (water[i]) {
+      Ts[i] = waterT;
+      Gout[i] = 0;
+    } else {
+      const sl = f0[i] + (f1[i] - f0[i]) * st;
+      const v = svf[i];
+      const K = sl * bh + v * df + cw[i] * k0 + cwa[i] * kg;
+      const L = v * lsky + (1 - v) * lwall;
+      const t = Ts[i];
+      const t4 = t * t * t * t;
+      const qstar = (1 - alpha[i]) * K + eps[i] * L - eps[i] * SIGMA * t4;
+      const G = qstar - hc * (t - taK) - (qstar > 0 ? ef[i] * qstar : 0);
+      Gout[i] = G;
+      Ts[i] = t + dt * (cap[i] * G - restore[i] * (t - Td[i]));
+    }
+    sumDay[i] += Ts[i];
+  }
+}
+
+/**
  * One model minute for every cell with a per-cell h_c and / or several water
  * kinds (block 4). The same arithmetic as stepPlain, with hcA[i] for hc (or
  * the scalar hc when there is no wind factor) and C.wt[kind] for the water.
@@ -919,6 +961,18 @@ export class Thermal {
   /** Water evaporated from cell i's store over the design day, mm (the model's own 1-min sum; block 5). */
   evaporated(i) {
     return this.info.wet ? this.info.wet.evap[i] : 0;
+  }
+
+  /** Ground heat flux G into cell i at hour h, W m-2 (block 6 flux runs; null elsewhere). Negative: the surface gives stored heat back. */
+  flux(i, h) {
+    const F = this.info.flux;
+    if (!F) return null;
+    const x = ((((h % 24) + 24) % 24) * STORE) / 24;
+    const k = Math.floor(x);
+    const f = x - k;
+    const a = F[i * STORE + (k % STORE)];
+    const b = F[i * STORE + ((k + 1) % STORE)];
+    return a + (b - a) * f;
   }
 
   /** Wind factor f_w of cell i (1 for blocks without a wind direction). */

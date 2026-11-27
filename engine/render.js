@@ -28,6 +28,9 @@ const AC_INK = hexRgb('#8a2f22');
 const AIR_COOL = hexRgb('#3b6573');
 const AIR_WARM = hexRgb('#b96d4d');
 const WIND_INK = hexRgb('#24354a');
+// block 6: the night-release strokes (heat out of the ground) and the uptake ticks
+const FLUX_UP = hexRgb('#a2452f');
+const FLUX_DOWN = hexRgb('#3b6573');
 const HAND_FONT = '"Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive';
 
 function makeCanvas(w, h) {
@@ -112,6 +115,7 @@ export class Renderer {
     this.glass = 'lowe'; // glass type (block 3): pane colours
     this.spotFor = null; // (hq) -> reflection spot field on the 2 m grid, or null (block 3)
     this.wind = null; // block 4: {lines, items} wind lines (wind.js windLines + pen.stream items)
+    this.flux = null; // block 6: (hq) -> [{x, y, z, g}] ground heat flux samples (parking.js fluxSamples)
     this.pool = world.scene.pooling !== false; // edge pooling on washes (off in block 5)
     // block 5: skip shadow polygons off the tile. Not used elsewhere: Skia may anti-alias a smaller
     // path differently, so blocks 1-4 keep their exact pixels
@@ -396,6 +400,7 @@ export class Renderer {
       if (it.t === 'slab') return scaleRgb(THERMAL_WALL, 0.85);
       if (it.t === 'r' || it.t === 'rd') return it.b >= 0 ? heatRgb(hc.roof[it.b]) : null;
       if (it.t === 'tree') return null;
+      if (it.t === 'car') return null; // block 6: parked cars are outlines over the wash (not modelled)
       if (it.t === 'win') return null;
       const n = f.n ?? [0, 1];
       return scaleRgb(THERMAL_WALL, n[0] ? 0.9 : 1);
@@ -429,6 +434,7 @@ export class Renderer {
         if (t === 'g' || t === 'gm' || t === 'treeTick') strokeA *= 0.28;
         else if (t === 'win') strokeA *= 0.22;
         else if (t === 'tree') strokeA *= 0.55;
+        else if (t === 'car') strokeA *= 0.4;
         else strokeA *= 0.7;
       }
       if (mode === 'scaffold' && (t === 'gm' || t === 'treeTick')) strokeA *= 0.8;
@@ -840,9 +846,12 @@ export class Renderer {
     this.noteHits = [];
     this.stats.windDashes = 0;
     this.stats.airSegs = 0;
+    this.stats.fluxUp = 0;
+    this.stats.fluxDown = 0;
     if (lifeA > 0) {
       if (this.wind && (look.wind || look.air)) this.drawWind(ctx, f, cam, W, H, lifeA, look, hq);
       if (look.ac) this.drawAc(ctx, f, cam, W, H, lifeA);
+      if (look.flux && this.flux) this.drawFlux(ctx, f, cam, W, H, lifeA, hq);
       if (look.people !== false) this.drawPeople(ctx, f, cam, hq, W, H, lifeA, look.thermalMix ?? 0);
       if (look.notes) this.drawNotes(ctx, cam, W, H, look.notes, lifeA);
     }
@@ -1007,6 +1016,98 @@ export class Renderer {
     }
     ctx.restore();
     this.stats.ac = !!label;
+  }
+
+  /**
+   * Block 6: the night-release overlay. On a 10 m grid of samples, where the
+   * ground gives stored heat back (G < 0) soft warm strokes rise from the
+   * surface, longer and stronger for more W m-2; where it takes heat in
+   * (G > 0) short cool ticks point down; the share of samples drawn grows
+   * with |G| (all of them from 120 W m-2). The strokes drift upward with the
+   * frame number (a pure function of frame, camera and hour), and a label
+   * says what they show.
+   */
+  drawFlux(ctx, f, cam, W, H, alpha, hq) {
+    const [ox, oy, Z] = this.origin(cam, W, H);
+    const d = this.dpr;
+    const samples = this.flux(hq);
+    const B = 5;
+    const up = Array.from({ length: B }, () => []);
+    const down = Array.from({ length: B }, () => []);
+    const unit = Math.max(10 * d, 4.2 * Z); // stroke length at 100 W m-2
+    for (let k = 0; k < samples.length; k++) {
+      const s = samples[k];
+      const a = Math.abs(s.g);
+      // stroke density follows |G| too: every sample at 120 W m-2 or more, fewer below
+      if (a < 15 || hash3(k, 9, 91) >= a / 120) continue;
+      const p = iso(s.x, s.y, s.z);
+      const X = ox + p[0] * Z;
+      const Y = oy + p[1] * Z;
+      if (X < -20 || X > W + 20 || Y < -unit * 2 || Y > H + 20) continue;
+      if (this.clip && (X < this.clip[0] || X > this.clip[1])) continue;
+      const b = Math.min(B - 1, Math.floor((a / 175) * B));
+      (s.g < 0 ? up : down)[b].push(X, Y, a, k);
+    }
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.lineCap = 'round';
+    ctx.lineWidth = Math.max(1.1 * d, 0.45 * Z);
+    const t = f / 60;
+    ctx.strokeStyle = rgbCss(FLUX_UP);
+    for (let b = 0; b < B; b++) {
+      const P = up[b];
+      if (!P.length) continue;
+      ctx.globalAlpha = alpha * (0.25 + 0.6 * ((b + 0.5) / B));
+      ctx.beginPath();
+      for (let q = 0; q < P.length; q += 4) {
+        const L = (unit * Math.min(1.75, P[q + 2] / 100));
+        const k = P[q + 3];
+        // rise: the stroke slides up by up to half its length and starts again (period 2.5 s)
+        const ph = (t / 2.5 + hash3(k, 7, 91)) % 1;
+        const y0 = P[q + 1] - ph * L * 0.5;
+        const x0 = P[q] + (hash3(k, 8, 91) - 0.5) * 3 * d;
+        ctx.moveTo(x0, y0);
+        for (let i = 1; i <= 4; i++) ctx.lineTo(x0 + Math.sin(i * 1.7 + k + t * 1.3) * 1.4 * d, y0 - (L * i) / 4);
+      }
+      ctx.stroke();
+      this.stats.fluxUp += P.length / 4;
+    }
+    ctx.strokeStyle = rgbCss(FLUX_DOWN);
+    for (let b = 0; b < B; b++) {
+      const P = down[b];
+      if (!P.length) continue;
+      ctx.globalAlpha = alpha * (0.15 + 0.35 * ((b + 0.5) / B));
+      ctx.beginPath();
+      for (let q = 0; q < P.length; q += 4) {
+        const L = unit * 0.45 * Math.min(1.75, P[q + 2] / 100);
+        const x0 = P[q] + (hash3(P[q + 3], 8, 91) - 0.5) * 3 * d;
+        const y0 = P[q + 1] - L - 2 * d;
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x0, y0 + L);
+        ctx.moveTo(x0 - 1.6 * d, y0 + L - 2 * d);
+        ctx.lineTo(x0, y0 + L);
+        ctx.lineTo(x0 + 1.6 * d, y0 + L - 2 * d);
+      }
+      ctx.stroke();
+      this.stats.fluxDown += P.length / 4;
+    }
+    const night = this.stats.fluxUp >= this.stats.fluxDown;
+    const text = `Ground heat flux G (simulated): ${night ? 'rising strokes = stored heat coming back out' : 'ticks down = heat going into the ground; rising strokes = heat coming back out'} · more and longer strokes = more W/m²`;
+    ctx.globalAlpha = alpha;
+    ctx.font = `${Math.round(13 * d)}px ${HAND_FONT}`;
+    ctx.textBaseline = 'bottom';
+    const w = ctx.measureText(text).width;
+    const bx = clamp(W / 2 - w / 2, 8 * d, W - w - 8 * d);
+    const by = H - 84 * d;
+    ctx.fillStyle = 'rgba(248,243,231,0.94)';
+    ctx.fillRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
+    ctx.strokeStyle = rgbCss(FLUX_UP, 0.7);
+    ctx.lineWidth = 0.9 * d;
+    ctx.strokeRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
+    ctx.fillStyle = rgbCss(FLUX_UP);
+    ctx.fillText(text, bx, by);
+    ctx.restore();
+    this.stats.fluxLabel = text;
   }
 
   /**

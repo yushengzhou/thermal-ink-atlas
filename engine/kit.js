@@ -19,6 +19,9 @@ export const GROUND_RGB = {
   river: hexRgb('#7ea3ab'),
   pond: hexRgb('#87adb2'),
   greyBrick: hexRgb('#b9b3a6'),
+  ballast: hexRgb('#a29a8d'),
+  drySoil: hexRgb('#cbb38c'),
+  scrub: hexRgb('#b2ad7c'),
 };
 export const ROOF_RGB = {
   membrane: hexRgb('#5c5e66'),
@@ -28,6 +31,7 @@ export const ROOF_RGB = {
   coolroofAged: hexRgb('#ddd8cc'),
   greenroof: hexRgb('#93a865'),
   greyTile: hexRgb('#6e7072'),
+  rustShed: hexRgb('#97603f'),
 };
 const SOIL = hexRgb('#b49a77');
 const WIN = hexRgb('#5f7480');
@@ -269,6 +273,16 @@ export function drawDecor(pen, world, D) {
   // block 5: brick courses in lanes and courtyards, the well, fish bowls under the awnings
   for (const r of D.brick ?? []) brickCourses(pen, ...r);
   if (D.well) well(pen, ...D.well);
+  // block 6: rails on the ballast, brownfield tufts and speckle, faded bay stripes
+  for (const r of D.rails ?? []) rails(pen, ...r);
+  for (const [x0, y0, x1, y1, n, seed] of D.tufts ?? []) tufts(pen, x0, y0, x1, y1, n, seed);
+  for (const [x0, y0, x1, y1, n, seed] of D.soil ?? []) speckle(pen, x0, y0, x1, y1, n, seed, hexRgb('#9a8463'));
+  for (const [xa, xb, ya, yb, step] of D.stripes ?? []) {
+    const segs = [];
+    for (let x = xa; x <= xb + 1e-9; x += step) segs.push([[x, ya], [x, yb]]);
+    pen.tag = 'gm';
+    pen.lines(segs, { lw: 0.6, stroke: hexRgb('#efe8d6'), a: 0.6, over: 0.1 });
+  }
   if (D.pond) {
     const [cx, cy, rx, ry] = D.pond;
     groundEllipse(pen, cx, cy, rx + 0.8, ry + 0.8, null, { lw: 0.7, a: 0.6, t: 'gm' });
@@ -285,6 +299,29 @@ function brickCourses(pen, x0, y0, x1, y1) {
   if (x1 - x0 >= y1 - y0) for (let y = y0 + 2; y < y1 - 0.5; y += 2) segs.push([[x0 + 0.3, y], [x1 - 0.3, y]]);
   else for (let x = x0 + 2; x < x1 - 0.5; x += 2) segs.push([[x, y0 + 0.3], [x, y1 - 0.3]]);
   if (segs.length) pen.lines(segs, { lw: 0.35, stroke: hexRgb('#8f897d'), a: 0.4, over: 0.1 });
+}
+
+/** A rail siding (block 6): two rails 1.435 m apart along x at y, sleepers every 0.8 m, as two items. */
+function rails(pen, y, x0, x1) {
+  pen.tag = 'gm';
+  const sl = [];
+  for (let x = x0 + 0.4; x < x1; x += 0.8) sl.push([[x, y - 1.25], [x, y + 1.25]]);
+  pen.lines(sl, { lw: 0.55, stroke: hexRgb('#6b5443'), a: 0.6, over: 0 });
+  pen.lines([[[x0, y - 0.72], [x1, y - 0.72]], [[x0, y + 0.72], [x1, y + 0.72]]], { lw: 0.9, stroke: hexRgb('#4a4744'), a: 0.85, over: 0.1 });
+}
+
+/** Dry tufts on the brownfield (block 6): n small three-blade strokes, one item. */
+function tufts(pen, x0, y0, x1, y1, n, seed) {
+  const r = makeRng(seed);
+  pen.tag = 'gm';
+  const segs = [];
+  for (let i = 0; i < n; i++) {
+    const x = x0 + r() * (x1 - x0);
+    const y = y0 + r() * (y1 - y0);
+    const h = 0.5 + r() * 0.7;
+    for (let k = -1; k <= 1; k++) segs.push([[x, y, 0], [x + k * 0.3, y - 0.1, h]]);
+  }
+  pen.lines(segs, { lw: 0.45, stroke: hexRgb('#6d6a3a'), a: 0.7, over: 0 });
 }
 
 /** The old well of Well Square (block 5): a stone curb, dark water and a windlass. */
@@ -506,7 +543,7 @@ export function building(pen, B, world = null) {
     pen.shape([[x0 + p, y0 + p, h - 0.1], [x1 - p, y0 + p, h - 0.1], [x1 - p, y1 - p, h - 0.1], [x0 + p, y1 - p, h - 0.1]], roof, { lw: 0.5, a: 0.7, t: 'r' });
     pen.tag = 'rd';
     const rng = makeRng(B.index * 101 + 7);
-    if (B.roof === 'metal') {
+    if (B.roof === 'metal' || B.roof === 'rustShed') {
       for (let x = x0 + 1.5; x < x1 - 1; x += 1.5) pen.line([[x, y0 + p, h], [x, y1 - p, h]], { lw: 0.4, a: 0.35, over: 0.1, t: 'rd' });
     } else if (B.roof === 'greenroof') {
       // sedum tufts in loose rows, and a gravel margin inside the parapet
@@ -730,6 +767,49 @@ export function screen(pen, P, i) {
   }
 }
 
+/**
+ * A solar (PV) canopy (block 6): steel posts every 8 m along its long edges
+ * and a row of dark panels at z, gridded into modules; tagged as crowns
+ * (as block 5 screens), so the heat wash of the bays shows through it.
+ */
+export function pvCanopy(pen, P, i) {
+  const { x0, y0, x1, y1, z } = P;
+  pen.tag = 'trunk';
+  const posts = [];
+  for (let x = x0 + 2; x <= x1 - 1.9; x += 8) for (const y of [y0 + 1, y1 - 1]) posts.push([[x, y, 0], [x, y, z - 0.2]]);
+  pen.lines(posts, { lw: 0.8, stroke: hexRgb('#6f7378'), a: 0.9, over: 0.05, t: 'trunk' });
+  pen.tag = 'tree';
+  pen.shape([[x0, y0, z], [x1, y0, z], [x1, y1, z - 0.6], [x0, y1, z - 0.6]], jitter(hexRgb('#40506a'), i * 17, 0.05), { lw: 0.9, t: 'tree', a: 0.94 });
+  const grid = [];
+  for (let x = x0 + 2; x < x1 - 0.5; x += 2) grid.push([[x, y0, z], [x, y1, z - 0.6]]);
+  const mid = (y0 + y1) / 2;
+  grid.push([[x0, mid, z - 0.3], [x1, mid, z - 0.3]]);
+  pen.lines(grid, { lw: 0.3, stroke: hexRgb('#9fb1c4'), a: 0.5, over: 0, t: 'treeTick' });
+}
+
+/**
+ * A parked car of the block 6 lot, in three items (body sides, body top,
+ * cabin) instead of block 1's six; tagged 'car', so the thermal view draws
+ * only its outline over the heat wash (the car itself is not modelled).
+ */
+export function lotCar(pen, x, y, axis, colour, i) {
+  const L = 4.4;
+  const W = 1.8;
+  const c = hexRgb(colour);
+  const [hx, hy] = axis === 'x' ? [L / 2, W / 2] : [W / 2, L / 2];
+  const sides = (x0, y0, x1, y1, z0, z1) => [[[x0, y1, z0], [x1, y1, z0], [x1, y1, z1], [x0, y1, z1]], [[x1, y1, z0], [x1, y0, z0], [x1, y0, z1], [x1, y1, z1]]];
+  const top = (x0, y0, x1, y1, z) => [[x0, y0, z], [x1, y0, z], [x1, y1, z], [x0, y1, z]];
+  pen.tag = 'car';
+  pen.shapes(sides(x - hx, y - hy, x + hx, y + hy, 0.25, 1.0), { k: 'wall', c, n: [0, 1] }, { lw: 0.5, t: 'car' });
+  pen.shape(top(x - hx, y - hy, x + hx, y + hy, 1.0), scaleRgb(c, 1.08), { lw: 0.5, t: 'car' });
+  const [cx, cy] = axis === 'x' ? [L * 0.27, W * 0.42] : [W * 0.42, L * 0.27];
+  const off = (hash3(i, 3) - 0.5) * 0.6;
+  const ox = axis === 'x' ? off : 0;
+  const oy = axis === 'y' ? off : 0;
+  const g = mixRgb(c, hexRgb('#c9d3d6'), 0.45);
+  pen.shapes([...sides(x - cx + ox, y - cy + oy, x + cx + ox, y + cy + oy, 1.0, 1.5), top(x - cx + ox, y - cy + oy, x + cx + ox, y + cy + oy, 1.5)], g, { lw: 0.45, t: 'car' });
+}
+
 /** A glazed fish bowl under the awning (block 5). */
 export function bowl(pen, x, y) {
   pen.tag = 'o';
@@ -835,7 +915,7 @@ export function drawWorld(world, seed = 1) {
   if (world.screens) {
     world.screens.forEach((P, i) => {
       const e = P.kind === 'awning' ? 6 : 0;
-      objs.push({ kind: 'p', o: P, i, x0: P.x0, y0: P.y0, x1: P.x1 + e, y1: P.y1 + e });
+      objs.push({ kind: 'p', o: P, i, x0: P.x0, y0: P.y0, x1: P.x1 + e, y1: P.y1 + e, ...(P.kind === 'pvCanopy' ? { front: true } : {}) });
     });
     for (const [x, y] of D?.bowls ?? []) objs.push({ kind: 'f', o: [x, y], i: 0, x0: x - 0.6, y0: y - 0.6, x1: x + 0.6, y1: y + 0.6 });
   }
@@ -844,6 +924,8 @@ export function drawWorld(world, seed = 1) {
     const ob = objs[k];
     pen.group = gi + 1;
     if (ob.kind === 'b' && ob.o.style === 'hutong') hutongHouse(pen, ob.o, world);
+    else if (ob.kind === 'p' && ob.o.kind === 'pvCanopy') pvCanopy(pen, ob.o, ob.i);
+    else if (ob.kind === 'c' && world.scene.parkingBlock) lotCar(pen, ...ob.o, ob.i);
     else if (ob.kind === 'p') screen(pen, ob.o, ob.i);
     else if (ob.kind === 'f') bowl(pen, ...ob.o);
     else if (ob.kind === 'b') building(pen, ob.o, world);

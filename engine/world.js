@@ -5,7 +5,7 @@ import { svfAt, svfGridAt } from './thermal.js';
 import { windField, isWindBlock } from './wind.js';
 import { MATERIALS } from './materials.js';
 
-export const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water', 'pavers', 'porousAsphalt', 'coolPave', 'raingarden', 'river', 'pond', 'greyBrick'];
+export const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water', 'pavers', 'porousAsphalt', 'coolPave', 'raingarden', 'river', 'pond', 'greyBrick', 'ballast', 'drySoil', 'scrub'];
 const WALKABLE = { concrete: 1, stone: 1, grass: 1, pavers: 1, greyBrick: 1 };
 
 /** Shopfront segments [s0, s1] (metres along a face) for a shop building. */
@@ -199,6 +199,8 @@ export function depthOrder(boxes) {
     const B = boxes[b];
     const overlapX = A.x0 < B.x1 && B.x0 < A.x1;
     const overlapY = A.y0 < B.y1 && B.y0 < A.y1;
+    // block 6: an overhead screen marked front (PV canopy) is drawn after whatever its footprint overlaps
+    if (overlapX && overlapY && !A.front !== !B.front) return !!B.front;
     if (overlapX && overlapY) return A.x0 + A.x1 + A.y0 + A.y1 < B.x0 + B.x1 + B.y0 + B.y1;
     const west = A.x1 <= B.x0;
     const north = A.y1 <= B.y0;
