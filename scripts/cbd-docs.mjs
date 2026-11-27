@@ -1,7 +1,7 @@
 // docs/sources.md section for block 3 (glass CBD), generated from the code and
 // model runs (scripts/cbd.mjs).
 import { GLASS, GLASS_IDS, GLASS_DEFAULT, MODEL, BASIS } from '../engine/materials.js';
-import { base3, canyonSvfRows, fresnelRows, specularCheck, SPECULAR_CASES, spotRows, canyons, wallBound, walkers, bands3, dTmrtByRho } from './cbd.mjs';
+import { base3, canyonSvfRows, fresnelRows, specularCheck, SPECULAR_CASES, spotRows, canyons, wallBound, walkers, bands3, dTmrtByRho, epClearShapeDiff, maxSpotCell } from './cbd.mjs';
 import { glassRho } from '../engine/reflect.js';
 import { SPOT_MIN, WARM, spotClasses, canyonStats } from '../engine/cbd.js';
 import { glossaryStats } from '../engine/glossary.js';
@@ -61,6 +61,9 @@ export function cbdMarkdown() {
   const T = setup.model(GLASS_DEFAULT);
   const ac = (g) => spots.find((r) => r.g === g && r.h === 15);
   const lowe15 = dTmrtByRho('lowe', 15);
+  const ep = epClearShapeDiff();
+  const mx = maxSpotCell();
+  const mxF = mx.facades.map((f) => `the ${f.name}'s ${f.face} face (θ ${f1(f.theta)}°, ρ ${f3(f.rho)}${f.cover < 0.999 ? `, ${Math.round(f.cover * 100)}% of the cell` : ''})`).join(' and ');
   const glassRows = GLASS_IDS.map((id) => {
     const g = GLASS[id];
     return `| ${g.name} (\`${id}\`) | ${cell(g.rho0)} | ${f2(glassRho(g.rho0.value, 45))} / ${f2(glassRho(g.rho0.value, 70))} / ${f2(glassRho(g.rho0.value, 80))} | ${cell(g.absorb)} | ${cell(g.eps)} |`;
@@ -138,8 +141,12 @@ ${fr.map((r) => `| ${r.th}° | ${r.brief} | ${f3(r.model)} | ${f3(r.clear)} | ${
 The brief's table is a little higher at 60–80° (0.41 vs ${f3(fr[4].model)} at 75°): it matches applying the two-surface
 formula 2R/(1 + R) to the polarisation-averaged single-surface R. Both are inside the acceptance band at 75° (0.41 ± 0.03).
 Coated glass keeps the clear-glass angular shape, scaled so that ρ(0) = ρ₀ and ρ(90°) = 1:
-ρ(θ) = ρ₀ + (1 − ρ₀)·(R(θ) − R(0))/(1 − R(0)) (*interpretation* of "Fresnel scaled to ρ₀"; LBNL finds coated glass up to
-about 8% off the clear-glass shape at 60°). **At grazing incidence every glass reflects strongly**: at 15:00 the sun is
+ρ(θ) = ρ₀·(1 − ρ̄(θ)) + ρ̄(θ), ρ̄(θ) = (R(θ) − R(0))/(1 − R(0)). This is the EnergyPlus form for coated glass [energyplus]
+(origin given there as Finlayson et al. 1993, WINDOW 4.0 documentation, LBL-33943; not checked), with two differences:
+the engine uses exact normalised Fresnel for ρ̄ instead of EnergyPlus's 4th-order polynomial fit in cos θ (largest
+difference ${f3(ep.max)} at ${ep.at}°, the fit is a little lower), and EnergyPlus switches to a bronze-glass curve when the normal
+transmittance is ≤ 0.645 (likely for low-e and mirror products), while the engine always uses the clear shape. LBNL finds
+coated glass up to about 8% off the clear-glass shape at 60°. **At grazing incidence every glass reflects strongly**: at 15:00 the sun is
 at azimuth 261°, so the south faces are lit at about 84° and reflect 0.7–0.8 of the beam whatever the glass type.
 
 ### Specular reflection
@@ -148,7 +155,10 @@ Single bounce of the direct beam off every sunlit glass façade [brief3]: mirror
 altitude, mirrored azimuth); for each ground sample p, if the ray from p along s′ first hits glass of façade f at a point
 that is itself in sun (both rays tested against every other building, clipped to the space in front of the façade, and
 crowns transmitting as for shade), p receives ρ(θ)·I_b·sinβ on the ground and a person there an extra beam ρ(θ)·I_b
-(S_str += a_k·f_p·ρ·I_b). Samples: 2 × 2 per 5 m cell, every 10-min sun slot, only under each sunlit façade's reflected
+(S_str += a_k·f_p·ρ·I_b). The reflected beam is evaluated where it reaches the ground (z = 0), not at a person's height,
+a negligible shift (about 1 m along the beam). Coverage across the façade normal is clipped analytically: a sample stands
+for a square, and a strip thinner than a sample (grazing incidence) is counted with its true area, so no façade lights more
+ground than its unobstructed area A·cosθ/sinβ (checked in the block, 8:00–17:00). Samples: 2 × 2 per 5 m cell, every 10-min sun slot, only under each sunlit façade's reflected
 beam (the projection of the façade along −s′, landing up to H/tanβ away). Reflections land on the ground only (not on
 lower roofs). Flat façades do not focus: no point gets more than Σ ρ(θ)·I_b·sinβ over the façades that face it.
 
@@ -195,7 +205,7 @@ pedestrian ΔTmrt rose from +2.6 to ${signed(diagnostics().coatNew.dTmrt)} K at 
 
 ### Glass surface temperature
 
-T_g = Ta + a_g·I_f/(h_o + h_i), I_f = f_lit·I_b·max(0, cos θ) + 0.5·D per façade orientation (brief equation; *assumption*,
+T_g = Ta + a_g·I_f/(h_o + h_i), I_f = I_b·max(0, cos θ) + 0.5·D per façade orientation (the brief's equation, a sunlit façade taken as fully lit; *assumption*,
 no measurement found): at 15:00 on a face lit head-on, Ta + ${f1(tgRise('clear'))} K (clear) to Ta + ${f1(tgRise('mirror'))} K (mirror); ≈ Ta at night. Glass walls emit
 ε_g·σT_g⁴ and reflect (1 − ε_g)·σTa⁴; each cell's wall view is split into opaque and glass (per orientation) by the horizon scan:
 in each direction the building that sets the horizon takes that direction's wall view through the face the ray enters
@@ -218,8 +228,9 @@ Notes on the rows outside:
   model's rise comes from three parts: the reflected beam on the person, the extra sunshine the ground reflects up, and
   the ground under the spot warming (low-e, 15:00: mean shaded-spot paving ${signed(ac('lowe').tsSpotShade - ac('lowe').tsSpotShadeOff)} K against reflection off).
   The mean for r 0.1–0.3 is inside for clear glass and just above +6 K for the coated glasses (low-e at 15:00
-  ${signed(lowe15.mean)} K over ${lowe15.n} cells). The maximum (${signed(Math.max(...spots.map((r) => r.dTmrtMax)))} K) is far above Chengdu's +13 K: it comes from
-  façades lit at grazing angles, where Fresnel reflectance passes 0.5 for any glass, and from cells that see two façades.
+  ${signed(lowe15.mean)} K over ${lowe15.n} cells); over all spot cells every glass type and hour is above +6 K (rows above). The maximum
+  (${signed(mx.d)} K, ${GLASS[mx.g].name.toLowerCase()}, ${mx.h}:00, a ${mx.sunlit > 0.95 ? 'sunlit' : mx.sunlit < 0.05 ? 'shaded' : 'part-shaded'} cell: Tmrt ${f1(mx.off)} → ${f1(mx.tmrt)} °C) is far above Chengdu's +13 K.
+  That cell is lit by ${mx.facades.length === 1 ? 'one façade' : `${mx.facades.length} façades`}: ${mxF}. Façades lit at grazing angles reflect over half the beam for any glass.
   The glass here is ideally flat and frameless; mullions, frames and pane distortion that break up grazing reflections in
   real curtain walls are not modelled. Not tuned: ρ₀, a_g and the Fresnel shape stay at their cited values.
 - **${c.deep.name} shaded floor at 15:00** is above 34–40 °C for the reasons in "Street canyons" (noon sun and reflected

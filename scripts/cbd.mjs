@@ -7,7 +7,7 @@ import { SCENE } from '../cities/glass-cbd/scene.js';
 import { buildWorld } from '../engine/world.js';
 import { sunSlots, cellMat, svfAt, irradiance } from '../engine/thermal.js';
 import { glassSetup, glassShade, spotStats, canyonStats, openReference, SPOT_MIN } from '../engine/cbd.js';
-import { fresnelPane, glassRho, reflectField, glassFacades } from '../engine/reflect.js';
+import { fresnelPane, glassRho, fresnelShape, reflectField, glassFacades } from '../engine/reflect.js';
 import { solarPosition, sunVector } from '../engine/sun.js';
 import { GLASS, GLASS_IDS, MODEL } from '../engine/materials.js';
 import { Life, classDensity } from '../engine/life.js';
@@ -41,6 +41,25 @@ export function canyonSvfRows(hws = [1, 2, 3, 5]) {
       app: svfAt(heightAt, 0, 0, 0, 16, 160, 2.5), // blocks 1 and 2
     };
   });
+}
+
+/**
+ * EnergyPlus clear-glass normalised reflectance (Engineering Reference,
+ * "Angular Properties for Coated Glass"): rho_bar = sum r_i cos^i - tau_bar,
+ * against the engine's exact normalised Fresnel. Returns the largest |difference|.
+ */
+export function epClearShapeDiff() {
+  const t = [-0.0015, 3.355, -3.84, 1.46, 0.0288];
+  const r = [0.999, -0.563, 2.043, -2.532, 1.054];
+  const poly = (c, x) => c.reduce((s, a, i) => s + a * x ** i, 0);
+  let max = 0;
+  let at = 0;
+  for (let th = 0; th <= 90; th += 0.5) {
+    const c = Math.cos(th * DEG);
+    const d = Math.abs(poly(r, c) - poly(t, c) - fresnelShape(th));
+    if (d > max) [max, at] = [d, th];
+  }
+  return { max, at };
 }
 
 /** Fresnel reflectance of clear float glass vs the brief's table. */
@@ -112,8 +131,69 @@ export function specularCheck({ hour = 15, face = 'S', h = 60, cell = 2, rho0 = 
   };
 }
 
-/** Flat-ground cases: a near-normal west face, a south face at 76° and a grazing one at 84°. */
-export const SPECULAR_CASES = [[15, 'W'], [12, 'S'], [15, 'S'], [10, 'E']];
+/** Flat-ground cases: a west face at 50°, south faces at 76° and 84°, an east face at 61° and one at 88.5° (every tower's east face at noon). */
+export const SPECULAR_CASES = [[15, 'W'], [12, 'S'], [15, 'S'], [10, 'E'], [12, 'E']];
+
+/**
+ * Lit ground area of each sunlit glass façade in the block (page sampling)
+ * against its unobstructed area A cos(theta) / sin(beta), hourly 8:00-17:00.
+ * Obstruction and the block edge only lower it; it can never exceed 1.
+ */
+export function litAreaRatio() {
+  const { world } = base3();
+  const facades = glassFacades(world);
+  const cellA = (world.cell / 2) ** 2;
+  let max = 0;
+  let worst = null;
+  for (let h = 8; h <= 17; h++) {
+    const sun = solarPosition(SCENE.site, h);
+    const sv = sunVector(sun.alt, sun.az);
+    const area = new Map();
+    reflectField(world, sun, { n: world.n, cell: world.cell, S: 2 }, (i) => world.bld[i] < 0, {
+      trace: (i, x, y, f, g, tr, cover) => area.set(f, (area.get(f) ?? 0) + cover * cellA),
+    });
+    for (const [f, A] of area) {
+      const cosT = sv[0] * f.n[0] + sv[1] * f.n[1];
+      const ideal = ((f.u[1] - f.u[0]) * (f.z[1] - f.z[0]) * cosT) / Math.sin(sun.alt * DEG);
+      if (A / ideal > max) {
+        max = A / ideal;
+        worst = { h, b: world.buildings[f.b].id, face: f.face };
+      }
+    }
+  }
+  return { max, worst };
+}
+
+/**
+ * The spot cell with the largest ΔTmrt (any glass, 12:00 or 15:00) and the
+ * façades that light it at that hour: [{b, face, theta, rho, cover}].
+ */
+export function maxSpotCell() {
+  const { world, setup } = base3();
+  let best = null;
+  for (const g of GLASS_IDS) {
+    const T = setup.model(g);
+    const O = setup.off(g);
+    for (const h of [12, 15]) {
+      for (let i = 0; i < world.n * world.n; i++) {
+        if (world.bld[i] >= 0 || cellMat(world, i) === 'water' || T.refl(i, h) < SPOT_MIN) continue;
+        const d = T.tmrt(i, h) - O.tmrt(i, h);
+        if (!best || d > best.d) best = { d, g, h, i, tmrt: T.tmrt(i, h), off: O.tmrt(i, h), sunlit: T.sunlit(i, h) };
+      }
+    }
+  }
+  const sun = solarPosition(SCENE.site, best.h);
+  const sv = sunVector(sun.alt, sun.az);
+  const by = new Map();
+  reflectField(world, sun, { n: world.n, cell: world.cell, S: 2 }, (i) => i === best.i, {
+    trace: (i, x, y, f, g, tr, cover) => by.set(f, (by.get(f) ?? 0) + (cover * tr) / 4),
+  });
+  best.facades = [...by].map(([f, c]) => {
+    const theta = Math.acos(sv[0] * f.n[0] + sv[1] * f.n[1]) / DEG;
+    return { b: world.buildings[f.b].id, name: world.buildings[f.b].name, face: f.face, theta, rho: glassRho(GLASS[best.g].rho0.value, theta), cover: c };
+  });
+  return best;
+}
 
 /** Mean ΔTmrt (glass vs the same glass with reflection off) over spot cells whose reflected share r is in [lo, hi]. */
 export function dTmrtByRho(g, h, lo = 0.1, hi = 0.3) {
@@ -243,7 +323,10 @@ export function bands3() {
     add(`Flat ground, ${tag}: lit cell irradiance / ρ(θ) I sinβ − 1`, sc.cellE / sc.expectE - 1, -0.01, 0.01, 'brief3', '');
     add(`Flat ground, ${tag}: far edge in front of the façade minus (H/tanβ) along the mirrored azimuth (m, 0.5 m cells)`, sc.farPlane - sc.farPlaneExpect, -sc.cell, sc.cell, 'brief3', 'm');
     add(`Flat ground, ${tag}: energy on the ground / reflected by the façade − 1 (0.5 m cells)`, sc.closure - 1, -0.03, 0.03, 'brief3', '');
+    add(`Flat ground, ${tag}: energy closure − 1 at the page's 2.5 m sampling`, specularCheck({ hour, face, cell: 2.5 }).closure - 1, -0.03, 0.03, 'brief3', '');
   }
+  const la = litAreaRatio();
+  add('In the block: largest lit ground area of any façade / its unobstructed area (8:00–17:00)', Math.round(la.max * 1e6) / 1e6, null, 1, 'brief3', '');
   for (const g of GLASS_IDS) {
     for (const h of [12, 15]) {
       const d = dTmrtByRho(g, h);
@@ -251,6 +334,7 @@ export function bands3() {
     }
   }
   const all = spotRows();
+  for (const r of all) add(`${GLASS[r.g].name}, ${r.h}:00: mean ΔTmrt over all spot cells (r ≥ ${SPOT_MIN}, n ${r.n}), read against the same band`, r.dTmrt, 1, 6, 'brief3');
   add('Largest ΔTmrt in any spot cell, any glass, 12:00 or 15:00', Math.max(...all.map((r) => r.dTmrtMax)), null, 13, 'du2025');
   const wb = wallBound();
   for (const [k, v] of Object.entries(wb)) add(`Wall term at a_w 0.5: extra daily shortwave on the ${base3().scene.canyons[k].name} floor (share)`, v.day, 0, 0.3, 'brief3', '');

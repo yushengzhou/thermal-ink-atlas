@@ -64,7 +64,7 @@ Shown on the heat cards as a caveat:
 | `youngTreeCrown` | crown radius 2.6 m, crown centre 4.4 m [engine] *engine assumption (no source)*, unverified (scene assumption for newly planted street trees (cities/sponge-retrofit/scene.js)) |
 | `latentHeat` | 2.45e6 J kg-1 [brief2] *cited value* (evaporated depth = sum of EF x max(Q*, 0) x dt / 2.45e6) |
 | `wallAlbedo` | 0.3 [brief3] *cited range*, unverified (opaque walls; brief: 0.3 (0.2-0.5, Oke range unverified); SOLWEIG uses 0.5 [wallenberg2026]) |
-| `wallLit` | 0.5 [engine] *engine assumption (no source)*, unverified (share of a wall in sun, f_lit, for the wall-reflection and glass-temperature terms) |
+| `wallLit` | 0.5 [engine] *engine assumption (no source)*, unverified (share of a wall in sun, f_lit, for the diffuse wall-reflection term (not used for glass temperature, which follows the brief)) |
 | `wallReflection` | K_wr = a_w (1 - SVF) K_wall [brief3] *interpretation of the source*, unverified (K_wall = f_lit I cos(beta)/pi + 0.5 D + 0.5 a_g G; SOLWEIG form a_w G (1 - psi) recalled from memory in the brief) |
 | `glassHo` | 20 [brief3] *cited range*, unverified (outside film coefficient h_o, brief 15-25 W m-2 K-1) |
 | `glassHi` | 7.7 [iso6946] *interpretation of the source*, unverified (inside film coefficient h_i,eff, W m-2 K-1, read as 1 / 0.13) |
@@ -94,6 +94,7 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[middel2021]** Middel et al. (2021) Bull. Amer. Meteor. Soc., doi 10.1175/BAMS-D-20-0193.1, shade and Tmrt in Phoenix
 - **[brief3]** Research brief docs/research/cbd-brief.md (block 3; values compiled from the sources below, items marked unverified there are flagged here)
 - **[fresnel]** Fresnel equations for uncoated float glass, n = 1.52, two surfaces (computed); LBNL (Furler; Rubin et al.): ASHRAE-style angular fit within 1.5% for clear glass, coated glass up to about 8% off at 60 deg
+- **[energyplus]** EnergyPlus Engineering Reference, Window Calculation Module, Angular Properties for Coated Glass: R(phi) = R(0) (1 - rho_bar(phi)) + rho_bar(phi), rho_bar a normalised clear-glass curve (polynomial fit in cos phi); origin given as Finlayson et al. 1993, WINDOW 4.0 documentation, LBL-33943 (not checked)
 - **[igdb]** LBNL International Glazing Database (IGDB) suggested for product reflectances; no datasheet was checked for the low-e or mirror values
 - **[bca]** Singapore BCA Approved Document, Section P: glass daylight reflectance at most 20% (via the block-3 brief)
 - **[en673]** EN 673 glass outer-surface emissivity about 0.84 (via the block-3 brief)
@@ -162,7 +163,7 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Glass curtain wall** (glass-cbd only): Typical: Normal-incidence solar reflectance: clear float glass about 0.08, solar-control low-e 0.15–0.35, reflective (mirror) glass 0.25–0.45; outer-surface emissivity about 0.84. [fresnel, brief3, en673]
 - **Specular reflection** (glass-cbd only): Typical: Scale models: flat mirror façades more than double the sunshine at pedestrian level; diffuse façades add at most about 30%; concave façades more than 300%. [speroni2022]
 - **Fresnel reflection** (glass-cbd only): Typical: Clear float glass (n = 1.52, two surfaces): 0.082 at 0°, 0.10 at 45°, 0.17 at 60°, 0.30 at 70°, 0.41 at 75°, 0.56 at 80°. [fresnel]
-- **Reflection spot** (glass-cbd only): In this model: At 3 pm with solar-control low-e glass: Tmrt 48 °C in shaded spots vs 40 °C in plain shade and 71 °C in sun. [this model]
+- **Reflection spot** (glass-cbd only): In this model: At 3 pm with solar-control low-e glass: Tmrt 49 °C in shaded spots vs 40 °C in plain shade and 71 °C in sun. [this model]
 - **Street canyon (H/W)** (glass-cbd only): Typical: Sky view factor at the centre of a long canyon: 1/√(1 + (2H/W)²), i.e. 0.45 at H/W 1, 0.24 at 2, 0.16 at 3, 0.10 at 5. Oke (1981): calm-night urban–rural air difference about 7.45 + 3.97 ln(H/W) K (secondary source). [brief3, oke1981]
 - **Low-e glass** (glass-cbd only): Typical: Solar reflectance about 0.15–0.35 head-on; Singapore caps glass daylight reflectance at 20%. [brief3, bca]
 - **AC waste heat** (glass-cbd only): Typical: Dense urban areas 20–70 W m⁻² of ground area, sometimes over 100; central Tokyo over 400 W m⁻² by day. [xie2016, sailor2011]
@@ -387,7 +388,7 @@ south-east hides any street floor behind a building taller than the street is wi
 | Solar-control low-e glass (`lowe`) | 0.2 [brief3] *cited range*, unverified (brief range 0.15-0.35; no datasheet checked (LBNL IGDB) [igdb]) | 0.21 / 0.37 / 0.60 | 0.3 [brief3] *edge of cited range*, unverified (brief: 0.3-0.45 for coated glass, marked an assumption) | 0.84 [en673] *cited value*, unverified (outer surface; the low-e coating faces the cavity) |
 | Reflective (mirror) glass (`mirror`) | 0.35 [brief3] *cited range*, unverified (brief range 0.25-0.45; no datasheet checked (LBNL IGDB) [igdb]) | 0.36 / 0.49 / 0.68 | 0.4 [brief3] *cited range*, unverified (brief: 0.3-0.45 for coated glass, marked an assumption) | 0.84 [en673] *cited value*, unverified |
 
-Wall and glass constants: wall albedo α_w 0.3 [brief3] *cited range*, unverified (opaque walls; brief: 0.3 (0.2-0.5, Oke range unverified); SOLWEIG uses 0.5 [wallenberg2026]); sunlit share of a wall f_lit 0.5 [engine] *engine assumption (no source)*, unverified (share of a wall in sun, f_lit, for the wall-reflection and glass-temperature terms);
+Wall and glass constants: wall albedo α_w 0.3 [brief3] *cited range*, unverified (opaque walls; brief: 0.3 (0.2-0.5, Oke range unverified); SOLWEIG uses 0.5 [wallenberg2026]); sunlit share of a wall f_lit 0.5 [engine] *engine assumption (no source)*, unverified (share of a wall in sun, f_lit, for the diffuse wall-reflection term (not used for glass temperature, which follows the brief));
 glass outside film coefficient h_o 20 [brief3] *cited range*, unverified (outside film coefficient h_o, brief 15-25 W m-2 K-1); inside film coefficient h_i 7.7 [iso6946] *interpretation of the source*, unverified (inside film coefficient h_i,eff, W m-2 K-1, read as 1 / 0.13).
 Singapore caps the daylight reflectance of façade glass at 20% [bca]; the low-e value sits at that cap.
 
@@ -406,7 +407,7 @@ horizon elevation) reproduces it in the limit; at page settings (2.5 m steps, 16
 | Canyon | H/W | floor SVF (model) | endless canyon | floor at 15:00 in shade | open surface at 15:00 | floor at 05:00 | open surface at 05:00 | night lag |
 |---|---|---|---|---|---|---|---|---|
 | Silk Lane (stone) | 2.3 | 0.23 | 0.21 | not in shade | 55.2 °C | 29.9 °C | 27.7 °C | +2.3 K |
-| Exchange Street (asphalt) | 2.6 | 0.39 | 0.19 | 48.4 °C (reflection off 41.9 °C) | 63.5 °C | 27.4 °C | 27.6 °C | −0.2 K |
+| Exchange Street (asphalt) | 2.6 | 0.39 | 0.19 | 48.6 °C (reflection off 42.0 °C) | 63.5 °C | 27.4 °C | 27.6 °C | −0.2 K |
 
 "Open surface" is a reference cell of the same material with SVF 1 and no shade or walls, run on the same design day.
 The floors' SVF sits above the endless-canyon value because the streets are short and open at their ends.
@@ -419,8 +420,8 @@ The floors' SVF sits above the endless-canyon value because the streets are shor
   source (unverified); Theeuwes et al. (2014) [theeuwes2014] show it breaks down at high H/W. Quoted on the canyon card, not modelled.
 - **Daytime:** Fez (H/W about 10) was about 6 K, up to 10 K, cooler than open streets by day (Johansson 2006) [johansson2006].
   Exchange Street's floor is in shade at 15:00 but got about two hours of sun around noon and, in the early afternoon, the reflected
-  sun of the Exchange Tower's west face; it reads 48.4 °C, outside the brief's 34–40 °C for shaded paving
-  (with the reflection off: 41.9 °C). Block 1's shaded paving is outside the same band (see above).
+  sun of the Exchange Tower's west face; it reads 48.6 °C, outside the brief's 34–40 °C for shaded paving
+  (with the reflection off: 42.0 °C). Block 1's shaded paving is outside the same band (see above).
 
 ### Glass optics
 
@@ -439,8 +440,12 @@ between the surfaces, computed per polarisation and then averaged (unpolarised s
 The brief's table is a little higher at 60–80° (0.41 vs 0.385 at 75°): it matches applying the two-surface
 formula 2R/(1 + R) to the polarisation-averaged single-surface R. Both are inside the acceptance band at 75° (0.41 ± 0.03).
 Coated glass keeps the clear-glass angular shape, scaled so that ρ(0) = ρ₀ and ρ(90°) = 1:
-ρ(θ) = ρ₀ + (1 − ρ₀)·(R(θ) − R(0))/(1 − R(0)) (*interpretation* of "Fresnel scaled to ρ₀"; LBNL finds coated glass up to
-about 8% off the clear-glass shape at 60°). **At grazing incidence every glass reflects strongly**: at 15:00 the sun is
+ρ(θ) = ρ₀·(1 − ρ̄(θ)) + ρ̄(θ), ρ̄(θ) = (R(θ) − R(0))/(1 − R(0)). This is the EnergyPlus form for coated glass [energyplus]
+(origin given there as Finlayson et al. 1993, WINDOW 4.0 documentation, LBL-33943; not checked), with two differences:
+the engine uses exact normalised Fresnel for ρ̄ instead of EnergyPlus's 4th-order polynomial fit in cos θ (largest
+difference 0.032 at 84°, the fit is a little lower), and EnergyPlus switches to a bronze-glass curve when the normal
+transmittance is ≤ 0.645 (likely for low-e and mirror products), while the engine always uses the clear shape. LBNL finds
+coated glass up to about 8% off the clear-glass shape at 60°. **At grazing incidence every glass reflects strongly**: at 15:00 the sun is
 at azimuth 261°, so the south faces are lit at about 84° and reflect 0.7–0.8 of the beam whatever the glass type.
 
 ### Specular reflection
@@ -449,7 +454,10 @@ Single bounce of the direct beam off every sunlit glass façade [brief3]: mirror
 altitude, mirrored azimuth); for each ground sample p, if the ray from p along s′ first hits glass of façade f at a point
 that is itself in sun (both rays tested against every other building, clipped to the space in front of the façade, and
 crowns transmitting as for shade), p receives ρ(θ)·I_b·sinβ on the ground and a person there an extra beam ρ(θ)·I_b
-(S_str += a_k·f_p·ρ·I_b). Samples: 2 × 2 per 5 m cell, every 10-min sun slot, only under each sunlit façade's reflected
+(S_str += a_k·f_p·ρ·I_b). The reflected beam is evaluated where it reaches the ground (z = 0), not at a person's height,
+a negligible shift (about 1 m along the beam). Coverage across the façade normal is clipped analytically: a sample stands
+for a square, and a strip thinner than a sample (grazing incidence) is counted with its true area, so no façade lights more
+ground than its unobstructed area A·cosθ/sinβ (checked in the block, 8:00–17:00). Samples: 2 × 2 per 5 m cell, every 10-min sun slot, only under each sunlit façade's reflected
 beam (the projection of the façade along −s′, landing up to H/tanβ away). Reflections land on the ground only (not on
 lower roofs). Flat façades do not focus: no point gets more than Σ ρ(θ)·I_b·sinβ over the façades that face it.
 
@@ -457,10 +465,11 @@ Flat-ground checks (one 50 m × 60 m glass face on open ground, low-e glass):
 
 | Case | θ | ρ(θ) | ρ I_b sinβ (W m⁻²) | lit cell (W m⁻²) | H/tanβ | far edge (0.5 m cells) | energy closure, 0.5 m cells | energy closure, page sampling (2.5 m) |
 |---|---|---|---|---|---|---|---|---|
-| W face, 15:00 | 50.0° | 0.224 | 150.6 | 150.6 | 51.3 m | 50.8 m | 0.996 | 0.986 |
-| S face, 12:00 | 75.9° | 0.486 | 445.4 | 445.4 | 15.2 m | 14.8 m | 0.995 | 0.995 |
-| S face, 15:00 | 84.4° | 0.762 | 513.1 | 513.1 | 51.3 m | 48.3 m | 0.974 | 0.974 |
-| E face, 10:00 | 60.7° | 0.270 | 211.8 | 211.8 | 36.1 m | 35.6 m | 0.993 | 1.022 |
+| W face, 15:00 | 50.0° | 0.224 | 150.6 | 150.6 | 51.3 m | 51.3 m | 1.000 | 1.000 |
+| S face, 12:00 | 75.9° | 0.486 | 445.4 | 445.4 | 15.2 m | 15.3 m | 1.000 | 1.000 |
+| S face, 15:00 | 84.4° | 0.762 | 513.1 | 513.1 | 51.3 m | 51.7 m | 1.000 | 1.000 |
+| E face, 10:00 | 60.7° | 0.270 | 211.8 | 211.8 | 36.1 m | 36.1 m | 1.000 | 1.000 |
+| E face, 12:00 | 88.5° | 0.936 | 858.0 | 858.0 | 15.2 m | 16.8 m | 1.000 | 1.000 |
 
 At grazing incidence the spot is a thin strip (a south face at 84° throws a strip only 7.7 m deep but over
 50 m long), so the far edge along the mirrored azimuth moves in large steps per cell; measured as a distance in front of the
@@ -473,12 +482,12 @@ compares the same glass with the specular bounce switched off (same glass temper
 
 | Glass | Hour | spot cells | mean r | mean ΔTmrt | max ΔTmrt | Tmrt, spots in shade | plain shade | sun | spots in sun |
 |---|---|---|---|---|---|---|---|---|---|
-| Clear float glass | 12:00 | 420 | 0.38 | +10.2 K | +20.7 K | 48.7 °C (48) | 38.6 °C | 66.4 °C | 75.3 °C |
-| Clear float glass | 15:00 | 740 | 0.23 | +6.8 K | +24.2 K | 44.9 °C (253) | 39.6 °C | 70.7 °C | 77.7 °C |
-| Solar-control low-e glass | 12:00 | 420 | 0.43 | +11.7 K | +22.6 K | 51.1 °C (48) | 38.7 °C | 66.5 °C | 76.9 °C |
-| Solar-control low-e glass | 15:00 | 752 | 0.31 | +9.1 K | +25.5 K | 48.4 °C (258) | 39.8 °C | 70.8 °C | 79.7 °C |
-| Reflective (mirror) glass | 12:00 | 420 | 0.51 | +13.5 K | +24.8 K | 53.9 °C (48) | 38.8 °C | 66.6 °C | 78.7 °C |
-| Reflective (mirror) glass | 15:00 | 752 | 0.41 | +12.0 K | +27.1 K | 52.5 °C (258) | 40.0 °C | 70.9 °C | 82.1 °C |
+| Clear float glass | 12:00 | 450 | 0.35 | +9.7 K | +22.7 K | 48.0 °C (48) | 38.6 °C | 66.3 °C | 74.9 °C |
+| Clear float glass | 15:00 | 753 | 0.22 | +6.6 K | +22.8 K | 45.0 °C (252) | 39.6 °C | 70.6 °C | 77.4 °C |
+| Solar-control low-e glass | 12:00 | 450 | 0.40 | +11.1 K | +24.5 K | 50.4 °C (48) | 38.8 °C | 66.5 °C | 76.5 °C |
+| Solar-control low-e glass | 15:00 | 767 | 0.30 | +8.9 K | +24.0 K | 48.6 °C (256) | 39.9 °C | 70.8 °C | 79.5 °C |
+| Reflective (mirror) glass | 12:00 | 450 | 0.47 | +12.8 K | +26.8 K | 53.1 °C (48) | 38.9 °C | 66.6 °C | 78.3 °C |
+| Reflective (mirror) glass | 15:00 | 769 | 0.40 | +11.7 K | +25.6 K | 52.7 °C (258) | 40.1 °C | 70.9 °C | 81.9 °C |
 
 Field comparison: Chengdu, Chunxi Road (August 2023), reflection zones Tmrt +4 to +13 °C, air +1–2 °C, UTCI +2–5 °C,
 peak Tmrt 73.9 °C [du2025]. SOLWEIG with reflective walls also puts the highest Tmrt in front of sunlit façades [wallenberg2026].
@@ -489,9 +498,9 @@ in simulation [sanagar2025] (not modelled: glass emissivity is 0.84 for every ty
 
 Walkers' route cost treats a reflection spot by its Tmrt: a class sits between building shade (w_b) and sun (1) in
 proportion to where its mean Tmrt sits between plain shade and plain sun at that hour, w = w_b + (1 − w_b)(Tmrt − Tmrt_shade)/(Tmrt_sun − Tmrt_shade)
-(*engine assumption* built on [melnikov]); spots in sun weigh more than 1. At 15:00 (low-e) the weights are 0.884 for a spot in shade and 1.046
-for a spot in sun (building shade 0.840). People per m² of walkable ground at 15:00: plain shade 1.762, spots in shade 1.368,
-all spots 0.806, sun 1.393 (per 1000 m²). The sweat cue follows Tmrt (65 → 70 °C) for anyone in sun or in a
+(*engine assumption* built on [melnikov]); spots in sun weigh more than 1. At 15:00 (low-e) the weights are 0.885 for a spot in shade and 1.045
+for a spot in sun (building shade 0.840). People per m² of walkable ground at 15:00: plain shade 1.770, spots in shade 1.346,
+all spots 0.764, sun 1.420 (per 1000 m²). The sweat cue follows Tmrt (65 → 70 °C) for anyone in sun or in a
 reflection spot; shaded spots stay below 65 °C here, so in practice it shows in sunlit spots.
 
 ### Diffuse wall reflection (all blocks)
@@ -504,8 +513,8 @@ pedestrian ΔTmrt rose from +2.6 to +2.9 K at noon (toward Middel's +3 to +5 K, 
 
 ### Glass surface temperature
 
-T_g = Ta + a_g·I_f/(h_o + h_i), I_f = f_lit·I_b·max(0, cos θ) + 0.5·D per façade orientation (brief equation; *assumption*,
-no measurement found): at 15:00 on a face lit head-on, Ta + 1.7 K (clear) to Ta + 7.0 K (mirror); ≈ Ta at night. Glass walls emit
+T_g = Ta + a_g·I_f/(h_o + h_i), I_f = I_b·max(0, cos θ) + 0.5·D per façade orientation (the brief's equation, a sunlit façade taken as fully lit; *assumption*,
+no measurement found): at 15:00 on a face lit head-on, Ta + 3.3 K (clear) to Ta + 13.4 K (mirror); ≈ Ta at night. Glass walls emit
 ε_g·σT_g⁴ and reflect (1 − ε_g)·σTa⁴; each cell's wall view is split into opaque and glass (per orientation) by the horizon scan:
 in each direction the building that sets the horizon takes that direction's wall view through the face the ray enters
 (*engine assumption*: lower walls in front of it are not counted separately).
@@ -528,40 +537,56 @@ surface temperature or Tmrt; the overlay only marks rooftop plant.
 | Fresnel, clear glass, ρ(0°) | +0.082 | 0.077 to 0.087 | fresnel | inside |
 | Fresnel, clear glass, ρ(75°) | +0.385 | 0.38 to 0.44 | fresnel | inside |
 | Flat ground, W face at 15:00 (θ 50°): lit cell irradiance / ρ(θ) I sinβ − 1 | +0.000 | -0.01 to 0.01 | brief3 | inside |
-| Flat ground, W face at 15:00 (θ 50°): far edge in front of the façade minus (H/tanβ) along the mirrored azimuth (m, 0.5 m cells) | −0.47 | -0.5 to 0.5 | brief3 | inside |
-| Flat ground, W face at 15:00 (θ 50°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | −0.004 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, W face at 15:00 (θ 50°): far edge in front of the façade minus (H/tanβ) along the mirrored azimuth (m, 0.5 m cells) | +0.04 | -0.5 to 0.5 | brief3 | inside |
+| Flat ground, W face at 15:00 (θ 50°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | +0.000 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, W face at 15:00 (θ 50°): energy closure − 1 at the page's 2.5 m sampling | +0.000 | -0.03 to 0.03 | brief3 | inside |
 | Flat ground, S face at 12:00 (θ 76°): lit cell irradiance / ρ(θ) I sinβ − 1 | +0.000 | -0.01 to 0.01 | brief3 | inside |
-| Flat ground, S face at 12:00 (θ 76°): far edge in front of the façade minus (H/tanβ) along the mirrored azimuth (m, 0.5 m cells) | −0.33 | -0.5 to 0.5 | brief3 | inside |
-| Flat ground, S face at 12:00 (θ 76°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | −0.005 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, S face at 12:00 (θ 76°): far edge in front of the façade minus (H/tanβ) along the mirrored azimuth (m, 0.5 m cells) | +0.17 | -0.5 to 0.5 | brief3 | inside |
+| Flat ground, S face at 12:00 (θ 76°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | +0.000 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, S face at 12:00 (θ 76°): energy closure − 1 at the page's 2.5 m sampling | +0.000 | -0.03 to 0.03 | brief3 | inside |
 | Flat ground, S face at 15:00 (θ 84°): lit cell irradiance / ρ(θ) I sinβ − 1 | +0.000 | -0.01 to 0.01 | brief3 | inside |
-| Flat ground, S face at 15:00 (θ 84°): far edge in front of the façade minus (H/tanβ) along the mirrored azimuth (m, 0.5 m cells) | −0.45 | -0.5 to 0.5 | brief3 | inside |
-| Flat ground, S face at 15:00 (θ 84°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | −0.026 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, S face at 15:00 (θ 84°): far edge in front of the façade minus (H/tanβ) along the mirrored azimuth (m, 0.5 m cells) | +0.05 | -0.5 to 0.5 | brief3 | inside |
+| Flat ground, S face at 15:00 (θ 84°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | +0.000 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, S face at 15:00 (θ 84°): energy closure − 1 at the page's 2.5 m sampling | +0.000 | -0.03 to 0.03 | brief3 | inside |
 | Flat ground, E face at 10:00 (θ 61°): lit cell irradiance / ρ(θ) I sinβ − 1 | +0.000 | -0.01 to 0.01 | brief3 | inside |
-| Flat ground, E face at 10:00 (θ 61°): far edge in front of the façade minus (H/tanβ) along the mirrored azimuth (m, 0.5 m cells) | −0.50 | -0.5 to 0.5 | brief3 | inside |
-| Flat ground, E face at 10:00 (θ 61°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | −0.007 | -0.03 to 0.03 | brief3 | inside |
-| Clear float glass, 12:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 81) | +5.1 K | 1 to 6 | brief3 | inside |
-| Clear float glass, 15:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 435) | +3.8 K | 1 to 6 | brief3 | inside |
-| Solar-control low-e glass, 12:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 81) | +5.9 K | 1 to 6 | brief3 | inside |
-| Solar-control low-e glass, 15:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 524) | +6.6 K | 1 to 6 | brief3 | **outside** |
-| Reflective (mirror) glass, 12:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 80) | +6.9 K | 1 to 6 | brief3 | **outside** |
-| Reflective (mirror) glass, 15:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 102) | +6.3 K | 1 to 6 | brief3 | **outside** |
-| Largest ΔTmrt in any spot cell, any glass, 12:00 or 15:00 | +27.1 K | ≤ 13 | du2025 | **outside** |
+| Flat ground, E face at 10:00 (θ 61°): far edge in front of the façade minus (H/tanβ) along the mirrored azimuth (m, 0.5 m cells) | +0.00 | -0.5 to 0.5 | brief3 | inside |
+| Flat ground, E face at 10:00 (θ 61°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | +0.000 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, E face at 10:00 (θ 61°): energy closure − 1 at the page's 2.5 m sampling | +0.000 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, E face at 12:00 (θ 89°): lit cell irradiance / ρ(θ) I sinβ − 1 | +0.000 | -0.01 to 0.01 | brief3 | inside |
+| Flat ground, E face at 12:00 (θ 89°): far edge in front of the façade minus (H/tanβ) along the mirrored azimuth (m, 0.5 m cells) | +0.17 | -0.5 to 0.5 | brief3 | inside |
+| Flat ground, E face at 12:00 (θ 89°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | +0.000 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, E face at 12:00 (θ 89°): energy closure − 1 at the page's 2.5 m sampling | +0.000 | -0.03 to 0.03 | brief3 | inside |
+| In the block: largest lit ground area of any façade / its unobstructed area (8:00–17:00) | +1.000 | ≤ 1 | brief3 | inside |
+| Clear float glass, 12:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 105) | +5.2 K | 1 to 6 | brief3 | inside |
+| Clear float glass, 15:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 453) | +3.9 K | 1 to 6 | brief3 | inside |
+| Solar-control low-e glass, 12:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 105) | +5.9 K | 1 to 6 | brief3 | inside |
+| Solar-control low-e glass, 15:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 538) | +6.6 K | 1 to 6 | brief3 | **outside** |
+| Reflective (mirror) glass, 12:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 90) | +6.9 K | 1 to 6 | brief3 | **outside** |
+| Reflective (mirror) glass, 15:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 121) | +6.3 K | 1 to 6 | brief3 | **outside** |
+| Clear float glass, 12:00: mean ΔTmrt over all spot cells (r ≥ 0.05, n 450), read against the same band | +9.7 K | 1 to 6 | brief3 | **outside** |
+| Clear float glass, 15:00: mean ΔTmrt over all spot cells (r ≥ 0.05, n 753), read against the same band | +6.6 K | 1 to 6 | brief3 | **outside** |
+| Solar-control low-e glass, 12:00: mean ΔTmrt over all spot cells (r ≥ 0.05, n 450), read against the same band | +11.1 K | 1 to 6 | brief3 | **outside** |
+| Solar-control low-e glass, 15:00: mean ΔTmrt over all spot cells (r ≥ 0.05, n 767), read against the same band | +8.9 K | 1 to 6 | brief3 | **outside** |
+| Reflective (mirror) glass, 12:00: mean ΔTmrt over all spot cells (r ≥ 0.05, n 450), read against the same band | +12.8 K | 1 to 6 | brief3 | **outside** |
+| Reflective (mirror) glass, 15:00: mean ΔTmrt over all spot cells (r ≥ 0.05, n 769), read against the same band | +11.7 K | 1 to 6 | brief3 | **outside** |
+| Largest ΔTmrt in any spot cell, any glass, 12:00 or 15:00 | +26.8 K | ≤ 13 | du2025 | **outside** |
 | Wall term at a_w 0.5: extra daily shortwave on the Silk Lane floor (share) | +0.209 | 0 to 0.3 | brief3 | inside |
 | Wall term at a_w 0.5: extra daily shortwave on the Exchange Street floor (share) | +0.089 | 0 to 0.3 | brief3 | inside |
 | Night lag, Silk Lane (H/W 2.3) floor minus open stone, 05:00 | +2.3 K | 2 to 6 | engine | inside |
-| Exchange Street (H/W 2.6) floor in shade at 15:00 (°C) | 48.4 °C | 34 to 40 | brief | **outside** |
-| Walkers at 15:00: people per m² in shaded spots / in plain shade | +0.777 | ≤ 0.999 | melnikov | inside |
+| Exchange Street (H/W 2.6) floor in shade at 15:00 (°C) | 48.6 °C | 34 to 40 | brief | **outside** |
+| Walkers at 15:00: people per m² in shaded spots / in plain shade | +0.760 | ≤ 0.999 | melnikov | inside |
 
-5 of 30 checks fall outside their band. They are reported, not tuned away: every input stays at its cited value or inside its cited range.
+11 of 45 checks fall outside their band. They are reported, not tuned away: every input stays at its cited value or inside its cited range.
 
 Notes on the rows outside:
 
 - **Spot ΔTmrt for ρ 0.1–0.3 and the +13 K ceiling.** The spec band counts the reflected share of the beam r = ρ(θ). The
   model's rise comes from three parts: the reflected beam on the person, the extra sunshine the ground reflects up, and
-  the ground under the spot warming (low-e, 15:00: mean shaded-spot paving +3.5 K against reflection off).
+  the ground under the spot warming (low-e, 15:00: mean shaded-spot paving +3.6 K against reflection off).
   The mean for r 0.1–0.3 is inside for clear glass and just above +6 K for the coated glasses (low-e at 15:00
-  +6.6 K over 524 cells). The maximum (+27.1 K) is far above Chengdu's +13 K: it comes from
-  façades lit at grazing angles, where Fresnel reflectance passes 0.5 for any glass, and from cells that see two façades.
+  +6.6 K over 538 cells); over all spot cells every glass type and hour is above +6 K (rows above). The maximum
+  (+26.8 K, reflective (mirror) glass, 12:00, a sunlit cell: Tmrt 65.6 → 92.5 °C) is far above Chengdu's +13 K.
+  That cell is lit by 2 façades: the North Tower's S face (θ 75.9°, ρ 0.582) and the Exchange Tower's E face (θ 88.5°, ρ 0.948, 63% of the cell). Façades lit at grazing angles reflect over half the beam for any glass.
   The glass here is ideally flat and frameless; mullions, frames and pane distortion that break up grazing reflections in
   real curtain walls are not modelled. Not tuned: ρ₀, a_g and the Fresnel shape stay at their cited values.
 - **Exchange Street shaded floor at 15:00** is above 34–40 °C for the reasons in "Street canyons" (noon sun and reflected
