@@ -489,6 +489,38 @@ export const GLOSSARY = {
     why: 'Dry air makes a colder night sky and strong evaporation, so lawns, misters and sweat cool well, but only while there is water.',
     scenes: ['desert'],
   },
+  // ---- block 12 (night market street) ----------------------------------------------
+  netLongwave: {
+    term: 'Net longwave (infrared) loss',
+    text: 'Every surface sends out invisible infrared heat and takes some back from the sky and the walls around it; the difference is what it really loses. Warm stone under a clear night sky loses a lot, under an awning or in a narrow alley much less.',
+    model: (S) => S.netLwLine,
+    why: 'After sunset this, with the warm air rising off it, is how paving gives back the heat it stored by day.',
+    scenes: ['nightmarket'],
+  },
+  metabolicRate: {
+    term: 'Metabolic rate (met)',
+    text: 'The heat a body makes, in "met": 1 met is 58.2 watts per square metre of skin, about 105 W for an adult sitting still.',
+    range: 'Standing about 1.2 met (about 125 W), walking slowly about 2 met (about 210 W).',
+    src: 'ashrae55',
+    why: 'A packed crowd of about one person per square metre gives off as much heat as warm paving at night.',
+    scenes: ['nightmarket'],
+  },
+  anthropogenicHeat: {
+    term: 'Anthropogenic heat',
+    text: 'Heat that people add to a place: from engines, air conditioners, cooking fires, lights and their own bodies.',
+    range: 'Whole cities usually 20–70 W m⁻², more in dense centres; a night market\'s stalls about 60 W m⁻² over the street, several kW over a stall.',
+    src: 'sailor2011, brief12',
+    why: 'It warms the air of a street; this page keeps the air temperature fixed, so it is shown but not felt.',
+    scenes: ['nightmarket'],
+  },
+  sensibleLatent: {
+    term: 'Sensible and latent heat',
+    text: 'Sensible heat warms the air directly; latent heat leaves as water vapour (from sweat or breath) and warms the air only where the vapour condenses again.',
+    range: 'People at about 26 °C: about 73 W sensible and 59 W latent each in a shop; at 30 °C only about 40% of a body\'s heat is sensible.',
+    src: 'ashraeRetail, brief12',
+    why: 'On a warm night most of a crowd\'s heat goes into the air as moisture, which makes it feel muggy rather than hotter.',
+    scenes: ['nightmarket'],
+  },
 };
 
 /** Glossary keys shown for a scene (shared terms plus the scene's own). */
