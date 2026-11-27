@@ -161,7 +161,7 @@ export function pageParts(city) {
 }
 
 function build(city) {
-  const { scene, bundle, ownBytes, sceneBytes } = pageParts(city);
+  const { scene, keys: srcKeys, bundle, ownBytes, sceneBytes } = pageParts(city);
 
   const meta = /title: '([^']+)'/.exec(scene)[1];
   const sub = /note: '([^']+)'/.exec(scene)[1];
@@ -177,18 +177,37 @@ function build(city) {
   const size = Buffer.byteLength(html);
   if (size > LIMIT) throw new Error(`${city}: built file is ${size} bytes, over the ${LIMIT} byte budget`);
   writeFileSync(`${root}cities/${city}/index.html`, html);
-  console.log(`cities/${city}/index.html  ${(size / 1024).toFixed(1)} KB (own modules ${(ownBytes / 1024).toFixed(1)} KB, scene ${(sceneBytes / 1024).toFixed(1)} KB, shared core ${((size - ownBytes - sceneBytes) / 1024).toFixed(1)} KB)`);
+  const ownSrc = ownSources(city, srcKeys).bytes;
+  console.log(`cities/${city}/index.html  ${(size / 1024).toFixed(1)} KB (own modules ${(ownBytes / 1024).toFixed(1)} KB, scene ${(sceneBytes / 1024).toFixed(1)} KB, own sources ${(ownSrc / 1024).toFixed(1)} KB, shared core ${((size - ownBytes - sceneBytes - ownSrc) / 1024).toFixed(1)} KB)`);
 }
 
-/** Bytes of a built page that are not its own block modules or its scene: the shared core as this page carries it. */
+const allCities = () => readdirSync(`${root}cities`).filter((c) => existsSync(`${root}cities/${c}/scene.js`)).sort();
+
+/**
+ * The page's own SOURCES keys: keys it carries that no other page carries
+ * (the sources only its block cites), and their bytes in its materials.js
+ * (one line each). keys: the page's key set (pageParts).
+ */
+export function ownSources(city, keys = pageParts(city).keys) {
+  const others = new Set(allCities().filter((c) => c !== city).flatMap((c) => [...pageParts(c).keys]));
+  const own = [...keys].filter((k) => !others.has(k));
+  const lines = new Map(read('engine/materials.js').split('\n').filter((l) => /^  \w+: '.*',$/.test(l)).map((l) => [/^  (\w+): /.exec(l)[1], l]));
+  return { keys: own, bytes: own.reduce((a, k) => a + Buffer.byteLength(`${lines.get(k)}\n`), 0) };
+}
+
+/**
+ * Bytes of a built page that are not its own: not its block modules, not its
+ * scene and not its own SOURCES keys (ownSources). The shared core as this
+ * page carries it: what every page pays for.
+ */
 export function coreBytes(city) {
   const size = Buffer.byteLength(read(`cities/${city}/index.html`));
   const p = pageParts(city);
-  return size - p.ownBytes - p.sceneBytes;
+  return size - p.ownBytes - p.sceneBytes - ownSources(city, p.keys).bytes;
 }
 
 // run as a script (tests import modulesFor without building)
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const cities = process.argv[2] ? [process.argv[2]] : readdirSync(`${root}cities`).filter((c) => existsSync(`${root}cities/${c}/scene.js`)).sort();
+  const cities = process.argv[2] ? [process.argv[2]] : allCities();
   for (const c of cities) build(c);
 }

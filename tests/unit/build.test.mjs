@@ -80,7 +80,9 @@ test('external-reference rule: allow-listed relative links pass; schemes, hosts,
 // own, the shell, the stubs, and the per-page cut of materials.js and
 // glossary.js). Blocks 7-12 must still fit under 500 KB, so the core may not
 // grow past this budget; a block's own code belongs in its own modules.
-const CORE_BUDGET = 290000; // bytes; largest core at the time of setting: 283,013 B (waterfront)
+// A page's own SOURCES keys (carried by no other page: the sources only its
+// block cites) count as the page's own bytes, not core (build.mjs ownSources).
+const CORE_BUDGET = 290000; // bytes; largest core at the time of setting: 283,013 B (waterfront); 282,568 B (estate) once own source keys stopped counting as core
 
 test(`the shared core stays under its budget (${CORE_BUDGET} bytes on every page)`, async () => {
   const { coreBytes } = await import('../../scripts/build.mjs');
@@ -88,6 +90,24 @@ test(`the shared core stays under its budget (${CORE_BUDGET} bytes on every page
     const b = coreBytes(c);
     console.log(`${c}: shared core ${b} B`);
     assert.ok(b <= CORE_BUDGET, `${c}: shared core ${b} B over the ${CORE_BUDGET} B budget (move block-only code into the block's modules)`);
+  }
+});
+
+test('a page\'s own source keys are carried by that page only, and their bytes are its own', async () => {
+  const { ownSources, pageParts } = await import('../../scripts/build.mjs');
+  const keys = Object.fromEntries(CITIES.map((c) => [c, pageParts(c).keys]));
+  for (const c of CITIES) {
+    const o = ownSources(c, keys[c]);
+    for (const k of o.keys) {
+      assert.ok(keys[c].has(k), `${c}: ${k}`);
+      for (const d of CITIES) if (d !== c) assert.ok(!keys[d].has(k), `${c}: own key ${k} is also on ${d}`);
+    }
+    // the bytes are the SOURCES lines of those keys in the built page
+    const html = readFileSync(file(c), 'utf8');
+    const block = /const SOURCES = \{\n([\s\S]*?)\n\};/.exec(html)[1].split('\n');
+    const lines = block.filter((l) => o.keys.includes(/^ {2}(\w+): /.exec(l)?.[1]));
+    assert.equal(lines.length, o.keys.length, c);
+    assert.equal(o.bytes, lines.reduce((a, l) => a + Buffer.byteLength(`${l}\n`), 0), c);
   }
 });
 
