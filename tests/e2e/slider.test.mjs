@@ -1,8 +1,9 @@
 // Hour-slider drag pacing in headless Chromium (issue #3). Each animation
 // frame moves the slider one 15-minute step and fires `input`, the way a fast
 // drag does, sweeping 00:00 -> 23:45 and back. Spec target: p95 frame time
-// <= 33 ms. On shared CI runners the rAF-gap threshold is relaxed to the
-// main-thread cost of a frame (set PERF_STRICT=1 to enforce gaps there too).
+// <= 33 ms. On shared CI runners the rAF-gap check is replaced by the
+// main-thread draw cost of a frame, p95 <= 20 ms (set PERF_STRICT=1 to
+// enforce gaps there too).
 // After release the view must refine to exactly the pixels seek() gives.
 import { test, after, before } from 'node:test';
 import assert from 'node:assert/strict';
@@ -68,7 +69,7 @@ for (const [name, query] of [['day', 'hour=15'], ['thermal', 'thermal&hour=15']]
         `draw mean ${mean(work).toFixed(1)} / p95 ${wp95.toFixed(1)} / max ${Math.max(...work).toFixed(1)} ms; ${previews}/${work.length} preview frames (${strict ? 'strict' : 'relaxed'})`,
     );
     if (strict) assert.ok(p95 <= 33, `drag p95 frame ${p95.toFixed(1)} ms`);
-    assert.ok(wp95 <= 33, `drag p95 draw ${wp95.toFixed(1)} ms`);
+    assert.ok(wp95 <= (strict ? 33 : 20), `drag p95 draw ${wp95.toFixed(1)} ms`);
     assert.ok(previews > 0, 'the drag never used the preview path');
 
     // released at 00:00: once refined, the frame on screen is exact, i.e. the
@@ -82,6 +83,42 @@ for (const [name, query] of [['day', 'hour=15'], ['thermal', 'thermal&hour=15']]
     assert.equal(st.hash, ref, 'refined frame after drag differs from ?f=N');
     assert.deepEqual(errors, []);
     await fresh.context.close();
+    await context.close();
+  });
+}
+
+// Large HiDPI views have more visible tiles than the tile cache cap; the
+// preview's pending and shown hours are pinned so a drag still settles.
+for (const [w, h] of [[2560, 1440], [3008, 1692]]) {
+  test(`drag settles on a large HiDPI view (${w}x${h} @2, z=4)`, async () => {
+    const { page, context, errors } = await open(browser, 'hour=15&cam=4,40,40', { viewport: { width: w, height: h }, dpr: 2 });
+    const n = await page.evaluate(
+      () =>
+        new Promise((resolve) => {
+          const s = document.getElementById('hour');
+          s.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+          let k = 0;
+          const step = () => {
+            if (k < 96) {
+              s.value = String((15 + k++ * 0.25) % 24);
+              s.dispatchEvent(new Event('input', { bubbles: true }));
+              requestAnimationFrame(step);
+            } else {
+              s.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+              s.dispatchEvent(new Event('change', { bubbles: true }));
+              resolve(k);
+            }
+          };
+          requestAnimationFrame(step);
+        }),
+    );
+    assert.equal(n, 96);
+    const t0 = Date.now();
+    await page.waitForFunction(() => window.atlas.settled(), null, { timeout: 10000 });
+    console.log(`${w}x${h}@2: settled ${Date.now() - t0} ms after release`);
+    const st = await page.evaluate(() => ({ hour: window.atlas.state().hour, preview: window.atlas.stats().preview }));
+    assert.deepEqual(st, { hour: 14.75, preview: false });
+    assert.deepEqual(errors, []);
     await context.close();
   });
 }
