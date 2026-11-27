@@ -55,17 +55,17 @@
   #fn .rng { opacity: .8; }
   #fn .why { font-style: italic; }
   /* block control panels (blocks 2-6): one look */
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate) { position: fixed; left: 18px; bottom: 16px; width: 212px; padding: 8px 10px 9px; background: rgba(246,240,226,.93); border: 1.5px solid #2b2621; border-radius: 4px 9px 5px 8px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); font-size: 13px; }
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate) .seg, :is(#retro, #glass) .row { display: flex; align-items: center; gap: 4px; margin: 0 0 6px; flex-wrap: wrap; }
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate) button { font: 12.5px/1.2 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; background: #fbf7ee; color: #2b2621; border-radius: 4px 7px 3px 6px; cursor: pointer; }
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate) button[aria-pressed="true"] { background: #2b2621; color: #fbf7ee; }
+  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus) { position: fixed; left: 18px; bottom: 16px; width: 212px; padding: 8px 10px 9px; background: rgba(246,240,226,.93); border: 1.5px solid #2b2621; border-radius: 4px 9px 5px 8px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); font-size: 13px; }
+  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus) .seg, :is(#retro, #glass) .row { display: flex; align-items: center; gap: 4px; margin: 0 0 6px; flex-wrap: wrap; }
+  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus) button { font: 12.5px/1.2 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; background: #fbf7ee; color: #2b2621; border-radius: 4px 7px 3px 6px; cursor: pointer; }
+  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus) button[aria-pressed="true"] { background: #2b2621; color: #fbf7ee; }
   :is(#retro, #glass) input[type=range] { width: 96px; accent-color: #3f6e6a; }
   :is(#retro, #glass) #rainLabel { font-size: 12px; flex-basis: 100%; }
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate) .measures { display: flex; flex-wrap: wrap; gap: 4px; border-top: 1px dashed #6d6355; padding-top: 6px; }
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate) .measures .hand { flex-basis: 100%; }
-  :is(#retro, #glass, #wind, #hutong, #parking, #estate) .measures button { font-size: 12px; padding: 2px 6px; }
+  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus) .measures { display: flex; flex-wrap: wrap; gap: 4px; border-top: 1px dashed #6d6355; padding-top: 6px; }
+  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus) .measures .hand { flex-basis: 100%; }
+  :is(#retro, #glass, #wind, #hutong, #parking, #estate, #campus) .measures button { font-size: 12px; padding: 2px 6px; }
   :is(#retro, #glass, #wind, #parking) .measures button.warn { border-color: #8a2f22; color: #8a2f22; }
-  .noui #wind, .noui #hutong, .noui #parking, .noui #estate { display: none; }
+  .noui #wind, .noui #hutong, .noui #parking, .noui #estate, .noui #campus { display: none; }
   #terms .refs a { color: #8a2f22; }
   #card table.cmp td { text-align: right; }
   #card table.cmp td:first-child, #card table.cmp td.sub { text-align: left; }
@@ -1190,6 +1190,7 @@ __m['thermal'] = (() => {
 //   G = ... - EF max(Q*, 0) - LE,  LE = L beta(W) (h_c / c_p) max(0, q_sat(Ts) - q_a),
 //   beta(W) = beta_wet min(1, W / W_c),  dW/dt = -LE / L,  W := W0 at the splash hour.
 // Blocks without wet cells never enter that step (stepSplash below).
+// Block 8: efOnly with a pulse, EF = res + (ef0 - res) exp(-(t - hour) / tau).
 // Block 6 keeps G itself (opts.flux): on the stored 15-min steps the model
 // minute runs through stepFlux, the same arithmetic as stepPlain that also
 // writes G per cell; the other minutes and every other block are unchanged.
@@ -1711,6 +1712,7 @@ function runModel(world, opts = {}) {
       at: Math.round(sp.hour * 60),
       efOnly: !!sp.efOnly, // the old path alone: EF := efWet from the splash hour to midnight, no store
       efWet: sp.efWet ?? 1,
+      pulse: sp.pulse ?? null, // block 8 (tau in minutes)
       efOn: false,
       margin: Infinity, // smallest Ts - wet-bulb of the air over wet cells holding water, every model minute (last day)
       marginAt: null,
@@ -1775,6 +1777,7 @@ function runModel(world, opts = {}) {
         if (WS.efOnly) WS.efOn = true;
         else for (let i = 0; i < NN; i++) if (WS.wet[i]) WS.W[i] = WS.w0;
       }
+      if (WS && WS.pulse && WS.efOn) WS.efWet = WS.pulse.res + (WS.pulse.ef0 - WS.pulse.res) * Math.exp(-(m - WS.at) / WS.pulse.tau);
       const h = m / 60;
       const taK = ta[m] + K0;
       const ta4 = taK * taK * taK * taK;
@@ -2420,8 +2423,8 @@ const { svfAt, svfGridAt } = __m['thermal'];
 const { windField, isWindBlock } = __m['wind'];
 const { MATERIALS } = __m['materials'];
 
-const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water', 'pavers', 'porousAsphalt', 'coolPave', 'raingarden', 'river', 'pond', 'greyBrick', 'ballast', 'drySoil', 'scrub'];
-const WALKABLE = { concrete: 1, stone: 1, grass: 1, pavers: 1, greyBrick: 1 };
+const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water', 'pavers', 'porousAsphalt', 'coolPave', 'raingarden', 'river', 'pond', 'greyBrick', 'ballast', 'drySoil', 'scrub', 'turf', 'track', 'acrylic', 'rubber'];
+const WALKABLE = { concrete: 1, stone: 1, grass: 1, pavers: 1, greyBrick: 1, turf: 1, track: 1, acrylic: 1, rubber: 1 };
 
 /** Shopfront segments [s0, s1] (metres along a face) for a shop building. */
 function shopSegments(B, face) {
@@ -4743,8 +4746,8 @@ class Renderer {
     ctx.drawImage(c, 0, 0);
   }
 
-  /** True if the person's hip at (x, y) is hidden behind a building (block 5: or under a pergola or awning). */
-  hidden(x, y) {
+  /** True if the person's hip at (x, y) is hidden behind a building (block 5: or under a pergola or awning; block 8: not children, seen through the sail mesh). */
+  hidden(x, y, mesh = false) {
     for (const B of this.world.buildings) {
       const dIn = Math.max(B.x0 - x, B.y0 - y, 0);
       const dOut = Math.min(B.x1 - x, B.y1 - y);
@@ -4752,7 +4755,7 @@ class Renderer {
       const top = B.h + (B.gable ? 2 : 0);
       if (top > 0.9 + dIn / ISO_Z) return true;
     }
-    if (this.world.screens) {
+    if (this.world.screens && !mesh) {
       // a flat top at z hides the hip if the line of sight passes through it inside its footprint
       for (const P of this.world.screens) {
         const dIn = Math.max(P.x0 - x, P.y0 - y, 0);
@@ -4851,7 +4854,7 @@ class Renderer {
     const shLen = hc.up ? Math.min(4, 1.7 / Math.tan(Math.max(8, hc.sun.alt) * DEG)) : 0;
     // people drawn a little larger than life, with a floor so they (and the
     // sweat cue) stay legible at the default overview zoom
-    const s = Math.max(Z * 1.25, 5.5 * this.dpr);
+    const s0 = Math.max(Z * 1.25, 5.5 * this.dpr);
     const lw = Math.max(0.8, this.lineBase(cam.z) * 0.8);
     const ink = rgbCss(INK);
     let count = 0;
@@ -4863,8 +4866,9 @@ class Renderer {
       const Y = oy + p[1] * Z;
       if (X < -20 || Y < -20 || X > W + 20 || Y > H + 40) continue;
       if (this.clip && (X < this.clip[0] - 30 || X > this.clip[1] + 30)) continue;
-      if (this.hidden(a.x, a.y)) continue;
+      if (this.hidden(a.x, a.y, a.child)) continue;
       count++;
+      const s = a.child ? s0 * 0.7 : s0; // block 8: children
       ctx.globalAlpha = alpha;
       if (sh) {
         const q = iso(a.x + sh[0] * shLen * 0.5, a.y + sh[1] * shLen * 0.5, 0);
@@ -5158,6 +5162,7 @@ const GLOSSARY = {
   // ---- block 5 (hutong) -----------------------------------------------------
   // ---- block 6 (car park and brownfield) -------------------------------------
   // ---- block 7 (older high-rise estate) ---------------------------------------
+  // ---- block 8 (campus) -------------------------------------------------------
   // ---- block 2 (sponge-retrofit) --------------------------------------------
   daysSinceRain: {
     term: 'Days since rain (d)',
@@ -5788,6 +5793,12 @@ __m['estate'] = { isEstate: () => false };
 
 __m['esui'] = {};
 
+__m['cpkit'] = {};
+
+__m['campus'] = { isCampus: () => false };
+
+__m['cpui'] = {};
+
 __m['app'] = (() => {
 // app: boot, clock, keys, seek(), query modes, overlay (slider, notes, heat
 // card) and a small window.atlas API used by the checks.
@@ -5819,6 +5830,8 @@ const { isParking, parkingSetup } = __m['parking'];
 const { pkApp } = __m['pkui'];
 const { isEstate, estateSetup } = __m['estate'];
 const { esApp } = __m['esui'];
+const { isCampus, campusSetup } = __m['campus'];
+const { cpApp } = __m['cpui'];
 
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
@@ -5923,6 +5936,8 @@ function boot(scene, root = document) {
   // estate block (block 7): a block plugin too (esui.js esApp)
   const esMode = isEstate(scene);
   let esSet = null;
+  const cpMode = isCampus(scene); // block 8 plugin (cpui.js cpApp)
+  let cpSet = null;
   if (!retro) {
     world = buildWorld(scene);
     t1 = performance.now();
@@ -5956,6 +5971,9 @@ function boot(scene, root = document) {
     } else if (esMode) {
       esSet = estateSetup(world);
       thermal = esSet.model;
+    } else if (cpMode) {
+      cpSet = campusSetup(world);
+      thermal = cpSet.base;
     } else thermal = runModel(world);
     t2 = performance.now();
     V = { main: makeView('main', scene, world, thermal, canvas, glassMode ? { type: () => glassNow.type } : null, wfMode ? { lines: wfSet.lines() } : null) };
@@ -6108,7 +6126,7 @@ function boot(scene, root = document) {
       sunTmrt: w.shade.sunTmrt,
     };
   }
-  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode || pkMode || esMode ? null : block1Notes();
+  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode || pkMode || esMode || cpMode ? null : block1Notes();
   function block1Notes() {
   const notesText = {
     asphalt: ['Kiln Street, old asphalt (albedo 0.12):', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
@@ -6520,7 +6538,7 @@ function boot(scene, root = document) {
   // ---- a block plugin (blocks 5 and 6): its controls, cards, notes, heat-card rows, glossary numbers
   // and API live in its own module; app.js only calls these hooks
   const env = {
-    scene, world, thermal, root, card, R, S, main, query: q, setup: htSet ?? pkSet ?? esSet,
+    scene, world, thermal, root, card, R, S, main, query: q, setup: htSet ?? pkSet ?? esSet ?? cpSet,
     hideCard: () => hideCard(),
     reopen: () => card.dataset.open === '1' && reopenCard(),
     redraw: () => S.paused && draw(),
@@ -6532,7 +6550,7 @@ function boot(scene, root = document) {
     },
     setNotes: (n) => (notes = n),
   };
-  const blk = pkMode ? pkApp(env) : htMode ? htApp(env, htSplash0) : esMode ? esApp(env) : null;
+  const blk = pkMode ? pkApp(env) : htMode ? htApp(env, htSplash0) : esMode ? esApp(env) : cpMode ? cpApp(env) : null;
   if (blk) notes = blk.notes();
 
   const toggleThermal = () => {
@@ -7056,6 +7074,7 @@ function boot(scene, root = document) {
       ...(htSet ? htSet.timing : {}),
       ...(pkSet ? pkSet.timing : {}),
       ...(esSet ? esSet.timing : {}),
+      ...(cpSet ? cpSet.timing : {}),
     },
     /** Pure seek: render frame N with an optional camera {z,cx,cy}; pauses the clock. */
     seek(frame, cam) {
@@ -7260,6 +7279,7 @@ function boot(scene, root = document) {
     parking: pkMode ? blk.api : null,
     /** Estate block (block 7) only: its plugin's API (esui.js esApp). */
     estate: esMode ? blk.api : null,
+    campus: cpMode ? blk.api : null,
     retro: retro
       ? {
         state: () => ({ state: S.state, split: S.split, swap: S.swap, d: S.d, aged: S.aged }),
