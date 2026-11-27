@@ -3,7 +3,9 @@
 // sheltered street, riverside shade).
 import { SOURCES, BASIS, MODEL } from './materials.js';
 import { gl } from './glossary.js';
-import { OVERLAY } from './wind.js';
+import { OVERLAY, overlayDT, dayWeight } from './wind.js';
+import { rgbCss, clamp, hexRgb } from './core.js';
+import { HAND_FONT } from './render.js';
 
 const fmt = (v) => (Math.round(v * 10) / 10).toFixed(1);
 const f2 = (v) => v.toFixed(2);
@@ -149,3 +151,153 @@ export const WF_CARDS = [
   ['shelter', 'Sheltered street'],
   ['shade', 'Riverside shade'],
 ];
+
+// ---- the block's overlay in the canvas (moved from render.js; the same drawing) ----
+// the water's air overlay (cooling / warming) and the wind-line ink
+const AIR_COOL = hexRgb('#3b6573');
+const AIR_WARM = hexRgb('#b96d4d');
+const WIND_INK = hexRgb('#24354a');
+
+/**
+ * Block 4: the water's illustrative air overlay (a soft band along each wind
+ * line, cool by day, warm at night, strength |dTa|) and the pen-drawn wind
+ * lines with moving dashes (spacing and speed proportional to u_i), each
+ * with a label saying what it is. Vertices hidden behind buildings are
+ * skipped. Pure function of (frame, camera, look).
+ */
+export function drawWind(R, ctx, f, cam, W, H, alpha, look, hq) {
+  const [ox, oy, Z] = R.origin(cam, W, H);
+  const d = R.dpr;
+  const { lines, items } = R.wind;
+  const t = f / 60;
+  const u = look.u || 1;
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  const X = (sp, v) => ox + sp[v * 2] * Z;
+  const Y = (sp, v) => oy + sp[v * 2 + 1] * Z;
+  const labels = [];
+  if (look.air) {
+    const wd = dayWeight(R.hourCtx(hq).sun.alt);
+    // strength in 6 alpha steps per sign, one path each
+    const B = 6;
+    const paths = [[], []];
+    for (let s = 0; s < 2; s++) for (let b = 0; b < B; b++) paths[s].push([]);
+    lines.forEach((L, li) => {
+      const sp = items[li].sp;
+      for (let v = 0; v + 1 < L.fw.length; v++) {
+        if (L.hid[v] || L.hid[v + 1] || L.wet[v + 1]) continue; // over land only
+        const dt = overlayDT(L.lam[v], L.kind[v], wd);
+        const a = Math.abs(dt);
+        if (a < 0.02) continue;
+        const b = Math.min(B - 1, Math.floor((a / 1.0) * B));
+        paths[dt < 0 ? 0 : 1][b].push(v, li);
+      }
+    });
+    ctx.lineWidth = Math.max(4 * d, 6 * Z);
+    for (let s = 0; s < 2; s++) {
+      ctx.strokeStyle = rgbCss(s === 0 ? AIR_COOL : AIR_WARM);
+      for (let b = 0; b < B; b++) {
+        const P = paths[s][b];
+        if (!P.length) continue;
+        ctx.globalAlpha = alpha * (0.12 + 0.5 * ((b + 0.5) / B));
+        ctx.beginPath();
+        for (let k = 0; k < P.length; k += 2) {
+          const v = P[k];
+          const sp = items[P[k + 1]].sp;
+          ctx.moveTo(X(sp, v), Y(sp, v));
+          ctx.lineTo(X(sp, v + 1), Y(sp, v + 1));
+        }
+        ctx.stroke();
+        R.stats.airSegs += P.length / 2;
+      }
+    }
+    labels.push([wd > 0.5 ? AIR_COOL : AIR_WARM, `Air effect of the water: illustrative, from literature, not simulated (${wd > 0.5 ? 'cooler' : wd < 0.5 ? 'warmer' : 'cooler / warmer'})`]);
+  }
+  if (look.wind) {
+    ctx.strokeStyle = rgbCss(WIND_INK);
+    ctx.fillStyle = rgbCss(WIND_INK);
+    ctx.lineWidth = Math.max(1.6 * d, R.lineBase(cam.z) * 1.9);
+    ctx.globalAlpha = alpha * 0.9;
+    ctx.beginPath();
+    const heads = [];
+    let dashes = 0;
+    lines.forEach((L, li) => {
+      const sp = items[li].sp;
+      // a dash is "on" where frac(phi / u - t) < 0.5 (phi: integral of ds / (4 f_w))
+      let on = false;
+      for (let v = 0; v + 1 < L.fw.length; v++) {
+        if (L.hid[v] || L.hid[v + 1]) {
+          on = false;
+          continue;
+        }
+        const p0 = L.phi[v] / u - t;
+        const p1 = L.phi[v + 1] / u - t;
+        if (p1 <= p0) continue;
+        // walk the on / off boundaries inside this segment
+        let a = p0;
+        while (a < p1) {
+          const fr = a - Math.floor(a);
+          const inOn = fr < 0.5;
+          const next = Math.min(p1, Math.floor(a) + (inOn ? 0.5 : 1));
+          const ta = (a - p0) / (p1 - p0);
+          const tb = (next - p0) / (p1 - p0);
+          if (inOn) {
+            const xa = X(sp, v) + (X(sp, v + 1) - X(sp, v)) * ta;
+            const ya = Y(sp, v) + (Y(sp, v + 1) - Y(sp, v)) * ta;
+            const xb = X(sp, v) + (X(sp, v + 1) - X(sp, v)) * tb;
+            const yb = Y(sp, v) + (Y(sp, v + 1) - Y(sp, v)) * tb;
+            if (!on) {
+              ctx.moveTo(xa, ya);
+              dashes++;
+            }
+            ctx.lineTo(xb, yb);
+            on = true;
+            // the head of every third dash gets a small arrow
+            if (next === Math.floor(a) + 0.5 && next < p1 + 1e-9 && ((Math.floor(a) % 3) + 3) % 3 === 0) heads.push([xb, yb, X(sp, v + 1) - X(sp, v), Y(sp, v + 1) - Y(sp, v)]);
+          } else on = false;
+          if (next === a) break;
+          a = next;
+        }
+      }
+    });
+    ctx.stroke();
+    const hs = Math.max(2.5 * d, 1.2 * Z);
+    ctx.beginPath();
+    for (const [x, y, dx, dy] of heads) {
+      const L = Math.hypot(dx, dy) || 1;
+      const ux = dx / L;
+      const uy = dy / L;
+      ctx.moveTo(x - ux * hs - uy * hs * 0.6, y - uy * hs + ux * hs * 0.6);
+      ctx.lineTo(x, y);
+      ctx.lineTo(x - ux * hs + uy * hs * 0.6, y - uy * hs - ux * hs * 0.6);
+    }
+    ctx.stroke();
+    R.stats.windDashes = dashes;
+    labels.unshift([WIND_INK, `Wind lines: assumed direction × shelter factor, not computed flow · ${u} m/s from the river`]);
+  }
+  // labels, bottom centre above the hour bar
+  ctx.globalAlpha = alpha;
+  ctx.font = `${Math.round(13 * d)}px ${HAND_FONT}`;
+  ctx.textBaseline = 'bottom';
+  labels.forEach(([c, text], k) => {
+    const w = ctx.measureText(text).width;
+    const bx = clamp(W / 2 - w / 2, 8 * d, W - w - 8 * d);
+    const by = H - (84 + (labels.length - 1 - k) * 26) * d;
+    ctx.fillStyle = 'rgba(248,243,231,0.94)';
+    ctx.fillRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
+    ctx.strokeStyle = rgbCss(c, 0.7);
+    ctx.lineWidth = 0.9 * d;
+    ctx.strokeRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
+    ctx.fillStyle = rgbCss(c);
+    ctx.fillText(text, bx, by);
+  });
+  ctx.restore();
+  R.stats.windLabels = labels.map((l) => l[1]);
+}
+
+/** Renderer overlay hook (render.js R.overlay): wind lines and the air overlay, when shown. */
+export function wfOverlay(R, ctx, f, cam, W, H, alpha, look, hq) {
+  if (R.wind && (look.wind || look.air)) drawWind(R, ctx, f, cam, W, H, alpha, look, hq);
+}

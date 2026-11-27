@@ -7,6 +7,7 @@
 import { MODEL, MATERIALS } from './materials.js';
 import { runModel, sunSlots, cellMat, daylight, SIGMA } from './thermal.js';
 import { buildWorld } from './world.js';
+import { PK_DRAW } from './pkkit.js';
 
 /** True if a scene is the car park block. */
 export const isParking = (scene) => !!scene.parkingBlock;
@@ -67,6 +68,7 @@ export function prepWorld(world) {
     world.svf[i] = v * (1 - share[i]);
   }
   world.parking = { share, pv, svf0 };
+  world.draw = PK_DRAW; // the block's own drawing (pkkit.js)
   return world;
 }
 

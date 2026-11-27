@@ -6,7 +6,6 @@
 import { iso, hash3, noise2, clamp, smooth, rgbCss, mixRgb, scaleRgb, hexRgb, PAPER, INK, ISO_C, ISO_S, ISO_Z, DEG } from './core.js';
 import { shadowPolys, heatRgb } from './thermal.js';
 import { sweatState, shadeAt } from './life.js';
-import { overlayDT, dayWeight } from './wind.js';
 
 export const TILE = 512;
 export const HOUR_STEP = 0.25;
@@ -23,15 +22,7 @@ const SWEAT_CSS = 'rgba(143,182,207,0.95)';
 // glass pane colours by type (day view), and the reflection-spot glint
 export const GLASS_RGB = { clear: hexRgb('#7d9ea6'), lowe: hexRgb('#8ea4b8'), mirror: hexRgb('#b9c3c6') };
 const GLINT = [255, 246, 214];
-const AC_INK = hexRgb('#8a2f22');
-// block 4: the water's air overlay (cooling / warming) and the wind-line ink
-const AIR_COOL = hexRgb('#3b6573');
-const AIR_WARM = hexRgb('#b96d4d');
-const WIND_INK = hexRgb('#24354a');
-// block 6: the night-release strokes (heat out of the ground) and the uptake ticks
-const FLUX_UP = hexRgb('#a2452f');
-const FLUX_DOWN = hexRgb('#3b6573');
-const HAND_FONT = '"Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive';
+export const HAND_FONT = '"Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive';
 
 function makeCanvas(w, h) {
   if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(w, h);
@@ -116,6 +107,7 @@ export class Renderer {
     this.spotFor = null; // (hq) -> reflection spot field on the 2 m grid, or null (block 3)
     this.wind = null; // block 4: {lines, items} wind lines (wind.js windLines + pen.stream items)
     this.flux = null; // block 6: (hq) -> [{x, y, z, g}] ground heat flux samples (parking.js fluxSamples)
+    this.overlay = null; // a block's overlay (R, ctx, f, cam, W, H, alpha, look, hq), drawn under the people
     this.pool = world.scene.pooling !== false; // edge pooling on washes (off in block 5)
     // block 5: skip shadow polygons off the tile. Not used elsewhere: Skia may anti-alias a smaller
     // path differently, so blocks 1-4 keep their exact pixels
@@ -849,9 +841,8 @@ export class Renderer {
     this.stats.fluxUp = 0;
     this.stats.fluxDown = 0;
     if (lifeA > 0) {
-      if (this.wind && (look.wind || look.air)) this.drawWind(ctx, f, cam, W, H, lifeA, look, hq);
-      if (look.ac) this.drawAc(ctx, f, cam, W, H, lifeA);
-      if (look.flux && this.flux) this.drawFlux(ctx, f, cam, W, H, lifeA, hq);
+      // block overlays (block 3 AC plumes, block 4 wind lines and air, block 6 night release), set by the block's own module
+      if (this.overlay) this.overlay(this, ctx, f, cam, W, H, lifeA, look, hq);
       if (look.people !== false) this.drawPeople(ctx, f, cam, hq, W, H, lifeA, look.thermalMix ?? 0);
       if (look.notes) this.drawNotes(ctx, cam, W, H, look.notes, lifeA);
     }
@@ -955,298 +946,6 @@ export class Renderer {
     const c = sh.night ? -1 : shadeAt(sh, a.x, a.y);
     const lit = c === 0 || c === 4 ? h.sunlit : c === 3 ? 1 : 0;
     return sweatState(a.k, t, h.tmrt, lit);
-  }
-
-  /**
-   * AC overlay (block 3, information only): rooftop plant on each tall
-   * building with a rising heat plume, and one label saying the model does not
-   * feel this heat. Pure function of (frame, camera).
-   */
-  drawAc(ctx, f, cam, W, H, alpha) {
-    const [ox, oy, Z] = this.origin(cam, W, H);
-    const d = this.dpr;
-    ctx.save();
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.lineCap = 'round';
-    let label = null;
-    for (const B of this.world.buildings) {
-      if (B.h < 25) continue;
-      const units = 1 + Math.floor(((B.x1 - B.x0) * (B.y1 - B.y0)) / 2500);
-      for (let u = 0; u < Math.min(3, units); u++) {
-        const x = B.x0 + (B.x1 - B.x0) * (0.25 + 0.5 * hash3(B.index, u, 61));
-        const y = B.y0 + (B.y1 - B.y0) * (0.25 + 0.5 * hash3(B.index, u, 62));
-        const p = iso(x, y, B.h + 1.5);
-        const X = ox + p[0] * Z;
-        const Y = oy + p[1] * Z;
-        if (X < -40 || X > W + 40 || Y < -80 || Y > H + 40) continue;
-        if (this.clip && (X < this.clip[0] || X > this.clip[1])) continue;
-        ctx.globalAlpha = alpha * 0.8;
-        ctx.strokeStyle = rgbCss(AC_INK);
-        ctx.lineWidth = 1.1 * d;
-        for (let k = 0; k < 3; k++) {
-          ctx.beginPath();
-          const x0 = X + (k - 1) * 4 * d;
-          for (let i = 0; i <= 10; i++) {
-            const v = i / 10;
-            const yy = Y - v * 26 * d;
-            const xx = x0 + Math.sin(v * 7 + f * 0.08 + k * 1.7 + u) * 2.2 * d * (0.4 + v);
-            if (i) ctx.lineTo(xx, yy);
-            else ctx.moveTo(xx, yy);
-          }
-          ctx.stroke();
-        }
-        if (!label || Y < label[1]) label = [X, Y - 30 * d];
-      }
-    }
-    if (label) {
-      ctx.globalAlpha = alpha;
-      ctx.font = `${Math.round(14 * d)}px "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive`;
-      ctx.textBaseline = 'bottom';
-      const text = 'AC rejected heat — not felt in this model';
-      const w = ctx.measureText(text).width;
-      const bx = clamp(label[0] - w / 2, 8 * d, W - w - 8 * d);
-      const by = Math.max(24 * d, label[1]);
-      ctx.fillStyle = 'rgba(248,243,231,0.94)';
-      ctx.fillRect(bx - 5 * d, by - 19 * d, w + 10 * d, 23 * d);
-      ctx.strokeStyle = 'rgba(138,47,34,0.7)';
-      ctx.lineWidth = 0.9 * d;
-      ctx.strokeRect(bx - 5 * d, by - 19 * d, w + 10 * d, 23 * d);
-      ctx.fillStyle = rgbCss(AC_INK);
-      ctx.fillText(text, bx, by);
-    }
-    ctx.restore();
-    this.stats.ac = !!label;
-  }
-
-  /**
-   * Block 6: the night-release overlay. On a 10 m grid of samples, where the
-   * ground gives stored heat back (G < 0) soft warm strokes rise from the
-   * surface, longer and stronger for more W m-2; where it takes heat in
-   * (G > 0) short cool ticks point down; the share of samples drawn grows
-   * with |G| (all of them from 120 W m-2). The strokes drift upward with the
-   * frame number (a pure function of frame, camera and hour), and a label
-   * says what they show.
-   */
-  drawFlux(ctx, f, cam, W, H, alpha, hq) {
-    const [ox, oy, Z] = this.origin(cam, W, H);
-    const d = this.dpr;
-    const samples = this.flux(hq);
-    const B = 5;
-    const up = Array.from({ length: B }, () => []);
-    const down = Array.from({ length: B }, () => []);
-    const unit = Math.max(10 * d, 4.2 * Z); // stroke length at 100 W m-2
-    for (let k = 0; k < samples.length; k++) {
-      const s = samples[k];
-      const a = Math.abs(s.g);
-      // stroke density follows |G| too: every sample at 120 W m-2 or more, fewer below
-      if (a < 15 || hash3(k, 9, 91) >= a / 120) continue;
-      const p = iso(s.x, s.y, s.z);
-      const X = ox + p[0] * Z;
-      const Y = oy + p[1] * Z;
-      if (X < -20 || X > W + 20 || Y < -unit * 2 || Y > H + 20) continue;
-      if (this.clip && (X < this.clip[0] || X > this.clip[1])) continue;
-      const b = Math.min(B - 1, Math.floor((a / 175) * B));
-      (s.g < 0 ? up : down)[b].push(X, Y, a, k);
-    }
-    ctx.save();
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.lineCap = 'round';
-    ctx.lineWidth = Math.max(1.1 * d, 0.45 * Z);
-    const t = f / 60;
-    ctx.strokeStyle = rgbCss(FLUX_UP);
-    for (let b = 0; b < B; b++) {
-      const P = up[b];
-      if (!P.length) continue;
-      ctx.globalAlpha = alpha * (0.25 + 0.6 * ((b + 0.5) / B));
-      ctx.beginPath();
-      for (let q = 0; q < P.length; q += 4) {
-        const L = (unit * Math.min(1.75, P[q + 2] / 100));
-        const k = P[q + 3];
-        // rise: the stroke slides up by up to half its length and starts again (period 2.5 s)
-        const ph = (t / 2.5 + hash3(k, 7, 91)) % 1;
-        const y0 = P[q + 1] - ph * L * 0.5;
-        const x0 = P[q] + (hash3(k, 8, 91) - 0.5) * 3 * d;
-        ctx.moveTo(x0, y0);
-        for (let i = 1; i <= 4; i++) ctx.lineTo(x0 + Math.sin(i * 1.7 + k + t * 1.3) * 1.4 * d, y0 - (L * i) / 4);
-      }
-      ctx.stroke();
-      this.stats.fluxUp += P.length / 4;
-    }
-    ctx.strokeStyle = rgbCss(FLUX_DOWN);
-    for (let b = 0; b < B; b++) {
-      const P = down[b];
-      if (!P.length) continue;
-      ctx.globalAlpha = alpha * (0.15 + 0.35 * ((b + 0.5) / B));
-      ctx.beginPath();
-      for (let q = 0; q < P.length; q += 4) {
-        const L = unit * 0.45 * Math.min(1.75, P[q + 2] / 100);
-        const x0 = P[q] + (hash3(P[q + 3], 8, 91) - 0.5) * 3 * d;
-        const y0 = P[q + 1] - L - 2 * d;
-        ctx.moveTo(x0, y0);
-        ctx.lineTo(x0, y0 + L);
-        ctx.moveTo(x0 - 1.6 * d, y0 + L - 2 * d);
-        ctx.lineTo(x0, y0 + L);
-        ctx.lineTo(x0 + 1.6 * d, y0 + L - 2 * d);
-      }
-      ctx.stroke();
-      this.stats.fluxDown += P.length / 4;
-    }
-    const night = this.stats.fluxUp >= this.stats.fluxDown;
-    const text = `Ground heat flux G (simulated): ${night ? 'rising strokes = stored heat coming back out' : 'ticks down = heat going into the ground; rising strokes = heat coming back out'} · more and longer strokes = more W/m²`;
-    ctx.globalAlpha = alpha;
-    ctx.font = `${Math.round(13 * d)}px ${HAND_FONT}`;
-    ctx.textBaseline = 'bottom';
-    const w = ctx.measureText(text).width;
-    const bx = clamp(W / 2 - w / 2, 8 * d, W - w - 8 * d);
-    const by = H - 84 * d;
-    ctx.fillStyle = 'rgba(248,243,231,0.94)';
-    ctx.fillRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
-    ctx.strokeStyle = rgbCss(FLUX_UP, 0.7);
-    ctx.lineWidth = 0.9 * d;
-    ctx.strokeRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
-    ctx.fillStyle = rgbCss(FLUX_UP);
-    ctx.fillText(text, bx, by);
-    ctx.restore();
-    this.stats.fluxLabel = text;
-  }
-
-  /**
-   * Block 4: the water's illustrative air overlay (a soft band along each wind
-   * line, cool by day, warm at night, strength |dTa|) and the pen-drawn wind
-   * lines with moving dashes (spacing and speed proportional to u_i), each
-   * with a label saying what it is. Vertices hidden behind buildings are
-   * skipped. Pure function of (frame, camera, look).
-   */
-  drawWind(ctx, f, cam, W, H, alpha, look, hq) {
-    const [ox, oy, Z] = this.origin(cam, W, H);
-    const d = this.dpr;
-    const { lines, items } = this.wind;
-    const t = f / 60;
-    const u = look.u || 1;
-    ctx.save();
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    const X = (sp, v) => ox + sp[v * 2] * Z;
-    const Y = (sp, v) => oy + sp[v * 2 + 1] * Z;
-    const labels = [];
-    if (look.air) {
-      const wd = dayWeight(this.hourCtx(hq).sun.alt);
-      // strength in 6 alpha steps per sign, one path each
-      const B = 6;
-      const paths = [[], []];
-      for (let s = 0; s < 2; s++) for (let b = 0; b < B; b++) paths[s].push([]);
-      lines.forEach((L, li) => {
-        const sp = items[li].sp;
-        for (let v = 0; v + 1 < L.fw.length; v++) {
-          if (L.hid[v] || L.hid[v + 1] || L.wet[v + 1]) continue; // over land only
-          const dt = overlayDT(L.lam[v], L.kind[v], wd);
-          const a = Math.abs(dt);
-          if (a < 0.02) continue;
-          const b = Math.min(B - 1, Math.floor((a / 1.0) * B));
-          paths[dt < 0 ? 0 : 1][b].push(v, li);
-        }
-      });
-      ctx.lineWidth = Math.max(4 * d, 6 * Z);
-      for (let s = 0; s < 2; s++) {
-        ctx.strokeStyle = rgbCss(s === 0 ? AIR_COOL : AIR_WARM);
-        for (let b = 0; b < B; b++) {
-          const P = paths[s][b];
-          if (!P.length) continue;
-          ctx.globalAlpha = alpha * (0.12 + 0.5 * ((b + 0.5) / B));
-          ctx.beginPath();
-          for (let k = 0; k < P.length; k += 2) {
-            const v = P[k];
-            const sp = items[P[k + 1]].sp;
-            ctx.moveTo(X(sp, v), Y(sp, v));
-            ctx.lineTo(X(sp, v + 1), Y(sp, v + 1));
-          }
-          ctx.stroke();
-          this.stats.airSegs += P.length / 2;
-        }
-      }
-      labels.push([wd > 0.5 ? AIR_COOL : AIR_WARM, `Air effect of the water: illustrative, from literature, not simulated (${wd > 0.5 ? 'cooler' : wd < 0.5 ? 'warmer' : 'cooler / warmer'})`]);
-    }
-    if (look.wind) {
-      ctx.strokeStyle = rgbCss(WIND_INK);
-      ctx.fillStyle = rgbCss(WIND_INK);
-      ctx.lineWidth = Math.max(1.6 * d, this.lineBase(cam.z) * 1.9);
-      ctx.globalAlpha = alpha * 0.9;
-      ctx.beginPath();
-      const heads = [];
-      let dashes = 0;
-      lines.forEach((L, li) => {
-        const sp = items[li].sp;
-        // a dash is "on" where frac(phi / u - t) < 0.5 (phi: integral of ds / (4 f_w))
-        let on = false;
-        for (let v = 0; v + 1 < L.fw.length; v++) {
-          if (L.hid[v] || L.hid[v + 1]) {
-            on = false;
-            continue;
-          }
-          const p0 = L.phi[v] / u - t;
-          const p1 = L.phi[v + 1] / u - t;
-          if (p1 <= p0) continue;
-          // walk the on / off boundaries inside this segment
-          let a = p0;
-          while (a < p1) {
-            const fr = a - Math.floor(a);
-            const inOn = fr < 0.5;
-            const next = Math.min(p1, Math.floor(a) + (inOn ? 0.5 : 1));
-            const ta = (a - p0) / (p1 - p0);
-            const tb = (next - p0) / (p1 - p0);
-            if (inOn) {
-              const xa = X(sp, v) + (X(sp, v + 1) - X(sp, v)) * ta;
-              const ya = Y(sp, v) + (Y(sp, v + 1) - Y(sp, v)) * ta;
-              const xb = X(sp, v) + (X(sp, v + 1) - X(sp, v)) * tb;
-              const yb = Y(sp, v) + (Y(sp, v + 1) - Y(sp, v)) * tb;
-              if (!on) {
-                ctx.moveTo(xa, ya);
-                dashes++;
-              }
-              ctx.lineTo(xb, yb);
-              on = true;
-              // the head of every third dash gets a small arrow
-              if (next === Math.floor(a) + 0.5 && next < p1 + 1e-9 && ((Math.floor(a) % 3) + 3) % 3 === 0) heads.push([xb, yb, X(sp, v + 1) - X(sp, v), Y(sp, v + 1) - Y(sp, v)]);
-            } else on = false;
-            if (next === a) break;
-            a = next;
-          }
-        }
-      });
-      ctx.stroke();
-      const hs = Math.max(2.5 * d, 1.2 * Z);
-      ctx.beginPath();
-      for (const [x, y, dx, dy] of heads) {
-        const L = Math.hypot(dx, dy) || 1;
-        const ux = dx / L;
-        const uy = dy / L;
-        ctx.moveTo(x - ux * hs - uy * hs * 0.6, y - uy * hs + ux * hs * 0.6);
-        ctx.lineTo(x, y);
-        ctx.lineTo(x - ux * hs + uy * hs * 0.6, y - uy * hs - ux * hs * 0.6);
-      }
-      ctx.stroke();
-      this.stats.windDashes = dashes;
-      labels.unshift([WIND_INK, `Wind lines: assumed direction × shelter factor, not computed flow · ${u} m/s from the river`]);
-    }
-    // labels, bottom centre above the hour bar
-    ctx.globalAlpha = alpha;
-    ctx.font = `${Math.round(13 * d)}px ${HAND_FONT}`;
-    ctx.textBaseline = 'bottom';
-    labels.forEach(([c, text], k) => {
-      const w = ctx.measureText(text).width;
-      const bx = clamp(W / 2 - w / 2, 8 * d, W - w - 8 * d);
-      const by = H - (84 + (labels.length - 1 - k) * 26) * d;
-      ctx.fillStyle = 'rgba(248,243,231,0.94)';
-      ctx.fillRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
-      ctx.strokeStyle = rgbCss(c, 0.7);
-      ctx.lineWidth = 0.9 * d;
-      ctx.strokeRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
-      ctx.fillStyle = rgbCss(c);
-      ctx.fillText(text, bx, by);
-    });
-    ctx.restore();
-    this.stats.windLabels = labels.map((l) => l[1]);
   }
 
   /**

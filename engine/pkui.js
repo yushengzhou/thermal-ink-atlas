@@ -4,6 +4,9 @@
 // which is information only).
 import { SOURCES, BASIS, MODEL, MATERIALS } from './materials.js';
 import { gl } from './glossary.js';
+import { parkingStats, parkingGlossary, fluxSamples, pvCompare, slab, STEMPIHAR, tsMean, fluxMean, shedTau } from './parking.js';
+import { pkOverlay } from './pkkit.js';
+import { quantHour } from './render.js';
 
 const fmt = (v) => (Math.round(v * 10) / 10).toFixed(1);
 const r0 = (v) => String(Math.round(v));
@@ -175,3 +178,118 @@ export const PK_CARDS = [
   ['soil', 'Brownfield'],
   ['car', 'Hot car (info)'],
 ];
+
+/**
+ * The block's plugin for app.js: its controls (the night-release toggle and
+ * the cards), notes, heat-card rows, glossary numbers, renderer hooks and API.
+ * env: {scene, world, thermal, root, card, R, S (app state: hour, paused),
+ * query, hideCard(), reopen() (re-render an open card), redraw() (draw if paused)}.
+ */
+export function pkApp(env) {
+  const { scene, world, thermal, root, card, R, S } = env;
+  const st = { flux: env.query.get('flux') === '1' }; // ?flux=0|1, default off
+  let fixed = null;
+  const pk = () => (fixed ??= { st: parkingStats(world, thermal), pv: null });
+  /** Lazily: the PV comparison with an empty bay under the canopy (a run without cars on those cells). */
+  const pkPv = () => (pk().pv ??= pvCompare(world, thermal, pk().st.C));
+  // ground heat flux samples for the night-release overlay, per quantised hour
+  const fc = new Map();
+  R.flux = (hq) => {
+    if (!fc.has(hq)) {
+      if (fc.size >= 24) fc.delete(fc.keys().next().value);
+      fc.set(hq, fluxSamples(world, thermal, hq));
+    }
+    return fc.get(hq);
+  };
+  R.overlay = pkOverlay;
+
+  const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
+  root.body.insertAdjacentHTML(
+    'beforeend',
+    `<div id="parking" aria-label="Car park controls">
+        <div class="seg">${btn('data-flux', '1', 'night release G')}</div>
+        <div class="measures"><div class="hand">Cards</div>${PK_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'car' ? 'class="warn"' : '')).join('')}</div>
+      </div>`,
+  );
+  const el = root.getElementById('parking');
+  el.addEventListener('click', (e) => {
+    const b = e.target.closest ? e.target.closest('button') : null;
+    if (!b) return;
+    if (b.dataset.flux) setFlux(!st.flux);
+    else if (b.dataset.card) show(b.dataset.card, b);
+  });
+  function sync() {
+    el.querySelector('[data-flux]').setAttribute('aria-pressed', String(!!st.flux));
+    root.body.dataset.flux = st.flux ? '1' : '0';
+  }
+  function setFlux(on) {
+    st.flux = !!on;
+    sync();
+    env.reopen();
+    env.redraw();
+  }
+  function html(id) {
+    const P = pk();
+    const s = P.st;
+    if (id === 'storage') {
+      const C = s.C;
+      const K = { asphalt: C.openAsphalt, concrete: C.yard, soil: C.soil, lawn: C.lawn, shed: C.shed };
+      const curve = [12, 15, 20, 23, 4].map((h) => ({ h, air: thermal.air(h), rows: Object.fromEntries(Object.entries(K).map(([k, c]) => [k, [tsMean(thermal, c, h), fluxMean(thermal, c, h)]])) }));
+      return storageCard({ st: s, curve, slabs: { hma: slab(STEMPIHAR.hma.k, STEMPIHAR.hma.rho, STEMPIHAR.hma.c), pcc: slab(STEMPIHAR.pcc.k, STEMPIHAR.pcc.rho, STEMPIHAR.pcc.c) }, flux: !!st.flux });
+    }
+    if (id === 'pv') return pvCard({ pv: pkPv() });
+    if (id === 'trees') return lotTreesCard({ trees: s.table.treeBays, openBays: s.table.openBays, share: (s.table.openBays.share + s.table.treeBays.share) / 2 });
+    if (id === 'shed') return shedCard({ shed: s.table.shed, cool: s.cool.shed, tau: shedTau(thermal.air(s.set), thermal.info.hc), air: s.air, set: s.set });
+    if (id === 'soil') return soilCard({ st: s });
+    return hotCarCard({ openBay15: s.table.openBays.t15, openAsphalt15: s.table.openAsphalt.t15 });
+  }
+  function show(id, anchor) {
+    card.innerHTML = html(id);
+    card.querySelector('.x').onclick = env.hideCard;
+    card._pick = null;
+    card._measure = `blk:${id}`;
+    card.dataset.open = '1';
+    card.dataset.kind = id;
+    card.style.display = 'block';
+    const r = anchor ? anchor.getBoundingClientRect() : { top: 120 };
+    const panel = el.getBoundingClientRect();
+    card.style.left = `${Math.min(window.innerWidth - card.offsetWidth - 10, panel.right + 12)}px`;
+    card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
+  }
+  function noteData() {
+    const t = pk().st.table;
+    return { asphalt15: t.openAsphalt.t15, asphalt23: t.openAsphalt.t23, asphaltG23: t.openAsphalt.g23, shed15: t.shed.t15, shed23: t.shed.t23, air23: thermal.air(23), pv15: t.pvBays.t15, soil23: t.soil.t23, yard15: t.yard.t15, yard23: t.yard.t23 };
+  }
+  return {
+    notes: () => pkNotes(scene, noteData()),
+    look: () => ({ flux: !!st.flux }),
+    sync,
+    html,
+    /** Keyboard: G toggles the night release; true if the key was the block's. */
+    key(k) {
+      if (k !== 'g' && k !== 'G') return false;
+      setFlux(!st.flux);
+      return true;
+    },
+    /** Heat-card numbers of cells: G now and at 23:00, the car share and the canopy of a ground cell. */
+    cardInfo: (cells, tmrtCell, h) => ({ now: cells.reduce((a, i) => a + thermal.flux(i, h), 0) / cells.length, g23: cells.reduce((a, i) => a + thermal.flux(i, 23), 0) / cells.length, cars: tmrtCell !== null ? world.parking.share[tmrtCell] : 0, pv: tmrtCell !== null ? !!world.parking.pv[tmrtCell] : false }),
+    cardRows: (f) => `<tr class="t"><td>${gl('groundFlux', 'ground heat flux G')} now / 23:00</td><td>${Math.round(f.now)} / ${Math.round(f.g23)} W m⁻² (${f.now < 0 ? 'giving heat back' : 'taking heat in'})</td></tr>${f.cars > 0 ? `<tr><td>share of the cell under cars</td><td>${Math.round(f.cars * 100)}% (shade and sky view, sub-grid)</td></tr>` : ''}${f.pv ? `<tr><td>under the PV canopy</td><td>yes (sky view ${MODEL.pvSvf.value} before cars, Golden et al. 2007)</td></tr>` : ''}`,
+    glossary: () => ({ parking: parkingGlossary(pk().st) }),
+    /** Car park block (block 6) only: state {flux}; set() it; numbers for the bands and cards; card HTML; G at a point; the overlay's samples. */
+    api: {
+      state: () => ({ flux: !!st.flux }),
+      set(o) {
+        if (o.flux !== undefined) setFlux(!!o.flux);
+      },
+      stats: () => {
+        const s = pk().st;
+        return { table: s.table, cool: s.cool, ranges: s.ranges, gap: s.gap, set: s.set, peakG: s.peakG, air: s.air, lotShare: s.lotShare, n: Object.fromEntries(Object.entries(s.C).map(([k, v]) => [k, v.length])) };
+      },
+      pv: () => pkPv(),
+      html: (id) => html(id),
+      show: (id) => show(id, root.querySelector(`#parking [data-card="${id}"]`)),
+      flux: (x, y, h = S.hour) => thermal.flux(world.cellIndex(x, y), h),
+      samples: (h = S.hour) => R.flux(quantHour(h)).length,
+    },
+  };
+}

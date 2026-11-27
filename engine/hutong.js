@@ -8,6 +8,7 @@ import { MODEL } from './materials.js';
 import { runModel, cellMat, Thermal, STORE, sunlitField, wetBulb, isWater } from './thermal.js';
 import { solarPosition } from './sun.js';
 import { DEG } from './core.js';
+import { HT_DRAW } from './htkit.js';
 
 /** Coarse 10-min spin-up days (thermal.js opts.warm, as blocks 3 and 4; guarded there). */
 export const WARM_HT = 6;
@@ -42,6 +43,7 @@ export function splashCells(world) {
  * computed when first asked for.
  */
 export function hutongSetup(world, slots) {
+  world.draw = HT_DRAW; // the block's own drawing (htkit.js)
   const cells = splashCells(world);
   let dry = null;
   let wet = null;

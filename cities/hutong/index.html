@@ -508,58 +508,11 @@ __m['materials'] = (() => {
 const SOURCES = {
   lbnl: 'Pomerantz, Pon, Akbari & Chang (2000) LBNL-43442, The effect of pavements\' temperatures on air temperatures in large cities (Fig. 1): asphalt albedo about 0.05 fresh, about 0.12 +- 0.03 after about 5 years; secondary: Pomerantz et al. (2003) LBNL-49283, doi 10.2172/816205, which quotes the same values',
   oke: 'Oke (1987) Boundary Layer Climates, 2nd ed. (Methuen) / Oke, Mills, Christen & Voogt (2017) Urban Climates (Cambridge University Press), surface property tables (cited from memory in the research brief)',
-  epa: 'US EPA Reducing Urban Heat Islands: Compendium of Strategies (October 2008; the Cool Pavements chapter updated 2012, cited as 2012; the 2012 text was not read)',
   brief: 'Research brief docs/research/thermal-model-brief.md (ranges compiled from the sources above; not yet checked)',
-  deardorff: 'Deardorff (1978) J. Geophys. Res. 83(C4) 1889-1903, force-restore method (NASA NTRS 19780019748)',
-  melnikov: 'Melnikov et al. (2022) Scientific Reports 12, 2441, doi 10.1038/s41598-022-06383-5',
   engine: 'Engine assumption: no literature source',
-  brief2: 'Research brief docs/research/retrofit-brief.md (block 2; values compiled from the sources below, items marked unverified there are flagged here)',
-  lbnlRoof: 'US EPA Cool Roofs compendium with ENERGY STAR / LBNL roof data: new white roof albedo about 0.80',
-  rupar2015: 'Rupar & Graham (2015) ASTM STP1590, 153-205, doi 10.1520/STP159020150019 (abstract only): 70 Chicago-area roofs 2008-2012, in-service reflectance generally below the listed aged values',
-  chicago: 'Chicago energy code via the block-2 brief: low-slope roofs need initial albedo >= 0.72 or 3-year aged >= 0.50',
-  santamouris: 'Santamouris (2014) Solar Energy 103, 682-703, doi 10.1016/j.solener.2012.07.003, cool roofs and pavements review',
-  noaaGreen: 'NOAA Institutional Repository noaa_57843: Javits Center green roof, NYC, up to 18.4 K cooler than a black roof',
-  heusinger: 'Heusinger & Weber (2017) Science of the Total Environment, doi 10.1016/j.scitotenv.2016.10.168, extensive green roof energy balance (Bowen ratio about <1 to 2)',
-  li2013: 'Li, Harvey et al. (2013) Environ. Res. Lett. 8 015023, permeable pavements (corrigendum not checked)',
-  middel2020: 'Middel et al. (2020) Environ. Res. Lett., doi 10.1088/1748-9326/ab87d4, reflective coating on Los Angeles streets',
-  ko2022: 'Ko et al. (2022) Environ. Res. Lett. 17 044027, cool pavement at neighbourhood scale, albedo 0.26 -> 0.18 in one year',
-  mccoll: 'McColl et al. (2017) Geophys. Res. Lett., doi 10.1002/2017GL072819, global soil-moisture drydown timescales',
-  middel2021: 'Middel et al. (2021) Bull. Amer. Meteor. Soc., doi 10.1175/BAMS-D-20-0193.1, shade and Tmrt in Phoenix',
-  brief3: 'Research brief docs/research/cbd-brief.md (block 3; values compiled from the sources below, items marked unverified there are flagged here)',
   fresnel: 'Fresnel equations for uncoated float glass, n = 1.52, two surfaces (computed); LBNL (Furler; Rubin et al.): ASHRAE-style angular fit within 1.5% for clear glass, coated glass up to about 8% off at 60 deg',
-  energyplus: 'EnergyPlus Engineering Reference, Window Calculation Module, Angular Properties for Coated Glass: R(phi) = R(0) (1 - rho_bar(phi)) + rho_bar(phi), rho_bar a normalised clear-glass curve (polynomial fit in cos phi); origin given as Finlayson et al. 1993, WINDOW 4.0 documentation, LBL-33943 (not checked)',
-  igdb: 'LBNL International Glazing Database (IGDB) suggested for product reflectances; no datasheet was checked for the low-e or mirror values',
-  bca: 'Singapore BCA Approved Document, Section P: glass daylight reflectance at most 20% (via the block-3 brief)',
-  en673: 'EN 673 glass outer-surface emissivity about 0.84 (via the block-3 brief)',
-  iso6946: 'EN ISO 6946 internal surface resistance 0.13 m2 K W-1, i.e. about 7.7 W m-2 K-1 (from memory)',
-  oke1981: 'Oke (1981) J. Climatol. 1, 237-254, doi 10.1002/joc.3370010304: max nocturnal UHI = 7.45 + 3.97 ln(H/W) (coefficients via a secondary source, redalyc 283230157011)',
-  theeuwes2014: 'Theeuwes et al. (2014) Q. J. R. Meteorol. Soc., doi 10.1002/qj.2289: the Oke relation breaks down at high H/W',
   johansson2006: 'Johansson (2006) Building and Environment, doi 10.1016/j.buildenv.2005.05.022: Fez deep canyon (H/W about 10) about 6 K, up to 10 K, cooler by day',
-  zhu2018: 'Zhu, Jahn & Rein (2019, online 2018) J. Building Performance Simulation 12(4), 378-387, doi 10.1080/19401493.2018.1538389: 20 Fenchurch St simulated peak 3,384 W m-2 (worst 4,176)',
-  vdara: 'Vdara hotel, Las Vegas, 2010 pool-deck hot zone (NBC News; Architectural Record): anecdotal',
-  speroni2022: 'Speroni et al. (2022) Sustainability 14, 5781, doi 10.3390/su14105781 (abstract only): scale models, diffuse façades <= +30%, flat mirror > +100%, concave > +300% at pedestrian level',
-  du2025: 'Du et al. (2025) J. Harbin Inst. Tech. 57(9), doi 10.11918/202406062: Chengdu Chunxi Road, Aug 2023, reflection zones Tmrt +4 to +13 C, air +1-2 C, UTCI +2-5 C, peak Tmrt 73.9 C',
-  chen2024: 'Chen et al. (2024) Energy and Buildings, doi 10.1016/j.enbuild.2024.114926: reflective façades lower cooling energy but raise canyon UTCI',
-  sanagar2025: 'Sanagar Darbani et al. (2025) Developments in the Built Environment, doi 10.1016/j.dibe.2025.100758: low-emissivity glass cuts Tmrt by up to 5 K (simulation)',
-  wallenberg2026: 'Wallenberg et al. (2026) Geosci. Model Dev. 19, 1321-1336, doi 10.5194/gmd-19-1321-2026: SOLWEIG wall albedo 0.5 with reflected shortwave (abstract, sections 2.6 and 3); the authors note, as background, that Tmrt is highest in front of sunlit façades',
-  xie2016: 'Xie et al. (2016) Atmos. Chem. Phys. 16, 6071, doi 10.5194/acp-16-6071-2016: dense urban anthropogenic heat 20-70 W m-2 of ground area, occasionally > 100',
-  sailor2011: 'Sailor (2011) Int. J. Climatol., doi 10.1002/joc.2106, anthropogenic heat review; Sailor et al. (2015) citing Ichinose (1999): central Tokyo > 400 W m-2 by day',
-  sponge2015: 'State Council General Office (2015) Guiding Opinions on Promoting Sponge City Construction, Guo Ban Fa [2015] No. 75 (English notice, gov.cn, 2015-10-16; reprint waizi.org.cn/law/6860.html; MOHURD interpretation via cs.com.cn; the primary Chinese text was not located)',
-  brief4: 'Research brief docs/research/waterfront-brief.md (block 4; values compiled from the sources below, items marked unverified there are flagged here)',
-  volker2013: 'Völker et al. (2013) Erdkunde 67(4), review of 27 studies: urban blue space about 2.5 K (95% CI 1.9-3.2) cooler May-October, inflated by remote-sensing surface temperatures',
-  hathway2012: 'Hathway & Sharples (2012) Building and Environment, River Don, Sheffield: river about 1 K cooler than the city reference, vegetated banks about 2 K cooler than paved, reach about 30 m with open banks (via secondary sources, unverified)',
-  steeneveld2014: 'Steeneveld et al. (2014) Landscape and Urban Planning, doi 10.1016/j.landurbplan.2013.09.001: in Rotterdam, water bodies raise the 95th percentile of the daily maximum UHI (warm after sunset)',
-  theeuwes2013: 'Theeuwes et al. (2013) J. Geophys. Res. Atmos., doi 10.1002/jgrd.50704 (WRF): water warmer than the air at night worsens night-time comfort',
-  jacobs2020: 'Jacobs et al. (2020) Are urban water bodies really cooling? Urban Climate (ENVI-met, small Dutch water bodies): afternoon air -0.2 K typical, -0.6 K at most; PET -0.6 typical, -1.9 at most; shade gives PET -1 to -7 K',
-  cheonggyecheon: 'Cheonggyecheon, Seoul (TMU repository; AMS abstract): more than 1 K cooler to 70-80 m (north side), about 0.5 K to 30-50 m (south side); before / after -0.1 to -0.9 K',
-  ota: 'Murakawa et al. (1990) J. Archit. Plann. Environ. Eng. (Trans. AIJ) 415, 9-19, doi 10.3130/aijax.415.0_9, Ota River, Hiroshima: river cooling detectable 150-500 m inland along streets perpendicular to the river, more with wind, wider streets and lower density (unverified: via the block-4 brief; the abstract mentions an effect up to about 20 m height and the 150-500 m figure was not found in it)',
   corridor: 'Ventilation-corridor planning criteria: corridors within 30 deg of the prevailing wind (Chinese planning criteria and Givoni 20-30 deg, via Ren et al. 2018 (CUHK) and MDPI Buildings 14(2):348)',
-  oke1988: 'Oke (1988) Energy and Buildings 11, street-canyon flow regimes, thresholds about 0.3-0.4 and 0.65-0.7 H/W (unverified)',
-  wake: 'Chen, Mo & Hang (2024) Building Simulation 17(4), 509-524, doi 10.1007/s12273-024-1103-z: building wake recirculation length about 1.6-2.6 x building width',
-  solcerova2019: 'Solcerova et al. (2019) Frontiers in Earth Science 7, 156, doi 10.3389/feart.2019.00156: a Delft pond is warmer than the air at night and releases about 2.7 MJ m-2 per night (43% longwave, 39% latent, 11% sensible)',
-  webb2008: 'Webb et al. (2008) Hydrological Processes, river water temperature review: large deep rivers have the smallest daily range ("< 1 K" unverified)',
-  steadman1994: 'Steadman (1994) Australian Meteorological Magazine 43, apparent temperature with radiation (the paper itself was not read; formula via [bom])',
-  bom: 'Australian Bureau of Meteorology, Thermal stress: About the formula for the apparent temperature (bom.gov.au/info/thermal_stress/): AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25, ws the 10 m wind, Q the net radiation absorbed per unit area of body surface (W m-2); coefficients checked against this page',
   brief5: 'Research brief docs/research/hutong-brief.md (block 5; values compiled from the sources below, items marked unverified there are flagged here)',
   hendel2015: 'Hendel et al. (2015) J. Sustain. Dev. Energy Water Environ. Syst., doi 10.13044/j.sdewes.2015.03.0001: watering the Rue du Louvre, Paris, about 1 L m-2 per cycle; surface -7.5 K at 19:30 and -6 K at 20:30, lasting several hours',
   hendel2016: 'Hendel et al. (2016) Urban Climate, doi 10.1016/j.uclim.2016.02.003: pavement watering in Paris, air -0.79 K at most, Tmrt -1.76 K',
@@ -569,30 +522,11 @@ const SOURCES = {
   lin2019: 'Lin et al. (2019) Int. J. Environ. Res. Public Health 16, 2986, doi 10.3390/ijerph16162986: traditional block in Harbin, SVF lanes 0.09-0.27, courtyards 0.22-0.37; lower-SVF courtyards 0.3 K cooler air (at most 0.6 K) and 0.4 K globe (at most 1.0 K)',
   spainCourtyard: 'Cordoba and Seville courtyard studies, MDPI Proceedings 2(22) 1390 and 1381, 38(1) 17 (abstracts only, unverified): courtyards 3-6 K below the outdoor air on hot days, up to 11-15 K at 40-45 C',
   yang2024: 'Yang & Wang (2024) J. Beijing Forestry Univ., doi 10.12171/j.1000-1522.20240012 (abstract only): Beijing street-tree shade -1.0 to -2.1 K air and -481 to -789 W m-2; pagoda tree second for comfort',
-  carb: 'California Air Resources Board cool-roof data, via the block-5 brief: clay tile solar reflectance 0.40-0.50, emissivity 0.80-0.90 (light terracotta; grey reduced-fired tile is darker, unverified)',
-  midlandBrick: 'Midland Brick product data, via the block-5 brief: brick solar absorptance 0.45 (light grey) to 0.90 (slate grey)',
-  sohuRoof: 'Web article (sohu), via the block-5 brief: northern roofs of paired tiles on a mud or lime back, not ventilated (secondary, unverified)',
-  miller2007: 'Miller (2007), Oak Ridge National Laboratory, via the block-5 brief: ventilated tile roofs run cooler; does not apply to mud-backed, unventilated roofs',
   ucdavis: 'UC Davis guidance, via the block-5 brief: overhead vine arbours give more than 90% cover',
   jjshs: 'J. Japan. Soc. Hort. Sci. 54(3) 293, via the block-5 brief: pergola vines need LAI 2 or more, ideally 3',
   deng: 'Deng Yunxiang, Tianpeng zheyin (The Paper, newsDetail_forward_18319465), via the block-5 brief: summer mat awnings over Beijing courtyards; the old Beijing saying "tianpeng, fish bowl, pomegranate tree", which the cartoonist Li Binsheng drew',
   visitBeijing: 'Visit Beijing (official tourism site), via the block-5 brief: jujube and pagoda trees in courtyards; the pomegranate stands for many children',
   bolton1980: 'Bolton (1980) Monthly Weather Review 108, 1046-1053: saturation vapour pressure e_s = 6.112 exp(17.67 T / (T + 243.5)) hPa (formula from memory, not checked)',
-  brief6: 'Research brief docs/research/parking-brief.md (block 6; values compiled from the sources below, items marked unverified there are flagged here; brownfield values are mostly its assumptions)',
-  golden2007: 'Golden et al. (2007) Solar Energy 81, 872, doi 10.1016/j.solener.2006.11.007: Phoenix, 17 June 2004 (air max 41.0 C, wind 0.86 m/s): exposed asphalt (SVF 0.90) max 63.5 / min 28.5 / mean 43.6 C, under a PV canopy (SVF 0.11) 37.0 / 27.7 / 32.1 C; the paper has internal inconsistencies',
-  stempihar2012: 'Stempihar et al. (2012) Transportation Research Record 2293, doi 10.3141/2293-15: modelled Phoenix pavements, max 53-69 C, min 29-35 C; HMA k 1.2, rho 2238, c 921; PCC k 1.5, rho 2350, c 1000; eps 0.91; surface temperatures asymptotic above about 203 mm thickness',
-  takebayashi2009: 'Takebayashi & Moriyama (2009) Solar Energy 83, 1211, doi 10.1016/j.solener.2009.01.019: grass parking vs asphalt, sensible heat about 100-150 W m-2 lower by day and about 50 W m-2 lower at night',
-  asaeda1996: 'Asaeda, Ca & Wake (1996), via the block-6 brief: asphalt emits about 150 W m-2 more infrared than bare soil at its maximum (extra sensible heat 50 vs 200 W m-2 across abstracts, unverified)',
-  zhu2022: 'Zhu et al. (2022) Frontiers in Environmental Science, doi 10.3389/fenvs.2021.795474, ECOSTRESS Phoenix: roads the only class warming at night; a 100% road pixel about 4.5 K warmer than grass at night (interpretation, unverified)',
-  hoehne2020: 'Hoehne et al. (2020/2022) Sustainable and Resilient Infrastructure, doi 10.1080/23789689.2020.1773013: Phoenix pavement and vehicle sensible heat, 67% roads, 29% parking, 3.9% vehicles (snippet only, unverified)',
-  matias2025: 'Matias et al. (2025), Lisbon parked cars (abstract and press, unverified): black roofs about 71 C vs white about 45 C; air 2.5-3.8 K warmer next to black cars',
-  levinson2011: 'Levinson et al. (2011) Applied Energy, doi 10.1016/j.apenergy.2011.05.006: black vs silver car roof up to 25 K hotter; cabin soak air 5-6 K',
-  vanos2018: 'Vanos et al. (2018) Temperature, doi 10.1080/23328940.2018.1468205: Tempe, after 1 h: cabin air 46 C in sun vs 38 C in shade, dashboard 69 vs 48 C',
-  mclaren2005: 'McLaren, Null & Quinn (2005) Pediatrics (PMID 15995010): parked-car cabin +1.8 K per 5 min, 80% of the rise in the first 30 min, 47 C at 22 C ambient; cracking the windows did not help',
-  nsc: 'US National Safety Council, child hot-car deaths (via the block-6 brief): 1,010 US children 1998-2024, 39 in 2024',
-  scott1999: 'Scott, Simpson & McPherson (1999) Journal of Arboriculture 25, 129: parking-lot tree shade, asphalt -20 K, air at 0.5 m -1.3 K, car cabins -26 K',
-  onishi2010: 'Onishi et al. (2010) Urban Forestry & Urban Greening, doi 10.1016/j.ufug.2010.06.002: parking-lot greening, surface temperature up to -7.26 K',
-  optris: 'Optris and Fluke emissivity tables, via the block-6 brief: rusty or oxidised steel about 0.69-0.88 (unverified)',
 };
 
 /** How a value relates to its source. */
@@ -617,41 +551,41 @@ const v = (value, source, basis, verified = false, note = '') => ({ value, sourc
 const MATERIALS = {
   asphalt: {
     name: 'Aged asphalt',
-    alpha: v(0.12, 'lbnl', 'cited', true, 'LBNL-43442: about 0.12 +- 0.03 after about 5 years'),
+    alpha: v(0.12, 'lbnl', 'cited', true),
     eps: v(0.95, 'oke', 'cited'),
     mu: v(1200, 'oke', 'cited'),
-    ef: v(0, 'brief', 'cited', false, 'dry impervious'),
+    ef: v(0, 'brief', 'cited', false),
     note: 'Dark, dense and dry: it soaks up most of the sun and gives the heat back long after dark.',
   },
   concrete: {
     name: 'Concrete paving',
-    alpha: v(0.3, 'oke', 'range', false, 'cited 0.10-0.35'),
-    eps: v(0.9, 'oke', 'edge', false, 'cited 0.71-0.90'),
+    alpha: v(0.3, 'oke', 'range', false),
+    eps: v(0.9, 'oke', 'edge', false),
     mu: v(1785, 'oke', 'cited'),
-    ef: v(0, 'brief', 'cited', false, 'dry impervious'),
+    ef: v(0, 'brief', 'cited', false),
     note: 'Lighter than asphalt so it peaks lower, but its mass keeps it warm into the night.',
   },
   stone: {
     name: 'Stone paving / gravel path',
-    alpha: v(0.3, 'oke', 'range', false, 'cited 0.20-0.40'),
-    eps: v(0.92, 'oke', 'range', false, 'cited 0.85-0.95'),
-    mu: v(1500, 'brief', 'range', false, 'between brick 1065 and stone 2220'),
+    alpha: v(0.3, 'oke', 'range', false),
+    eps: v(0.92, 'oke', 'range', false),
+    mu: v(1500, 'brief', 'range', false),
     ef: v(0.05, 'engine', 'engine'),
     note: 'Pale and porous: warm in the sun, cools sooner than the street.',
   },
   grass: {
     name: 'Irrigated lawn',
-    alpha: v(0.25, 'oke', 'edge', false, 'cited 0.16-0.26'),
-    eps: v(0.95, 'oke', 'edge', false, 'cited 0.90-0.95'),
-    mu: v(1400, 'brief', 'range', false, 'soil 600-2200'),
-    ef: v(0.8, 'brief', 'edge', false, 'cited 0.6-0.8'),
+    alpha: v(0.25, 'oke', 'edge', false),
+    eps: v(0.95, 'oke', 'edge', false),
+    mu: v(1400, 'brief', 'range', false),
+    ef: v(0.8, 'brief', 'edge', false),
     note: 'Watered grass spends much of its sunshine evaporating water, and at night it cools below the air.',
     caveat: 'Its 3 pm place below shaded paving holds only with evaporative fraction and albedo at the top of their cited ranges (see Sensitivity in docs/sources.md).',
   },
   water: {
     name: 'Pond (open water)',
-    alpha: v(0.06, 'oke', 'range', false, 'cited 0.03-0.10'),
-    eps: v(0.96, 'oke', 'range', false, 'cited 0.92-0.97'),
+    alpha: v(0.06, 'oke', 'range', false),
+    eps: v(0.96, 'oke', 'range', false),
     mu: v(1545, 'oke', 'cited'),
     ef: v(1, 'engine', 'engine'),
     prescribed: 'Not used by the grid model: the pond is held at daily mean air - 1 K, +-1 K (research brief).',
@@ -659,34 +593,34 @@ const MATERIALS = {
   },
   membrane: {
     name: 'Dark membrane roof',
-    alpha: v(0.1, 'oke', 'range', false, 'cited 0.08-0.18'),
+    alpha: v(0.1, 'oke', 'range', false),
     eps: v(0.92, 'oke', 'cited'),
-    mu: v(450, 'brief', 'range', false, 'brief assumes 300-500'),
-    ef: v(0, 'brief', 'cited', false, 'dry impervious'),
+    mu: v(450, 'brief', 'range', false),
+    ef: v(0, 'brief', 'cited', false),
     note: 'A thin, dark, insulated skin: one of the hottest surfaces at 3 pm, cold again by midnight.',
   },
   metal: {
     name: 'Dark metal roof',
-    alpha: v(0.15, 'oke', 'range', false, 'cited 0.10-0.25'),
-    eps: v(0.9, 'brief', 'cited', false, '~0.9 painted'),
-    thinC: v(12000, 'brief', 'range', false, 'thin layers 5-20 kJ m-2 K-1'),
-    ef: v(0, 'brief', 'cited', false, 'dry impervious'),
+    alpha: v(0.15, 'oke', 'range', false),
+    eps: v(0.9, 'brief', 'cited', false),
+    thinC: v(12000, 'brief', 'range', false),
+    ef: v(0, 'brief', 'cited', false),
     note: 'Painted sheet metal has almost no heat capacity: it follows the sun up and the sky down.',
   },
   coolroof: {
     name: 'Cool (white) roof',
-    alpha: v(0.8, 'epa', 'edge', false, 'cited >=0.65 new, 0.5-0.6 aged; 0.80 is a new, clean white roof'),
-    eps: v(0.88, 'epa', 'range', false, 'cited 0.85-0.90'),
-    mu: v(450, 'brief', 'range', false, 'same build-up as the dark membrane'),
-    ef: v(0, 'brief', 'cited', false, 'dry impervious'),
+    alpha: v(0.8, 'epa', 'edge', false),
+    eps: v(0.88, 'epa', 'range', false),
+    mu: v(450, 'brief', 'range', false),
+    ef: v(0, 'brief', 'cited', false),
     note: 'The same roof build-up as its dark neighbour, painted white: it reflects most of the sun.',
     caveat: 'Its 3 pm place below shaded paving holds only with albedo at the top of its cited range (see Sensitivity in docs/sources.md).',
   },
   canopy: {
     name: 'Tree canopy',
-    alpha: v(0.18, 'oke', 'range', false, 'cited 0.15-0.20'),
-    eps: v(0.97, 'oke', 'range', false, 'cited 0.97-0.99'),
-    ef: v(0.7, 'brief', 'range', false, 'cited 0.6-0.8'),
+    alpha: v(0.18, 'oke', 'range', false),
+    eps: v(0.97, 'oke', 'range', false),
+    ef: v(0.7, 'brief', 'range', false),
     prescribed: 'Not used by the grid model: leaf temperature = air + 2.5 K x (K/900 W m-2) by day, air - 0.5 K at night (engine assumption; brief: air +0-3 K).',
     note: 'Leaves stay within a few degrees of the air; the ground beneath sits in their shade.',
   },
@@ -696,8 +630,8 @@ const MATERIALS = {
 Object.assign(MATERIALS, {
   river: {
     name: 'River (open water)',
-    alpha: v(0.06, 'oke', 'range', false, 'cited 0.03-0.10'),
-    eps: v(0.96, 'oke', 'range', false, 'cited 0.92-0.97'),
+    alpha: v(0.06, 'oke', 'range', false),
+    eps: v(0.96, 'oke', 'range', false),
     mu: v(1545, 'oke', 'cited'),
     ef: v(1, 'engine', 'engine'),
     prescribed: 'Not used by the grid model: the river is held at daily mean air - 2 K, +-0.5 K (peak at 15:00), so it stays below the air all afternoon (research brief, block 4; offset and amplitude are assumptions).',
@@ -705,8 +639,8 @@ Object.assign(MATERIALS, {
   },
   pond: {
     name: 'Still pond (shallow)',
-    alpha: v(0.06, 'oke', 'range', false, 'cited 0.03-0.10'),
-    eps: v(0.96, 'oke', 'range', false, 'cited 0.92-0.97'),
+    alpha: v(0.06, 'oke', 'range', false),
+    eps: v(0.96, 'oke', 'range', false),
     mu: v(1545, 'oke', 'cited'),
     ef: v(1, 'engine', 'engine'),
     prescribed: 'Not used by the grid model: the pond is held at daily mean air - 0.5 K, +-2 K (peak at 16:00): cooler than the afternoon air, warmer than the air before dawn (research brief, block 4; numbers are assumptions, the warm night is cited).',
@@ -722,68 +656,68 @@ Object.assign(MATERIALS, {
 Object.assign(MATERIALS, {
   coolroofAged: {
     name: 'Cool roof, aged',
-    alpha: v(0.6, 'brief2', 'range', false, 'brief: aged cool roofs 0.50-0.70, of which 0.60-0.70 unverified; Chicago code floor: 3-year aged >= 0.50 [chicago]'),
+    alpha: v(0.6, 'brief2', 'range', false),
     eps: v(0.88, 'lbnlRoof', 'cited', false),
-    mu: v(450, 'brief', 'range', false, 'same build-up as the dark membrane'),
-    ef: v(0, 'brief', 'cited', false, 'dry impervious'),
+    mu: v(450, 'brief', 'range', false),
+    ef: v(0, 'brief', 'cited', false),
     note: 'A white roof after a few years of dust and weather: still far cooler than the dark membrane it replaced, but not as cool as when new.',
   },
   coolroofNew: {
     name: 'Cool roof, new',
-    alpha: v(0.8, 'lbnlRoof', 'cited', false, 'new white roof about 0.80; read second-hand via the compendium, so unverified as in block 1'),
+    alpha: v(0.8, 'lbnlRoof', 'cited', false),
     eps: v(0.88, 'lbnlRoof', 'cited', false),
-    mu: v(450, 'brief', 'range', false, 'same build-up as the dark membrane'),
-    ef: v(0, 'brief', 'cited', false, 'dry impervious'),
+    mu: v(450, 'brief', 'range', false),
+    ef: v(0, 'brief', 'cited', false),
     note: 'A freshly coated white roof reflects about four fifths of the sun.',
   },
   greenroof: {
     name: 'Extensive green roof',
-    alpha: v(0.2, 'brief2', 'range', false, 'cited 0.15-0.25'),
+    alpha: v(0.2, 'brief2', 'range', false),
     eps: v(0.95, 'brief2', 'cited', false),
-    mu: v(600, 'brief2', 'cited', false, 'dry substrate; wet 1200, decays with tau'),
-    muWet: v(1200, 'brief2', 'cited', false, 'wet substrate'),
-    ef: v(0.25, 'brief2', 'interp', false, 'dry; the brief\'s value. Heusinger & Weber report Bowen ratio <1-2'),
-    efWet: v(0.5, 'heusinger', 'interp', false, 'wet; Bowen ratio about 1 (Heusinger & Weber: <1-2)'),
-    tau: v(4, 'brief2', 'cited', false, 'substrate drying time, days'),
-    storage: v(30, 'brief2', 'range', false, '100 mm substrate holds 20-40 mm'),
+    mu: v(600, 'brief2', 'cited', false),
+    muWet: v(1200, 'brief2', 'cited', false),
+    ef: v(0.25, 'brief2', 'interp', false),
+    efWet: v(0.5, 'heusinger', 'interp', false),
+    tau: v(4, 'brief2', 'cited', false),
+    storage: v(30, 'brief2', 'range', false),
     note: 'Sedum and thin soil over the roof: plants and wet substrate spend sunshine on evaporation, more so soon after rain.',
   },
   pavers: {
     name: 'Permeable pavers',
     alpha: v(0.26, 'li2013', 'cited', true),
     eps: v(0.92, 'brief2', 'cited', false),
-    mu: v(870, 'engine', 'engine', false, 'dry, assumed'),
-    ef: v(0.02, 'brief2', 'interp', false, 'dry; brief value'),
-    efWet: v(0.5, 'brief2', 'interp', false, 'wet; brief value'),
-    tau: v(1, 'brief2', 'interp', false, 'days; the brief calls it calibrated to Li 2013, but in this model it does not reproduce Li at d = 1 (see docs/sources.md)'),
-    storage: v(5, 'brief2', 'interp', false, 'brief: "a few mm", read as 5 mm; the daily water check needs >= 4.1 mm'),
+    mu: v(870, 'engine', 'engine', false),
+    ef: v(0.02, 'brief2', 'interp', false),
+    efWet: v(0.5, 'brief2', 'interp', false),
+    tau: v(1, 'brief2', 'interp', false),
+    storage: v(5, 'brief2', 'interp', false),
     note: 'Pavers with open joints let rain soak in; the water evaporates over the next day or two and cools them while it lasts.',
   },
   porousAsphalt: {
     name: 'Porous asphalt',
     alpha: v(0.08, 'li2013', 'cited', true),
     eps: v(0.95, 'brief2', 'cited', false),
-    mu: v(800, 'engine', 'engine', false, 'dry, assumed'),
-    ef: v(0.02, 'brief2', 'interp', false, 'dry; as pavers'),
-    efWet: v(0.5, 'brief2', 'interp', false, 'wet; as pavers'),
-    tau: v(1, 'brief2', 'interp', false, 'days; as pavers'),
-    storage: v(5, 'brief2', 'interp', false, 'brief: "a few mm", read as 5 mm; the daily water check needs >= 4.1 mm'),
+    mu: v(800, 'engine', 'engine', false),
+    ef: v(0.02, 'brief2', 'interp', false),
+    efWet: v(0.5, 'brief2', 'interp', false),
+    tau: v(1, 'brief2', 'interp', false),
+    storage: v(5, 'brief2', 'interp', false),
     note: 'Open-graded asphalt that drains rain: cooler while wet, but once dry it is darker and lighter-weight than dense asphalt, so it runs hotter.',
   },
   coolPaveAged: {
     name: 'Cool pavement coating, 1 year old',
-    alpha: v(0.18, 'ko2022', 'cited', false, '0.26 -> 0.18 after one year'),
+    alpha: v(0.18, 'ko2022', 'cited', false),
     eps: v(0.92, 'brief2', 'cited', false),
-    mu: v(1200, 'oke', 'cited', false, 'the asphalt underneath'),
-    ef: v(0, 'brief', 'cited', false, 'dry impervious'),
+    mu: v(1200, 'oke', 'cited', false),
+    ef: v(0, 'brief', 'cited', false),
     note: 'A light grey coating on the old asphalt, after a year of traffic: a little cooler underfoot, and it bounces more sun onto people.',
   },
   coolPaveNew: {
     name: 'Cool pavement coating, new',
     alpha: v(0.25, 'middel2020', 'cited', false),
     eps: v(0.92, 'brief2', 'cited', false),
-    mu: v(1200, 'oke', 'cited', false, 'the asphalt underneath'),
-    ef: v(0, 'brief', 'cited', false, 'dry impervious'),
+    mu: v(1200, 'oke', 'cited', false),
+    ef: v(0, 'brief', 'cited', false),
     note: 'A fresh light grey coating on the old asphalt: the road is cooler, but more sun bounces up onto people.',
   },
   raingarden: {
@@ -791,17 +725,17 @@ Object.assign(MATERIALS, {
     alpha: v(0.2, 'engine', 'engine', false),
     eps: v(0.95, 'engine', 'engine', false),
     mu: v(1400, 'engine', 'engine', false),
-    ef: v(0.35, 'engine', 'engine', false, 'dry'),
-    efWet: v(0.8, 'engine', 'engine', false, 'wet'),
-    tau: v(3, 'mccoll', 'interp', false, 'soil drydown, days; median not checked'),
-    storage: v(40, 'engine', 'engine', false, 'ponding and soil, assumed'),
+    ef: v(0.35, 'engine', 'engine', false),
+    efWet: v(0.8, 'engine', 'engine', false),
+    tau: v(3, 'mccoll', 'interp', false),
+    storage: v(40, 'engine', 'engine', false),
     note: 'A shallow planted hollow that takes the street runoff; its soil stays damp for days after rain.',
   },
   youngCanopy: {
     name: 'Young street tree',
-    alpha: v(0.18, 'oke', 'range', false, 'cited 0.15-0.20'),
-    eps: v(0.97, 'oke', 'range', false, 'cited 0.97-0.99'),
-    ef: v(0.7, 'brief', 'range', false, 'cited 0.6-0.8'),
+    alpha: v(0.18, 'oke', 'range', false),
+    eps: v(0.97, 'oke', 'range', false),
+    ef: v(0.7, 'brief', 'range', false),
     prescribed: 'Not used by the grid model: leaf temperature as for mature trees. Its thin crown lets through exp(-0.5 x 1.5) = 0.47 of the sun (see youngTreeTransmission).',
     note: 'A newly planted tree: its small, thin crown gives patchy shade for now; it takes years to grow a full canopy.',
   },
@@ -811,8 +745,8 @@ Object.assign(MATERIALS, {
 // tr: share of the sun a crown or screen lets through, exp(-0.5 LAI) as for
 // MODEL.canopyTransmission (sun.js / thermal.js: per tree or per screen).
 const leaf = (ef, efNote, tr, trNote, trSource = 'brief5') => ({
-  alpha: v(0.18, 'oke', 'range', false, 'cited 0.15-0.20'),
-  eps: v(0.97, 'oke', 'range', false, 'cited 0.97-0.99'),
+  alpha: v(0.18, 'oke', 'range', false),
+  eps: v(0.97, 'oke', 'range', false),
   ef: v(ef, 'brief5', 'cited', false, efNote),
   tr: v(tr, trSource, 'interp', false, trNote),
   tree: true,
@@ -821,18 +755,18 @@ const leaf = (ef, efNote, tr, trNote, trSource = 'brief5') => ({
 Object.assign(MATERIALS, {
   greyBrick: {
     name: 'Grey brick paving (青砖)',
-    alpha: v(0.2, 'brief5', 'range', false, 'brief 0.20 (0.15-0.30); brick absorptance 0.45 light grey to 0.90 slate grey [midlandBrick]'),
+    alpha: v(0.2, 'brief5', 'range', false),
     eps: v(0.92, 'brief5', 'cited', false),
     mu: v(1100, 'brief5', 'cited', false),
-    ef: v(0.02, 'brief5', 'cited', false, 'dry, porous brick'),
+    ef: v(0.02, 'brief5', 'cited', false),
     note: 'Lanes and courtyards are paved with fired grey brick: darker than stone, a little porous, and it holds the day\'s heat into the evening.',
   },
   greyTile: {
     name: 'Grey tile roof on a mud and lime back',
-    alpha: v(0.18, 'brief5', 'range', false, 'brief 0.18 (0.12-0.25); light terracotta clay tile 0.40-0.50 [carb], grey reduced-fired tile darker (unverified)'),
-    eps: v(0.9, 'brief5', 'cited', false, 'clay tile 0.80-0.90 [carb]'),
-    mu: v(1000, 'brief5', 'cited', false, 'tiles bedded on a mud and lime back, not ventilated [sohuRoof]; the ventilated-tile result [miller2007] does not apply'),
-    ef: v(0, 'brief5', 'cited', false, 'dry'),
+    alpha: v(0.18, 'brief5', 'range', false),
+    eps: v(0.9, 'brief5', 'cited', false),
+    mu: v(1000, 'brief5', 'cited', false),
+    ef: v(0, 'brief5', 'cited', false),
     note: 'Paired grey tiles laid on a thick mud and lime bed: dark and heavy, the roof bakes in the afternoon and gives the heat back slowly.',
   },
   jujube: { name: 'Jujube tree (枣树)', ...leaf(0.6, 'brief value', 0.37, 'exp(-0.5 x 2.0); brief LAI 1.5-2.5 (no measured LAI for jujube), i.e. 0.29-0.47'), note: 'A small courtyard tree with an open, airy crown: patchy shade.' },
@@ -841,10 +775,10 @@ Object.assign(MATERIALS, {
   pergola: { name: 'Vine pergola (葡萄架)', ...leaf(0.6, 'brief value', 0.29, 'exp(-0.5 x 2.5); pergola vines LAI 2-3 [jjshs], overhead arbours > 90% cover [ucdavis]', 'jjshs'), note: 'A grape vine trained over a trellis at head height: dappled shade over the courtyard path.' },
   awning: {
     name: 'Summer mat awning (天棚)',
-    alpha: v(0.3, 'engine', 'engine', false, 'not used: only the transmission of the mat matters here'),
-    eps: v(0.9, 'engine', 'engine', false, 'not used'),
-    ef: v(0, 'engine', 'engine', false, 'not used'),
-    tr: v(0.2, 'brief5', 'range', false, 'brief 0.1-0.3 for reed mats (unverified)'),
+    alpha: v(0.3, 'engine', 'engine', false),
+    eps: v(0.9, 'engine', 'engine', false),
+    ef: v(0, 'engine', 'engine', false),
+    tr: v(0.2, 'brief5', 'range', false),
     prescribed: 'Not used by the grid model as a surface: a flat screen above the eaves that lets through tr of the sun; the cells under it count as fully covered for the sky view (crown factor).',
     note: 'A shed of reed mats on poles, built over the whole courtyard each summer, higher than the eaves; its side mats roll up to let the air through.',
   },
@@ -856,42 +790,42 @@ Object.assign(MATERIALS, {
 Object.assign(MATERIALS, {
   ballast: {
     name: 'Rail ballast (gravel)',
-    alpha: v(0.2, 'brief6', 'engine', false, 'brief assumption 0.20 (0.10-0.30)'),
-    eps: v(0.92, 'brief6', 'engine', false, 'brief assumption'),
-    mu: v(700, 'brief6', 'engine', false, 'effective admittance of a loose, airy layer; brief assumption 700 (600-900)'),
-    ef: v(0, 'brief6', 'engine', false, 'dry, drains at once'),
+    alpha: v(0.2, 'brief6', 'engine', false),
+    eps: v(0.92, 'brief6', 'engine', false),
+    mu: v(700, 'brief6', 'engine', false),
+    ef: v(0, 'brief6', 'engine', false),
     note: 'Loose crushed stone under the rails: full of air, so it heats fast in the sun and lets go of the heat soon after dark.',
   },
   drySoil: {
     name: 'Bare compacted soil',
-    alpha: v(0.25, 'brief6', 'engine', false, 'brief assumption 0.25 (0.20-0.35)'),
-    eps: v(0.93, 'brief6', 'engine', false, 'brief assumption'),
-    mu: v(800, 'brief6', 'interp', false, 'dry soil about 600 [oke], read up to 800 for compacted ground (brief assumption)'),
-    ef: v(0.05, 'brief6', 'engine', false, 'dry, a little moisture left deep down (brief assumption)'),
+    alpha: v(0.25, 'brief6', 'engine', false),
+    eps: v(0.93, 'brief6', 'engine', false),
+    mu: v(800, 'brief6', 'interp', false),
+    ef: v(0.05, 'brief6', 'engine', false),
     note: 'Dry, compacted ground of the old works: lighter than asphalt and with less heat store, so it cools sooner after dark.',
   },
   scrub: {
     name: 'Scrubby dry vegetation',
-    alpha: v(0.22, 'brief6', 'engine', false, 'brief assumption'),
-    eps: v(0.95, 'brief6', 'engine', false, 'brief assumption'),
-    mu: v(800, 'brief6', 'engine', false, 'the dry soil beneath (brief assumption)'),
-    ef: v(0.2, 'brief6', 'engine', false, 'sparse, drought-stressed plants: little water to spend (brief assumption)'),
+    alpha: v(0.22, 'brief6', 'engine', false),
+    eps: v(0.95, 'brief6', 'engine', false),
+    mu: v(800, 'brief6', 'engine', false),
+    ef: v(0.2, 'brief6', 'engine', false),
     note: 'Weeds and dry grass that took over the brownfield: a little evaporation, not much shade.',
   },
   rustShed: {
     name: 'Rusty corrugated steel shed roof',
-    alpha: v(0.2, 'brief6', 'engine', false, 'brief assumption for rusted steel'),
-    eps: v(0.75, 'optris', 'range', false, 'oxidised steel 0.69-0.88 [optris]'),
-    thinC: v(3000, 'brief6', 'interp', false, 'one corrugated sheet about 0.7 mm of steel, rho c about 3.6 MJ m-3 K-1 (calculation in the brief); range 2-5 kJ m-2 K-1'),
-    ef: v(0, 'brief6', 'cited', false, 'dry'),
+    alpha: v(0.2, 'brief6', 'engine', false),
+    eps: v(0.75, 'optris', 'range', false),
+    thinC: v(3000, 'brief6', 'interp', false),
+    ef: v(0, 'brief6', 'cited', false),
     note: 'A single sheet of rusty steel over an open shed: almost no heat store, so it follows the sun up and drops below the air within minutes of sunset.',
   },
   pvCanopy: {
     name: 'Solar (PV) canopy over the bays',
-    alpha: v(0.1, 'engine', 'engine', false, 'not used: the panels are a screen here'),
-    eps: v(0.9, 'engine', 'engine', false, 'not used'),
-    ef: v(0, 'engine', 'engine', false, 'not used'),
-    tr: v(0, 'golden2007', 'interp', false, 'opaque panels: no direct sun through them'),
+    alpha: v(0.1, 'engine', 'engine', false),
+    eps: v(0.9, 'engine', 'engine', false),
+    ef: v(0, 'engine', 'engine', false),
+    tr: v(0, 'golden2007', 'interp', false),
     prescribed: 'Not used by the grid model as a surface: a flat opaque screen 4.2 m up; the ground beneath sees the sky with SVF 0.11 [golden2007] and the panel undersides as warm walls (engine assumption).',
     note: 'Rows of solar panels on steel posts over the parking bays: shade for the cars by day and a lid on the night sky.',
   },
@@ -904,22 +838,22 @@ Object.assign(MATERIALS, {
 const GLASS = {
   clear: {
     name: 'Clear float glass',
-    rho0: v(0.08, 'fresnel', 'cited', true, 'Fresnel calculation, n = 1.52, two surfaces: 0.082'),
-    absorb: v(0.1, 'brief3', 'cited', false, 'brief: a_g 0.1 for clear glass, marked an assumption'),
+    rho0: v(0.08, 'fresnel', 'cited', true),
+    absorb: v(0.1, 'brief3', 'cited', false),
     eps: v(0.84, 'en673', 'cited', false),
     note: 'Ordinary clear glass reflects only about 8% of the sun head-on, but far more at a glancing angle (Fresnel).',
   },
   lowe: {
     name: 'Solar-control low-e glass',
-    rho0: v(0.2, 'brief3', 'range', false, 'brief range 0.15-0.35; no datasheet checked (LBNL IGDB) [igdb]'),
-    absorb: v(0.3, 'brief3', 'edge', false, 'brief: 0.3-0.45 for coated glass, marked an assumption'),
-    eps: v(0.84, 'en673', 'cited', false, 'outer surface; the low-e coating faces the cavity'),
+    rho0: v(0.2, 'brief3', 'range', false),
+    absorb: v(0.3, 'brief3', 'edge', false),
+    eps: v(0.84, 'en673', 'cited', false),
     note: 'A coated glass that turns away much of the sun; at 0.20 it sits at the Singapore cap for daylight reflectance.',
   },
   mirror: {
     name: 'Reflective (mirror) glass',
-    rho0: v(0.35, 'brief3', 'range', false, 'brief range 0.25-0.45; no datasheet checked (LBNL IGDB) [igdb]'),
-    absorb: v(0.4, 'brief3', 'range', false, 'brief: 0.3-0.45 for coated glass, marked an assumption'),
+    rho0: v(0.35, 'brief3', 'range', false),
+    absorb: v(0.4, 'brief3', 'range', false),
     eps: v(0.84, 'en673', 'cited', false),
     note: 'A metallic coating makes the tower a mirror: it keeps sun out of the offices and throws more of it onto the street.',
   },
@@ -930,56 +864,56 @@ const GLASS_DEFAULT = 'lowe';
 /** Model constants shared by thermal.js and life.js. */
 const MODEL = {
   hc: v('5.7 + 3.8 u', 'oke', 'cited'),
-  canopyTransmission: v(0.17, 'brief', 'interp', false, 'exp(-0.5 LAI) with LAI 3.5 (LAI is an engine assumption)'),
-  diffuseFraction: v(0.12, 'brief', 'cited', false, 'D = 0.12 I_b sin(beta)'),
-  wallTerm: v('Ta + 2 K + 6 K x K/900', 'engine', 'engine', false, 'warms the walls seen from the ground; ignores wall orientation'),
-  efClip: v('EF x max(Q*, 0)', 'engine', 'engine', false, 'brief writes EF x Q*; clipped so latent heat never warms the surface at night'),
-  buildingShadeWeight: v(0.84, 'melnikov', 'cited', false, 'shade walking perceived ~16% shorter'),
-  treeShadeWeight: v(0.92, 'melnikov', 'interp', false, 'tree shade ~half as effective as building shade, read as half the 16% benefit'),
-  shadeHeatRamp: v('26 -> 32 C', 'engine', 'engine', false, 'shade benefit scales linearly from none at air <= 26 C to full at >= 32 C'),
-  youngTreeTransmission: v(0.47, 'brief2', 'interp', false, 'exp(-0.5 LAI) with LAI 1.5; brief range 0.37-0.61 for LAI 1-2'),
-  youngTreeCrown: v('crown radius 2.6 m, crown centre 4.4 m', 'engine', 'engine', false, 'scene assumption for newly planted street trees (cities/sponge-retrofit/scene.js)'),
-  latentHeat: v('2.45e6 J kg-1', 'brief2', 'cited', true, 'evaporated depth = sum of EF x max(Q*, 0) x dt / 2.45e6'),
-  wallAlbedo: v(0.3, 'brief3', 'range', false, 'opaque walls; brief: 0.3 (0.2-0.5, Oke range unverified); SOLWEIG uses 0.5 [wallenberg2026]'),
-  wallLit: v(0.5, 'engine', 'engine', false, 'share of a wall in sun, f_lit, for the diffuse wall-reflection term (not used for glass temperature, which follows the brief)'),
-  wallReflection: v('K_wr = a_w (1 - SVF) K_wall', 'brief3', 'interp', false, 'K_wall = f_lit I cos(beta)/pi + 0.5 D + 0.5 a_g G; SOLWEIG form a_w G (1 - psi) recalled from memory in the brief'),
-  glassHo: v(20, 'brief3', 'range', false, 'outside film coefficient h_o, brief 15-25 W m-2 K-1'),
-  glassHi: v(7.7, 'iso6946', 'interp', false, 'inside film coefficient h_i,eff, W m-2 K-1, read as 1 / 0.13'),
-  sweatCue: v('Tmrt 65 -> 70 C', 'engine', 'engine', false, 'visual cue only: droplets on people in sun, strength rising from Tmrt 65 C to full at 70 C (separates sunlit pavement from sunlit lawn in this model); no physiological model'),
+  canopyTransmission: v(0.17, 'brief', 'interp', false),
+  diffuseFraction: v(0.12, 'brief', 'cited', false),
+  wallTerm: v('Ta + 2 K + 6 K x K/900', 'engine', 'engine', false),
+  efClip: v('EF x max(Q*, 0)', 'engine', 'engine', false),
+  buildingShadeWeight: v(0.84, 'melnikov', 'cited', false),
+  treeShadeWeight: v(0.92, 'melnikov', 'interp', false),
+  shadeHeatRamp: v('26 -> 32 C', 'engine', 'engine', false),
+  youngTreeTransmission: v(0.47, 'brief2', 'interp', false),
+  youngTreeCrown: v('crown radius 2.6 m, crown centre 4.4 m', 'engine', 'engine', false),
+  latentHeat: v('2.45e6 J kg-1', 'brief2', 'cited', true),
+  wallAlbedo: v(0.3, 'brief3', 'range', false),
+  wallLit: v(0.5, 'engine', 'engine', false),
+  wallReflection: v('K_wr = a_w (1 - SVF) K_wall', 'brief3', 'interp', false),
+  glassHo: v(20, 'brief3', 'range', false),
+  glassHi: v(7.7, 'iso6946', 'interp', false),
+  sweatCue: v('Tmrt 65 -> 70 C', 'engine', 'engine', false),
   // ---- block 4 (waterfront): wind factor, water curves, air overlay, comfort ----
-  windFmin: v(0.3, 'brief4', 'engine', false, 'f_min: wind factor right behind an obstacle (leeward face); also the lower clamp of f_w'),
-  shelterReach: v('5 H', 'brief4', 'engine', false, 'shelter recovers linearly to 1 at 5 building heights downwind ("5H recovery" is an assumption in the brief; wake recirculation 1.6-2.6 x building width is cited [wake])'),
-  channelC: v(0.2, 'brief4', 'engine', false, 'c_ch: channelling gain in streets aligned with the wind, C = 1 + c_ch max(0, cos 3 delta)'),
-  windFmax: v(1.2, 'brief4', 'engine', false, 'f_max: upper clamp of f_w'),
-  alignCut: v('30 deg', 'corridor', 'cited', false, 'channelling only in streets whose axis is within 30 deg of the wind'),
-  channelHw: v(0.4, 'oke1988', 'interp', false, 'channelling only where the street H/W > 0.4 (read from the Oke 1988 regime thresholds, about 0.3-0.4, unverified)'),
-  windHc: v('h_c = 5.7 + 3.8 u_site f_w', 'brief4', 'interp', false, 'the same h_c formula [oke] with the local wind u_i = u_site f_w per cell (roofs and blocks without a wind direction: f_w = 1). The formula is a near-surface flat-plate fit fed here with the 10 m wind x f_w, which overstates street-level h_c and its wind sensitivity'),
-  riverCurve: v('Ta_mean - 2 K + 0.5 K sin(2 pi (h - 9) / 24)', 'brief4', 'engine', false, 'prescribed river surface; range 1 K (large rivers: smallest daily range [webb2008]); the -2 K offset and 0.5 K amplitude are assumptions'),
-  pondCurve: v('Ta_mean - 0.5 K + 2 K sin(2 pi (h - 10) / 24)', 'brief4', 'engine', false, 'prescribed shallow pond surface; range 4 K; warmer than the air at night is cited [solcerova2019], the numbers are assumptions'),
-  airDay: v(1.0, 'brief4', 'range', false, 'overlay only: dTa at the bank by day, -1.0 K (cited range 0.2-1.5 K [hathway2012, cheonggyecheon, jacobs2020])'),
-  airL: v(30, 'brief4', 'range', false, 'overlay only: decay length L, m (cited 30-80 m [hathway2012, cheonggyecheon], unverified)'),
-  airLaligned: v(60, 'brief4', 'interp', false, 'overlay only: decay length in streets aligned with the wind, m, chosen so the effect is below 0.2 K by 150 m (the brief reads the Ota River 150-500 m [ota] as at most 150 m here)'),
-  airNight: v(0.3, 'brief4', 'engine', false, 'overlay only: dTa at the bank at night, +0.3 K (range 0-1 K assumed; the sign is cited [steeneveld2014, solcerova2019])'),
-  airPond: v(0.2, 'jacobs2020', 'cited', false, 'overlay only: dTa next to the small pond by day, -0.2 K (Jacobs et al. typical afternoon value)'),
-  apparentTemp: v('AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25', 'bom', 'cited', true, 'Steadman (1994) [steadman1994], coefficients checked against the BoM page; comfort for the walkers in block 4 (a stand-in for UTCI, which is not implemented); ws = u_10 f_w clamped to 0.5-17 m/s as the brief gives for UTCI'),
-  atRadiation: v('Q = 6.1 W m-2 K-1 x (Tmrt - Ta)', 'bom', 'interp', false, 'extra radiation absorbed by a person, linearised: 4 eps sigma T^3 with eps 0.97 and T 303 K over the whole body surface. At a sunlit Tmrt near 68 C (341 K) 4 eps sigma T^3 is about 8.7, so Q is understated by about 30% there; a standing person radiates over only about 0.7 of the body surface (ASHRAE effective radiating area), which errs the other way. Route weights divide by the sun-shade AT gap, so this largely cancels for the walkers; absolute AT on the cards carries it'),
-  windLines: v('seeds every 20 m upwind, RK2 2.5 m steps, slide along buildings', 'brief4', 'engine', false, 'drawing only: assumed direction x shelter factor, not computed flow; dash spacing and speed proportional to u_i (speed drawn 4x)'),
+  windFmin: v(0.3, 'brief4', 'engine', false),
+  shelterReach: v('5 H', 'brief4', 'engine', false),
+  channelC: v(0.2, 'brief4', 'engine', false),
+  windFmax: v(1.2, 'brief4', 'engine', false),
+  alignCut: v('30 deg', 'corridor', 'cited', false),
+  channelHw: v(0.4, 'oke1988', 'interp', false),
+  windHc: v('h_c = 5.7 + 3.8 u_site f_w', 'brief4', 'interp', false),
+  riverCurve: v('Ta_mean - 2 K + 0.5 K sin(2 pi (h - 9) / 24)', 'brief4', 'engine', false),
+  pondCurve: v('Ta_mean - 0.5 K + 2 K sin(2 pi (h - 10) / 24)', 'brief4', 'engine', false),
+  airDay: v(1.0, 'brief4', 'range', false),
+  airL: v(30, 'brief4', 'range', false),
+  airLaligned: v(60, 'brief4', 'interp', false),
+  airNight: v(0.3, 'brief4', 'engine', false),
+  airPond: v(0.2, 'jacobs2020', 'cited', false),
+  apparentTemp: v('AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25', 'bom', 'cited', true),
+  atRadiation: v('Q = 6.1 W m-2 K-1 x (Tmrt - Ta)', 'bom', 'interp', false),
+  windLines: v('seeds every 20 m upwind, RK2 2.5 m steps, slide along buildings', 'brief4', 'engine', false),
   // ---- block 5 (hutong): surface water store, shade sampling, screens ----
-  waterStore: v('LE = L beta(W) (h_c / c_p) max(0, q_sat(Ts) - q_a), dW/dt = -LE / L', 'brief5', 'cited', false, 'bulk evaporation from the splashed paving; beta(W) = beta_wet min(1, W / W_c); c_p 1005 J kg-1 K-1, p 1013.25 hPa, q = 0.622 e / (p - 0.378 e); adds to the EF term, which is zero after sunset'),
-  satVapour: v('e_s = 6.112 exp(17.67 T / (T + 243.5)) hPa', 'bolton1980', 'cited', false, 'saturation vapour pressure over water'),
-  splashW0: v(1.0, 'brief5', 'edge', false, 'W0, mm of evaporable water left on the paving by one splash; brief 0.5-1.0 mm of the 1-2 L m-2 thrown (about 1 L m-2 per cycle in Paris [hendel2015])'),
-  splashBeta: v(0.5, 'brief5', 'range', false, 'beta_wet, the wetness factor of splashed brick; brief 0.3-1 (unverified); Kobe asphalt 0.15 [takebayashi2023]'),
-  splashWc: v(0.2, 'brief5', 'cited', false, 'W_c, mm: below it the wet patch dries up and beta falls in proportion'),
-  splashHour: v(19, 'brief5', 'cited', false, 'the evening splash, every evening of the repeated design day (evening watering recommended [takebayashi2023]; the uchimizu custom [nippon])'),
-  shadeSamples: v('4 x 4 per 5 m cell', 'engine', 'engine', false, 'block 5 only: shade sampled every 1.25 m, so the 1.2 m wall shadow of a 5 m lane at noon registers (blocks 1-4: 2 x 2)'),
-  screenCover: v('SVF x (1 - 0.75)', 'engine', 'engine', false, 'cells under a pergola or awning take the crown factor of a full tree crown for the sky view and wall reflection, as cells under trees do'),
+  waterStore: v('LE = L beta(W) (h_c / c_p) max(0, q_sat(Ts) - q_a), dW/dt = -LE / L', 'brief5', 'cited', false),
+  satVapour: v('e_s = 6.112 exp(17.67 T / (T + 243.5)) hPa', 'bolton1980', 'cited', false),
+  splashW0: v(1.0, 'brief5', 'edge', false),
+  splashBeta: v(0.5, 'brief5', 'range', false),
+  splashWc: v(0.2, 'brief5', 'cited', false),
+  splashHour: v(19, 'brief5', 'cited', false),
+  shadeSamples: v('4 x 4 per 5 m cell', 'engine', 'engine', false),
+  screenCover: v('SVF x (1 - 0.75)', 'engine', 'engine', false),
   // ---- block 6 (car park and brownfield): ground heat flux, cars, PV canopy ----
-  groundFlux: v('G = (1 - a) K + eps L - eps sigma Ts^4 - h_c (Ts - Ta) - EF max(Q*, 0)', 'deardorff', 'cited', false, 'the force-restore surface flux into the ground (thin layers: C dTs/dt), stored every 15 min; negative = the ground gives stored heat back'),
-  dampingDepth: v('d = sqrt(kappa tau / pi)', 'brief6', 'cited', false, 'kappa = k / (rho c); HMA 0.126 m, PCC 0.133 m from the Stempihar inputs [stempihar2012]; force-restore holds for slabs thicker than about 1.5 d (about 0.2 m)'),
-  pvSvf: v(0.11, 'golden2007', 'cited', false, 'sky view factor of the ground under the PV canopy, as measured by Golden et al.; set on the cells whose centre is under a panel row'),
-  carShade: v('sunlit x (1 - car share)', 'engine', 'engine', false, 'parked cars as a sub-grid shade: each cell loses the share of its area under car footprints from its direct sun, all day (the lot is taken as full; shadows are not offset with the sun angle)'),
-  carSky: v('SVF x (1 - car share)', 'engine', 'engine', false, 'at night the ground under a car sees the car underside, taken as the warm-wall term (air + 2 K), instead of the sky'),
-  thinPaving: v(600, 'brief6', 'interp', false, 'effective admittance of thin (< 0.2 m) asphalt over a loose base, for the thin-layer check only (not in the scene); brief: thin paving needs a lower effective mu'),
+  groundFlux: v('G = (1 - a) K + eps L - eps sigma Ts^4 - h_c (Ts - Ta) - EF max(Q*, 0)', 'deardorff', 'cited', false),
+  dampingDepth: v('d = sqrt(kappa tau / pi)', 'brief6', 'cited', false),
+  pvSvf: v(0.11, 'golden2007', 'cited', false),
+  carShade: v('sunlit x (1 - car share)', 'engine', 'engine', false),
+  carSky: v('SVF x (1 - car share)', 'engine', 'engine', false),
+  thinPaving: v(600, 'brief6', 'interp', false),
 };
 
 /** Parameter keys a material uses (for cards and docs). */
@@ -3252,19 +3186,8 @@ function drawDecor(pen, world, D) {
     }
   }
   if (D.river) riverMarks(pen, world.size, D.river[0], D.river[1], S.seed);
-  // block 5: brick courses in lanes and courtyards, the well, fish bowls under the awnings
-  for (const r of D.brick ?? []) brickCourses(pen, ...r);
-  if (D.well) well(pen, ...D.well);
-  // block 6: rails on the ballast, brownfield tufts and speckle, faded bay stripes
-  for (const r of D.rails ?? []) rails(pen, ...r);
-  for (const [x0, y0, x1, y1, n, seed] of D.tufts ?? []) tufts(pen, x0, y0, x1, y1, n, seed);
-  for (const [x0, y0, x1, y1, n, seed] of D.soil ?? []) speckle(pen, x0, y0, x1, y1, n, seed, hexRgb('#9a8463'));
-  for (const [xa, xb, ya, yb, step] of D.stripes ?? []) {
-    const segs = [];
-    for (let x = xa; x <= xb + 1e-9; x += step) segs.push([[x, ya], [x, yb]]);
-    pen.tag = 'gm';
-    pen.lines(segs, { lw: 0.6, stroke: hexRgb('#efe8d6'), a: 0.6, over: 0.1 });
-  }
+  // blocks 5 and 6: their own ground marks (world.draw.decor: htkit.js, pkkit.js)
+  if (world.draw && world.draw.decor) world.draw.decor(pen, world, D);
   if (D.pond) {
     const [cx, cy, rx, ry] = D.pond;
     groundEllipse(pen, cx, cy, rx + 0.8, ry + 0.8, null, { lw: 0.7, a: 0.6, t: 'gm' });
@@ -3272,45 +3195,6 @@ function drawDecor(pen, world, D) {
       pen.line([[cx + dx - w / 2, cy + dy], [cx + dx, cy + dy - 0.25], [cx + dx + w / 2, cy + dy]], { lw: 0.6, stroke: hexRgb('#e9f0ec'), a: 0.8, over: 0.2 });
     }
   }
-}
-
-/** Grey brick paving (block 5): courses every 2 m along the long side of the rect, one item. */
-function brickCourses(pen, x0, y0, x1, y1) {
-  pen.tag = 'gm';
-  const segs = [];
-  if (x1 - x0 >= y1 - y0) for (let y = y0 + 2; y < y1 - 0.5; y += 2) segs.push([[x0 + 0.3, y], [x1 - 0.3, y]]);
-  else for (let x = x0 + 2; x < x1 - 0.5; x += 2) segs.push([[x, y0 + 0.3], [x, y1 - 0.3]]);
-  if (segs.length) pen.lines(segs, { lw: 0.35, stroke: hexRgb('#8f897d'), a: 0.4, over: 0.1 });
-}
-
-/** A rail siding (block 6): two rails 1.435 m apart along x at y, sleepers every 0.8 m, as two items. */
-function rails(pen, y, x0, x1) {
-  pen.tag = 'gm';
-  const sl = [];
-  for (let x = x0 + 0.4; x < x1; x += 0.8) sl.push([[x, y - 1.25], [x, y + 1.25]]);
-  pen.lines(sl, { lw: 0.55, stroke: hexRgb('#6b5443'), a: 0.6, over: 0 });
-  pen.lines([[[x0, y - 0.72], [x1, y - 0.72]], [[x0, y + 0.72], [x1, y + 0.72]]], { lw: 0.9, stroke: hexRgb('#4a4744'), a: 0.85, over: 0.1 });
-}
-
-/** Dry tufts on the brownfield (block 6): n small three-blade strokes, one item. */
-function tufts(pen, x0, y0, x1, y1, n, seed) {
-  const r = makeRng(seed);
-  pen.tag = 'gm';
-  const segs = [];
-  for (let i = 0; i < n; i++) {
-    const x = x0 + r() * (x1 - x0);
-    const y = y0 + r() * (y1 - y0);
-    const h = 0.5 + r() * 0.7;
-    for (let k = -1; k <= 1; k++) segs.push([[x, y, 0], [x + k * 0.3, y - 0.1, h]]);
-  }
-  pen.lines(segs, { lw: 0.45, stroke: hexRgb('#6d6a3a'), a: 0.7, over: 0 });
-}
-
-/** The old well of Well Square (block 5): a stone curb, dark water and a windlass. */
-function well(pen, x, y) {
-  pen.tag = 'gm';
-  groundEllipse(pen, x, y, 1.5, 1.5, hexRgb('#a29a8a'), { lw: 0.8, n: 16, t: 'gm' });
-  groundEllipse(pen, x, y, 0.85, 0.85, hexRgb('#46555b'), { lw: 0.5, n: 12, t: 'gm' });
 }
 
 /** River (block 4): current ripples in rows, and the quay wall along the bank (y1). */
@@ -3560,252 +3444,9 @@ function building(pen, B, world = null) {
   pen.b = -1;
 }
 
-// ---- block 5: hutong houses ---------------------------------------------------
-
-const PILLAR = hexRgb('#8e3b2c');
-const LATTICE = hexRgb('#5b4636');
-
-/**
- * A single-storey courtyard house (block 5): grey brick walls, one or two
- * gabled grey tile roofs (ridge along x for B.gable 'x', along y for 'y'),
- * tile rows and the ridge in one stroke item each; courtyard-facing walls
- * (B.court) get red pillars and lattice windows, lane-facing walls stay
- * blank but for small high windows. The roof rise is drawing only: the model
- * treats the house as a box at eave height.
- */
-function hutongHouse(pen, B, world) {
-  pen.b = B.index;
-  const { x0, y0, x1, y1, h } = B;
-  const wall = jitter(hexRgb(B.wall), B.index * 3, 0.05);
-  const roof = jitter(ROOF_RGB.greyTile, B.index * 5, 0.06);
-  pen.tag = 'w';
-  pen.shape([[x0, y1, 0], [x1, y1, 0], [x1, y1, h], [x0, y1, h]], { k: 'wall', c: wall, n: [0, 1] }, { lw: 1.05, t: 'w' });
-  pen.shape([[x1, y1, 0], [x1, y0, 0], [x1, y0, h], [x1, y1, h]], { k: 'wall', c: wall, n: [1, 0] }, { lw: 1.05, t: 'w' });
-  // shade hatching, one item per face (drawn only when the face is turned from the sun)
-  for (const face of ['S', 'E']) {
-    const len = face === 'S' ? x1 - x0 : y1 - y0;
-    const P = (u, z) => (face === 'S' ? [x0 + u, y1, z] : [x1, y1 - u, z]);
-    const segs = [];
-    for (let t = 1.2; t < len + h; t += 1.6) {
-      const a = Math.max(0, t - h);
-      const b = Math.min(len, t);
-      if (b - a >= 0.5) segs.push([P(a, t - a), P(b, t - b)]);
-    }
-    if (segs.length) pen.lines(segs, { lw: 0.4, a: 0.28, over: 0.1, t: face === 'S' ? 'hatchS' : 'hatchE' });
-  }
-  // façades: courtyard sides get pillars and lattice; lane sides small high windows
-  const court = B.court ?? '';
-  for (const face of ['S', 'E']) {
-    const len = face === 'S' ? x1 - x0 : y1 - y0;
-    const P = (u, z) => (face === 'S' ? [x0 + u, y1, z] : [x1, y1 - u, z]);
-    const toCourt = face === 'S' ? court.includes('S') || court === 'NS' : court.includes('E');
-    pen.tag = 'win';
-    if (toCourt) {
-      // the panes and the doors of a façade are one item each (Pen.shapes); lit together at night
-      const bays = Math.max(1, Math.round(len / 3.3));
-      const w = len / bays;
-      const pil = [];
-      const lat = [];
-      const panes = [];
-      const doors = [];
-      for (let k = 0; k <= bays; k++) pil.push([P(k * w, 0), P(k * w, h - 0.3)]);
-      for (let k = 0; k < bays; k++) {
-        const a = k * w + 0.45;
-        const b = (k + 1) * w - 0.45;
-        if (hash3(B.index, k, 17) < 0.25) {
-          doors.push([P(a + 0.4, 0), P(b - 0.4, 0), P(b - 0.4, 2.5), P(a + 0.4, 2.5)]);
-          continue;
-        }
-        panes.push([P(a, 1), P(b, 1), P(b, h - 0.6), P(a, h - 0.6)]);
-        for (let u = a + 0.8; u < b - 0.3; u += 0.8) lat.push([P(u, 1), P(u, h - 0.6)]);
-        lat.push([P(a, 2.2), P(b, 2.2)]);
-      }
-      if (panes.length) pen.shapes(panes, { k: 'win', h: hash3(B.index * 7 + (face === 'S' ? 0 : 1), 3), c: scaleRgb(WIN, 0.95) }, { lw: 0.45, over: 0.3, t: 'win' });
-      if (doors.length) pen.shapes(doors, hexRgb('#6b4e3a'), { lw: 0.5, t: 'win' });
-      if (lat.length) pen.lines(lat, { lw: 0.3, stroke: LATTICE, a: 0.55, over: 0, t: 'win' });
-      pen.lines(pil, { lw: 0.9, stroke: PILLAR, a: 0.85, over: 0, t: 'win' });
-    } else {
-      const panes = [];
-      for (let u = 3 + 3 * hash3(B.index, face === 'S' ? 1 : 2, 19); u < len - 1.5; u += 6.5) panes.push([P(u, 2.6), P(u + 0.9, 2.6), P(u + 0.9, 3.3), P(u, 3.3)]);
-      if (panes.length) pen.shapes(panes, { k: 'win', h: hash3(B.index, face === 'S' ? 1 : 2, 5), c: WIN }, { lw: 0.4, over: 0.2, t: 'win' });
-    }
-  }
-  // eave line
-  pen.tag = 'w';
-  pen.line([[x0, y1, h - 0.25], [x1, y1, h - 0.25], [x1, y0, h - 0.25]], { lw: 0.45, a: 0.55, t: 'w' });
-  // roofs: back (north / west) parts first
-  pen.tag = 'r';
-  const alongX = B.gable !== 'y';
-  const depth = alongX ? y1 - y0 : x1 - x0;
-  const nr = B.ridges ?? Math.max(1, Math.round(depth / 5));
-  for (let r = 0; r < nr; r++) {
-    const a = (alongX ? y0 : x0) + (depth * r) / nr;
-    const b = (alongX ? y0 : x0) + (depth * (r + 1)) / nr;
-    const m = (a + b) / 2;
-    const rise = Math.min(1.8, (b - a) * 0.36);
-    const z = h + rise;
-    const tiles0 = [];
-    const tiles1 = [];
-    if (alongX) {
-      pen.shape([[x0, a, h], [x1, a, h], [x1, m, z], [x0, m, z]], scaleRgb(roof, 0.84), { lw: 0.9, t: 'r' });
-      pen.shape([[x0, m, z], [x1, m, z], [x1, b, h], [x0, b, h]], roof, { lw: 0.9, t: 'r' });
-      pen.shape([[x1, b, h], [x1, a, h], [x1, m, z]], { k: 'wall', c: wall, n: [1, 0] }, { lw: 0.9, t: 'w' });
-      for (let x = x0 + 0.8; x < x1 - 0.3; x += 1.6) {
-        tiles0.push([[x, a + 0.15, h], [x, m, z]]);
-        tiles1.push([[x, m, z], [x, b - 0.15, h]]);
-      }
-      pen.tag = 'rd';
-      pen.lines(tiles0.concat(tiles1), { lw: 0.33, a: 0.38, over: 0, t: 'rd' });
-      pen.line([[x0, m, z + 0.12], [x1, m, z + 0.12]], { lw: 1.5, a: 0.9, over: 0.2, t: 'rd' });
-    } else {
-      pen.shape([[a, y0, h], [m, y0, z], [m, y1, z], [a, y1, h]], roof, { lw: 0.9, t: 'r' });
-      pen.shape([[m, y0, z], [b, y0, h], [b, y1, h], [m, y1, z]], scaleRgb(roof, 0.84), { lw: 0.9, t: 'r' });
-      pen.shape([[a, y1, h], [b, y1, h], [m, y1, z]], { k: 'wall', c: wall, n: [0, 1] }, { lw: 0.9, t: 'w' });
-      for (let y = y0 + 0.8; y < y1 - 0.3; y += 1.6) {
-        tiles0.push([[a + 0.15, y, h], [m, y, z]]);
-        tiles1.push([[m, y, z], [b - 0.15, y, h]]);
-      }
-      pen.tag = 'rd';
-      pen.lines(tiles0.concat(tiles1), { lw: 0.33, a: 0.38, over: 0, t: 'rd' });
-      pen.line([[m, y0, z + 0.12], [m, y1, z + 0.12]], { lw: 1.5, a: 0.9, over: 0.2, t: 'rd' });
-    }
-    pen.tag = 'r';
-  }
-  pen.b = -1;
-}
-
-/** Species look (block 5): leaf colours, crown blobs and alpha; pomegranates carry red fruit. */
-const SPECIES = {
-  pagodaTree: { leaf: [hexRgb('#4f6e3f'), hexRgb('#5c7c47'), hexRgb('#6d8c52'), hexRgb('#82a05e')], blobs: 7, a: undefined },
-  jujube: { leaf: [hexRgb('#6c8a4c'), hexRgb('#7b9a57'), hexRgb('#8eac63'), hexRgb('#a3bd74')], blobs: 4, a: 0.82 },
-  pomegranate: { leaf: [hexRgb('#4c6b3a'), hexRgb('#587a42'), hexRgb('#678a4b'), hexRgb('#7a9a56')], blobs: 3, a: undefined, fruit: hexRgb('#b8402f') },
-};
-
-function speciesTree(pen, T, i) {
-  const { x, y, r, zc } = T;
-  const sp = SPECIES[T.species];
-  pen.tag = 'trunk';
-  const trunkTop = zc - r * 0.2;
-  const tw = T.species === 'pagodaTree' ? 0.4 : 0.22;
-  pen.shape([[x - tw, y + tw, 0], [x + tw, y - tw, 0], [x + tw * 0.8, y - tw * 0.8, trunkTop], [x - tw * 0.8, y + tw * 0.8, trunkTop]], hexRgb('#5e4a3b'), { lw: 0.7, t: 'trunk' });
-  pen.tag = 'tree';
-  const blobs = [];
-  const n = sp.blobs + Math.floor(hash3(i, 41) * 2);
-  for (let k = 0; k < n; k++) {
-    const a = (k / n) * Math.PI * 2 + hash3(i, k) * 0.8;
-    const d = r * (0.35 + 0.15 * hash3(i, k, 2));
-    blobs.push([Math.cos(a) * d, Math.sin(a) * d, (hash3(i, k, 3) - 0.6) * r * 0.5, r * (0.55 + 0.12 * hash3(i, k, 4))]);
-  }
-  blobs.push([0, 0, r * 0.35, r * 0.66]);
-  blobs.sort((p, q) => p[0] + p[1] + p[2] * 0.6 - (q[0] + q[1] + q[2] * 0.6));
-  blobs.forEach(([dx, dy, dz, rr], k) => {
-    const lit = (dz / r + 0.6 - (dx + dy) / (3 * r)) * 1.4;
-    const c = sp.leaf[Math.max(0, Math.min(3, Math.round(lit + 1)))];
-    pen.blob([x + dx, y + dy, zc + dz], rr, jitter(c, i * 31 + k, 0.08), { lw: 0.7, t: 'tree', lumpy: 0.05, a: sp.a });
-  });
-  pen.tag = 'gm';
-  const ticks = [];
-  for (let k = 0; k < (sp.fruit ? 7 : 4); k++) {
-    const dx = (hash3(i, k, 7) - 0.5) * r;
-    const dy = (hash3(i, k, 8) - 0.5) * r;
-    const z = zc + r * 0.1 + hash3(i, k, 9) * r * 0.45;
-    ticks.push([[x + dx, y + dy, z], [x + dx + (sp.fruit ? 0.18 : 0.4), y + dy - (sp.fruit ? 0.18 : 0.4), z + (sp.fruit ? 0.12 : 0.3)]]);
-  }
-  pen.lines(ticks, sp.fruit ? { lw: 1.4, stroke: sp.fruit, a: 0.9, over: 0, t: 'treeTick' } : { lw: 0.5, a: 0.6, over: 0.1, t: 'treeTick' });
-}
-
-/**
- * A flat screen (block 5): a vine pergola (posts, a lattice and leaves at
- * z 2.4) or the summer mat awning, tianpeng (poles and a reed-mat top above
- * the eaves, its side mats rolled up under the edge). Tops are tagged as
- * crowns, so the heat wash shows through them in the thermal view.
- */
-function screen(pen, P, i) {
-  const { x0, y0, x1, y1, z } = P;
-  pen.tag = 'trunk';
-  const posts = [];
-  const step = P.kind === 'awning' ? 5 : 4;
-  for (let x = x0; x <= x1 + 0.01; x += (x1 - x0) / Math.max(1, Math.round((x1 - x0) / step))) for (const y of [y0, y1]) posts.push([[x, y, 0], [x, y, z]]);
-  for (let y = y0; y <= y1 + 0.01; y += (y1 - y0) / Math.max(1, Math.round((y1 - y0) / step))) for (const x of [x0, x1]) posts.push([[x, y, 0], [x, y, z]]);
-  pen.lines(posts, { lw: P.kind === 'awning' ? 0.6 : 0.7, stroke: hexRgb('#7a5c42'), a: 0.85, over: 0.05, t: 'trunk' });
-  pen.tag = 'tree';
-  if (P.kind === 'awning') {
-    pen.shape([[x0, y0, z], [x1, y0, z], [x1, y1, z], [x0, y1, z]], jitter(hexRgb('#d9c79c'), i * 13, 0.05), { lw: 1.0, t: 'tree', a: 0.92 });
-    const mats = [];
-    for (let x = x0 + 1; x < x1; x += 1) mats.push([[x, y0 + 0.2, z], [x, y1 - 0.2, z]]);
-    pen.lines(mats, { lw: 0.3, stroke: hexRgb('#9b8660'), a: 0.5, over: 0, t: 'treeTick' });
-    // rolled side mats under the south and east edges
-    pen.line([[x0, y1, z - 0.35], [x1, y1, z - 0.35], [x1, y0, z - 0.35]], { lw: 2.2, stroke: hexRgb('#b6a277'), a: 0.9, over: 0, t: 'trunk' });
-  } else {
-    pen.shape([[x0, y0, z], [x1, y0, z], [x1, y1, z], [x0, y1, z]], jitter(hexRgb('#6f8c4e'), i * 13, 0.06), { lw: 0.6, t: 'tree', a: 0.72 });
-    const lat = [];
-    for (let x = x0 + 1; x < x1; x += 1) lat.push([[x, y0, z + 0.05], [x, y1, z + 0.05]]);
-    pen.lines(lat, { lw: 0.35, stroke: hexRgb('#7a5c42'), a: 0.6, over: 0, t: 'treeTick' });
-    for (let k = 0; k < 4; k++) {
-      const bx = x0 + (x1 - x0) * (0.15 + 0.7 * hash3(i, k, 31));
-      const by = y0 + (y1 - y0) * (0.2 + 0.6 * hash3(i, k, 32));
-      pen.blob([bx, by, z + 0.3], 0.9 + 0.4 * hash3(i, k, 33), jitter(LEAF[1 + (k % 2)], i * 7 + k, 0.08), { lw: 0.5, t: 'tree', lumpy: 0.08, a: 0.85 });
-    }
-  }
-}
-
-/**
- * A solar (PV) canopy (block 6): steel posts every 8 m along its long edges
- * and a row of dark panels at z, gridded into modules; tagged as crowns
- * (as block 5 screens), so the heat wash of the bays shows through it.
- */
-function pvCanopy(pen, P, i) {
-  const { x0, y0, x1, y1, z } = P;
-  pen.tag = 'trunk';
-  const posts = [];
-  for (let x = x0 + 2; x <= x1 - 1.9; x += 8) for (const y of [y0 + 1, y1 - 1]) posts.push([[x, y, 0], [x, y, z - 0.2]]);
-  pen.lines(posts, { lw: 0.8, stroke: hexRgb('#6f7378'), a: 0.9, over: 0.05, t: 'trunk' });
-  pen.tag = 'tree';
-  pen.shape([[x0, y0, z], [x1, y0, z], [x1, y1, z - 0.6], [x0, y1, z - 0.6]], jitter(hexRgb('#40506a'), i * 17, 0.05), { lw: 0.9, t: 'tree', a: 0.94 });
-  const grid = [];
-  for (let x = x0 + 2; x < x1 - 0.5; x += 2) grid.push([[x, y0, z], [x, y1, z - 0.6]]);
-  const mid = (y0 + y1) / 2;
-  grid.push([[x0, mid, z - 0.3], [x1, mid, z - 0.3]]);
-  pen.lines(grid, { lw: 0.3, stroke: hexRgb('#9fb1c4'), a: 0.5, over: 0, t: 'treeTick' });
-}
-
-/**
- * A parked car of the block 6 lot, in three items (body sides, body top,
- * cabin) instead of block 1's six; tagged 'car', so the thermal view draws
- * only its outline over the heat wash (the car itself is not modelled).
- */
-function lotCar(pen, x, y, axis, colour, i) {
-  const L = 4.4;
-  const W = 1.8;
-  const c = hexRgb(colour);
-  const [hx, hy] = axis === 'x' ? [L / 2, W / 2] : [W / 2, L / 2];
-  const sides = (x0, y0, x1, y1, z0, z1) => [[[x0, y1, z0], [x1, y1, z0], [x1, y1, z1], [x0, y1, z1]], [[x1, y1, z0], [x1, y0, z0], [x1, y0, z1], [x1, y1, z1]]];
-  const top = (x0, y0, x1, y1, z) => [[x0, y0, z], [x1, y0, z], [x1, y1, z], [x0, y1, z]];
-  pen.tag = 'car';
-  pen.shapes(sides(x - hx, y - hy, x + hx, y + hy, 0.25, 1.0), { k: 'wall', c, n: [0, 1] }, { lw: 0.5, t: 'car' });
-  pen.shape(top(x - hx, y - hy, x + hx, y + hy, 1.0), scaleRgb(c, 1.08), { lw: 0.5, t: 'car' });
-  const [cx, cy] = axis === 'x' ? [L * 0.27, W * 0.42] : [W * 0.42, L * 0.27];
-  const off = (hash3(i, 3) - 0.5) * 0.6;
-  const ox = axis === 'x' ? off : 0;
-  const oy = axis === 'y' ? off : 0;
-  const g = mixRgb(c, hexRgb('#c9d3d6'), 0.45);
-  pen.shapes([...sides(x - cx + ox, y - cy + oy, x + cx + ox, y + cy + oy, 1.0, 1.5), top(x - cx + ox, y - cy + oy, x + cx + ox, y + cy + oy, 1.5)], g, { lw: 0.45, t: 'car' });
-}
-
-/** A glazed fish bowl under the awning (block 5). */
-function bowl(pen, x, y) {
-  pen.tag = 'o';
-  const pts = (z, r) => Array.from({ length: 12 }, (_, k) => [x + Math.cos((k / 12) * Math.PI * 2) * r, y + Math.sin((k / 12) * Math.PI * 2) * r, z]);
-  box(pen, x - 0.55, y - 0.55, x + 0.55, y + 0.55, 0, 0.75, hexRgb('#5e6f7a'), { t: 'o', lw: 0.5, top: hexRgb('#6f8f96') });
-  pen.shape(pts(0.76, 0.5), hexRgb('#7ea3ab'), { lw: 0.4, t: 'o' });
-}
-
-// ---- trees, cars, furniture -----------------------------------------------------
-
 const LEAF = [hexRgb('#5f7d48'), hexRgb('#6f8c52'), hexRgb('#85a05f'), hexRgb('#9bb46c')];
 
 function tree(pen, T, i) {
-  if (T.species) return speciesTree(pen, T, i);
   const { x, y, r, zc } = T;
   if (T.young) {
     // tree guard: two stakes and a tie, then a small, airy crown
@@ -3905,12 +3546,9 @@ function drawWorld(world, seed = 1) {
   order.forEach((k, gi) => {
     const ob = objs[k];
     pen.group = gi + 1;
-    if (ob.kind === 'b' && ob.o.style === 'hutong') hutongHouse(pen, ob.o, world);
-    else if (ob.kind === 'p' && ob.o.kind === 'pvCanopy') pvCanopy(pen, ob.o, ob.i);
-    else if (ob.kind === 'c' && world.scene.parkingBlock) lotCar(pen, ...ob.o, ob.i);
-    else if (ob.kind === 'p') screen(pen, ob.o, ob.i);
-    else if (ob.kind === 'f') bowl(pen, ...ob.o);
-    else if (ob.kind === 'b') building(pen, ob.o, world);
+    // blocks 5 and 6 draw their own objects (world.draw.objects: htkit.js, pkkit.js); true if it did
+    if (world.draw && world.draw.objects && world.draw.objects(pen, ob, world)) return;
+    if (ob.kind === 'b') building(pen, ob.o, world);
     else if (ob.kind === 't') tree(pen, ob.o, ob.i);
     else if (ob.kind === 'c') car(pen, ...ob.o, ob.i);
     else if (ob.kind === 'n') bench(pen, ob.o.x, ob.o.y, ob.o.a);
@@ -3921,7 +3559,7 @@ function drawWorld(world, seed = 1) {
 }
 
 
-return { GROUND_RGB, ROOF_RGB, drawGround, drawDecor, box, isGlassFace, building, hutongHouse, screen, pvCanopy, lotCar, bowl, tree, car, bench, lamp, drawWorld };
+return { GROUND_RGB, ROOF_RGB, WIN, jitter, groundEllipse, drawGround, drawDecor, speckle, box, isGlassFace, building, LEAF, tree, car, bench, lamp, drawWorld };
 })();
 
 __m['life'] = (() => {
@@ -4249,7 +3887,6 @@ __m['render'] = (() => {
 const { iso, hash3, noise2, clamp, smooth, rgbCss, mixRgb, scaleRgb, hexRgb, PAPER, INK, ISO_C, ISO_S, ISO_Z, DEG } = __m['core'];
 const { shadowPolys, heatRgb } = __m['thermal'];
 const { sweatState, shadeAt } = __m['life'];
-const { overlayDT, dayWeight } = __m['wind'];
 
 const TILE = 512;
 const HOUR_STEP = 0.25;
@@ -4266,14 +3903,6 @@ const SWEAT_CSS = 'rgba(143,182,207,0.95)';
 // glass pane colours by type (day view), and the reflection-spot glint
 const GLASS_RGB = { clear: hexRgb('#7d9ea6'), lowe: hexRgb('#8ea4b8'), mirror: hexRgb('#b9c3c6') };
 const GLINT = [255, 246, 214];
-const AC_INK = hexRgb('#8a2f22');
-// block 4: the water's air overlay (cooling / warming) and the wind-line ink
-const AIR_COOL = hexRgb('#3b6573');
-const AIR_WARM = hexRgb('#b96d4d');
-const WIND_INK = hexRgb('#24354a');
-// block 6: the night-release strokes (heat out of the ground) and the uptake ticks
-const FLUX_UP = hexRgb('#a2452f');
-const FLUX_DOWN = hexRgb('#3b6573');
 const HAND_FONT = '"Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive';
 
 function makeCanvas(w, h) {
@@ -4359,6 +3988,7 @@ class Renderer {
     this.spotFor = null; // (hq) -> reflection spot field on the 2 m grid, or null (block 3)
     this.wind = null; // block 4: {lines, items} wind lines (wind.js windLines + pen.stream items)
     this.flux = null; // block 6: (hq) -> [{x, y, z, g}] ground heat flux samples (parking.js fluxSamples)
+    this.overlay = null; // a block's overlay (R, ctx, f, cam, W, H, alpha, look, hq), drawn under the people
     this.pool = world.scene.pooling !== false; // edge pooling on washes (off in block 5)
     // block 5: skip shadow polygons off the tile. Not used elsewhere: Skia may anti-alias a smaller
     // path differently, so blocks 1-4 keep their exact pixels
@@ -5092,9 +4722,8 @@ class Renderer {
     this.stats.fluxUp = 0;
     this.stats.fluxDown = 0;
     if (lifeA > 0) {
-      if (this.wind && (look.wind || look.air)) this.drawWind(ctx, f, cam, W, H, lifeA, look, hq);
-      if (look.ac) this.drawAc(ctx, f, cam, W, H, lifeA);
-      if (look.flux && this.flux) this.drawFlux(ctx, f, cam, W, H, lifeA, hq);
+      // block overlays (block 3 AC plumes, block 4 wind lines and air, block 6 night release), set by the block's own module
+      if (this.overlay) this.overlay(this, ctx, f, cam, W, H, lifeA, look, hq);
       if (look.people !== false) this.drawPeople(ctx, f, cam, hq, W, H, lifeA, look.thermalMix ?? 0);
       if (look.notes) this.drawNotes(ctx, cam, W, H, look.notes, lifeA);
     }
@@ -5198,298 +4827,6 @@ class Renderer {
     const c = sh.night ? -1 : shadeAt(sh, a.x, a.y);
     const lit = c === 0 || c === 4 ? h.sunlit : c === 3 ? 1 : 0;
     return sweatState(a.k, t, h.tmrt, lit);
-  }
-
-  /**
-   * AC overlay (block 3, information only): rooftop plant on each tall
-   * building with a rising heat plume, and one label saying the model does not
-   * feel this heat. Pure function of (frame, camera).
-   */
-  drawAc(ctx, f, cam, W, H, alpha) {
-    const [ox, oy, Z] = this.origin(cam, W, H);
-    const d = this.dpr;
-    ctx.save();
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.lineCap = 'round';
-    let label = null;
-    for (const B of this.world.buildings) {
-      if (B.h < 25) continue;
-      const units = 1 + Math.floor(((B.x1 - B.x0) * (B.y1 - B.y0)) / 2500);
-      for (let u = 0; u < Math.min(3, units); u++) {
-        const x = B.x0 + (B.x1 - B.x0) * (0.25 + 0.5 * hash3(B.index, u, 61));
-        const y = B.y0 + (B.y1 - B.y0) * (0.25 + 0.5 * hash3(B.index, u, 62));
-        const p = iso(x, y, B.h + 1.5);
-        const X = ox + p[0] * Z;
-        const Y = oy + p[1] * Z;
-        if (X < -40 || X > W + 40 || Y < -80 || Y > H + 40) continue;
-        if (this.clip && (X < this.clip[0] || X > this.clip[1])) continue;
-        ctx.globalAlpha = alpha * 0.8;
-        ctx.strokeStyle = rgbCss(AC_INK);
-        ctx.lineWidth = 1.1 * d;
-        for (let k = 0; k < 3; k++) {
-          ctx.beginPath();
-          const x0 = X + (k - 1) * 4 * d;
-          for (let i = 0; i <= 10; i++) {
-            const v = i / 10;
-            const yy = Y - v * 26 * d;
-            const xx = x0 + Math.sin(v * 7 + f * 0.08 + k * 1.7 + u) * 2.2 * d * (0.4 + v);
-            if (i) ctx.lineTo(xx, yy);
-            else ctx.moveTo(xx, yy);
-          }
-          ctx.stroke();
-        }
-        if (!label || Y < label[1]) label = [X, Y - 30 * d];
-      }
-    }
-    if (label) {
-      ctx.globalAlpha = alpha;
-      ctx.font = `${Math.round(14 * d)}px "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive`;
-      ctx.textBaseline = 'bottom';
-      const text = 'AC rejected heat — not felt in this model';
-      const w = ctx.measureText(text).width;
-      const bx = clamp(label[0] - w / 2, 8 * d, W - w - 8 * d);
-      const by = Math.max(24 * d, label[1]);
-      ctx.fillStyle = 'rgba(248,243,231,0.94)';
-      ctx.fillRect(bx - 5 * d, by - 19 * d, w + 10 * d, 23 * d);
-      ctx.strokeStyle = 'rgba(138,47,34,0.7)';
-      ctx.lineWidth = 0.9 * d;
-      ctx.strokeRect(bx - 5 * d, by - 19 * d, w + 10 * d, 23 * d);
-      ctx.fillStyle = rgbCss(AC_INK);
-      ctx.fillText(text, bx, by);
-    }
-    ctx.restore();
-    this.stats.ac = !!label;
-  }
-
-  /**
-   * Block 6: the night-release overlay. On a 10 m grid of samples, where the
-   * ground gives stored heat back (G < 0) soft warm strokes rise from the
-   * surface, longer and stronger for more W m-2; where it takes heat in
-   * (G > 0) short cool ticks point down; the share of samples drawn grows
-   * with |G| (all of them from 120 W m-2). The strokes drift upward with the
-   * frame number (a pure function of frame, camera and hour), and a label
-   * says what they show.
-   */
-  drawFlux(ctx, f, cam, W, H, alpha, hq) {
-    const [ox, oy, Z] = this.origin(cam, W, H);
-    const d = this.dpr;
-    const samples = this.flux(hq);
-    const B = 5;
-    const up = Array.from({ length: B }, () => []);
-    const down = Array.from({ length: B }, () => []);
-    const unit = Math.max(10 * d, 4.2 * Z); // stroke length at 100 W m-2
-    for (let k = 0; k < samples.length; k++) {
-      const s = samples[k];
-      const a = Math.abs(s.g);
-      // stroke density follows |G| too: every sample at 120 W m-2 or more, fewer below
-      if (a < 15 || hash3(k, 9, 91) >= a / 120) continue;
-      const p = iso(s.x, s.y, s.z);
-      const X = ox + p[0] * Z;
-      const Y = oy + p[1] * Z;
-      if (X < -20 || X > W + 20 || Y < -unit * 2 || Y > H + 20) continue;
-      if (this.clip && (X < this.clip[0] || X > this.clip[1])) continue;
-      const b = Math.min(B - 1, Math.floor((a / 175) * B));
-      (s.g < 0 ? up : down)[b].push(X, Y, a, k);
-    }
-    ctx.save();
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.lineCap = 'round';
-    ctx.lineWidth = Math.max(1.1 * d, 0.45 * Z);
-    const t = f / 60;
-    ctx.strokeStyle = rgbCss(FLUX_UP);
-    for (let b = 0; b < B; b++) {
-      const P = up[b];
-      if (!P.length) continue;
-      ctx.globalAlpha = alpha * (0.25 + 0.6 * ((b + 0.5) / B));
-      ctx.beginPath();
-      for (let q = 0; q < P.length; q += 4) {
-        const L = (unit * Math.min(1.75, P[q + 2] / 100));
-        const k = P[q + 3];
-        // rise: the stroke slides up by up to half its length and starts again (period 2.5 s)
-        const ph = (t / 2.5 + hash3(k, 7, 91)) % 1;
-        const y0 = P[q + 1] - ph * L * 0.5;
-        const x0 = P[q] + (hash3(k, 8, 91) - 0.5) * 3 * d;
-        ctx.moveTo(x0, y0);
-        for (let i = 1; i <= 4; i++) ctx.lineTo(x0 + Math.sin(i * 1.7 + k + t * 1.3) * 1.4 * d, y0 - (L * i) / 4);
-      }
-      ctx.stroke();
-      this.stats.fluxUp += P.length / 4;
-    }
-    ctx.strokeStyle = rgbCss(FLUX_DOWN);
-    for (let b = 0; b < B; b++) {
-      const P = down[b];
-      if (!P.length) continue;
-      ctx.globalAlpha = alpha * (0.15 + 0.35 * ((b + 0.5) / B));
-      ctx.beginPath();
-      for (let q = 0; q < P.length; q += 4) {
-        const L = unit * 0.45 * Math.min(1.75, P[q + 2] / 100);
-        const x0 = P[q] + (hash3(P[q + 3], 8, 91) - 0.5) * 3 * d;
-        const y0 = P[q + 1] - L - 2 * d;
-        ctx.moveTo(x0, y0);
-        ctx.lineTo(x0, y0 + L);
-        ctx.moveTo(x0 - 1.6 * d, y0 + L - 2 * d);
-        ctx.lineTo(x0, y0 + L);
-        ctx.lineTo(x0 + 1.6 * d, y0 + L - 2 * d);
-      }
-      ctx.stroke();
-      this.stats.fluxDown += P.length / 4;
-    }
-    const night = this.stats.fluxUp >= this.stats.fluxDown;
-    const text = `Ground heat flux G (simulated): ${night ? 'rising strokes = stored heat coming back out' : 'ticks down = heat going into the ground; rising strokes = heat coming back out'} · more and longer strokes = more W/m²`;
-    ctx.globalAlpha = alpha;
-    ctx.font = `${Math.round(13 * d)}px ${HAND_FONT}`;
-    ctx.textBaseline = 'bottom';
-    const w = ctx.measureText(text).width;
-    const bx = clamp(W / 2 - w / 2, 8 * d, W - w - 8 * d);
-    const by = H - 84 * d;
-    ctx.fillStyle = 'rgba(248,243,231,0.94)';
-    ctx.fillRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
-    ctx.strokeStyle = rgbCss(FLUX_UP, 0.7);
-    ctx.lineWidth = 0.9 * d;
-    ctx.strokeRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
-    ctx.fillStyle = rgbCss(FLUX_UP);
-    ctx.fillText(text, bx, by);
-    ctx.restore();
-    this.stats.fluxLabel = text;
-  }
-
-  /**
-   * Block 4: the water's illustrative air overlay (a soft band along each wind
-   * line, cool by day, warm at night, strength |dTa|) and the pen-drawn wind
-   * lines with moving dashes (spacing and speed proportional to u_i), each
-   * with a label saying what it is. Vertices hidden behind buildings are
-   * skipped. Pure function of (frame, camera, look).
-   */
-  drawWind(ctx, f, cam, W, H, alpha, look, hq) {
-    const [ox, oy, Z] = this.origin(cam, W, H);
-    const d = this.dpr;
-    const { lines, items } = this.wind;
-    const t = f / 60;
-    const u = look.u || 1;
-    ctx.save();
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    const X = (sp, v) => ox + sp[v * 2] * Z;
-    const Y = (sp, v) => oy + sp[v * 2 + 1] * Z;
-    const labels = [];
-    if (look.air) {
-      const wd = dayWeight(this.hourCtx(hq).sun.alt);
-      // strength in 6 alpha steps per sign, one path each
-      const B = 6;
-      const paths = [[], []];
-      for (let s = 0; s < 2; s++) for (let b = 0; b < B; b++) paths[s].push([]);
-      lines.forEach((L, li) => {
-        const sp = items[li].sp;
-        for (let v = 0; v + 1 < L.fw.length; v++) {
-          if (L.hid[v] || L.hid[v + 1] || L.wet[v + 1]) continue; // over land only
-          const dt = overlayDT(L.lam[v], L.kind[v], wd);
-          const a = Math.abs(dt);
-          if (a < 0.02) continue;
-          const b = Math.min(B - 1, Math.floor((a / 1.0) * B));
-          paths[dt < 0 ? 0 : 1][b].push(v, li);
-        }
-      });
-      ctx.lineWidth = Math.max(4 * d, 6 * Z);
-      for (let s = 0; s < 2; s++) {
-        ctx.strokeStyle = rgbCss(s === 0 ? AIR_COOL : AIR_WARM);
-        for (let b = 0; b < B; b++) {
-          const P = paths[s][b];
-          if (!P.length) continue;
-          ctx.globalAlpha = alpha * (0.12 + 0.5 * ((b + 0.5) / B));
-          ctx.beginPath();
-          for (let k = 0; k < P.length; k += 2) {
-            const v = P[k];
-            const sp = items[P[k + 1]].sp;
-            ctx.moveTo(X(sp, v), Y(sp, v));
-            ctx.lineTo(X(sp, v + 1), Y(sp, v + 1));
-          }
-          ctx.stroke();
-          this.stats.airSegs += P.length / 2;
-        }
-      }
-      labels.push([wd > 0.5 ? AIR_COOL : AIR_WARM, `Air effect of the water: illustrative, from literature, not simulated (${wd > 0.5 ? 'cooler' : wd < 0.5 ? 'warmer' : 'cooler / warmer'})`]);
-    }
-    if (look.wind) {
-      ctx.strokeStyle = rgbCss(WIND_INK);
-      ctx.fillStyle = rgbCss(WIND_INK);
-      ctx.lineWidth = Math.max(1.6 * d, this.lineBase(cam.z) * 1.9);
-      ctx.globalAlpha = alpha * 0.9;
-      ctx.beginPath();
-      const heads = [];
-      let dashes = 0;
-      lines.forEach((L, li) => {
-        const sp = items[li].sp;
-        // a dash is "on" where frac(phi / u - t) < 0.5 (phi: integral of ds / (4 f_w))
-        let on = false;
-        for (let v = 0; v + 1 < L.fw.length; v++) {
-          if (L.hid[v] || L.hid[v + 1]) {
-            on = false;
-            continue;
-          }
-          const p0 = L.phi[v] / u - t;
-          const p1 = L.phi[v + 1] / u - t;
-          if (p1 <= p0) continue;
-          // walk the on / off boundaries inside this segment
-          let a = p0;
-          while (a < p1) {
-            const fr = a - Math.floor(a);
-            const inOn = fr < 0.5;
-            const next = Math.min(p1, Math.floor(a) + (inOn ? 0.5 : 1));
-            const ta = (a - p0) / (p1 - p0);
-            const tb = (next - p0) / (p1 - p0);
-            if (inOn) {
-              const xa = X(sp, v) + (X(sp, v + 1) - X(sp, v)) * ta;
-              const ya = Y(sp, v) + (Y(sp, v + 1) - Y(sp, v)) * ta;
-              const xb = X(sp, v) + (X(sp, v + 1) - X(sp, v)) * tb;
-              const yb = Y(sp, v) + (Y(sp, v + 1) - Y(sp, v)) * tb;
-              if (!on) {
-                ctx.moveTo(xa, ya);
-                dashes++;
-              }
-              ctx.lineTo(xb, yb);
-              on = true;
-              // the head of every third dash gets a small arrow
-              if (next === Math.floor(a) + 0.5 && next < p1 + 1e-9 && ((Math.floor(a) % 3) + 3) % 3 === 0) heads.push([xb, yb, X(sp, v + 1) - X(sp, v), Y(sp, v + 1) - Y(sp, v)]);
-            } else on = false;
-            if (next === a) break;
-            a = next;
-          }
-        }
-      });
-      ctx.stroke();
-      const hs = Math.max(2.5 * d, 1.2 * Z);
-      ctx.beginPath();
-      for (const [x, y, dx, dy] of heads) {
-        const L = Math.hypot(dx, dy) || 1;
-        const ux = dx / L;
-        const uy = dy / L;
-        ctx.moveTo(x - ux * hs - uy * hs * 0.6, y - uy * hs + ux * hs * 0.6);
-        ctx.lineTo(x, y);
-        ctx.lineTo(x - ux * hs + uy * hs * 0.6, y - uy * hs - ux * hs * 0.6);
-      }
-      ctx.stroke();
-      this.stats.windDashes = dashes;
-      labels.unshift([WIND_INK, `Wind lines: assumed direction × shelter factor, not computed flow · ${u} m/s from the river`]);
-    }
-    // labels, bottom centre above the hour bar
-    ctx.globalAlpha = alpha;
-    ctx.font = `${Math.round(13 * d)}px ${HAND_FONT}`;
-    ctx.textBaseline = 'bottom';
-    labels.forEach(([c, text], k) => {
-      const w = ctx.measureText(text).width;
-      const bx = clamp(W / 2 - w / 2, 8 * d, W - w - 8 * d);
-      const by = H - (84 + (labels.length - 1 - k) * 26) * d;
-      ctx.fillStyle = 'rgba(248,243,231,0.94)';
-      ctx.fillRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
-      ctx.strokeStyle = rgbCss(c, 0.7);
-      ctx.lineWidth = 0.9 * d;
-      ctx.strokeRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
-      ctx.fillStyle = rgbCss(c);
-      ctx.fillText(text, bx, by);
-    });
-    ctx.restore();
-    this.stats.windLabels = labels.map((l) => l[1]);
   }
 
   /**
@@ -5693,7 +5030,7 @@ class Renderer {
 }
 
 
-return { TILE, HOUR_STEP, INTRO, PREVIEW_BUDGET, quantHour, GLASS_RGB, Renderer };
+return { TILE, HOUR_STEP, INTRO, PREVIEW_BUDGET, quantHour, GLASS_RGB, HAND_FONT, Renderer };
 })();
 
 __m['glossary'] = (() => {
@@ -5781,14 +5118,6 @@ const GLOSSARY = {
     src: 'brief',
     why: 'Reflecting more sun keeps the roof, and the rooms under it, much cooler.',
   },
-  permeable: {
-    term: 'Permeable paving',
-    text: 'Paving with gaps or pores that let rain soak through into the ground.',
-    range: 'Albedo 0.15–0.30; 5–10 °C cooler than concrete while wet (not modelled in this block).',
-    src: 'brief',
-    why: 'Water evaporating from wet paving cools it, but only while there is water left to evaporate.',
-    scenes: ['asphalt-park'],
-  },
   wallReflection: {
     term: 'Wall reflection',
     text: 'Sunlight that building walls bounce back onto the street and onto people. Opaque walls scatter it in all directions (diffuse); glass reflects it like a mirror (specular).',
@@ -5821,13 +5150,6 @@ const GLOSSARY = {
     why: 'A façade lit at a grazing angle can glare onto the street even with ordinary clear glass.',
     scenes: ['glass-cbd'],
   },
-  reflectionSpot: {
-    term: 'Reflection spot',
-    text: 'The patch of ground where a sunlit glass façade sends its reflected sunshine. It moves through the day and can fall in the shade of other buildings.',
-    model: (S) => S.spotLine,
-    why: 'Someone standing in a spot is out of the sun and still feels much of its heat.',
-    scenes: ['glass-cbd'],
-  },
   canyon: {
     term: 'Street canyon (H/W)',
     text: 'A street lined by buildings on both sides. Its aspect ratio H/W is the building height divided by the street width.',
@@ -5836,52 +5158,12 @@ const GLOSSARY = {
     why: 'Deep canyons shade the street by day but see little cold sky at night, so they cool slowly after dark.',
     scenes: ['glass-cbd', 'hutong'],
   },
-  lowE: {
-    term: 'Low-e glass',
-    text: 'Glass with a thin metal-oxide coating that keeps out much of the sun’s heat (solar control) and holds in indoor heat (low emissivity on the coated face).',
-    range: 'Solar reflectance about 0.15–0.35 head-on; Singapore caps glass daylight reflectance at 20%.',
-    src: 'brief3, bca',
-    why: 'What keeps heat out of the offices goes somewhere: more of it is reflected onto the street.',
-    scenes: ['glass-cbd'],
-  },
-  acHeat: {
-    term: 'AC waste heat',
-    text: 'Air conditioners move heat from inside to outside and add their own electricity: rejected heat = cooling × (1 + 1/COP).',
-    range: 'Dense urban areas 20–70 W m⁻² of ground area, sometimes over 100; central Tokyo over 400 W m⁻² by day.',
-    src: 'xie2016, sailor2011',
-    why: 'It warms the street air; this model holds the air temperature fixed, so the heat is shown but not felt.',
-    scenes: ['glass-cbd'],
-  },
   // ---- block 4 (waterfront) -------------------------------------------------
   windFactor: {
     term: 'Wind factor (f_w)',
     text: 'How much of the open-site wind reaches a spot: 1 in the open, lower in the lee of buildings, a little above 1 in streets that point along the wind. Here it is a geometric rule (shelter × channelling), not a flow simulation.',
     model: (S) => S.windLine,
     why: 'More wind carries heat off a sunlit pavement faster and makes a hot day feel cooler; it does not change the air temperature here.',
-    scenes: ['waterfront'],
-  },
-  ventilationCorridor: {
-    term: 'Ventilation corridor',
-    text: 'A wide, open street or green strip that lines up with the prevailing wind, so the breeze (here, off the river) can run into the city.',
-    range: 'Planning guides ask for corridors within about 30° of the prevailing wind; along the Ota River (Hiroshima) river cooling was detected 150–500 m inland along streets perpendicular to the river (unverified).',
-    src: 'corridor, ota',
-    why: 'Streets across the wind are sheltered by the buildings upwind; corridors keep the wind moving.',
-    scenes: ['waterfront'],
-  },
-  fetch: {
-    term: 'Fetch',
-    text: 'The distance the wind has travelled over a surface. Air that has just crossed water carries a little of its coolness for a short fetch over land, then mixes with the city air.',
-    range: 'River Don, Sheffield: about 30 m with open banks; Cheonggyecheon, Seoul: 30–80 m; small water bodies: −0.2 K typical in the afternoon.',
-    src: 'hathway2012, cheonggyecheon, jacobs2020',
-    why: 'The cooling of the air by water fades within tens of metres, so it helps the promenade, not the streets behind.',
-    scenes: ['waterfront'],
-  },
-  sheltering: {
-    term: 'Sheltering (lee)',
-    text: 'The slow, gusty zone downwind of a building, where the wind is much weaker than in the open and recovers only gradually.',
-    range: 'Recirculation behind a building about 1.6–2.6 times its width; recovery to the open wind after about 5 building heights is an assumption of this model.',
-    src: 'wake, brief4',
-    why: 'A sheltered sunlit pavement loses less heat to the air, so it runs hotter than an exposed one.',
     scenes: ['waterfront'],
   },
   apparentTemp: {
@@ -5923,81 +5205,13 @@ const GLOSSARY = {
     scenes: ['hutong'],
   },
   // ---- block 6 (car park and brownfield) -------------------------------------
-  heatStorage: {
-    term: 'Heat storage',
-    text: 'Heat a surface soaks down into its own material by day and gives back after dark. Thick, dense paving stores a lot; a thin metal sheet almost none.',
-    model: (S) => S.storageLine,
-    why: 'Stored heat is why a car park stays warm long after sunset, while a tin roof is cold within the hour.',
-    scenes: ['parking'],
-  },
-  dampingDepth: {
-    term: 'Damping depth (d)',
-    text: 'How deep the daily swing of the surface temperature reaches into the ground: at depth d it is down to about a third, at 3d to a twentieth. d = √(κτ/π), κ the thermal diffusivity and τ one day.',
-    model: (S) => S.dampingLine,
-    why: 'A slab much thicker than d holds a full day\'s heat; thin paving over loose stone holds less, so it runs hotter by day and cooler at night.',
-    scenes: ['parking'],
-  },
-  groundFlux: {
-    term: 'Ground heat flux (G)',
-    text: 'The heat going into the ground through its surface (positive) or coming back out (negative), in watts per square metre. The night-release strokes (G) draw it.',
-    model: (S) => S.fluxLine,
-    why: 'At night G is the heat the pavement keeps feeding to its surface, so the surface cannot cool down to the air.',
-    scenes: ['parking'],
-  },
-  thermalInertia: {
-    term: 'Thermal inertia',
-    text: 'How slowly a surface changes temperature when its heating changes: high for thick, dense materials (asphalt, concrete), low for loose or thin ones (soil, ballast, sheet metal). Measured here by the admittance μ.',
-    model: (S) => S.inertiaLine,
-    why: 'High-inertia surfaces lag behind the sun: they peak late and stay warm into the night.',
-    scenes: ['parking'],
-  },
   // ---- block 2 (sponge-retrofit) --------------------------------------------
-  permeablePaving: {
-    term: 'Permeable paving',
-    text: 'Pavers with open joints, or porous asphalt, that let rain soak through instead of running off.',
-    range: 'Wetted permeable pavement 15–35 °C cooler than dense asphalt in the early afternoon, 2–7 °C cooler about a day later; dry porous asphalt about 5 °C warmer.',
-    src: 'li2013',
-    why: 'It cools only while there is water in it to evaporate; dry, it can be as hot as the asphalt it replaced, or hotter.',
-    scenes: ['sponge-retrofit'],
-  },
-  greenRoof: {
-    term: 'Green roof',
-    text: 'A roof covered with a thin layer of soil-like substrate and hardy plants such as sedum (an “extensive” green roof).',
-    range: 'Albedo about 0.15–0.25; up to 18 °C cooler than a black roof in a New York case; Bowen ratio about 1–2.',
-    src: 'brief2, noaaGreen, heusinger',
-    why: 'Plants and damp substrate turn sunshine into evaporation instead of heat, and the roof also holds back rain.',
-    scenes: ['sponge-retrofit'],
-  },
-  rainGarden: {
-    term: 'Rain garden',
-    text: 'A shallow planted hollow that collects rain running off streets and roofs and lets it soak away.',
-    range: 'No measured cooling figure in our sources; this block uses engine assumptions (evaporative fraction 0.8 wet, 0.35 dry, 3-day drying).',
-    src: 'engine, mccoll',
-    why: 'It manages rain where it falls, and its damp soil stays cooler than paving for days after rain.',
-    scenes: ['sponge-retrofit'],
-  },
   daysSinceRain: {
     term: 'Days since rain (d)',
     text: 'How many clear days have passed since the last soaking rain. d = 0 is the best case: a clear day after overnight rain.',
     range: 'Wet surfaces dry with a time scale τ: pavers about 1 day, soils about 3 days, green-roof substrate about 4 days.',
     src: 'brief2, mccoll',
     why: 'Wet-surface cooling fades as the stored water evaporates, so a sponge-city street is coolest just after rain.',
-    scenes: ['sponge-retrofit'],
-  },
-  bowen: {
-    term: 'Bowen ratio and evaporative fraction',
-    text: 'Two ways to describe how much of a surface’s energy goes into evaporating water. In this model the evaporative fraction (EF) is the share of the positive net radiation spent on evaporation (EF × max(Q*, 0)). The Bowen ratio, used in field studies, is sensible heat ÷ latent heat; if heat stored in the ground is ignored, EF ≈ 1 ÷ (1 + Bowen ratio).',
-    range: 'Green roofs: Bowen ratio below 1 to about 2 in field data; this block uses EF 0.5 for a wet and 0.25 for a dry green roof (the brief’s values); dry paving EF near 0.',
-    src: 'heusinger, brief2',
-    why: 'The more energy goes into evaporation, the less is left to heat the surface.',
-    scenes: ['sponge-retrofit'],
-  },
-  spongeCity: {
-    term: 'Sponge city (海绵城市)',
-    text: 'China’s national programme (State Council guideline, 2015) to manage rain where it falls: let it soak in, slow it, store it, clean it, use it, and only then drain it (渗、滞、蓄、净、用、排).',
-    range: 'Target: absorb and use 70% of rainfall on site; 20% of built-up area by 2020, 80% by 2030.',
-    src: 'sponge2015',
-    why: 'Its goals are flooding and water supply; cooler streets are a side benefit, and no robust measured block-scale cooling figure was found.',
     scenes: ['sponge-retrofit'],
   },
   albedoAgeing: {
@@ -6106,6 +5320,251 @@ __m['waterfront'] = { isWaterfront: () => false };
 
 __m['wfui'] = {};
 
+__m['htkit'] = (() => {
+// htkit: what the pen draws for block 5 (hutong) only: the courtyard houses,
+// species trees, pergolas and mat awnings, fish bowls, brick courses and the
+// well. kit.js reaches them through world.draw (set by hutong.js hutongSetup),
+// so the other pages do not carry this code.
+const { hash3, hexRgb, scaleRgb } = __m['core'];
+const { box, jitter, ROOF_RGB, LEAF, WIN, groundEllipse } = __m['kit'];
+
+const PILLAR = hexRgb('#8e3b2c');
+const LATTICE = hexRgb('#5b4636');
+
+/**
+ * A single-storey courtyard house (block 5): grey brick walls, one or two
+ * gabled grey tile roofs (ridge along x for B.gable 'x', along y for 'y'),
+ * tile rows and the ridge in one stroke item each; courtyard-facing walls
+ * (B.court) get red pillars and lattice windows, lane-facing walls stay
+ * blank but for small high windows. The roof rise is drawing only: the model
+ * treats the house as a box at eave height.
+ */
+function hutongHouse(pen, B, world) {
+  pen.b = B.index;
+  const { x0, y0, x1, y1, h } = B;
+  const wall = jitter(hexRgb(B.wall), B.index * 3, 0.05);
+  const roof = jitter(ROOF_RGB.greyTile, B.index * 5, 0.06);
+  pen.tag = 'w';
+  pen.shape([[x0, y1, 0], [x1, y1, 0], [x1, y1, h], [x0, y1, h]], { k: 'wall', c: wall, n: [0, 1] }, { lw: 1.05, t: 'w' });
+  pen.shape([[x1, y1, 0], [x1, y0, 0], [x1, y0, h], [x1, y1, h]], { k: 'wall', c: wall, n: [1, 0] }, { lw: 1.05, t: 'w' });
+  // shade hatching, one item per face (drawn only when the face is turned from the sun)
+  for (const face of ['S', 'E']) {
+    const len = face === 'S' ? x1 - x0 : y1 - y0;
+    const P = (u, z) => (face === 'S' ? [x0 + u, y1, z] : [x1, y1 - u, z]);
+    const segs = [];
+    for (let t = 1.2; t < len + h; t += 1.6) {
+      const a = Math.max(0, t - h);
+      const b = Math.min(len, t);
+      if (b - a >= 0.5) segs.push([P(a, t - a), P(b, t - b)]);
+    }
+    if (segs.length) pen.lines(segs, { lw: 0.4, a: 0.28, over: 0.1, t: face === 'S' ? 'hatchS' : 'hatchE' });
+  }
+  // façades: courtyard sides get pillars and lattice; lane sides small high windows
+  const court = B.court ?? '';
+  for (const face of ['S', 'E']) {
+    const len = face === 'S' ? x1 - x0 : y1 - y0;
+    const P = (u, z) => (face === 'S' ? [x0 + u, y1, z] : [x1, y1 - u, z]);
+    const toCourt = face === 'S' ? court.includes('S') || court === 'NS' : court.includes('E');
+    pen.tag = 'win';
+    if (toCourt) {
+      // the panes and the doors of a façade are one item each (Pen.shapes); lit together at night
+      const bays = Math.max(1, Math.round(len / 3.3));
+      const w = len / bays;
+      const pil = [];
+      const lat = [];
+      const panes = [];
+      const doors = [];
+      for (let k = 0; k <= bays; k++) pil.push([P(k * w, 0), P(k * w, h - 0.3)]);
+      for (let k = 0; k < bays; k++) {
+        const a = k * w + 0.45;
+        const b = (k + 1) * w - 0.45;
+        if (hash3(B.index, k, 17) < 0.25) {
+          doors.push([P(a + 0.4, 0), P(b - 0.4, 0), P(b - 0.4, 2.5), P(a + 0.4, 2.5)]);
+          continue;
+        }
+        panes.push([P(a, 1), P(b, 1), P(b, h - 0.6), P(a, h - 0.6)]);
+        for (let u = a + 0.8; u < b - 0.3; u += 0.8) lat.push([P(u, 1), P(u, h - 0.6)]);
+        lat.push([P(a, 2.2), P(b, 2.2)]);
+      }
+      if (panes.length) pen.shapes(panes, { k: 'win', h: hash3(B.index * 7 + (face === 'S' ? 0 : 1), 3), c: scaleRgb(WIN, 0.95) }, { lw: 0.45, over: 0.3, t: 'win' });
+      if (doors.length) pen.shapes(doors, hexRgb('#6b4e3a'), { lw: 0.5, t: 'win' });
+      if (lat.length) pen.lines(lat, { lw: 0.3, stroke: LATTICE, a: 0.55, over: 0, t: 'win' });
+      pen.lines(pil, { lw: 0.9, stroke: PILLAR, a: 0.85, over: 0, t: 'win' });
+    } else {
+      const panes = [];
+      for (let u = 3 + 3 * hash3(B.index, face === 'S' ? 1 : 2, 19); u < len - 1.5; u += 6.5) panes.push([P(u, 2.6), P(u + 0.9, 2.6), P(u + 0.9, 3.3), P(u, 3.3)]);
+      if (panes.length) pen.shapes(panes, { k: 'win', h: hash3(B.index, face === 'S' ? 1 : 2, 5), c: WIN }, { lw: 0.4, over: 0.2, t: 'win' });
+    }
+  }
+  // eave line
+  pen.tag = 'w';
+  pen.line([[x0, y1, h - 0.25], [x1, y1, h - 0.25], [x1, y0, h - 0.25]], { lw: 0.45, a: 0.55, t: 'w' });
+  // roofs: back (north / west) parts first
+  pen.tag = 'r';
+  const alongX = B.gable !== 'y';
+  const depth = alongX ? y1 - y0 : x1 - x0;
+  const nr = B.ridges ?? Math.max(1, Math.round(depth / 5));
+  for (let r = 0; r < nr; r++) {
+    const a = (alongX ? y0 : x0) + (depth * r) / nr;
+    const b = (alongX ? y0 : x0) + (depth * (r + 1)) / nr;
+    const m = (a + b) / 2;
+    const rise = Math.min(1.8, (b - a) * 0.36);
+    const z = h + rise;
+    const tiles0 = [];
+    const tiles1 = [];
+    if (alongX) {
+      pen.shape([[x0, a, h], [x1, a, h], [x1, m, z], [x0, m, z]], scaleRgb(roof, 0.84), { lw: 0.9, t: 'r' });
+      pen.shape([[x0, m, z], [x1, m, z], [x1, b, h], [x0, b, h]], roof, { lw: 0.9, t: 'r' });
+      pen.shape([[x1, b, h], [x1, a, h], [x1, m, z]], { k: 'wall', c: wall, n: [1, 0] }, { lw: 0.9, t: 'w' });
+      for (let x = x0 + 0.8; x < x1 - 0.3; x += 1.6) {
+        tiles0.push([[x, a + 0.15, h], [x, m, z]]);
+        tiles1.push([[x, m, z], [x, b - 0.15, h]]);
+      }
+      pen.tag = 'rd';
+      pen.lines(tiles0.concat(tiles1), { lw: 0.33, a: 0.38, over: 0, t: 'rd' });
+      pen.line([[x0, m, z + 0.12], [x1, m, z + 0.12]], { lw: 1.5, a: 0.9, over: 0.2, t: 'rd' });
+    } else {
+      pen.shape([[a, y0, h], [m, y0, z], [m, y1, z], [a, y1, h]], roof, { lw: 0.9, t: 'r' });
+      pen.shape([[m, y0, z], [b, y0, h], [b, y1, h], [m, y1, z]], scaleRgb(roof, 0.84), { lw: 0.9, t: 'r' });
+      pen.shape([[a, y1, h], [b, y1, h], [m, y1, z]], { k: 'wall', c: wall, n: [0, 1] }, { lw: 0.9, t: 'w' });
+      for (let y = y0 + 0.8; y < y1 - 0.3; y += 1.6) {
+        tiles0.push([[a + 0.15, y, h], [m, y, z]]);
+        tiles1.push([[m, y, z], [b - 0.15, y, h]]);
+      }
+      pen.tag = 'rd';
+      pen.lines(tiles0.concat(tiles1), { lw: 0.33, a: 0.38, over: 0, t: 'rd' });
+      pen.line([[m, y0, z + 0.12], [m, y1, z + 0.12]], { lw: 1.5, a: 0.9, over: 0.2, t: 'rd' });
+    }
+    pen.tag = 'r';
+  }
+  pen.b = -1;
+}
+
+/** Species look (block 5): leaf colours, crown blobs and alpha; pomegranates carry red fruit. */
+const SPECIES = {
+  pagodaTree: { leaf: [hexRgb('#4f6e3f'), hexRgb('#5c7c47'), hexRgb('#6d8c52'), hexRgb('#82a05e')], blobs: 7, a: undefined },
+  jujube: { leaf: [hexRgb('#6c8a4c'), hexRgb('#7b9a57'), hexRgb('#8eac63'), hexRgb('#a3bd74')], blobs: 4, a: 0.82 },
+  pomegranate: { leaf: [hexRgb('#4c6b3a'), hexRgb('#587a42'), hexRgb('#678a4b'), hexRgb('#7a9a56')], blobs: 3, a: undefined, fruit: hexRgb('#b8402f') },
+};
+
+function speciesTree(pen, T, i) {
+  const { x, y, r, zc } = T;
+  const sp = SPECIES[T.species];
+  pen.tag = 'trunk';
+  const trunkTop = zc - r * 0.2;
+  const tw = T.species === 'pagodaTree' ? 0.4 : 0.22;
+  pen.shape([[x - tw, y + tw, 0], [x + tw, y - tw, 0], [x + tw * 0.8, y - tw * 0.8, trunkTop], [x - tw * 0.8, y + tw * 0.8, trunkTop]], hexRgb('#5e4a3b'), { lw: 0.7, t: 'trunk' });
+  pen.tag = 'tree';
+  const blobs = [];
+  const n = sp.blobs + Math.floor(hash3(i, 41) * 2);
+  for (let k = 0; k < n; k++) {
+    const a = (k / n) * Math.PI * 2 + hash3(i, k) * 0.8;
+    const d = r * (0.35 + 0.15 * hash3(i, k, 2));
+    blobs.push([Math.cos(a) * d, Math.sin(a) * d, (hash3(i, k, 3) - 0.6) * r * 0.5, r * (0.55 + 0.12 * hash3(i, k, 4))]);
+  }
+  blobs.push([0, 0, r * 0.35, r * 0.66]);
+  blobs.sort((p, q) => p[0] + p[1] + p[2] * 0.6 - (q[0] + q[1] + q[2] * 0.6));
+  blobs.forEach(([dx, dy, dz, rr], k) => {
+    const lit = (dz / r + 0.6 - (dx + dy) / (3 * r)) * 1.4;
+    const c = sp.leaf[Math.max(0, Math.min(3, Math.round(lit + 1)))];
+    pen.blob([x + dx, y + dy, zc + dz], rr, jitter(c, i * 31 + k, 0.08), { lw: 0.7, t: 'tree', lumpy: 0.05, a: sp.a });
+  });
+  pen.tag = 'gm';
+  const ticks = [];
+  for (let k = 0; k < (sp.fruit ? 7 : 4); k++) {
+    const dx = (hash3(i, k, 7) - 0.5) * r;
+    const dy = (hash3(i, k, 8) - 0.5) * r;
+    const z = zc + r * 0.1 + hash3(i, k, 9) * r * 0.45;
+    ticks.push([[x + dx, y + dy, z], [x + dx + (sp.fruit ? 0.18 : 0.4), y + dy - (sp.fruit ? 0.18 : 0.4), z + (sp.fruit ? 0.12 : 0.3)]]);
+  }
+  pen.lines(ticks, sp.fruit ? { lw: 1.4, stroke: sp.fruit, a: 0.9, over: 0, t: 'treeTick' } : { lw: 0.5, a: 0.6, over: 0.1, t: 'treeTick' });
+}
+
+/**
+ * A flat screen (block 5): a vine pergola (posts, a lattice and leaves at
+ * z 2.4) or the summer mat awning, tianpeng (poles and a reed-mat top above
+ * the eaves, its side mats rolled up under the edge). Tops are tagged as
+ * crowns, so the heat wash shows through them in the thermal view.
+ */
+function screen(pen, P, i) {
+  const { x0, y0, x1, y1, z } = P;
+  pen.tag = 'trunk';
+  const posts = [];
+  const step = P.kind === 'awning' ? 5 : 4;
+  for (let x = x0; x <= x1 + 0.01; x += (x1 - x0) / Math.max(1, Math.round((x1 - x0) / step))) for (const y of [y0, y1]) posts.push([[x, y, 0], [x, y, z]]);
+  for (let y = y0; y <= y1 + 0.01; y += (y1 - y0) / Math.max(1, Math.round((y1 - y0) / step))) for (const x of [x0, x1]) posts.push([[x, y, 0], [x, y, z]]);
+  pen.lines(posts, { lw: P.kind === 'awning' ? 0.6 : 0.7, stroke: hexRgb('#7a5c42'), a: 0.85, over: 0.05, t: 'trunk' });
+  pen.tag = 'tree';
+  if (P.kind === 'awning') {
+    pen.shape([[x0, y0, z], [x1, y0, z], [x1, y1, z], [x0, y1, z]], jitter(hexRgb('#d9c79c'), i * 13, 0.05), { lw: 1.0, t: 'tree', a: 0.92 });
+    const mats = [];
+    for (let x = x0 + 1; x < x1; x += 1) mats.push([[x, y0 + 0.2, z], [x, y1 - 0.2, z]]);
+    pen.lines(mats, { lw: 0.3, stroke: hexRgb('#9b8660'), a: 0.5, over: 0, t: 'treeTick' });
+    // rolled side mats under the south and east edges
+    pen.line([[x0, y1, z - 0.35], [x1, y1, z - 0.35], [x1, y0, z - 0.35]], { lw: 2.2, stroke: hexRgb('#b6a277'), a: 0.9, over: 0, t: 'trunk' });
+  } else {
+    pen.shape([[x0, y0, z], [x1, y0, z], [x1, y1, z], [x0, y1, z]], jitter(hexRgb('#6f8c4e'), i * 13, 0.06), { lw: 0.6, t: 'tree', a: 0.72 });
+    const lat = [];
+    for (let x = x0 + 1; x < x1; x += 1) lat.push([[x, y0, z + 0.05], [x, y1, z + 0.05]]);
+    pen.lines(lat, { lw: 0.35, stroke: hexRgb('#7a5c42'), a: 0.6, over: 0, t: 'treeTick' });
+    for (let k = 0; k < 4; k++) {
+      const bx = x0 + (x1 - x0) * (0.15 + 0.7 * hash3(i, k, 31));
+      const by = y0 + (y1 - y0) * (0.2 + 0.6 * hash3(i, k, 32));
+      pen.blob([bx, by, z + 0.3], 0.9 + 0.4 * hash3(i, k, 33), jitter(LEAF[1 + (k % 2)], i * 7 + k, 0.08), { lw: 0.5, t: 'tree', lumpy: 0.08, a: 0.85 });
+    }
+  }
+}
+
+/** A glazed fish bowl under the awning (block 5). */
+function bowl(pen, x, y) {
+  pen.tag = 'o';
+  const pts = (z, r) => Array.from({ length: 12 }, (_, k) => [x + Math.cos((k / 12) * Math.PI * 2) * r, y + Math.sin((k / 12) * Math.PI * 2) * r, z]);
+  box(pen, x - 0.55, y - 0.55, x + 0.55, y + 0.55, 0, 0.75, hexRgb('#5e6f7a'), { t: 'o', lw: 0.5, top: hexRgb('#6f8f96') });
+  pen.shape(pts(0.76, 0.5), hexRgb('#7ea3ab'), { lw: 0.4, t: 'o' });
+}
+
+// ---- trees, cars, furniture -----------------------------------------------------
+
+
+/** Grey brick paving (block 5): courses every 2 m along the long side of the rect, one item. */
+function brickCourses(pen, x0, y0, x1, y1) {
+  pen.tag = 'gm';
+  const segs = [];
+  if (x1 - x0 >= y1 - y0) for (let y = y0 + 2; y < y1 - 0.5; y += 2) segs.push([[x0 + 0.3, y], [x1 - 0.3, y]]);
+  else for (let x = x0 + 2; x < x1 - 0.5; x += 2) segs.push([[x, y0 + 0.3], [x, y1 - 0.3]]);
+  if (segs.length) pen.lines(segs, { lw: 0.35, stroke: hexRgb('#8f897d'), a: 0.4, over: 0.1 });
+}
+
+
+/** The old well of Well Square (block 5): a stone curb, dark water and a windlass. */
+function well(pen, x, y) {
+  pen.tag = 'gm';
+  groundEllipse(pen, x, y, 1.5, 1.5, hexRgb('#a29a8a'), { lw: 0.8, n: 16, t: 'gm' });
+  groundEllipse(pen, x, y, 0.85, 0.85, hexRgb('#46555b'), { lw: 0.5, n: 12, t: 'gm' });
+}
+
+/** kit.js drawWorld hook: draw a block-5 object; true if it was one. */
+function objects(pen, ob, world) {
+  if (ob.kind === 'b' && ob.o.style === 'hutong') hutongHouse(pen, ob.o, world);
+  else if (ob.kind === 'p') screen(pen, ob.o, ob.i);
+  else if (ob.kind === 'f') bowl(pen, ...ob.o);
+  else if (ob.kind === 't' && ob.o.species) speciesTree(pen, ob.o, ob.i);
+  else return false;
+  return true;
+}
+
+/** kit.js drawDecor hook: brick courses in lanes and courtyards, and the well. */
+function decor(pen, world, D) {
+  for (const r of D.brick ?? []) brickCourses(pen, ...r);
+  if (D.well) well(pen, ...D.well);
+}
+
+/** The block-5 drawing hooks for kit.js (world.draw). */
+const HT_DRAW = { objects, decor };
+
+return { hutongHouse, screen, bowl, HT_DRAW };
+})();
+
 __m['hutong'] = (() => {
 // hutong: block 5 (hutong lanes and courtyards) model runs and numbers: the
 // dry model, the evening-splash model (the wet-able cells run again with the
@@ -6117,6 +5576,7 @@ const { MODEL } = __m['materials'];
 const { runModel, cellMat, Thermal, STORE, sunlitField, wetBulb, isWater } = __m['thermal'];
 const { solarPosition } = __m['sun'];
 const { DEG } = __m['core'];
+const { HT_DRAW } = __m['htkit'];
 
 /** Coarse 10-min spin-up days (thermal.js opts.warm, as blocks 3 and 4; guarded there). */
 const WARM_HT = 6;
@@ -6151,6 +5611,7 @@ function splashCells(world) {
  * computed when first asked for.
  */
 function hutongSetup(world, slots) {
+  world.draw = HT_DRAW; // the block's own drawing (htkit.js)
   const cells = splashCells(world);
   let dry = null;
   let wet = null;
@@ -6593,6 +6054,8 @@ const HT_CARDS = [
 return { htNotes, lanesCard, courtyardCard, tianpengCard, splashCard, treesCard, HT_CARDS };
 })();
 
+__m['pkkit'] = {};
+
 __m['parking'] = { isParking: () => false };
 
 __m['pkui'] = {};
@@ -6606,26 +6069,26 @@ const { drawWorld } = __m['kit'];
 const { runModel, shadeClassField, paletteLut, PALETTE_STOPS, heatRgb } = __m['thermal'];
 const { Life, shadeDensity, shadeAt } = __m['life'];
 const { Renderer, INTRO, quantHour } = __m['render'];
-const { MATERIALS, SOURCES, BASIS, MODEL, paramKeys } = __m['materials'];
+const { MATERIALS, SOURCES, BASIS, paramKeys } = __m['materials'];
 const { GLOSSARY, gl, glossaryStats, rangeLine, termsFor } = __m['glossary'];
 const { isRetrofit, sceneState, stateMaterials, runShared, resolveId, MEASURES, measureStats, waterBudget, ALIASES, D_MAX, D_DEFAULT } = __m['retrofit'];
 const { retrofitNotes, measureCard, tradeoffCard, spongeCard, drawDivider } = __m['retroui'];
 const { sunSlots } = __m['thermal'];
 const { GLASS, GLASS_IDS, GLASS_DEFAULT } = __m['materials'];
 const { isGlass, glassSetup, glassShade, spotStats, spotClasses, openReference, canyonStats } = __m['cbd'];
-const { cbdNotes, canyonCard, glassCard, spotCard, acCard, extremeCard, CBD_CARDS } = __m['cbdui'];
+const { cbdNotes, canyonCard, glassCard, spotCard, acCard, extremeCard, CBD_CARDS, cbdOverlay } = __m['cbdui'];
 const { classDensity } = __m['life'];
 const { glassRho, FACE_N } = __m['reflect'];
 const { sunVector } = __m['sun'];
 const { isGlassFace } = __m['kit'];
 const { isWaterfront, waterfrontSetup, comfortShade, windStats, hcStats, asphaltContrast, waterStats, overlayStats, lineStats, promenadeShade, shelterProfile, overlayReach, walkerWind } = __m['waterfront'];
-const { wfNotes, riverCard, pondCard, corridorCard, shelterCard, shadeCard, WF_CARDS } = __m['wfui'];
+const { wfNotes, riverCard, pondCard, corridorCard, shelterCard, shadeCard, WF_CARDS, wfOverlay } = __m['wfui'];
 const { penLines, SPEEDS, apparentTemp } = __m['wind'];
 const { Pen } = __m['pen'];
 const { isHutong, hutongSetup, lanesOf, solarNoon, splashStats, efPathRun, efPathStats, splashSensitivity, roofStats, courtyardStats, treeStats, shadedLanes, hutongGlossary, dwellShade } = __m['hutong'];
 const { htNotes, lanesCard, courtyardCard, tianpengCard, splashCard, treesCard, HT_CARDS } = __m['hutui'];
-const { isParking, parkingSetup, parkingStats, parkingGlossary, fluxSamples, pvCompare, slab, STEMPIHAR, tsMean, fluxMean, shedTau } = __m['parking'];
-const { pkNotes, storageCard, pvCard, lotTreesCard, shedCard, soilCard, hotCarCard, PK_CARDS } = __m['pkui'];
+const { isParking, parkingSetup } = __m['parking'];
+const { pkApp } = __m['pkui'];
 
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
@@ -6671,6 +6134,7 @@ function makeView(id, sc, world, thermal, canvas, glass = null, wf = null) {
   if (gs) {
     R.spotFor = gs.spotFor;
     R.glass = glass.type();
+    R.overlay = cbdOverlay;
   }
   /** Glass type changed: drop spot, shade and walker caches. */
   view.resetGlass = () => {
@@ -6680,6 +6144,7 @@ function makeView(id, sc, world, thermal, canvas, glass = null, wf = null) {
   if (wf) {
     // wind lines through the pen recorder (own pen, so the block's display list is unchanged)
     R.wind = { lines: wf.lines, items: penLines(new Pen(sc.seed + 97), wf.lines) };
+    R.overlay = wfOverlay;
   }
   /** Wind preset changed: drop comfort-shade and walker caches. */
   view.resetWind = () => {
@@ -6722,10 +6187,9 @@ function boot(scene, root = document) {
   const htMode = isHutong(scene);
   let htSet = null;
   const htQ = htMode ? { splash: q.get('splash') !== '0' } : null;
-  // car park block (block 6): the night-release overlay, ?flux=0|1 (default off)
+  // car park block (block 6): its page parts live in its own module (pkui.js pkApp: a block plugin, see blk below)
   const pkMode = isParking(scene);
   let pkSet = null;
-  const pkQ = pkMode ? { flux: q.get('flux') === '1' } : null;
   if (!retro) {
     world = buildWorld(scene);
     t1 = performance.now();
@@ -6795,17 +6259,6 @@ function boot(scene, root = document) {
   // ?spotskip=0 (checks): draw the glint on every tile, without the bounding-box skip
   if (glassMode && q.get('spotskip') === '0') main.R.spotSkip = false;
   const R = main.R;
-  // car park block: ground heat flux samples for the night-release overlay, per quantised hour
-  if (pkMode) {
-    const fc = new Map();
-    R.flux = (hq) => {
-      if (!fc.has(hq)) {
-        if (fc.size >= 24) fc.delete(fc.keys().next().value);
-        fc.set(hq, fluxSamples(world, thermal, hq));
-      }
-      return fc.get(hq);
-    };
-  }
   const display = main.display;
   const t3 = performance.now();
 
@@ -6831,8 +6284,6 @@ function boot(scene, root = document) {
     ...(wfMode ? wfQ : {}),
     // hutong only: the evening splash on or off
     ...(htMode ? htQ : {}),
-    // car park only: the night-release overlay
-    ...(pkMode ? pkQ : {}),
   };
   if (q.get('ui') === '0') root.body.classList.add('noui');
   if (q.has('hour')) S.hour = Math.round(clamp(parseFloat(q.get('hour')) || 0, 0, 23.75) / 0.25) * 0.25;
@@ -6966,16 +6417,7 @@ function boot(scene, root = document) {
       laneSunTmrt: m(mc.filter((i) => thermal.sunlit(i, 15) > 0.95)),
     };
   }
-  // car park block: numbers for notes, cards and glossary (one model, computed once)
-  let pkFixed = null;
-  const pk = () => (pkFixed ??= { st: parkingStats(world, thermal), pv: null });
-  /** Lazily: the PV comparison with an empty bay under the canopy (a run without cars on those cells). */
-  const pkPv = () => (pk().pv ??= pvCompare(world, thermal, pk().st.C));
-  function pkNoteData() {
-    const t = pk().st.table;
-    return { asphalt15: t.openAsphalt.t15, asphalt23: t.openAsphalt.t23, asphaltG23: t.openAsphalt.g23, shed15: t.shed.t15, shed23: t.shed.t23, air23: thermal.air(23), pv15: t.pvBays.t15, soil23: t.soil.t23, yard15: t.yard.t15, yard23: t.yard.t23 };
-  }
-  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode ? htNotes(scene, htNoteData()) : pkMode ? pkNotes(scene, pkNoteData()) : block1Notes();
+  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode ? htNotes(scene, htNoteData()) : pkMode ? null : block1Notes();
   function block1Notes() {
   const notesText = {
     asphalt: ['Kiln Street, old asphalt (albedo 0.12):', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
@@ -7002,7 +6444,7 @@ function boot(scene, root = document) {
   // glass block: its tall façades make a day tile slower to bake (about 7 ms),
   // so a slider drag bakes one tile per frame instead of two; the hutong block
   // likewise (hundreds of small tiled roofs and crowns per tile)
-  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people, scrub: S.scrub, ac: !!S.ac, budget: glassMode || htMode ? 1 : undefined, ...(wfMode ? { wind: S.wind, air: S.air, u: S.u } : {}), ...(pkMode ? { flux: !!S.flux } : {}) });
+  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people, scrub: S.scrub, ac: !!S.ac, budget: glassMode || htMode ? 1 : undefined, ...(wfMode ? { wind: S.wind, air: S.air, u: S.u } : {}), ...(blk ? blk.look() : {}) });
 
   // ---- sizing ------------------------------------------------------------------------------
   const resize = () => {
@@ -7224,8 +6666,8 @@ function boot(scene, root = document) {
     card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
   }
   function reopenCard() {
-    if (card._measure && card._measure.startsWith('pk:')) {
-      card.innerHTML = pkCardHtml(card._measure.slice(3));
+    if (card._measure && card._measure.startsWith('blk:')) {
+      card.innerHTML = blk.html(card._measure.slice(4));
       card.querySelector('.x').onclick = hideCard;
     } else if (card._measure && card._measure.startsWith('ht:')) {
       card.innerHTML = htCardHtml(card._measure.slice(3));
@@ -7445,65 +6887,10 @@ function boot(scene, root = document) {
     card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
   }
 
-  // ---- car park controls (block 6): the night-release overlay, cards -------------------------
-  const pkUi = pkMode ? buildPkUi() : null;
-  function buildPkUi() {
-    const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
-    root.body.insertAdjacentHTML(
-      'beforeend',
-      `<div id="parking" aria-label="Car park controls">
-        <div class="seg">${btn('data-flux', '1', 'night release G')}</div>
-        <div class="measures"><div class="hand">Cards</div>${PK_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'car' ? 'class="warn"' : '')).join('')}</div>
-      </div>`,
-    );
-    const el = root.getElementById('parking');
-    el.addEventListener('click', (e) => {
-      const b = e.target.closest ? e.target.closest('button') : null;
-      if (!b) return;
-      if (b.dataset.flux) setFlux(!S.flux);
-      else if (b.dataset.card) showPkCard(b.dataset.card, b);
-    });
-    return { el };
-  }
-  function syncPk() {
-    if (!pkUi) return;
-    pkUi.el.querySelector('[data-flux]').setAttribute('aria-pressed', String(!!S.flux));
-    root.body.dataset.flux = S.flux ? '1' : '0';
-  }
-  function setFlux(on) {
-    S.flux = !!on;
-    syncPk();
-    if (card.dataset.open === '1') reopenCard();
-    if (S.paused) draw();
-  }
-  function pkCardHtml(id) {
-    const P = pk();
-    const st = P.st;
-    if (id === 'storage') {
-      const C = st.C;
-      const K = { asphalt: C.openAsphalt, concrete: C.yard, soil: C.soil, lawn: C.lawn, shed: C.shed };
-      const curve = [12, 15, 20, 23, 4].map((h) => ({ h, air: thermal.air(h), rows: Object.fromEntries(Object.entries(K).map(([k, c]) => [k, [tsMean(thermal, c, h), fluxMean(thermal, c, h)]])) }));
-      return storageCard({ st, curve, slabs: { hma: slab(STEMPIHAR.hma.k, STEMPIHAR.hma.rho, STEMPIHAR.hma.c), pcc: slab(STEMPIHAR.pcc.k, STEMPIHAR.pcc.rho, STEMPIHAR.pcc.c) }, flux: !!S.flux });
-    }
-    if (id === 'pv') return pvCard({ pv: pkPv() });
-    if (id === 'trees') return lotTreesCard({ trees: st.table.treeBays, openBays: st.table.openBays, share: (st.table.openBays.share + st.table.treeBays.share) / 2 });
-    if (id === 'shed') return shedCard({ shed: st.table.shed, cool: st.cool.shed, tau: shedTau(thermal.air(st.set), thermal.info.hc), air: st.air, set: st.set });
-    if (id === 'soil') return soilCard({ st });
-    return hotCarCard({ openBay15: st.table.openBays.t15, openAsphalt15: st.table.openAsphalt.t15 });
-  }
-  function showPkCard(id, anchor) {
-    card.innerHTML = pkCardHtml(id);
-    card.querySelector('.x').onclick = hideCard;
-    card._pick = null;
-    card._measure = `pk:${id}`;
-    card.dataset.open = '1';
-    card.dataset.kind = id;
-    card.style.display = 'block';
-    const r = anchor ? anchor.getBoundingClientRect() : { top: 120 };
-    const panel = pkUi.el.getBoundingClientRect();
-    card.style.left = `${Math.min(window.innerWidth - card.offsetWidth - 10, panel.right + 12)}px`;
-    card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
-  }
+  // ---- a block plugin (block 6): its controls, cards, notes, heat-card rows, glossary numbers and API ----
+  // live in its own module; app.js only calls these hooks
+  const blk = pkMode ? pkApp({ scene, world, thermal, root, card, R, S, query: q, hideCard: () => hideCard(), reopen: () => card.dataset.open === '1' && reopenCard(), redraw: () => S.paused && draw() }) : null;
+  if (blk) notes = blk.notes();
 
   const toggleThermal = () => {
     const m = thermalMix(S.frame);
@@ -7521,7 +6908,9 @@ function boot(scene, root = document) {
     else if (wfMode && (k === 'w' || k === 'W')) setWindLines(!S.wind);
     else if (wfMode && (k === 'a' || k === 'A')) setAir(!S.air);
     else if (htMode && (k === 'p' || k === 'P')) setSplash(!S.splash);
-    else if (pkMode && (k === 'g' || k === 'G')) setFlux(!S.flux);
+    else if (blk && blk.key(k)) {
+      // handled by the block plugin
+    }
     else if (k === 'h') setHour(S.hour + 1);
     else if (k === 'H') setHour(S.hour - 1);
     else if (k === 'n' || k === 'N') S.notes = !S.notes;
@@ -7714,17 +7103,15 @@ function boot(scene, root = document) {
       : null;
     // hutong: water on a splashed cell now
     const waterInfo = htMode && tmrtCell !== null && htSplashSet().has(tmrtCell) ? { now: thermal.water(tmrtCell, h), on: !!S.splash } : null;
-    // car park: ground heat flux G of the cells now and at 23:00; the share of a ground cell under cars
-    const fluxInfo = pkMode && cells.length && !leaf
-      ? { now: cells.reduce((a, i) => a + thermal.flux(i, h), 0) / cells.length, g23: cells.reduce((a, i) => a + thermal.flux(i, 23), 0) / cells.length, cars: tmrtCell !== null ? world.parking.share[tmrtCell] : 0, pv: tmrtCell !== null ? !!world.parking.pv[tmrtCell] : false }
-      : null;
+    // a block plugin's own heat-card numbers (block 6: G and the car share)
+    const blkInfo = blk && cells.length && !leaf ? blk.cardInfo(cells, tmrtCell, h) : null;
     return {
       title,
       state: view.id,
       compare,
       wind: windInfo,
       water: waterInfo,
-      flux: fluxInfo,
+      flux: blkInfo,
       glass: glassInfo,
       wallsNow: sw ? sw.walls : null,
       glassNow: sw ? sw.glass : null,
@@ -7797,7 +7184,7 @@ function boot(scene, root = document) {
         ${d.wallsNow !== null ? `<tr><td>sun off the ${gl('wallReflection', 'walls')} now</td><td>${Math.round(d.wallsNow)} W m⁻²</td></tr>` : ''}
         ${d.glassNow !== null && glassMode ? `<tr><td>sun off the ${gl('specular', 'glass')} now</td><td>${Math.round(d.glassNow)} W m⁻²</td></tr>` : ''}
         <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
-        ${d.flux ? `<tr class="t"><td>${gl('groundFlux', 'ground heat flux G')} now / 23:00</td><td>${Math.round(d.flux.now)} / ${Math.round(d.flux.g23)} W m⁻² (${d.flux.now < 0 ? 'giving heat back' : 'taking heat in'})</td></tr>${d.flux.cars > 0 ? `<tr><td>share of the cell under cars</td><td>${Math.round(d.flux.cars * 100)}% (shade and night sky, sub-grid)</td></tr>` : ''}${d.flux.pv ? `<tr><td>under the PV canopy</td><td>yes (sky view ${MODEL.pvSvf.value} before cars, Golden et al. 2007)</td></tr>` : ''}` : ''}
+        ${d.flux ? blk.cardRows(d.flux) : ''}
         ${d.water ? `<tr><td>${gl('waterStore', 'water on the paving')} now</td><td>${d.water.now.toFixed(2)} mm${d.water.on ? ' (splashed at 19:00)' : ' (splash off: P)'}</td></tr>` : ''}
         ${d.wind ? `<tr><td>${gl('windFactor', 'wind factor f_w')}</td><td>${d.wind.fw.toFixed(2)} · ${fmt(d.wind.u)} of ${d.wind.site} m/s</td></tr>
         <tr><td>convection h_c</td><td>${fmt(d.wind.hc)} W m⁻² K⁻¹</td></tr>
@@ -7849,8 +7236,8 @@ function boot(scene, root = document) {
         ? glossaryStats(world, thermal, { wind: { river: wf().st.river.mean, corridor: wf().st.corridorMean, shelter: wf().st.shelterMean, lee: wf().st.lee01.mean } })
         : htMode
           ? glossaryStats(world, thermal, { hutong: hutongGlossary(world, thermal, ht()) })
-          : pkMode
-            ? glossaryStats(world, thermal, { parking: parkingGlossary(pk().st) })
+          : blk
+            ? glossaryStats(world, thermal, blk.glossary())
             : glossaryStats(world, thermal);
   let fnPinned = false;
   let fnByFocus = false;
@@ -8013,7 +7400,7 @@ function boot(scene, root = document) {
   syncGlass();
   syncWf();
   syncHt();
-  syncPk();
+  if (blk) blk.sync();
   draw();
   requestAnimationFrame(loop);
 
@@ -8260,27 +7647,8 @@ function boot(scene, root = document) {
         models: () => htSet.cached(),
       }
       : null,
-    /**
-     * Car park block (block 6) only: state {flux}; set() it; numbers for the
-     * bands and cards; card HTML; G at a point; the overlay's samples.
-     */
-    parking: pkMode
-      ? {
-        state: () => ({ flux: !!S.flux }),
-        set(o) {
-          if (o.flux !== undefined) setFlux(!!o.flux);
-        },
-        stats: () => {
-          const st = pk().st;
-          return { table: st.table, cool: st.cool, ranges: st.ranges, gap: st.gap, set: st.set, peakG: st.peakG, air: st.air, lotShare: st.lotShare, n: Object.fromEntries(Object.entries(st.C).map(([k, v]) => [k, v.length])) };
-        },
-        pv: () => pkPv(),
-        html: (id) => pkCardHtml(id),
-        show: (id) => showPkCard(id, root.querySelector(`#parking [data-card="${id}"]`)),
-        flux: (x, y, h = S.hour) => thermal.flux(world.cellIndex(x, y), h),
-        samples: (h = S.hour) => R.flux(quantHour(h)).length,
-      }
-      : null,
+    /** Car park block (block 6) only: its plugin's API (pkui.js pkApp). */
+    parking: blk ? blk.api : null,
     retro: retro
       ? {
         state: () => ({ state: S.state, split: S.split, swap: S.swap, d: S.d, aged: S.aged }),

@@ -5,6 +5,7 @@ import { SOURCES, BASIS, GLASS, GLASS_IDS } from './materials.js';
 import { gl } from './glossary.js';
 import { glassRho } from './reflect.js';
 import { AC } from './cbd.js';
+import { iso, hash3, rgbCss, clamp, hexRgb } from './core.js';
 
 const fmt = (v) => (Math.round(v * 10) / 10).toFixed(1);
 const f2 = (v) => v.toFixed(2);
@@ -146,3 +147,72 @@ export const CBD_CARDS = [
   ['ac', 'AC rejected heat'],
   ['extreme', 'Extreme case: concave glass'],
 ];
+
+// ---- the block's overlay in the canvas (moved from render.js; the same drawing) ----
+const AC_INK = hexRgb('#8a2f22');
+
+/**
+ * AC overlay (block 3, information only): rooftop plant on each tall
+ * building with a rising heat plume, and one label saying the model does not
+ * feel this heat. Pure function of (frame, camera).
+ */
+export function drawAc(R, ctx, f, cam, W, H, alpha) {
+  const [ox, oy, Z] = R.origin(cam, W, H);
+  const d = R.dpr;
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.lineCap = 'round';
+  let label = null;
+  for (const B of R.world.buildings) {
+    if (B.h < 25) continue;
+    const units = 1 + Math.floor(((B.x1 - B.x0) * (B.y1 - B.y0)) / 2500);
+    for (let u = 0; u < Math.min(3, units); u++) {
+      const x = B.x0 + (B.x1 - B.x0) * (0.25 + 0.5 * hash3(B.index, u, 61));
+      const y = B.y0 + (B.y1 - B.y0) * (0.25 + 0.5 * hash3(B.index, u, 62));
+      const p = iso(x, y, B.h + 1.5);
+      const X = ox + p[0] * Z;
+      const Y = oy + p[1] * Z;
+      if (X < -40 || X > W + 40 || Y < -80 || Y > H + 40) continue;
+      if (R.clip && (X < R.clip[0] || X > R.clip[1])) continue;
+      ctx.globalAlpha = alpha * 0.8;
+      ctx.strokeStyle = rgbCss(AC_INK);
+      ctx.lineWidth = 1.1 * d;
+      for (let k = 0; k < 3; k++) {
+        ctx.beginPath();
+        const x0 = X + (k - 1) * 4 * d;
+        for (let i = 0; i <= 10; i++) {
+          const v = i / 10;
+          const yy = Y - v * 26 * d;
+          const xx = x0 + Math.sin(v * 7 + f * 0.08 + k * 1.7 + u) * 2.2 * d * (0.4 + v);
+          if (i) ctx.lineTo(xx, yy);
+          else ctx.moveTo(xx, yy);
+        }
+        ctx.stroke();
+      }
+      if (!label || Y < label[1]) label = [X, Y - 30 * d];
+    }
+  }
+  if (label) {
+    ctx.globalAlpha = alpha;
+    ctx.font = `${Math.round(14 * d)}px "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive`;
+    ctx.textBaseline = 'bottom';
+    const text = 'AC rejected heat — not felt in this model';
+    const w = ctx.measureText(text).width;
+    const bx = clamp(label[0] - w / 2, 8 * d, W - w - 8 * d);
+    const by = Math.max(24 * d, label[1]);
+    ctx.fillStyle = 'rgba(248,243,231,0.94)';
+    ctx.fillRect(bx - 5 * d, by - 19 * d, w + 10 * d, 23 * d);
+    ctx.strokeStyle = 'rgba(138,47,34,0.7)';
+    ctx.lineWidth = 0.9 * d;
+    ctx.strokeRect(bx - 5 * d, by - 19 * d, w + 10 * d, 23 * d);
+    ctx.fillStyle = rgbCss(AC_INK);
+    ctx.fillText(text, bx, by);
+  }
+  ctx.restore();
+  R.stats.ac = !!label;
+}
+
+/** Renderer overlay hook (render.js R.overlay): the AC plumes, when shown. */
+export function cbdOverlay(R, ctx, f, cam, W, H, alpha, look) {
+  if (look.ac) drawAc(R, ctx, f, cam, W, H, alpha);
+}
