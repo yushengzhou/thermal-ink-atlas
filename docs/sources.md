@@ -734,7 +734,7 @@ The air temperature stays a fixed forcing. The water's effect on the air is draw
 comfort value. Along a line, λ = ∫ds/L(s) from where it leaves the water, L = 30 m (60 m in streets along the
 wind); by day ΔTa = −1 K·exp(−λ), at night +0.3 K·exp(−λ) (day weight from the sun altitude, full above
 10°). The pond uses the river's numbers ×0.20 (−0.2 K by day [jacobs2020]; at night the same ratio,
-an *engine assumption*). By day: −1.00 K at the bank, −0.39 K at 30 m, −0.13 K at 80 m.
+an *engine assumption*). By day: −0.92 K at the bank, −0.39 K at 30 m, −0.13 K at 80 m.
 
 ### Wind lines (drawing only)
 
@@ -793,7 +793,7 @@ the overlay's −1 K at the bank.
 | River minus air at 15:00 | −6.50 K | ≤ 0 | brief4 | inside |
 | Pond minus air at 15:00 | −3.57 K | ≤ 0 | brief4 | inside |
 | Pond minus air at 04:00 | +2.35 K | ≥ 0 | solcerova2019 | inside |
-| Air overlay by day: size of ΔTa at the bank (20 lines) | 1 K | 0.5 to 1.5 | brief4 | inside |
+| Air overlay by day: size of ΔTa at the bank, first drawn vertex over land (20 lines) | +0.92 K | 0.5 to 1.5 | brief4 | inside |
 | Air overlay by day: largest size of ΔTa more than 80 m from the water, outside streets along the wind | +0.09 K | ≤ 0.2 | brief4 | inside |
 | Air overlay by day: largest size of ΔTa more than 150 m from the water, in streets along the wind | +0.06 K | ≤ 0.2 | brief4 | inside |
 | Air overlay at night: smallest ΔTa | 0 K | ≥ 0 | brief4 | inside |

@@ -209,7 +209,7 @@ export function waterStats(world, T) {
 
 /**
  * Air overlay numbers along the wind lines (information only): |dTa| at the
- * bank (first vertex off the river) by day, the largest |dTa| beyond 80 m
+ * bank (first drawn vertex over land, from the line's own lambda) by day, the largest |dTa| beyond 80 m
  * outside aligned streets and beyond 150 m inside them, and the smallest
  * night value.
  */
@@ -227,8 +227,10 @@ export function overlayStats(world, lines) {
       const night = overlayDT(L.lam[v], L.kind[v], 0);
       nightMin = Math.min(nightMin, night);
       const d = L.dist[v];
-      if (!seenBank && d > 0) {
-        bank.push(Math.abs(overlayDT(0, 2, 1)));
+      // the bank: the first drawn vertex over land (one 2.5 m step off the
+      // water), read from the line's own lambda, i.e. what is drawn there
+      if (!seenBank && d > 0 && !L.wet[v]) {
+        bank.push(day);
         seenBank = true;
       }
       const c = world.cellIndex(L.p[v * 2], L.p[v * 2 + 1]);
@@ -240,7 +242,7 @@ export function overlayStats(world, lines) {
       });
     }
   }
-  return { bank: mean(bank), nBank: bank.length, beyond80, beyond150, nightMin, at0: mean(at[0]), at30: mean(at[1]), at80: mean(at[2]) };
+  return { bank: Math.abs(mean(bank)), nBank: bank.length, beyond80, beyond150, nightMin, at0: mean(bank), at30: mean(at[1]), at80: mean(at[2]) };
 }
 
 /** Wind-line checks: hash, vertex count and vertices inside any building footprint. */

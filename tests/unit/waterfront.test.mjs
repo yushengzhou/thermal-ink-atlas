@@ -105,6 +105,9 @@ test('air overlay decay: −ΔT0 at the bank, e-folding over L (2 L in aligned s
   const { world, setup } = base4();
   const o = overlayStats(world, setup.lines());
   assert.ok(o.bank >= 0.5 && o.bank <= 1.5);
+  // read from the drawn lines: one 2.5 m step off the water, ΔT0 exp(−2.5 / L)
+  assert.ok(Math.abs(o.bank - OVERLAY.day * Math.exp(-2.5 / OVERLAY.L)) < 0.01, `bank ${o.bank}`);
+  assert.equal(o.nBank, setup.lines().length);
   assert.ok(o.beyond80 < 0.2 && o.beyond150 < 0.2);
   assert.ok(o.nightMin >= 0);
 });

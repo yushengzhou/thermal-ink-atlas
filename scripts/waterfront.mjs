@@ -130,7 +130,7 @@ export function bands4() {
   add('Pond minus air at 04:00', w.pond.t04 - w.pond.a04, 1e-6, null, 'solcerova2019', 'K');
   const lines = setup.lines();
   const o = overlayStats(world, lines);
-  add(`Air overlay by day: size of ΔTa at the bank (${o.nBank} lines)`, o.bank, 0.5, 1.5, 'brief4', 'K');
+  add(`Air overlay by day: size of ΔTa at the bank, first drawn vertex over land (${o.nBank} lines)`, o.bank, 0.5, 1.5, 'brief4', 'K');
   add('Air overlay by day: largest size of ΔTa more than 80 m from the water, outside streets along the wind', o.beyond80, null, 0.2 - 1e-6, 'brief4', 'K');
   add('Air overlay by day: largest size of ΔTa more than 150 m from the water, in streets along the wind', o.beyond150, null, 0.2 - 1e-6, 'brief4', 'K');
   add('Air overlay at night: smallest ΔTa', o.nightMin, 0, null, 'brief4', 'K');

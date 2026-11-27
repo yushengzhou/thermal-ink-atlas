@@ -46,7 +46,7 @@ export function riverCard(d) {
       <tr><td>river surface, 04:00</td><td>${fmt(r.t04)} °C</td><td>${fmt(r.a04)} °C</td></tr>
       <tr><td>daily range of the river</td><td>${fmt(r.range)} K</td><td></td></tr>
       <tr><td colspan="3" class="sub">Air overlay along the ${gl('fetch', 'wind lines')} by day (illustrative, from literature):</td></tr>
-      <tr><td>at the bank</td><td>${K(o.at0)}</td><td></td></tr>
+      <tr><td>at the bank (first 2.5 m)</td><td>${K(o.at0)}</td><td></td></tr>
       <tr><td>30 m inland</td><td>${K(o.at30)}</td><td></td></tr>
       <tr><td>80 m inland</td><td>${K(o.at80)}</td><td></td></tr>
     </table>
