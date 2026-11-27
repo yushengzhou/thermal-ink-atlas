@@ -1,11 +1,11 @@
-// Blocks 1-10 are unchanged by later blocks: every page renders the same
+// Blocks 1-11 are unchanged by later blocks: every page renders the same
 // pixels, notes and probe values as its fixture page, kept gzipped in
 // tests/fixtures/base-pages: blocks 1-3 as built before block 4 (main at
 // 8e76f7a), block 4 as built before block 5 (189b7e1), block 5 as built
 // before block 6 (40b5366, the block 5 branch), block 6 as first built
 // (577a750, before the shared-core diet), block 7 as on its branch before
 // block 8 (1e292a5), block 8 as on its branch before block 9 (8735385), block 9 as on its branch
-// before block 10 (de54f2a), block 10 as on its branch before block 11 (f751d00). Both pages run in the
+// before block 10 (de54f2a), block 10 as on its branch before block 11 (f751d00), block 11 as on its branch before block 12 (d75de57). Both pages run in the
 // same browser here, so the comparison does not depend on the platform.
 // A deliberate change to these blocks must refresh the fixtures: commit the
 // rebuilt pages, then `npm run fixtures` (gzips them from HEAD) and commit.
@@ -29,9 +29,10 @@ const CASES = {
   estate: ['hour=15&f=640', 'thermal&hour=15&f=640', 'hour=12&f=640&date=dajhan', 'thermal&hour=21&f=777&ac=1&cam=3.5,230,250', 'hour=9.25&f=400&date=dajhan&ac=1&notes=0&cam=4,70,200', 'thermal&hour=4&f=1500&acwall=0'],
   busstop: ['hour=15&f=640', 'thermal&hour=15&f=640', 'hour=15&f=1650&spots=1&cam=5.5,265,195', 'thermal&hour=16.25&f=777&burn=1&cam=4,200,262', 'hour=12&f=400&spots=1&burn=1&notes=0&cam=1.75,200,180', 'thermal&hour=4&f=1500&spots=1&burn=1'],
   village: ['hour=15&f=640', 'thermal&hour=15&f=640', 'thermal&hour=22&f=640&notes=0&cam=4,150,200', 'hour=15&f=640&under=1&notes=0&cam=4,130,340', 'thermal&hour=15&f=777&coolroof=1&cam=4,130,340', 'hour=21&f=1500&coolroof=1&under=1&cam=5,120,330'],
+  desert: ['hour=15&f=640', 'thermal&hour=15&f=640', 'thermal&hour=21&f=640&notes=0&cam=3.5,300,120', 'hour=15&f=640&water=1&notes=0&cam=3,300,200', 'thermal&hour=15&f=777&coat=0&cam=4,120,190', 'f=120', 'hour=12&f=1500&coat=0&water=1&cam=5,250,40'],
 };
 // which page each fixture is (for messages)
-const BEFORE = { 'asphalt-park': 'block 4', 'sponge-retrofit': 'block 4', 'glass-cbd': 'block 4', waterfront: 'block 5', hutong: 'block 6', parking: 'the shared-core diet', estate: 'block 8', campus: 'block 9', busstop: 'block 10', village: 'block 11' };
+const BEFORE = { 'asphalt-park': 'block 4', 'sponge-retrofit': 'block 4', 'glass-cbd': 'block 4', waterfront: 'block 5', hutong: 'block 6', parking: 'the shared-core diet', estate: 'block 8', campus: 'block 9', busstop: 'block 10', village: 'block 11', desert: 'block 12' };
 
 let browser;
 let dir;
