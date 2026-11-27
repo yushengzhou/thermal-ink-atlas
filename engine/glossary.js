@@ -326,6 +326,47 @@ export const GLOSSARY = {
     why: 'It is the quickest shade a school can add; unlike a tree it does not cool the air by evaporation, and after sunset it holds a little warmth over the ground.',
     scenes: ['campus'],
   },
+  // ---- block 9 (busstop) -------------------------------------------------------
+  transmittance: {
+    term: 'Solar transmittance (τ)',
+    text: 'The share of direct sunlight that passes through a roof sheet, a screen or a pane: 0 for an opaque sheet, 1 for nothing in the way.',
+    range: '10 mm twinwall polycarbonate: clear 0.80, opal 0.47, bronze 0.43 (a datasheet, unverified); opaque metal, PV and ad panels 0; the solar heat gain coefficient of a window is a different number.',
+    src: 'brettMartin, brief9',
+    why: 'A see-through roof keeps the rain off but lets most of the sun through to the people under it.',
+    scenes: ['busstop'],
+  },
+  profileAngle: {
+    term: 'Profile angle (φ)',
+    text: 'The sun\'s height seen edge-on to a façade or a shelter side: tan φ = tan(sun height) / cos(sun azimuth − the side\'s facing direction).',
+    range: 'At 35° N on 20 July the sun stands 61° high at 14:00 and 25° at 17:00, from the west-south-west to the west; a roof 1.45 m above a seated head must reach (that height) / tan φ past the head to shade it.',
+    src: 'brief9',
+    why: 'When the sun is low and to the side, a roof edge casts its shade far from where people stand; a vertical screen on that side shades right behind it.',
+    scenes: ['busstop'],
+  },
+  headway: {
+    term: 'Headway',
+    text: 'The time between two buses of a route at a stop.',
+    range: 'Here 10 min (an assumption of the brief, 5–15 min), with gaps spread by a coefficient of variation of 0.4 (0.3–0.5, unverified); riders who arrive at random then wait (h / 2)(1 + cv²) on average.',
+    src: 'brief9, fan2002',
+    why: 'The longer and the less regular the gap between buses, the longer people stand at the stop in the heat.',
+    scenes: ['busstop'],
+  },
+  heatDose: {
+    term: 'Heat dose of a wait',
+    text: 'This page\'s own measure of how much heat a wait brings: the minutes waited times how far the apparent temperature (with the sun\'s radiation) is above 32 °C, summed minute by minute (K·min).',
+    range: 'No standard dose exists for a few minutes of waiting; the brief defines it on UTCI, which this engine does not compute, so the apparent temperature stands in.',
+    src: 'brief9, bom',
+    why: 'It adds up how long and how hot: a short wait in the sun and a long wait in the shade can come out alike.',
+    scenes: ['busstop'],
+  },
+  burnThreshold: {
+    term: 'Contact-burn threshold (benches, rails, decks)',
+    text: 'The surface temperature at which touching it with bare skin starts to burn, for a material and a contact time (ISO 13732-1). Metal conducts heat into the skin fastest, so its limit is lowest.',
+    range: '1 min of contact: metal 51 °C, stone, concrete and glass 56 °C, plastics and wood 60 °C; 10 min: 48 °C; bare metal burns in about 1 s at 65–70 °C (unverified).',
+    src: 'iso13732, brief9',
+    why: 'A hand on a sunlit handrail or bare legs on a metal bench meet the hottest metal of the street; older people and children pull away more slowly.',
+    scenes: ['busstop'],
+  },
   // ---- block 2 (sponge-retrofit) --------------------------------------------
   permeablePaving: {
     term: 'Permeable paving',

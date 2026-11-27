@@ -30,6 +30,8 @@ import { isEstate, estateSetup } from './estate.js';
 import { esApp } from './esui.js';
 import { isCampus, campusSetup } from './campus.js';
 import { cpApp } from './cpui.js';
+import { isBus, busSetup } from './busstop.js';
+import { bsApp } from './bsui.js';
 
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
@@ -136,6 +138,8 @@ export function boot(scene, root = document) {
   let esSet = null;
   const cpMode = isCampus(scene); // block 8 plugin (cpui.js cpApp)
   let cpSet = null;
+  const bsMode = isBus(scene); // block 9 plugin (bsui.js bsApp)
+  let bsSet = null;
   if (!retro) {
     world = buildWorld(scene);
     t1 = performance.now();
@@ -172,6 +176,9 @@ export function boot(scene, root = document) {
     } else if (cpMode) {
       cpSet = campusSetup(world);
       thermal = cpSet.base;
+    } else if (bsMode) {
+      bsSet = busSetup(world);
+      thermal = bsSet.base;
     } else thermal = runModel(world);
     t2 = performance.now();
     V = { main: makeView('main', scene, world, thermal, canvas, glassMode ? { type: () => glassNow.type } : null, wfMode ? { lines: wfSet.lines() } : null) };
@@ -324,7 +331,7 @@ export function boot(scene, root = document) {
       sunTmrt: w.shade.sunTmrt,
     };
   }
-  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode || pkMode || esMode || cpMode ? null : block1Notes();
+  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode || pkMode || esMode || cpMode || bsMode ? null : block1Notes();
   function block1Notes() {
   const notesText = {
     asphalt: ['Kiln Street, old asphalt (albedo 0.12):', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
@@ -736,7 +743,7 @@ export function boot(scene, root = document) {
   // ---- a block plugin (blocks 5 and 6): its controls, cards, notes, heat-card rows, glossary numbers
   // and API live in its own module; app.js only calls these hooks
   const env = {
-    scene, world, thermal, root, card, R, S, main, query: q, setup: htSet ?? pkSet ?? esSet ?? cpSet,
+    scene, world, thermal, root, card, R, S, main, query: q, setup: htSet ?? pkSet ?? esSet ?? cpSet ?? bsSet,
     hideCard: () => hideCard(),
     reopen: () => card.dataset.open === '1' && reopenCard(),
     redraw: () => S.paused && draw(),
@@ -748,7 +755,7 @@ export function boot(scene, root = document) {
     },
     setNotes: (n) => (notes = n),
   };
-  const blk = pkMode ? pkApp(env) : htMode ? htApp(env, htSplash0) : esMode ? esApp(env) : cpMode ? cpApp(env) : null;
+  const blk = pkMode ? pkApp(env) : htMode ? htApp(env, htSplash0) : esMode ? esApp(env) : cpMode ? cpApp(env) : bsMode ? bsApp(env) : null;
   if (blk) notes = blk.notes();
 
   const toggleThermal = () => {
@@ -1273,6 +1280,7 @@ export function boot(scene, root = document) {
       ...(pkSet ? pkSet.timing : {}),
       ...(esSet ? esSet.timing : {}),
       ...(cpSet ? cpSet.timing : {}),
+      ...(bsSet ? bsSet.timing : {}),
     },
     /** Pure seek: render frame N with an optional camera {z,cx,cy}; pauses the clock. */
     seek(frame, cam) {
@@ -1331,9 +1339,9 @@ export function boot(scene, root = document) {
       const { life, shadeFor, R } = vw(which);
       const hq = quantHour(hour);
       return life.at(frame / 60, hq).map((a) => {
-        const h = R.heatAt(a.x, a.y, hq);
+        const h = a.heat ?? R.heatAt(a.x, a.y, hq);
         const st = R.sweatAt(a, frame / 60, hq);
-        return { x: a.x, y: a.y, tmrt: h.tmrt, sunlit: h.sunlit, shade: shadeAt(shadeFor(hq), a.x, a.y), s: st.s, drops: st.drops.length, fall: st.drops.length ? st.drops[0].fall : null, fan: st.fan, hidden: R.hidden(a.x, a.y) };
+        return { x: a.x, y: a.y, tmrt: h.tmrt, sunlit: h.sunlit, shade: a.heat ? +(h.sunlit < 0.5) : shadeAt(shadeFor(hq), a.x, a.y), s: st.s, drops: st.drops.length, fall: st.drops.length ? st.drops[0].fall : null, fan: st.fan, hidden: R.hidden(a.x, a.y) };
       });
     },
     shadeStats(frame = S.frame, hour = S.hour, which) {
@@ -1478,6 +1486,7 @@ export function boot(scene, root = document) {
     /** Estate block (block 7) only: its plugin's API (esui.js esApp). */
     estate: esMode ? blk.api : null,
     campus: cpMode ? blk.api : null,
+    busstop: bsMode ? blk.api : null,
     retro: retro
       ? {
         state: () => ({ state: S.state, split: S.split, swap: S.swap, d: S.d, aged: S.aged }),

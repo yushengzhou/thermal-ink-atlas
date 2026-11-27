@@ -125,6 +125,21 @@ export const SOURCES = {
   courtVendor: 'Acrylic court coating makers (CoolTop; Laykold), via the block-8 brief: a standard acrylic court about 52 C at air about 30 C (vendor claims, unverified)',
   iso13732: 'ISO 13732-1:2006, hot surfaces, via CENELEC Guide 29 Table A.1 (via the block-8 brief): burn thresholds for 1 min / 10 min / 8 h of contact, metal 51 / 48 / 43 C, stone and concrete 56 / 48 / 43 C, plastics and wood 60 / 48 / 43 C; the low end for children (unverified)',
   vanosPress: 'Press coverage of Vanos\'s playground studies, via the block-8 brief: 60 C burns skin in 1 min, 74 C in 5 s, 77 C in 3 s (the standard behind it not named; unverified)',
+  brief9: 'Research brief docs/research/busstop-brief.md (block 9; values compiled from the sources below, items marked unverified there are flagged here; the shelter, footbridge and headway dimensions are assumptions of the brief; the 1 s contact-burn value for bare metal, about 65-70 C, is unverified)',
+  dzyuban2022: 'Dzyuban et al. (2022) International Journal of Biometeorology 66, 345, doi 10.1007/s00484-021-02074-4, Phoenix bus stops, June-July 2018 (via the block-9 brief): air 41.8 / 41.2 C, globe 52.0 / 44.3 C, PET 68.2 / 49.5 C in sun / shade; shade 19 C PET cooler on average (maximum PET 81.6 C); metal roof 20.6, ad panel 20.3, polycarbonate 18.2 C PET cooler, sparse vine not significant; stops without side panels worse; concrete 57.4 / 41.3 C, metal bench 47.7 / 40.4 C; most riders arrive less than 5 min before the bus (unverified)',
+  lanza2025: 'Lanza et al. (2025) Transportation Research Part D 140, 104653, doi 10.1016/j.trd.2025.104653, 17 bus stops in Houston (via the block-9 brief): tree shade 3.2 C WBGT cooler; enclosed shelters without overhead shade more than 3 C hotter than open sun (unverified)',
+  chenWalk2024: 'Chen et al. (2024) Sustainable Cities and Society 100, 105048, doi 10.1016/j.scs.2023.105048, a covered walkway in Hong Kong (via the block-9 brief): Tmrt 53.5-68.0 C on the open sidewalk vs 19.9-39.6 C under the cover (gap 19.8-34.8 K); PET 32.6-37.3 and 45.8-51.1 C (in that order in the brief); air -0.4 to 1.5 K; a footbridge raised street PET by up to 2.7 K (simulated) (unverified)',
+  hyd047: 'Highways Department, Hong Kong, Guidance Note BS/GN/047 (November 2018), via the block-9 brief: bus shelters opaque, translucent materials avoided; walkway covers translucent on at most 1/3 of the width at the sides; low headroom or wider covers and fascias; flat covers better than upward-sloped ones; check with a sun-shadow analysis (unverified)',
+  brettMartin: 'Brett Martin polycarbonate datasheet, 10 mm twinwall sheet (via the block-9 brief): solar transmission clear 0.80, opal 0.47, bronze 0.43; the solar heat gain coefficient is not the transmittance (unverified)',
+  asuFilm: 'Arizona State University radiative-cooling film on a bus shelter roof (via the block-9 brief): Tmrt 1-2 K lower, roof 10-20 F cooler (not peer reviewed, unverified)',
+  sgWalkway: 'Singapore covered walkways (secondary, via the block-9 brief): strong heat stress more than 77% of the time (unverified)',
+  ucla: 'UCLA study of Los Angeles Metro bus stops (via the block-9 brief): 26% of 10,526 stops sheltered (unverified)',
+  fan2002: 'Fan & Machemehl (2002) and a City University review, via the block-9 brief: passengers arrive at random for headways up to about 10-12 min, the mean wait is about half the headway (unverified)',
+  fraser2017: 'Fraser & Chester (2017) Journal of Transport & Health 4, 216 (via the block-9 brief): heat exposure and vulnerability of transit riders (unverified)',
+  liu2025: 'Liu et al. (2025) Journal of Transport Geography 128, 104383 (via the block-9 brief): walking to the stop adds more heat exposure than waiting at it (unverified)',
+  cpsc: 'US Consumer Product Safety Commission, via the block-9 brief: sunlit steel decks can burn bare skin in seconds (unverified)',
+  deckSteel: 'Steel bridge deck surfacing, Materials 18(13) 3109, doi 10.3390/ma18133109 (via the block-9 brief): steel deck surfacing 60-70 C in summer sun (unverified)',
+  lasVegas: 'Las Vegas surface measurements, via the block-9 brief: sunlit metal up to 62 C (unverified)',
 };
 
 /** How a value relates to its source. */
@@ -473,6 +488,76 @@ Object.assign(MATERIALS, {
     tr: v(0.2, 'brief8', 'range', false, 'brief 0.10-0.30 for knitted HDPE shade cloth (unverified); the middle value'),
     prescribed: 'Not used by the grid model as a surface: a flat screen 3.5 m up that lets through tr of the sun; the cells under it count as fully covered for the sky view (crown factor), so their walls term stands in for the warm fabric overhead.',
     note: 'Knitted plastic cloth stretched between steel posts over the play area: most of the sun stops on it, but it holds some warmth after sunset.',
+  },
+});
+
+// ---- block 9: bus stops and footbridges (@page busstop: cut from the other pages at build time) ----
+// Shelter roofs, panels and footbridge decks are flat screens (the transmission
+// tr of direct sun is what the grid model and the waiting-point model use);
+// decks, handrails and bench seats are the shared thin metal layer (metal).
+Object.assign(MATERIALS, {
+  roofMetal: {
+    name: 'Opaque metal shelter roof',
+    alpha: v(0.15, 'engine', 'engine', false, 'not used: the roof is a screen; its underside is the warm-wall term'),
+    eps: v(0.9, 'engine', 'engine', false, 'not used'),
+    ef: v(0, 'engine', 'engine', false, 'not used'),
+    tr: v(0, 'brief9', 'cited', false, 'opaque metal, PV or ad panel: no direct sun through it'),
+    prescribed: 'Not used by the grid model as a surface: a flat opaque screen 2.65 m up; at the waiting points (point model) its underside is seen as the warm-wall term (air + 2 K, more by day).',
+    note: 'A sheet-metal roof on steel posts: it stops all the direct sun, as long as the sun is high enough to be over it.',
+  },
+  polyClear: {
+    name: 'Clear polycarbonate shelter roof',
+    alpha: v(0.1, 'engine', 'engine', false, 'not used'),
+    eps: v(0.9, 'engine', 'engine', false, 'not used'),
+    ef: v(0, 'engine', 'engine', false, 'not used'),
+    tr: v(0.8, 'brettMartin', 'cited', false, '10 mm twinwall, clear: solar transmission 0.80 (datasheet via the brief)'),
+    prescribed: 'Not used by the grid model as a surface: a flat screen that lets through tr of the direct sun; its diffuse light is not counted (the sky view counts it as cover).',
+    note: 'A see-through plastic roof: it keeps the rain off, but four fifths of the sun comes straight through.',
+  },
+  polyOpal: {
+    name: 'Opal polycarbonate shelter roof',
+    alpha: v(0.3, 'engine', 'engine', false, 'not used'),
+    eps: v(0.9, 'engine', 'engine', false, 'not used'),
+    ef: v(0, 'engine', 'engine', false, 'not used'),
+    tr: v(0.47, 'brettMartin', 'cited', false, '10 mm twinwall, opal: solar transmission 0.47 (bronze 0.43, not used) (datasheet via the brief)'),
+    prescribed: 'As the clear sheet: a flat screen that lets through tr of the direct sun.',
+    note: 'Milky plastic: it scatters the light and lets about half of the sun through.',
+  },
+  glassBox: {
+    name: 'Clear glass shelter (roof and walls)',
+    alpha: v(0.08, 'engine', 'engine', false, 'not used'),
+    eps: v(0.84, 'engine', 'engine', false, 'not used'),
+    ef: v(0, 'engine', 'engine', false, 'not used'),
+    tr: v(0.82, 'brief3', 'interp', false, '1 - rho0 - a_g of clear float glass at normal incidence (block 3: 0.08 and 0.10); the brief gives no glass value; less at a glancing angle (not modelled)'),
+    prescribed: 'A flat glass roof (screen) and glass walls that let through tr of the direct sun; the air trapped inside is not modelled.',
+    note: 'A glass box with a glass roof: out of the wind and rain, but the sun comes in from above and from every side.',
+  },
+  adPanel: {
+    name: 'Opaque shelter panel (advertising panel or sheet)',
+    alpha: v(0.3, 'engine', 'engine', false, 'not used'),
+    eps: v(0.9, 'engine', 'engine', false, 'not used'),
+    ef: v(0, 'engine', 'engine', false, 'not used'),
+    tr: v(0, 'brief9', 'cited', false, 'opaque ad panel: no direct sun through it'),
+    prescribed: 'A vertical panel: it blocks the direct sun on the 5 m grid (as a thin opaque box) and at the waiting points; it reflects no sunlight and its own temperature is not computed.',
+    note: 'A solid back or side panel: it stops the low sun that gets under the roof.',
+  },
+  bridgeDeck: {
+    name: 'Footbridge deck (steel)',
+    alpha: v(0.15, 'engine', 'engine', false, 'not used for the screen: the deck surface is the shared thin metal layer (metal)'),
+    eps: v(0.9, 'engine', 'engine', false, 'not used'),
+    ef: v(0, 'engine', 'engine', false, 'not used'),
+    tr: v(0, 'engine', 'engine', false, 'the deck shades the road beneath it'),
+    prescribed: 'Over the road a flat opaque screen 6 m up; its walking surface is computed at points as the shared dark metal thin layer (metal).',
+    note: 'A steel footbridge over the avenue: a thin plate in the sun, it heats as fast as a metal roof.',
+  },
+  bridgeRoof: {
+    name: 'Footbridge cover (opaque metal)',
+    alpha: v(0.15, 'engine', 'engine', false, 'not used'),
+    eps: v(0.9, 'engine', 'engine', false, 'not used'),
+    ef: v(0, 'engine', 'engine', false, 'not used'),
+    tr: v(0, 'brief9', 'cited', false, 'opaque metal cover'),
+    prescribed: 'A flat opaque screen 2.65 m above the deck.',
+    note: 'A roof over the footbridge: shade for the people crossing and for the steel under their feet.',
   },
 });
 
