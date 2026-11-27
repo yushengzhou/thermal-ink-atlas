@@ -89,6 +89,17 @@
   #wind .measures button { font-size: 12px; padding: 2px 6px; }
   #wind .measures button.warn { border-color: #8a2f22; color: #8a2f22; }
   .noui #wind { display: none; }
+  #hutong { position: fixed; left: 18px; bottom: 16px; width: 212px; padding: 8px 10px 9px; background: rgba(246,240,226,.93);
+    border: 1.5px solid #2b2621; border-radius: 4px 9px 5px 8px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); font-size: 13px; }
+  #hutong .seg { display: flex; align-items: center; gap: 4px; margin: 0 0 6px; flex-wrap: wrap; }
+  #hutong button { font: 12.5px/1.2 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; background: #fbf7ee; color: #2b2621;
+    border-radius: 4px 7px 3px 6px; cursor: pointer; }
+  #hutong button[aria-pressed="true"] { background: #2b2621; color: #fbf7ee; }
+  #hutong .measures { display: flex; flex-wrap: wrap; gap: 4px; border-top: 1px dashed #6d6355; padding-top: 6px; }
+  #hutong .measures .hand { flex-basis: 100%; }
+  #hutong .measures button { font-size: 12px; padding: 2px 6px; }
+  .noui #hutong { display: none; }
+  #terms .refs a { color: #8a2f22; }
   #card table.cmp td { text-align: right; }
   #card table.cmp td:first-child, #card table.cmp td.sub { text-align: left; }
   #card .sub { font-size: 11.5px; opacity: .8; font-weight: normal; }
@@ -117,7 +128,7 @@
 <div id="terms" role="dialog" aria-label="Glossary of terms" hidden>
   <div class="hand">Terms used here</div>
   <ul id="termsList"></ul>
-  <p class="refs">Full reference list for every block: <b>references.html</b>, linked from the gallery page; details in docs/sources.md.</p>
+  <p class="refs">Full reference list for every block: <a id="refsLink" href="../../references.html">references.html</a> (in this repository, also linked from the gallery page); details in docs/sources.md.</p>
 </div>
 <div id="fn" role="tooltip" hidden></div>
 <div id="card" data-open="0"></div>
@@ -408,7 +419,70 @@ function rasterise(polys, grid, visit, s = 1, win = null) {
   }
 }
 
-return { dayOfYear, solarPosition, sunVector, shadowOffset, boxShadow, canopyShadow, rasterise };
+/**
+ * Scanline version of rasterise (block 5, many small shadows on a fine
+ * sample grid): the same samples and the same inside rule as inPoly
+ * (crossing count, x strictly left of the crossing), found per sample row
+ * from the polygon's edge crossings instead of one test per sample.
+ */
+function rasteriseScan(polys, grid, visit, s = 1, win = null) {
+  const { nx, ny, cell } = grid;
+  const wi0 = win ? win[0] : 0;
+  const wj0 = win ? win[1] : 0;
+  const wi1 = win ? win[2] : nx - 1;
+  const wj1 = win ? win[3] : ny - 1;
+  const xs = [];
+  for (let p = 0; p < polys.length; p++) {
+    const poly = polys[p];
+    if (!poly) continue;
+    let x0 = Infinity;
+    let y0 = Infinity;
+    let x1 = -Infinity;
+    let y1 = -Infinity;
+    for (let i = 0; i < poly.length; i += 2) {
+      x0 = Math.min(x0, poly[i]);
+      x1 = Math.max(x1, poly[i]);
+      y0 = Math.min(y0, poly[i + 1]);
+      y1 = Math.max(y1, poly[i + 1]);
+    }
+    const i0 = Math.max(wi0, Math.floor(x0 / cell));
+    const i1 = Math.min(wi1, Math.floor(x1 / cell));
+    const j0 = Math.max(wj0, Math.floor(y0 / cell));
+    const j1 = Math.min(wj1, Math.floor(y1 / cell));
+    if (i0 > i1) continue;
+    const n = poly.length;
+    for (let j = j0; j <= j1; j++) {
+      for (let sj = 0; sj < s; sj++) {
+        const y = (j + (sj + 0.5) / s) * cell;
+        xs.length = 0;
+        for (let i = 0, k = n - 2; i < n; k = i, i += 2) {
+          const xi = poly[i];
+          const yi = poly[i + 1];
+          const xj = poly[k];
+          const yj = poly[k + 1];
+          if (yi > y !== yj > y) xs.push(((xj - xi) * (y - yi)) / (yj - yi) + xi);
+        }
+        if (xs.length < 2) continue;
+        xs.sort((a, b) => a - b);
+        // inside: an odd number of crossings strictly right of x, i.e. xs[2q] <= x < xs[2q + 1]
+        for (let q = 0; q + 1 < xs.length; q += 2) {
+          const a = xs[q];
+          const b = xs[q + 1];
+          const g0 = Math.max(i0 * s, Math.floor((a / cell) * s - 0.5) - 1);
+          const g1 = Math.min(i1 * s + s - 1, Math.ceil((b / cell) * s - 0.5) + 1);
+          for (let g = g0; g <= g1; g++) {
+            const i = Math.floor(g / s);
+            const si = g - i * s;
+            const x = (i + (si + 0.5) / s) * cell;
+            if (x >= a && x < b) visit(j * nx + i, p, si + sj * s);
+          }
+        }
+      }
+    }
+  }
+}
+
+return { dayOfYear, solarPosition, sunVector, shadowOffset, boxShadow, canopyShadow, rasterise, rasteriseScan };
 })();
 
 __m['materials'] = (() => {
@@ -474,6 +548,24 @@ const SOURCES = {
   webb2008: 'Webb et al. (2008) Hydrological Processes, river water temperature review: large deep rivers have the smallest daily range ("< 1 K" unverified)',
   steadman1994: 'Steadman (1994) Australian Meteorological Magazine 43, apparent temperature with radiation (the paper itself was not read; formula via [bom])',
   bom: 'Australian Bureau of Meteorology, Thermal stress: About the formula for the apparent temperature (bom.gov.au/info/thermal_stress/): AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25, ws the 10 m wind, Q the net radiation absorbed per unit area of body surface (W m-2); coefficients checked against this page',
+  brief5: 'Research brief docs/research/hutong-brief.md (block 5; values compiled from the sources below, items marked unverified there are flagged here)',
+  hendel2015: 'Hendel et al. (2015) J. Sustain. Dev. Energy Water Environ. Syst., doi 10.13044/j.sdewes.2015.03.0001: watering the Rue du Louvre, Paris, about 1 L m-2 per cycle; surface -7.5 K at 19:30 and -6 K at 20:30, lasting several hours',
+  hendel2016: 'Hendel et al. (2016) Urban Climate, doi 10.1016/j.uclim.2016.02.003: pavement watering in Paris, air -0.79 K at most, Tmrt -1.76 K',
+  takebayashi2023: 'Takebayashi et al. (2023) Atmosphere 14, 1014, doi 10.3390/atmos14061014: road watering in Kobe, 0.025 mm per pass, -2 to -4 K at once, about 6 K on average, gone within 30 min in sun, evening watering recommended; lE = l beta alpha_w (X_s - X_a) with beta 0.15 on asphalt',
+  kato2008: 'Kato et al. (2008), via the block-5 brief: a watered road 50 -> 40 C in about 60 min (unverified)',
+  nippon: 'nippon.com feature on uchimizu (via the block-5 brief): sprinkling water in the evening and in shade, a custom since the Edo period',
+  lin2019: 'Lin et al. (2019) Int. J. Environ. Res. Public Health 16, 2986, doi 10.3390/ijerph16162986: traditional block in Harbin, SVF lanes 0.09-0.27, courtyards 0.22-0.37; lower-SVF courtyards 0.3 K cooler air (at most 0.6 K) and 0.4 K globe (at most 1.0 K)',
+  spainCourtyard: 'Cordoba and Seville courtyard studies, MDPI Proceedings 2(22) 1390 and 1381, 38(1) 17 (abstracts only, unverified): courtyards 3-6 K below the outdoor air on hot days, up to 11-15 K at 40-45 C',
+  yang2024: 'Yang & Wang (2024) J. Beijing Forestry Univ., doi 10.12171/j.1000-1522.20240012 (abstract only): Beijing street-tree shade -1.0 to -2.1 K air and -481 to -789 W m-2; pagoda tree second for comfort',
+  carb: 'California Air Resources Board cool-roof data, via the block-5 brief: clay tile solar reflectance 0.40-0.50, emissivity 0.80-0.90 (light terracotta; grey reduced-fired tile is darker, unverified)',
+  midlandBrick: 'Midland Brick product data, via the block-5 brief: brick solar absorptance 0.45 (light grey) to 0.90 (slate grey)',
+  sohuRoof: 'Web article (sohu), via the block-5 brief: northern roofs of paired tiles on a mud or lime back, not ventilated (secondary, unverified)',
+  miller2007: 'Miller (2007), Oak Ridge National Laboratory, via the block-5 brief: ventilated tile roofs run cooler; does not apply to mud-backed, unventilated roofs',
+  ucdavis: 'UC Davis guidance, via the block-5 brief: overhead vine arbours give more than 90% cover',
+  jjshs: 'J. Japan. Soc. Hort. Sci. 54(3) 293, via the block-5 brief: pergola vines need LAI 2 or more, ideally 3',
+  deng: 'Deng Yunxiang, Tianpeng zheyin (The Paper, newsDetail_forward_18319465), via the block-5 brief: summer mat awnings over Beijing courtyards; Li Binsheng\'s "tianpeng, fish bowl, pomegranate tree"',
+  visitBeijing: 'Visit Beijing (official tourism site), via the block-5 brief: jujube and pagoda trees in courtyards; the pomegranate stands for many children',
+  bolton1980: 'Bolton (1980) Monthly Weather Review 108, 1046-1053: saturation vapour pressure e_s = 6.112 exp(17.67 T / (T + 243.5)) hPa (formula from memory, not checked)',
 };
 
 /** How a value relates to its source. */
@@ -688,6 +780,49 @@ Object.assign(MATERIALS, {
   },
 });
 
+// ---- block 5: hutong lanes and courtyards ------------------------------------
+// tr: share of the sun a crown or screen lets through, exp(-0.5 LAI) as for
+// MODEL.canopyTransmission (sun.js / thermal.js: per tree or per screen).
+const leaf = (ef, efNote, tr, trNote, trSource = 'brief5') => ({
+  alpha: v(0.18, 'oke', 'range', false, 'cited 0.15-0.20'),
+  eps: v(0.97, 'oke', 'range', false, 'cited 0.97-0.99'),
+  ef: v(ef, 'brief5', 'cited', false, efNote),
+  tr: v(tr, trSource, 'interp', false, trNote),
+  tree: true,
+  prescribed: 'Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.',
+});
+Object.assign(MATERIALS, {
+  greyBrick: {
+    name: 'Grey brick paving (青砖)',
+    alpha: v(0.2, 'brief5', 'range', false, 'brief 0.20 (0.15-0.30); brick absorptance 0.45 light grey to 0.90 slate grey [midlandBrick]'),
+    eps: v(0.92, 'brief5', 'cited', false),
+    mu: v(1100, 'brief5', 'cited', false),
+    ef: v(0.02, 'brief5', 'cited', false, 'dry, porous brick'),
+    note: 'Lanes and courtyards are paved with fired grey brick: darker than stone, a little porous, and it holds the day\'s heat into the evening.',
+  },
+  greyTile: {
+    name: 'Grey tile roof on a mud and lime back',
+    alpha: v(0.18, 'brief5', 'range', false, 'brief 0.18 (0.12-0.25); light terracotta clay tile 0.40-0.50 [carb], grey reduced-fired tile darker (unverified)'),
+    eps: v(0.9, 'brief5', 'cited', false, 'clay tile 0.80-0.90 [carb]'),
+    mu: v(1000, 'brief5', 'cited', false, 'tiles bedded on a mud and lime back, not ventilated [sohuRoof]; the ventilated-tile result [miller2007] does not apply'),
+    ef: v(0, 'brief5', 'cited', false, 'dry'),
+    note: 'Paired grey tiles laid on a thick mud and lime bed: dark and heavy, the roof bakes in the afternoon and gives the heat back slowly.',
+  },
+  jujube: { name: 'Jujube tree (枣树)', ...leaf(0.6, 'brief value', 0.37, 'exp(-0.5 x 2.0); brief LAI 1.5-2.5 (no measured LAI for jujube), i.e. 0.29-0.47'), note: 'A small courtyard tree with an open, airy crown: patchy shade.' },
+  pomegranate: { name: 'Pomegranate (石榴)', ...leaf(0.6, 'brief value', 0.29, 'exp(-0.5 x 2.5); brief LAI 2-3, i.e. 0.22-0.37'), note: 'A low, dense courtyard tree; its fruit stands for many children.' },
+  pagodaTree: { name: 'Pagoda tree (国槐)', ...leaf(0.7, 'brief value', 0.17, 'exp(-0.5 x 3.5); brief LAI 3-4 (no measured LAI), i.e. 0.14-0.22'), note: 'The big shade tree of the Beijing lanes: a wide, dense crown high above the roofs.' },
+  pergola: { name: 'Vine pergola (葡萄架)', ...leaf(0.6, 'brief value', 0.29, 'exp(-0.5 x 2.5); pergola vines LAI 2-3 [jjshs], overhead arbours > 90% cover [ucdavis]', 'jjshs'), note: 'A grape vine trained over a trellis at head height: dappled shade over the courtyard path.' },
+  awning: {
+    name: 'Summer mat awning (天棚)',
+    alpha: v(0.3, 'engine', 'engine', false, 'not used: only the transmission of the mat matters here'),
+    eps: v(0.9, 'engine', 'engine', false, 'not used'),
+    ef: v(0, 'engine', 'engine', false, 'not used'),
+    tr: v(0.2, 'brief5', 'range', false, 'brief 0.1-0.3 for reed mats (unverified)'),
+    prescribed: 'Not used by the grid model as a surface: a flat screen above the eaves that lets through tr of the sun; the cells under it count as fully covered for the sky view (crown factor).',
+    note: 'A shed of reed mats on poles, built over the whole courtyard each summer, higher than the eaves; its side mats roll up to let the air through.',
+  },
+});
+
 // ---- block 3: glass presets ---------------------------------------------------
 // rho0: normal-incidence solar reflectance (the angular shape is Fresnel, see
 // reflect.js); absorb: solar absorptance of the pane (glass temperature);
@@ -755,10 +890,19 @@ const MODEL = {
   apparentTemp: v('AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25', 'bom', 'cited', true, 'Steadman (1994) [steadman1994], coefficients checked against the BoM page; comfort for the walkers in block 4 (a stand-in for UTCI, which is not implemented); ws = u_10 f_w clamped to 0.5-17 m/s as the brief gives for UTCI'),
   atRadiation: v('Q = 6.1 W m-2 K-1 x (Tmrt - Ta)', 'bom', 'interp', false, 'extra radiation absorbed by a person, linearised: 4 eps sigma T^3 with eps 0.97 and T 303 K over the whole body surface. At a sunlit Tmrt near 68 C (341 K) 4 eps sigma T^3 is about 8.7, so Q is understated by about 30% there; a standing person radiates over only about 0.7 of the body surface (ASHRAE effective radiating area), which errs the other way. Route weights divide by the sun-shade AT gap, so this largely cancels for the walkers; absolute AT on the cards carries it'),
   windLines: v('seeds every 20 m upwind, RK2 2.5 m steps, slide along buildings', 'brief4', 'engine', false, 'drawing only: assumed direction x shelter factor, not computed flow; dash spacing and speed proportional to u_i (speed drawn 4x)'),
+  // ---- block 5 (hutong): surface water store, shade sampling, screens ----
+  waterStore: v('LE = L beta(W) (h_c / c_p) max(0, q_sat(Ts) - q_a), dW/dt = -LE / L', 'brief5', 'cited', false, 'bulk evaporation from the splashed paving; beta(W) = beta_wet min(1, W / W_c); c_p 1005 J kg-1 K-1, p 1013.25 hPa, q = 0.622 e / (p - 0.378 e); adds to the EF term, which is zero after sunset'),
+  satVapour: v('e_s = 6.112 exp(17.67 T / (T + 243.5)) hPa', 'bolton1980', 'cited', false, 'saturation vapour pressure over water'),
+  splashW0: v(1.0, 'brief5', 'edge', false, 'W0, mm of evaporable water left on the paving by one splash; brief 0.5-1.0 mm of the 1-2 L m-2 thrown (about 1 L m-2 per cycle in Paris [hendel2015])'),
+  splashBeta: v(0.5, 'brief5', 'range', false, 'beta_wet, the wetness factor of splashed brick; brief 0.3-1 (unverified); Kobe asphalt 0.15 [takebayashi2023]'),
+  splashWc: v(0.2, 'brief5', 'cited', false, 'W_c, mm: below it the wet patch dries up and beta falls in proportion'),
+  splashHour: v(19, 'brief5', 'cited', false, 'the evening splash, every evening of the repeated design day (evening watering recommended [takebayashi2023]; the uchimizu custom [nippon])'),
+  shadeSamples: v('4 x 4 per 5 m cell', 'engine', 'engine', false, 'block 5 only: shade sampled every 1.25 m, so the 1.2 m wall shadow of a 5 m lane at noon registers (blocks 1-4: 2 x 2)'),
+  screenCover: v('SVF x (1 - 0.75)', 'engine', 'engine', false, 'cells under a pergola or awning take the crown factor of a full tree crown for the sky view and wall reflection, as cells under trees do'),
 };
 
 /** Parameter keys a material uses (for cards and docs). */
-const paramKeys = (m) => ['alpha', 'eps', m.thinC ? 'thinC' : 'mu', 'muWet', 'ef', 'efWet', 'tau', 'storage'].filter((k) => m[k]);
+const paramKeys = (m) => ['alpha', 'eps', m.thinC ? 'thinC' : 'mu', 'muWet', 'ef', 'efWet', 'tau', 'storage', 'tr'].filter((k) => m[k]);
 
 return { SOURCES, BASIS, MATERIALS, GLASS, GLASS_IDS, GLASS_DEFAULT, MODEL, paramKeys };
 })();
@@ -1070,6 +1214,10 @@ __m['thermal'] = (() => {
 // dTs/dt = (2 sqrt(pi) / (mu sqrt(tau))) G - (2 pi / tau) (Ts - Td)   (Deardorff 1978)
 // G = (1-a) K + e L_down - e s Ts^4 - hc (Ts - Ta) - EF max(Q*, 0)
 // Thin layers (sheet metal) use dTs/dt = G / C instead (no restore term).
+// Block 5 adds a surface water store W (mm) on chosen cells (splashing):
+//   G = ... - EF max(Q*, 0) - LE,  LE = L beta(W) (h_c / c_p) max(0, q_sat(Ts) - q_a),
+//   beta(W) = beta_wet min(1, W / W_c),  dW/dt = -LE / L,  W := W0 at the splash hour.
+// Blocks without wet cells never enter that step (stepSplash below).
 // Computed once at load with 1-min steps, repeating the design day until the
 // deep temperature Td converges (max change < 0.05 K, at least 3 days), and
 // stored at 15-min resolution for the last day; seek() only looks values up.
@@ -1085,7 +1233,7 @@ __m['thermal'] = (() => {
 // glass walls at T_g (reflect.js glassTemp) with emissivity eps_g, reflecting
 // the air temperature for the rest.
 const { MATERIALS, MODEL, GLASS } = __m['materials'];
-const { solarPosition, boxShadow, canopyShadow, rasterise, sunVector } = __m['sun'];
+const { solarPosition, boxShadow, canopyShadow, rasterise: rasterOne, rasteriseScan, sunVector } = __m['sun'];
 const { lerp, hexRgb, DEG } = __m['core'];
 const { glassTemp, FACE_N, FACES } = __m['reflect'];
 
@@ -1181,6 +1329,49 @@ function svfAt(heightAt, x, y, z0, nDirs = 16, maxDist = 160, step = 2.5, onDir 
   return sum / nDirs;
 }
 
+/**
+ * Sky view factor by an exact horizon scan over the cell grid (block 5,
+ * narrow lanes): along each azimuth the ray steps from cell boundary to cell
+ * boundary (Amanatides-Woo traversal), and each cell it enters sets the
+ * horizon at its height over the distance to its near edge, so walls on
+ * cell edges are seen at their true distance. grid: {n, cell, height}.
+ */
+function svfGridAt(grid, x, y, z0, nDirs = 16, maxDist = 160) {
+  const { n, cell, height } = grid;
+  let sum = 0;
+  for (let k = 0; k < nDirs; k++) {
+    const a = ((k + 0.5) / nDirs) * 2 * Math.PI;
+    const dx = Math.cos(a);
+    const dy = Math.sin(a);
+    let i = Math.floor(x / cell);
+    let j = Math.floor(y / cell);
+    const si = dx > 0 ? 1 : -1;
+    const sj = dy > 0 ? 1 : -1;
+    const ddx = Math.abs(dx) < 1e-12 ? Infinity : cell / Math.abs(dx);
+    const ddy = Math.abs(dy) < 1e-12 ? Infinity : cell / Math.abs(dy);
+    let tx = Math.abs(dx) < 1e-12 ? Infinity : ((dx > 0 ? (i + 1) * cell : i * cell) - x) / dx;
+    let ty = Math.abs(dy) < 1e-12 ? Infinity : ((dy > 0 ? (j + 1) * cell : j * cell) - y) / dy;
+    let best = 0;
+    for (;;) {
+      let t;
+      if (tx < ty) {
+        t = tx;
+        i += si;
+        tx += ddx;
+      } else {
+        t = ty;
+        j += sj;
+        ty += ddy;
+      }
+      if (t > maxDist || i < 0 || j < 0 || i >= n || j >= n) break;
+      const h = height[j * n + i] - z0;
+      if (h > 0 && h / t > best) best = h / t;
+    }
+    sum += 1 / (1 + best * best);
+  }
+  return sum / nDirs;
+}
+
 /** Shadow polygons for all buildings and trees at a sun position. */
 function shadowPolys(world, sun, zFloor = 0) {
   const b = [];
@@ -1191,21 +1382,32 @@ function shadowPolys(world, sun, zFloor = 0) {
   if (zFloor === 0) for (const A of world.awnings ?? []) b.push(boxShadow(A.x0, A.y0, A.x1, A.y1, A.z1, sun, A.z0));
   const t = [];
   for (const T of world.trees) t.push(canopyShadow(T.x, T.y, T.zc, T.r, sun));
+  // block 5: flat screens (vine pergolas, mat awnings) shade like canopies
+  if (world.screens) for (const P of world.screens) t.push(screenShadow(P, sun));
   return { b, t };
 }
+
+/** Ground shadow of a flat screen {x0, y0, x1, y1, z} (a thin box 0.1 m deep). */
+const screenShadow = (P, sun) => boxShadow(P.x0, P.y0, P.x1, P.y1, P.z, sun, P.z - 0.1);
+
+/** Shade samples per cell side (2, i.e. 2.5 m apart on the 5 m grid; block 5: world.shadeS). */
+const samplesOf = (world) => world.shadeS ?? 2;
+/** Rasteriser for a world: the scanline version for fine shade samples (block 5; same samples, same inside rule). */
+const rasterFor = (world) => (world.shadeS ? rasteriseScan : rasterOne);
 
 /**
  * Building shade mask for one sun position: 2x2 samples per cell, 1 where a
  * building (or awning) shades the ground or a taller building shades a roof.
  */
 function buildingMask(world, sun) {
+  if (world.shadeS && !(world.awnings && world.awnings.length)) return buildingMaskRay(world, sun);
   const { n, cell } = world;
   const N = n * n;
-  const S = 2;
+  const S = samplesOf(world);
   const grid = { nx: n, ny: n, cell };
   const bmask = new Uint8Array(N * S * S);
   const { b } = shadowPolys(world, sun);
-  rasterise(b, grid, (i, p, s) => {
+  rasterFor(world)(b, grid, (i, p, s) => {
     const bi = world.bld[i];
     if (bi < 0) bmask[i * S * S + s] = 1; // ground cells only
   }, S);
@@ -1219,9 +1421,67 @@ function buildingMask(world, sun) {
     if (!polys.length) continue;
     // only the roof's own cells can be marked: visit just its cell window
     const win = [Math.floor(R.x0 / cell), Math.floor(R.y0 / cell), Math.min(n - 1, Math.floor(R.x1 / cell)), Math.min(n - 1, Math.floor(R.y1 / cell))];
-    rasterise(polys, grid, (i, p, s) => {
+    rasterFor(world)(polys, grid, (i, p, s) => {
       if (world.bld[i] === r) bmask[i * S * S + s] = 1;
     }, S, win);
+  }
+  return bmask;
+}
+
+/**
+ * Building shade mask by ray marching (block 5: fine samples, many low
+ * boxes): a sample at (x, y, z0) (ground 0, roof its height) is shaded if the
+ * ray toward the sun enters a cell taller than the ray there. The ray is
+ * lowest where it enters a cell, so for boxes on the grid this is the same
+ * test as the cast-shadow polygons, without visiting the footprints.
+ */
+function buildingMaskRay(world, sun) {
+  const { n, cell, height } = world;
+  const N = n * n;
+  const S = samplesOf(world);
+  const bmask = new Uint8Array(N * S * S);
+  if (sun.alt <= 0) return bmask;
+  const tanA = Math.tan(sun.alt * DEG);
+  const b = sun.az * DEG;
+  const dx = Math.sin(b); // toward the sun: x east, y south
+  const dy = -Math.cos(b);
+  let hMax = 0;
+  for (let i = 0; i < N; i++) hMax = Math.max(hMax, height[i]);
+  const si = dx > 0 ? 1 : -1;
+  const sj = dy > 0 ? 1 : -1;
+  const ddx = Math.abs(dx) < 1e-12 ? Infinity : cell / Math.abs(dx);
+  const ddy = Math.abs(dy) < 1e-12 ? Infinity : cell / Math.abs(dy);
+  for (let c = 0; c < N; c++) {
+    const z0 = height[c];
+    const reach = (hMax - z0) / tanA;
+    if (reach <= 0) continue;
+    const ci = c % n;
+    const cj = (c - ci) / n;
+    for (let s = 0; s < S * S; s++) {
+      const x = (ci + ((s % S) + 0.5) / S) * cell;
+      const y = (cj + (Math.floor(s / S) + 0.5) / S) * cell;
+      let i = ci;
+      let j = cj;
+      let tx = Math.abs(dx) < 1e-12 ? Infinity : ((dx > 0 ? (i + 1) * cell : i * cell) - x) / dx;
+      let ty = Math.abs(dy) < 1e-12 ? Infinity : ((dy > 0 ? (j + 1) * cell : j * cell) - y) / dy;
+      for (;;) {
+        let t;
+        if (tx < ty) {
+          t = tx;
+          i += si;
+          tx += ddx;
+        } else {
+          t = ty;
+          j += sj;
+          ty += ddy;
+        }
+        if (t > reach || i < 0 || j < 0 || i >= n || j >= n) break;
+        if (height[j * n + i] > z0 + t * tanA) {
+          bmask[c * S * S + s] = 1;
+          break;
+        }
+      }
+    }
   }
   return bmask;
 }
@@ -1238,17 +1498,18 @@ function sunlitField(world, sun, bmask = null) {
   const out = new Float32Array(N);
   if (sun.alt <= 0) return out;
   out.fill(1);
-  const S = 2; // 2x2 samples per cell
+  const S = samplesOf(world); // S x S samples per cell (2 x 2 in blocks 1-4)
   const grid = { nx: n, ny: n, cell };
   const bm = bmask ?? buildingMask(world, sun);
   const t = world.trees.map((T) => canopyShadow(T.x, T.y, T.zc, T.r, sun));
   const tr = MODEL.canopyTransmission.value;
+  if (world.screens) return screenedField(world, sun, bm, t, S, out);
   if (world.trees.some((T) => T.tr !== undefined)) {
     // per-tree transmission: multiply per sample, at most three crowns deep
     // as for the uniform case
     const trans = new Float64Array(N * S * S).fill(1);
     const deep = new Uint8Array(N * S * S);
-    rasterise(t, grid, (i, p, s) => {
+    rasterOne(t, grid, (i, p, s) => {
       const k = i * S * S + s;
       if (world.bld[i] < 0 && deep[k] < 3) {
         deep[k]++;
@@ -1266,7 +1527,7 @@ function sunlitField(world, sun, bmask = null) {
     return out;
   }
   const tcount = new Uint8Array(N * S * S);
-  rasterise(t, grid, (i, p, s) => {
+  rasterOne(t, grid, (i, p, s) => {
     if (world.bld[i] < 0 && tcount[i * S * S + s] < 3) tcount[i * S * S + s]++;
   }, S);
   for (let i = 0; i < N; i++) {
@@ -1280,6 +1541,40 @@ function sunlitField(world, sun, bmask = null) {
   return out;
 }
 
+/**
+ * Sunlit fraction with per-tree crowns (each its own transmission, at most
+ * three crowns deep as above) and flat screens (block 5: pergolas and mat
+ * awnings, each multiplying in its own transmission), on S x S samples.
+ */
+function screenedField(world, sun, bm, t, S, out) {
+  const { n, cell } = world;
+  const N = n * n;
+  const grid = { nx: n, ny: n, cell };
+  const tr = MODEL.canopyTransmission.value;
+  const trans = new Float64Array(N * S * S).fill(1);
+  const deep = new Uint8Array(N * S * S);
+  rasterFor(world)(t, grid, (i, p, s) => {
+    const k = i * S * S + s;
+    if (world.bld[i] < 0 && deep[k] < 3) {
+      deep[k]++;
+      trans[k] *= world.trees[p].tr ?? tr;
+    }
+  }, S);
+  const sc = world.screens.map((P) => screenShadow(P, sun));
+  rasterFor(world)(sc, grid, (i, p, s) => {
+    if (world.bld[i] < 0) trans[i * S * S + s] *= world.screens[p].tr;
+  }, S);
+  for (let i = 0; i < N; i++) {
+    let f = 0;
+    for (let s = 0; s < S * S; s++) {
+      const k = i * S * S + s;
+      if (!bm[k]) f += trans[k];
+    }
+    out[i] = f / (S * S);
+  }
+  return out;
+}
+
 /** Fine shade-class raster (0 sun, 1 building shade, 2 tree shade). */
 function shadeClassField(world, sun, cell = 2) {
   const n = Math.round(world.size / cell);
@@ -1287,10 +1582,10 @@ function shadeClassField(world, sun, cell = 2) {
   if (sun.alt <= 0) return { n, cell, cls: out, night: true };
   const { b, t } = shadowPolys(world, sun);
   const grid = { nx: n, ny: n, cell };
-  rasterise(t, grid, (i) => {
+  rasterFor(world)(t, grid, (i) => {
     out[i] = 2;
   });
-  rasterise(b, grid, (i) => {
+  rasterFor(world)(b, grid, (i) => {
     out[i] = 1;
   });
   return { n, cell, cls: out, night: false };
@@ -1413,6 +1708,31 @@ function runModel(world, opts = {}) {
     for (let i = 0; i < NN; i++) hcA[i] = 5.7 + 3.8 * uSite * fwFull[idx ? idx[i] : i];
   }
   const kinds = water.some((k) => k > 1);
+  // block 5: surface water store on the wet-able cells (opts.splash), see the header
+  const sp = opts.splash ?? null;
+  let WS = null;
+  if (sp) {
+    const set = new Set(sp.cells);
+    const wet = new Uint8Array(NN);
+    for (let i = 0; i < NN; i++) wet[i] = !water[i] && set.has(idx ? idx[i] : i) ? 1 : 0;
+    WS = {
+      wet,
+      W: new Float64Array(NN), // mm = kg m-2
+      evap: new Float64Array(NN), // mm evaporated over the current day
+      start: new Float64Array(NN), // W at the start of the day, just before the splash, at the end (mass balance)
+      before: new Float64Array(NN),
+      end: new Float64Array(NN),
+      store: new Float32Array(NN * STORE),
+      qa: specificHumidity(site.vapourHpa),
+      beta: sp.beta,
+      wc: sp.wc,
+      w0: sp.w0,
+      at: Math.round(sp.hour * 60),
+      efOnly: !!sp.efOnly, // the old path alone: EF := efWet from the splash hour to midnight, no store
+      efWet: sp.efWet ?? 1,
+      efOn: false,
+    };
+  }
 
   // per-minute forcing
   const M = 1440;
@@ -1445,14 +1765,25 @@ function runModel(world, opts = {}) {
   const stepsPerStore = M / STORE;
 
   // per-cell inputs and state for the step functions (one minute, all cells)
-  const C = { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, hcA, dt, gOpaque, g0, g1, g2, g3, wt: new Float64Array(4) };
+  const C = { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, hcA, dt, gOpaque, g0, g1, g2, g3, wt: new Float64Array(4), WS };
   let days = 0;
   let maxDelta = Infinity;
   /** One design day with steps of stepMin minutes; returns max |change of Td| over cells. */
   const runDay = (stepMin, keep) => {
     sumDay.fill(0);
     C.dt = stepMin * 60;
+    if (WS) {
+      WS.evap.fill(0);
+      WS.start.set(WS.W);
+      WS.efOn = false;
+    }
     for (let m = 0; m < M; m += stepMin) {
+      if (WS && m === WS.at) {
+        // the evening splash: every wet-able cell gets W0 (the old path alone: EF switched on)
+        WS.before.set(WS.W);
+        if (WS.efOnly) WS.efOn = true;
+        else for (let i = 0; i < NN; i++) if (WS.wet[i]) WS.W[i] = WS.w0;
+      }
       const h = m / 60;
       const taK = ta[m] + K0;
       const ta4 = taK * taK * taK * taK;
@@ -1475,15 +1806,20 @@ function runModel(world, opts = {}) {
       const kg = kwG[m];
       const waterT = taMean - 1 + Math.sin((2 * Math.PI * (h - 9)) / 24) + K0;
       if (gv) stepGlass(C, f0, f1, st, r0, r1, bh, df, k0, kg, lsky, lwall, lglass[m * 4], lglass[m * 4 + 1], lglass[m * 4 + 2], lglass[m * 4 + 3], taK, waterT);
-      else if (hcA || kinds) {
+      else if (WS) {
+        for (let k = 1; k <= 3; k++) C.wt[k] = waterTemp(k, taMean, h) + K0;
+        stepSplash(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK);
+      } else if (hcA || kinds) {
         for (let k = 1; k <= 3; k++) C.wt[k] = waterTemp(k, taMean, h) + K0;
         stepWind(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK);
       } else stepPlain(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT);
       if (keep && m % stepsPerStore === 0) {
         const k = m / stepsPerStore;
         for (let i = 0; i < NN; i++) store[i * STORE + k] = Ts[i] - K0;
+        if (WS) for (let i = 0; i < NN; i++) WS.store[i * STORE + k] = WS.W[i];
       }
     }
+    if (WS) WS.end.set(WS.W);
     const steps = M / stepMin;
     let md = 0;
     for (let i = 0; i < NN; i++) {
@@ -1500,28 +1836,143 @@ function runModel(world, opts = {}) {
   // comfortably stable: max over cells of 600 s x (cap (4 eps sigma T^3 + hc)
   // + restore) < 0.5 with T = 340 K (membrane roofs 0.31; thin metal roofs
   // about 0.96, so a block with them falls back to the plain start).
-  const warmFactor = opts.warm ? coarseStability(C, 600) : 0;
+  const warmFactor = opts.warm ? coarseStability(C, 600, WS ? latentCoupling(WS, C) : null) : 0;
   const warmUsed = !!opts.warm && warmFactor < 0.5;
   if (warmUsed) for (let k = 0; k < opts.warm; k++) runDay(10, false);
   while (days < maxDays && (days < minDays || maxDelta >= tol)) {
     maxDelta = runDay(dt / 60, true);
     days++;
   }
+  let wetInfo = null;
+  if (WS) {
+    // water left (mm, at the stored 15-min steps) and evaporated over the last day, per cell
+    let wst = WS.store;
+    const full = (a) => {
+      if (!idx) return a;
+      const out = new Float64Array(NF);
+      idx.forEach((i, c) => (out[i] = a[c]));
+      return out;
+    };
+    if (idx) {
+      wst = new Float32Array(NF * STORE);
+      idx.forEach((i, c) => wst.set(WS.store.subarray(c * STORE, (c + 1) * STORE), i * STORE));
+    }
+    // per cell, last day: evaporated, and the store at the start, just before the splash and at the end
+    // (mass balance: evap = start - before + w0 - end on wet cells)
+    wetInfo = { store: wst, evap: full(WS.evap), start: full(WS.start), before: full(WS.before), end: full(WS.end), wet: full(WS.wet), w0: WS.w0, beta: WS.beta, wc: WS.wc, hour: sp.hour, efOnly: WS.efOnly, qa: WS.qa };
+  }
   if (idx) {
     const full = new Float32Array(NF * STORE);
     idx.forEach((i, c) => full.set(store.subarray(c * STORE, (c + 1) * STORE), i * STORE));
     store = full;
   }
-  return new Thermal(world, store, slots, { rise, taMean, hc, fw: fwFull, wind: uSite, site, ta, days, maxDelta, mats, cells: idx, refl: reflFull, glass, warm: warmUsed ? opts.warm : 0, warmFactor });
+  return new Thermal(world, store, slots, { rise, taMean, hc, fw: fwFull, wind: uSite, site, ta, days, maxDelta, mats, cells: idx, refl: reflFull, glass, warm: warmUsed ? opts.warm : 0, warmFactor, ...(wetInfo ? { wet: wetInfo } : {}) });
+}
+
+// ---- block 5: moist air and the surface water store --------------------------
+const CP_AIR = 1005; // specific heat of air, J kg-1 K-1
+const P_AIR = 1013.25; // air pressure, hPa (sea level)
+
+/** Saturation vapour pressure over water, hPa, at t deg C (Bolton 1980). */
+const satVapour = (t) => 6.112 * Math.exp((17.67 * t) / (t + 243.5));
+
+/** Specific humidity (kg kg-1) of air with vapour pressure e hPa: 0.622 e / (p - 0.378 e). */
+const specificHumidity = (e, p = P_AIR) => (0.622 * e) / (p - 0.378 * e);
+
+/** Saturation specific humidity at t deg C. */
+const qSat = (t) => specificHumidity(satVapour(t));
+
+// q_sat table for the model step (Math.exp per cell and minute is the slow
+// part): 230-370 K every 0.02 K; linear interpolation is within 1e-7 kg kg-1
+// of the formula (checked in tests/unit/hutong.test.mjs).
+const QSAT_T0 = 230;
+const QSAT_DT = 0.02;
+const QSAT = Float64Array.from({ length: Math.round((370 - QSAT_T0) / QSAT_DT) + 2 }, (_, k) => qSat(QSAT_T0 + k * QSAT_DT - K0));
+/** q_sat at T kelvin from the table, as the model step reads it. */
+function qSatTable(T) {
+  const u = (T - QSAT_T0) / QSAT_DT;
+  const k = u | 0;
+  return QSAT[k] + (QSAT[k + 1] - QSAT[k]) * (u - k);
+}
+
+/**
+ * Wet-bulb temperature (deg C) of air at ta deg C with vapour pressure e hPa:
+ * the t where c_p (ta - t) = L (q_sat(t) - q_a) (psychrometric balance), by bisection.
+ */
+function wetBulb(ta, e) {
+  const qa = specificHumidity(e);
+  let lo = ta - 40;
+  let hi = ta;
+  for (let k = 0; k < 60; k++) {
+    const t = (lo + hi) / 2;
+    if (CP_AIR * (ta - t) > LATENT * (qSat(t) - qa)) lo = t;
+    else hi = t;
+  }
+  return (lo + hi) / 2;
+}
+
+/**
+ * Upper bound of the latent term's coupling dLE/dTs (W m-2 K-1) on wet cells
+ * for the coarse-step guard: L beta (h_c / c_p) dq_sat/dT at 313 K (40 C,
+ * warmer than any wet surface at the evening splash on the design day).
+ */
+function latentCoupling(WS, C) {
+  const t = 40;
+  const dq = qSat(t) * ((17.67 * 243.5) / (t + 243.5) ** 2);
+  const out = new Float64Array(C.NN);
+  for (let i = 0; i < C.NN; i++) if (WS.wet[i]) out[i] = LATENT * WS.beta * ((C.hcA ? C.hcA[i] : C.hc) / CP_AIR) * dq;
+  return out;
+}
+
+/**
+ * One model minute with the surface water store (block 5): the same
+ * arithmetic as stepWind, minus LE on wet cells while they hold water.
+ * Evaporation is explicit and capped so W never goes below 0.
+ */
+function stepSplash(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK) {
+  const { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, hcA, dt, wt, WS } = C;
+  const { wet, W, evap, qa, beta, wc, efOn, efWet } = WS;
+  for (let i = 0; i < NN; i++) {
+    if (water[i]) {
+      Ts[i] = wt[water[i]];
+    } else {
+      const sl = f0[i] + (f1[i] - f0[i]) * st;
+      const v = svf[i];
+      const K = sl * bh + v * df + cw[i] * k0 + cwa[i] * kg;
+      const L = v * lsky + (1 - v) * lwall;
+      const t = Ts[i];
+      const t4 = t * t * t * t;
+      const qstar = (1 - alpha[i]) * K + eps[i] * L - eps[i] * SIGMA * t4;
+      const h = hcA ? hcA[i] : hc;
+      let le = 0.0;
+      if (wet[i] === 1 && W[i] > 0) {
+        // q_sat(Ts) from the table (QSAT_T0, QSAT_DT), linear between entries
+        const u = (t - QSAT_T0) / QSAT_DT;
+        const k = u | 0;
+        const dq = QSAT[k] + (QSAT[k + 1] - QSAT[k]) * (u - k) - qa;
+        if (dq > 0) {
+          let E = beta * Math.min(1, W[i] / wc) * (h / CP_AIR) * dq; // kg m-2 s-1
+          if (E * dt > W[i]) E = W[i] / dt;
+          W[i] -= E * dt;
+          evap[i] += E * dt;
+          le = LATENT * E;
+        }
+      }
+      const e = efOn && wet[i] ? efWet : ef[i];
+      const G = qstar - h * (t - taK) - (qstar > 0 ? e * qstar : 0) - le;
+      Ts[i] = t + dt * (cap[i] * G - restore[i] * (t - Td[i]));
+    }
+    sumDay[i] += Ts[i];
+  }
 }
 
 /** Largest explicit-step stability factor over the cells for a step of dtS seconds (T = 340 K). */
-function coarseStability(C, dtS) {
+function coarseStability(C, dtS, latent = null) {
   const T3 = 340 ** 3;
   let max = 0;
   for (let i = 0; i < C.NN; i++) {
     if (C.water[i]) continue;
-    max = Math.max(max, dtS * (C.cap[i] * (4 * C.eps[i] * SIGMA * T3 + (C.hcA ? C.hcA[i] : C.hc)) + C.restore[i]));
+    max = Math.max(max, dtS * (C.cap[i] * (4 * C.eps[i] * SIGMA * T3 + (C.hcA ? C.hcA[i] : C.hc) + (latent ? latent[i] : 0)) + C.restore[i]));
   }
   return max;
 }
@@ -1642,6 +2093,23 @@ class Thermal {
     this.store = store;
     this.slots = slots;
     this.info = info;
+  }
+
+  /** Water held on cell i at hour h, mm (block 5 splash runs; 0 elsewhere). */
+  water(i, h) {
+    const w = this.info.wet;
+    if (!w) return 0;
+    const x = ((((h % 24) + 24) % 24) * STORE) / 24;
+    const k = Math.floor(x);
+    const f = x - k;
+    const a = w.store[i * STORE + (k % STORE)];
+    const b = w.store[i * STORE + ((k + 1) % STORE)];
+    return a + (b - a) * f;
+  }
+
+  /** Water evaporated from cell i's store over the design day, mm (the model's own 1-min sum; block 5). */
+  evaporated(i) {
+    return this.info.wet ? this.info.wet.evap[i] : 0;
   }
 
   /** Wind factor f_w of cell i (1 for blocks without a wind direction). */
@@ -1891,7 +2359,7 @@ function paletteLut() {
 }
 
 
-return { SIGMA, SLOTS, STORE, LATENT, WATER_KIND, isWater, waterTemp, daylight, airTemp, irradiance, skyEmissivity, svfAt, shadowPolys, buildingMask, sunlitField, shadeClassField, sunSlots, cellMat, runModel, coarseStability, wallTemp, wallReflectCoef, wallShortwave, glassLongwave, Thermal, PALETTE_STOPS, heatRgb, paletteLut };
+return { SIGMA, SLOTS, STORE, LATENT, WATER_KIND, isWater, waterTemp, daylight, airTemp, irradiance, skyEmissivity, svfAt, svfGridAt, shadowPolys, screenShadow, buildingMask, buildingMaskRay, sunlitField, shadeClassField, sunSlots, cellMat, runModel, CP_AIR, P_AIR, satVapour, specificHumidity, qSat, QSAT_T0, QSAT_DT, qSatTable, wetBulb, coarseStability, wallTemp, wallReflectCoef, wallShortwave, glassLongwave, Thermal, PALETTE_STOPS, heatRgb, paletteLut };
 })();
 
 __m['wind'] = { isWindBlock: () => false };
@@ -1900,11 +2368,12 @@ __m['world'] = (() => {
 // world: parcels -> grids (5 m model grid, 2 m fine grid), sky view factor,
 // and a back-to-front depth order for objects by footprint.
 const { inPoly } = __m['core'];
-const { svfAt } = __m['thermal'];
+const { svfAt, svfGridAt } = __m['thermal'];
 const { windField, isWindBlock } = __m['wind'];
+const { MATERIALS } = __m['materials'];
 
-const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water', 'pavers', 'porousAsphalt', 'coolPave', 'raingarden', 'river', 'pond'];
-const WALKABLE = { concrete: 1, stone: 1, grass: 1, pavers: 1 };
+const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water', 'pavers', 'porousAsphalt', 'coolPave', 'raingarden', 'river', 'pond', 'greyBrick'];
+const WALKABLE = { concrete: 1, stone: 1, grass: 1, pavers: 1, greyBrick: 1 };
 
 /** Shopfront segments [s0, s1] (metres along a face) for a shop building. */
 function shopSegments(B, face) {
@@ -1938,8 +2407,11 @@ function buildWorld(scene, opts = {}) {
   const n = Math.round(size / cell);
   const N = n * n;
   const buildings = scene.buildings.map((b, i) => ({ ...b, index: i }));
-  const trees = scene.trees.map((t, i) => ({ ...t, index: i }));
+  // block 5: trees of a named species take its crown transmission (materials.js tr)
+  const trees = scene.trees.map((t, i) => (t.species ? { ...t, tr: t.tr ?? MATERIALS[t.species].tr.value, index: i } : { ...t, index: i }));
   const awnings = buildings.flatMap(awningsOf);
+  // block 5: flat screens (vine pergolas, mat awnings) with their material's transmission
+  const screens = scene.screens ? scene.screens.map((P, i) => ({ ...P, tr: MATERIALS[P.kind].tr.value, index: i })) : null;
 
   const parcelAt = (x, y) => {
     for (let k = scene.ground.length - 1; k >= 0; k--) {
@@ -1976,6 +2448,8 @@ function buildWorld(scene, opts = {}) {
         const d = Math.hypot(t.x - x, t.y - y);
         if (d < t.r) cover = Math.max(cover, 1 - (d / t.r) ** 2 * 0.5);
       }
+      // a screen counts as full cover over the cells whose centre it spans (sky view, wall reflection)
+      if (screens) for (const P of screens) if (x > P.x0 && x < P.x1 && y > P.y0 && y < P.y1) cover = 1;
       canopy[k] = cover;
     }
   }
@@ -2024,7 +2498,8 @@ function buildWorld(scene, opts = {}) {
         const wall = 1 - v0;
         for (let o = 0; o < 4; o++) gview[k * 4 + o] = wall > 1e-6 ? g[o] / wall : 0;
       }
-      let v = opts.svfFrom ? svfOpen[k] : onDir ? v0 : svfAt(heightAt, x, y, z0 + 0.01, nDirs, 160, cell / 2);
+      // block 5 (svfExact): grid traversal, walls at their true distance in 5 m lanes
+      let v = opts.svfFrom ? svfOpen[k] : onDir ? v0 : scene.svfExact ? svfGridAt({ n, cell, height }, x, y, z0 + 0.01, nDirs, 160) : svfAt(heightAt, x, y, z0 + 0.01, nDirs, 160, cell / 2);
       svfOpen[k] = v;
       if (bld[k] < 0) v *= 1 - 0.75 * canopy[k];
       svf[k] = v;
@@ -2063,6 +2538,8 @@ function buildWorld(scene, opts = {}) {
     buildings,
     trees,
     awnings,
+    ...(screens ? { screens } : {}),
+    ...(scene.shadeSamples ? { shadeS: scene.shadeSamples } : {}),
     cellIndex,
     heightAt,
     parcelAt,
@@ -2248,6 +2725,23 @@ class Pen {
   }
 
   /**
+   * Many short strokes as one item (block 5: tile rows, brick courses,
+   * hatching): segs is [[a, b], ...] of world points; each segment gets its
+   * own wobble and overshoot, separated by pen-up breaks.
+   */
+  lines(segs, opts = {}) {
+    const k = this._k();
+    const sp = [];
+    segs.forEach(([a, b], n) => {
+      const p = iso(a[0], a[1], a[2] ?? 0);
+      const q = iso(b[0], b[1], b[2] ?? 0);
+      this._edge(sp, p[0], p[1], q[0], q[1], k + n * 31, opts.over ?? 1);
+    });
+    const it = { f: null, s: opts.stroke ?? 1, lw: opts.lw ?? 1, fp: null, sp: new Float32Array(sp), t: opts.t, a: opts.a };
+    return this._push(it, sp);
+  }
+
+  /**
    * One continuous hand-drawn stream line (block 4 wind lines) from a flat
    * world array [x0, y0, x1, y1, ...] at height opts.z: projected, with a
    * slow seeded wobble across the line (no overshoot, no breaks), so it can
@@ -2329,6 +2823,7 @@ const GROUND_RGB = {
   raingarden: hexRgb('#8fa56a'),
   river: hexRgb('#7ea3ab'),
   pond: hexRgb('#87adb2'),
+  greyBrick: hexRgb('#b9b3a6'),
 };
 const ROOF_RGB = {
   membrane: hexRgb('#5c5e66'),
@@ -2337,6 +2832,7 @@ const ROOF_RGB = {
   coolroofNew: hexRgb('#f3efe6'),
   coolroofAged: hexRgb('#ddd8cc'),
   greenroof: hexRgb('#93a865'),
+  greyTile: hexRgb('#6e7072'),
 };
 const SOIL = hexRgb('#b49a77');
 const WIN = hexRgb('#5f7480');
@@ -2575,6 +3071,9 @@ function drawDecor(pen, world, D) {
     }
   }
   if (D.river) riverMarks(pen, world.size, D.river[0], D.river[1], S.seed);
+  // block 5: brick courses in lanes and courtyards, the well, fish bowls under the awnings
+  for (const r of D.brick ?? []) brickCourses(pen, ...r);
+  if (D.well) well(pen, ...D.well);
   if (D.pond) {
     const [cx, cy, rx, ry] = D.pond;
     groundEllipse(pen, cx, cy, rx + 0.8, ry + 0.8, null, { lw: 0.7, a: 0.6, t: 'gm' });
@@ -2582,6 +3081,22 @@ function drawDecor(pen, world, D) {
       pen.line([[cx + dx - w / 2, cy + dy], [cx + dx, cy + dy - 0.25], [cx + dx + w / 2, cy + dy]], { lw: 0.6, stroke: hexRgb('#e9f0ec'), a: 0.8, over: 0.2 });
     }
   }
+}
+
+/** Grey brick paving (block 5): courses every 2 m along the long side of the rect, one item. */
+function brickCourses(pen, x0, y0, x1, y1) {
+  pen.tag = 'gm';
+  const segs = [];
+  if (x1 - x0 >= y1 - y0) for (let y = y0 + 2; y < y1 - 0.5; y += 2) segs.push([[x0 + 0.3, y], [x1 - 0.3, y]]);
+  else for (let x = x0 + 2; x < x1 - 0.5; x += 2) segs.push([[x, y0 + 0.3], [x, y1 - 0.3]]);
+  if (segs.length) pen.lines(segs, { lw: 0.35, stroke: hexRgb('#8f897d'), a: 0.4, over: 0.1 });
+}
+
+/** The old well of Well Square (block 5): a stone curb, dark water and a windlass. */
+function well(pen, x, y) {
+  pen.tag = 'gm';
+  groundEllipse(pen, x, y, 1.5, 1.5, hexRgb('#a29a8a'), { lw: 0.8, n: 16, t: 'gm' });
+  groundEllipse(pen, x, y, 0.85, 0.85, hexRgb('#46555b'), { lw: 0.5, n: 12, t: 'gm' });
 }
 
 /** River (block 4): current ripples in rows, and the quay wall along the bank (y1). */
@@ -2831,11 +3346,206 @@ function building(pen, B, world = null) {
   pen.b = -1;
 }
 
+// ---- block 5: hutong houses ---------------------------------------------------
+
+const PILLAR = hexRgb('#8e3b2c');
+const LATTICE = hexRgb('#5b4636');
+
+/**
+ * A single-storey courtyard house (block 5): grey brick walls, one or two
+ * gabled grey tile roofs (ridge along x for B.gable 'x', along y for 'y'),
+ * tile rows and the ridge in one stroke item each; courtyard-facing walls
+ * (B.court) get red pillars and lattice windows, lane-facing walls stay
+ * blank but for small high windows. The roof rise is drawing only: the model
+ * treats the house as a box at eave height.
+ */
+function hutongHouse(pen, B, world) {
+  pen.b = B.index;
+  const { x0, y0, x1, y1, h } = B;
+  const wall = jitter(hexRgb(B.wall), B.index * 3, 0.05);
+  const roof = jitter(ROOF_RGB.greyTile, B.index * 5, 0.06);
+  pen.tag = 'w';
+  pen.shape([[x0, y1, 0], [x1, y1, 0], [x1, y1, h], [x0, y1, h]], { k: 'wall', c: wall, n: [0, 1] }, { lw: 1.05, t: 'w' });
+  pen.shape([[x1, y1, 0], [x1, y0, 0], [x1, y0, h], [x1, y1, h]], { k: 'wall', c: wall, n: [1, 0] }, { lw: 1.05, t: 'w' });
+  // shade hatching, one item per face (drawn only when the face is turned from the sun)
+  for (const face of ['S', 'E']) {
+    const len = face === 'S' ? x1 - x0 : y1 - y0;
+    const P = (u, z) => (face === 'S' ? [x0 + u, y1, z] : [x1, y1 - u, z]);
+    const segs = [];
+    for (let t = 1.2; t < len + h; t += 1.6) {
+      const a = Math.max(0, t - h);
+      const b = Math.min(len, t);
+      if (b - a >= 0.5) segs.push([P(a, t - a), P(b, t - b)]);
+    }
+    if (segs.length) pen.lines(segs, { lw: 0.4, a: 0.28, over: 0.1, t: face === 'S' ? 'hatchS' : 'hatchE' });
+  }
+  // façades: courtyard sides get pillars and lattice; lane sides small high windows
+  const court = B.court ?? '';
+  for (const face of ['S', 'E']) {
+    const len = face === 'S' ? x1 - x0 : y1 - y0;
+    const P = (u, z) => (face === 'S' ? [x0 + u, y1, z] : [x1, y1 - u, z]);
+    const toCourt = face === 'S' ? court.includes('S') || court === 'NS' : court.includes('E');
+    pen.tag = 'win';
+    if (toCourt) {
+      const bays = Math.max(1, Math.round(len / 3.3));
+      const w = len / bays;
+      const pil = [];
+      const lat = [];
+      for (let k = 0; k <= bays; k++) pil.push([P(k * w, 0), P(k * w, h - 0.3)]);
+      for (let k = 0; k < bays; k++) {
+        const a = k * w + 0.45;
+        const b = (k + 1) * w - 0.45;
+        if (hash3(B.index, k, 17) < 0.25) {
+          pen.shape([P(a + 0.4, 0), P(b - 0.4, 0), P(b - 0.4, 2.5), P(a + 0.4, 2.5)], hexRgb('#6b4e3a'), { lw: 0.5, t: 'win' });
+          continue;
+        }
+        pen.shape([P(a, 1), P(b, 1), P(b, h - 0.6), P(a, h - 0.6)], { k: 'win', h: hash3(B.index * 7 + (face === 'S' ? 0 : 1), k, 3), c: scaleRgb(WIN, 0.95) }, { lw: 0.45, over: 0.3, t: 'win' });
+        for (let u = a + 0.8; u < b - 0.3; u += 0.8) lat.push([P(u, 1), P(u, h - 0.6)]);
+        lat.push([P(a, 2.2), P(b, 2.2)]);
+      }
+      if (lat.length) pen.lines(lat, { lw: 0.3, stroke: LATTICE, a: 0.55, over: 0, t: 'win' });
+      pen.lines(pil, { lw: 0.9, stroke: PILLAR, a: 0.85, over: 0, t: 'win' });
+    } else {
+      for (let u = 3 + 3 * hash3(B.index, face === 'S' ? 1 : 2, 19); u < len - 1.5; u += 6.5) {
+        pen.shape([P(u, 2.6), P(u + 0.9, 2.6), P(u + 0.9, 3.3), P(u, 3.3)], { k: 'win', h: hash3(B.index, u | 0, 5), c: WIN }, { lw: 0.4, over: 0.2, t: 'win' });
+      }
+    }
+  }
+  // eave line
+  pen.tag = 'w';
+  pen.line([[x0, y1, h - 0.25], [x1, y1, h - 0.25], [x1, y0, h - 0.25]], { lw: 0.45, a: 0.55, t: 'w' });
+  // roofs: back (north / west) parts first
+  pen.tag = 'r';
+  const alongX = B.gable !== 'y';
+  const depth = alongX ? y1 - y0 : x1 - x0;
+  const nr = B.ridges ?? Math.max(1, Math.round(depth / 5));
+  for (let r = 0; r < nr; r++) {
+    const a = (alongX ? y0 : x0) + (depth * r) / nr;
+    const b = (alongX ? y0 : x0) + (depth * (r + 1)) / nr;
+    const m = (a + b) / 2;
+    const rise = Math.min(1.8, (b - a) * 0.36);
+    const z = h + rise;
+    const tiles0 = [];
+    const tiles1 = [];
+    if (alongX) {
+      pen.shape([[x0, a, h], [x1, a, h], [x1, m, z], [x0, m, z]], scaleRgb(roof, 0.84), { lw: 0.9, t: 'r' });
+      pen.shape([[x0, m, z], [x1, m, z], [x1, b, h], [x0, b, h]], roof, { lw: 0.9, t: 'r' });
+      pen.shape([[x1, b, h], [x1, a, h], [x1, m, z]], { k: 'wall', c: wall, n: [1, 0] }, { lw: 0.9, t: 'w' });
+      for (let x = x0 + 0.8; x < x1 - 0.3; x += 1.6) {
+        tiles0.push([[x, a + 0.15, h], [x, m, z]]);
+        tiles1.push([[x, m, z], [x, b - 0.15, h]]);
+      }
+      pen.tag = 'rd';
+      pen.lines(tiles0, { lw: 0.3, a: 0.32, over: 0, t: 'rd' });
+      pen.lines(tiles1, { lw: 0.35, a: 0.42, over: 0, t: 'rd' });
+      pen.line([[x0, m, z + 0.12], [x1, m, z + 0.12]], { lw: 1.5, a: 0.9, over: 0.2, t: 'rd' });
+    } else {
+      pen.shape([[a, y0, h], [m, y0, z], [m, y1, z], [a, y1, h]], roof, { lw: 0.9, t: 'r' });
+      pen.shape([[m, y0, z], [b, y0, h], [b, y1, h], [m, y1, z]], scaleRgb(roof, 0.84), { lw: 0.9, t: 'r' });
+      pen.shape([[a, y1, h], [b, y1, h], [m, y1, z]], { k: 'wall', c: wall, n: [0, 1] }, { lw: 0.9, t: 'w' });
+      for (let y = y0 + 0.8; y < y1 - 0.3; y += 1.6) {
+        tiles0.push([[a + 0.15, y, h], [m, y, z]]);
+        tiles1.push([[m, y, z], [b - 0.15, y, h]]);
+      }
+      pen.tag = 'rd';
+      pen.lines(tiles0, { lw: 0.35, a: 0.42, over: 0, t: 'rd' });
+      pen.lines(tiles1, { lw: 0.3, a: 0.32, over: 0, t: 'rd' });
+      pen.line([[m, y0, z + 0.12], [m, y1, z + 0.12]], { lw: 1.5, a: 0.9, over: 0.2, t: 'rd' });
+    }
+    pen.tag = 'r';
+  }
+  pen.b = -1;
+}
+
+/** Species look (block 5): leaf colours, crown blobs and alpha; pomegranates carry red fruit. */
+const SPECIES = {
+  pagodaTree: { leaf: [hexRgb('#4f6e3f'), hexRgb('#5c7c47'), hexRgb('#6d8c52'), hexRgb('#82a05e')], blobs: 9, a: undefined },
+  jujube: { leaf: [hexRgb('#6c8a4c'), hexRgb('#7b9a57'), hexRgb('#8eac63'), hexRgb('#a3bd74')], blobs: 6, a: 0.82 },
+  pomegranate: { leaf: [hexRgb('#4c6b3a'), hexRgb('#587a42'), hexRgb('#678a4b'), hexRgb('#7a9a56')], blobs: 6, a: undefined, fruit: hexRgb('#b8402f') },
+};
+
+function speciesTree(pen, T, i) {
+  const { x, y, r, zc } = T;
+  const sp = SPECIES[T.species];
+  pen.tag = 'trunk';
+  const trunkTop = zc - r * 0.2;
+  const tw = T.species === 'pagodaTree' ? 0.4 : 0.22;
+  pen.shape([[x - tw, y + tw, 0], [x + tw, y - tw, 0], [x + tw * 0.8, y - tw * 0.8, trunkTop], [x - tw * 0.8, y + tw * 0.8, trunkTop]], hexRgb('#5e4a3b'), { lw: 0.7, t: 'trunk' });
+  pen.tag = 'tree';
+  const blobs = [];
+  const n = sp.blobs + Math.floor(hash3(i, 41) * 3);
+  for (let k = 0; k < n; k++) {
+    const a = (k / n) * Math.PI * 2 + hash3(i, k) * 0.8;
+    const d = r * (0.35 + 0.15 * hash3(i, k, 2));
+    blobs.push([Math.cos(a) * d, Math.sin(a) * d, (hash3(i, k, 3) - 0.6) * r * 0.5, r * (0.5 + 0.12 * hash3(i, k, 4))]);
+  }
+  blobs.push([0, 0, r * 0.35, r * 0.62]);
+  blobs.sort((p, q) => p[0] + p[1] + p[2] * 0.6 - (q[0] + q[1] + q[2] * 0.6));
+  blobs.forEach(([dx, dy, dz, rr], k) => {
+    const lit = (dz / r + 0.6 - (dx + dy) / (3 * r)) * 1.4;
+    const c = sp.leaf[Math.max(0, Math.min(3, Math.round(lit + 1)))];
+    pen.blob([x + dx, y + dy, zc + dz], rr, jitter(c, i * 31 + k, 0.08), { lw: 0.7, t: 'tree', lumpy: 0.05, a: sp.a });
+  });
+  pen.tag = 'gm';
+  const ticks = [];
+  for (let k = 0; k < (sp.fruit ? 7 : 4); k++) {
+    const dx = (hash3(i, k, 7) - 0.5) * r;
+    const dy = (hash3(i, k, 8) - 0.5) * r;
+    const z = zc + r * 0.1 + hash3(i, k, 9) * r * 0.45;
+    ticks.push([[x + dx, y + dy, z], [x + dx + (sp.fruit ? 0.18 : 0.4), y + dy - (sp.fruit ? 0.18 : 0.4), z + (sp.fruit ? 0.12 : 0.3)]]);
+  }
+  pen.lines(ticks, sp.fruit ? { lw: 1.4, stroke: sp.fruit, a: 0.9, over: 0, t: 'treeTick' } : { lw: 0.5, a: 0.6, over: 0.1, t: 'treeTick' });
+}
+
+/**
+ * A flat screen (block 5): a vine pergola (posts, a lattice and leaves at
+ * z 2.4) or the summer mat awning, tianpeng (poles and a reed-mat top above
+ * the eaves, its side mats rolled up under the edge). Tops are tagged as
+ * crowns, so the heat wash shows through them in the thermal view.
+ */
+function screen(pen, P, i) {
+  const { x0, y0, x1, y1, z } = P;
+  pen.tag = 'trunk';
+  const posts = [];
+  const step = P.kind === 'awning' ? 5 : 4;
+  for (let x = x0; x <= x1 + 0.01; x += (x1 - x0) / Math.max(1, Math.round((x1 - x0) / step))) for (const y of [y0, y1]) posts.push([[x, y, 0], [x, y, z]]);
+  for (let y = y0; y <= y1 + 0.01; y += (y1 - y0) / Math.max(1, Math.round((y1 - y0) / step))) for (const x of [x0, x1]) posts.push([[x, y, 0], [x, y, z]]);
+  pen.lines(posts, { lw: P.kind === 'awning' ? 0.6 : 0.7, stroke: hexRgb('#7a5c42'), a: 0.85, over: 0.05, t: 'trunk' });
+  pen.tag = 'tree';
+  if (P.kind === 'awning') {
+    pen.shape([[x0, y0, z], [x1, y0, z], [x1, y1, z], [x0, y1, z]], jitter(hexRgb('#d9c79c'), i * 13, 0.05), { lw: 1.0, t: 'tree', a: 0.92 });
+    const mats = [];
+    for (let x = x0 + 1; x < x1; x += 1) mats.push([[x, y0 + 0.2, z], [x, y1 - 0.2, z]]);
+    pen.lines(mats, { lw: 0.3, stroke: hexRgb('#9b8660'), a: 0.5, over: 0, t: 'treeTick' });
+    // rolled side mats under the south and east edges
+    pen.line([[x0, y1, z - 0.35], [x1, y1, z - 0.35], [x1, y0, z - 0.35]], { lw: 2.2, stroke: hexRgb('#b6a277'), a: 0.9, over: 0, t: 'trunk' });
+  } else {
+    pen.shape([[x0, y0, z], [x1, y0, z], [x1, y1, z], [x0, y1, z]], jitter(hexRgb('#6f8c4e'), i * 13, 0.06), { lw: 0.6, t: 'tree', a: 0.72 });
+    const lat = [];
+    for (let x = x0 + 1; x < x1; x += 1) lat.push([[x, y0, z + 0.05], [x, y1, z + 0.05]]);
+    pen.lines(lat, { lw: 0.35, stroke: hexRgb('#7a5c42'), a: 0.6, over: 0, t: 'treeTick' });
+    for (let k = 0; k < 4; k++) {
+      const bx = x0 + (x1 - x0) * (0.15 + 0.7 * hash3(i, k, 31));
+      const by = y0 + (y1 - y0) * (0.2 + 0.6 * hash3(i, k, 32));
+      pen.blob([bx, by, z + 0.3], 0.9 + 0.4 * hash3(i, k, 33), jitter(LEAF[1 + (k % 2)], i * 7 + k, 0.08), { lw: 0.5, t: 'tree', lumpy: 0.08, a: 0.85 });
+    }
+  }
+}
+
+/** A glazed fish bowl under the awning (block 5). */
+function bowl(pen, x, y) {
+  pen.tag = 'o';
+  const pts = (z, r) => Array.from({ length: 12 }, (_, k) => [x + Math.cos((k / 12) * Math.PI * 2) * r, y + Math.sin((k / 12) * Math.PI * 2) * r, z]);
+  box(pen, x - 0.55, y - 0.55, x + 0.55, y + 0.55, 0, 0.75, hexRgb('#5e6f7a'), { t: 'o', lw: 0.5, top: hexRgb('#6f8f96') });
+  pen.shape(pts(0.76, 0.5), hexRgb('#7ea3ab'), { lw: 0.4, t: 'o' });
+}
+
 // ---- trees, cars, furniture -----------------------------------------------------
 
 const LEAF = [hexRgb('#5f7d48'), hexRgb('#6f8c52'), hexRgb('#85a05f'), hexRgb('#9bb46c')];
 
 function tree(pen, T, i) {
+  if (T.species) return speciesTree(pen, T, i);
   const { x, y, r, zc } = T;
   if (T.young) {
     // tree guard: two stakes and a tie, then a small, airy crown
@@ -2923,11 +3633,22 @@ function drawWorld(world, seed = 1) {
     const [w, d] = ax === 'x' ? [6, 4] : [4, 6];
     objs.push({ kind: 's', o: [x, y, x + w, y + d], i, x0: x, y0: y, x1: x + w, y1: y + d });
   });
+  // block 5: pergolas and awnings; an awning sits above the eaves, so it sorts in front of its own yard's houses
+  if (world.screens) {
+    world.screens.forEach((P, i) => {
+      const e = P.kind === 'awning' ? 6 : 0;
+      objs.push({ kind: 'p', o: P, i, x0: P.x0, y0: P.y0, x1: P.x1 + e, y1: P.y1 + e });
+    });
+    for (const [x, y] of D?.bowls ?? []) objs.push({ kind: 'f', o: [x, y], i: 0, x0: x - 0.6, y0: y - 0.6, x1: x + 0.6, y1: y + 0.6 });
+  }
   const order = depthOrder(objs);
   order.forEach((k, gi) => {
     const ob = objs[k];
     pen.group = gi + 1;
-    if (ob.kind === 'b') building(pen, ob.o, world);
+    if (ob.kind === 'b' && ob.o.style === 'hutong') hutongHouse(pen, ob.o, world);
+    else if (ob.kind === 'p') screen(pen, ob.o, ob.i);
+    else if (ob.kind === 'f') bowl(pen, ...ob.o);
+    else if (ob.kind === 'b') building(pen, ob.o, world);
     else if (ob.kind === 't') tree(pen, ob.o, ob.i);
     else if (ob.kind === 'c') car(pen, ...ob.o, ob.i);
     else if (ob.kind === 'n') bench(pen, ob.o.x, ob.o.y, ob.o.a);
@@ -2938,7 +3659,7 @@ function drawWorld(world, seed = 1) {
 }
 
 
-return { GROUND_RGB, ROOF_RGB, drawGround, drawDecor, box, isGlassFace, building, tree, car, bench, lamp, drawWorld };
+return { GROUND_RGB, ROOF_RGB, drawGround, drawDecor, box, isGlassFace, building, hutongHouse, screen, bowl, tree, car, bench, lamp, drawWorld };
 })();
 
 __m['life'] = (() => {
@@ -4135,7 +4856,7 @@ class Renderer {
     ctx.drawImage(c, 0, 0);
   }
 
-  /** True if the person's hip at (x, y) is hidden behind a building. */
+  /** True if the person's hip at (x, y) is hidden behind a building (block 5: or under a pergola or awning). */
   hidden(x, y) {
     for (const B of this.world.buildings) {
       const dIn = Math.max(B.x0 - x, B.y0 - y, 0);
@@ -4143,6 +4864,14 @@ class Renderer {
       if (dOut <= dIn) continue;
       const top = B.h + (B.gable ? 2 : 0);
       if (top > 0.9 + dIn / ISO_Z) return true;
+    }
+    if (this.world.screens) {
+      // a flat top at z hides the hip if the line of sight passes through it inside its footprint
+      for (const P of this.world.screens) {
+        const dIn = Math.max(P.x0 - x, P.y0 - y, 0);
+        const dOut = Math.min(P.x1 - x, P.y1 - y);
+        if (dOut > dIn && 0.9 + dIn / ISO_Z <= P.z && 0.9 + dOut / ISO_Z >= P.z - 0.1) return true;
+      }
     }
     return false;
   }
@@ -4638,7 +5367,7 @@ const GLOSSARY = {
   tmrt: {
     term: 'Mean radiant temperature (Tmrt)',
     text: 'One number for all the sunshine and infrared heat falling on a standing person from every direction.',
-    model: (S) => `At 3 pm: ${S.tmrtShade} °C in building shade, ${S.tmrtSun} °C on sunlit ground (5th–95th percentile).`,
+    model: (S) => S.tmrtLine ?? `At 3 pm: ${S.tmrtShade} °C in building shade, ${S.tmrtSun} °C on sunlit ground (5th–95th percentile).`,
     why: 'It shapes how hot it feels outdoors more than air temperature does.',
   },
   forceRestore: {
@@ -4713,7 +5442,7 @@ const GLOSSARY = {
     range: 'Sky view factor at the centre of a long canyon: 1/√(1 + (2H/W)²), i.e. 0.45 at H/W 1, 0.24 at 2, 0.16 at 3, 0.10 at 5. Oke (1981): calm-night urban–rural air difference about 7.45 + 3.97 ln(H/W) K (secondary source).',
     src: 'brief3, oke1981',
     why: 'Deep canyons shade the street by day but see little cold sky at night, so they cool slowly after dark.',
-    scenes: ['glass-cbd'],
+    scenes: ['glass-cbd', 'hutong'],
   },
   lowE: {
     term: 'Low-e glass',
@@ -4770,6 +5499,36 @@ const GLOSSARY = {
     src: 'bom, steadman1994',
     why: 'It lets the walkers weigh a breeze against shade: both make a hot afternoon feel cooler.',
     scenes: ['waterfront'],
+  },
+  // ---- block 5 (hutong) -----------------------------------------------------
+  siheyuan: {
+    term: 'Siheyuan (四合院)',
+    text: 'A courtyard house: four single-storey houses (the main house, two side houses and a gate house) around a paved yard, entered from the lane through a gate in one corner.',
+    model: (S) => S.courtLine,
+    why: 'Walls on all four sides shade the edges of the yard; the rest needs trees, vines or an awning. Measured courtyards can hold air a few degrees cooler than the lane, which this model does not simulate.',
+    scenes: ['hutong'],
+  },
+  tianpeng: {
+    term: 'Tianpeng (天棚), the summer mat awning',
+    text: 'A shed of reed mats on poles built over a Beijing courtyard each summer, higher than the eaves, with side mats that roll up to let the air through.',
+    range: 'Reed mats let through about 10–30% of the sun (the brief, unverified); this model uses 20%.',
+    src: 'deng, brief5',
+    why: 'It shades the whole courtyard at midday, when the low walls give almost no shade.',
+    scenes: ['hutong'],
+  },
+  waterStore: {
+    term: 'Surface water store (W)',
+    text: 'The water left lying on the paving after a splash, in millimetres (1 mm is 1 litre per square metre). While it lasts it evaporates, and the heat that takes comes out of the paving.',
+    model: (S) => S.waterLine,
+    why: 'Only water that is there can cool: when the store runs dry, the cooling stops.',
+    scenes: ['hutong'],
+  },
+  wetBulb: {
+    term: 'Wet-bulb temperature',
+    text: 'The temperature a wet surface cools to when evaporation alone sets it, from the air temperature and humidity: the drier the air, the further below the air it lies.',
+    model: (S) => S.wetBulbLine,
+    why: 'Splashed paving cannot get colder than this by evaporating, so it bounds how much a splash can cool.',
+    scenes: ['hutong'],
   },
   // ---- block 2 (sponge-retrofit) --------------------------------------------
   permeablePaving: {
@@ -4890,6 +5649,7 @@ function glossaryStats(world, thermal, extra = {}) {
     const w = extra.wind;
     out.windLine = `Over the river ${r2(w.river)}; along Quay Street ${r2(w.corridor)}; Rope Walk, behind the warehouses, ${r2(w.shelter)} (mean), ${r2(w.lee)} within one building height of the wall.`;
   }
+  if (extra.hutong) Object.assign(out, extra.hutong);
   if (extra.spot) {
     const s = extra.spot;
     out.spotLine = `At 3 pm with ${s.glassName}: Tmrt ${r0(s.tmrtSpotShade)} °C in shaded spots vs ${r0(s.tmrtShade)} °C in plain shade and ${r0(s.tmrtSun)} °C in sun.`;
@@ -5351,6 +6111,10 @@ __m['waterfront'] = { isWaterfront: () => false };
 
 __m['wfui'] = {};
 
+__m['hutong'] = { isHutong: () => false };
+
+__m['hutui'] = {};
+
 __m['app'] = (() => {
 // app: boot, clock, keys, seek(), query modes, overlay (slider, notes, heat
 // card) and a small window.atlas API used by the checks.
@@ -5376,6 +6140,8 @@ const { isWaterfront, waterfrontSetup, comfortShade, windStats, hcStats, asphalt
 const { wfNotes, riverCard, pondCard, corridorCard, shelterCard, shadeCard, WF_CARDS } = __m['wfui'];
 const { penLines, SPEEDS, apparentTemp } = __m['wind'];
 const { Pen } = __m['pen'];
+const { isHutong, hutongSetup, lanesOf, solarNoon, splashStats, efPathRun, efPathStats, splashSensitivity, roofStats, courtyardStats, treeStats, shadedLanes, hutongGlossary, dwellShade } = __m['hutong'];
+const { htNotes, lanesCard, courtyardCard, tianpengCard, splashCard, treesCard, HT_CARDS } = __m['hutui'];
 
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
@@ -5468,6 +6234,10 @@ function boot(scene, root = document) {
   const wfQ = wfMode
     ? { wind: q.get('wind') !== '0', air: q.get('air') === '1', u: SPEEDS.includes(Number(q.get('u'))) ? Number(q.get('u')) : scene.wind.default }
     : null;
+  // hutong block (block 5): the evening splash, ?splash=0|1 (default on)
+  const htMode = isHutong(scene);
+  let htSet = null;
+  const htQ = htMode ? { splash: q.get('splash') !== '0' } : null;
   if (!retro) {
     world = buildWorld(scene);
     t1 = performance.now();
@@ -5487,6 +6257,14 @@ function boot(scene, root = document) {
       const tc = performance.now();
       wfSet.lines();
       wfSet.timing = { slotsMs: tb - ta, runMs: tc - tb, linesMs: performance.now() - tc };
+    } else if (htMode) {
+      const ta = performance.now();
+      htSet = hutongSetup(world, sunSlots(world));
+      const tb = performance.now();
+      htSet.base();
+      const tc = performance.now();
+      thermal = htSet.model(htQ.splash);
+      htSet.timing = { slotsMs: tb - ta, runMs: tc - tb, splashMs: performance.now() - tc };
     } else thermal = runModel(world);
     t2 = performance.now();
     V = { main: makeView('main', scene, world, thermal, canvas, glassMode ? { type: () => glassNow.type } : null, wfMode ? { lines: wfSet.lines() } : null) };
@@ -5549,6 +6327,8 @@ function boot(scene, root = document) {
     ...(glassMode ? { glass: glassQ.type, ac: glassQ.ac } : {}),
     // waterfront only: wind lines, air overlay, wind speed preset
     ...(wfMode ? wfQ : {}),
+    // hutong only: the evening splash on or off
+    ...(htMode ? htQ : {}),
   };
   if (q.get('ui') === '0') root.body.classList.add('noui');
   if (q.has('hour')) S.hour = Math.round(clamp(parseFloat(q.get('hour')) || 0, 0, 23.75) / 0.25) * 0.25;
@@ -5639,7 +6419,50 @@ function boot(scene, root = document) {
       sunTmrt: w.shade.sunTmrt,
     };
   }
-  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : block1Notes();
+  // hutong block: numbers for notes, cards and glossary; the splash comparison
+  // once, the 15:00 numbers per model (splash on / off)
+  let htFixed = null;
+  const htCache = new Map();
+  const ht = () => {
+    if (!htFixed) {
+      const noon = solarNoon(scene.site);
+      const lanes = lanesOf(world, noon);
+      const band = lanes.filter((l) => l.splash).flatMap((l) => l.cells);
+      const dry = htSet.base();
+      const wet = htSet.splash();
+      htFixed = { noon, lanes, band, dry, wet, s: splashStats(world, dry, wet, band, htSet.cells), sens: null, ef: null };
+    }
+    const key = S.splash ? 1 : 0;
+    if (!htCache.has(key)) htCache.set(key, { roof: roofStats(world, thermal, 15), court: courtyardStats(world, thermal, 15), trees: treeStats(world, thermal, 15), shaded: shadedLanes(world, thermal, 15) });
+    return { ...htFixed, ...htCache.get(key) };
+  };
+  /** Lazily: beta_wet sensitivity and the old EF path alone, on the splashed lanes (small runs). */
+  const htExtra = () => {
+    const h = ht();
+    if (!htFixed.sens) htFixed.sens = splashSensitivity(world, htSet.slots, h.dry, h.band);
+    if (!htFixed.ef) htFixed.ef = efPathStats(h.dry, efPathRun(world, htSet.slots, h.band), h.band);
+    return { sens: htFixed.sens, ef: htFixed.ef };
+  };
+  function htNoteData() {
+    const h = ht();
+    const l5 = h.lanes.find((l) => l.id === 'jujube');
+    const mainK = scene.ground.findIndex((g) => g.id === 'main');
+    const mc = [];
+    for (let i = 0; i < world.n * world.n; i++) if (world.bld[i] < 0 && world.parcel[i] === mainK) mc.push(i);
+    const m = (a) => a.reduce((x, i) => x + thermal.tmrt(i, 15), 0) / Math.max(1, a.length);
+    return {
+      laneHw: l5.hw,
+      laneNoon: l5.noon.sunlit,
+      roof15: h.roof.mean,
+      awningTmrt: h.court.awning.tmrt,
+      sunTmrt: h.court.sun.tmrt,
+      d20: h.s.d20,
+      d23: h.s.d23,
+      treeTmrt: m(mc.filter((i) => thermal.sunlit(i, 15) <= 0.5)),
+      laneSunTmrt: m(mc.filter((i) => thermal.sunlit(i, 15) > 0.95)),
+    };
+  }
+  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode ? htNotes(scene, htNoteData()) : block1Notes();
   function block1Notes() {
   const notesText = {
     asphalt: ['Kiln Street, old asphalt (albedo 0.12):', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
@@ -5887,7 +6710,10 @@ function boot(scene, root = document) {
     card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
   }
   function reopenCard() {
-    if (card._measure && card._measure.startsWith('wf:')) {
+    if (card._measure && card._measure.startsWith('ht:')) {
+      card.innerHTML = htCardHtml(card._measure.slice(3));
+      card.querySelector('.x').onclick = hideCard;
+    } else if (card._measure && card._measure.startsWith('wf:')) {
       card.innerHTML = wfCardHtml(card._measure.slice(3));
       card.querySelector('.x').onclick = hideCard;
     } else if (card._measure && card._measure.startsWith('cbd:')) {
@@ -6044,6 +6870,64 @@ function boot(scene, root = document) {
     card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
   }
 
+  // ---- hutong controls (block 5): the evening splash, cards ------------------------------
+  const htUi = htMode ? buildHtUi() : null;
+  function buildHtUi() {
+    const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
+    root.body.insertAdjacentHTML(
+      'beforeend',
+      `<div id="hutong" aria-label="Hutong controls">
+        <div class="seg">${btn('data-splash', '1', 'splash at 19:00 (P)')}</div>
+        <div class="measures"><div class="hand">Cards</div>${HT_CARDS.map(([id, label]) => btn('data-card', id, label)).join('')}</div>
+      </div>`,
+    );
+    const el = root.getElementById('hutong');
+    el.addEventListener('click', (e) => {
+      const b = e.target.closest ? e.target.closest('button') : null;
+      if (!b) return;
+      if (b.dataset.splash) setSplash(!S.splash);
+      else if (b.dataset.card) showHtCard(b.dataset.card, b);
+    });
+    return { el };
+  }
+  function syncHt() {
+    if (!htUi) return;
+    htUi.el.querySelector('[data-splash]').setAttribute('aria-pressed', String(!!S.splash));
+    root.body.dataset.splash = S.splash ? '1' : '0';
+  }
+  function setSplash(on) {
+    if (!!on === S.splash) return;
+    S.splash = !!on;
+    thermal = htSet.model(S.splash);
+    main.thermal = thermal;
+    R.setThermal(thermal);
+    notes = htNotes(scene, htNoteData());
+    syncHt();
+    if (card.dataset.open === '1') reopenCard();
+    if (S.paused) draw();
+  }
+  function htCardHtml(id) {
+    const h = ht();
+    if (id === 'lanes') return lanesCard({ lanes: h.lanes, noon: h.noon });
+    if (id === 'courtyard') return courtyardCard({ court: h.court });
+    if (id === 'tianpeng') return tianpengCard({ court: h.court });
+    if (id === 'splash') return splashCard({ s: h.s, ...htExtra(), on: S.splash });
+    return treesCard({ trees: h.trees, court: h.court });
+  }
+  function showHtCard(id, anchor) {
+    card.innerHTML = htCardHtml(id);
+    card.querySelector('.x').onclick = hideCard;
+    card._pick = null;
+    card._measure = `ht:${id}`;
+    card.dataset.open = '1';
+    card.dataset.kind = id;
+    card.style.display = 'block';
+    const r = anchor ? anchor.getBoundingClientRect() : { top: 120 };
+    const panel = htUi.el.getBoundingClientRect();
+    card.style.left = `${Math.min(window.innerWidth - card.offsetWidth - 10, panel.right + 12)}px`;
+    card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
+  }
+
   const toggleThermal = () => {
     const m = thermalMix(S.frame);
     S.thermal = !S.thermal;
@@ -6059,6 +6943,7 @@ function boot(scene, root = document) {
     else if (glassMode && (k === 'g' || k === 'G')) setGlass(GLASS_IDS[(GLASS_IDS.indexOf(S.glass) + (k === 'g' ? 1 : GLASS_IDS.length - 1)) % GLASS_IDS.length]);
     else if (wfMode && (k === 'w' || k === 'W')) setWindLines(!S.wind);
     else if (wfMode && (k === 'a' || k === 'A')) setAir(!S.air);
+    else if (htMode && (k === 'p' || k === 'P')) setSplash(!S.splash);
     else if (k === 'h') setHour(S.hour + 1);
     else if (k === 'H') setHour(S.hour - 1);
     else if (k === 'n' || k === 'N') S.notes = !S.notes;
@@ -6195,8 +7080,9 @@ function boot(scene, root = document) {
       cells = [];
       for (let i = 0; i < world.bld.length; i++) if (world.bld[i] === p.B.index) cells.push(i);
     } else if (p.kind === 'tree') {
-      title = p.T.young ? 'Young street tree' : 'Tree';
-      mat = p.T.young ? 'youngCanopy' : 'canopy';
+      // block 5 trees carry a species (their own material)
+      title = p.T.species ? mats[p.T.species].name : p.T.young ? 'Young street tree' : 'Tree';
+      mat = p.T.species ?? (p.T.young ? 'youngCanopy' : 'canopy');
       cells = [world.cellIndex(p.T.x, p.T.y)];
       tmrtCell = cells[0];
     } else {
@@ -6208,7 +7094,7 @@ function boot(scene, root = document) {
     const m = mats[mat];
     const mean = (hh, T = thermal) => cells.reduce((s, i) => s + T.ts(i, hh), 0) / cells.length;
     const svf = cells.reduce((s, i) => s + world.svf[i], 0) / cells.length;
-    const leaf = mat === 'canopy' || mat === 'youngCanopy';
+    const leaf = mat === 'canopy' || mat === 'youngCanopy' || !!m.tree;
     const ts = leaf ? (hh) => thermal.canopyTemp(hh) : mean;
     // retrofit: the same cells in the other state, if anything there differs
     let compare = null;
@@ -6248,11 +7134,14 @@ function boot(scene, root = document) {
         return { fw, u: thermal.info.wind * fw, hc: thermal.hcAt(c), site: thermal.info.wind, at };
       })()
       : null;
+    // hutong: water on a splashed cell now
+    const waterInfo = htMode && tmrtCell !== null && htSplashSet().has(tmrtCell) ? { now: thermal.water(tmrtCell, h), on: !!S.splash } : null;
     return {
       title,
       state: view.id,
       compare,
       wind: windInfo,
+      water: waterInfo,
       glass: glassInfo,
       wallsNow: sw ? sw.walls : null,
       glassNow: sw ? sw.glass : null,
@@ -6276,6 +7165,10 @@ function boot(scene, root = document) {
     };
   }
 
+  let htSplash = null;
+  function htSplashSet() {
+    return (htSplash ??= new Set(htSet.cells));
+  }
   function showCard(p, x, y) {
     if (!p) return;
     const d = cardData(p);
@@ -6296,6 +7189,7 @@ function boot(scene, root = document) {
       P.muWet ? `<tr><td>admittance wet / dry</td><td>${P.muWet.value} / ${d.dryMu}${tag(P.muWet)}</td></tr>` : '',
       P.tau ? `<tr><td>drying time τ</td><td>${P.tau.value} d${tag(P.tau)}</td></tr>` : '',
       P.storage ? `<tr><td>water held after rain</td><td>${P.storage.value} mm${tag(P.storage)}</td></tr>` : '',
+      P.tr ? `<tr><td>sun let through the crown</td><td>${P.tr.value}${tag(P.tr)}</td></tr>` : '',
     ].join('');
     const cmp = d.compare
       ? `<tr class="t"><td>15:00 Before → After</td><td>${fmt(d.compare.before)} → ${fmt(d.compare.after)} °C</td></tr>
@@ -6320,6 +7214,7 @@ function boot(scene, root = document) {
         ${d.wallsNow !== null ? `<tr><td>sun off the ${gl('wallReflection', 'walls')} now</td><td>${Math.round(d.wallsNow)} W m⁻²</td></tr>` : ''}
         ${d.glassNow !== null && glassMode ? `<tr><td>sun off the ${gl('specular', 'glass')} now</td><td>${Math.round(d.glassNow)} W m⁻²</td></tr>` : ''}
         <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
+        ${d.water ? `<tr><td>${gl('waterStore', 'water on the paving')} now</td><td>${d.water.now.toFixed(2)} mm${d.water.on ? ' (splashed at 19:00)' : ' (splash off: P)'}</td></tr>` : ''}
         ${d.wind ? `<tr><td>${gl('windFactor', 'wind factor f_w')}</td><td>${d.wind.fw.toFixed(2)} · ${fmt(d.wind.u)} of ${d.wind.site} m/s</td></tr>
         <tr><td>convection h_c</td><td>${fmt(d.wind.hc)} W m⁻² K⁻¹</td></tr>
         ${d.wind.at !== null ? `<tr><td>${gl('apparentTemp', 'apparent temp.')} now</td><td>${fmt(d.wind.at)} °C</td></tr>` : ''}` : ''}
@@ -6368,7 +7263,9 @@ function boot(scene, root = document) {
       ? glossaryStats(world, thermal, { canyon: canyonStats(world, thermal, CANYONS.lane, openRef('stone')), spot: spotTmrt(15) })
       : wfMode
         ? glossaryStats(world, thermal, { wind: { river: wf().st.river.mean, corridor: wf().st.corridorMean, shelter: wf().st.shelterMean, lee: wf().st.lee01.mean } })
-        : glossaryStats(world, thermal);
+        : htMode
+          ? glossaryStats(world, thermal, { hutong: hutongGlossary(world, thermal, ht()) })
+          : glossaryStats(world, thermal);
   let fnPinned = false;
   let fnByFocus = false;
   let fnTrigger = null;
@@ -6529,6 +7426,7 @@ function boot(scene, root = document) {
   syncRetro();
   syncGlass();
   syncWf();
+  syncHt();
   draw();
   requestAnimationFrame(loop);
 
@@ -6548,6 +7446,7 @@ function boot(scene, root = document) {
       changedCells: retro ? V.after.thermal.info.changed : 0,
       ...(glassSet ? glassSet.timing : {}),
       ...(wfSet ? wfSet.timing : {}),
+      ...(htSet ? htSet.timing : {}),
     },
     /** Pure seek: render frame N with an optional camera {z,cx,cy}; pauses the clock. */
     seek(frame, cam) {
@@ -6648,7 +7547,8 @@ function boot(scene, root = document) {
             out.push({ kind: 'chimney', b: -1, box: [cx - 1.6, cy - 1.6, cx + 1.6, cy + 1.6, B.h, ch] });
           }
           for (const A of world.awnings) if (A.b === B.index) out.push({ kind: 'a', b: -1, box: [A.x0, A.y0, A.x1, A.y1, A.z0 - 0.3, A.z1] });
-        } else if (o.kind === 'c') out.push({ kind: 'c', b: -1, box: [o.x0, o.y0, o.x1, o.y1, 0, 1.6] });
+        } else if (o.kind === 'p') out.push({ kind: 'p', b: -1, box: [o.o.x0, o.o.y0, o.o.x1, o.o.y1, o.o.z - 0.1, o.o.z] });
+        else if (o.kind === 'c') out.push({ kind: 'c', b: -1, box: [o.x0, o.y0, o.x1, o.y1, 0, 1.6] });
         else if (o.kind === 's') out.push({ kind: 's', b: -1, box: [o.x0, o.y0, o.x1, o.y1, 0, 2.6] });
         else if (o.kind === 'n') out.push({ kind: 'n', b: -1, box: [o.x0, o.y0, o.x1, o.y1, 0, 1] });
       }
@@ -6742,6 +7642,33 @@ function boot(scene, root = document) {
           return { ...walkerWind(world, main.life.at(frame / 60, hq), sh), choice: P.choice.slice(), costs: P.costs.map((c) => c.slice()), routes: scene.routes.map((r) => r.id), atGap: sh.atGap ?? null };
         },
         models: () => wfSet.cached(),
+      }
+      : null,
+    /**
+     * Hutong block (block 5) only: state {splash}; set() it; numbers for the
+     * bands and cards; card HTML; water on the paving at a point; dwellers by
+     * the shade class of their spot.
+     */
+    hutong: htMode
+      ? {
+        state: () => ({ splash: !!S.splash }),
+        set(o) {
+          if (o.splash !== undefined) setSplash(!!o.splash);
+        },
+        stats: () => {
+          const h = ht();
+          const strip = (o) => Object.fromEntries(Object.entries(o).filter(([k]) => k !== 'cells'));
+          return { noon: { h: h.noon.h, alt: h.noon.alt }, lanes: h.lanes.map(strip), s: { ...h.s, curve: undefined, marginAt: undefined }, roof: h.roof, court: h.court, trees: h.trees, shaded: strip(h.shaded), cells: htSet.cells.length };
+        },
+        extra: () => htExtra(),
+        html: (id) => htCardHtml(id),
+        show: (id) => showHtCard(id, root.querySelector(`#hutong [data-card="${id}"]`)),
+        water: (x, y, h = S.hour) => thermal.water(world.cellIndex(x, y), h),
+        dwell: (frame = S.frame, hour = S.hour) => {
+          const hq = quantHour(hour);
+          return dwellShade(main.life, main.shadeFor(hq), hq);
+        },
+        models: () => htSet.cached(),
       }
       : null,
     retro: retro

@@ -8,12 +8,13 @@ import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const MODULES = ['core', 'sun', 'materials', 'reflect', 'thermal', 'wind', 'world', 'pen', 'kit', 'life', 'render', 'glossary', 'retrofit', 'retroui', 'cbd', 'cbdui', 'waterfront', 'wfui', 'app'];
+const MODULES = ['core', 'sun', 'materials', 'reflect', 'thermal', 'wind', 'world', 'pen', 'kit', 'life', 'render', 'glossary', 'retrofit', 'retroui', 'cbd', 'cbdui', 'waterfront', 'wfui', 'hutong', 'hutui', 'app'];
 /** Block-specific modules, by the scene flag that selects them. */
 export const BLOCKS = [
   { flag: /retrofit: true/, modules: ['retrofit', 'retroui'] },
   { flag: /glassBlock: true/, modules: ['cbd', 'cbdui'] },
   { flag: /windBlock: true/, modules: ['wind', 'waterfront', 'wfui'] },
+  { flag: /hutongBlock: true/, modules: ['hutong', 'hutui'] },
 ];
 /** What a left-out module exposes: only the predicates the core calls (always false there). */
 export const STUBS = {
@@ -21,6 +22,7 @@ export const STUBS = {
   cbd: '{ isGlass: () => false }',
   wind: '{ isWindBlock: () => false }',
   waterfront: '{ isWaterfront: () => false }',
+  hutong: '{ isHutong: () => false }',
 };
 /** Modules a page needs, given its scene source. */
 export function modulesFor(scene) {
@@ -29,6 +31,18 @@ export function modulesFor(scene) {
   return MODULES.map((m) => ({ m, stub: other.has(m) }));
 }
 const LIMIT = 500 * 1024;
+
+/**
+ * What a page may not reference: any URL with a host (//host/...), a src=
+ * other than data: or #, @import, url() other than data: or #, and any href
+ * with a scheme (http:, file:, javascript:, data: ...), a host (//) or a
+ * root path (/...). Relative links inside this repository (href="../../references.html",
+ * href="#x") are allowed: they open offline and fetch nothing on load.
+ */
+export function externalRefs(html) {
+  const hits = html.match(/(?:https?:)?\/\/[a-z0-9.-]+\.[a-z]{2,}\/|\bsrc\s*=\s*["'](?!#|data:)|@import|url\((?!\s*["']?(?:data:|#))|\bhref\s*=\s*["'](?:[a-z][a-z0-9+.-]*:|\/)/gi) ?? [];
+  return [...new Set(hits)];
+}
 
 // Each ES module becomes a function scope; imports become destructuring.
 function wrap(name, src) {
@@ -56,15 +70,15 @@ function build(city) {
 
   const meta = /title: '([^']+)'/.exec(scene)[1];
   const sub = /note: '([^']+)'/.exec(scene)[1];
-  const keys = /retrofit: true/.test(scene) ? '<kbd>B</kbd> before/after · ' : /glassBlock: true/.test(scene) ? '<kbd>G</kbd> glass · ' : /windBlock: true/.test(scene) ? '<kbd>W</kbd> wind · <kbd>A</kbd> air · ' : '';
+  const keys = /retrofit: true/.test(scene) ? '<kbd>B</kbd> before/after · ' : /glassBlock: true/.test(scene) ? '<kbd>G</kbd> glass · ' : /windBlock: true/.test(scene) ? '<kbd>W</kbd> wind · <kbd>A</kbd> air · ' : /hutongBlock: true/.test(scene) ? '<kbd>P</kbd> splash · ' : '';
   const html = read('engine/shell.html')
     .replace(/__TITLE__/g, meta)
     .replace('__SUBTITLE__', sub)
     .replace('__KEYS__', keys)
     .replace('__BUNDLE__', () => bundle.replace(/<\/script/gi, '<\\/script'));
 
-  const external = html.match(/(?:https?:)?\/\/[a-z0-9.-]+\.[a-z]{2,}\/|\b(?:src|href)\s*=\s*["'](?!#|data:)|@import|url\((?!\s*["']?(?:data:|#))/gi);
-  if (external) throw new Error(`${city}: external reference(s): ${[...new Set(external)].join(', ')}`);
+  const external = externalRefs(html);
+  if (external.length) throw new Error(`${city}: external reference(s): ${external.join(', ')}`);
   const size = Buffer.byteLength(html);
   if (size > LIMIT) throw new Error(`${city}: built file is ${size} bytes, over the ${LIMIT} byte budget`);
   writeFileSync(`${root}cities/${city}/index.html`, html);
