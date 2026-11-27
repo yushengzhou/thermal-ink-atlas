@@ -55,17 +55,17 @@
   #fn .rng { opacity: .8; }
   #fn .why { font-style: italic; }
   /* block control panels (blocks 2-6): one look */
-  :is(#retro, #glass, #wind, #hutong, #parking) { position: fixed; left: 18px; bottom: 16px; width: 212px; padding: 8px 10px 9px; background: rgba(246,240,226,.93); border: 1.5px solid #2b2621; border-radius: 4px 9px 5px 8px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); font-size: 13px; }
-  :is(#retro, #glass, #wind, #hutong, #parking) .seg, :is(#retro, #glass) .row { display: flex; align-items: center; gap: 4px; margin: 0 0 6px; flex-wrap: wrap; }
-  :is(#retro, #glass, #wind, #hutong, #parking) button { font: 12.5px/1.2 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; background: #fbf7ee; color: #2b2621; border-radius: 4px 7px 3px 6px; cursor: pointer; }
-  :is(#retro, #glass, #wind, #hutong, #parking) button[aria-pressed="true"] { background: #2b2621; color: #fbf7ee; }
+  :is(#retro, #glass, #wind, #hutong, #parking, #estate) { position: fixed; left: 18px; bottom: 16px; width: 212px; padding: 8px 10px 9px; background: rgba(246,240,226,.93); border: 1.5px solid #2b2621; border-radius: 4px 9px 5px 8px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); font-size: 13px; }
+  :is(#retro, #glass, #wind, #hutong, #parking, #estate) .seg, :is(#retro, #glass) .row { display: flex; align-items: center; gap: 4px; margin: 0 0 6px; flex-wrap: wrap; }
+  :is(#retro, #glass, #wind, #hutong, #parking, #estate) button { font: 12.5px/1.2 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; background: #fbf7ee; color: #2b2621; border-radius: 4px 7px 3px 6px; cursor: pointer; }
+  :is(#retro, #glass, #wind, #hutong, #parking, #estate) button[aria-pressed="true"] { background: #2b2621; color: #fbf7ee; }
   :is(#retro, #glass) input[type=range] { width: 96px; accent-color: #3f6e6a; }
   :is(#retro, #glass) #rainLabel { font-size: 12px; flex-basis: 100%; }
-  :is(#retro, #glass, #wind, #hutong, #parking) .measures { display: flex; flex-wrap: wrap; gap: 4px; border-top: 1px dashed #6d6355; padding-top: 6px; }
-  :is(#retro, #glass, #wind, #hutong, #parking) .measures .hand { flex-basis: 100%; }
-  :is(#retro, #glass, #wind, #hutong, #parking) .measures button { font-size: 12px; padding: 2px 6px; }
+  :is(#retro, #glass, #wind, #hutong, #parking, #estate) .measures { display: flex; flex-wrap: wrap; gap: 4px; border-top: 1px dashed #6d6355; padding-top: 6px; }
+  :is(#retro, #glass, #wind, #hutong, #parking, #estate) .measures .hand { flex-basis: 100%; }
+  :is(#retro, #glass, #wind, #hutong, #parking, #estate) .measures button { font-size: 12px; padding: 2px 6px; }
   :is(#retro, #glass, #wind, #parking) .measures button.warn { border-color: #8a2f22; color: #8a2f22; }
-  .noui #wind, .noui #hutong, .noui #parking { display: none; }
+  .noui #wind, .noui #hutong, .noui #parking, .noui #estate { display: none; }
   #terms .refs a { color: #8a2f22; }
   #card table.cmp td { text-align: right; }
   #card table.cmp td:first-child, #card table.cmp td.sub { text-align: left; }
@@ -4827,6 +4827,7 @@ const GLOSSARY = {
   },
   // ---- block 5 (hutong) -----------------------------------------------------
   // ---- block 6 (car park and brownfield) -------------------------------------
+  // ---- block 7 (older high-rise estate) ---------------------------------------
   // ---- block 2 (sponge-retrofit) --------------------------------------------
   daysSinceRain: {
     term: 'Days since rain (d)',
@@ -4954,6 +4955,12 @@ __m['parking'] = { isParking: () => false };
 
 __m['pkui'] = {};
 
+__m['eskit'] = {};
+
+__m['estate'] = { isEstate: () => false };
+
+__m['esui'] = {};
+
 __m['app'] = (() => {
 // app: boot, clock, keys, seek(), query modes, overlay (slider, notes, heat
 // card) and a small window.atlas API used by the checks.
@@ -4983,6 +4990,8 @@ const { isHutong, hutongSetup } = __m['hutong'];
 const { htApp } = __m['hutui'];
 const { isParking, parkingSetup } = __m['parking'];
 const { pkApp } = __m['pkui'];
+const { isEstate, estateSetup } = __m['estate'];
+const { esApp } = __m['esui'];
 
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
@@ -5084,6 +5093,9 @@ function boot(scene, root = document) {
   // car park block (block 6): its page parts live in its own module (pkui.js pkApp: a block plugin, see blk below)
   const pkMode = isParking(scene);
   let pkSet = null;
+  // estate block (block 7): a block plugin too (esui.js esApp)
+  const esMode = isEstate(scene);
+  let esSet = null;
   if (!retro) {
     world = buildWorld(scene);
     t1 = performance.now();
@@ -5114,6 +5126,9 @@ function boot(scene, root = document) {
     } else if (pkMode) {
       pkSet = parkingSetup(world);
       thermal = pkSet.model;
+    } else if (esMode) {
+      esSet = estateSetup(world);
+      thermal = esSet.model;
     } else thermal = runModel(world);
     t2 = performance.now();
     V = { main: makeView('main', scene, world, thermal, canvas, glassMode ? { type: () => glassNow.type } : null, wfMode ? { lines: wfSet.lines() } : null) };
@@ -5266,7 +5281,7 @@ function boot(scene, root = document) {
       sunTmrt: w.shade.sunTmrt,
     };
   }
-  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode || pkMode ? null : block1Notes();
+  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode || pkMode || esMode ? null : block1Notes();
   function block1Notes() {
   const notesText = {
     asphalt: ['Kiln Street, old asphalt (albedo 0.12):', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
@@ -5678,7 +5693,7 @@ function boot(scene, root = document) {
   // ---- a block plugin (blocks 5 and 6): its controls, cards, notes, heat-card rows, glossary numbers
   // and API live in its own module; app.js only calls these hooks
   const env = {
-    scene, world, thermal, root, card, R, S, main, query: q, setup: htSet ?? pkSet,
+    scene, world, thermal, root, card, R, S, main, query: q, setup: htSet ?? pkSet ?? esSet,
     hideCard: () => hideCard(),
     reopen: () => card.dataset.open === '1' && reopenCard(),
     redraw: () => S.paused && draw(),
@@ -5690,7 +5705,7 @@ function boot(scene, root = document) {
     },
     setNotes: (n) => (notes = n),
   };
-  const blk = pkMode ? pkApp(env) : htMode ? htApp(env, htSplash0) : null;
+  const blk = pkMode ? pkApp(env) : htMode ? htApp(env, htSplash0) : esMode ? esApp(env) : null;
   if (blk) notes = blk.notes();
 
   const toggleThermal = () => {
@@ -6213,6 +6228,7 @@ function boot(scene, root = document) {
       ...(wfSet ? wfSet.timing : {}),
       ...(htSet ? htSet.timing : {}),
       ...(pkSet ? pkSet.timing : {}),
+      ...(esSet ? esSet.timing : {}),
     },
     /** Pure seek: render frame N with an optional camera {z,cx,cy}; pauses the clock. */
     seek(frame, cam) {
@@ -6415,6 +6431,8 @@ function boot(scene, root = document) {
     hutong: htMode ? blk.api : null,
     /** Car park block (block 6) only: its plugin's API (pkui.js pkApp). */
     parking: blk ? blk.api : null,
+    /** Estate block (block 7) only: its plugin's API (esui.js esApp). */
+    estate: esMode ? blk.api : null,
     retro: retro
       ? {
         state: () => ({ state: S.state, split: S.split, swap: S.swap, d: S.d, aged: S.aged }),
