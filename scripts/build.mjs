@@ -5,7 +5,7 @@ import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const MODULES = ['core', 'sun', 'materials', 'thermal', 'world', 'pen', 'kit', 'life', 'render', 'glossary', 'retrofit', 'retroui', 'app'];
+const MODULES = ['core', 'sun', 'materials', 'reflect', 'thermal', 'world', 'pen', 'kit', 'life', 'render', 'glossary', 'retrofit', 'retroui', 'cbd', 'cbdui', 'app'];
 const LIMIT = 500 * 1024;
 
 // Each ES module becomes a function scope; imports become destructuring.
@@ -34,7 +34,7 @@ function build(city) {
 
   const meta = /title: '([^']+)'/.exec(scene)[1];
   const sub = /note: '([^']+)'/.exec(scene)[1];
-  const keys = /retrofit: true/.test(scene) ? '<kbd>B</kbd> before/after · ' : '';
+  const keys = /retrofit: true/.test(scene) ? '<kbd>B</kbd> before/after · ' : /glassBlock: true/.test(scene) ? '<kbd>G</kbd> glass · ' : '';
   const html = read('engine/shell.html')
     .replace(/__TITLE__/g, meta)
     .replace('__SUBTITLE__', sub)

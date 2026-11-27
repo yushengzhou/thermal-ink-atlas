@@ -23,7 +23,11 @@ export function shadeWeights(air) {
 
 const SHIRTS = ['#b5533c', '#3f6e6a', '#c9973f', '#5b6b8c', '#e8e1d0', '#8e4b5e', '#2f3e52', '#d07a5a', '#6f8c52'].map(hexRgb);
 
-/** Shade class (0 sun, 1 building, 2 tree) at a world point. */
+/**
+ * Shade class at a world point: 0 sun, 1 building shade, 2 tree shade; glass
+ * blocks add 3 (reflection spot in shade) and 4 (reflection spot in sun),
+ * whose route weights are Tmrt-based (cbd.js spotWeights, shade.spotW).
+ */
 export function shadeAt(shade, x, y) {
   const i = Math.floor(x / shade.cell);
   const j = Math.floor(y / shade.cell);
@@ -114,7 +118,8 @@ export class Life {
     if (this.plans.has(hq)) return this.plans.get(hq);
     const shade = this.shadeFor(hq);
     const air = this.airFor(hq);
-    const weight = shade.night ? [1, 1, 1] : shadeWeights(air);
+    let weight = shade.night ? [1, 1, 1] : shadeWeights(air);
+    if (shade.spotW && !shade.night) weight = [...weight, ...shade.spotW];
     const costs = this.scene.routes.map((r) => r.variants.map((v) => routeCost(v, shade, 1, weight)));
     const choice = this.walkers.map((w) => {
       const c = costs[w.route];
@@ -199,6 +204,9 @@ export class Life {
   }
 }
 
+/** Classes that count as shade (a reflection spot in shade is still out of the sun). */
+const isShade = (c) => c === 1 || c === 2 || c === 3;
+
 /**
  * People per m2 in shade vs in sun, over walkable ground (pavements, paths,
  * lawn) of the fine grid.
@@ -211,14 +219,14 @@ export function shadeDensity(world, agents, shade) {
     for (let i = 0; i < f.n; i++) {
       if (!f.walk[j * f.n + i]) continue;
       const c = shadeAt(shade, (i + 0.5) * f.cell, (j + 0.5) * f.cell);
-      if (c) aShade += f.cell * f.cell;
+      if (isShade(c)) aShade += f.cell * f.cell;
       else aSun += f.cell * f.cell;
     }
   }
   let nShade = 0;
   let nSun = 0;
   for (const a of agents) {
-    if (shadeAt(shade, a.x, a.y)) nShade++;
+    if (isShade(shadeAt(shade, a.x, a.y))) nShade++;
     else nSun++;
   }
   const dShade = nShade / Math.max(1, aShade);
@@ -268,4 +276,22 @@ export function sweatState(k, t, tmrt, sunlit) {
   // occasional hand-to-brow fan, only in strong heat
   const fan = s > 0.5 && hash3(k, Math.floor(tt / (CYCLE * 3)), 60) < 0.15 * s;
   return { s, drops, fan };
+}
+
+/**
+ * People per m2 by shade class over walkable ground (glass block): plain
+ * shade (1, 2), reflection spot in shade (3), sun (0), spot in sun (4).
+ */
+export function classDensity(world, agents, shade) {
+  const f = world.fine;
+  const area = [0, 0, 0, 0, 0];
+  const count = [0, 0, 0, 0, 0];
+  for (let j = 0; j < f.n; j++) {
+    for (let i = 0; i < f.n; i++) {
+      if (f.walk[j * f.n + i]) area[shadeAt(shade, (i + 0.5) * f.cell, (j + 0.5) * f.cell)] += f.cell * f.cell;
+    }
+  }
+  for (const a of agents) count[shadeAt(shade, a.x, a.y)]++;
+  const d = (ks) => ks.reduce((s, k) => s + count[k], 0) / Math.max(1, ks.reduce((s, k) => s + area[k], 0));
+  return { area, count, plainShade: d([1, 2]), spotShade: d([3]), spots: d([3, 4]), sun: d([0]), spotSun: d([4]) };
 }
