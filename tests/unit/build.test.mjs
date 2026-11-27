@@ -7,9 +7,9 @@ import { fileURLToPath } from 'node:url';
 import { modulesFor, BLOCKS, STUBS, externalRefs } from '../../scripts/build.mjs';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
-const CITIES = ['asphalt-park', 'campus', 'estate', 'glass-cbd', 'hutong', 'parking', 'sponge-retrofit', 'waterfront'];
+const CITIES = ['asphalt-park', 'busstop', 'campus', 'estate', 'glass-cbd', 'hutong', 'parking', 'sponge-retrofit', 'waterfront'];
 // block-specific modules each page must carry (all other block modules are stubs)
-const OWN = { 'asphalt-park': [], 'sponge-retrofit': ['retrofit', 'retroui'], 'glass-cbd': ['reflect', 'cbd', 'cbdui'], waterfront: ['wind', 'waterfront', 'wfui'], hutong: ['htkit', 'hutong', 'hutui'], parking: ['pkkit', 'parking', 'pkui'], estate: ['eskit', 'estate', 'esui'], campus: ['cpkit', 'campus', 'cpui'] };
+const OWN = { 'asphalt-park': [], 'sponge-retrofit': ['retrofit', 'retroui'], 'glass-cbd': ['reflect', 'cbd', 'cbdui'], waterfront: ['wind', 'waterfront', 'wfui'], hutong: ['htkit', 'hutong', 'hutui'], parking: ['pkkit', 'parking', 'pkui'], estate: ['eskit', 'estate', 'esui'], campus: ['cpkit', 'campus', 'cpui'], busstop: ['bskit', 'busstop', 'bsui'] };
 const file = (c) => `${root}cities/${c}/index.html`;
 
 test('build succeeds and the committed files are current', () => {

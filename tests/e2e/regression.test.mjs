@@ -1,10 +1,10 @@
-// Blocks 1-7 are unchanged by later blocks: every page renders the same
+// Blocks 1-8 are unchanged by later blocks: every page renders the same
 // pixels, notes and probe values as its fixture page, kept gzipped in
 // tests/fixtures/base-pages: blocks 1-3 as built before block 4 (main at
 // 8e76f7a), block 4 as built before block 5 (189b7e1), block 5 as built
 // before block 6 (40b5366, the block 5 branch), block 6 as first built
 // (577a750, before the shared-core diet), block 7 as on its branch before
-// block 8 (1e292a5). Both pages run in the
+// block 8 (1e292a5), block 8 as on its branch before block 9 (8735385). Both pages run in the
 // same browser here, so the comparison does not depend on the platform.
 // A deliberate change to these blocks must refresh the fixtures: commit the
 // rebuilt pages, then `npm run fixtures` (gzips them from HEAD) and commit.
@@ -24,10 +24,11 @@ const CASES = {
   waterfront: ['hour=15&f=640', 'thermal&hour=15&f=640', 'thermal&hour=4&f=640&cam=3.5,205,212&u=1', 'hour=15&f=640&air=1&notes=0&cam=3.5,200,95', 'hour=9&f=777&wind=0&cam=4.5,130,160', 'thermal&hour=23&f=400&u=1&air=1'],
   hutong: ['hour=15&f=640', 'thermal&hour=15&f=640', 'thermal&hour=21&f=640&cam=3.5,120,240&splash=1', 'thermal&hour=21&f=400&splash=0', 'hour=12.25&f=777&cam=5.5,125,240&notes=0', 'thermal&hour=23&f=1500&cam=5,125,245'],
   parking: ['hour=15&f=640', 'thermal&hour=15&f=640', 'thermal&hour=23&f=640&flux=1', 'thermal&hour=23&f=777&flux=1&notes=0&cam=4,140,170', 'hour=12&f=500&flux=1&cam=5,70,150', 'hour=9&f=400&cam=5.5,330,150'],
+  campus: ['hour=15&f=640', 'thermal&hour=15&f=640', 'hour=14.25&f=640&irrigate=1&cam=3.5,160,130', 'thermal&hour=15&f=777&burn=1&cam=4,320,210', 'hour=10.25&f=400&notes=0&cam=5,330,210', 'thermal&hour=23&f=1500&irrigate=1&burn=1'],
   estate: ['hour=15&f=640', 'thermal&hour=15&f=640', 'hour=12&f=640&date=dajhan', 'thermal&hour=21&f=777&ac=1&cam=3.5,230,250', 'hour=9.25&f=400&date=dajhan&ac=1&notes=0&cam=4,70,200', 'thermal&hour=4&f=1500&acwall=0'],
 };
 // which page each fixture is (for messages)
-const BEFORE = { 'asphalt-park': 'block 4', 'sponge-retrofit': 'block 4', 'glass-cbd': 'block 4', waterfront: 'block 5', hutong: 'block 6', parking: 'the shared-core diet', estate: 'block 8' };
+const BEFORE = { 'asphalt-park': 'block 4', 'sponge-retrofit': 'block 4', 'glass-cbd': 'block 4', waterfront: 'block 5', hutong: 'block 6', parking: 'the shared-core diet', estate: 'block 8', campus: 'block 9' };
 
 let browser;
 let dir;
