@@ -6,7 +6,7 @@
 //                  (materials.js SOURCES), or
 //   model(stats) - values computed from this model at load (glossaryStats),
 //                  shown as "In this model" so they cannot go stale.
-import { cellMat } from './thermal.js';
+import { cellMat, isWater } from './thermal.js';
 
 export const GLOSSARY = {
   albedo: {
@@ -153,6 +153,46 @@ export const GLOSSARY = {
     why: 'It warms the street air; this model holds the air temperature fixed, so the heat is shown but not felt.',
     scenes: ['glass-cbd'],
   },
+  // ---- block 4 (waterfront) -------------------------------------------------
+  windFactor: {
+    term: 'Wind factor (f_w)',
+    text: 'How much of the open-site wind reaches a spot: 1 in the open, lower in the lee of buildings, a little above 1 in streets that point along the wind. Here it is a geometric rule (shelter × channelling), not a flow simulation.',
+    model: (S) => S.windLine,
+    why: 'More wind carries heat off a sunlit pavement faster and makes a hot day feel cooler; it does not change the air temperature here.',
+    scenes: ['waterfront'],
+  },
+  ventilationCorridor: {
+    term: 'Ventilation corridor',
+    text: 'A wide, open street or green strip that lines up with the prevailing wind, so the breeze (here, off the river) can run into the city.',
+    range: 'Planning guides ask for corridors within about 30° of the prevailing wind; along the Ota River (Hiroshima) river cooling was detected 150–500 m inland along streets perpendicular to the river (unverified).',
+    src: 'corridor, ota',
+    why: 'Streets across the wind are sheltered by the buildings upwind; corridors keep the wind moving.',
+    scenes: ['waterfront'],
+  },
+  fetch: {
+    term: 'Fetch',
+    text: 'The distance the wind has travelled over a surface. Air that has just crossed water carries a little of its coolness for a short fetch over land, then mixes with the city air.',
+    range: 'River Don, Sheffield: about 30 m with open banks; Cheonggyecheon, Seoul: 30–80 m; small water bodies: −0.2 K typical in the afternoon.',
+    src: 'hathway2012, cheonggyecheon, jacobs2020',
+    why: 'The cooling of the air by water fades within tens of metres, so it helps the promenade, not the streets behind.',
+    scenes: ['waterfront'],
+  },
+  sheltering: {
+    term: 'Sheltering (lee)',
+    text: 'The slow, gusty zone downwind of a building, where the wind is much weaker than in the open and recovers only gradually.',
+    range: 'Recirculation behind a building about 1.6–2.6 times its width; recovery to the open wind after about 5 building heights is an assumption of this model.',
+    src: 'wake, brief4',
+    why: 'A sheltered sunlit pavement loses less heat to the air, so it runs hotter than an exposed one.',
+    scenes: ['waterfront'],
+  },
+  apparentTemp: {
+    term: 'Apparent temperature',
+    text: 'A feels-like temperature from air temperature, humidity, wind and the extra radiation a person absorbs (Steadman 1994). Used here as a simple stand-in for UTCI.',
+    range: 'AT = Ta + 0.348 e − 0.70 ws + 0.70 Q/(ws + 10) − 4.25 (e in hPa, ws the 10 m wind in m/s, Q in W m⁻²; coefficients from memory, not checked).',
+    src: 'steadman1994',
+    why: 'It lets the walkers weigh a breeze against shade: both make a hot afternoon feel cooler.',
+    scenes: ['waterfront'],
+  },
   // ---- block 2 (sponge-retrofit) --------------------------------------------
   permeablePaving: {
     term: 'Permeable paving',
@@ -234,7 +274,7 @@ export function glossaryStats(world, thermal, extra = {}) {
   for (let i = 0; i < N; i++) {
     if (world.bld[i] >= 0) continue;
     const m = cellMat(world, i);
-    if (m === 'water') continue;
+    if (isWater(m)) continue;
     const s = thermal.sunlit(i, 15);
     if (s > 0.95) sun.push(thermal.tmrt(i, 15));
     else if (s < 0.05 && world.canopy[i] === 0) shade.push(thermal.tmrt(i, 15));
@@ -267,6 +307,10 @@ export function glossaryStats(world, thermal, extra = {}) {
     for (let i = 0; i < N; i++) if (world.bld[i] < 0) ground.push(world.svf[i]);
     out.svfLine = `Street-level ground ${r2(q(ground, 0.1))}–${r2(q(ground, 0.9))}; Silk Lane floor ${r2(c.svf)} (an endless canyon of the same H/W: ${r2(c.svfCanyon)}).`;
     out.lagLine = `At 5 am the Silk Lane floor is ${r1(c.lag05)} °C warmer than an open stone surface (walls fixed at air + 2 K at night, an engine assumption).`;
+  }
+  if (extra.wind) {
+    const w = extra.wind;
+    out.windLine = `Over the river ${r2(w.river)}; along Quay Street ${r2(w.corridor)}; Rope Walk, behind the warehouses, ${r2(w.shelter)} (mean), ${r2(w.lee)} within one building height of the wall.`;
   }
   if (extra.spot) {
     const s = extra.spot;

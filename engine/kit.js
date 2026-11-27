@@ -16,6 +16,8 @@ export const GROUND_RGB = {
   coolPaveAged: hexRgb('#aaa59c'),
   coolPaveNew: hexRgb('#bdb8ae'),
   raingarden: hexRgb('#8fa56a'),
+  river: hexRgb('#7ea3ab'),
+  pond: hexRgb('#87adb2'),
 };
 export const ROOF_RGB = {
   membrane: hexRgb('#5c5e66'),
@@ -125,7 +127,8 @@ export function drawGround(pen, world) {
       opts = g.street === 'ew' ? { edges: [true, false, true, false], lw: 1.1 } : { edges: [false, true, false, true], lw: 1.1 };
     } else if (g.id === 'park' || g.id === 'gardens' || g.id === 'carpark' || g.outline) opts = { lw: 1 };
     else if (g.mat === 'raingarden') opts = { lw: 0.7, a: 0.7 };
-    else if (g.mat === 'water') opts = { lw: 1.3 };
+    else if (g.mat === 'water' || g.mat === 'pond') opts = { lw: 1.3 };
+    else if (g.mat === 'river') opts = { stroke: null };
     else if (g.mat === 'stone') opts = { lw: 0.5, a: 0.45 };
     else if (g.id === 'yards') opts = { lw: 1.4 };
     pen.shape(pts, fill, { ...opts, t: 'g' });
@@ -260,6 +263,7 @@ export function drawDecor(pen, world, D) {
       pen.line([[x - 0.35, y + 0.2], [x, y - 0.15], [x + 0.3, y + 0.25]], { lw: 0.5, stroke: grassInk, a: 0.55, over: 0.1 });
     }
   }
+  if (D.river) riverMarks(pen, world.size, D.river[0], D.river[1], S.seed);
   if (D.pond) {
     const [cx, cy, rx, ry] = D.pond;
     groundEllipse(pen, cx, cy, rx + 0.8, ry + 0.8, null, { lw: 0.7, a: 0.6, t: 'gm' });
@@ -267,6 +271,25 @@ export function drawDecor(pen, world, D) {
       pen.line([[cx + dx - w / 2, cy + dy], [cx + dx, cy + dy - 0.25], [cx + dx + w / 2, cy + dy]], { lw: 0.6, stroke: hexRgb('#e9f0ec'), a: 0.8, over: 0.2 });
     }
   }
+}
+
+/** River (block 4): current ripples in rows, and the quay wall along the bank (y1). */
+function riverMarks(pen, size, y0, y1, seed) {
+  const r = makeRng(seed + 7);
+  pen.tag = 'gm';
+  const light = hexRgb('#e9f0ec');
+  const deep = hexRgb('#4f7480');
+  for (let y = y0 + 4; y < y1 - 3; y += 4.5) {
+    for (let x = 2 + r() * 10; x < size - 6; x += 9 + r() * 14) {
+      const w = 2.5 + r() * 4;
+      const yy = y + (r() - 0.5) * 1.5;
+      pen.line([[x, yy], [x + w / 2, yy - 0.3], [x + w, yy]], { lw: 0.55, stroke: r() < 0.6 ? light : deep, a: 0.7, over: 0.2 });
+    }
+  }
+  // quay wall: a double ink line with coping joints
+  pen.line([[0, y1 - 0.6], [size, y1 - 0.6]], { lw: 1.4, over: 0.2 });
+  pen.line([[0, y1 + 0.7], [size, y1 + 0.7]], { lw: 0.6, a: 0.6, over: 0.2 });
+  for (let x = 2; x < size; x += 2.5) pen.line([[x, y1 - 0.6], [x, y1 + 0.7]], { lw: 0.35, a: 0.4, over: 0 });
 }
 
 function bboxOf(p) {

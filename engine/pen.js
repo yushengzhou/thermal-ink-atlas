@@ -128,6 +128,38 @@ export class Pen {
     return this._push(it, sp);
   }
 
+  /**
+   * One continuous hand-drawn stream line (block 4 wind lines) from a flat
+   * world array [x0, y0, x1, y1, ...] at height opts.z: projected, with a
+   * slow seeded wobble across the line (no overshoot, no breaks), so it can
+   * be dashed vertex by vertex. Returns the item; sp keeps one projected
+   * point per input vertex.
+   */
+  stream(w, opts = {}) {
+    const k = opts.k ?? this._k();
+    const z = opts.z ?? 0;
+    const amp = opts.amp ?? this.amp;
+    const m = w.length / 2;
+    const sp = new Float32Array(m * 2);
+    let s = 0;
+    for (let v = 0; v < m; v++) {
+      const a = Math.max(0, v - 1);
+      const b = Math.min(m - 1, v + 1);
+      const p = iso(w[v * 2], w[v * 2 + 1], z);
+      const pa = iso(w[a * 2], w[a * 2 + 1], z);
+      const pb = iso(w[b * 2], w[b * 2 + 1], z);
+      const dx = pb[0] - pa[0];
+      const dy = pb[1] - pa[1];
+      const L = Math.hypot(dx, dy) || 1;
+      if (v) s += Math.hypot(p[0] - sp[v * 2 - 2], p[1] - sp[v * 2 - 1]);
+      const off = amp * noise1(s / 9 + (k % 89) * 1.7, k * 13 + 5);
+      sp[v * 2] = p[0] - (dy / L) * off;
+      sp[v * 2 + 1] = p[1] + (dx / L) * off;
+    }
+    const it = { f: null, s: opts.stroke ?? 1, lw: opts.lw ?? 1, fp: null, sp, t: opts.t ?? 'wind', a: opts.a };
+    return this._push(it, Array.from(sp));
+  }
+
   /** Screen-plane blob (circle with wobbly outline) at a world point. */
   blob(c, r, fill, opts = {}) {
     const [cx, cy] = iso(c[0], c[1], c[2] ?? 0);

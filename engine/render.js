@@ -6,6 +6,7 @@
 import { iso, hash3, noise2, clamp, smooth, rgbCss, mixRgb, scaleRgb, hexRgb, PAPER, INK, ISO_C, ISO_S, ISO_Z, DEG } from './core.js';
 import { shadowPolys, heatRgb } from './thermal.js';
 import { sweatState, shadeAt } from './life.js';
+import { overlayDT, dayWeight } from './wind.js';
 
 export const TILE = 512;
 export const HOUR_STEP = 0.25;
@@ -23,6 +24,11 @@ const SWEAT_CSS = 'rgba(143,182,207,0.95)';
 export const GLASS_RGB = { clear: hexRgb('#7d9ea6'), lowe: hexRgb('#8ea4b8'), mirror: hexRgb('#b9c3c6') };
 const GLINT = [255, 246, 214];
 const AC_INK = hexRgb('#8a2f22');
+// block 4: the water's air overlay (cooling / warming) and the wind-line ink
+const AIR_COOL = hexRgb('#3b6573');
+const AIR_WARM = hexRgb('#b96d4d');
+const WIND_INK = hexRgb('#24354a');
+const HAND_FONT = '"Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive';
 
 function makeCanvas(w, h) {
   if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(w, h);
@@ -105,6 +111,7 @@ export class Renderer {
     this.clip = null; // [x0, x1] device px: draw only this vertical band (split view)
     this.glass = 'lowe'; // glass type (block 3): pane colours
     this.spotFor = null; // (hq) -> reflection spot field on the 2 m grid, or null (block 3)
+    this.wind = null; // block 4: {lines, items} wind lines (wind.js windLines + pen.stream items)
     const hs = Math.max(0, ...world.buildings.map((b) => b.h + (b.chimney ? b.chimney[2] - b.h : 0)));
     this.topMargin = Math.max(40, hs + 8); // m above ground that tiles must cover
   }
@@ -802,7 +809,10 @@ export class Renderer {
     this.stats.sweating = 0;
     this.stats.sweatGlyphPx = 0;
     this.noteHits = [];
+    this.stats.windDashes = 0;
+    this.stats.airSegs = 0;
     if (lifeA > 0) {
+      if (this.wind && (look.wind || look.air)) this.drawWind(ctx, f, cam, W, H, lifeA, look, hq);
       if (look.ac) this.drawAc(ctx, f, cam, W, H, lifeA);
       if (look.people !== false) this.drawPeople(ctx, f, cam, hq, W, H, lifeA, look.thermalMix ?? 0);
       if (look.notes) this.drawNotes(ctx, cam, W, H, look.notes, lifeA);
@@ -960,6 +970,145 @@ export class Renderer {
     }
     ctx.restore();
     this.stats.ac = !!label;
+  }
+
+  /**
+   * Block 4: the water's illustrative air overlay (a soft band along each wind
+   * line, cool by day, warm at night, strength |dTa|) and the pen-drawn wind
+   * lines with moving dashes (spacing and speed proportional to u_i), each
+   * with a label saying what it is. Vertices hidden behind buildings are
+   * skipped. Pure function of (frame, camera, look).
+   */
+  drawWind(ctx, f, cam, W, H, alpha, look, hq) {
+    const [ox, oy, Z] = this.origin(cam, W, H);
+    const d = this.dpr;
+    const { lines, items } = this.wind;
+    const t = f / 60;
+    const u = look.u || 1;
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    const X = (sp, v) => ox + sp[v * 2] * Z;
+    const Y = (sp, v) => oy + sp[v * 2 + 1] * Z;
+    const labels = [];
+    if (look.air) {
+      const wd = dayWeight(this.hourCtx(hq).sun.alt);
+      // strength in 6 alpha steps per sign, one path each
+      const B = 6;
+      const paths = [[], []];
+      for (let s = 0; s < 2; s++) for (let b = 0; b < B; b++) paths[s].push([]);
+      lines.forEach((L, li) => {
+        const sp = items[li].sp;
+        for (let v = 0; v + 1 < L.fw.length; v++) {
+          if (L.hid[v] || L.hid[v + 1] || L.wet[v + 1]) continue; // over land only
+          const dt = overlayDT(L.lam[v], L.kind[v], wd);
+          const a = Math.abs(dt);
+          if (a < 0.02) continue;
+          const b = Math.min(B - 1, Math.floor((a / 1.0) * B));
+          paths[dt < 0 ? 0 : 1][b].push(v, li);
+        }
+      });
+      ctx.lineWidth = Math.max(4 * d, 6 * Z);
+      for (let s = 0; s < 2; s++) {
+        ctx.strokeStyle = rgbCss(s === 0 ? AIR_COOL : AIR_WARM);
+        for (let b = 0; b < B; b++) {
+          const P = paths[s][b];
+          if (!P.length) continue;
+          ctx.globalAlpha = alpha * (0.12 + 0.5 * ((b + 0.5) / B));
+          ctx.beginPath();
+          for (let k = 0; k < P.length; k += 2) {
+            const v = P[k];
+            const sp = items[P[k + 1]].sp;
+            ctx.moveTo(X(sp, v), Y(sp, v));
+            ctx.lineTo(X(sp, v + 1), Y(sp, v + 1));
+          }
+          ctx.stroke();
+          this.stats.airSegs += P.length / 2;
+        }
+      }
+      labels.push([wd > 0.5 ? AIR_COOL : AIR_WARM, `Air effect of the water: illustrative, from literature, not simulated (${wd > 0.5 ? 'cooler' : wd < 0.5 ? 'warmer' : 'cooler / warmer'})`]);
+    }
+    if (look.wind) {
+      ctx.strokeStyle = rgbCss(WIND_INK);
+      ctx.fillStyle = rgbCss(WIND_INK);
+      ctx.lineWidth = Math.max(1.6 * d, this.lineBase(cam.z) * 1.9);
+      ctx.globalAlpha = alpha * 0.9;
+      ctx.beginPath();
+      const heads = [];
+      let dashes = 0;
+      lines.forEach((L, li) => {
+        const sp = items[li].sp;
+        // a dash is "on" where frac(phi / u - t) < 0.5 (phi: integral of ds / (4 f_w))
+        let on = false;
+        for (let v = 0; v + 1 < L.fw.length; v++) {
+          if (L.hid[v] || L.hid[v + 1]) {
+            on = false;
+            continue;
+          }
+          const p0 = L.phi[v] / u - t;
+          const p1 = L.phi[v + 1] / u - t;
+          if (p1 <= p0) continue;
+          // walk the on / off boundaries inside this segment
+          let a = p0;
+          while (a < p1) {
+            const fr = a - Math.floor(a);
+            const inOn = fr < 0.5;
+            const next = Math.min(p1, Math.floor(a) + (inOn ? 0.5 : 1));
+            const ta = (a - p0) / (p1 - p0);
+            const tb = (next - p0) / (p1 - p0);
+            if (inOn) {
+              const xa = X(sp, v) + (X(sp, v + 1) - X(sp, v)) * ta;
+              const ya = Y(sp, v) + (Y(sp, v + 1) - Y(sp, v)) * ta;
+              const xb = X(sp, v) + (X(sp, v + 1) - X(sp, v)) * tb;
+              const yb = Y(sp, v) + (Y(sp, v + 1) - Y(sp, v)) * tb;
+              if (!on) {
+                ctx.moveTo(xa, ya);
+                dashes++;
+              }
+              ctx.lineTo(xb, yb);
+              on = true;
+              // the head of every third dash gets a small arrow
+              if (next === Math.floor(a) + 0.5 && next < p1 + 1e-9 && ((Math.floor(a) % 3) + 3) % 3 === 0) heads.push([xb, yb, X(sp, v + 1) - X(sp, v), Y(sp, v + 1) - Y(sp, v)]);
+            } else on = false;
+            if (next === a) break;
+            a = next;
+          }
+        }
+      });
+      ctx.stroke();
+      const hs = Math.max(2.5 * d, 1.2 * Z);
+      ctx.beginPath();
+      for (const [x, y, dx, dy] of heads) {
+        const L = Math.hypot(dx, dy) || 1;
+        const ux = dx / L;
+        const uy = dy / L;
+        ctx.moveTo(x - ux * hs - uy * hs * 0.6, y - uy * hs + ux * hs * 0.6);
+        ctx.lineTo(x, y);
+        ctx.lineTo(x - ux * hs + uy * hs * 0.6, y - uy * hs - ux * hs * 0.6);
+      }
+      ctx.stroke();
+      this.stats.windDashes = dashes;
+      labels.unshift([WIND_INK, `Wind lines: assumed direction × shelter factor, not computed flow · ${u} m/s from the river`]);
+    }
+    // labels, bottom centre above the hour bar
+    ctx.globalAlpha = alpha;
+    ctx.font = `${Math.round(13 * d)}px ${HAND_FONT}`;
+    ctx.textBaseline = 'bottom';
+    labels.forEach(([c, text], k) => {
+      const w = ctx.measureText(text).width;
+      const bx = clamp(W / 2 - w / 2, 8 * d, W - w - 8 * d);
+      const by = H - (84 + (labels.length - 1 - k) * 26) * d;
+      ctx.fillStyle = 'rgba(248,243,231,0.94)';
+      ctx.fillRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
+      ctx.strokeStyle = rgbCss(c, 0.7);
+      ctx.lineWidth = 0.9 * d;
+      ctx.strokeRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
+      ctx.fillStyle = rgbCss(c);
+      ctx.fillText(text, bx, by);
+    });
+    ctx.restore();
+    this.stats.windLabels = labels.map((l) => l[1]);
   }
 
   /**
