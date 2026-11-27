@@ -16,7 +16,7 @@ the sources listed below without checking them.
 
 ## Surface parameters
 
-| Material | albedo α | emissivity ε | heat storage (μ, or thin-layer C) | evaporative fraction | wet after rain, drying time, water held (block 2); crown transmission (block 5) |
+| Material | albedo α | emissivity ε | heat storage (μ, or thin-layer C) | evaporative fraction | wet after rain, drying time, water held (block 2); crown or screen transmission (blocks 5, 6, 8) |
 |---|---|---|---|---|---|
 | Aged asphalt (`asphalt`) | 0.12 [lbnl] *cited value* (LBNL-43442: about 0.12 +- 0.03 after about 5 years) | 0.95 [oke] *cited value*, unverified | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Concrete paving (`concrete`) | 0.3 [oke] *cited range*, unverified (cited 0.10-0.35) | 0.9 [oke] *edge of cited range*, unverified (cited 0.71-0.90) | μ 1785 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 0 [brief] *cited value*, unverified (dry impervious) | — |
@@ -50,6 +50,11 @@ the sources listed below without checking them.
 | Scrubby dry vegetation (`scrub`) | 0.22 [brief6] *engine assumption (no source)*, unverified (brief assumption) | 0.95 [brief6] *engine assumption (no source)*, unverified (brief assumption) | μ 800 J m⁻² s⁻½ K⁻¹ [brief6] *engine assumption (no source)*, unverified (the dry soil beneath (brief assumption)) | 0.2 [brief6] *engine assumption (no source)*, unverified (sparse, drought-stressed plants: little water to spend (brief assumption)) | — |
 | Rusty corrugated steel shed roof (`rustShed`) | 0.2 [brief6] *engine assumption (no source)*, unverified (brief assumption for rusted steel) | 0.75 [optris] *cited range*, unverified (oxidised steel 0.69-0.88 [optris]) | C 3000 J m⁻² K⁻¹ [brief6] *interpretation of the source*, unverified (one corrugated sheet about 0.7 mm of steel, rho c about 3.6 MJ m-3 K-1 (calculation in the brief); range 2-5 kJ m-2 K-1) | 0 [brief6] *cited value*, unverified (dry) | — |
 | Solar (PV) canopy over the bays (`pvCanopy`) | 0.1 [engine] *engine assumption (no source)*, unverified (not used: the panels are a screen here) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [golden2007] *interpretation of the source*, unverified (opaque panels: no direct sun through them) |
+| Artificial turf (crumb-rubber infill) (`turf`) | 0.08 [brief8] *cited range*, unverified (brief 0.08 (0.05-0.15); Jim measured 0.073 [jim2017]; 0.10-0.12 (Loveday) and 0.069 (Wardenaar) via the brief) | 0.93 [brief8] *engine assumption (no source)*, unverified (an assumption of the brief) | μ 350 J m⁻² s⁻½ K⁻¹ [brief8] *engine assumption (no source)*, unverified (an assumption of the brief, 350 (250-500): plastic fibres over loose black SBR crumb and a shock pad; damping depth about 6 cm in the infill) | 0 [brief8] *cited value*, unverified (dry plastic: no water to spend (watering: the irrigation pulse in block 8)) | — |
+| Running track (PU / EPDM on asphalt) (`track`) | 0.12 [brief8] *cited range*, unverified (brief 0.12 (0.10-0.20), unverified) | 0.92 [brief8] *engine assumption (no source)*, unverified (an assumption of the brief) | μ 950 J m⁻² s⁻½ K⁻¹ [brief8] *interpretation of the source*, unverified (brief: a blend of about 900-1000 for a thin rubber coat over asphalt, read as 950) | 0 [brief8] *cited value*, unverified (dry) | — |
+| Acrylic court coating on asphalt (`acrylic`) | 0.2 [brief8] *cited range*, unverified (brief 0.20 (0.15-0.30); an asphalt court measured 0.24 [vanos2017]) | 0.92 [brief8] *engine assumption (no source)*, unverified (an assumption of the brief) | μ 1200 J m⁻² s⁻½ K⁻¹ [brief8] *interpretation of the source*, unverified (brief: the asphalt underneath (a coat a few millimetres thick)) | 0 [brief8] *cited value*, unverified (dry) | — |
+| Poured rubber play surface (`rubber`) | 0.12 [brief8] *interpretation of the source*, unverified (the brief has no row for play-surface rubber; its PU / EPDM track value 0.12 (0.10-0.20) is used) | 0.92 [brief8] *engine assumption (no source)*, unverified (as the track (an assumption of the brief)) | μ 950 J m⁻² s⁻½ K⁻¹ [brief8] *interpretation of the source*, unverified (as the track: EPDM granules over an SBR base on a hard bed) | 0 [brief8] *cited value*, unverified (dry) | — |
+| Shade sail (knitted HDPE) (`shadeSail`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used: only the transmission of the fabric matters here) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0.2 [brief8] *cited range*, unverified (brief 0.10-0.30 for knitted HDPE shade cloth (unverified); the middle value) |
 
 Not used by the grid model:
 
@@ -64,6 +69,7 @@ Not used by the grid model:
 - `pergola`: Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.
 - `awning`: Not used by the grid model as a surface: a flat screen above the eaves that lets through tr of the sun; the cells under it count as fully covered for the sky view (crown factor).
 - `pvCanopy`: Not used by the grid model as a surface: a flat opaque screen 4.2 m up; the ground beneath sees the sky with SVF 0.11 [golden2007] and the panel undersides as warm walls (engine assumption).
+- `shadeSail`: Not used by the grid model as a surface: a flat screen 3.5 m up that lets through tr of the sun; the cells under it count as fully covered for the sky view (crown factor), so their walls term stands in for the warm fabric overhead.
 
 Shown on the heat cards as a caveat:
 
@@ -229,6 +235,22 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[li2023]** Li et al. (2023) Building and Environment, doi 10.1016/j.buildenv.2023.110225, Hong Kong: a sky view factor threshold near 0.4 (via the block-7 brief, unverified)
 - **[yang2010]** Yang, Lau & Qian (2010) Building and Environment 45(1) 115, Shanghai high-rise housing quarters: vegetation matters more at night; the night heat island not explained by the site, so anthropogenic heat (via the block-7 brief, unverified)
 - **[cai2017]** Cai & Hu (2017) Int. J. Environ. Sci. Dev. 8(5) 378-384, doi 10.18178/ijesd.2017.8.5.981, Wuhan, August 2015: under direct sun hard paving 9.87 K and open space 3.67 K hotter than grass (checked against the paper)
+- **[brief8]** Research brief docs/research/campus-brief.md (block 8; values compiled from the sources below, items marked unverified there are flagged here; the emissivities and admittances of the turf, track and court build-ups and the sail transmission are assumptions of the brief)
+- **[jim2016]** Jim (2016) Applied Energy 173, 520, via the block-8 brief and [singh2024]: artificial turf 74.6 C vs natural grass 36.9 C; air at 15 cm over the turf 54.2 C vs 36.0 C at 150 cm; daily minimum of the turf 23.1-23.4 C, about the grass 23.1 C (unverified)
+- **[jim2017]** Jim (2017) Landscape and Urban Planning 157, 561, via the block-8 brief: artificial turf 73.8 C vs grass 37.3 C at air 34.4 C; turf albedo 0.073 (0.05-0.15) (unverified)
+- **[singh2024]** Singh et al. (2024) International Journal of Biometeorology, doi 10.1007/s00484-024-02679-5, systematic review of 23 studies (via the block-8 brief): artificial turf 9.4-33.7 K hotter than natural grass at the surface and 0.5-1.2 K in the air; Tmrt and WBGT findings inconsistent; maxima 86.6 C (Twomey 2016), 80.1 vs 53.2 C (Petrass 2014), 71.5 C at air 30.6 C (McNitt 2008), 65.3 vs 40.4 C at air 34.8 C (Liu & Jim 2021); SBR infill 53.5 vs TPE 45.6 C in the lab (unverified)
+- **[nydoh]** New York State Department of Health fact sheet on crumb-rubber infilled synthetic turf, via the block-8 brief: Brigham Young University (2002) turf average 47 C vs grass 26 C and asphalt 43 C, maximum 93 C; watering cut the turf from 79 to 29 C, back to 49 C after 5 min and 73 C after 20 min; Penn State plots 49/54/63 C at air 26-29 C, turf 20-30 K hotter than grass (unverified)
+- **[mcnitt2008]** McNitt et al. (2008) Acta Horticulturae 783, 573, via the block-8 brief: irrigating synthetic turf at Penn State, 54-71 C down to 24 C, back to 32-49 C within 30 min, then about stable for 3 h (unverified)
+- **[pfautsch2020]** Pfautsch et al. (2020), school microclimate report for New South Wales, via the block-8 brief: sunlit artificial turf 51.7 / 56.1 / 59.2 C (max 67.5) on normal / hot / extreme days, asphalt 44.8 / 51.1 / 54.4 C (max 61.6); shaded turf 35 C vs 61 C sunlit; shade cooled black asphalt by about 25 K and the black-globe temperature by more than 10 K (unverified)
+- **[vanos2016]** Vanos et al. (2016) Landscape and Urban Planning 146, 29, doi 10.1016/j.landurbplan.2015.10.007, playgrounds in Gilbert, Arizona, at noon, air 41.6 C: rubber surface 87.2 C in sun, 42.2 C under a tree, 46.7 C under a shade sail; a slide 71.7 C in sun, 43.9 C in shade (via the block-8 brief, unverified)
+- **[vanos2017]** Vanos et al. (2017) Building and Environment 126, 119, playgrounds in Lubbock, Texas, via the block-8 brief: a shade sail cut the radiation a child absorbs by 168 W m-2; concrete in sun / shade 40.0 / 29.2, 43.8 / 32.7 and 44.4 / 34.1 C; grass albedo 0.22-0.26, an asphalt court 0.24; a child's body is nearer the hot ground (unverified)
+- **[vanos2015]** Vanos (2015) review of children's health and vulnerability in outdoor microclimates, via the block-8 brief (unverified)
+- **[paolini]** Paolini et al., ICUC12 extended abstract 249, via the block-8 brief: in weak wind the air at 0.3 m was up to 1 K warmer than at 1.5 m (unverified)
+- **[kinmen]** Kinmen school GLOBE report, via the block-8 brief: a PU running track more than 15 K above the air at noon (weak source, unverified)
+- **[aoki2004]** Aoki (2004), via the block-8 brief: running track 42.2 C vs artificial turf 67.0 C (unverified)
+- **[courtVendor]** Acrylic court coating makers (CoolTop; Laykold), via the block-8 brief: a standard acrylic court about 52 C at air about 30 C (vendor claims, unverified)
+- **[iso13732]** ISO 13732-1:2006, hot surfaces, via CENELEC Guide 29 Table A.1 (via the block-8 brief): burn thresholds for 1 min / 10 min / 8 h of contact, metal 51 / 48 / 43 C, stone and concrete 56 / 48 / 43 C, plastics and wood 60 / 48 / 43 C; the low end for children (unverified)
+- **[vanosPress]** Press coverage of Vanos's playground studies, via the block-8 brief: 60 C burns skin in 1 min, 74 C in 5 s, 77 C in 3 s (the standard behind it not named; unverified)
 - **[noaa]** NOAA Global Monitoring Laboratory, General Solar Position Calculations (solareqns.PDF)
 - **[brutsaert]** Brutsaert (1975) Water Resources Research 11(5) 742-744, clear-sky emissivity
 - **[meinel]** Meinel & Meinel (1976) Applied Solar Energy, clear-sky beam irradiance
@@ -305,6 +327,10 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Spacing coefficient (G / H_eff)** (estate only): Typical: At 35° N for long slabs: 1.45 for 1 h, 1.47 for 2 h and 1.52 for 3 h of 大寒 sun; 1.64–1.74 on the winter solstice (calculated in the brief). The coefficient method is "no longer appropriate" for high-rises in the draft Zhejiang rules. [brief7, db33]
 - **Condenser heat rejection** (estate only): Typical: A 3.5 kW split unit with EER 3.3 rejects about 4.6 kW; at 0.5–0.7 m³/s of fan air that is 5.5–7.5 K above the air (calculated in the brief). Measured in Changsha: exhaust 5.2 K above the air by day, 6.5 K at night (snippet, unverified). [brief7, mu2025]
 - **EER (energy efficiency ratio)** (estate only): Typical: Split air conditioners about 3–4; the brief uses 3.3. [brief7]
+- **Artificial turf** (campus only): Typical: In summer sun 65–80 °C, at times over 85 °C: 9.4–34 K hotter than natural grass at the surface, but only 0.5–1.2 K warmer in the air above (review of 23 studies); at night it cools to about the grass temperature. [singh2024, jim2016]
+- **Crumb-rubber infill** (campus only): Typical: Lab tests: SBR 53.5 °C against TPE 45.6 °C under the same lamp; a shock pad adds about 1.8 K, the blade colour 1–2 K. [singh2024]
+- **Contact-burn threshold** (campus only): Typical: 1 min of contact: metal 51 °C, stone and concrete 56 °C, plastics and wood 60 °C; 10 min: 48 °C for all of them; 8 h: 43 °C. The lower end for children (unverified, via CENELEC Guide 29). [iso13732]
+- **Shade sail** (campus only): Typical: Lets through about 10–30% of the sun (unverified); Gilbert, Arizona at noon: rubber 46.7 °C under a sail against 87.2 °C in sun; Lubbock: 168 W m⁻² less radiation absorbed by a child. [brief8, vanos2016, vanos2017]
 - **Permeable paving** (sponge-retrofit only): Typical: Wetted permeable pavement 15–35 °C cooler than dense asphalt in the early afternoon, 2–7 °C cooler about a day later; dry porous asphalt about 5 °C warmer. [li2013]
 - **Green roof** (sponge-retrofit only): Typical: Albedo about 0.15–0.25; up to 18 °C cooler than a black roof in a New York case; Bowen ratio about 1–2. [brief2, noaaGreen, heusinger]
 - **Rain garden** (sponge-retrofit only): Typical: No measured cooling figure in our sources; this block uses engine assumptions (evaporative fraction 0.8 wet, 0.35 dry, 3-day drying). [engine, mccoll]
@@ -1696,3 +1722,224 @@ sun. The north-face paths are hidden behind the next row in this view. The sweat
 - **Drawing:** in this view the 49 m of each courtyard next to the row south of it (the parking and the north-face path)
   are hidden behind that row (18 floors); the 大寒 shadows are cut where a building stands in front, and the sill tallies
   are drawn on each slab's roof edge, one per flat.
+
+## Block 8: school campus playground
+
+The eighth block (`cities/campus`) is an invented 400 m school campus at 35° N on a summer day-camp day: a 400 m running
+track (PU / EPDM on asphalt; 36.5 m radius, 84.39 m straights, 8 lanes) around an artificial-turf football pitch, three
+acrylic basketball courts, a natural grass field, a playground on poured rubber with a slide, climbing frames, swings, two
+shade sails (2, 3.5 m up) and shade trees, the teaching block and a gym on the north road, a staff car park (46
+cars) and trees along the edges. The design day is block 1's (35° N, 20 July, air 25–35 °C, wind 1.5 m/s, vapour pressure
+20 hPa); 20 July falls in the school holidays, so the children are at a day camp. Watering the pitch at 14:00 is `I`, the panel
+button or `?irrigate=1` (default off); the contact-burn hatching is `U`, the panel button or `?burn=1` (default off).
+Its research brief is [`docs/research/campus-brief.md`](research/campus-brief.md).
+
+### Block 8 parameters
+
+The block's materials (`turf`, `track`, `acrylic`, `rubber`, `shadeSail`) are in the parameter table above; they
+are cut from the other pages at build time (`@page campus` in `engine/materials.js`). The grass field is the shared
+irrigated lawn (`grass`, α 0.25; the brief lists 0.23 and calls it the existing value), the paving `concrete`, the roads
+and the car park `asphalt`, the roofs `membrane` and `metal` (the gym), the trees `canopy`. The poured rubber of the
+playground has no row in the brief: its PU / EPDM track row is used (an *interpretation*). The block's own values live in
+`engine/campus.js` (`CP`):
+
+| Parameter | Value |
+|---|---|
+| `irrigateHour` | 14 [engine] *engine assumption (no source)*, unverified (the pitch is watered at 14:00 (the spec); the design day repeats, so it is watered every day at that hour) |
+| `efPeak` | 0.8 [brief8] *cited value*, unverified (evaporative fraction of the watered turf at the start of the pulse (the brief: 0.8 decaying)) |
+| `efRes` | 0.05 [brief8] *cited range*, unverified (evaporative fraction the pulse decays to, until midnight; brief 0-0.1, the middle value) |
+| `irrigateTau` | 15 [brief8] *cited range*, unverified (decay time of the pulse, minutes; brief 10-20 min, the middle value; the model steps every minute and stores every 15 min) |
+| `sailHeight` | 3.5 [engine] *engine assumption (no source)*, unverified (height of the shade sails, m; an assumption of this block) |
+| `burnMetal` | 51 [iso13732] *cited value*, unverified (1-min contact-burn threshold for bare metal (ISO 13732-1 via CENELEC Guide 29, via the brief)) |
+| `burnStone` | 56 [iso13732] *cited value*, unverified (1-min contact-burn threshold for stone and concrete (as above)) |
+| `burnPlastic` | 60 [iso13732] *cited value*, unverified (1-min contact-burn threshold for plastics and wood (as above); used for the turf, the rubber, the track and the courts) |
+| `burn10min` | 48 [iso13732] *cited value*, unverified (the 10-min threshold, 48 C for every material group (as above); quoted on the burn card for children) |
+| `asphaltClass` | stone and concrete [iso13732] *interpretation of the source*, unverified (ISO 13732-1 has no asphalt group; asphalt (stone aggregate in bitumen) is read with stone and concrete) |
+| `playTimes` | 10:00-10:30, 12:00-13:00, 15:00-15:30 [engine] *engine assumption (no source)*, unverified (when the children come out (a summer day camp): engine assumption) |
+| `kidSize` | 0.7 [engine] *engine assumption (no source)*, unverified (children are drawn at 0.7 of an adult figure; drawing only) |
+
+### Surfaces
+
+Cell classes (ground cells picked by material and geometry before any result; `cellClasses` in `engine/campus.js`), mean
+surface temperature (°C) and Tmrt of a standing adult (°C):
+
+| Class | n | SVF | Ts 05:00 | Ts 12:00 | Ts 14:00 | Ts 15:00 | Ts 23:00 | Tmrt 12:00 | Tmrt 15:00 |
+|---|---|---|---|---|---|---|---|---|---|
+| artificial turf (the pitch) (`turf`) | 404 | 0.99 | 23.7 | 74.7 | 73.2 | 68.0 | 27.3 | 67.3 | 68.5 |
+| natural grass (the field, no crown) (`grass`) | 836 | 1.00 | 24.6 | 36.4 | 38.3 | 38.4 | 27.8 | 58.0 | 61.4 |
+| running track (no crown) (`track`) | 172 | 0.99 | 26.8 | 66.8 | 68.1 | 65.0 | 30.2 | 65.0 | 68.1 |
+| acrylic courts (no crown) (`courts`) | 300 | 0.99 | 27.4 | 61.3 | 63.3 | 61.0 | 30.8 | 65.9 | 68.8 |
+| playground rubber (all) (`rubber`) | 396 | 0.85 | 26.7 | 60.8 | 62.0 | 59.4 | 30.1 | 60.0 | 62.4 |
+| rubber with its centre under a sail (`sail`) | 65 | 0.25 | 27.3 | 41.2 | 43.2 | 43.5 | 30.8 | 43.8 | 47.2 |
+| rubber, no crown, not under a sail (`openRubber`) | 309 | 1.00 | 26.6 | 65.9 | 66.8 | 63.4 | 29.9 | 64.3 | 66.1 |
+
+The turf peaks at 75.6 °C at 12:45 (Hong Kong: 74.6 °C [jim2016]); at 15:00 it is +29.6 K on the grass
+(review: 9.4–33.7 K [singh2024]; Penn State 20–30 K [nydoh]), and at 05:00 −0.9 K (Jim: both near 23 °C). Low admittance
+(μ 350) and a dark, dry surface make it fast both ways. The track and the courts are a thin coat on asphalt: at 15:00 the
+track is +30.0 K above the air and the courts +26.0 K (bands 5 and 6; weak sources [kinmen], [aoki2004],
+vendor claims [courtVendor]).
+
+Rubber of the playground by what shades the cell's centre (shadow polygons of the sails and the crowns; the cell's sunlit
+share from the model), 12:00 / 15:00 (`shadeSplit`):
+
+| Rubber | n | Ts °C | Tmrt °C |
+|---|---|---|---|
+| in full sun (sunlit > 0.95) | 294 / 279 | 66.4 / 64.6 | 64.8 / 68.0 |
+| in a sail's shadow only (sunlit < 0.35) | 65 / 55 | 41.2 / 42.0 | 43.8 / 45.3 |
+| in a crown's shadow only (sunlit < 0.35) | 12 / 18 | 41.1 / 45.6 | 42.7 / 43.1 |
+
+Gilbert, Arizona at noon (air 41.6 °C): rubber 87.2 °C in sun, 46.7 °C under a sail, 42.2 °C under a tree [vanos2016]. Here the sail
+cuts 25.2 K at noon and 22.6 K at 15:00 (band 7 asks 25 K or more at the air's peak: **missed** at 15:00); the sail cells sit
++7.0 K above the air (inside 0–8 K). The tree-shaded cells at 15:00 are the cells east of the crowns, in their shade only since
+early afternoon and still warm from the morning sun: +10.6 K above the air (18 cells; +8.2 K at noon), outside the
+brief's 0–5 K (band 8 **missed**). The crowns pass 0.17 of the sun (the shared canopy) and the sail 0.20.
+
+### Watering the pitch
+
+The brief's pulse [brief8]: EF(t) = EF_res + (0.8 − EF_res)·exp(−t/τ), EF_res 0.05, τ 15 min, from 14:00, on the turf cells only.
+It runs through the per-minute path of the block-5 water store (`opts.splash` with `efOnly` and a `pulse`; no water store,
+EF·max(Q*, 0) as everywhere else); the watered turf cells are a second run of just those cells (404), merged into the dry model
+(no lateral coupling). Turf means:
+
+| Time | EF | air °C | dry °C | watered °C | difference |
+|---|---|---|---|---|---|
+| 14:00 | 0.80 | 34.8 | 73.2 | 72.4 | −0.8 |
+| 14:15 | 0.33 | 34.9 | 72.2 | 66.3 | −5.9 |
+| 14:30 | 0.15 | 34.9 | 71.0 | 65.7 | −5.3 |
+| 14:45 | 0.09 | 35.0 | 69.6 | 65.8 | −3.8 |
+| 15:00 | 0.06 | 35.0 | 68.0 | 65.4 | −2.6 |
+| 15:15 | 0.06 | 35.0 | 66.3 | 64.5 | −1.8 |
+| 15:30 | 0.05 | 35.0 | 64.5 | 63.1 | −1.4 |
+| 15:45 | 0.05 | 34.9 | 62.5 | 61.4 | −1.1 |
+| 16:00 | 0.05 | 34.9 | 60.4 | 59.5 | −0.9 |
+| 16:15 | 0.05 | 34.8 | 58.2 | 57.4 | −0.8 |
+| 16:30 | 0.05 | 34.7 | 55.8 | 55.2 | −0.6 |
+| 16:45 | 0.05 | 34.6 | 53.4 | 52.9 | −0.6 |
+| 17:00 | 0.05 | 34.5 | 51.0 | 50.5 | −0.5 |
+
+The largest cooling, 5.9 K at 14:15, leaves the turf 31.4 K above the air: the measured drops to near the air
+(Brigham Young University 79 → 29 °C [nydoh]; Penn State 54–71 → 24 °C [mcnitt2008]) are **not reproduced** (band 9 missed). EF caps the
+evaporation at 0.8 of the net radiation (a few hundred W m⁻² in the early afternoon), while real sprinkler water cools the infill with its own heat
+capacity and evaporates from a 70 °C surface far faster than the net radiation alone allows. The recovery is inside the band
+(36% of the cooling gone 30 min later; 0.47 K left after 3 h), but of a small drop. Not tuned.
+
+For comparison only (supplementary, not shipped): the block-5 water store on the turf (bulk evaporation from W0 1 mm with
+β 0.5 and W_c 0.2 mm, the hutong splash values, which were not set for turf) cools the turf 28.2 K by 14:30, to
+7.8 K above the air, and 36% of that is gone 30 min later: the shape of the measurements, but with
+parameters nobody measured for turf.
+
+### Contact burns
+
+ISO 13732-1 via CENELEC Guide 29 [iso13732], 1 min of contact: metal 51 °C, stone and concrete 56 °C, plastics and wood
+60 °C (10 min: 48 °C; 8 h: 43 °C). Material classes: `turf` plastic, `track` plastic, `acrylic` plastic, `rubber` plastic, `concrete` stone, `stone` stone, `greyBrick` stone, `asphalt` stone, `metal` metal, `rustShed` metal; grass, water and leaves
+have none. Asphalt is read with stone and concrete (an *interpretation*). The overlay hatches every ground cell above its
+limit at the hour shown (`burnCells`). Cells over the limit at 12:00: Aged asphalt 551, Acrylic court coating on asphalt 300, Running track (PU / EPDM on asphalt) 172, Artificial turf (crumb-rubber infill) 404, Poured rubber play surface 299; at 15:00: Aged asphalt 551, Concrete paving 156, Acrylic court coating on asphalt 300, Running track (PU / EPDM on asphalt) 172, Artificial turf (crumb-rubber infill) 404, Poured rubber play surface 282. The slide
+is drawn, not modelled (no metal ground is hatched); Vanos et al. measured a slide at 71.7 °C in sun [vanos2016].
+
+### Children and walkers
+
+Children come out at the play times (10:00-10:30, 12:00-13:00, 15:00-15:30, an engine assumption) and take the cheapest play spot with room left,
+the cost being the shade weight of the spot (sun 1, building shade 0.84, tree or sail shade 0.92 at full heat [melnikov]). At
+15:00 55% of the 26 children play in shade (14 of the 52 play places are shaded then; at 12:00 40%). They are drawn at
+0.7 of an adult. The grown-ups (walkers and people waiting) use the weights of blocks 1–7: at 15:00 8 of 8
+waiting sit in shade, and walkers' density in shade is 6.1 times that in sun. The sweat cue is as before.
+
+No measured child-height against adult-height Tmrt was found [brief8], and the model cannot resolve one: the ground share a
+person sees within R from height z is R²/(R² + z²), so 90% lies within 3 m at 1.0 m and 4.5 m at 1.5 m, both less than one 5 m
+cell. The children card is qualitative: children are nearer the hot ground [vanos2017], [vanos2015], and the air at 0.3 m can be
+up to 1 K warmer than at 1.5 m [paolini].
+
+### Sensitivity
+
+One value at a time, within the brief's ranges, on the cells it touches:
+
+| Case | turf peak 14–15 h °C | turf − grass 15:00 K | turf − grass 05:00 K |
+|---|---|---|---|
+| shipped (α 0.08, μ 350) | 73.2 | +29.6 | −0.9 |
+| turf albedo 0.05 | 74.5 | +30.8 | −0.9 |
+| turf albedo 0.15 | 70.1 | +26.9 | −1.1 |
+| turf μ 250 | 73.7 | +29.7 | −1.6 |
+| turf μ 500 | 72.3 | +29.3 | −0.0 |
+
+| Case | above the air at 15:00, K |
+|---|---|
+| courts, shipped α 0.2 | +26.0 |
+| court albedo 0.15 | +27.9 |
+| court albedo 0.3 | +22.2 |
+| track, shipped α 0.12 | +30.0 |
+| track albedo 0.1 | +30.7 |
+| track albedo 0.2 | +26.9 |
+
+| Case | under the sail above the air, 15:00 | sun − sail, 15:00 | Tmrt sun − sail, 12:00 |
+|---|---|---|---|
+| shipped, transmission 0.2 | +7.0 K | +22.6 K | +20.9 K |
+| sail transmission 0.1 | +3.8 K | +25.8 K | +24.2 K |
+| sail transmission 0.3 | +10.2 K | +19.4 K | +17.7 K |
+
+| Irrigation pulse | at the largest cooling, above the air | largest cooling | gone 30 min later | left after 3 h |
+|---|---|---|---|---|
+| shipped: τ 15 min, EF_res 0.05 | +31.4 K | −5.9 K | 36% | 0.47 K |
+| τ 10 min, EF_res 0.05 | +32.5 K | −4.8 K | 46% | 0.46 K |
+| τ 20 min, EF_res 0.05 | +30.7 K | −6.6 K | 25% | 0.49 K |
+| τ 15 min, EF_res 0 | +31.7 K | −5.6 K | 47% | 0.03 K |
+| τ 15 min, EF_res 0.1 | +31.2 K | −6.1 K | 25% | 0.93 K |
+
+The courts' miss (band 6) closes at the light end of the court albedo range (0.30) and the sail's 25 K (band 7) at the
+dense end of the sail range (0.10); the shipped values are the brief's middle values and were not moved. No pulse in the
+brief's ranges brings the watered turf within 5 K of the air.
+
+### Acceptance bands (block 8)
+
+Evaluated at 15:00, the air's peak (the brief's bands are for Ta peak 35 °C), unless the band names its hour: the turf peak
+at 14–15 h, the night at 05:00, the irrigation from 14:00, Tmrt at noon.
+
+| Check (spec #12) | Model | Band | Source | |
+|---|---|---|---|---|
+| 1. Artificial turf, highest 15-min mean 14:00–15:00 (n 404), °C | 73.20 °C | 65 to 80 | jim2016 | inside |
+| 1. Supplementary: turf daily peak (12:45), °C | 75.59 °C | 65 to 80 | jim2016 | inside (supplementary, not counted) |
+| 2. Turf − grass at 15:00 (grass field n 836), K | 29.63 K | 20 to 40 | singh2024 | inside |
+| 2. Supplementary: turf − grass at 14:00, K | 34.85 K | 20 to 40 | singh2024 | inside (supplementary, not counted) |
+| 3. Natural grass at 15:00, °C | 38.39 °C | 33 to 42 | jim2016 | inside |
+| 4. Turf − grass at 05:00, K | -0.93 K | -2 to 2 | jim2016 | inside |
+| 5. Running track at 15:00 above the air (n 172), K | 29.95 K | 15 to 30 | kinmen | inside |
+| 5. Running track − turf at 15:00, K (below the turf) | -3.07 K | < 0 | aoki2004 | inside |
+| 5. Supplementary: running track at 14:00 above the air, K | 33.30 K | 15 to 30 | kinmen | outside (supplementary, not counted) |
+| 6. Acrylic courts at 15:00 above the air (n 300), K | 25.98 K | 15 to 25 | courtVendor | **outside** |
+| 7. Rubber under a sail at 15:00 above the air (n 55), K | 7.05 K | 0 to 8 | vanos2016 | inside |
+| 7. Rubber in sun (n 279) − under a sail at 15:00, K | 22.57 K | ≥ 25 | pfautsch2020 | **outside** |
+| 7. Supplementary: the same at 12:00 (Vanos et al. measured at noon), K | 25.19 K | ≥ 25 | vanos2016 | inside (supplementary, not counted) |
+| 8. Rubber under a tree at 15:00 above the air (n 18), K | 10.59 K | 0 to 5 | vanos2016 | **outside** |
+| 8. Supplementary: the same at 12:00 (n 12), K | 8.22 K | 0 to 5 | vanos2016 | outside (supplementary, not counted) |
+| 9. Watered pitch at its largest cooling (14:15) above the air, K (within 5 K) | 31.43 K | ≤ 5 | nydoh | **outside** |
+| 9. Share of that cooling gone 30 min later (14:45), 1 − ΔT(+30 min) / ΔT | 0.357 | 0.3 to 0.9 | mcnitt2008 | inside |
+| 9. Cooling left 3 h after watering (17:00), K | 0.47 K | ≤ 10 | mcnitt2008 | inside |
+| 9. Supplementary (not shipped): the block-5 water store instead of the pulse (W0 1 mm, β 0.5, W_c 0.2 mm, as the hutong splash), largest cooling (14:30) above the air, K | 7.82 K | ≤ 5 | nydoh | outside (supplementary, not counted) |
+| 9. Supplementary (not shipped): the same, share of the cooling gone 30 min later | 0.364 | 0.3 to 0.9 | mcnitt2008 | inside (supplementary, not counted) |
+| 10. Tmrt at noon, rubber in sun − under a sail (n 294 / 65), K | 20.91 K | 15 to 30 | vanos2017 | inside |
+| 10. Tmrt at noon, rubber in sun − under a tree (n 12), K | 22.01 K | 15 to 30 | vanos2017 | inside |
+| Children at 15:00 (n 26) playing in shade (sails, trees, buildings) | 0.548 | ≥ 0.5 | melnikov | inside |
+| Grown-ups resting at 15:00 in shade (n 8) | 1.000 | ≥ 0.5 | melnikov | inside |
+| Walkers at 15:00: density in shade over density in sun | 6.118 | ≥ 2 | melnikov | inside |
+
+4 of 18 counted checks fall outside their band; 7 supplementary rows are not counted. By the brief's bands: 6 of 10 met (1, 2, 3, 4, 5, 10); missed: 6, 7, 8, 9. They are reported, not tuned away: every input is the brief's central value (or the shared value the brief names), set before the first model run.
+
+### Disclosures (block 8)
+
+- **Air fixed:** no near-ground air layer (54 °C at 15 cm over a 74 °C pitch in Hong Kong [jim2016] is not modelled), no
+  cooling of the air by the grass or the sprinklers; a child's exposure on the turf is understated.
+- **No height-resolved Tmrt:** every Tmrt is for a standing adult; the children card is qualitative, and no child-height
+  number is quoted.
+- **Burn limits depend on the material and the contact time:** the overlay uses the 1-min limits per material class
+  (asphalt read with stone and concrete); children's longer contact makes the 10-min 48 °C the safer reading; the slide
+  is not modelled.
+- **Irrigation lasts minutes, and here it is weak:** the brief's EF pulse cools the turf 5.9 K at most, far short of the measured
+  drops to near the air (band 9 missed); not tuned. The bulk water store of block 5 would come closer but has no turf values.
+- **Shade structures hold heat after sunset:** the cells under the sails see the cloth as a warm wall (air + 2 K, more by
+  day) instead of the sky, so they stay a little warmer at night [middel2021]; the cloth's own temperature is not computed.
+- **Weak evidence:** the track (one school report, one study) and the courts (vendor claims) bands are unverified; the
+  play-surface rubber borrows the track's values.
+- **Misses:** band 6 (courts +26.0 K above the air, against 15–25 K), band 7 (sun − sail 22.6 K at 15:00, against ≥ 25 K),
+  band 8 (tree-shaded rubber +10.6 K, against 0–5 K; 18 cells) and band 9 (watered turf 31.4 K above the air, against
+  ≤ 5 K) are outside; each card that states the number says so. Reported, not tuned.
+- **Invented campus:** layout, the sail height, the play times and the play spots are assumptions; 20 July is a holiday,
+  so the children are at a day camp.

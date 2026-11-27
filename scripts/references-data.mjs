@@ -626,4 +626,84 @@ export const REFS = {
     venue: 'International Journal of Environmental Science and Development 8(5), 378–384',
     doi: '10.18178/ijesd.2017.8.5.981',
   },
+  brief8: {
+    authors: 'This project', year: 2026, title: 'Research brief: school campus playground (block 8)',
+    venue: 'docs/research/campus-brief.md', link: 'docs/research/campus-brief.md',
+  },
+  jim2016: {
+    authors: 'Jim, C. Y.', year: 2016,
+    title: 'Solar–terrestrial radiant-energy regimes and temperature anomalies of natural and artificial turfs',
+    venue: 'Applied Energy 173, 520–534',
+    flags: ['title from memory'],
+  },
+  jim2017: {
+    authors: 'Jim, C. Y.', year: 2017, title: null,
+    venue: 'Landscape and Urban Planning 157, 561 (artificial turf, Hong Kong)',
+  },
+  singh2024: {
+    authors: 'Singh et al.', year: 2024, title: null,
+    venue: 'International Journal of Biometeorology (systematic review, 23 studies)',
+    doi: '10.1007/s00484-024-02679-5',
+  },
+  nydoh: {
+    authors: 'New York State Department of Health', year: null,
+    title: 'Crumb-rubber infilled synthetic turf athletic fields',
+    venue: 'Fact sheet (quotes Brigham Young University 2002 and Penn State measurements)',
+    flags: ['title from memory'],
+  },
+  mcnitt2008: {
+    authors: 'McNitt, A. S., Petrunak, D. M. & Serensits, T. J.', year: 2008,
+    title: 'Temperature amelioration of synthetic turf surfaces through irrigation',
+    venue: 'Acta Horticulturae 783, 573–582',
+    flags: ['title from memory'],
+  },
+  pfautsch2020: {
+    authors: 'Pfautsch, S. et al.', year: 2020, title: null,
+    venue: 'Western Sydney University, school microclimate report for New South Wales',
+  },
+  vanos2016: {
+    authors: 'Vanos, J. K., Middel, A., McKercher, G. R., Kuras, E. R. & Ruddell, B. L.', year: 2016,
+    title: 'Hot playgrounds and children\'s health: a multiscale analysis of surface temperatures in Arizona, USA',
+    venue: 'Landscape and Urban Planning 146, 29–42',
+    doi: '10.1016/j.landurbplan.2015.10.007',
+    flags: ['title from memory'],
+  },
+  vanos2017: {
+    authors: 'Vanos, J. K., Herdt, A. J. & Lochbaum, M. R.', year: 2017,
+    title: 'Effects of physical activity and shade on the heat balance and thermal perceptions of children in a playground microclimate',
+    venue: 'Building and Environment 126, 119–131',
+    flags: ['title from memory'],
+  },
+  vanos2015: {
+    authors: 'Vanos, J. K.', year: 2015,
+    title: 'Children\'s health and vulnerability in outdoor microclimates: a comprehensive review',
+    venue: 'Environment International 76, 1–15',
+    flags: ['title from memory'],
+  },
+  paolini: {
+    authors: 'Paolini et al.', year: null, title: null,
+    venue: 'ICUC12 (12th International Conference on Urban Climate), extended abstract 249',
+  },
+  kinmen: {
+    authors: null, year: null, title: null,
+    venue: 'School GLOBE report, Kinmen (running-track surface temperatures)',
+  },
+  aoki2004: {
+    authors: 'Aoki', year: 2004, title: null,
+    venue: 'Running track and artificial turf surface temperatures (via the block-8 brief)',
+  },
+  courtVendor: {
+    authors: 'CoolTop; Laykold', year: null, title: null,
+    venue: 'Acrylic court coating product information (vendor claims)',
+  },
+  iso13732: {
+    authors: 'ISO', year: 2006,
+    title: 'ISO 13732-1: Ergonomics of the thermal environment — Methods for the assessment of human responses to contact with surfaces — Part 1: Hot surfaces',
+    venue: 'International standard; values via CENELEC Guide 29 (Temperatures of hot surfaces likely to be touched), Table A.1',
+    flags: ['title from memory'],
+  },
+  vanosPress: {
+    authors: null, year: null, title: null,
+    venue: 'Press coverage of Vanos\'s playground studies (skin-burn times; standard not named)',
+  },
 };

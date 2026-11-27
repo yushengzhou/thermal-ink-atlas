@@ -19,6 +19,7 @@ import { htGlossaryStats } from './hutong.mjs';
 import { parkingMarkdown } from './parking-docs.mjs';
 import { pkGlossaryStats } from './parking.mjs';
 import { estateMarkdown } from './estate-docs.mjs';
+import { campusMarkdown } from './campus-docs.mjs';
 
 const UNITS = { mu: ' J m⁻² s⁻½ K⁻¹', muWet: ' J m⁻² s⁻½ K⁻¹', thinC: ' J m⁻² K⁻¹', tau: ' d', storage: ' mm' };
 const cell = (p, k = '') =>
@@ -249,7 +250,7 @@ the sources listed below without checking them.
 
 ## Surface parameters
 
-| Material | albedo α | emissivity ε | heat storage (μ, or thin-layer C) | evaporative fraction | wet after rain, drying time, water held (block 2); crown transmission (block 5) |
+| Material | albedo α | emissivity ε | heat storage (μ, or thin-layer C) | evaporative fraction | wet after rain, drying time, water held (block 2); crown or screen transmission (blocks 5, 6, 8) |
 |---|---|---|---|---|---|
 ${rows.join('\n')}
 
@@ -329,7 +330,8 @@ ${cbdMarkdown()}
 ${waterfrontMarkdown()}
 ${hutongMarkdown()}
 ${parkingMarkdown()}
-${estateMarkdown()}`;
+${estateMarkdown()}
+${campusMarkdown()}`;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
