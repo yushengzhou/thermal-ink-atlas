@@ -83,7 +83,7 @@ export const SOURCES = {
   golden2007: 'Golden et al. (2007) Solar Energy 81, 872, doi 10.1016/j.solener.2006.11.007: Phoenix, 17 June 2004 (air max 41.0 C, wind 0.86 m/s): exposed asphalt (SVF 0.90) max 63.5 / min 28.5 / mean 43.6 C, under a PV canopy (SVF 0.11) 37.0 / 27.7 / 32.1 C; the paper has internal inconsistencies',
   stempihar2012: 'Stempihar et al. (2012) Transportation Research Record 2293, doi 10.3141/2293-15: modelled Phoenix pavements, max 53-69 C, min 29-35 C; HMA k 1.2, rho 2238, c 921; PCC k 1.5, rho 2350, c 1000; eps 0.91; surface temperatures asymptotic above about 203 mm thickness',
   takebayashi2009: 'Takebayashi & Moriyama (2009) Solar Energy 83, 1211, doi 10.1016/j.solener.2009.01.019: grass parking vs asphalt, sensible heat about 100-150 W m-2 lower by day and about 50 W m-2 lower at night',
-  asaeda1996: 'Asaeda, Ca & Wake (1996), via the block-6 brief: asphalt emits about 150 W m-2 more infrared than bare soil at its maximum (extra sensible heat 50 vs 200 W m-2 across abstracts, unverified)',
+  asaeda1996: 'Asaeda, Ca & Wake (1996) Atmospheric Environment 30, 413-427, Heat storage of pavement and its effect on the lower atmosphere; via the block-6 brief: asphalt emits about 150 W m-2 more infrared than bare soil at its maximum (extra sensible heat 50 vs 200 W m-2 across abstracts, unverified)',
   zhu2022: 'Zhu et al. (2022) Frontiers in Environmental Science, doi 10.3389/fenvs.2021.795474, ECOSTRESS Phoenix: roads the only class warming at night; a 100% road pixel about 4.5 K warmer than grass at night (interpretation, unverified)',
   hoehne2020: 'Hoehne et al. (2020/2022) Sustainable and Resilient Infrastructure, doi 10.1080/23789689.2020.1773013: Phoenix pavement and vehicle sensible heat, 67% roads, 29% parking, 3.9% vehicles (snippet only, unverified)',
   matias2025: 'Matias et al. (2025), Lisbon parked cars (abstract and press, unverified): black roofs about 71 C vs white about 45 C; air 2.5-3.8 K warmer next to black cars',
@@ -479,7 +479,7 @@ export const MODEL = {
   dampingDepth: v('d = sqrt(kappa tau / pi)', 'brief6', 'cited', false, 'kappa = k / (rho c); HMA 0.126 m, PCC 0.133 m from the Stempihar inputs [stempihar2012]; force-restore holds for slabs thicker than about 1.5 d (about 0.2 m)'),
   pvSvf: v(0.11, 'golden2007', 'cited', false, 'sky view factor of the ground under the PV canopy, as measured by Golden et al.; set on the cells whose centre is under a panel row'),
   carShade: v('sunlit x (1 - car share)', 'engine', 'engine', false, 'parked cars as a sub-grid shade: each cell loses the share of its area under car footprints from its direct sun, all day (the lot is taken as full; shadows are not offset with the sun angle)'),
-  carSky: v('SVF x (1 - car share)', 'engine', 'engine', false, 'at night the ground under a car sees the car underside, taken as the warm-wall term (air + 2 K), instead of the sky'),
+  carSky: v('SVF x (1 - car share)', 'engine', 'engine', false, 'all day: the ground under a car sees the car underside, taken as the warm-wall term (air + 2 K, more by day), instead of the sky, so it also loses diffuse sky light by day'),
   thinPaving: v(600, 'brief6', 'interp', false, 'effective admittance of thin (< 0.2 m) asphalt over a loose base, for the thin-layer check only (not in the scene); brief: thin paving needs a lower effective mu'),
 };
 

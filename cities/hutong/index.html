@@ -1480,7 +1480,8 @@ function runModel(world, opts = {}) {
       // walls seen from the ground: air + 2 K plus a sun term by day that
       // peaks at midday (engine assumption; ignores wall orientation; the peak
       // value is computed in docs/sources.md)
-      const tw = wallTemp(taK, beamH[m] + dif[m]);
+      // opts.wallTemp (docs sensitivity runs only, never a page): another wall temperature, K
+      const tw = opts.wallTemp ? opts.wallTemp(taK, beamH[m] + dif[m]) : wallTemp(taK, beamH[m] + dif[m]);
       const tw4 = tw * tw * tw * tw;
       const lsky = skyEmissivity(site.vapourHpa, taK) * SIGMA * ta4;
       const lwall = SIGMA * tw4;

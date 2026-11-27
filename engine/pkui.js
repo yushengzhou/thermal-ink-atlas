@@ -83,7 +83,7 @@ export function pvCard(d) {
     </table>
     <p class="note">The panels take the sun off the bays all day, so the asphalt beneath stays near the air temperature; at night they hide the cold sky, so it cools a little less than the open lot. Cars under the canopy are out of the sun too.</p>
     <p class="lit">Phoenix, 17 June 2004 (air up to 41 °C): exposed asphalt 63.5 / 28.5 °C (max / min), under a PV canopy 37.0 / 27.7 °C, the daily range about 70% smaller (Golden et al. 2007; the paper has internal inconsistencies).</p>
-    <p class="caveat">Here the range shrinks by ${red(p.empty)}, more than in Phoenix and outside the spec's −60 to −75% band (see docs/sources.md): the open asphalt swings ${fmt(p.open.range)} K here against 35.0 K there, the bay under the canopy ${fmt(p.empty.range)} K against 9.3 K, on a cooler day. Not tuned. The panel undersides count as warm walls (air + 2 K, more by day); the panels' own heat, their electricity and the air under them are not modelled.</p>
+    <p class="caveat">Here the range shrinks by ${red(p.empty)}, more than in Phoenix and outside the spec's −60 to −75% band (see docs/sources.md): the open asphalt swings ${fmt(p.open.range)} K here against 35.0 K there, the bay under the canopy ${fmt(p.empty.range)} K against 9.3 K, on a cooler day. Not tuned. The panel undersides count as warm walls (air + 2 K, more by day); a test run with hotter undersides by day and cooler ones at night brings the range inside the band (a sensitivity in docs/sources.md, not used here). The panels' own heat, their electricity and the air under them are not modelled.</p>
     ${srcLine(['golden2007', 'brief6'])}`;
 }
 
@@ -115,13 +115,13 @@ export function shedCard(d) {
     <table class="cmp">
       <tr><td>roof at 15:00 / 23:00</td><td>${fmt(d.shed.t15)} / ${fmt(d.shed.t23)} °C</td></tr>
       <tr><td>air at 23:00</td><td>${fmt(d.air.t23)} °C</td></tr>
-      <tr class="t"><td>fastest evening cooling (at ${hhmm(d.cool.at)})</td><td>${fmt(d.cool.peak)} K/h</td></tr>
-      <tr><td>first hour after sunset (${hhmm(d.set)})</td><td>${fmt(d.cool.after)} K</td></tr>
+      <tr><td>fastest evening cooling (at ${hhmm(d.cool.at)}, before sunset)</td><td>${fmt(d.cool.peak)} K/h</td></tr>
+      <tr class="t"><td>first hour after sunset (${hhmm(d.set)})</td><td>${fmt(d.cool.after)} K (slower than the slabs)</td></tr>
       <tr><td>time constant C / (4εσT³ + h_c)</td><td>${fmt(d.tau)} min</td></tr>
       <tr><td>${gl('groundFlux', 'G')} at 23:00</td><td>${W(d.shed.g23)}</td></tr>
     </table>
     <p class="note">The thin roof follows its sunshine within minutes. As the low evening sun leaves it, it drops faster than any other surface of the block, and by sunset it has already lost most of its heat: after that it only follows the slowly cooling sky and ends the night below the air.</p>
-    <p class="caveat">In the first hour after sunset the asphalt, concrete and soil cool faster than the roof, so the spec's "steepest cooling after sunset" holds for the evening as a whole, not for that hour (outside its band; see docs/sources.md). Not tuned. The shed's walls, its dark inside and the air in it are not modelled; the roof is one cell layer at 5–8 m. Emissivity of rusted steel varies widely (0.69–0.88 in emissivity tables, unverified); with a lower ε the roof cools less at night.</p>
+    <p class="caveat">In the first hour after sunset the asphalt, concrete and soil cool faster than the roof, so the spec's "steepest cooling after sunset" is not met (band 4 missed; see docs/sources.md): the roof's fastest cooling comes before sunset. Not tuned. The shed's walls, its dark inside and the air in it are not modelled; the roof is one cell layer at 5–8 m. Emissivity of rusted steel varies widely (0.69–0.88 in emissivity tables, unverified); with a lower ε the roof cools less at night.</p>
     ${srcLine(['optris', 'brief6'])}`;
 }
 

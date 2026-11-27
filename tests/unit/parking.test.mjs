@@ -7,11 +7,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { base6, bands6, pv6, thin6, cabinNumbers } from '../../scripts/parking.mjs';
+import { base6, bands6, pv6, thin6, cabinNumbers, bandVerdicts } from '../../scripts/parking.mjs';
 import { bands6Markdown } from '../../scripts/parking-docs.mjs';
 import { runModel, sunSlots, stepFlux, SIGMA } from '../../engine/thermal.js';
 import { buildWorld, GROUND_MATS, depthOrder } from '../../engine/world.js';
 import { drawWorld } from '../../engine/kit.js';
+import { HT_DRAW } from '../../engine/htkit.js';
 import { MATERIALS, MODEL, SOURCES, BASIS, paramKeys } from '../../engine/materials.js';
 import { carBox, carShareField, slab, STEMPIHAR, tsMean, fluxMean } from '../../engine/parking.js';
 import { GLOSSARY, termsFor } from '../../engine/glossary.js';
@@ -118,9 +119,10 @@ test('damping depth and admittance from the Stempihar inputs match the brief (0.
 });
 
 // Rows outside their band, as shipped (see docs/sources.md, Block 6): pinned so a change shows up here.
+// Each with its own tolerance: K rows 0.1 K, the PV range ratio 0.02.
 const PINNED_OUTSIDE = {
-  '4. Shed roof: cooling in the first hour after sunset (19.15 h) minus the fastest other surface class (shed 0.98 K)': -2.285,
-  '6. Daily range under the PV canopy (8.2 K) vs open asphalt (38.7 K): relative change': -0.787,
+  '4. Shed roof: cooling in the first hour after sunset (19.15 h) minus the fastest other surface class (shed 0.98 K)': [-2.285, 0.1],
+  '6. Daily range under the PV canopy (8.2 K) vs open asphalt (38.7 K): relative change': [-0.787, 0.02],
 };
 const key = (label) => label.replace(/n \d+/g, 'n');
 
@@ -129,7 +131,10 @@ test('acceptance bands: values, pinned deviations, docs table in sync', () => {
   for (const r of rows) console.log(`${r.inside ? 'inside ' : 'OUTSIDE'} ${r.label}: ${r.value} (band ${r.lo} to ${r.hi})`);
   const outside = Object.fromEntries(rows.filter((r) => !r.inside).map((r) => [key(r.label), r.value]));
   assert.deepEqual(Object.keys(outside).sort(), Object.keys(PINNED_OUTSIDE).sort(), 'the set of rows outside a band changed');
-  for (const [k, v] of Object.entries(outside)) assert.ok(Math.abs(v - PINNED_OUTSIDE[k]) <= 0.25, `${k}: ${v} (pinned ${PINNED_OUTSIDE[k]})`);
+  for (const [k, v] of Object.entries(outside)) assert.ok(Math.abs(v - PINNED_OUTSIDE[k][0]) <= PINNED_OUTSIDE[k][1], `${k}: ${v} (pinned ${PINNED_OUTSIDE[k][0]} ± ${PINNED_OUTSIDE[k][1]})`);
+  // the brief's bands: 4 (after sunset) and 6 (PV range) missed; the supplementary evening-window row does not count
+  assert.deepEqual(bandVerdicts(rows), { 1: true, 2: true, 3: true, 4: false, 5: true, 6: false, 7: true, 8: true });
+  assert.deepEqual(rows.filter((r) => r.supp).map((r) => r.label.slice(0, 18)), ['4. Supplementary (']);
   assert.ok(md.includes(bands6Markdown(rows)), 'run `node scripts/sources.mjs` to refresh the table');
   for (const s of ['**Air fixed:**', '**No measured night W m⁻² for a car park**', '**Brownfield values are assumptions:**', '**Cars are a sub-grid shade**', 'internal inconsistencies', '**Misses:**', 'Not tuned', 'not changed after the bands were checked', 'information only']) assert.ok(md.includes(s), `disclosure missing: ${s}`);
 });
@@ -215,7 +220,9 @@ test('the PV canopy is drawn after every car beneath it (front flag); no object 
   for (const S of [S1, S2, S3, S4, S5]) {
     assert.ok(!S.parkingBlock);
     if (S.retrofit) continue; // drawn per state; it has no screens
-    const objs = drawWorld(buildWorld(S, { svf: false }), S.seed).objects;
+    const w = buildWorld(S, { svf: false });
+    if (S.hutongBlock) w.draw = HT_DRAW; // as hutongSetup does on the page
+    const objs = drawWorld(w, S.seed).objects;
     assert.ok(objs.every((o) => !o.front), S.id);
   }
   // with no front flags the depth order is the old one (overlap falls back to the centre sum)

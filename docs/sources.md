@@ -120,7 +120,7 @@ Shown on the heat cards as a caveat:
 | `dampingDepth` | d = sqrt(kappa tau / pi) [brief6] *cited value*, unverified (kappa = k / (rho c); HMA 0.126 m, PCC 0.133 m from the Stempihar inputs [stempihar2012]; force-restore holds for slabs thicker than about 1.5 d (about 0.2 m)) |
 | `pvSvf` | 0.11 [golden2007] *cited value*, unverified (sky view factor of the ground under the PV canopy, as measured by Golden et al.; set on the cells whose centre is under a panel row) |
 | `carShade` | sunlit x (1 - car share) [engine] *engine assumption (no source)*, unverified (parked cars as a sub-grid shade: each cell loses the share of its area under car footprints from its direct sun, all day (the lot is taken as full; shadows are not offset with the sun angle)) |
-| `carSky` | SVF x (1 - car share) [engine] *engine assumption (no source)*, unverified (at night the ground under a car sees the car underside, taken as the warm-wall term (air + 2 K), instead of the sky) |
+| `carSky` | SVF x (1 - car share) [engine] *engine assumption (no source)*, unverified (all day: the ground under a car sees the car underside, taken as the warm-wall term (air + 2 K, more by day), instead of the sky, so it also loses diffuse sky light by day) |
 | `thinPaving` | 600 [brief6] *interpretation of the source*, unverified (effective admittance of thin (< 0.2 m) asphalt over a loose base, for the thin-layer check only (not in the scene); brief: thin paving needs a lower effective mu) |
 
 The wall term's daytime part peaks at 6.8 K on the design day (total wall excess up to 8.8 K above air).
@@ -203,7 +203,7 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[golden2007]** Golden et al. (2007) Solar Energy 81, 872, doi 10.1016/j.solener.2006.11.007: Phoenix, 17 June 2004 (air max 41.0 C, wind 0.86 m/s): exposed asphalt (SVF 0.90) max 63.5 / min 28.5 / mean 43.6 C, under a PV canopy (SVF 0.11) 37.0 / 27.7 / 32.1 C; the paper has internal inconsistencies
 - **[stempihar2012]** Stempihar et al. (2012) Transportation Research Record 2293, doi 10.3141/2293-15: modelled Phoenix pavements, max 53-69 C, min 29-35 C; HMA k 1.2, rho 2238, c 921; PCC k 1.5, rho 2350, c 1000; eps 0.91; surface temperatures asymptotic above about 203 mm thickness
 - **[takebayashi2009]** Takebayashi & Moriyama (2009) Solar Energy 83, 1211, doi 10.1016/j.solener.2009.01.019: grass parking vs asphalt, sensible heat about 100-150 W m-2 lower by day and about 50 W m-2 lower at night
-- **[asaeda1996]** Asaeda, Ca & Wake (1996), via the block-6 brief: asphalt emits about 150 W m-2 more infrared than bare soil at its maximum (extra sensible heat 50 vs 200 W m-2 across abstracts, unverified)
+- **[asaeda1996]** Asaeda, Ca & Wake (1996) Atmospheric Environment 30, 413-427, Heat storage of pavement and its effect on the lower atmosphere; via the block-6 brief: asphalt emits about 150 W m-2 more infrared than bare soil at its maximum (extra sensible heat 50 vs 200 W m-2 across abstracts, unverified)
 - **[zhu2022]** Zhu et al. (2022) Frontiers in Environmental Science, doi 10.3389/fenvs.2021.795474, ECOSTRESS Phoenix: roads the only class warming at night; a 100% road pixel about 4.5 K warmer than grass at night (interpretation, unverified)
 - **[hoehne2020]** Hoehne et al. (2020/2022) Sustainable and Resilient Infrastructure, doi 10.1080/23789689.2020.1773013: Phoenix pavement and vehicle sensible heat, 67% roads, 29% parking, 3.9% vehicles (snippet only, unverified)
 - **[matias2025]** Matias et al. (2025), Lisbon parked cars (abstract and press, unverified): black roofs about 71 C vs white about 45 C; air 2.5-3.8 K warmer next to black cars
@@ -1185,9 +1185,9 @@ values (ballast, soil, scrub, the shed's albedo) are the brief's **assumptions**
 ### Cars, the PV canopy and heat storage in the model
 
 - **Parked cars** are not modelled as objects with a temperature. Each 5 m cell gets the share of its area under car
-  footprints (exact rectangle overlap with the drawn 4.4 × 1.8 m cars); by day its direct sun is multiplied by
-  (1 − share) in every 10-min sun slot (`carShade`), at night its sky view by (1 − share) (`carSky`: the car underside
-  is taken as the warm-wall term, air + 2 K). The lot is taken as full all day and the car shadow is not offset with the
+  footprints (exact rectangle overlap with the drawn 4.4 × 1.8 m cars); its direct sun is multiplied by
+  (1 − share) in every 10-min sun slot (`carShade`), and its sky view by (1 − share) all day (`carSky`: the car underside
+  is taken as the warm-wall term, air + 2 K and more by day, so the ground under a car also loses diffuse sky light by day). The lot is taken as full all day and the car shadow is not offset with the
   sun angle. 848 cars cover 24% of the lot (the brief's rule of thumb is 30–35%, unverified); the
   bay rows 40%.
 - **The PV canopy** is a flat opaque screen 4.2 m up (`pvCanopy`, tr 0); its cast shadow is computed like the block-5
@@ -1212,7 +1212,7 @@ values (ballast, soil, scrub, the shed's albedo) are the brief's **assumptions**
 | `dampingDepth` | d = sqrt(kappa tau / pi) [brief6] *cited value*, unverified (kappa = k / (rho c); HMA 0.126 m, PCC 0.133 m from the Stempihar inputs [stempihar2012]; force-restore holds for slabs thicker than about 1.5 d (about 0.2 m)) |
 | `pvSvf` | 0.11 [golden2007] *cited value*, unverified (sky view factor of the ground under the PV canopy, as measured by Golden et al.; set on the cells whose centre is under a panel row) |
 | `carShade` | sunlit x (1 - car share) [engine] *engine assumption (no source)*, unverified (parked cars as a sub-grid shade: each cell loses the share of its area under car footprints from its direct sun, all day (the lot is taken as full; shadows are not offset with the sun angle)) |
-| `carSky` | SVF x (1 - car share) [engine] *engine assumption (no source)*, unverified (at night the ground under a car sees the car underside, taken as the warm-wall term (air + 2 K), instead of the sky) |
+| `carSky` | SVF x (1 - car share) [engine] *engine assumption (no source)*, unverified (all day: the ground under a car sees the car underside, taken as the warm-wall term (air + 2 K, more by day), instead of the sky, so it also loses diffuse sky light by day) |
 | `thinPaving` | 600 [brief6] *interpretation of the source*, unverified (effective admittance of thin (< 0.2 m) asphalt over a loose base, for the thin-layer check only (not in the scene); brief: thin paving needs a lower effective mu) |
 
 ### The 23:00 picture: heat storage and the night release
@@ -1274,10 +1274,13 @@ Golden et al., Phoenix, 17 June 2004 (air max 41.0 °C, wind 0.86 m/s): exposed 
 the canopy 37.0 / 27.7 °C: the brief quotes the range as −70% (−73% from these max / min; the paper has internal
 inconsistencies). Here the empty bay's range shrinks by 79%, **outside** the spec's −60 to −75% band. Both ranges
 differ from Phoenix: the open asphalt swings 38.7 K here vs 35.0 K there, the bay under the canopy 8.2 K vs 9.3 K
-(a different day: air 25–35 °C here, up to 41 °C there). Which model term causes the miss was not established. The
-panel undersides are the shared warm-wall term (air + 2 K + 6 K·K↓/900); measured under-canopy maxima below the air
-(37.0 °C at 41.0 °C air) suggest this is not too cold by day. Not tuned: SVF 0.11 is the measured value and the wall term
-is shared by every block. The panels' own temperature, their electricity and the air beneath are not modelled.
+(a different day: air 25–35 °C here, up to 41 °C there). The panel undersides are the shared warm-wall term (air + 2 K +
+6 K·K↓/900). **Sensitivity (not shipped, not tuned):** with undersides at air + 2 K + 25 K·K↓/900 by day (a module about
+25 K above the air in full sun, a typical rating figure, not from the brief) and air − 2 K at night (panels facing a
+clear sky), the empty bay runs 41.1 / 27.0 °C (max / min), 40.9 °C at 15:00, a range of 14.1 K: −64% against
+open asphalt, inside the band. So the shared wall term is a likely cause of the miss. It stays as shipped:
+the wall term is shared by every block, and the underside temperatures above are an assumption, not a source. The
+panels' own temperature, their electricity and the air beneath are not modelled.
 
 ### Lot trees, cars and the hot-car card
 
@@ -1312,9 +1315,9 @@ cooling over the first hour after sunset:
 
 The shed roof (C 3 kJ m⁻² K⁻¹, time constant C/(4εσT³ + h_c) about 3.1 min) cools fastest of all
 as the low evening sun leaves it, and is already near its night balance with the sky at sunset; after sunset it cools
-**more slowly** than the slabs, which still have heat to lose. So the brief's "steepest cooling after sunset" holds for
-the evening as a whole and **not** for the first hour after sunset (both rows are in the table below; the second is
-outside). At 23:00 the roof is −3.5 K from the air.
+**more slowly** than the slabs, which still have heat to lose. So the brief's "steepest cooling after sunset" is **not**
+met: band 4 counts as missed. The evening-window row in the table below (16:00 to sunset + 1 h, peaking two hours before
+sunset) is supplementary and does not count. At 23:00 the roof is −3.5 K from the air.
 
 ### Thin layers and sensitivity
 
@@ -1375,7 +1378,7 @@ times that in sun on the walkable ground (footpaths, yard, lawn). The sweat cue 
 | 3. Concrete yard (n 1095) minus open asphalt at 15:00 | −7.60 K | -12 to -5 | brief6 | inside |
 | 3. Concrete yard minus open asphalt at 23:00 | +1.06 K | -2 to 2 | brief6 | inside |
 | 4. Rusty shed roof (n 280) at 23:00 minus the air | −3.47 K | ≤ 0.5 | brief6 | inside |
-| 4. Shed roof: fastest evening cooling (largest 15-min rate, 16:00 to sunset + 1 h) minus the fastest other surface class (shed 10.86 K/h at 17.13 h) | +2.98 K/h | ≥ 0 | brief6 | inside |
+| 4. Supplementary (not the brief's wording, mostly before sunset): shed roof's fastest evening cooling (largest 15-min rate, 16:00 to sunset + 1 h) minus the fastest other surface class (shed 10.86 K/h at 17.13 h) | +2.98 K/h | ≥ 0 | brief6 | inside (supplementary, not counted) |
 | 4. Shed roof: cooling in the first hour after sunset (19.15 h) minus the fastest other surface class (shed 0.98 K) | −2.29 K | ≥ 0 | brief6 | **outside** |
 | 5. Bare soil minus open asphalt at 15:00 | −3.60 K | -8 to 8 | brief6 | inside |
 | 5. Bare soil minus open asphalt at 23:00 | −2.02 K | ≤ -2 | brief6 | inside |
@@ -1389,7 +1392,7 @@ times that in sun on the walkable ground (footpaths, yard, lawn). The sweat cue 
 | Dwellers at 15:00 resting in shade (crowns, PV canopy, buildings), n 12 | 0.833 | ≥ 0.5 | melnikov | inside |
 | Walkers at 15:00: density in shade over density in sun, walkable ground (footpaths, yard, lawn) | 11.442 | ≥ 1 | melnikov | inside |
 
-2 of 23 checks fall outside their band. They are reported, not tuned away: no input was moved to pass a band.
+2 of 22 checks fall outside their band (1 supplementary row not counted). By the brief's bands: 6 of 8 met (1, 2, 3, 5, 7, 8); missed: 4, 6. They are reported, not tuned away: no input was moved to pass a band.
 
 ### Disclosures (block 6)
 
@@ -1402,7 +1405,7 @@ times that in sun on the walkable ground (footpaths, yard, lawn). The sweat cue 
   (the hot-car card is information only).
 - **Golden et al. 2007** has internal inconsistencies; several other figures are from abstracts or press only
   (Asaeda, Zhu, Hoehne, Matias) and flagged unverified.
-- **Misses:** the shed's first hour after sunset and the PV canopy's range reduction fall outside their bands (above);
+- **Misses:** bands 4 (the shed's steepest cooling after sunset) and 6 (the PV canopy's range reduction) are missed (above);
   bands 1 and 5 pass by 0.02 K and are sensitive to albedos inside their ranges (Sensitivity). Not tuned.
 - **Footpaths narrower than the grid:** the 2 m concrete footpaths between the bays are drawn and walkable (2 m grid);
   the 5 m model sees the asphalt around them.

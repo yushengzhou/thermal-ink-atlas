@@ -4,7 +4,7 @@
 // sensitivity runs and the acceptance bands.
 import { SCENE } from '../cities/parking/scene.js';
 import { buildWorld } from '../engine/world.js';
-import { shadeClassField } from '../engine/thermal.js';
+import { shadeClassField, runModel } from '../engine/thermal.js';
 import { parkingSetup, parkingStats, pvCompare, rerun, dayRange, tsMean, fluxMean, shedTau, slab, STEMPIHAR, parkingGlossary } from '../engine/parking.js';
 import { MATERIALS, MODEL } from '../engine/materials.js';
 import { Life, shadeDensity, shadeAt } from '../engine/life.js';
@@ -93,6 +93,27 @@ export function sensitivity6() {
   return sens;
 }
 
+let pvWall = null;
+/**
+ * Sensitivity for the PV range miss (docs only; nothing shipped changes): the
+ * empty bays under the canopy run again with the panel undersides warmer by
+ * day and cooler at night than the shared warm-wall term (Ta + 2 K + 6 K x
+ * K/900): Ta + 2 K + 25 K x K/900 by day (a module about 25 K above the air in
+ * full sun, a typical rating figure, not from the brief) and Ta - 2 K at night
+ * (panels facing a clear sky). Every wall of those cells takes this value.
+ */
+export function pvWallSensitivity() {
+  if (!pvWall) {
+    const P = pv6();
+    const { C } = base6();
+    const wall = (taK, k) => (k > 0 ? taK + 2 + (25 * k) / 900 : taK - 2);
+    const E = runModel(P.world, { slots: P.slotsEmpty, cells: C.pvBays, wallTemp: wall });
+    const r = dayRange(E, C.pvBays);
+    pvWall = { ...r, t15: tsMean(E, C.pvBays, 15), ratio: r.range / P.open.range - 1 };
+  }
+  return pvWall;
+}
+
 /** Walkers at hour h: dwellers by shade class, walkers' shade density (frames 400-4000). */
 export function walkers6(hour = 15) {
   const { world, T } = base6();
@@ -130,14 +151,18 @@ export function cabinNumbers() {
   return { sun, shade, trees };
 }
 
-/** Block 6 acceptance bands (spec #11). Rows: {label, value, lo, hi, unit, src, inside}. */
+/**
+ * Block 6 acceptance bands (spec #11). Rows: {label, value, lo, hi, unit, src,
+ * inside, supp}. A supplementary row (supp) is reported but does not decide
+ * its band: it is not the brief's wording.
+ */
 export function bands6() {
   const { st, T, C } = base6();
   const t = st.table;
   const P = pv6();
   const th = thin6();
   const rows = [];
-  const add = (label, value, lo, hi, src, unit = '', tol = 1e-9) => rows.push({ label, value: Math.round(value * 1000) / 1000, lo, hi, unit, src, inside: (lo === null || value >= lo - tol) && (hi === null || value <= hi + tol) });
+  const add = (label, value, lo, hi, src, unit = '', supp = false, tol = 1e-9) => rows.push({ label, value: Math.round(value * 1000) / 1000, lo, hi, unit, src, supp, inside: (lo === null || value >= lo - tol) && (hi === null || value <= hi + tol) });
   const n = (k) => `n ${C[k].length}`;
   // 1: night lag of thick asphalt
   add(`1. Open asphalt (${n('openAsphalt')}) minus bare compacted soil (${n('soil')}) at 23:00`, t.openAsphalt.t23 - t.soil.t23, 2, 6, 'brief6', 'K');
@@ -156,7 +181,7 @@ export function bands6() {
   add(`4. Rusty shed roof (${n('shed')}) at 23:00 minus the air`, t.shed.t23 - st.air.t23, null, 0.5, 'brief6', 'K');
   const others = Object.keys(st.cool).filter((k) => k !== 'shed');
   const top = (f) => Math.max(...others.map((k) => f(st.cool[k])));
-  add(`4. Shed roof: fastest evening cooling (largest 15-min rate, 16:00 to sunset + 1 h) minus the fastest other surface class (shed ${st.cool.shed.peak.toFixed(2)} K/h at ${st.cool.shed.at.toFixed(2)} h)`, st.cool.shed.peak - top((c) => c.peak), 0, null, 'brief6', 'K/h');
+  add(`4. Supplementary (not the brief's wording, mostly before sunset): shed roof's fastest evening cooling (largest 15-min rate, 16:00 to sunset + 1 h) minus the fastest other surface class (shed ${st.cool.shed.peak.toFixed(2)} K/h at ${st.cool.shed.at.toFixed(2)} h)`, st.cool.shed.peak - top((c) => c.peak), 0, null, 'brief6', 'K/h', true);
   add(`4. Shed roof: cooling in the first hour after sunset (${st.set.toFixed(2)} h) minus the fastest other surface class (shed ${st.cool.shed.after.toFixed(2)} K)`, st.cool.shed.after - top((c) => c.after), 0, null, 'brief6', 'K');
   // 5: bare soil
   add('5. Bare soil minus open asphalt at 15:00', t.soil.t15 - t.openAsphalt.t15, -8, 8, 'brief6', 'K');
@@ -177,6 +202,17 @@ export function bands6() {
   add(`Dwellers at 15:00 resting in shade (crowns, PV canopy, buildings), n ${wk.n}`, wk.shadeShare, 0.5, null, 'melnikov');
   add('Walkers at 15:00: density in shade over density in sun, walkable ground (footpaths, yard, lawn)', wk.ratio, 1, null, 'melnikov');
   return rows;
+}
+
+/** The brief's bands 1-8: met if every one of its rows that is not supplementary is inside. */
+export function bandVerdicts(rows) {
+  const out = {};
+  for (const r of rows) {
+    const m = /^(\d)\. /.exec(r.label);
+    if (!m || r.supp) continue;
+    out[m[1]] = (out[m[1]] ?? true) && r.inside;
+  }
+  return out;
 }
 
 export { dayRange, tsMean, fluxMean, shedTau };

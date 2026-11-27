@@ -54,7 +54,7 @@ export function pvField(world) {
 /**
  * Block-6 changes to a built world (once): car shares and PV cells, and the
  * sky view they set: under a canopy SVF = pvSvf (Golden et al. 2007), and
- * SVF x (1 - car share) where cars stand (MODEL.carSky). world.svfOpen (the
+ * SVF x (1 - car share) where cars stand, all day (MODEL.carSky). world.svfOpen (the
  * building-only scan behind the wall reflection) is left as it is.
  */
 export function prepWorld(world) {
@@ -266,7 +266,7 @@ export function pvCompare(world, T, C) {
   const w2 = prepWorld(buildWorld({ ...world.scene, cars: [] }));
   const slots = applyCarShade(w2, sunSlots(w2));
   const E = runModel(w2, { slots, cells: C.pvBays, flux: true });
-  return { open: summary(T, C.openAsphalt), empty: { ...summary(E, C.pvBays), svf: mean(C.pvBays.map((i) => w2.svf[i])), g23: fluxMean(E, C.pvBays, 23) }, bays: summary(T, C.pvBays), openBays: summary(T, C.openBays), model: E, world: w2 };
+  return { open: summary(T, C.openAsphalt), empty: { ...summary(E, C.pvBays), svf: mean(C.pvBays.map((i) => w2.svf[i])), g23: fluxMean(E, C.pvBays, 23) }, bays: summary(T, C.pvBays), openBays: summary(T, C.openBays), model: E, world: w2, slotsEmpty: slots };
 }
 
 /** Time constant of the shed roof, minutes: C / (4 eps sigma T^3 + h_c) at air ta (deg C). */

@@ -2,7 +2,7 @@
 // from the code and model runs (scripts/parking.mjs).
 import { MODEL, MATERIALS, BASIS } from '../engine/materials.js';
 import { slab, STEMPIHAR, tsMean, fluxMean, shedTau } from '../engine/parking.js';
-import { base6, pv6, thin6, sensitivity6, walkers6, bands6 } from './parking.mjs';
+import { base6, pv6, thin6, sensitivity6, walkers6, bands6, bandVerdicts, pvWallSensitivity } from './parking.mjs';
 
 const f1 = (x) => (Math.round(x * 10) / 10).toFixed(1);
 const f2 = (x) => x.toFixed(2);
@@ -17,18 +17,23 @@ const NAMES = { openAsphalt: 'open asphalt (no car, crown or canopy)', openBays:
 export function bands6Markdown(rows) {
   const v = (r) => (Number.isInteger(r.value) ? String(r.value) : r.unit === 'K' || r.unit === 'K/h' ? signed(r.value, 2) : r.unit === 'W m⁻²' ? signed(r.value, 1) : r.value.toFixed(3));
   const b = (r) => (r.lo === null ? `≤ ${+r.hi.toFixed(3)}` : r.hi === null ? `≥ ${+r.lo.toFixed(3)}` : `${+r.lo.toFixed(3)} to ${+r.hi.toFixed(3)}`);
-  const lines = rows.map((r) => `| ${r.label} | ${v(r)}${r.unit ? ` ${r.unit}` : ''} | ${b(r)} | ${r.src} | ${r.inside ? 'inside' : '**outside**'} |`);
-  const out = rows.filter((r) => !r.inside).length;
+  const lines = rows.map((r) => `| ${r.label} | ${v(r)}${r.unit ? ` ${r.unit}` : ''} | ${b(r)} | ${r.src} | ${r.supp ? `${r.inside ? 'inside' : 'outside'} (supplementary, not counted)` : r.inside ? 'inside' : '**outside**'} |`);
+  const counted = rows.filter((r) => !r.supp);
+  const out = counted.filter((r) => !r.inside).length;
+  const bv = bandVerdicts(rows);
+  const met = Object.keys(bv).filter((k) => bv[k]);
+  const missed = Object.keys(bv).filter((k) => !bv[k]);
   return `| Check (spec #11) | Model | Band | Source | |
 |---|---|---|---|---|
 ${lines.join('\n')}
 
-${out} of ${rows.length} checks fall outside their band. They are reported, not tuned away: no input was moved to pass a band.`;
+${out} of ${counted.length} checks fall outside their band (${rows.length - counted.length} supplementary row not counted). By the brief's bands: ${met.length} of ${met.length + missed.length} met (${met.join(', ')}); missed: ${missed.join(', ')}. They are reported, not tuned away: no input was moved to pass a band.`;
 }
 
 export function parkingMarkdown() {
   const { scene, world, T, st, C } = base6();
   const P = pv6();
+  const PW = pvWallSensitivity();
   const th = thin6();
   const sens = sensitivity6();
   const wk = walkers6(15);
@@ -73,9 +78,9 @@ values (ballast, soil, scrub, the shed's albedo) are the brief's **assumptions**
 ### Cars, the PV canopy and heat storage in the model
 
 - **Parked cars** are not modelled as objects with a temperature. Each 5 m cell gets the share of its area under car
-  footprints (exact rectangle overlap with the drawn 4.4 × 1.8 m cars); by day its direct sun is multiplied by
-  (1 − share) in every 10-min sun slot (\`carShade\`), at night its sky view by (1 − share) (\`carSky\`: the car underside
-  is taken as the warm-wall term, air + 2 K). The lot is taken as full all day and the car shadow is not offset with the
+  footprints (exact rectangle overlap with the drawn 4.4 × 1.8 m cars); its direct sun is multiplied by
+  (1 − share) in every 10-min sun slot (\`carShade\`), and its sky view by (1 − share) all day (\`carSky\`: the car underside
+  is taken as the warm-wall term, air + 2 K and more by day, so the ground under a car also loses diffuse sky light by day). The lot is taken as full all day and the car shadow is not offset with the
   sun angle. ${st.lotShare.cars} cars cover ${Math.round(st.lotShare.share * 100)}% of the lot (the brief's rule of thumb is 30–35%, unverified); the
   bay rows ${Math.round(t.openBays.share * 100)}%.
 - **The PV canopy** is a flat opaque screen 4.2 m up (\`pvCanopy\`, tr 0); its cast shadow is computed like the block-5
@@ -141,10 +146,13 @@ Golden et al., Phoenix, 17 June 2004 (air max 41.0 °C, wind 0.86 m/s): exposed 
 the canopy 37.0 / 27.7 °C: the brief quotes the range as −70% (−73% from these max / min; the paper has internal
 inconsistencies). Here the empty bay's range shrinks by ${r0(Math.abs((P.empty.range / P.open.range - 1) * 100))}%, **outside** the spec's −60 to −75% band. Both ranges
 differ from Phoenix: the open asphalt swings ${f1(P.open.range)} K here vs 35.0 K there, the bay under the canopy ${f1(P.empty.range)} K vs 9.3 K
-(a different day: air 25–35 °C here, up to 41 °C there). Which model term causes the miss was not established. The
-panel undersides are the shared warm-wall term (air + 2 K + 6 K·K↓/900); measured under-canopy maxima below the air
-(37.0 °C at 41.0 °C air) suggest this is not too cold by day. Not tuned: SVF 0.11 is the measured value and the wall term
-is shared by every block. The panels' own temperature, their electricity and the air beneath are not modelled.
+(a different day: air 25–35 °C here, up to 41 °C there). The panel undersides are the shared warm-wall term (air + 2 K +
+6 K·K↓/900). **Sensitivity (not shipped, not tuned):** with undersides at air + 2 K + 25 K·K↓/900 by day (a module about
+25 K above the air in full sun, a typical rating figure, not from the brief) and air − 2 K at night (panels facing a
+clear sky), the empty bay runs ${f1(PW.max)} / ${f1(PW.min)} °C (max / min), ${f1(PW.t15)} °C at 15:00, a range of ${f1(PW.range)} K: ${signed(PW.ratio * 100, 0)}% against
+open asphalt, ${PW.ratio >= -0.75 && PW.ratio <= -0.6 ? 'inside' : 'outside'} the band. So the shared wall term is a likely cause of the miss. It stays as shipped:
+the wall term is shared by every block, and the underside temperatures above are an assumption, not a source. The
+panels' own temperature, their electricity and the air beneath are not modelled.
 
 ### Lot trees, cars and the hot-car card
 
@@ -170,9 +178,9 @@ ${cool.join('\n')}
 
 The shed roof (C ${MATERIALS.rustShed.thinC.value / 1000} kJ m⁻² K⁻¹, time constant C/(4εσT³ + h_c) about ${f1(shedTau(T.air(st.set), st.hc))} min) cools fastest of all
 as the low evening sun leaves it, and is already near its night balance with the sky at sunset; after sunset it cools
-**more slowly** than the slabs, which still have heat to lose. So the brief's "steepest cooling after sunset" holds for
-the evening as a whole and **not** for the first hour after sunset (both rows are in the table below; the second is
-outside). At 23:00 the roof is ${signed(t.shed.t23 - st.air.t23)} K from the air.
+**more slowly** than the slabs, which still have heat to lose. So the brief's "steepest cooling after sunset" is **not**
+met: band 4 counts as missed. The evening-window row in the table below (16:00 to sunset + 1 h, peaking two hours before
+sunset) is supplementary and does not count. At 23:00 the roof is ${signed(t.shed.t23 - st.air.t23)} K from the air.
 
 ### Thin layers and sensitivity
 
@@ -221,7 +229,7 @@ ${bands6Markdown(rows)}
   (the hot-car card is information only).
 - **Golden et al. 2007** has internal inconsistencies; several other figures are from abstracts or press only
   (Asaeda, Zhu, Hoehne, Matias) and flagged unverified.
-- **Misses:** the shed's first hour after sunset and the PV canopy's range reduction fall outside their bands (above);
+- **Misses:** bands 4 (the shed's steepest cooling after sunset) and 6 (the PV canopy's range reduction) are missed (above);
   bands 1 and 5 pass by ${margin} K and are sensitive to albedos inside their ranges (Sensitivity). Not tuned.
 - **Footpaths narrower than the grid:** the 2 m concrete footpaths between the bays are drawn and walkable (2 m grid);
   the 5 m model sees the asphalt around them.

@@ -489,8 +489,9 @@ export const REFS = {
     doi: '10.1016/j.solener.2009.01.019',
   },
   asaeda1996: {
-    authors: 'Asaeda, T., Ca, V. T. & Wake, A.', year: 1996, title: null,
-    venue: 'Atmospheric Environment (pavement heat and the urban atmosphere; via the block-6 brief)',
+    authors: 'Asaeda, T., Ca, V. T. & Wake, A.', year: 1996,
+    title: 'Heat storage of pavement and its effect on the lower atmosphere',
+    venue: 'Atmospheric Environment 30(3), 413–427',
   },
   zhu2022: {
     authors: 'Zhu et al.', year: 2022, title: null,
