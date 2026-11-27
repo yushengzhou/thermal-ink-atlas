@@ -53,8 +53,8 @@ export function measureCard(m, st, mats, d, aged) {
   const row = (h) => {
     const r = st[`h${h}`];
     if (!r.n) return `<tr><td>${h}:00</td><td colspan="2">no cells in full sun</td></tr>`;
-    const tm = m.roof ? '<td>— (roof)</td>' : `<td>${K(r.dTmrt)}</td>`;
-    return `<tr class="t"><td>${h}:00</td><td>${K(r.dTs)} <span class="sub">(${fmt(r.before)} → ${fmt(r.after)} °C)</span></td>${tm}</tr>`;
+    const tm = m.roof ? '<td class="sub">roof</td>' : `<td>${K(r.dTmrt)}</td>`;
+    return `<tr class="t"><td>${h}:00</td><td>${K(r.dTs)}</td>${tm}</tr><tr><td></td><td class="sub" colspan="2">surface ${fmt(r.before)} → ${fmt(r.after)} °C${m.roof ? '' : `; Tmrt ${fmt(r.tmrtBefore)} → ${fmt(r.tmrtAfter)} °C`}</td></tr>`;
   };
   const wet = mat.efWet ? `<p class="sub">${gl('daysSinceRain', 'Days since rain')} d = ${d}: ${gl('ef', 'evaporative fraction')} ${mat.ef.value.toFixed(2)} (wet ${mat.efWet.value}, dry ${mat.dry.ef.value}, τ ${mat.tau.value} d).</p>` : '';
   const age = m.mat === 'coolroofR' || m.mat === 'coolPave' ? `<p class="sub">Materials: ${aged ? 'aged' : 'new'}, ${gl('albedo', 'albedo')} ${mat.alpha.value.toFixed(2)} (${gl('albedoAgeing', 'aged vs new')}).</p>` : '';
@@ -63,7 +63,7 @@ export function measureCard(m, st, mats, d, aged) {
     <button class="x" aria-label="close">×</button>
     <h3>${m.name}</h3>
     <div class="mat">After minus Before, same cells, simulated</div>
-    <table>
+    <table class="cmp">
       <tr><td></td><td>${gl('surfaceTemp', 'surface')} ΔTs</td><td>${gl('tmrt', 'person')} ΔTmrt</td></tr>
       ${row(12)}
       ${row(15)}
@@ -75,21 +75,24 @@ export function measureCard(m, st, mats, d, aged) {
     ${srcLine(m.sources)}`;
 }
 
-/** The reflective-pavement trade-off card. */
-export function tradeoffCard(st, mats, aged) {
-  const r = st.h12;
-  const a = mats.coolPave.alpha.value;
+/**
+ * The reflective-pavement trade-off card. st: {new, aged} noon stats of the
+ * coating measure; matsNew / matsAged: material tables for the two coatings.
+ */
+export function tradeoffCard(st, matsNew, matsAged) {
+  const row = (label, r) => `<tr class="t"><td>${label}</td><td>${K(r.dTs)}</td><td>${K(r.dTmrt)}</td></tr>`;
   return `
     <button class="x" aria-label="close">×</button>
     <h3>Reflective pavement: cools the road, not the person</h3>
-    <div class="mat">Canal Street coating (${aged ? 'aged' : 'new'}, ${gl('albedo', 'albedo')} ${a.toFixed(2)} vs 0.12), noon, simulated</div>
-    <table>
-      <tr class="t"><td>road surface</td><td>${K(r.dTs)}</td></tr>
-      <tr class="t"><td>${gl('tmrt', 'Tmrt')}, person on the road</td><td>${K(r.dTmrt)}</td></tr>
+    <div class="mat">Canal Street coating vs the old asphalt (${gl('albedo', 'albedo')} 0.12), noon, simulated</div>
+    <table class="cmp">
+      <tr><td>coating</td><td>road ΔTs</td><td>person ΔTmrt</td></tr>
+      ${row(`new, α ${matsNew.coolPave.alpha.value}`, st.new)}
+      ${row(`1 year, α ${matsAged.coolPave.alpha.value}`, st.aged)}
     </table>
     <p class="note">The light coating sends more sunshine back up, and part of it lands on people. The road gets cooler; a person standing on it gets more radiant heat at midday. Pair reflective paving with shade, such as trees or awnings.</p>
     <p class="lit">Literature (Los Angeles): road −4 to −6 K, pedestrian Tmrt about +4 K at midday, with +118 W m⁻² more reflected sunshine (Middel et al. 2020). Neighbourhood scale: surface up to −5 K in the afternoon, air only −0.2 K (Ko et al. 2022).</p>
-    <p class="caveat">Known under-estimate: walls reflect no sunlight in this model, so light bounced onto the pavements from building faces is missing (Middel saw +20–30 W m⁻² on sidewalks in the evening).</p>
+    <p class="caveat">Known under-estimate: walls reflect no sunlight in this model, so light bounced onto the pavements from building faces is missing (Middel saw +20–30 W m⁻² on sidewalks in the evening). Coating albedos are <span class="unv">unverified</span></p>
     ${srcLine(['middel2020', 'ko2022'])}`;
 }
 

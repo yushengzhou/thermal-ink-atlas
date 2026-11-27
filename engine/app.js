@@ -196,6 +196,14 @@ export function boot(scene, root = document) {
     else {
       const lk = look(S.frame);
       const parts = onScreen();
+      // the canvas context is shared by two renderers: start every frame from
+      // the same context state so a frame never depends on the one before it
+      const c0 = R.ctx;
+      c0.setTransform(1, 0, 0, 1, 0, 0);
+      c0.lineCap = 'butt';
+      c0.lineJoin = 'miter';
+      c0.textBaseline = 'alphabetic';
+      c0.setLineDash([]);
       const stats = parts.map(({ v, clip }) => ({ ...v.R.frame(S.frame, S.cam, { ...lk, notes: null, clip, budget: parts.length > 1 ? 1 : undefined }) }));
       const st = stats[stats.length - 1];
       lastStats = {
@@ -353,7 +361,12 @@ export function boot(scene, root = document) {
   function measureHtml(id) {
     const mats = V.after.thermal.info.mats;
     if (id === 'sponge') return spongeCard();
-    if (id === 'tradeoff') return tradeoffCard(measureStatsFor('coating'), mats, S.aged);
+    if (id === 'tradeoff') {
+      // both coatings: new (the literature case) and after one year
+      const m = MEASURES.find((x) => x.id === 'coating');
+      const st = (aged) => measureStats(m, V.before.world, V.before.thermal, V.after.world, afterModel(S.d, aged), [12]).h12;
+      return tradeoffCard({ new: st(false), aged: st(true) }, stateMaterials(S.d, false), stateMaterials(S.d, true));
+    }
     return measureCard(MEASURES.find((x) => x.id === id), measureStatsFor(id), mats, S.d, S.aged);
   }
   function showMeasure(id, anchor) {
@@ -364,8 +377,10 @@ export function boot(scene, root = document) {
     card.dataset.open = '1';
     card.dataset.kind = id;
     card.style.display = 'block';
-    const r = anchor ? anchor.getBoundingClientRect() : { right: 300, top: 120 };
-    card.style.left = `${Math.min(window.innerWidth - card.offsetWidth - 10, r.right + 12)}px`;
+    // beside the controls panel, level with the button
+    const r = anchor ? anchor.getBoundingClientRect() : { top: 120 };
+    const panel = retroUi.el.getBoundingClientRect();
+    card.style.left = `${Math.min(window.innerWidth - card.offsetWidth - 10, panel.right + 12)}px`;
     card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
   }
   function reopenCard() {

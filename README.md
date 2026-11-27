@@ -3,6 +3,8 @@
 A hand-inked isometric city block that shows urban heat: an old asphalt street
 next to a shady pocket park, through one heat-wave day.
 
+Block 2, `cities/sponge-retrofit/index.html`, shows one invented block Before and After a sponge-city and cool-roof retrofit, side by side with a draggable divider (`B` swaps) and a days-since-rain slider.
+
 Live: https://yushengzhou.github.io/thermal-ink-atlas/
 
 The block is simulated and invented (not a real address). Temperatures are

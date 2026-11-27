@@ -100,12 +100,17 @@ export const SCENE = {
     { x: 252, y: 88, r: 4.5, zc: 6 },
     { x: 92, y: 216, r: 4.5, zc: 6 },
     { x: 330, y: 84, r: 4.5, zc: 6 },
-    // young trees in the Willow Lane rain gardens
-    ...[8, 20, 32, 44, 56, 68, 80, 92, 104, 116].map((x) => ({ x, y: 302.5, ...YOUNG })),
-    ...[300, 312, 324, 336, 348, 360, 372, 384, 396].map((x) => ({ x, y: 302.5, ...YOUNG })),
-    // young trees along Market Road (east pavement) and Bridge Road (west pavement)
-    ...[180, 192, 204, 216, 228, 240, 252, 264, 276].map((y) => ({ x: 142.5, y, ...YOUNG })),
-    ...[180, 192, 204, 216, 228, 240, 252, 264, 276].map((y) => ({ x: 272.5, y, ...YOUNG })),
+    // young trees at the edge of the Willow Lane rain gardens (south pavement)
+    ...[8, 20, 32, 44, 56, 68, 80, 92, 104, 116].map((x) => ({ x, y: 306.5, ...YOUNG })),
+    ...[300, 312, 324, 336, 348, 360, 372, 384, 396].map((x) => ({ x, y: 306.5, ...YOUNG })),
+    // young trees on the west kerb of Market Road and Bridge Road (afternoon shade on the pavement)
+    ...[180, 192, 204, 216, 228, 240, 252, 264, 276].map((y) => ({ x: 140.8, y, ...YOUNG })),
+    ...[180, 192, 204, 216, 228, 240, 252, 264, 276].map((y) => ({ x: 270.8, y, ...YOUNG })),
+    // Canal Street, north pavement
+    ...[10, 26, 42, 58, 74, 90, 106, 156, 172, 188, 204, 220, 236, 252, 306, 322, 338, 354, 370, 386].map((x) => ({ x, y: 146.2, ...YOUNG })),
+    // trees on the new Market square
+    ...[310, 330, 350, 370, 390].map((x) => ({ x, y: 212, ...YOUNG })),
+    ...[320, 360].map((x) => ({ x, y: 238, ...YOUNG })),
   ],
   benches: [
     { x: 172, y: 330, a: 0 },

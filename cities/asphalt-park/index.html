@@ -25,7 +25,7 @@
   #legendBar { height: 12px; border: 1px solid #2b2621; margin: 4px 0 2px; }
   #legend .ends { display: flex; justify-content: space-between; font-size: 12px; white-space: nowrap; }
   #legend .cap { font-size: 11px; opacity: .7; margin-top: 2px; }
-  #card { display: none; position: fixed; width: 350px; max-height: calc(100vh - 20px); overflow: auto; box-sizing: border-box; padding: 12px 14px; background: #fbf7ee; border: 1.5px solid #2b2621;
+  #card { display: none; position: fixed; z-index: 5; width: 350px; max-height: calc(100vh - 20px); overflow: auto; box-sizing: border-box; padding: 12px 14px; background: #fbf7ee; border: 1.5px solid #2b2621;
     border-radius: 4px 10px 5px 9px; box-shadow: 3px 4px 0 rgba(43,38,33,.2); font-size: 13px; }
   #card h3 { margin: 0 0 2px; font-size: 17px; }
   #card .mat { opacity: .75; margin-bottom: 6px; }
@@ -65,6 +65,8 @@
   #retro .measures .hand { flex-basis: 100%; }
   #retro .measures button { font-size: 12px; padding: 2px 6px; }
   #retro .measures button.warn { border-color: #8a2f22; color: #8a2f22; }
+  #card table.cmp td { text-align: right; }
+  #card table.cmp td:first-child, #card table.cmp td.sub { text-align: left; }
   #card .sub { font-size: 11.5px; opacity: .8; font-weight: normal; }
   #card .lit { margin: 4px 0; font-size: 12px; }
   .noui #retro { display: none; }
@@ -3822,8 +3824,8 @@ function measureCard(m, st, mats, d, aged) {
   const row = (h) => {
     const r = st[`h${h}`];
     if (!r.n) return `<tr><td>${h}:00</td><td colspan="2">no cells in full sun</td></tr>`;
-    const tm = m.roof ? '<td>— (roof)</td>' : `<td>${K(r.dTmrt)}</td>`;
-    return `<tr class="t"><td>${h}:00</td><td>${K(r.dTs)} <span class="sub">(${fmt(r.before)} → ${fmt(r.after)} °C)</span></td>${tm}</tr>`;
+    const tm = m.roof ? '<td class="sub">roof</td>' : `<td>${K(r.dTmrt)}</td>`;
+    return `<tr class="t"><td>${h}:00</td><td>${K(r.dTs)}</td>${tm}</tr><tr><td></td><td class="sub" colspan="2">surface ${fmt(r.before)} → ${fmt(r.after)} °C${m.roof ? '' : `; Tmrt ${fmt(r.tmrtBefore)} → ${fmt(r.tmrtAfter)} °C`}</td></tr>`;
   };
   const wet = mat.efWet ? `<p class="sub">${gl('daysSinceRain', 'Days since rain')} d = ${d}: ${gl('ef', 'evaporative fraction')} ${mat.ef.value.toFixed(2)} (wet ${mat.efWet.value}, dry ${mat.dry.ef.value}, τ ${mat.tau.value} d).</p>` : '';
   const age = m.mat === 'coolroofR' || m.mat === 'coolPave' ? `<p class="sub">Materials: ${aged ? 'aged' : 'new'}, ${gl('albedo', 'albedo')} ${mat.alpha.value.toFixed(2)} (${gl('albedoAgeing', 'aged vs new')}).</p>` : '';
@@ -3832,7 +3834,7 @@ function measureCard(m, st, mats, d, aged) {
     <button class="x" aria-label="close">×</button>
     <h3>${m.name}</h3>
     <div class="mat">After minus Before, same cells, simulated</div>
-    <table>
+    <table class="cmp">
       <tr><td></td><td>${gl('surfaceTemp', 'surface')} ΔTs</td><td>${gl('tmrt', 'person')} ΔTmrt</td></tr>
       ${row(12)}
       ${row(15)}
@@ -3844,21 +3846,24 @@ function measureCard(m, st, mats, d, aged) {
     ${srcLine(m.sources)}`;
 }
 
-/** The reflective-pavement trade-off card. */
-function tradeoffCard(st, mats, aged) {
-  const r = st.h12;
-  const a = mats.coolPave.alpha.value;
+/**
+ * The reflective-pavement trade-off card. st: {new, aged} noon stats of the
+ * coating measure; matsNew / matsAged: material tables for the two coatings.
+ */
+function tradeoffCard(st, matsNew, matsAged) {
+  const row = (label, r) => `<tr class="t"><td>${label}</td><td>${K(r.dTs)}</td><td>${K(r.dTmrt)}</td></tr>`;
   return `
     <button class="x" aria-label="close">×</button>
     <h3>Reflective pavement: cools the road, not the person</h3>
-    <div class="mat">Canal Street coating (${aged ? 'aged' : 'new'}, ${gl('albedo', 'albedo')} ${a.toFixed(2)} vs 0.12), noon, simulated</div>
-    <table>
-      <tr class="t"><td>road surface</td><td>${K(r.dTs)}</td></tr>
-      <tr class="t"><td>${gl('tmrt', 'Tmrt')}, person on the road</td><td>${K(r.dTmrt)}</td></tr>
+    <div class="mat">Canal Street coating vs the old asphalt (${gl('albedo', 'albedo')} 0.12), noon, simulated</div>
+    <table class="cmp">
+      <tr><td>coating</td><td>road ΔTs</td><td>person ΔTmrt</td></tr>
+      ${row(`new, α ${matsNew.coolPave.alpha.value}`, st.new)}
+      ${row(`1 year, α ${matsAged.coolPave.alpha.value}`, st.aged)}
     </table>
     <p class="note">The light coating sends more sunshine back up, and part of it lands on people. The road gets cooler; a person standing on it gets more radiant heat at midday. Pair reflective paving with shade, such as trees or awnings.</p>
     <p class="lit">Literature (Los Angeles): road −4 to −6 K, pedestrian Tmrt about +4 K at midday, with +118 W m⁻² more reflected sunshine (Middel et al. 2020). Neighbourhood scale: surface up to −5 K in the afternoon, air only −0.2 K (Ko et al. 2022).</p>
-    <p class="caveat">Known under-estimate: walls reflect no sunlight in this model, so light bounced onto the pavements from building faces is missing (Middel saw +20–30 W m⁻² on sidewalks in the evening).</p>
+    <p class="caveat">Known under-estimate: walls reflect no sunlight in this model, so light bounced onto the pavements from building faces is missing (Middel saw +20–30 W m⁻² on sidewalks in the evening). Coating albedos are <span class="unv">unverified</span></p>
     ${srcLine(['middel2020', 'ko2022'])}`;
 }
 
@@ -4144,6 +4149,14 @@ function boot(scene, root = document) {
     else {
       const lk = look(S.frame);
       const parts = onScreen();
+      // the canvas context is shared by two renderers: start every frame from
+      // the same context state so a frame never depends on the one before it
+      const c0 = R.ctx;
+      c0.setTransform(1, 0, 0, 1, 0, 0);
+      c0.lineCap = 'butt';
+      c0.lineJoin = 'miter';
+      c0.textBaseline = 'alphabetic';
+      c0.setLineDash([]);
       const stats = parts.map(({ v, clip }) => ({ ...v.R.frame(S.frame, S.cam, { ...lk, notes: null, clip, budget: parts.length > 1 ? 1 : undefined }) }));
       const st = stats[stats.length - 1];
       lastStats = {
@@ -4301,7 +4314,12 @@ function boot(scene, root = document) {
   function measureHtml(id) {
     const mats = V.after.thermal.info.mats;
     if (id === 'sponge') return spongeCard();
-    if (id === 'tradeoff') return tradeoffCard(measureStatsFor('coating'), mats, S.aged);
+    if (id === 'tradeoff') {
+      // both coatings: new (the literature case) and after one year
+      const m = MEASURES.find((x) => x.id === 'coating');
+      const st = (aged) => measureStats(m, V.before.world, V.before.thermal, V.after.world, afterModel(S.d, aged), [12]).h12;
+      return tradeoffCard({ new: st(false), aged: st(true) }, stateMaterials(S.d, false), stateMaterials(S.d, true));
+    }
     return measureCard(MEASURES.find((x) => x.id === id), measureStatsFor(id), mats, S.d, S.aged);
   }
   function showMeasure(id, anchor) {
@@ -4312,8 +4330,10 @@ function boot(scene, root = document) {
     card.dataset.open = '1';
     card.dataset.kind = id;
     card.style.display = 'block';
-    const r = anchor ? anchor.getBoundingClientRect() : { right: 300, top: 120 };
-    card.style.left = `${Math.min(window.innerWidth - card.offsetWidth - 10, r.right + 12)}px`;
+    // beside the controls panel, level with the button
+    const r = anchor ? anchor.getBoundingClientRect() : { top: 120 };
+    const panel = retroUi.el.getBoundingClientRect();
+    card.style.left = `${Math.min(window.innerWidth - card.offsetWidth - 10, panel.right + 12)}px`;
     card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
   }
   function reopenCard() {

@@ -6,20 +6,23 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
-const file = `${root}cities/asphalt-park/index.html`;
+const CITIES = ['asphalt-park', 'sponge-retrofit'];
+const file = (c) => `${root}cities/${c}/index.html`;
 
-test('build succeeds and the committed file is current', () => {
-  const before = readFileSync(file, 'utf8');
+test('build succeeds and the committed files are current', () => {
+  const before = CITIES.map((c) => readFileSync(file(c), 'utf8'));
   execFileSync(process.execPath, [`${root}scripts/build.mjs`], { stdio: 'pipe' });
-  assert.equal(readFileSync(file, 'utf8'), before, 'run `npm run build` and commit the result');
+  CITIES.forEach((c, k) => assert.equal(readFileSync(file(c), 'utf8'), before[k], `${c}: run \`npm run build\` and commit the result`));
 });
 
-test('built file < 500 KB with no external references', () => {
-  const size = statSync(file).size;
-  console.log(`built size: ${(size / 1024).toFixed(1)} KB`);
-  assert.ok(size < 500 * 1024);
-  const html = readFileSync(file, 'utf8');
-  assert.ok(!/https?:\/\//i.test(html), 'contains a URL');
-  assert.ok(!/<(script|link|img|iframe)[^>]+(src|href)=/i.test(html), 'references a resource');
-  assert.ok(!/Math\.random\s*\(|Date\.now\s*\(|new Date\s*\(/.test(html), 'non-deterministic source in drawing code');
-});
+for (const c of CITIES) {
+  test(`${c}: built file < 500 KB with no external references`, () => {
+    const size = statSync(file(c)).size;
+    console.log(`${c} built size: ${(size / 1024).toFixed(1)} KB`);
+    assert.ok(size < 500 * 1024);
+    const html = readFileSync(file(c), 'utf8');
+    assert.ok(!/https?:\/\//i.test(html), 'contains a URL');
+    assert.ok(!/<(script|link|img|iframe)[^>]+(src|href)=/i.test(html), 'references a resource');
+    assert.ok(!/Math\.random\s*\(|Date\.now\s*\(|new Date\s*\(/.test(html), 'non-deterministic source in drawing code');
+  });
+}
