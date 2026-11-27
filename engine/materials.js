@@ -178,6 +178,23 @@ export const SOURCES = {
   erell2014: 'Erell, Pearlmutter, Boneh & Kutiel (2014) Urban Climate 10, 367-386, doi 10.1016/j.uclim.2013.10.005, high-albedo materials can worsen pedestrian heat stress in street canyons (via the block-11 brief)',
   mcdph2025: 'Maricopa County Department of Public Health, annual report on heat deaths in 2025 (April 2026), via the block-11 brief: heat-related deaths 339 (2021), 425 (2022), 645 (2023), 608 (2024), 430 (2025: 313 outdoors, 111 indoors); in 2024, 49% of those who died were homeless and substances were involved in 57%; news reports gave 427 for 2025; a preliminary 585 for 2026 is unverified',
   stull2011: 'Stull (2011) J. Applied Meteorology and Climatology 50, 2267-2269, doi 10.1175/JAMC-D-11-0143.1, wet-bulb temperature from relative humidity and air temperature (via the block-11 brief: about 22 C at 43 C and 12 hPa)',
+  brief12: 'Research brief docs/research/nightmarket-brief.md (block 12; values compiled from the sources below; the stone night release, the crowd and stall heat, the grill radiation and the night Tmrt are the brief\'s own arithmetic; items marked unverified there are flagged here)',
+  cwaTaipei: 'Taiwan Central Weather Administration climate normals 1991-2020, Taipei station, July: mean daily maximum about 34 C, minimum about 27 C (not in the brief; from memory, unverified)',
+  yang2016: 'Yang & Zhao (2016, online December 2015) Buildings 6(1), 2, doi 10.3390/buildings6010002, diurnal thermal behaviour of pavements, vegetation and a water pond in a hot-humid city (Guangzhou, via the block-12 brief: granite and concrete warmed the air all day; full text not read, night numbers unverified)',
+  doulos2004: 'Doulos, Santamouris & Livada (2004) Solar Energy 77(2), 231-249, doi 10.1016/j.solener.2004.04.005, passive cooling of outdoor urban spaces: the role of materials (via the block-12 brief, which suggests checking it; not read)',
+  coolPaveNight: 'City of Phoenix and Arizona State University cool pavement pilot, night results (phoenix.gov, via the block-12 brief): treated surface 2.4 F cooler at sunrise, air at 1.8 m 0.5 F cooler at night (unverified)',
+  ashrae55: 'ASHRAE Standard 55 and ISO 8996 metabolic rates, via the block-12 brief: 1 met = 58.2 W m-2, a body of 1.8 m2 about 105 W; standing about 1.2 met (about 125 W), walking at 0.9 m/s about 2.0 met (about 210 W) (from memory in the brief, unverified)',
+  ashraeRetail: 'ASHRAE heat gain from people, retail, via the block-12 brief: 73 W sensible and 59 W latent at 25.6 C (secondary copies disagree; unverified)',
+  sailorAms: 'Sailor, anthropogenic heat (an AMS abstract, via the block-12 brief): metabolism about 2-3% of urban anthropogenic heat (unverified)',
+  crowdLimits: 'Crowd density guidance (G. Keith Still, crowd safety notes; NSW event factsheet), via the block-12 brief: critical density 2-3 people per m2, event limits about 2 (unverified)',
+  wokVendor: 'Vendor specifications of jet wok burners, via the block-12 brief: 28-37 kW per burner (unverified)',
+  charcoalVendor: 'A vendor listing of a charcoal roaster (archiexpo), via the block-12 brief: about 1.2 kg of charcoal an hour, 6 kW output; with about 29 MJ per kg, 1 kg an hour is about 8 kW of fuel (unverified)',
+  taiwanNewsPm: 'Taiwan News on night markets and air quality, via the block-12 brief: night markets raise fine particles (PM) nearby (unverified; no stall heat or air temperature measured)',
+  nccuXimen: 'A National Chengchi University thesis on thermal comfort in Ximending, Taipei, via the block-12 brief: uncomfortable before 16:00 (title not recorded; unverified)',
+  ntuEnvimet: 'A National Taiwan University ENVI-met study of a Taipei street, via the block-12 brief: evening PET depends on how wet the pavement is (title not recorded; unverified)',
+  ftvFans: 'Formosa TV news on night-market vendors and heat, via the block-12 brief: stalls use floor fans (unverified)',
+  travelTaipei: 'Taipei Travel (the city\'s tourism site), Shilin Night Market, via the block-12 brief: open about 16:00 to 00:00 (unverified)',
+  shilinWiki: 'Wikipedia, Shilin Night Market, and travel guides, via the block-12 brief: busiest 20:00-23:00 (guides: 19:00-22:00) (unverified)',
   ren2025: 'Ren, Xu & Jiang (2025) Buildings 15(13), 2166, doi 10.3390/buildings15132166, thermal environment of public space in high-density old districts on Shenzhen\'s urban fringe (the brief cites it as a Baishizhou CFD study of wind shadows in the lanes; not checked)',
 };
 
@@ -741,6 +758,21 @@ Object.assign(MATERIALS, {
     tree: true,
     prescribed: 'Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.',
     note: 'The desert tree with a green trunk and tiny leaves: its thin crown lets through more light than a shade tree from wetter places.',
+  },
+});
+
+// ---- block 12: night market street (@page nightmarket: cut from the other pages at build time) ----
+// The street, the square and the alleys are the shared stone paving (the brief gives no granite values);
+// the shop awnings are flat screens (only their transmission tr counts, as the block-5 mat awning).
+Object.assign(MATERIALS, {
+  marketAwning: {
+    name: 'Shop awning (canvas)',
+    alpha: v(0.3, 'engine', 'engine', false, 'not used: only the transmission of the canvas matters here'),
+    eps: v(0.9, 'engine', 'engine', false, 'not used'),
+    ef: v(0, 'engine', 'engine', false, 'not used'),
+    tr: v(0, 'engine', 'engine', false, 'taken as opaque (no value in the brief): no direct sun through it'),
+    prescribed: 'Not used by the grid model as a surface: a flat opaque screen 3.2 m up in front of each shophouse; the cells under it count as fully covered for the sky view (crown factor), so the warm-wall term stands in for the canvas overhead.',
+    note: 'A canvas awning over a shopfront: shade by day; at night it hides the sky, so the spot beneath it stays about as warm as the air.',
   },
 });
 
