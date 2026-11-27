@@ -107,6 +107,25 @@ export class Pen {
     return this._push(it, sp.length ? sp.concat(Array.from(fp)) : Array.from(fp));
   }
 
+  /**
+   * Several closed shapes with one fill as one item (block 5: the window
+   * panes of a façade): polys is [[[x,y,z],...], ...]; the fill path and the
+   * ink keep pen-up breaks (NaN) between the shapes.
+   */
+  shapes(polys, fill, opts = {}) {
+    const k = this._k();
+    const fp = [];
+    const sp = [];
+    polys.forEach((wpts, n) => {
+      const p = wpts.map((q) => iso(q[0], q[1], q[2] ?? 0));
+      if (fp.length) fp.push(NaN, NaN);
+      for (const q of p) fp.push(q[0], q[1]);
+      if (opts.stroke !== null) for (let i = 0; i < p.length; i++) this._edge(sp, p[i][0], p[i][1], p[(i + 1) % p.length][0], p[(i + 1) % p.length][1], k + n * 131 + i * 31, opts.over ?? 1);
+    });
+    const it = { f: fill, s: opts.stroke === null ? null : opts.stroke ?? 1, lw: opts.lw ?? 1, fp: new Float32Array(fp), sp: new Float32Array(sp), t: opts.t, a: opts.a };
+    return this._push(it, sp.concat(fp));
+  }
+
   /** Open polyline from world points (ink only). */
   line(wpts, opts = {}) {
     const p = wpts.map((q) => iso(q[0], q[1], q[2] ?? 0));

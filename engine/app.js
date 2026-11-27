@@ -369,8 +369,9 @@ export function boot(scene, root = document) {
     return S.thermal ? k : 1 - k;
   };
   // glass block: its tall façades make a day tile slower to bake (about 7 ms),
-  // so a slider drag bakes one tile per frame instead of two
-  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people, scrub: S.scrub, ac: !!S.ac, budget: glassMode ? 1 : undefined, ...(wfMode ? { wind: S.wind, air: S.air, u: S.u } : {}) });
+  // so a slider drag bakes one tile per frame instead of two; the hutong block
+  // likewise (hundreds of small tiled roofs and crowns per tile)
+  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people, scrub: S.scrub, ac: !!S.ac, budget: glassMode || htMode ? 1 : undefined, ...(wfMode ? { wind: S.wind, air: S.air, u: S.u } : {}) });
 
   // ---- sizing ------------------------------------------------------------------------------
   const resize = () => {
@@ -1400,6 +1401,7 @@ export function boot(scene, root = document) {
     card: (kind, a, b, which) => {
       const view = vw(which);
       const w = view.world;
+      if (kind === 'tree') return cardData({ kind, T: w.trees[a], view }); // a: tree index
       return cardData(kind === 'building' ? { kind, B: w.buildings.find((B) => B.id === a), view } : { kind: 'ground', x: a, y: b, g: view.scene.ground[w.parcelAt(a, b)], view });
     },
     stats: () => ({ ...lastStats }),

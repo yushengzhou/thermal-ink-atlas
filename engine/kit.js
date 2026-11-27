@@ -582,28 +582,33 @@ export function hutongHouse(pen, B, world) {
     const toCourt = face === 'S' ? court.includes('S') || court === 'NS' : court.includes('E');
     pen.tag = 'win';
     if (toCourt) {
+      // the panes and the doors of a façade are one item each (Pen.shapes); lit together at night
       const bays = Math.max(1, Math.round(len / 3.3));
       const w = len / bays;
       const pil = [];
       const lat = [];
+      const panes = [];
+      const doors = [];
       for (let k = 0; k <= bays; k++) pil.push([P(k * w, 0), P(k * w, h - 0.3)]);
       for (let k = 0; k < bays; k++) {
         const a = k * w + 0.45;
         const b = (k + 1) * w - 0.45;
         if (hash3(B.index, k, 17) < 0.25) {
-          pen.shape([P(a + 0.4, 0), P(b - 0.4, 0), P(b - 0.4, 2.5), P(a + 0.4, 2.5)], hexRgb('#6b4e3a'), { lw: 0.5, t: 'win' });
+          doors.push([P(a + 0.4, 0), P(b - 0.4, 0), P(b - 0.4, 2.5), P(a + 0.4, 2.5)]);
           continue;
         }
-        pen.shape([P(a, 1), P(b, 1), P(b, h - 0.6), P(a, h - 0.6)], { k: 'win', h: hash3(B.index * 7 + (face === 'S' ? 0 : 1), k, 3), c: scaleRgb(WIN, 0.95) }, { lw: 0.45, over: 0.3, t: 'win' });
+        panes.push([P(a, 1), P(b, 1), P(b, h - 0.6), P(a, h - 0.6)]);
         for (let u = a + 0.8; u < b - 0.3; u += 0.8) lat.push([P(u, 1), P(u, h - 0.6)]);
         lat.push([P(a, 2.2), P(b, 2.2)]);
       }
+      if (panes.length) pen.shapes(panes, { k: 'win', h: hash3(B.index * 7 + (face === 'S' ? 0 : 1), 3), c: scaleRgb(WIN, 0.95) }, { lw: 0.45, over: 0.3, t: 'win' });
+      if (doors.length) pen.shapes(doors, hexRgb('#6b4e3a'), { lw: 0.5, t: 'win' });
       if (lat.length) pen.lines(lat, { lw: 0.3, stroke: LATTICE, a: 0.55, over: 0, t: 'win' });
       pen.lines(pil, { lw: 0.9, stroke: PILLAR, a: 0.85, over: 0, t: 'win' });
     } else {
-      for (let u = 3 + 3 * hash3(B.index, face === 'S' ? 1 : 2, 19); u < len - 1.5; u += 6.5) {
-        pen.shape([P(u, 2.6), P(u + 0.9, 2.6), P(u + 0.9, 3.3), P(u, 3.3)], { k: 'win', h: hash3(B.index, u | 0, 5), c: WIN }, { lw: 0.4, over: 0.2, t: 'win' });
-      }
+      const panes = [];
+      for (let u = 3 + 3 * hash3(B.index, face === 'S' ? 1 : 2, 19); u < len - 1.5; u += 6.5) panes.push([P(u, 2.6), P(u + 0.9, 2.6), P(u + 0.9, 3.3), P(u, 3.3)]);
+      if (panes.length) pen.shapes(panes, { k: 'win', h: hash3(B.index, face === 'S' ? 1 : 2, 5), c: WIN }, { lw: 0.4, over: 0.2, t: 'win' });
     }
   }
   // eave line
@@ -631,8 +636,7 @@ export function hutongHouse(pen, B, world) {
         tiles1.push([[x, m, z], [x, b - 0.15, h]]);
       }
       pen.tag = 'rd';
-      pen.lines(tiles0, { lw: 0.3, a: 0.32, over: 0, t: 'rd' });
-      pen.lines(tiles1, { lw: 0.35, a: 0.42, over: 0, t: 'rd' });
+      pen.lines(tiles0.concat(tiles1), { lw: 0.33, a: 0.38, over: 0, t: 'rd' });
       pen.line([[x0, m, z + 0.12], [x1, m, z + 0.12]], { lw: 1.5, a: 0.9, over: 0.2, t: 'rd' });
     } else {
       pen.shape([[a, y0, h], [m, y0, z], [m, y1, z], [a, y1, h]], roof, { lw: 0.9, t: 'r' });
@@ -643,8 +647,7 @@ export function hutongHouse(pen, B, world) {
         tiles1.push([[m, y, z], [b - 0.15, y, h]]);
       }
       pen.tag = 'rd';
-      pen.lines(tiles0, { lw: 0.35, a: 0.42, over: 0, t: 'rd' });
-      pen.lines(tiles1, { lw: 0.3, a: 0.32, over: 0, t: 'rd' });
+      pen.lines(tiles0.concat(tiles1), { lw: 0.33, a: 0.38, over: 0, t: 'rd' });
       pen.line([[m, y0, z + 0.12], [m, y1, z + 0.12]], { lw: 1.5, a: 0.9, over: 0.2, t: 'rd' });
     }
     pen.tag = 'r';
@@ -654,9 +657,9 @@ export function hutongHouse(pen, B, world) {
 
 /** Species look (block 5): leaf colours, crown blobs and alpha; pomegranates carry red fruit. */
 const SPECIES = {
-  pagodaTree: { leaf: [hexRgb('#4f6e3f'), hexRgb('#5c7c47'), hexRgb('#6d8c52'), hexRgb('#82a05e')], blobs: 9, a: undefined },
-  jujube: { leaf: [hexRgb('#6c8a4c'), hexRgb('#7b9a57'), hexRgb('#8eac63'), hexRgb('#a3bd74')], blobs: 6, a: 0.82 },
-  pomegranate: { leaf: [hexRgb('#4c6b3a'), hexRgb('#587a42'), hexRgb('#678a4b'), hexRgb('#7a9a56')], blobs: 6, a: undefined, fruit: hexRgb('#b8402f') },
+  pagodaTree: { leaf: [hexRgb('#4f6e3f'), hexRgb('#5c7c47'), hexRgb('#6d8c52'), hexRgb('#82a05e')], blobs: 7, a: undefined },
+  jujube: { leaf: [hexRgb('#6c8a4c'), hexRgb('#7b9a57'), hexRgb('#8eac63'), hexRgb('#a3bd74')], blobs: 4, a: 0.82 },
+  pomegranate: { leaf: [hexRgb('#4c6b3a'), hexRgb('#587a42'), hexRgb('#678a4b'), hexRgb('#7a9a56')], blobs: 3, a: undefined, fruit: hexRgb('#b8402f') },
 };
 
 function speciesTree(pen, T, i) {
@@ -668,13 +671,13 @@ function speciesTree(pen, T, i) {
   pen.shape([[x - tw, y + tw, 0], [x + tw, y - tw, 0], [x + tw * 0.8, y - tw * 0.8, trunkTop], [x - tw * 0.8, y + tw * 0.8, trunkTop]], hexRgb('#5e4a3b'), { lw: 0.7, t: 'trunk' });
   pen.tag = 'tree';
   const blobs = [];
-  const n = sp.blobs + Math.floor(hash3(i, 41) * 3);
+  const n = sp.blobs + Math.floor(hash3(i, 41) * 2);
   for (let k = 0; k < n; k++) {
     const a = (k / n) * Math.PI * 2 + hash3(i, k) * 0.8;
     const d = r * (0.35 + 0.15 * hash3(i, k, 2));
-    blobs.push([Math.cos(a) * d, Math.sin(a) * d, (hash3(i, k, 3) - 0.6) * r * 0.5, r * (0.5 + 0.12 * hash3(i, k, 4))]);
+    blobs.push([Math.cos(a) * d, Math.sin(a) * d, (hash3(i, k, 3) - 0.6) * r * 0.5, r * (0.55 + 0.12 * hash3(i, k, 4))]);
   }
-  blobs.push([0, 0, r * 0.35, r * 0.62]);
+  blobs.push([0, 0, r * 0.35, r * 0.66]);
   blobs.sort((p, q) => p[0] + p[1] + p[2] * 0.6 - (q[0] + q[1] + q[2] * 0.6));
   blobs.forEach(([dx, dy, dz, rr], k) => {
     const lit = (dz / r + 0.6 - (dx + dy) / (3 * r)) * 1.4;

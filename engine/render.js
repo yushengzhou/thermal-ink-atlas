@@ -112,6 +112,10 @@ export class Renderer {
     this.glass = 'lowe'; // glass type (block 3): pane colours
     this.spotFor = null; // (hq) -> reflection spot field on the 2 m grid, or null (block 3)
     this.wind = null; // block 4: {lines, items} wind lines (wind.js windLines + pen.stream items)
+    this.pool = world.scene.pooling !== false; // edge pooling on washes (off in block 5)
+    // block 5: skip shadow polygons off the tile. Not used elsewhere: Skia may anti-alias a smaller
+    // path differently, so blocks 1-4 keep their exact pixels
+    this.cullShadows = !!world.scene.cullShadows;
     const hs = Math.max(0, ...world.buildings.map((b) => b.h + (b.chimney ? b.chimney[2] - b.h : 0)));
     this.topMargin = Math.max(40, hs + 8); // m above ground that tiles must cover
   }
@@ -156,11 +160,20 @@ export class Renderer {
     const polys = shadowPolys(this.world, sun);
     const shadows = up ? polys.b.concat(polys.t).filter(Boolean).map((p) => {
       const out = new Float32Array(p.length);
+      let x0 = Infinity;
+      let y0 = Infinity;
+      let x1 = -Infinity;
+      let y1 = -Infinity;
       for (let i = 0; i < p.length; i += 2) {
         const q = iso(p[i], p[i + 1], 0);
         out[i] = q[0];
         out[i + 1] = q[1];
+        if (q[0] < x0) x0 = q[0];
+        if (q[0] > x1) x1 = q[0];
+        if (q[1] < y0) y0 = q[1];
+        if (q[1] > y1) y1 = q[1];
       }
+      out.bb = [x0, y0, x1, y1]; // projected bounds, to skip polygons off a tile
       return out;
     }) : [];
     // building roof temperatures and ground heat image for the thermal view
@@ -424,13 +437,20 @@ export class Renderer {
         const p = it.fp;
         ctx.beginPath();
         ctx.moveTo(p[0], p[1]);
-        for (let i = 2; i < p.length; i += 2) ctx.lineTo(p[i], p[i + 1]);
+        for (let i = 2; i < p.length; i += 2) {
+          // pen-up break between shapes of a multi-shape item (Pen.shapes, block 5)
+          if (p[i] !== p[i]) {
+            ctx.closePath();
+            i += 2;
+            ctx.moveTo(p[i], p[i + 1]);
+          } else ctx.lineTo(p[i], p[i + 1]);
+        }
         ctx.closePath();
         ctx.globalAlpha = mode === 'scaffold' ? 1 : alpha;
         ctx.fillStyle = rgbCss(fill);
         ctx.fill();
-        // pigment pooling at the edge of washes
-        if (mode !== 'scaffold' && (t === 'w' || t === 'r' || t === 'tree' || t === 'g')) {
+        // pigment pooling at the edge of washes (scene.pooling === false skips it: block 5, hundreds of small washes per tile)
+        if (mode !== 'scaffold' && this.pool && (t === 'w' || t === 'r' || t === 'tree' || t === 'g')) {
           ctx.globalAlpha = 0.28 * alpha;
           ctx.strokeStyle = rgbCss(scaleRgb(fill, 0.8));
           ctx.lineWidth = (lwBase * 1.6) / Z;
@@ -473,7 +493,13 @@ export class Renderer {
       const p = it.fp;
       ctx.beginPath();
       ctx.moveTo(p[0], p[1]);
-      for (let i = 2; i < p.length; i += 2) ctx.lineTo(p[i], p[i + 1]);
+      for (let i = 2; i < p.length; i += 2) {
+        if (p[i] !== p[i]) {
+          ctx.closePath();
+          i += 2;
+          ctx.moveTo(p[i], p[i + 1]);
+        } else ctx.lineTo(p[i], p[i + 1]);
+      }
       ctx.closePath();
       ctx.globalAlpha = 0.85 * hc.night;
       ctx.fillStyle = rgbCss(LIT);
@@ -529,7 +555,7 @@ export class Renderer {
       this.replay(g, objects, 'thermal', hc, Z, ox, oy, bb, lw);
     } else {
       this.replay(g, ground, 'day', hc, Z, ox, oy, bb, lw);
-      if (hc.shadows.length) this.drawShadows(g, hc, Z, ox, oy);
+      if (hc.shadows.length) this.drawShadows(g, hc, Z, ox, oy, this.cullShadows ? bb : null);
       if (hc.spot) this.drawSpots(g, hc, Z, ox, oy, bb);
       this.replay(g, objects, 'day', hc, Z, ox, oy, bb, lw);
       if (hc.night > 0) {
@@ -555,8 +581,9 @@ export class Renderer {
     return c;
   }
 
-  drawShadows(g, hc, Z, ox, oy) {
-    // union first (solid), then one translucent multiply so overlaps don't stack
+  drawShadows(g, hc, Z, ox, oy, bb = null) {
+    // union first (solid), then one translucent multiply so overlaps don't stack;
+    // bb (block 5): polygons wholly off the tile (drawing-plane bounds with a margin) are skipped
     if (!this.shadowScratch) this.shadowScratch = makeCanvas(TILE, TILE);
     const s = this.shadowScratch.getContext('2d');
     s.setTransform(1, 0, 0, 1, 0, 0);
@@ -565,6 +592,8 @@ export class Renderer {
     s.fillStyle = '#000';
     s.beginPath();
     for (const p of hc.shadows) {
+      const b = p.bb;
+      if (bb && b && (b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3])) continue;
       s.moveTo(p[0], p[1]);
       for (let i = 2; i < p.length; i += 2) s.lineTo(p[i], p[i + 1]);
       s.closePath();

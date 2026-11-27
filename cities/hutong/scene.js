@@ -118,6 +118,8 @@ export const SCENE = {
   shadeSamples: 4,
   svfDirs: 32,
   svfExact: true,
+  pooling: false, // no pigment pooling on the many small washes (bake time)
+  cullShadows: true, // draw only the shadow polygons that reach a tile (bake time)
   site: {
     lat: 39.9,
     lon: 116.4,

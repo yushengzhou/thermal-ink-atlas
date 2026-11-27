@@ -671,7 +671,7 @@ export const specificHumidity = (e, p = P_AIR) => (0.622 * e) / (p - 0.378 * e);
 export const qSat = (t) => specificHumidity(satVapour(t));
 
 // q_sat table for the model step (Math.exp per cell and minute is the slow
-// part): 230-370 K every 0.02 K; linear interpolation is within 1e-7 kg kg-1
+// part): 230-370 K every 0.02 K; linear interpolation is within 2e-7 kg kg-1
 // of the formula (checked in tests/unit/hutong.test.mjs).
 export const QSAT_T0 = 230;
 export const QSAT_DT = 0.02;
