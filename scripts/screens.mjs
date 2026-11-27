@@ -13,6 +13,7 @@ mkdirSync(`${root}thumbs`, { recursive: true });
 const AP = 'asphalt-park';
 const SR = 'sponge-retrofit';
 const GC = 'glass-cbd';
+const WF = 'waterfront';
 const shots = [
   [AP, 'docs/media/day-1500.jpg', 'hour=15&f=400', { width: 1280, height: 800 }],
   [AP, 'docs/media/thermal-1500.jpg', 'thermal&hour=15&f=400', { width: 1280, height: 800 }],
@@ -64,6 +65,21 @@ const shots = [
     },
   ],
   [GC, 'thumbs/glass-cbd.jpg', 'hour=15&f=400&notes=0&ui=0&cam=2.5,215,205', { width: 640, height: 400 }],
+  // block 4: wind lines by day, thermal at 15:00, the warm pond at 04:00, the air overlay, the sheltered-street card
+  [WF, 'docs/media/wf-day-1500-wind.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
+  [WF, 'docs/media/wf-thermal-1500.jpg', 'thermal&hour=15&f=640', { width: 1280, height: 800 }],
+  [WF, 'docs/media/wf-thermal-0400-pond.jpg', 'thermal&hour=4&f=640&cam=3.5,205,212', { width: 1280, height: 800 }],
+  [WF, 'docs/media/wf-air-overlay-1500.jpg', 'hour=15&f=640&air=1&notes=0&cam=3.5,200,95', { width: 1280, height: 800 }],
+  [
+    WF,
+    'docs/media/wf-shelter-card.jpg',
+    'hour=15&f=640',
+    { width: 1280, height: 800 },
+    async (page) => {
+      await page.click('#wind [data-card="shelter"]');
+    },
+  ],
+  [WF, 'thumbs/waterfront.jpg', 'hour=15&f=400&notes=0&ui=0&cam=2.5,170,150', { width: 640, height: 400 }],
 ];
 const browser = await chromium.launch();
 for (const [city, out, q, viewport, act] of shots) {

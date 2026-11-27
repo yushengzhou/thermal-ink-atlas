@@ -8,6 +8,10 @@ Hand-inked isometric city blocks that show urban heat through one heat-wave day:
 - Block 3, `glass-cbd`: glass towers and street canyons. Deep streets shade
   by day and cool slowly at night; glass façades throw reflected sun onto the
   street. Switch the glass between clear, low-e and mirror.
+- Block 4, `waterfront`: a river bank with wind corridors. Streets along the
+  river wind stay breezier (cooler pavement), streets across it are sheltered;
+  the river cools the air only a short way and the still pond is warm at night.
+  Wind lines show the assumed wind, not computed flow.
 
 Live: https://yushengzhou.github.io/thermal-ink-atlas/
 
@@ -19,7 +23,8 @@ modelled with a simple surface energy-balance model, not measured.
 ## Open it
 
 - Double-click `cities/asphalt-park/index.html`,
-  `cities/sponge-retrofit/index.html` or `cities/glass-cbd/index.html`.
+  `cities/sponge-retrofit/index.html`, `cities/glass-cbd/index.html` or
+  `cities/waterfront/index.html`.
   Each is one offline file.
 - Or serve the folder and open <http://localhost:8000/>:
 
@@ -39,6 +44,7 @@ modelled with a simple surface energy-balance model, not measured.
 | `terms` button | glossary of terms |
 | `B` (block 2) | swap Before / After |
 | `G` / `Shift+G` (block 3) | next / previous glass type |
+| `W` / `A` (block 4) | wind lines / water's air overlay on or off |
 
 ## Build and test
 
