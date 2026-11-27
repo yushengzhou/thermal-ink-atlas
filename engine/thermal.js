@@ -69,14 +69,15 @@ export function daylight(site) {
 
 /**
  * Air temperature (deg C): cosine rise from taMin at sunrise to taMax at
- * 15:00, cosine fall to the next sunrise.
+ * site.tmaxHour (default 15:00), cosine fall to the next sunrise.
  */
 export function airTemp(site, hour, rise) {
   const { taMin, taMax } = site;
+  const x = site.tmaxHour ?? 15;
   const h = ((hour % 24) + 24) % 24;
-  if (h >= rise && h <= 15) return taMin + ((taMax - taMin) * (1 - Math.cos((Math.PI * (h - rise)) / (15 - rise)))) / 2;
+  if (h >= rise && h <= x) return taMin + ((taMax - taMin) * (1 - Math.cos((Math.PI * (h - rise)) / (x - rise)))) / 2;
   const hh = h < rise ? h + 24 : h;
-  return taMax - ((taMax - taMin) * (1 - Math.cos((Math.PI * (hh - 15)) / (rise + 24 - 15)))) / 2;
+  return taMax - ((taMax - taMin) * (1 - Math.cos((Math.PI * (hh - x)) / (rise + 24 - x)))) / 2;
 }
 
 /** Clear-sky beam (normal) and diffuse (horizontal) irradiance, W m-2. */
@@ -910,13 +911,14 @@ export const wallTemp = (taK, kGlobal) => taK + 2 + (6 * kGlobal) / 900;
 
 /**
  * Wall-reflection coefficient of cell i: a_w (1 - SVF_open), times the crown
- * factor (1 - 0.75 cover) under trees as for the sky. Glass walls are taken
+ * factor (1 - 0.75 cover) under trees as for the sky (a_w: world.wallAlbedo
+ * if set, block 11). Glass walls are taken
  * out by the caller (they reflect specularly, see reflect.js).
  */
 export function wallReflectCoef(world, i) {
   const open = world.svfOpen ? world.svfOpen[i] : world.svf[i];
   const crown = world.bld[i] < 0 ? 1 - 0.75 * world.canopy[i] : 1;
-  return MODEL.wallAlbedo.value * Math.max(0, 1 - open) * crown;
+  return (world.wallAlbedo ?? MODEL.wallAlbedo.value) * Math.max(0, 1 - open) * crown;
 }
 
 /** Shortwave on a wall (azimuth mean): k0 = f_lit I cos(beta) / pi + 0.5 D; kG = 0.5 G (times ground albedo). */

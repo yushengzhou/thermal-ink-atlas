@@ -11,7 +11,7 @@ import { SOURCES, MATERIALS, GLASS } from '../engine/materials.js';
 import { GLOSSARY } from '../engine/glossary.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const MODULES = ['core', 'sun', 'materials', 'reflect', 'thermal', 'wind', 'world', 'pen', 'kit', 'life', 'render', 'glossary', 'retrofit', 'retroui', 'cbd', 'cbdui', 'waterfront', 'wfui', 'htkit', 'hutong', 'hutui', 'pkkit', 'parking', 'pkui', 'eskit', 'estate', 'esui', 'cpkit', 'campus', 'cpui', 'bskit', 'busstop', 'bsui', 'vgkit', 'village', 'vgui', 'app'];
+const MODULES = ['core', 'sun', 'materials', 'reflect', 'thermal', 'wind', 'world', 'pen', 'kit', 'life', 'render', 'glossary', 'retrofit', 'retroui', 'cbd', 'cbdui', 'waterfront', 'wfui', 'htkit', 'hutong', 'hutui', 'pkkit', 'parking', 'pkui', 'eskit', 'estate', 'esui', 'cpkit', 'campus', 'cpui', 'bskit', 'busstop', 'bsui', 'vgkit', 'village', 'vgui', 'dskit', 'desert', 'dsui', 'app'];
 /** Block-specific modules, by the scene flag that selects them. */
 export const BLOCKS = [
   { flag: /retrofit: true/, modules: ['retrofit', 'retroui'] },
@@ -23,6 +23,7 @@ export const BLOCKS = [
   { flag: /campusBlock: true/, modules: ['cpkit', 'campus', 'cpui'] },
   { flag: /busBlock: true/, modules: ['bskit', 'busstop', 'bsui'] },
   { flag: /villageBlock: true/, modules: ['vgkit', 'village', 'vgui'] },
+  { flag: /desertBlock: true/, modules: ['dskit', 'desert', 'dsui'] },
 ];
 /** What a left-out module exposes: only the predicates the core calls (always false there). */
 export const STUBS = {
@@ -36,6 +37,7 @@ export const STUBS = {
   campus: '{ isCampus: () => false }',
   busstop: '{ isBus: () => false }',
   village: '{ isVillage: () => false }',
+  desert: '{ isDesert: () => false }',
 };
 /** Modules a page needs, given its scene source. */
 export function modulesFor(scene) {
@@ -189,7 +191,7 @@ function build(city) {
 
   const meta = /title: '([^']+)'/.exec(scene)[1];
   const sub = /note: '([^']+)'/.exec(scene)[1];
-  const keys = /retrofit: true/.test(scene) ? '<kbd>B</kbd> before/after · ' : /glassBlock: true/.test(scene) ? '<kbd>G</kbd> glass · ' : /windBlock: true/.test(scene) ? '<kbd>W</kbd> wind · <kbd>A</kbd> air · ' : /hutongBlock: true/.test(scene) ? '<kbd>P</kbd> splash · ' : /parkingBlock: true/.test(scene) ? '<kbd>G</kbd> night release · ' : /estateBlock: true/.test(scene) ? '<kbd>S</kbd> 大寒 · <kbd>C</kbd> condensers · ' : /campusBlock: true/.test(scene) ? '<kbd>I</kbd> water the pitch · <kbd>U</kbd> burn limits · ' : /busBlock: true/.test(scene) ? '<kbd>K</kbd> waiting places · <kbd>U</kbd> burn flags · ' : /villageBlock: true/.test(scene) ? '<kbd>W</kbd> white roofs · <kbd>O</kbd> under the roof · ' : '';
+  const keys = /retrofit: true/.test(scene) ? '<kbd>B</kbd> before/after · ' : /glassBlock: true/.test(scene) ? '<kbd>G</kbd> glass · ' : /windBlock: true/.test(scene) ? '<kbd>W</kbd> wind · <kbd>A</kbd> air · ' : /hutongBlock: true/.test(scene) ? '<kbd>P</kbd> splash · ' : /parkingBlock: true/.test(scene) ? '<kbd>G</kbd> night release · ' : /estateBlock: true/.test(scene) ? '<kbd>S</kbd> 大寒 · <kbd>C</kbd> condensers · ' : /campusBlock: true/.test(scene) ? '<kbd>I</kbd> water the pitch · <kbd>U</kbd> burn limits · ' : /busBlock: true/.test(scene) ? '<kbd>K</kbd> waiting places · <kbd>U</kbd> burn flags · ' : /villageBlock: true/.test(scene) ? '<kbd>W</kbd> white roofs · <kbd>O</kbd> under the roof · ' : /desertBlock: true/.test(scene) ? '<kbd>C</kbd> street coating · <kbd>L</kbd> water used · ' : '';
   const html = read('engine/shell.html')
     .replace(/__TITLE__/g, meta)
     .replace('__SUBTITLE__', sub)

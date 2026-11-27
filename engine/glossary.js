@@ -221,7 +221,7 @@ export const GLOSSARY = {
     text: 'The temperature a wet surface cools to when evaporation alone sets it, from the air temperature and humidity: the drier the air, the further below the air it lies.',
     model: (S) => S.wetBulbLine,
     why: 'Splashed paving cannot get colder than this by evaporating, so it bounds how much a splash can cool.',
-    scenes: ['hutong'],
+    scenes: ['hutong', 'desert'],
   },
   // ---- block 6 (car park and brownfield) -------------------------------------
   heatStorage: {
@@ -324,7 +324,7 @@ export const GLOSSARY = {
     range: 'Lets through about 10–30% of the sun (unverified); Gilbert, Arizona at noon: rubber 46.7 °C under a sail against 87.2 °C in sun; Lubbock: 168 W m⁻² less radiation absorbed by a child.',
     src: 'brief8, vanos2016, vanos2017',
     why: 'It is the quickest shade a school can add; unlike a tree it does not cool the air by evaporation, and after sunset it holds a little warmth over the ground.',
-    scenes: ['campus'],
+    scenes: ['campus', 'desert'],
   },
   // ---- block 9 (busstop) -------------------------------------------------------
   transmittance: {
@@ -456,6 +456,38 @@ export const GLOSSARY = {
     src: 'ko2022, chicago',
     why: 'A retrofit judged by its brand-new albedo overstates the cooling people will get over its life.',
     scenes: ['sponge-retrofit'],
+  },
+  xeriscape: {
+    term: 'Xeriscape',
+    text: 'A garden or yard planned to need little or no watering: gravel or crushed granite instead of a lawn, with desert plants and trees.',
+    range: 'In Phoenix neighbourhoods, xeric yards were the warmest by day, then "oasis" yards, then fully watered (mesic) ones; by day the form of a neighbourhood mattered more than its landscaping.',
+    src: 'middel2014, brief11',
+    why: 'It saves a great deal of water, but bare gravel in the sun gets hot: the shade has to come from trees, sails or roofs instead.',
+    scenes: ['desert'],
+  },
+  ramada: {
+    term: 'Ramada',
+    text: 'An open-sided shelter: a solid roof on posts, without walls, the usual shade in desert parks and playgrounds.',
+    range: 'Sails, umbrellas and similar light shade lowered the radiant heat on a person by about 17 K in Tempe; arcades and overhangs by about 23–31 K.',
+    src: 'middel2021, colter2019, brief11',
+    why: 'Shade from a roof needs no water; the air moves freely beneath it.',
+    scenes: ['desert'],
+  },
+  referenceEt: {
+    term: 'Reference evapotranspiration (ET₀)',
+    text: 'The water a well-watered short grass would evaporate in a day under the local weather, in millimetres (1 mm is 1 litre per square metre). A real crop uses ET₀ times its crop coefficient.',
+    range: 'Phoenix in July about 7–8 mm a day (up to 10); bermudagrass about 0.78 of it, so about 5–7 L per m² a day.',
+    src: 'azmet, az1195, brief11',
+    why: 'It is what a lawn costs in water: in a desert summer, several litres per square metre every day.',
+    scenes: ['desert'],
+  },
+  vapourPressure: {
+    term: 'Vapour pressure (e_a)',
+    text: 'How much water vapour the air holds, as the part of the air pressure it makes up, in hectopascals (hPa).',
+    range: 'Desert summer air about 8–15 hPa (dew point 3–13 °C); a humid summer city 25–30 hPa.',
+    src: 'ncei, azmet, brief11',
+    why: 'Dry air makes a colder night sky and strong evaporation, so lawns, misters and sweat cool well, but only while there is water.',
+    scenes: ['desert'],
   },
 };
 
