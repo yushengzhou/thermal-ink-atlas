@@ -21,6 +21,8 @@ const tag = (v) => (v.basis !== 'cited' ? ` <span class="basis">${BASIS[v.basis]
 const srcLine = (keys) => `<p class="src">Sources: ${keys.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: ${gl('forceRestore', 'force-restore')}, simulated, on a 5 m grid with the lanes' sky view and sun from their own width and walls; the air temperature is fixed.</p>`;
 const close = '<button class="x" aria-label="close">×</button>';
 const MISS = ' <b>(band missed)</b>';
+/** A difference in words: "as warm", or "x.x °C warmer / cooler". */
+const than = (d) => (Math.abs(d) < 0.05 ? 'as warm' : `${fmt(Math.abs(d))} °C ${d > 0 ? 'warmer' : 'cooler'}`);
 
 /** The brief's bands the cards quote (docs/sources.md, Block 10, checks them all). */
 export const VG_BANDS = { laneNoon: 8, openNoon: 25, night: [2, 6], rust: [60, 75], white: [15, 25], asbestos: [50, 62], cool: [-2.5, -1] };
@@ -72,7 +74,7 @@ export function lanesCard(d) {
       <tr class="t"><td>the open square</td><td>—</td><td>${f2(sq.svf)}</td><td>${fmt(sq.tmrt[nn])} / ${fmt(sq.tmrt[15])} / ${fmt(sq.tmrt[ni])} °C</td></tr>
       <tr><td colspan="4" class="sub">Village lanes, ${gl('tmrt', 'Tmrt')} − air: ${K(L.village.tmrt[nn] - a[nn])} at ${hm(nn)}${noonMiss ? `, above the brief's +${VG_BANDS.laneNoon} K${MISS}` : ''}; the open square ${K(sq.tmrt[nn] - a[nn])}${openMiss ? `, below the brief's +${VG_BANDS.openNoon} K${MISS}` : ''}. At ${hm(ni)} the lanes are ${K(gap)} warmer than the square${nightMiss ? ` (brief +${VG_BANDS.night[0]} to +${VG_BANDS.night[1]} K${MISS})` : ` (brief +${VG_BANDS.night[0]} to +${VG_BANDS.night[1]} K)`}.</td></tr>
     </table>
-    <p class="note">A lane two metres wide between walls twenty metres high sees only a few per cent of the sky. By day the walls keep most of the sun off the floor; after sunset the same walls keep the floor and the people in it from losing their heat to the sky, so the lanes stay warm into the night while the open square cools.</p>
+    <p class="note">A lane two metres wide between walls twenty metres high sees only a few per cent of the sky. By day the walls keep much of the sun off the floor; after sunset the same walls stand between the people in the lane and the cold night sky, so a person there stays warm into the night while the open square cools.</p>
     <p class="lit">An urban village in Pingshan, Shenzhen, was warmest against its surroundings between 20:00 and 24:00 (mean 1.71 K over 18–24 h, at most 3.95 K), and its thermal-humidity index was worse than a green reference, especially at night (unverified). In old blocks of Guangzhou the pedestrian Tmrt peaked at 43.7 °C with the air at 41.3 °C (Deng et al. 2023). No measured Tmrt for lanes 1–3 m wide was found.</p>
     <p class="caveat">The lanes are narrower than the 5 m grid: their sky view and sun come from an endless canyon of the lane's width and its two walls (the grid's own value is shown for comparison); a crossing of two lanes is taken as the east–west lane. Walls are straight: no balconies, air-conditioner boxes, overhangs or washing over the lane, so at noon, with the sun ${fmt(d.noonAlt)}° high, ${pct(L.village.sun[nn])} of a lane floor is in the sun. Every wall is the engine's shared warm wall (air + 2 K, more in the sun), so a lane that sees almost only walls cannot be much cooler than that.${noonMiss ? ` Both are tested in docs/sources.md (Block 10, docs-only runs): without the direct sun in the lanes and with their walls at air + 2 K the lanes come inside the brief's band; each alone does not.` : ''} The air is fixed: the heat held in the lanes' air at night, and the lack of wind, are not modelled.</p>
     ${srcLine(['pingshan', 'deng2023', 'brief10'])}`;
@@ -300,7 +302,7 @@ export function vgApp(env) {
     el.querySelector('[data-under]').setAttribute('aria-pressed', String(st.under));
   }
   /** Repaint the marked roofs (the display list holds these colour arrays) and switch the model. */
-  function setCool(on) {
+  function setCool(on, init = false) {
     if (!!on === st.cool) return;
     st.cool = !!on;
     for (const [b, { bare, fills }] of world.vgFills ?? []) {
@@ -313,6 +315,7 @@ export function vgApp(env) {
     R.tiles.clear();
     R.scaffold = null;
     sync();
+    if (init) return; // at load (?coolroof=1): app.js draws once the plugin is in place
     env.reopen();
     env.redraw();
   }
@@ -361,7 +364,7 @@ export function vgApp(env) {
       air15: s.air[15],
     };
   }
-  if (env.query.get('coolroof') === '1') setCool(true);
+  if (env.query.get('coolroof') === '1') setCool(true, true);
   return {
     notes: () => vgNotes(scene, noteData()),
     look: () => ({ under: st.under, budget: 1 }),
@@ -398,7 +401,25 @@ export function vgApp(env) {
       const s = airShown(u.peak);
       return `<tr><td>${gl('indoorRadiant', 'radiant temperature under the roof')} now (proxy)</td><td>${fmt(u.radiant)} °C</td></tr><tr><td>room air now / day's peak (illustrative)</td><td>${K(u.value)}${u.capped ? ' (capped)' : ''} / ${K(s.value)}${s.capped ? ' (capped)' : ''} on the outdoor air</td></tr>${u.painted ? '<tr><td colspan="2" class="sub">Painted white by the residents (R).</td></tr>' : ''}`;
     },
-    glossary: () => ({}),
+    /**
+     * The shared sky-view and night-lag footnotes quote a block's own lines when it has no open lawn
+     * (glossaryStats merges the lines a block plugin passes under this key).
+     */
+    glossary: () => {
+      const s = stats();
+      const L = s.lanes.village;
+      const lag = (cells) => cells.reduce((a, i) => a + base.ts(i, 23), 0) / cells.length;
+      const sq = lag(squareCells(world));
+      const road = [];
+      const k = scene.ground.findIndex((g) => g.id === 'busroad');
+      for (let i = 0; i < world.n * world.n; i++) if (world.bld[i] < 0 && world.parcel[i] === k && world.canopy[i] === 0) road.push(i);
+      return {
+        hutong: {
+          svfLine: `Village lanes ${f2(L.svfMin)}–${f2(L.svfMax)} (from each lane's width and walls; the 5 m grid alone would give about ${f2(L.svfGrid)}); the open square about ${f2(s.square.svf)}.`,
+          lagLine: `At 11 pm, against the open square's concrete: the village lanes' floor ${than(lag(world.vg.lanes.filter((c) => c.zone === 'village' && c.kind === 'lane').map((c) => c.i)) - sq)}, the bus road's asphalt ${than(lag(road) - sq)}; a person in a lane still has Tmrt ${fmt(L.tmrt[VG.night.value] - s.square.tmrt[VG.night.value])} K above one on the square at 10 pm (the walls, not the floor, hold off the night sky).`,
+        },
+      };
+    },
     /** Urban village block (block 10) only: state {cool, under}; set() it; numbers for the bands and cards; card HTML; the proxies; residents. */
     api: {
       state: () => ({ cool: st.cool, under: st.under }),

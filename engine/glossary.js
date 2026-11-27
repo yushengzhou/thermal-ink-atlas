@@ -373,7 +373,7 @@ export const GLOSSARY = {
     text: 'A former farming village that a growing city has surrounded. The villagers kept their housing plots and built them up into rooms and flats to rent, often to people who have moved to the city for work.',
     range: 'In Shenzhen, satellite surface heat islands of about 3.5 K over high-density urban villages, against 2.6 K for multi-storey and 1.6 K for high-rise housing; urban villages had the worst summer thermal-humidity index in one Shenzhen study.',
     src: 'wu2015, yi2022, brief10',
-    why: 'Dense, low-cost housing close to work: the lanes keep out much of the sun, but the heat that gets in stays late into the night.',
+    why: 'Dense, low-cost housing close to work: its narrow lanes keep out much of the sun by day, and keep people from cooling off under the open night sky.',
     scenes: ['village'],
   },
   handshakeBuilding: {
@@ -381,7 +381,7 @@ export const GLOSSARY = {
     text: 'A house built to the very edge of its plot, so close to the next one that neighbours could almost shake hands from window to window across the lane.',
     range: 'Lanes about 1–3 m wide between walls 18–25 m high: a sky view of about 0.04–0.16 at the lane floor (canyon formula).',
     src: 'brief10',
-    why: 'Such deep, narrow lanes are shaded for most of the day but see little sky, so they cool slowly after sunset.',
+    why: 'Such deep, narrow lanes are shaded for much of the day but see little sky, so a person in one loses little heat to the cold night sky after sunset.',
     scenes: ['village'],
   },
   indoorRadiant: {
