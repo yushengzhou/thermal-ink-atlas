@@ -9,6 +9,7 @@ Each value carries a source key and a basis tag:
 - *edge of cited range*
 - *interpretation of the source*
 - *engine assumption (no source)*
+- *calibrated to a measured value (by construction)*
 
 Values marked *unverified* have not been checked against the primary source yet; the heat cards
 label them the same way. "Cited" ranges are the research brief's figures, which it compiled from
@@ -69,6 +70,14 @@ the sources listed below without checking them.
 | Corrugated iron, newly painted white (`whiteTin`) | 0.65 [brief10] *cited value*, unverified (white-painted tin 0.65 new (brief, from the earlier briefs)) | 0.88 [brief10] *cited value*, unverified (white paint) | C 3000 J m⁻² K⁻¹ [brief10] *cited range*, unverified (the same sheet as the bare roof, brief 2-4 kJ m-2 K-1) | 0 [brief10] *cited value*, unverified (dry) | — |
 | Corrugated iron painted white (weathered paint) (`whiteTinAged`) | 0.5 [brief10] *cited value*, unverified (white-painted tin 0.50 aged (brief, from the earlier briefs)) | 0.88 [brief10] *cited value*, unverified (white paint) | C 3000 J m⁻² K⁻¹ [brief10] *cited range*, unverified (the same sheet as the bare roof, brief 2-4 kJ m-2 K-1) | 0 [brief10] *cited value*, unverified (dry) | — |
 | Flat concrete roof slab (`slabRoof`) | 0.25 [oke] *cited value*, unverified (concrete roof slab 0.25 (via the block-10 brief)) | 0.9 [oke] *cited value*, unverified (via the block-10 brief) | μ 1785 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified (concrete, as the shared concrete paving) | 0 [brief10] *cited value*, unverified (dry) | — |
+| Decomposed granite and gravel (xeriscape) (`gravel`) | 0.275 [brief11] *cited range*, unverified (brief 0.16-0.39 for gravel and decomposed granite (unverified); the middle value) | 0.92 [oke] *cited range*, unverified (as the shared stone and gravel path, cited 0.85-0.95) | μ 800 J m⁻² s⁻½ K⁻¹ [brief6] *interpretation of the source*, unverified (a loose gravel layer on dry ground: the shared bare dry soil (block 6: dry soil about 600, read up to 800)) | 0 [brief11] *interpretation of the source*, unverified (dry: a xeriscape yard is not watered) | — |
+| Irrigated lawn (bermudagrass) (`desertLawn`) | 0.25 [oke] *edge of cited range*, unverified (as the shared lawn, cited 0.16-0.26) | 0.95 [oke] *edge of cited range*, unverified (as the shared lawn, cited 0.90-0.95) | μ 1400 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (as the shared lawn, soil 600-2200) | 0.9 [brief11] *cited range*, unverified (an engine assumption of the brief, 0.85-0.95; the middle value (the spec's 0.9). A fixed share of net radiation: it does not react to the dry air) | — |
+| Street with a light reflective coating (`coolCoat`) | 0.345 [coolPave2024] *cited range*, unverified (coated reflectance 0.30-0.39 [coolPave2024]; the middle value. Uncoated, the street is the shared aged asphalt (0.12), lighter than the 0.036 measured there) | 0.95 [oke] *cited value*, unverified (as asphalt) | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified (the asphalt beneath) | 0 [brief] *cited value*, unverified (dry impervious) | — |
+| Shade sail (knitted HDPE) (`desertSail`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used: only the transmission of the cloth matters here) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0.15 [brief11] *cited range*, unverified (the spec's 0.15, inside the brief's suggested 0.10-0.25 (no measured value checked; unverified)) |
+| Ramada (shade roof on posts) (`ramada`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [brief11] *cited value*, unverified (an opaque roof: no direct sun through it (the spec)) |
+| Arcade (covered walkway along the shops) (`arcadeRoof`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [brief11] *cited value*, unverified (an opaque roof (the brief's arcades, tunnels and overhangs)) |
+| Mesquite tree (Prosopis) (`mesquite`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.7 [brief] *cited range*, unverified (not used: leaf temperature is the shared canopy formula) | sun let through, tr 0.3 [middel2021] *calibrated to a measured value (by construction)*, unverified (the share of sun through the crown, calibrated (scripts/desert.mjs calibrateMesquite: bisection, 0.302, rounded) so that the mesquites' mean Tmrt at 15:00 is 16.7 K below open sun, as measured under Prosopis [middel2021]; no measured leaf area was found (brief). As exp(-0.5 LAI): LAI about 2.4) |
+| Palo verde tree (Parkinsonia) (`paloVerde`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.7 [brief] *cited range*, unverified (not used: leaf temperature is the shared canopy formula) | sun let through, tr 0.3 [brief11] *engine assumption (no source)*, unverified (taken as the mesquite's calibrated crown (0.3): no measured value was found; the brief groups the two native trees) |
 
 Not used by the grid model:
 
@@ -91,6 +100,11 @@ Not used by the grid model:
 - `adPanel`: A vertical panel: it blocks the direct sun on the 5 m grid (as a thin opaque box) and at the waiting points; it reflects no sunlight and its own temperature is not computed.
 - `bridgeDeck`: Over the road a flat opaque screen 6 m up; its walking surface is computed at points as the shared dark metal thin layer (metal).
 - `bridgeRoof`: A flat opaque screen 2.65 m above the deck.
+- `desertSail`: Not used by the grid model as a surface: a flat screen 4 m up that lets through tr of the sun; the cells under it count as fully covered for the sky view (crown factor), so the warm-wall term stands in for the cloth overhead.
+- `ramada`: Not used by the grid model as a surface: a flat opaque screen 3.2 m up; the cells under it count as fully covered for the sky view (crown factor).
+- `arcadeRoof`: Not used by the grid model as a surface: a flat opaque screen 3.5 m up along the shopfronts; with the building beside it, the walkway sees little sky.
+- `mesquite`: Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.
+- `paloVerde`: Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.
 
 Shown on the heat cards as a caveat:
 
@@ -306,6 +320,25 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[hess2018]** Hess et al. (2018) Journal of Environmental and Public Health, 7973519, doi 10.1155/2018/7973519, pilot evaluation of Ahmedabad's Heat Action Plan (via the block-10 brief): the May 2010 heat wave about 1,344 excess deaths (+43.1%); about 1,190 deaths avoided per year after the plan (unverified)
 - **[carbonBriefAc]** Carbon Brief on air conditioning in India (via the block-10 brief): 4.9% of households owned an air conditioner in 2020-21, about 8% in 2024 (unverified)
 - **[dialogueEarth]** Dialogue Earth on outdoor workers and heat in China (via the block-10 brief): about 100 million outdoor workers (unverified)
+- **[brief11]** Research brief docs/research/desert-brief.md (block 11; values compiled from the sources below, items marked unverified there are flagged here; the sail transmittance, the stucco and gravel albedos, the mesquite crown and the lawn evaporative fraction are assumptions or ranges of the brief, no measured value was checked)
+- **[ncei]** NOAA NCEI U.S. Climate Normals 1991-2020, Phoenix Sky Harbor (USW00023183), via the block-11 brief: July mean maximum 41.4 C and minimum 29.2 C; hourly normals with the minimum near 06 MST, the maximum at 16-17 MST and a dew point of 11-14 C (unverified)
+- **[azmet]** Arizona Meteorological Network (AZMET), Phoenix Encanto station, hot days of 2023-25, via the block-11 brief: minimum 28.7 C, dew point 11-13 C, reference evapotranspiration 7.8-8.9 mm a day (July mean 7.1-7.8), wind 1.5-2.2 m/s, lowest relative humidity 12-14% (unverified)
+- **[climateGov2023]** NOAA Climate.gov and NWS Phoenix on July 2023 in Phoenix, via the block-11 brief: mean high 46.0 C, mean low 32.7 C, 31 days at or above 110 F (43.3 C), a record warm low of 97 F (36.1 C) (unverified)
+- **[nwsPsr]** NWS Phoenix (PSR) on summer 2024, via the block-11 brief: 70 days at or above 110 F (43.3 C); 118 F (47.8 C) on 5 and 8 July (unverified)
+- **[middelKrayenhoff2019]** Middel & Krayenhoff (2019) Science of the Total Environment 687, 137-151, doi 10.1016/j.scitotenv.2019.06.085, pedestrian thermal exposure in Tempe during record heat (MaRTy cart); the block-11 brief quotes it together with Middel et al. 2021: peak sunlit Tmrt 76.2 C, 76.4 C in a bright east-west canyon at an air of 48.5 C, pedestrian wind under 1 m/s on average (unverified)
+- **[colter2019]** Colter, Middel & Martin (2019) Urban Forestry & Urban Greening 44, 126429, doi 10.1016/j.ufug.2019.126429, natural and artificial shade (trees and ramadas) in Phoenix neighbourhood parks (the brief gives no numbers from it; unverified)
+- **[az1195]** University of Arizona Cooperative Extension publication AZ1195, via the block-11 brief: bermudagrass crop coefficient 0.78 in July (title not recorded; unverified)
+- **[amwua]** Arizona Municipal Water Users Association (AMWUA) landscape watering guidance, via the block-11 brief: a lawn watered every 3 days, about 6.4 mm a day applied; a desert tree with a 6.1 m canopy about 890 L every 7-21 days, i.e. about 1.4-4.3 L per m2 of canopy a day (unverified)
+- **[templeton2018]** Templeton, Vivoni et al. (2018) J. Geophys. Res. Atmospheres 123, 2111-2128, doi 10.1002/2017JD027845, water and energy fluxes over urban land covers in Phoenix (matched by a title search to the brief's "Templeton 2018: turf has the highest evaporative fraction"; unverified)
+- **[gober2009]** Gober, Brazel, Quay, Myint et al. (2010, online 2009) J. American Planning Association 76(1), 109-121, doi 10.1080/01944360903433113, watered landscapes and the Phoenix heat island (via the block-11 brief): 32.8% more outdoor water for 0.41-0.82 K per hour faster evening cooling (unverified)
+- **[middel2014]** Middel et al. (2014) Landscape and Urban Planning 122, 16-28, doi 10.1016/j.landurbplan.2013.11.004, urban form and landscaping in Phoenix local climate zones (via the block-11 brief): xeric yards warmest, then oasis, then mesic; by day the form matters more than the landscaping (unverified)
+- **[middel2015]** Middel, Chhetri & Quay (2015) Urban Forestry & Urban Greening 14, 178-186, doi 10.1016/j.ufug.2014.09.010, trees and cool roofs in Phoenix neighbourhoods (via the block-11 brief): about -0.14 K of air per 1% more tree canopy (unverified)
+- **[vanos2022]** Vanos, Wright, Kaiser et al. (2022) International Journal of Biometeorology 66, 357-369, doi 10.1007/s00484-020-02056-y, evaporative misters for cooling and comfort (via the block-11 brief): Tmrt -7.6 K, PET -6.5 K, UTCI -4.4 K (unverified)
+- **[huang2025]** Huang, Bou-Zeid, Vanos, Middel et al. (2025) Landscape and Urban Planning 256, 105290, doi 10.1016/j.landurbplan.2024.105290, misting as blue infrastructure (via the block-11 brief): up to -17.5 K of air in a model, 4.87 L per hour per nozzle, 0.3-0.7 nozzles per m2, i.e. 1.5-3.4 L per m2 an hour (unverified)
+- **[coolPave2024]** City of Phoenix and Arizona State University, cool pavement pilot, phase 2 report (October 2024; report not read), via the block-11 brief: coated road surface -6.7 K at noon and -5.8 K in the afternoon; pedestrian Tmrt +3.2 K at noon and +2.5 K in the afternoon; air -0.07 K on average, a little warmer at 8-9 pm; reflectance 0.30-0.39 coated against 0.036 (unverified)
+- **[erell2014]** Erell, Pearlmutter, Boneh & Kutiel (2014) Urban Climate 10, 367-386, doi 10.1016/j.uclim.2013.10.005, high-albedo materials can worsen pedestrian heat stress in street canyons (via the block-11 brief)
+- **[mcdph2025]** Maricopa County Department of Public Health, annual report on heat deaths in 2025 (April 2026), via the block-11 brief: heat-related deaths 339 (2021), 425 (2022), 645 (2023), 608 (2024), 430 (2025: 313 outdoors, 111 indoors); in 2024, 49% of those who died were homeless and substances were involved in 57%; news reports gave 427 for 2025; a preliminary 585 for 2026 is unverified
+- **[stull2011]** Stull (2011) J. Applied Meteorology and Climatology 50, 2267-2269, doi 10.1175/JAMC-D-11-0143.1, wet-bulb temperature from relative humidity and air temperature (via the block-11 brief: about 22 C at 43 C and 12 hPa)
 - **[ren2025]** Ren, Xu & Jiang (2025) Buildings 15(13), 2166, doi 10.3390/buildings15132166, thermal environment of public space in high-density old districts on Shenzhen's urban fringe (the brief cites it as a Baishizhou CFD study of wind shadows in the lanes; not checked)
 - **[noaa]** NOAA Global Monitoring Laboratory, General Solar Position Calculations (solareqns.PDF)
 - **[brutsaert]** Brutsaert (1975) Water Resources Research 11(5) 742-744, clear-sky emissivity
@@ -373,7 +406,7 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Siheyuan (四合院)** (hutong only): In this model: Courtyard sky view 0.21–0.87 (10th–90th percentile), under a mat awning 0.18; Harbin's traditional courtyards measured 0.22–0.37. [this model]
 - **Tianpeng (天棚), the summer mat awning** (hutong only): Typical: Reed mats let through about 10–30% of the sun (the brief, unverified); this model uses 20%. [deng, brief5]
 - **Surface water store (W)** (hutong only): In this model: Each splash leaves 1 mm at 19:00; on the splashed lanes 0.49 mm is left at 21:00 and 0.20 mm at 23:00, and it is gone by morning. [this model]
-- **Wet-bulb temperature** (hutong only): In this model: At 21:00 the air is 31.0 °C and its wet-bulb 23.9 °C; the coolest wet paving stays 2.7 K above the wet-bulb. [this model]
+- **Wet-bulb temperature** (hutong, desert only): In this model: At 21:00 the air is 31.0 °C and its wet-bulb 23.9 °C; the coolest wet paving stays 2.7 K above the wet-bulb. [this model]
 - **Heat storage** (parking only): In this model: At 11 pm open asphalt is 1.9 °C above the air and still gives back 105 W m⁻²; bare soil 68 W m⁻², the rusty shed roof 1 W m⁻². [this model]
 - **Damping depth (d)** (parking only): In this model: With the Stempihar inputs: asphalt 0.127 m, concrete 0.132 m (admittance 1573 and 1877; the model uses 1200 and 1785). [this model]
 - **Ground heat flux (G)** (parking only): In this model: Open asphalt takes in up to 276 W m⁻² (at 11:00) and gives back 121 W m⁻² at 8 pm, 113 W m⁻² at 4 am. [this model]
@@ -386,7 +419,7 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Artificial turf** (campus only): Typical: In summer sun 65–80 °C, at times over 85 °C: 9.4–34 K hotter than natural grass at the surface, but only 0.5–1.2 K warmer in the air above (review of 23 studies); at night it cools to about the grass temperature. [singh2024, jim2016]
 - **Crumb-rubber infill** (campus only): Typical: Lab tests: SBR 53.5 °C against TPE 45.6 °C under the same lamp; a shock pad adds about 1.8 K, the blade colour 1–2 K. [singh2024]
 - **Contact-burn threshold** (campus only): Typical: 1 min of contact: metal 51 °C, stone and concrete 56 °C, plastics and wood 60 °C; 10 min: 48 °C for all of them; 8 h: 43 °C. The lower end for children (unverified, via CENELEC Guide 29). [iso13732]
-- **Shade sail** (campus only): Typical: Lets through about 10–30% of the sun (unverified); Gilbert, Arizona at noon: rubber 46.7 °C under a sail against 87.2 °C in sun; Lubbock: 168 W m⁻² less radiation absorbed by a child. [brief8, vanos2016, vanos2017]
+- **Shade sail** (campus, desert only): Typical: Lets through about 10–30% of the sun (unverified); Gilbert, Arizona at noon: rubber 46.7 °C under a sail against 87.2 °C in sun; Lubbock: 168 W m⁻² less radiation absorbed by a child. [brief8, vanos2016, vanos2017]
 - **Solar transmittance (τ)** (busstop only): Typical: 10 mm twinwall polycarbonate: clear 0.80, opal 0.47, bronze 0.43 (a datasheet, unverified); opaque metal, PV and ad panels 0; the solar heat gain coefficient of a window is a different number. [brettMartin, brief9]
 - **Profile angle (φ)** (busstop only): Typical: At 35° N on 20 July the sun stands 61° high at 14:00 and 25° at 17:00, from the west-south-west to the west; a roof 1.45 m above a seated head must reach (that height) / tan φ past the head to shade it. [brief9]
 - **Headway** (busstop only): Typical: Here 10 min (an assumption of the brief, 5–15 min), with gaps spread by a coefficient of variation of 0.4 (0.3–0.5, unverified); riders who arrive at random then wait (h / 2)(1 + cv²) on average. [brief9, fan2002]
@@ -403,6 +436,10 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Bowen ratio and evaporative fraction** (sponge-retrofit only): Typical: Green roofs: Bowen ratio below 1 to about 2 in field data; this block uses EF 0.5 for a wet and 0.25 for a dry green roof (the brief’s values); dry paving EF near 0. [heusinger, brief2]
 - **Sponge city (海绵城市)** (sponge-retrofit only): Typical: Target: absorb and use 70% of rainfall on site; 20% of built-up area by 2020, 80% by 2030. [sponge2015]
 - **Ageing (aged vs new)** (sponge-retrofit only): Typical: Cool pavement coating 0.26 → 0.18 within a year; cool roofs must reach 0.72 new or 0.50 after 3 years (Chicago code). [ko2022, chicago]
+- **Xeriscape** (desert only): Typical: In Phoenix neighbourhoods, xeric yards were the warmest by day, then "oasis" yards, then fully watered (mesic) ones; by day the form of a neighbourhood mattered more than its landscaping. [middel2014, brief11]
+- **Ramada** (desert only): Typical: Sails, umbrellas and similar light shade lowered the radiant heat on a person by about 17 K in Tempe; arcades and overhangs by about 23–31 K. [middel2021, colter2019, brief11]
+- **Reference evapotranspiration (ET₀)** (desert only): Typical: Phoenix in July about 7–8 mm a day (up to 10); bermudagrass about 0.78 of it, so about 5–7 L per m² a day. [azmet, az1195, brief11]
+- **Vapour pressure (e_a)** (desert only): Typical: Desert summer air about 8–15 hPa (dew point 3–13 °C); a humid summer city 25–30 hPa. [ncei, azmet, brief11]
 
 ## Model vs literature targets
 
@@ -2650,3 +2687,276 @@ Misses:
 - **Language:** "urban village (城中村)", "informal settlement", "residents"; vulnerability is described as exposure plus a lack of
   resources, with cited and hedged figures only; asbestos cement is named a health hazard in one line, without advice. The block's
   text is checked for the words the brief rules out (`tests/unit/village.test.mjs`).
+
+## Block 11: desert courtyard neighbourhood
+
+The eleventh block (`cities/desert`) is an invented 400 m neighbourhood in the manner of a hot desert city like Phoenix,
+at 33.43° N, 112.0° W on 15 July (no daylight saving): air 30–43 °C with the warmest air at 16:30, vapour pressure
+12 hPa, wind 1.5 m/s, a clear sky. 50 one- and two-storey courtyard houses of light stucco (four wings
+around a 10 m courtyard on a 30 m plot) stand in gravel yards (xeriscape) with mesquites and palo verdes; east of the cross street,
+a gravel plaza has three shade sails, a ramada, eight mesquites and four palo verdes, a row of shops has an arcade along Main Street,
+and a café patio has a misted roof; south of Main Street lies an irrigated bermudagrass lawn (Lawn Park). Main Street carries a light
+reflective coating (`C`, the panel button or `?coat=0` shows it bare); the water each kind of ground uses is `L`, the panel button
+or `?water=1`. Its research brief is [`docs/research/desert-brief.md`](research/desert-brief.md).
+
+### Block 11 parameters
+
+The block's materials (`gravel`, `desertLawn`, `coolCoat`, `desertSail`, `ramada`, `arcadeRoof`, `mesquite`, `paloVerde`) are in
+the parameter table above; they are cut from the other pages at build time (`@page desert` in `engine/materials.js`). House roofs
+are the shared aged cool roof and dark membrane, sidewalks the shared concrete, the cross street and the residential streets the
+shared aged asphalt. The block's own values live in `engine/desert.js` (`DS`):
+
+| Parameter | Value |
+|---|---|
+| `lat` | 33.43 [brief11] *cited value*, unverified (site latitude, ° N (Phoenix Sky Harbor about 33.43); longitude −112.0, time zone UTC−7 (no daylight saving), 15 July) |
+| `taMin` | 30 [brief11] *interpretation of the source*, unverified (the design day's coolest air, °C: between the 1991–2020 July normal (29.2) and July 2023 (32.7), as the brief suggests; AZMET hot days 28.7) |
+| `taMax` | 43 [brief11] *interpretation of the source*, unverified (the design day's warmest air, °C: between the July normal (41.4) and July 2023 (46.0), as the brief suggests) |
+| `tmaxHour` | 16.5 [ncei] *cited range*, unverified (clock hour of the warmest air: the hourly normals put it at 16–17 MST; 16:30, the middle (the spec). Every other block keeps 15:00) |
+| `vapour` | 12 [brief11] *interpretation of the source*, unverified (vapour pressure, hPa: the brief's 12 (dew point about 10 °C); AZMET hot days have dew points of 11–13 °C (13–15 hPa), June's normal 3.2 °C (7.7 hPa)) |
+| `wind` | 1.5 [azmet] *edge of cited range*, unverified (site wind, m/s, the h_c input: AZMET hot days 1.5–2.2 m/s (2 m), the lower end; Sky Harbor 10 m normals are 2.4–4.7 m/s and pedestrian-level wind in Tempe under 1 m/s (h_c uses the formula of the shared engine, issue #20)) |
+| `wallAlbedo` | 0.6 [brief11] *cited range*, unverified (the light stucco walls' albedo for the wall-reflection term (world.wallAlbedo, this block only; the shared value is 0.3): the brief's 0.5–0.7, the middle (the spec)) |
+| `sailZ` | 4 [engine] *engine assumption (no source)*, unverified (height of the shade sails, m (engine assumption)) |
+| `ramadaZ` | 3.2 [engine] *engine assumption (no source)*, unverified (height of the ramada roof, m (engine assumption); the café patio roof is 3 m) |
+| `arcadeZ` | 3.5 [engine] *engine assumption (no source)*, unverified (height of the arcade roof, m (engine assumption)) |
+| `hour` | 15 [brief11] *cited value*, unverified (the bands' hour, 15:00 (the brief's bands are at 15:00)) |
+| `noon` | 12 [engine] *engine assumption (no source)*, unverified (the coating's supplementary hour, 12:00 local clock time (the Phoenix trial's "noon"); solar noon here is about 12:34) |
+| `night` | 21 [engine] *engine assumption (no source)*, unverified (the "after sunset" hour, 21:00 (sunset about 19:35); set before the first run) |
+| `mesquiteTarget` | -16.7 [middel2021] *cited value*, unverified (the calibration target for the mesquite crown, K: ΔTmrt under Prosopis against open sun (Middel et al. 2021), as the brief says ("mesquite LAI: calibrate to −16.7 K")) |
+| `treeWater` | 1.4–4.3 [amwua] *cited range*, unverified (water a desert tree takes, L per m² of canopy a day: about 890 L every 7–21 days for a 6.1 m canopy (AMWUA via the brief); quoted on the cards and the water overlay, not modelled) |
+| `lawnApplied` | 6.4 [amwua] *cited value*, unverified (water a Phoenix lawn is given, mm (= L m⁻²) a day: every 3 days, about 6.4 mm a day (AMWUA via the brief); quoted) |
+| `misters` | 1.5–3.4 [huang2025] *cited range*, unverified (water a misted patio uses, L per m² an hour: 4.87 L h⁻¹ per nozzle at 0.3–0.7 nozzles per m² (Huang et al. 2025 via the brief); quoted, misting is not modelled) |
+| `warm` | 6 [engine] *engine assumption (no source)*, unverified (coarse 10-min spin-up days (block 3's opts.warm, with its stability guard); convergence is tested on 1-min days as everywhere) |
+
+### What is new in the engine (all other blocks pixel-identical)
+
+- **The hour of the warmest air** is a site setting, `site.tmaxHour` (default 15:00): the air is a cosine from `taMin` at sunrise to
+  `taMax` at that hour and back down to the next sunrise. Only this block sets it (16:30, the hourly normals' 16–17 MST [ncei]).
+  At 15:00 the air is 42.4 °C here, 0.6 K below the day's peak.
+- **A block's own wall albedo**, `world.wallAlbedo` (default the shared 0.3): the wall-reflection term K_wr = α_w·(1 − SVF_open)·c·K_wall
+  uses the light stucco's 0.6 here. It changes the sunlight walls throw onto the ground and onto a person, not the walls'
+  temperature: every wall is still the shared warm wall (air + 2 K + 6 K × K/900, issue #28).
+- Nothing else is new: sails, the ramada, the arcade and the patio are block 5's flat screens (their tr; the cells under them take the
+  crown factor for the sky view), the desert trees are block 5's species crowns, the lawn and gravel are ground materials, and the
+  coating toggle runs the street's cells again with aged asphalt (as block 10's white roofs) and merges them into the model.
+
+### Where people stand (cell classes)
+
+Defined before the first band run, by geometry only. The **open reference** is the plaza's gravel cells with nothing over their centre,
+no crown and sky view ≥ 0.85, by day those in full sun (sunlit > 0.95): 663 cells at 15:00. A cell counts for a **shade kind**
+at an hour if that kind's shadow alone covers its centre (shadow polygons; no building or other kind) and the model gives it at
+most the kind's transmission + 0.2 of the sun; at night, the cells under the kind's footprint (its screen, or within the crown's radius).
+Mean radiant temperature (°C) and its difference from the open reference (K):
+
+| Shade | footprint cells | cells 15:00 / 21:00 | SVF | sun | 12:00 | 15:00 | 21:00 | ground 15:00 °C |
+|---|---|---|---|---|---|---|---|---|
+| shade sails (τ 0.15, 4 m) | 48 | 36 / 48 | 0.25 | 15% | 48.0 (−21.9) | 50.8 (−22.9) | 38.2 (+9.8) | 47.2 |
+| ramada (opaque, 3.2 m) | 16 | 12 / 16 | 0.25 | 0% | 42.3 (−27.6) | 44.6 (−29.0) | 38.0 (+9.5) | 42.4 |
+| arcade (opaque, 3.5 m, beside the shops) | 33 | 32 / 33 | 0.17 | 0% | — | 46.7 (−27.0) | 39.1 (+10.7) | 43.7 |
+| café patio roof (opaque, 3 m, concrete) | 12 | 10 / 12 | 0.22 | 0% | 42.2 (−27.7) | 44.5 (−29.2) | 38.4 (+10.0) | 40.9 |
+| mesquites (crown τ 0.30, calibrated) | 45 | 36 / 45 | 0.52 | 36% | 53.3 (−16.5) | 56.9 (−16.8) | 36.3 (+7.9) | 52.5 |
+| palo verdes (crown τ 0.30, as the mesquite) | 6 | 7 / 6 | 0.40 | 41% | — | 64.8 (−8.8) | 35.4 (+6.9) | 57.3 |
+| the open reference (plaza gravel) | 726 | 663 / 726 | — | 100% | 69.9 | 73.6 | 28.5 | 65.7 |
+
+Air 38.3 / 42.4 / 39.5 °C. The 200 courtyard cells: sky view 0.43, 56% in sun at 15:00, Tmrt 68.5 °C at 15:00
+and 36.0 °C at 21:00; ground 59.9 °C at 15:00.
+
+### The mesquite calibration
+
+No measured leaf area was found for mesquite or palo verde (the brief); the brief says to calibrate the mesquite crown to the measured
+ΔTmrt under Prosopis, −16.7 K [middel2021]. `calibrateMesquite` (scripts/desert.mjs) bisects the crown transmission (both species
+together, as shipped) with the whole block run again at each step; it gave 0.302, shipped as 0.30 (an LAI of about 2.4 in exp(−0.5 LAI)):
+mesquites −16.76 K at 15:00. That row is **by construction** and the palo verdes, which take the same crown, are
+**semi-constructed**. The calibration ran after the parameter commit and before the first band run; it is the only value set from a model run.
+
+### Lawn, water and gravel
+
+Open lawn in full sun (748 cells): 40.9 °C at 15:00 (air 42.4 °C), 29.3 °C at 03:00. Water evaporated over
+the design day (`Thermal.evaporation`, EF × max(Q*, 0) over 2.45 MJ kg⁻¹ on the stored 15-min values): 6.47 mm (L m⁻²) on average,
+6.37–6.52 across the lawn, against 5–7 from reference ET × the July crop coefficient [azmet, az1195] and about
+6.4 mm applied [amwua]. EF 0.9 is a fixed share of the positive net radiation: it does not respond to the dry air and
+draws no advected heat (the brief estimates a real lawn's latent flux at about its daily net radiation). Sunlit open gravel (1593 cells):
+65.9 °C at 15:00. Water used by the other covers (overlay and cards) is quoted, not modelled: desert trees 1.4–4.3 L per m² of crown a day
+[amwua], misters 1.5–3.4 L m⁻² for each hour they run [huang2025], gravel and sails none.
+
+### The coated street
+
+Main Street's 228 cells (the cross street's intersection is bare asphalt) carry the coating (α 0.345, the middle of the
+trial's 0.30–0.39); without it they are the shared aged asphalt (α 0.12; the trial's bare streets measured 0.036, so the
+change in reflectance here, 0.225, is likely smaller than the trial's). Sunlit cells, coated / bare:
+
+| Hour | surface °C | change K | Tmrt °C | change K |
+|---|---|---|---|---|
+| 12:00 | 57.7 / 66.6 | −8.9 | 70.7 / 65.4 | +5.29 |
+| 15:00 | 60.9 / 69.8 | −8.8 | 74.5 / 71.1 | +3.37 |
+| 21:00 | 37.9 / 39.3 | −1.5 | 29.4 / 30.1 | −0.77 |
+
+The cross street's sunlit asphalt is 69.7 °C at 15:00. Measured in the trial: −6.7 K at noon and −5.8 K in the afternoon at the surface,
+pedestrian Tmrt +3.2 K and +2.5 K [coolPave2024]; high-albedo canyons can worsen pedestrian heat stress [erell2014].
+
+### Dry air
+
+At 12 hPa the clear-sky emissivity at 03:00 is 0.781 (Brutsaert) against 0.840 at 20 hPa: 380.1 against 408.8 W m⁻² of
+sky longwave. The air's wet-bulb temperature (the engine's psychrometric balance, block 5) is 21.6 °C at 15:00 and 21.7 °C at
+the day's peak (the brief: about 22 °C at 43 °C and 12 hPa [stull2011]). Misting and the lawn's cooling of the air are not modelled.
+
+### Walkers
+
+Walkers choose the shadier of two equal routes (across the plaza under the sails and mesquites or in the open, under the arcade or on
+the sunlit sidewalk, both Main Street sidewalks, both cross-street sidewalks, the mesquite path or the lawn, a residential street or the
+path between the houses). At 15:00 their density in shade is 5.52 times that in sun; 14 people dwell under the sails, the
+ramada, the mesquites, the arcade and the patio, in the plaza and on the lawn, and at 15:00 100% of them are in shade.
+
+### Sensitivity
+
+One change at a time, inside the brief's ranges (docs only; nothing shipped changes). Gravel (shipped 65.9 °C sunlit at 15:00, the
+open reference's Tmrt 73.6 °C):
+
+| Case | sunlit gravel 15:00 °C | open reference Tmrt °C |
+|---|---|---|
+| gravel α 0.16 | 70.6 | 72.0 |
+| gravel α 0.39 | 61.2 | 75.3 |
+| gravel μ 600 | 66.8 | 74.0 |
+| gravel μ 1000 | 65.0 | 73.2 |
+
+Lawn (shipped −1.6 K against the air at 15:00, 6.47 mm a day):
+
+| Case | surface − air K | mm a day |
+|---|---|---|
+| lawn EF 0.85 | +0.2 | 5.99 |
+| lawn EF 0.95 | −3.4 | 6.96 |
+| lawn α 0.16 | −1.0 | 7.40 |
+
+Coating (shipped −8.8 K surface, +3.37 K Tmrt at 15:00):
+
+| Case | surface K | Tmrt K |
+|---|---|---|
+| coating α 0.3 | −7.1 | +2.69 |
+| coating α 0.39 | −10.7 | +4.06 |
+
+The whole block run again (ΔTmrt against open sun at 15:00, the sails after sunset at 21:00, the courtyards' Tmrt, sunlit gravel and the open
+reference at 15:00; shipped: sails −22.9, ramada −29.0, arcade −27.0, mesquites −16.8, night +9.8 K,
+courtyards 68.5 °C):
+
+| Case | sails | ramada | arcade | mesquites | sails 21:00 | courtyards °C | gravel °C | open Tmrt °C |
+|---|---|---|---|---|---|---|---|---|
+| sail transmission 0.1 | −24.8 | −29.0 | −27.0 | −16.8 | +9.7 | 68.5 | 65.9 | 73.6 |
+| sail transmission 0.25 | −19.1 | −29.0 | −27.0 | −16.8 | +9.9 | 68.5 | 65.9 | 73.6 |
+| stucco wall albedo 0.5 | −22.8 | −29.0 | −27.1 | −16.8 | +9.8 | 67.6 | 65.9 | 73.6 |
+| stucco wall albedo 0.7 | −22.9 | −29.0 | −26.8 | −16.7 | +9.8 | 69.3 | 65.9 | 73.7 |
+| desert tree crowns' transmission 0.25 | −22.9 | −29.0 | −27.0 | −18.3 | +9.8 | 68.2 | 65.9 | 73.6 |
+| desert tree crowns' transmission 0.35 | −22.9 | −29.0 | −27.0 | −15.2 | +9.8 | 68.7 | 65.9 | 73.6 |
+| warmest air at 15:00 (the shared default) | −22.7 | −28.8 | −26.8 | −16.6 | +9.7 | 69.0 | 66.6 | 74.1 |
+| vapour pressure 15 hPa (dew point about 13 °C) | −23.6 | −29.7 | −27.8 | −17.2 | +8.6 | 69.0 | 66.6 | 74.7 |
+
+The sails' transmission at the brief's upper end (0.25) brings them inside band 6; nothing in range brings the ramada or the night
+gap inside. Moving the warmest air back to 15:00 warms the 15:00 air by 0.6 K and the gravel by
+0.7 K.
+
+### Causes of the misses (docs-only runs)
+
+Nothing shipped changes.
+
+- **Band 1** (sunlit gravel 65.9 °C against 55–63 °C, measured at an air of 41.0 °C): the gravel cells run again with
+  - shipped: 65.9 °C (air 42.4 °C at 15:00)
+  - (a) the July normal air, 29.2 → 41.4 °C: 64.7 °C (air 40.8 °C at 15:00)
+  - (b) direct sun 7% weaker: 64.0 °C (air 42.4 °C at 15:00)
+  - (c) gravel α 0.39 (the brief's upper end): 61.2 °C (air 42.4 °C at 15:00)
+  - (a), (b) and (c) together: 58.3 °C (air 40.8 °C at 15:00)
+
+  Each of (a) and (b) alone leaves it outside; the brief's upper albedo alone, or all three together, bring it inside. Likely causes: the
+  engine's clear-sky sun (the brief: noon global irradiance about 1037 W m⁻², 5–10% above Tempe's measured clear-day peaks) and an air
+  1.4 K warmer than on the measurement day; the albedo is unverified (0.16–0.39).
+- **Band 6** (sails −22.9 K, ramada −29.0 K against −14 to −20 K): with the person's view of the ground spread
+  over the neighbourhood (`tmrtView`: the downward face and the sides see each ground cell within 40 m by its view factor from 1.1 m,
+  instead of the own cell only) the sails are −20.7 K and the ramada −26.2 K; with that view and the sails' transmission at 0.25,
+  −17.3 K (inside); sails and ramada of 10 m instead of 20 m (same centres): −22.3 K and −28.7 K. Likely causes: the
+  sail's transmission in the lower half of the brief's range and the one-cell ground view; the ramada is opaque, and the band's
+  −17.3 K was measured under sails and umbrellas (opaque arcades and overhangs: −22.8 to −30.9 K), so its miss is likely the band's
+  scope, not tested further.
+- **Band 7** (palo verdes −8.8 K, semi-constructed): 6 of the 7 cells are in house courtyards
+  (−7.4 K), where the stucco walls reflect sunlight onto the ground and a person and are the shared warm walls; with those
+  walls at air + 2 K (no sun term) −9.8 K; the one cell in the open plaza: −17.4 K (inside). A person in the crown's
+  full shade (sunlit = τ) instead of the 5 m cell's mean sun: −10.4 K; with the neighbourhood ground view as well, −9.9 K.
+  Likely cause: the courtyards' reflected sun (the light walls' α_w 0.6), not the crown. Noticed after the first run: every palo
+  verde is centred on a cell corner, so no cell centre lies within its 3–3.5 m crown and the cells in its shade keep their open
+  (or courtyard) sky view (the crown factor counts by cell centre; 6 footprint cells in all); not changed.
+- **Band 9** (after sunset, under the sails +9.8, the ramada +9.5, the arcade +10.7, the mesquites
+  +7.9 K against 0 to +5 K): what is overhead at night at the engine's own leaf temperature (air − 0.5 K) instead of the
+  shared warm-wall term (air + 2 K), the shade cells run again: +8.5, +8.2, +9.3, +6.9 K; at a thin sheet's
+  own night temperature (sky above, its ground below, h_c on both faces: about 3.0 K below the air), run again:
+  +7.2, +7.0, +8.0, +5.8 K; the neighbourhood ground view: +9.5, +9.3, +10.6, +7.6 K.
+  None brings it inside. The ground under the sails is 3.2 K warmer than the open plaza at 21:00 (measured: shaded
+  ground 2.7–4.5 K cooler after sunset). Likely causes, not tested further: the crown factor hides three quarters of the night sky under
+  any screen or crown, and the open plaza sees the engine's clear, dry Brutsaert sky (Tmrt 28.5 °C at an air of 39.5 °C).
+- **Band 10** (a person on the coated street +3.37 K against +2.5 to +3.2 K): with the neighbourhood ground view (sidewalks,
+  yards and the cross street in view as well as the coated road) +3.06 K (inside). Likely cause: the one-cell ground view.
+
+### Acceptance bands
+
+At 15:00 (the brief's bands), "after sunset" 21:00, the open reference as above.
+
+| Check (spec #17) | Model | Band | Source | |
+|---|---|---|---|---|
+| 1. Sunlit open gravel at 15:00 (n 1593), °C | 65.92 °C | 55 to 63 | middel2021 | **outside** |
+| 1. Supplementary: the plaza's open gravel in full sun at 15:00 (n 663), °C | 65.67 °C | 55 to 63 | middel2021 | outside (supplementary, not counted) |
+| 2. Main Street coated − the same street bare at 15:00 (n 228 sunlit cells), K | -8.85 K | ≤ -5 | coolPave2024 | inside |
+| 2. Supplementary: the same at 12:00, K | -8.95 K | ≤ -5 | coolPave2024 | inside (supplementary, not counted) |
+| 2. Supplementary: Main Street coated − the cross street's bare asphalt at 15:00 (n 160), K | -8.78 K | ≤ -5 | coolPave2024 | inside (supplementary, not counted) |
+| 3. Irrigated lawn in full sun at 15:00 (n 748): surface − air, K | -1.55 K | ≤ 2 | middel2021 | inside |
+| 4. Irrigated lawn: water evaporated over the day, mean of the open lawn cells, mm (= L m⁻²) | 6.47 mm | 5 to 7 | az1195 | inside |
+| 4. Supplementary: the same, lowest cell, mm | 6.37 mm | 5 to 7 | az1195 | inside (supplementary, not counted) |
+| 4. Supplementary: the same, highest cell, mm | 6.52 mm | 5 to 7 | az1195 | inside (supplementary, not counted) |
+| 5. The plaza's open gravel in full sun at 15:00 (n 663): Tmrt, °C | 73.64 °C | 65 to 76 | middel2021 | inside |
+| 5. Supplementary: all sunlit open gravel at 15:00 (n 1593): Tmrt, °C | 74.00 °C | 65 to 76 | middel2021 | inside (supplementary, not counted) |
+| 5. Supplementary: the cross street's sunlit asphalt at 15:00: Tmrt, °C | 71.00 °C | 65 to 76 | middel2021 | inside (supplementary, not counted) |
+| 6. Under the shade sails at 15:00 (n 36): Tmrt − open sun, K | -22.86 K | -20 to -14 | middel2021 | **outside** |
+| 6. Under the ramada at 15:00 (n 12): Tmrt − open sun, K | -29.00 K | -20 to -14 | middel2021 | **outside** |
+| 6. Supplementary: under the café patio roof at 15:00 (n 10, concrete): Tmrt − open sun, K | -29.17 K | -20 to -14 | middel2021 | outside (supplementary, not counted) |
+| 7. Supplementary (by construction: the crown is calibrated to it): under the mesquites at 15:00 (n 36): Tmrt − open sun, K | -16.76 K | -20 to -14 | middel2021 | inside (supplementary, not counted) |
+| 7. Under the palo verdes at 15:00 (n 7; semi-constructed: the mesquite's calibrated crown): Tmrt − open sun, K | -8.81 K | -20 to -14 | middel2021 | **outside** |
+| 7. Supplementary (added after the first run): the palo verde cells in the courtyards (n 6): Tmrt − open sun, K | -7.37 K | -20 to -14 | middel2021 | outside (supplementary, not counted) |
+| 7. Supplementary (added after the first run): the palo verde cells in the open plaza (n 1): Tmrt − open sun, K | -17.44 K | -20 to -14 | middel2021 | inside (supplementary, not counted) |
+| 8. Under the arcade at 15:00 (n 32): Tmrt − open sun, K | -26.96 K | -31 to -20 | middel2021 | inside |
+| 9. After sunset (21:00), under the sails (n 48): Tmrt − the open plaza, K | 9.76 K | 0 to 5 | middel2021 | **outside** |
+| 9. After sunset (21:00), under the ramada (n 16): Tmrt − the open plaza, K | 9.52 K | 0 to 5 | middel2021 | **outside** |
+| 9. After sunset (21:00), under the arcade (n 33): Tmrt − the open plaza, K | 10.67 K | 0 to 5 | middel2021 | **outside** |
+| 9. After sunset (21:00), under the mesquites (n 45): Tmrt − the open plaza, K | 7.89 K | 0 to 5 | middel2021 | **outside** |
+| 9. Supplementary: after sunset, under the palo verdes (n 6), K | 6.94 K | 0 to 5 | middel2021 | outside (supplementary, not counted) |
+| 10. A person on Main Street at 15:00: Tmrt coated − bare, K | 3.37 K | 2.5 to 3.2 | coolPave2024 | **outside** |
+| 10. Supplementary: the same at 12:00, K | 5.29 K | 2.5 to 3.2 | coolPave2024 | outside (supplementary, not counted) |
+| Walkers at 15:00: density in shade over density in sun | 5.515 | ≥ 2 | melnikov | inside |
+| People dwelling at 15:00 (n 14) whose place is in shade | 1.000 | ≥ 0.5 | melnikov | inside |
+
+9 of 16 counted checks fall outside their band; 13 supplementary rows are not counted. By the brief's ten bands: 5 of 10 met (2, 3, 4, 5, 8); missed: 1, 6, 7, 9, 10. Band 7's only counted row (the palo verdes) is semi-constructed: their crown is the mesquite's, calibrated to the measured −16.7 K (the mesquite row is by construction and supplementary), so band 7 does not test the model independently. They are reported, not tuned away: every other parameter value is the brief's central value (or the shared value the brief names), committed before the first band run.
+
+Misses:
+- **Band 1** (sunlit gravel 65.9 °C against 55–63 °C): likely the engine's strong clear-sky sun and the warmer design-day air (tested
+  above); stated on the lawn card.
+- **Band 6** (sails −22.9 K, ramada −29.0 K): likely the sail's transmission and the one-cell ground view; for the
+  ramada, the band's scope (tested above); stated on the sails card.
+- **Band 7** (palo verdes −8.8 K, semi-constructed): likely the courtyards' reflected sun (tested above); stated on the sails card.
+- **Band 9** (after sunset +7.9 to +10.7 K): likely the crown factor and the dry night sky (the tests above
+  narrow it but do not close it); stated on the arcades card.
+- **Band 10** (+3.37 K): likely the one-cell ground view (tested above); stated on the coating card.
+
+### Disclosures
+
+- **Invented place:** no real neighbourhood, addresses or people; the street names are generic. The layout (plots, storeys, roofs,
+  the sails', ramada's and arcade's sizes and heights, which courtyards have a tree) is a design choice, committed with every parameter
+  value (commit 29ae537) before any model run; the mesquite crown was calibrated next (03e3d62), and the bands and cell classes were
+  committed (b6bd935) before the first band run.
+- **After the first band run:** two supplementary rows were added to band 7 (the palo verde cells in the courtyards and in the open), to
+  show where its miss comes from; they are not counted. Also noticed then, and not changed: the palo verdes stand on cell corners, so
+  the crown factor (sky view) applies to almost none of the cells in their shade (band 7 above). Drawing only, with no geometry or model input changed: the margin notes' label
+  offsets were moved so the five labels stay on screen at the opening view, and the coating layer was split at the cross street so it
+  is not drawn over the bare intersection. The card texts name the misses and their tested causes.
+- **Air fixed:** misters and the lawn do not cool the air; the patio's misters are drawn and quoted only; no wind from the streets, no
+  traffic or air-conditioner heat.
+- **Engine:** the shared warm-wall term (every wall and every screen or crown seen from below at air + 2 K, more in the sun; issue #28)
+  whatever its colour or shade; the person sees only their own cell's ground; h_c from the 1.5 m/s site wind with the shared formula
+  (issue #20); the engine's clear-sky sun, about 5–10% strong at noon by the brief; the lawn's EF is fixed (no response to the dry air,
+  no advection).
+- **Engine sun** (`sun.js`, issue #24): against suncalc at this site the sun differs by +0.15° in altitude and +0.13° in azimuth at 12:00, −0.04° in altitude and +0.27° in azimuth at 15:00: too small to move any band here.
+- **Thermal palette:** it tops out at 70 °C; the hottest surfaces here (the dark membrane roofs, up to 77.9 °C at 14:00) show in its top colour; the heat cards give the numbers.
+- **Health wording:** the heat-deaths card quotes the county's counts and its named risk factors, hedged, without advice beyond the
+  county's; nothing on it is modelled.
