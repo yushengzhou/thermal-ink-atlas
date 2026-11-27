@@ -902,7 +902,7 @@ export function boot(scene, root = document) {
       glass: glassInfo,
       wallsNow: sw ? sw.walls : null,
       glassNow: sw ? sw.glass : null,
-      matId: resolveId(mat, S.aged),
+      matId: retro ? resolveId(mat, S.aged) : mat,
       material: m.name,
       params: Object.fromEntries(paramKeys(m).map((k) => [k, m[k]])),
       caveat: m.caveat ?? null,

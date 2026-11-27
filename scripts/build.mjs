@@ -1,11 +1,33 @@
 // Build: inline engine modules + a city scene into one offline HTML file.
 // Usage: node scripts/build.mjs [city-id]   (default: every city in cities/)
 // Fails if the output is over 500 KB or references anything external.
+// Each page carries the core engine plus only its own block's modules; the
+// other blocks' modules are replaced by stubs whose predicates say "not this
+// block" (STUBS), so app.js and world.js never enter their code paths.
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const MODULES = ['core', 'sun', 'materials', 'reflect', 'thermal', 'wind', 'world', 'pen', 'kit', 'life', 'render', 'glossary', 'retrofit', 'retroui', 'cbd', 'cbdui', 'waterfront', 'wfui', 'app'];
+/** Block-specific modules, by the scene flag that selects them. */
+export const BLOCKS = [
+  { flag: /retrofit: true/, modules: ['retrofit', 'retroui'] },
+  { flag: /glassBlock: true/, modules: ['cbd', 'cbdui'] },
+  { flag: /windBlock: true/, modules: ['wind', 'waterfront', 'wfui'] },
+];
+/** What a left-out module exposes: only the predicates the core calls (always false there). */
+export const STUBS = {
+  retrofit: '{ isRetrofit: () => false }',
+  cbd: '{ isGlass: () => false }',
+  wind: '{ isWindBlock: () => false }',
+  waterfront: '{ isWaterfront: () => false }',
+};
+/** Modules a page needs, given its scene source. */
+export function modulesFor(scene) {
+  const own = BLOCKS.filter((b) => b.flag.test(scene)).flatMap((b) => b.modules);
+  const other = new Set(BLOCKS.flatMap((b) => b.modules).filter((m) => !own.includes(m)));
+  return MODULES.map((m) => ({ m, stub: other.has(m) }));
+}
 const LIMIT = 500 * 1024;
 
 // Each ES module becomes a function scope; imports become destructuring.
@@ -26,7 +48,7 @@ function build(city) {
     "'use strict';",
     '(() => {',
     'const __m = {};',
-    ...MODULES.map((m) => wrap(m, read(`engine/${m}.js`))),
+    ...modulesFor(scene).map(({ m, stub }) => (stub ? `__m['${m}'] = ${STUBS[m] ?? '{}'};\n` : wrap(m, read(`engine/${m}.js`)))),
     wrap('scene', scene),
     "__m['app'].boot(__m['scene'].SCENE);",
     '})();',
@@ -49,5 +71,8 @@ function build(city) {
   console.log(`cities/${city}/index.html  ${(size / 1024).toFixed(1)} KB`);
 }
 
-const cities = process.argv[2] ? [process.argv[2]] : readdirSync(`${root}cities`).filter((c) => existsSync(`${root}cities/${c}/scene.js`)).sort();
-for (const c of cities) build(c);
+// run as a script (tests import modulesFor without building)
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const cities = process.argv[2] ? [process.argv[2]] : readdirSync(`${root}cities`).filter((c) => existsSync(`${root}cities/${c}/scene.js`)).sort();
+  for (const c of cities) build(c);
+}
