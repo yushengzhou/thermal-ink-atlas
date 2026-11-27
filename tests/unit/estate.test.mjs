@@ -7,7 +7,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { base7, geometry7, court7, longSlabs, kFor2h, bands7, bandVerdicts, ES_NOTES, plumeTs7 } from '../../scripts/estate.mjs';
+import { base7, geometry7, court7, longSlabs, kFor2h, fullDecl, noonCompare, bands7, bandVerdicts, ES_NOTES, plumeTs7 } from '../../scripts/estate.mjs';
 import { bands7Markdown } from '../../scripts/estate-docs.mjs';
 import { ES, AC_SHARE, acShare, rayHits, sunHours, sillPoints, qRej, exhaustDT, rhoAir, siteHeat, flatsOf, plumeShares, plumeField, winterSite, clockOf, solarMinutes, courtShade, sunAtSolar, maskDepth, effHeight } from '../../engine/estate.js';
 import { hidden } from '../../engine/eskit.js';
@@ -67,6 +67,18 @@ test('long continuous slabs: the sill hours grow with the spacing, 1.47 H_eff gi
   assert.equal(longSlabs(1.47).hours, 1.5);
   const k = kFor2h();
   assert.ok(k > 1.47 && k < 1.5, `${k}`);
+});
+
+test('the engine sun vs the full NOAA declination: about 0.2 deg apart on the design days (documented, not changed); with the full one 1.47 H_eff gives the brief\'s 2 h', () => {
+  // full NOAA algorithm, reference values (solar-calculator spreadsheet method): 20 Jan 2026 and 20 Jul 2026 at 04:00 UT
+  assert.ok(Math.abs(fullDecl(2026, 1, 20, 4) - -20.129) < 0.01, `${fullDecl(2026, 1, 20, 4)}`);
+  const n = noonCompare();
+  assert.ok(Math.abs(n.full.jan - 34.87) < 0.01 && Math.abs(n.full.jul - 75.66) < 0.01, JSON.stringify(n.full));
+  // the brief's 34.8 / 75.6 match the full algorithm within 0.1 deg; the engine is about 0.2 deg off (pinned)
+  assert.ok(Math.abs(n.full.jan - 34.8) < 0.1 && Math.abs(n.full.jul - 75.6) < 0.1);
+  assert.ok(Math.abs(n.engine.jan - n.full.jan - -0.24) < 0.02 && Math.abs(n.engine.jul - n.full.jul - 0.22) < 0.02, JSON.stringify(n));
+  assert.equal(longSlabs(1.47, true).hours, 2);
+  assert.equal(kFor2h(true), 1.47);
 });
 
 test('sill points: every 2.5 m along each slab south face, 0.9 m up, eight flats per slab; the rule holds at every sill', () => {
@@ -175,7 +187,7 @@ test('the view test: a point is hidden by a tall block in front of it (south-eas
 // Rows outside their band, as shipped (see docs/sources.md, Block 7): pinned so a change shows up here.
 const PINNED_OUTSIDE = {
   '5. Soft: 15:00, building-shaded paving (n, SVF 0.33–0.85): Tmrt change per 0.1 less sky view, K (Lai et al.: +1.6 K, within × 2)': [0.174, 0.02],
-  '3. Supplementary: the checker on two long continuous slabs at G = 1.47 H_eff (75.4 m; a test scene, not the estate): sun at the middle sill, h (the brief: 2 h)': [1.5, 1e-9],
+  '3. Supplementary: the checker on two long continuous slabs at G = 1.47 H_eff (75.4 m; a test scene, not the estate), with the engine\'s approximate declination: sun at the middle sill, h (the brief: 2 h)': [1.5, 1e-9],
 };
 const key = (label) => label.replace(/n \d+/g, 'n');
 
@@ -191,7 +203,7 @@ test('acceptance bands: values, pinned deviations, verdicts, docs table in sync'
   assert.ok(rows.filter((r) => r.soft).every((r) => /^[57]\. Soft/.test(r.label)));
   assert.ok(rows.filter((r) => r.supp).every((r) => /Supplementary/.test(r.label)));
   assert.ok(md.includes(bands7Markdown(rows)), 'run `node scripts/sources.mjs` to refresh the table');
-  for (const s of ['**Air fixed:**', '**One wind**', '**National rule only:**', '**Rule counted at the sill, not the ground:**', '**The brief\'s 1.47 gives 1.5 h here:**', '**Invented estate:**', '**Misses:**', 'Not tuned', 'not changed after the bands were checked']) assert.ok(md.includes(s), `disclosure missing: ${s}`);
+  for (const s of ['**Air fixed:**', '**One wind**', '**National rule only:**', '**Rule counted at the sill, not the ground:**', '**The engine\'s sun is approximate:**', '**Invented estate:**', '**Misses:**', 'Not tuned', 'not changed after the bands were checked']) assert.ok(md.includes(s), `disclosure missing: ${s}`);
 });
 
 test('every band of the brief is checked: 1-7, each with at least one counted row', () => {

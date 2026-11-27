@@ -2,7 +2,7 @@
 // from the code and model runs (scripts/estate.mjs).
 import { BASIS } from '../engine/materials.js';
 import { ES, AC_SHARE, flatsOf, plumeShares, tsMean } from '../engine/estate.js';
-import { base7, geometry7, court7, longSlabs, kFor2h, plumeTs7, svfSlope7, sensitivity7, walkers7, bands7, bandVerdicts, ES_NOTES } from './estate.mjs';
+import { base7, geometry7, court7, longSlabs, kFor2h, noonCompare, plumeTs7, svfSlope7, sensitivity7, walkers7, bands7, bandVerdicts, ES_NOTES } from './estate.mjs';
 
 const f1 = (x) => (Math.round(x * 10) / 10).toFixed(1);
 const f2 = (x) => x.toFixed(2);
@@ -40,6 +40,9 @@ export function estateMarkdown() {
   const ct = court7();
   const L = longSlabs();
   const k2 = kFor2h();
+  const LF = longSlabs(ES.spacingK.value, true);
+  const k2f = kFor2h(true);
+  const nc = noonCompare();
   const pt = plumeTs7();
   const sl = svfSlope7(15);
   const sn = svfSlope7(21);
@@ -83,13 +86,17 @@ ${params.join('\n')}
 
 ### Sun and shadow geometry
 
-NOAA equations [noaa] at 35° N, 120° E, UTC+8 (the clock is within 12 min of true solar time on both days):
+NOAA equations [noaa] at 35° N, 120° E, UTC+8 (the clock is within 12 min of true solar time on both days). The engine
+(\`engine/sun.js\`, every block) takes the declination from NOAA's **fractional-year approximation**, which is about 0.2° off
+the full NOAA algorithm (the solar-calculator spreadsheet) on these dates; the engine is not changed here, since every block's
+pixels depend on it:
 
-- Solar noon altitude: 20 July ${f2(g.jul.alt)}°, 大寒 (20 January 2026) ${f2(g.jan.alt)}° (the brief: 75.6° and 34.8°, from β = 90° − φ + δ
-  with its own declinations; NOAA puts the July sun ${f2(g.jul.alt - 75.6)}° higher and the 大寒 sun ${f2(34.8 - g.jan.alt)}° lower).
+- Solar noon altitude, engine: 20 July ${f2(g.jul.alt)}°, 大寒 (20 January 2026) ${f2(g.jan.alt)}°. With the full NOAA declination:
+  ${f2(nc.full.jul)}° and ${f2(nc.full.jan)}°. The brief's 75.6° and 34.8° (β = 90° − φ + δ) agree with the full algorithm; the engine's
+  sun is ${f2(g.jul.alt - nc.full.jul)}° too high in July and ${f2(nc.full.jan - g.jan.alt)}° too low on 大寒 (band 1 allows ±0.3°).
 - On 20 July the sun is due east at ${hm(g.ew.east)} and due west at ${hm(g.ew.west)} solar time (the brief: 08:10 and 15:50); before and
   after, it shines on the slabs' north faces and the slabs shade a strip south of them.
-- A wall's north shadow at noon: ${g.jul.depth.toFixed(3)} H in July and ${g.jan.depth.toFixed(3)} H on 大寒 (brief 0.257 H and 1.44 H), i.e. ${f1(g.jul.depth * g.H)} m and
+- A wall's north shadow at noon: ${g.jul.depth.toFixed(3)} H in July and ${g.jan.depth.toFixed(3)} H on 大寒 (brief 0.257 H and 1.44 H; with the full declination ${(1 / Math.tan((nc.full.jul * Math.PI) / 180)).toFixed(3)} H and ${(1 / Math.tan((nc.full.jan * Math.PI) / 180)).toFixed(3)} H: the engine's sun explains the difference), i.e. ${f1(g.jul.depth * g.H)} m and
   ${f1(g.jan.depth * g.H)} m for an 18-floor slab. The engine's building mask (2 × 2 samples per 5 m cell) north of slab 2A at solar
   noon: ${f1(g.maskJul)} m and ${f1(g.maskJan)} m (the run of shaded samples, 2.5 m each).
 
@@ -115,9 +122,10 @@ the coefficient because the slabs are 100 m long with 30 m gaps (the low morning
 and G / H_eff is 1.56, not 1.47.
 
 The checker on two long continuous slabs (a 400 m test scene, not the estate) at G = 1.47 H_eff (${f1(L.G)} m) gives the middle
-sill **${f2(L.hours)} h**, not the brief's 2 h: the 大寒 noon sun here is ${f2(34.8 - g.jan.alt)}° lower than the brief's, and near the
-threshold the hours change fast (1.45: ${f2(sens.k[0].long)} h, 1.52: ${f2(sens.k[2].long)} h). With this model's sun 2 h needs G / H_eff ≈ ${k2}.
-The estate's 1.56 clears both.
+sill **${f2(L.hours)} h with the engine's approximate declination and ${f2(LF.hours)} h with the full NOAA declination** (the brief: 2 h).
+So the brief's coefficient is right; the shortfall is the engine's sun, ${f2(nc.full.jan - g.jan.alt)}° low on 大寒, and near the threshold the
+hours change fast (1.45: ${f2(sens.k[0].long)} / ${f2(sens.k[0].full)} h, 1.52: ${f2(sens.k[2].long)} / ${f2(sens.k[2].full)} h, engine / full). 2 h needs G / H_eff ≈ ${k2} with the engine's
+sun and ${k2f} with the full declination. The estate's 1.56 clears both, so the rule test above holds either way.
 
 ### The July courtyard
 
@@ -187,9 +195,9 @@ cells) it would change ground Ts by at most ${f2(pt.max)} K.
 |---|---|
 ${sens.rule.map((r) => `| ${r.label} | ${f2(r.min)} |`).join('\n')}
 
-| G / H_eff (long slabs) | G m | middle sill h |
-|---|---|---|
-${sens.k.map((x) => `| ${x.k} | ${f1(x.G)} | ${f2(x.long)} |`).join('\n')}
+| G / H_eff (long slabs) | G m | middle sill h, engine's sun | middle sill h, full NOAA declination |
+|---|---|---|---|
+${sens.k.map((x) => `| ${x.k} | ${f1(x.G)} | ${f2(x.long)} | ${f2(x.full)} |`).join('\n')}
 
 | Condenser case | Q_rej kW | exhaust ΔT at 35 °C, K |
 |---|---|---|
@@ -220,8 +228,10 @@ ${bands7Markdown(rows)}
   rules (such as the Beijing coefficient 1.7, unverified) are not checked; older estates were approved under GB 50180-93.
 - **Rule counted at the sill, not the ground:** the rule's point is 0.9 m above the ground-floor level (the floor taken at
   grade); trees do not count; the towers' ground floors are lobbies and shops (not tested).
-- **The brief's 1.47 gives 1.5 h here:** with this model's sun (NOAA, 20 January 2026) two long slabs at 1.47 H_eff give the
-  middle sill ${f2(L.hours)} h; about ${k2} gives 2 h. The estate stands at 1.56 and every sill gets at least ${f2(R.min)} h.
+- **The engine's sun is approximate:** \`sun.js\` uses NOAA's fractional-year declination, about 0.2° off the full algorithm
+  (大寒 noon ${f2(g.jan.alt)}° vs ${f2(nc.full.jan)}°; July ${f2(g.jul.alt)}° vs ${f2(nc.full.jul)}°); the brief agrees with the full algorithm. Two long slabs at
+  1.47 H_eff give the middle sill ${f2(L.hours)} h with the engine's sun and ${f2(LF.hours)} h with the full declination. The estate stands at
+  1.56 and every sill gets at least ${f2(R.min)} h with the engine's sun. Not changed in this block (it would move every block's pixels).
 - **Invented estate:** layout, flat counts, condensers per flat, the AC profile, the plume width and the plume wall term
   are assumptions; the shops' condensers are left out.
 - **Lawn:** the lawns use block 1's irrigated lawn (EF 0.8), so they run cooler than a dry worn lawn; worn patches are bare soil.

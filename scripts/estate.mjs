@@ -6,10 +6,10 @@
 import { SCENE } from '../cities/estate/scene.js';
 import { buildWorld } from '../engine/world.js';
 import { shadeClassField, runModel, buildingMask, wallTemp, cellMat } from '../engine/thermal.js';
-import { solarPosition } from '../engine/sun.js';
+import { solarPosition, sunVector } from '../engine/sun.js';
 import {
   ES, estateSetup, estateStats, winterSite, ewCrossing, shadowDepth, maskDepth, courtShade, sunAtSolar, clockOf, ruleCheck, sunHours, sillPoints,
-  effHeight, qRej, exhaustDT, rhoAir, acShare, siteHeat, plumeLw, tsMean, tmrtMean,
+  effHeight, svfSlope, qRej, exhaustDT, rhoAir, acShare, siteHeat, plumeLw, tsMean, tmrtMean,
 } from '../engine/estate.js';
 import { Life, shadeDensity, shadeAt } from '../engine/life.js';
 
@@ -29,7 +29,7 @@ export const ES_NOTES = {
   perFlat: 'heat rejected per flat at full use, kW; the brief\'s estate estimate (2,400 flats x 3.3 kW on 16 ha, about 50 W m-2); an assumption',
   condensers: 'brief: 2-3 per flat, stacked per floor 2.8-3.0 m apart (unverified); here 2 on the south face and 1 on the north face',
   plumeWidth: 'width of the warm wall strip above a stack of condensers, m; an assumption of this block',
-  wallDT: 'wall warming in the plume zones at full use; the brief: at most 2 K (assumption); the upper end is used, so the Tmrt it adds is an upper estimate',
+  wallDT: 'wall warming in the plume zones at full use; an assumption of the brief (at most 2 K), not a cited range; the upper end is used, so the Tmrt it adds is an upper estimate',
   acProfile: 'share of flats running AC by hour (AC_SHARE in engine/estate.js): 0.2 at 08:00, 0.45 in the afternoon, 1.0 at 20:00-21:00, 0.55 at 05:00; an assumption of this block',
 };
 
@@ -87,8 +87,60 @@ export function court7() {
   return { rows, B, yN, beyond16: beyond, far: Math.max(...rows.map((r) => r.far)), noon: rows.find((r) => r.tst === 720) };
 }
 
-/** The checker on long continuous slabs (a test scene, not the estate): two 400 m slabs G = k H_eff apart; sun hours at the middle sill. */
-export function longSlabs(k = ES.spacingK.value) {
+/**
+ * Solar declination (deg) from the full NOAA algorithm (the solar-calculator
+ * spreadsheet: apparent longitude, corrected obliquity) at a UT instant. The
+ * engine (sun.js) uses NOAA's fractional-year Fourier approximation instead,
+ * which is about 0.2 deg off on the design days; this is for the docs only.
+ */
+export function fullDecl(year, month, day, utHour) {
+  const jd = 367 * year - Math.floor((7 * (year + Math.floor((month + 9) / 12))) / 4) + Math.floor((275 * month) / 9) + day + 1721013.5 + utHour / 24;
+  const T = (jd - 2451545) / 36525;
+  const r = Math.PI / 180;
+  const L0 = (280.46646 + T * (36000.76983 + T * 0.0003032)) % 360;
+  const M = 357.52911 + T * (35999.05029 - 0.0001537 * T);
+  const C = Math.sin(M * r) * (1.914602 - T * (0.004817 + 0.000014 * T)) + Math.sin(2 * M * r) * (0.019993 - 0.000101 * T) + Math.sin(3 * M * r) * 0.000289;
+  const om = 125.04 - 1934.136 * T;
+  const lam = L0 + C - 0.00569 - 0.00478 * Math.sin(om * r);
+  const eps0 = 23 + (26 + (21.448 - T * (46.815 + T * (0.00059 - T * 0.001813))) / 60) / 60;
+  const eps = eps0 + 0.00256 * Math.cos(om * r);
+  return Math.asin(Math.sin(eps * r) * Math.sin(lam * r)) / r;
+}
+
+/** Declination at local solar noon of a site's day, full NOAA algorithm. */
+export const noonDecl = (site) => fullDecl(site.year ?? 2026, site.month, site.day, 12 - site.lon / 15);
+
+/** Noon altitudes on 20 July and 大寒 with the engine's declination and with the full NOAA declination. */
+export function noonCompare() {
+  const site = SCENE.site;
+  const win = winterSite(site);
+  return {
+    engine: { jul: shadowDepth(site).alt, jan: shadowDepth(win).alt },
+    full: { jul: 90 - site.lat + noonDecl(site), jan: 90 - site.lat + noonDecl(win) },
+  };
+}
+
+/** Sun samples as solarSamples, with one fixed declination (deg) and the hour angle from true solar time. */
+function fixedSuns(lat, decl, t0 = 480, t1 = 960, step = ES.ruleStep.value) {
+  const out = [];
+  const r = Math.PI / 180;
+  for (let t = t0; t < t1 - 1e-9; t += step) {
+    const ha = ((t + step / 2) / 4 - 180) * r;
+    const sa = Math.sin(lat * r) * Math.sin(decl * r) + Math.cos(lat * r) * Math.cos(decl * r) * Math.cos(ha);
+    const alt = Math.asin(sa) / r;
+    let az = Math.acos(Math.max(-1, Math.min(1, (Math.sin(decl * r) - Math.sin(lat * r) * sa) / (Math.cos(lat * r) * Math.cos(alt * r))))) / r;
+    if (ha > 0) az = 360 - az;
+    out.push({ t, alt, az, d: alt > 0 ? sunVector(alt, az) : null });
+  }
+  return out;
+}
+
+/**
+ * The checker on long continuous slabs (a test scene, not the estate): two
+ * 400 m slabs G = k H_eff apart; sun hours at the middle sill on 大寒, with
+ * the engine's sun (default) or with the full NOAA declination (full).
+ */
+export function longSlabs(k = ES.spacingK.value, full = false) {
   const h = 18 * ES.floorHeight.value;
   const hEff = h - ES.groundFloor.value - ES.sillHeight.value;
   const y1 = 100;
@@ -98,7 +150,8 @@ export function longSlabs(k = ES.spacingK.value) {
   ];
   const world = { buildings, scene: { site: SCENE.site } };
   const p = { x: 200, y: y1 + 0.05, z: ES.groundFloor.value + ES.sillHeight.value, b: 0 };
-  return { k, G: k * hEff, ...sunHours(world, p, winterSite(SCENE.site)) };
+  const win = winterSite(SCENE.site);
+  return { k, G: k * hEff, ...sunHours(world, p, win, full ? { suns: fixedSuns(win.lat, noonDecl(win)) } : {}) };
 }
 
 let tsRun = null;
@@ -127,30 +180,12 @@ export function plumeTs7() {
 /** Shaded ground at hour h: least-squares slope of Tmrt on SVF over building-shaded ground cells (no crown), K per unit SVF. */
 export function svfSlope7(h = 15) {
   const { world, T } = base7();
-  const xs = [];
-  const ys = [];
-  for (let i = 0; i < world.n * world.n; i++) {
-    if (world.bld[i] >= 0 || world.canopy[i] > 0) continue;
-    if (T.sunlit(i, h) > 0.05) continue;
-    const m = cellMat(world, i);
-    if (m !== 'concrete' && m !== 'asphalt') continue;
-    xs.push(world.svf[i]);
-    ys.push(T.tmrt(i, h));
-  }
-  const mx = xs.reduce((a, x) => a + x, 0) / xs.length;
-  const my = ys.reduce((a, x) => a + x, 0) / ys.length;
-  let sxy = 0;
-  let sxx = 0;
-  xs.forEach((x, k) => {
-    sxy += (x - mx) * (ys[k] - my);
-    sxx += (x - mx) ** 2;
-  });
-  return { n: xs.length, slope: sxy / sxx, svf: [Math.min(...xs), Math.max(...xs)] };
+  return svfSlope(world, T, h);
 }
 
-/** Smallest G / H_eff (to 0.005) that gives the long slabs' middle sill 2 h of 大寒 sun with this model's sun. */
-export function kFor2h() {
-  for (let k = 1.4; k < 1.7; k += 0.005) if (longSlabs(k).hours >= ES.ruleHours.value - 1e-9) return Math.round(k * 1000) / 1000;
+/** Smallest G / H_eff (to 0.005) that gives the long slabs' middle sill 2 h of 大寒 sun (engine's sun, or the full NOAA declination). */
+export function kFor2h(full = false) {
+  for (let k = 1.4; k < 1.7; k += 0.005) if (longSlabs(k, full).hours >= ES.ruleHours.value - 1e-9) return Math.round(k * 1000) / 1000;
   return null;
 }
 
@@ -170,7 +205,7 @@ export function sensitivity7() {
     const pts = sillPoints(world);
     const step1 = Math.min(...pts.filter((_, k) => k % 4 === 0).map((p) => sunHours(world, p, site, { step: 1 }).hours));
     r.push({ label: '1-min steps (every 4th sill)', min: step1 });
-    const k = [1.45, 1.47, 1.52].map((kk) => ({ k: kk, G: kk * st.hEff, long: longSlabs(kk).hours }));
+    const k = [1.45, 1.47, 1.52].map((kk) => ({ k: kk, G: kk * st.hEff, long: longSlabs(kk).hours, full: longSlabs(kk, true).hours }));
     const ac = [
       { label: 'shipped: 3.5 kW, EER 3.3, 0.6 m³/s', q: qRej(), dt: exhaustDT(35) },
       { label: 'fan 0.5 m³/s', q: qRej(), dt: exhaustDT(35, qRej(), 0.5) },
@@ -241,9 +276,11 @@ export function bands7() {
   add(`3. Lowest 大寒 sun at any ground-floor sill (n ${R.sills.length}), h`, R.min, ES.ruleHours.value, null, 'gb50180', 'h');
   add('3. Row spacing G / H_eff, lowest of rows 1–3', Math.min(...R.slabs.filter((s) => s.k !== null).map((s) => s.k)), ES.spacingK.value, null, 'brief7');
   const L = longSlabs();
-  const k2 = kFor2h();
-  add(`3. Supplementary: the checker on two long continuous slabs at G = 1.47 H_eff (${L.G.toFixed(1)} m; a test scene, not the estate): sun at the middle sill, h (the brief: 2 h)`, L.hours, 1.75, 2.25, 'brief7', 'h', { supp: true });
-  add(`3. Supplementary: G / H_eff that gives 2 h at the middle sill of the long slabs with this model's sun (the brief: 1.47)`, k2, 1.45, 1.52, 'brief7', '', { supp: true });
+  const LF = longSlabs(ES.spacingK.value, true);
+  add(`3. Supplementary: the checker on two long continuous slabs at G = 1.47 H_eff (${L.G.toFixed(1)} m; a test scene, not the estate), with the engine's approximate declination: sun at the middle sill, h (the brief: 2 h)`, L.hours, 1.75, 2.25, 'brief7', 'h', { supp: true });
+  add('3. Supplementary: the same long slabs with the full NOAA declination (the brief\'s sun): sun at the middle sill, h', LF.hours, 1.75, 2.25, 'brief7', 'h', { supp: true });
+  add('3. Supplementary: G / H_eff that gives 2 h at the middle sill of the long slabs, engine\'s approximate declination (the brief: 1.47)', kFor2h(), 1.45, 1.52, 'brief7', '', { supp: true });
+  add('3. Supplementary: the same with the full NOAA declination', kFor2h(true), 1.45, 1.52, 'brief7', '', { supp: true });
   // 4: the July courtyard
   add(`4. July, 10:00–16:00 solar time: deepest shade slab 2A casts into the courtyard north of it, m (no shade beyond 0.37 H = ${(0.37 * g.H).toFixed(1)} m)`, ct.far, null, 0.37 * g.H, 'brief7', 'm');
   const want = (0.257 * g.H) / SCENE.gap;

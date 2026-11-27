@@ -1466,18 +1466,22 @@ lawn trees `pagodaTree` (block 5). The block's own values live in `engine/estate
 | `perFlat` | 3.3 [brief7] *engine assumption (no source)*, unverified (heat rejected per flat at full use, kW; the brief's estate estimate (2,400 flats x 3.3 kW on 16 ha, about 50 W m-2); an assumption) |
 | `condensers` | 2 south + 1 north per flat [brief7] *cited range*, unverified (brief: 2-3 per flat, stacked per floor 2.8-3.0 m apart (unverified); here 2 on the south face and 1 on the north face) |
 | `plumeWidth` | 1.5 [engine] *engine assumption (no source)*, unverified (width of the warm wall strip above a stack of condensers, m; an assumption of this block) |
-| `wallDT` | 2 [brief7] *edge of cited range*, unverified (wall warming in the plume zones at full use; the brief: at most 2 K (assumption); the upper end is used, so the Tmrt it adds is an upper estimate) |
+| `wallDT` | 2 [brief7] *engine assumption (no source)*, unverified (wall warming in the plume zones at full use; an assumption of the brief (at most 2 K), not a cited range; the upper end is used, so the Tmrt it adds is an upper estimate) |
 | `acProfile` | peak 20:00-21:00 [engine] *engine assumption (no source)*, unverified (share of flats running AC by hour (AC_SHARE in engine/estate.js): 0.2 at 08:00, 0.45 in the afternoon, 1.0 at 20:00-21:00, 0.55 at 05:00; an assumption of this block) |
 
 ### Sun and shadow geometry
 
-NOAA equations [noaa] at 35° N, 120° E, UTC+8 (the clock is within 12 min of true solar time on both days):
+NOAA equations [noaa] at 35° N, 120° E, UTC+8 (the clock is within 12 min of true solar time on both days). The engine
+(`engine/sun.js`, every block) takes the declination from NOAA's **fractional-year approximation**, which is about 0.2° off
+the full NOAA algorithm (the solar-calculator spreadsheet) on these dates; the engine is not changed here, since every block's
+pixels depend on it:
 
-- Solar noon altitude: 20 July 75.88°, 大寒 (20 January 2026) 34.63° (the brief: 75.6° and 34.8°, from β = 90° − φ + δ
-  with its own declinations; NOAA puts the July sun 0.28° higher and the 大寒 sun 0.17° lower).
+- Solar noon altitude, engine: 20 July 75.88°, 大寒 (20 January 2026) 34.63°. With the full NOAA declination:
+  75.66° and 34.87°. The brief's 75.6° and 34.8° (β = 90° − φ + δ) agree with the full algorithm; the engine's
+  sun is 0.22° too high in July and 0.24° too low on 大寒 (band 1 allows ±0.3°).
 - On 20 July the sun is due east at 08:12 and due west at 15:48 solar time (the brief: 08:10 and 15:50); before and
   after, it shines on the slabs' north faces and the slabs shade a strip south of them.
-- A wall's north shadow at noon: 0.252 H in July and 1.448 H on 大寒 (brief 0.257 H and 1.44 H), i.e. 13.1 m and
+- A wall's north shadow at noon: 0.252 H in July and 1.448 H on 大寒 (brief 0.257 H and 1.44 H; with the full declination 0.256 H and 1.435 H: the engine's sun explains the difference), i.e. 13.1 m and
   75.6 m for an 18-floor slab. The engine's building mask (2 × 2 samples per 5 m cell) north of slab 2A at solar
   noon: 12.5 m and 75.0 m (the run of shaded samples, 2.5 m each).
 
@@ -1514,9 +1518,10 @@ the coefficient because the slabs are 100 m long with 30 m gaps (the low morning
 and G / H_eff is 1.56, not 1.47.
 
 The checker on two long continuous slabs (a 400 m test scene, not the estate) at G = 1.47 H_eff (75.4 m) gives the middle
-sill **1.50 h**, not the brief's 2 h: the 大寒 noon sun here is 0.17° lower than the brief's, and near the
-threshold the hours change fast (1.45: 0.33 h, 1.52: 2.75 h). With this model's sun 2 h needs G / H_eff ≈ 1.485.
-The estate's 1.56 clears both.
+sill **1.50 h with the engine's approximate declination and 2.00 h with the full NOAA declination** (the brief: 2 h).
+So the brief's coefficient is right; the shortfall is the engine's sun, 0.24° low on 大寒, and near the threshold the
+hours change fast (1.45: 0.33 / 1.33 h, 1.52: 2.75 / 3.00 h, engine / full). 2 h needs G / H_eff ≈ 1.485 with the engine's
+sun and 1.47 with the full declination. The estate's 1.56 clears both, so the rule test above holds either way.
 
 ### The July courtyard
 
@@ -1609,11 +1614,11 @@ cells) it would change ground Ts by at most 0.14 K.
 | counted at the ground (0 m), not the sill | 3.17 |
 | 1-min steps (every 4th sill) | 3.62 |
 
-| G / H_eff (long slabs) | G m | middle sill h |
-|---|---|---|
-| 1.45 | 74.4 | 0.33 |
-| 1.47 | 75.4 | 1.50 |
-| 1.52 | 78.0 | 2.75 |
+| G / H_eff (long slabs) | G m | middle sill h, engine's sun | middle sill h, full NOAA declination |
+|---|---|---|---|
+| 1.45 | 74.4 | 0.33 | 1.33 |
+| 1.47 | 75.4 | 1.50 | 2.00 |
+| 1.52 | 78.0 | 2.75 | 3.00 |
 
 | Condenser case | Q_rej kW | exhaust ΔT at 35 °C, K |
 |---|---|---|
@@ -1648,8 +1653,10 @@ sun. The north-face paths are hidden behind the next row in this view. The sweat
 | 3. Lowest 大寒 sun at a ground-floor sill behind another row (rows 1–3, n 360 sills), h | 3.50 h | ≥ 2 | gb50180 | inside |
 | 3. Lowest 大寒 sun at any ground-floor sill (n 480), h | 3.50 h | ≥ 2 | gb50180 | inside |
 | 3. Row spacing G / H_eff, lowest of rows 1–3 | 1.559 | ≥ 1.47 | brief7 | inside |
-| 3. Supplementary: the checker on two long continuous slabs at G = 1.47 H_eff (75.4 m; a test scene, not the estate): sun at the middle sill, h (the brief: 2 h) | 1.50 h | 1.75 to 2.25 | brief7 | outside (supplementary, not counted) |
-| 3. Supplementary: G / H_eff that gives 2 h at the middle sill of the long slabs with this model's sun (the brief: 1.47) | 1.485 | 1.45 to 1.52 | brief7 | inside (supplementary, not counted) |
+| 3. Supplementary: the checker on two long continuous slabs at G = 1.47 H_eff (75.4 m; a test scene, not the estate), with the engine's approximate declination: sun at the middle sill, h (the brief: 2 h) | 1.50 h | 1.75 to 2.25 | brief7 | outside (supplementary, not counted) |
+| 3. Supplementary: the same long slabs with the full NOAA declination (the brief's sun): sun at the middle sill, h | 2 h | 1.75 to 2.25 | brief7 | inside (supplementary, not counted) |
+| 3. Supplementary: G / H_eff that gives 2 h at the middle sill of the long slabs, engine's approximate declination (the brief: 1.47) | 1.485 | 1.45 to 1.52 | brief7 | inside (supplementary, not counted) |
+| 3. Supplementary: the same with the full NOAA declination | 1.470 | 1.45 to 1.52 | brief7 | inside (supplementary, not counted) |
 | 4. July, 10:00–16:00 solar time: deepest shade slab 2A casts into the courtyard north of it, m (no shade beyond 0.37 H = 19.3 m) | 11.25 m | ≤ 19.314 | brief7 | inside |
 | 4. July solar noon: shaded share of that courtyard's depth (middle column); brief 0.257 H / G = 0.168 ± 1 cell | 0.156 | 0.105 to 0.23 | brief7 | inside |
 | 4. Supplementary: 16:00 solar time, all buildings (engine mask): shaded samples of that courtyard beyond 0.37 H (the next row's south face, sun north of west after 15:50) | 23 | ≥ 0 | brief7 | inside (supplementary, not counted) |
@@ -1667,7 +1674,7 @@ sun. The north-face paths are hidden behind the next row in this view. The sweat
 | Walkers at 15:00: density in shade over density in sun | 9.224 | ≥ 2 | melnikov | inside |
 | Walkers at 12:00 on the courtyard routes: lowest share on the north-face path (in the slab's shadow) | 1 | ≥ 0.5 | melnikov | inside |
 
-0 of 20 asserted checks fall outside their band; 1 of 2 soft checks (bands 5 and 7, reported, not asserted) fall outside; 5 supplementary rows are not counted. By the brief's bands: 6 of 7 met (1, 2, 3, 4, 6, 7); missed: 5 (soft). They are reported, not tuned away: no input was moved to pass a band.
+0 of 20 asserted checks fall outside their band; 1 of 2 soft checks (bands 5 and 7, reported, not asserted) fall outside; 7 supplementary rows are not counted. By the brief's bands: 6 of 7 met (1, 2, 3, 4, 6, 7); missed: 5 (soft). They are reported, not tuned away: no input was moved to pass a band.
 
 ### Disclosures (block 7)
 
@@ -1678,8 +1685,10 @@ sun. The north-face paths are hidden behind the next row in this view. The sweat
   rules (such as the Beijing coefficient 1.7, unverified) are not checked; older estates were approved under GB 50180-93.
 - **Rule counted at the sill, not the ground:** the rule's point is 0.9 m above the ground-floor level (the floor taken at
   grade); trees do not count; the towers' ground floors are lobbies and shops (not tested).
-- **The brief's 1.47 gives 1.5 h here:** with this model's sun (NOAA, 20 January 2026) two long slabs at 1.47 H_eff give the
-  middle sill 1.50 h; about 1.485 gives 2 h. The estate stands at 1.56 and every sill gets at least 3.50 h.
+- **The engine's sun is approximate:** `sun.js` uses NOAA's fractional-year declination, about 0.2° off the full algorithm
+  (大寒 noon 34.63° vs 34.87°; July 75.88° vs 75.66°); the brief agrees with the full algorithm. Two long slabs at
+  1.47 H_eff give the middle sill 1.50 h with the engine's sun and 2.00 h with the full declination. The estate stands at
+  1.56 and every sill gets at least 3.50 h with the engine's sun. Not changed in this block (it would move every block's pixels).
 - **Invented estate:** layout, flat counts, condensers per flat, the AC profile, the plume width and the plume wall term
   are assumptions; the shops' condensers are left out.
 - **Lawn:** the lawns use block 1's irrigated lawn (EF 0.8), so they run cooler than a dry worn lawn; worn patches are bare soil.
