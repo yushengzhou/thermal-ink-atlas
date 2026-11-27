@@ -9,7 +9,7 @@ import { modulesFor, BLOCKS, STUBS, externalRefs } from '../../scripts/build.mjs
 const root = fileURLToPath(new URL('../..', import.meta.url));
 const CITIES = ['asphalt-park', 'glass-cbd', 'hutong', 'parking', 'sponge-retrofit', 'waterfront'];
 // block-specific modules each page must carry (all other block modules are stubs)
-const OWN = { 'asphalt-park': [], 'sponge-retrofit': ['retrofit', 'retroui'], 'glass-cbd': ['cbd', 'cbdui'], waterfront: ['wind', 'waterfront', 'wfui'], hutong: ['htkit', 'hutong', 'hutui'], parking: ['pkkit', 'parking', 'pkui'] };
+const OWN = { 'asphalt-park': [], 'sponge-retrofit': ['retrofit', 'retroui'], 'glass-cbd': ['reflect', 'cbd', 'cbdui'], waterfront: ['wind', 'waterfront', 'wfui'], hutong: ['htkit', 'hutong', 'hutui'], parking: ['pkkit', 'parking', 'pkui'] };
 const file = (c) => `${root}cities/${c}/index.html`;
 
 test('build succeeds and the committed files are current', () => {

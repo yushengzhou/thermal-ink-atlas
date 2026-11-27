@@ -15,7 +15,7 @@ const MODULES = ['core', 'sun', 'materials', 'reflect', 'thermal', 'wind', 'worl
 /** Block-specific modules, by the scene flag that selects them. */
 export const BLOCKS = [
   { flag: /retrofit: true/, modules: ['retrofit', 'retroui'] },
-  { flag: /glassBlock: true/, modules: ['cbd', 'cbdui'] },
+  { flag: /glassBlock: true/, modules: ['reflect', 'cbd', 'cbdui'] },
   { flag: /windBlock: true/, modules: ['wind', 'waterfront', 'wfui'] },
   { flag: /hutongBlock: true/, modules: ['htkit', 'hutong', 'hutui'] },
   { flag: /parkingBlock: true/, modules: ['pkkit', 'parking', 'pkui'] },

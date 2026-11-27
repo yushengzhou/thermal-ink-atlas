@@ -22,8 +22,8 @@ import { isWaterfront, waterfrontSetup, comfortShade, windStats, hcStats, asphal
 import { wfNotes, riverCard, pondCard, corridorCard, shelterCard, shadeCard, WF_CARDS, wfOverlay } from './wfui.js';
 import { penLines, SPEEDS, apparentTemp } from './wind.js';
 import { Pen } from './pen.js';
-import { isHutong, hutongSetup, lanesOf, solarNoon, splashStats, efPathRun, efPathStats, splashSensitivity, roofStats, courtyardStats, treeStats, shadedLanes, hutongGlossary, dwellShade } from './hutong.js';
-import { htNotes, lanesCard, courtyardCard, tianpengCard, splashCard, treesCard, HT_CARDS } from './hutui.js';
+import { isHutong, hutongSetup } from './hutong.js';
+import { htApp } from './hutui.js';
 import { isParking, parkingSetup } from './parking.js';
 import { pkApp } from './pkui.js';
 
@@ -120,10 +120,10 @@ export function boot(scene, root = document) {
   const wfQ = wfMode
     ? { wind: q.get('wind') !== '0', air: q.get('air') === '1', u: SPEEDS.includes(Number(q.get('u'))) ? Number(q.get('u')) : scene.wind.default }
     : null;
-  // hutong block (block 5): the evening splash, ?splash=0|1 (default on)
+  // hutong block (block 5): the evening splash, ?splash=0|1 (default on); its page parts are a block plugin (hutui.js htApp)
   const htMode = isHutong(scene);
   let htSet = null;
-  const htQ = htMode ? { splash: q.get('splash') !== '0' } : null;
+  const htSplash0 = q.get('splash') !== '0';
   // car park block (block 6): its page parts live in its own module (pkui.js pkApp: a block plugin, see blk below)
   const pkMode = isParking(scene);
   let pkSet = null;
@@ -152,7 +152,7 @@ export function boot(scene, root = document) {
       const tb = performance.now();
       htSet.base();
       const tc = performance.now();
-      thermal = htSet.model(htQ.splash);
+      thermal = htSet.model(htSplash0);
       htSet.timing = { slotsMs: tb - ta, runMs: tc - tb, splashMs: performance.now() - tc };
     } else if (pkMode) {
       pkSet = parkingSetup(world);
@@ -219,8 +219,6 @@ export function boot(scene, root = document) {
     ...(glassMode ? { glass: glassQ.type, ac: glassQ.ac } : {}),
     // waterfront only: wind lines, air overlay, wind speed preset
     ...(wfMode ? wfQ : {}),
-    // hutong only: the evening splash on or off
-    ...(htMode ? htQ : {}),
   };
   if (q.get('ui') === '0') root.body.classList.add('noui');
   if (q.has('hour')) S.hour = Math.round(clamp(parseFloat(q.get('hour')) || 0, 0, 23.75) / 0.25) * 0.25;
@@ -311,50 +309,7 @@ export function boot(scene, root = document) {
       sunTmrt: w.shade.sunTmrt,
     };
   }
-  // hutong block: numbers for notes, cards and glossary; the splash comparison
-  // once, the 15:00 numbers per model (splash on / off)
-  let htFixed = null;
-  const htCache = new Map();
-  const ht = () => {
-    if (!htFixed) {
-      const noon = solarNoon(scene.site);
-      const lanes = lanesOf(world, noon);
-      const band = lanes.filter((l) => l.splash).flatMap((l) => l.cells);
-      const dry = htSet.base();
-      const wet = htSet.splash();
-      htFixed = { noon, lanes, band, dry, wet, s: splashStats(world, dry, wet, band, htSet.cells), sens: null, ef: null };
-    }
-    const key = S.splash ? 1 : 0;
-    if (!htCache.has(key)) htCache.set(key, { roof: roofStats(world, thermal, 15), court: courtyardStats(world, thermal, 15), trees: treeStats(world, thermal, 15), shaded: shadedLanes(world, thermal, 15) });
-    return { ...htFixed, ...htCache.get(key) };
-  };
-  /** Lazily: beta_wet sensitivity and the old EF path alone, on the splashed lanes (small runs). */
-  const htExtra = () => {
-    const h = ht();
-    if (!htFixed.sens) htFixed.sens = splashSensitivity(world, htSet.slots, h.dry, h.band);
-    if (!htFixed.ef) htFixed.ef = efPathStats(h.dry, efPathRun(world, htSet.slots, h.band), h.band);
-    return { sens: htFixed.sens, ef: htFixed.ef };
-  };
-  function htNoteData() {
-    const h = ht();
-    const l5 = h.lanes.find((l) => l.id === 'jujube');
-    const mainK = scene.ground.findIndex((g) => g.id === 'main');
-    const mc = [];
-    for (let i = 0; i < world.n * world.n; i++) if (world.bld[i] < 0 && world.parcel[i] === mainK) mc.push(i);
-    const m = (a) => a.reduce((x, i) => x + thermal.tmrt(i, 15), 0) / Math.max(1, a.length);
-    return {
-      laneHw: l5.hw,
-      laneNoon: l5.noon.sunlit,
-      roof15: h.roof.mean,
-      awningTmrt: h.court.awning.tmrt,
-      sunTmrt: h.court.sun.tmrt,
-      d20: h.s.d20,
-      d23: h.s.d23,
-      treeTmrt: m(mc.filter((i) => thermal.sunlit(i, 15) <= 0.5)),
-      laneSunTmrt: m(mc.filter((i) => thermal.sunlit(i, 15) > 0.95)),
-    };
-  }
-  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode ? htNotes(scene, htNoteData()) : pkMode ? null : block1Notes();
+  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode || pkMode ? null : block1Notes();
   function block1Notes() {
   const notesText = {
     asphalt: ['Kiln Street, old asphalt (albedo 0.12):', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
@@ -606,9 +561,6 @@ export function boot(scene, root = document) {
     if (card._measure && card._measure.startsWith('blk:')) {
       card.innerHTML = blk.html(card._measure.slice(4));
       card.querySelector('.x').onclick = hideCard;
-    } else if (card._measure && card._measure.startsWith('ht:')) {
-      card.innerHTML = htCardHtml(card._measure.slice(3));
-      card.querySelector('.x').onclick = hideCard;
     } else if (card._measure && card._measure.startsWith('wf:')) {
       card.innerHTML = wfCardHtml(card._measure.slice(3));
       card.querySelector('.x').onclick = hideCard;
@@ -766,67 +718,22 @@ export function boot(scene, root = document) {
     card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
   }
 
-  // ---- hutong controls (block 5): the evening splash, cards ------------------------------
-  const htUi = htMode ? buildHtUi() : null;
-  function buildHtUi() {
-    const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
-    root.body.insertAdjacentHTML(
-      'beforeend',
-      `<div id="hutong" aria-label="Hutong controls">
-        <div class="seg">${btn('data-splash', '1', 'splash at 19:00 (P)')}</div>
-        <div class="measures"><div class="hand">Cards</div>${HT_CARDS.map(([id, label]) => btn('data-card', id, label)).join('')}</div>
-      </div>`,
-    );
-    const el = root.getElementById('hutong');
-    el.addEventListener('click', (e) => {
-      const b = e.target.closest ? e.target.closest('button') : null;
-      if (!b) return;
-      if (b.dataset.splash) setSplash(!S.splash);
-      else if (b.dataset.card) showHtCard(b.dataset.card, b);
-    });
-    return { el };
-  }
-  function syncHt() {
-    if (!htUi) return;
-    htUi.el.querySelector('[data-splash]').setAttribute('aria-pressed', String(!!S.splash));
-    root.body.dataset.splash = S.splash ? '1' : '0';
-  }
-  function setSplash(on) {
-    if (!!on === S.splash) return;
-    S.splash = !!on;
-    thermal = htSet.model(S.splash);
-    main.thermal = thermal;
-    R.setThermal(thermal);
-    notes = htNotes(scene, htNoteData());
-    syncHt();
-    if (card.dataset.open === '1') reopenCard();
-    if (S.paused) draw();
-  }
-  function htCardHtml(id) {
-    const h = ht();
-    if (id === 'lanes') return lanesCard({ lanes: h.lanes, noon: h.noon });
-    if (id === 'courtyard') return courtyardCard({ court: h.court });
-    if (id === 'tianpeng') return tianpengCard({ court: h.court });
-    if (id === 'splash') return splashCard({ s: h.s, ...htExtra(), on: S.splash });
-    return treesCard({ trees: h.trees, court: h.court });
-  }
-  function showHtCard(id, anchor) {
-    card.innerHTML = htCardHtml(id);
-    card.querySelector('.x').onclick = hideCard;
-    card._pick = null;
-    card._measure = `ht:${id}`;
-    card.dataset.open = '1';
-    card.dataset.kind = id;
-    card.style.display = 'block';
-    const r = anchor ? anchor.getBoundingClientRect() : { top: 120 };
-    const panel = htUi.el.getBoundingClientRect();
-    card.style.left = `${Math.min(window.innerWidth - card.offsetWidth - 10, panel.right + 12)}px`;
-    card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
-  }
-
-  // ---- a block plugin (block 6): its controls, cards, notes, heat-card rows, glossary numbers and API ----
-  // live in its own module; app.js only calls these hooks
-  const blk = pkMode ? pkApp({ scene, world, thermal, root, card, R, S, query: q, hideCard: () => hideCard(), reopen: () => card.dataset.open === '1' && reopenCard(), redraw: () => S.paused && draw() }) : null;
+  // ---- a block plugin (blocks 5 and 6): its controls, cards, notes, heat-card rows, glossary numbers
+  // and API live in its own module; app.js only calls these hooks
+  const env = {
+    scene, world, thermal, root, card, R, S, main, query: q, setup: htSet ?? pkSet,
+    hideCard: () => hideCard(),
+    reopen: () => card.dataset.open === '1' && reopenCard(),
+    redraw: () => S.paused && draw(),
+    /** A new model for the main view (block 5 splash on / off). */
+    setModel(T) {
+      thermal = T;
+      main.thermal = T;
+      R.setThermal(T);
+    },
+    setNotes: (n) => (notes = n),
+  };
+  const blk = pkMode ? pkApp(env) : htMode ? htApp(env, htSplash0) : null;
   if (blk) notes = blk.notes();
 
   const toggleThermal = () => {
@@ -844,7 +751,6 @@ export function boot(scene, root = document) {
     else if (glassMode && (k === 'g' || k === 'G')) setGlass(GLASS_IDS[(GLASS_IDS.indexOf(S.glass) + (k === 'g' ? 1 : GLASS_IDS.length - 1)) % GLASS_IDS.length]);
     else if (wfMode && (k === 'w' || k === 'W')) setWindLines(!S.wind);
     else if (wfMode && (k === 'a' || k === 'A')) setAir(!S.air);
-    else if (htMode && (k === 'p' || k === 'P')) setSplash(!S.splash);
     else if (blk && blk.key(k)) {
       // handled by the block plugin
     }
@@ -1038,17 +944,16 @@ export function boot(scene, root = document) {
         return { fw, u: thermal.info.wind * fw, hc: thermal.hcAt(c), site: thermal.info.wind, at };
       })()
       : null;
-    // hutong: water on a splashed cell now
-    const waterInfo = htMode && tmrtCell !== null && htSplashSet().has(tmrtCell) ? { now: thermal.water(tmrtCell, h), on: !!S.splash } : null;
-    // a block plugin's own heat-card numbers (block 6: G and the car share)
-    const blkInfo = blk && cells.length && !leaf ? blk.cardInfo(cells, tmrtCell, h) : null;
+    // a block plugin's own heat-card numbers (block 5: water on a splashed cell; block 6: G and the car share)
+    const blkInfo = blk && cells.length ? blk.cardInfo(cells, tmrtCell, h, leaf, thermal) : null;
     return {
       title,
       state: view.id,
       compare,
       wind: windInfo,
-      water: waterInfo,
-      flux: blkInfo,
+      water: null,
+      flux: null,
+      ...(blk ? { [blk.cardKey]: blkInfo } : {}),
       glass: glassInfo,
       wallsNow: sw ? sw.walls : null,
       glassNow: sw ? sw.glass : null,
@@ -1072,10 +977,6 @@ export function boot(scene, root = document) {
     };
   }
 
-  let htSplash = null;
-  function htSplashSet() {
-    return (htSplash ??= new Set(htSet.cells));
-  }
   function showCard(p, x, y) {
     if (!p) return;
     const d = cardData(p);
@@ -1121,8 +1022,7 @@ export function boot(scene, root = document) {
         ${d.wallsNow !== null ? `<tr><td>sun off the ${gl('wallReflection', 'walls')} now</td><td>${Math.round(d.wallsNow)} W m⁻²</td></tr>` : ''}
         ${d.glassNow !== null && glassMode ? `<tr><td>sun off the ${gl('specular', 'glass')} now</td><td>${Math.round(d.glassNow)} W m⁻²</td></tr>` : ''}
         <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
-        ${d.flux ? blk.cardRows(d.flux) : ''}
-        ${d.water ? `<tr><td>${gl('waterStore', 'water on the paving')} now</td><td>${d.water.now.toFixed(2)} mm${d.water.on ? ' (splashed at 19:00)' : ' (splash off: P)'}</td></tr>` : ''}
+        ${blk && d[blk.cardKey] ? blk.cardRows(d[blk.cardKey]) : ''}
         ${d.wind ? `<tr><td>${gl('windFactor', 'wind factor f_w')}</td><td>${d.wind.fw.toFixed(2)} · ${fmt(d.wind.u)} of ${d.wind.site} m/s</td></tr>
         <tr><td>convection h_c</td><td>${fmt(d.wind.hc)} W m⁻² K⁻¹</td></tr>
         ${d.wind.at !== null ? `<tr><td>${gl('apparentTemp', 'apparent temp.')} now</td><td>${fmt(d.wind.at)} °C</td></tr>` : ''}` : ''}
@@ -1171,9 +1071,7 @@ export function boot(scene, root = document) {
       ? glossaryStats(world, thermal, { canyon: canyonStats(world, thermal, CANYONS.lane, openRef('stone')), spot: spotTmrt(15) })
       : wfMode
         ? glossaryStats(world, thermal, { wind: { river: wf().st.river.mean, corridor: wf().st.corridorMean, shelter: wf().st.shelterMean, lee: wf().st.lee01.mean } })
-        : htMode
-          ? glossaryStats(world, thermal, { hutong: hutongGlossary(world, thermal, ht()) })
-          : blk
+        : blk
             ? glossaryStats(world, thermal, blk.glossary())
             : glossaryStats(world, thermal);
   let fnPinned = false;
@@ -1336,7 +1234,6 @@ export function boot(scene, root = document) {
   syncRetro();
   syncGlass();
   syncWf();
-  syncHt();
   if (blk) blk.sync();
   draw();
   requestAnimationFrame(loop);
@@ -1557,33 +1454,8 @@ export function boot(scene, root = document) {
         models: () => wfSet.cached(),
       }
       : null,
-    /**
-     * Hutong block (block 5) only: state {splash}; set() it; numbers for the
-     * bands and cards; card HTML; water on the paving at a point; dwellers by
-     * the shade class of their spot.
-     */
-    hutong: htMode
-      ? {
-        state: () => ({ splash: !!S.splash }),
-        set(o) {
-          if (o.splash !== undefined) setSplash(!!o.splash);
-        },
-        stats: () => {
-          const h = ht();
-          const strip = (o) => Object.fromEntries(Object.entries(o).filter(([k]) => k !== 'cells'));
-          return { noon: { h: h.noon.h, alt: h.noon.alt }, lanes: h.lanes.map(strip), s: { ...h.s, curve: undefined, marginAt: undefined }, roof: h.roof, court: h.court, trees: h.trees, shaded: strip(h.shaded), cells: htSet.cells.length };
-        },
-        extra: () => htExtra(),
-        html: (id) => htCardHtml(id),
-        show: (id) => showHtCard(id, root.querySelector(`#hutong [data-card="${id}"]`)),
-        water: (x, y, h = S.hour) => thermal.water(world.cellIndex(x, y), h),
-        dwell: (frame = S.frame, hour = S.hour) => {
-          const hq = quantHour(hour);
-          return dwellShade(main.life, main.shadeFor(hq), hq);
-        },
-        models: () => htSet.cached(),
-      }
-      : null,
+    /** Hutong block (block 5) only: its plugin's API (hutui.js htApp). */
+    hutong: htMode ? blk.api : null,
     /** Car park block (block 6) only: its plugin's API (pkui.js pkApp). */
     parking: blk ? blk.api : null,
     retro: retro

@@ -3,6 +3,8 @@
 // English, the evening splash, trees and screens).
 import { SOURCES, BASIS, MODEL, MATERIALS } from './materials.js';
 import { gl } from './glossary.js';
+import { lanesOf, solarNoon, splashStats, efPathRun, efPathStats, splashSensitivity, roofStats, courtyardStats, treeStats, shadedLanes, hutongGlossary, dwellShade } from './hutong.js';
+import { quantHour } from './render.js';
 
 const fmt = (v) => (Math.round(v * 10) / 10).toFixed(1);
 const f2 = (v) => v.toFixed(2);
@@ -147,3 +149,151 @@ export const HT_CARDS = [
   ['splash', 'Splash at 19:00'],
   ['trees', 'Trees and vines'],
 ];
+
+/**
+ * The block's plugin for app.js: the evening-splash toggle and the cards,
+ * notes, the heat-card water row, glossary numbers and API. env as for the
+ * block-6 plugin (pkui.js pkApp), with setup (hutong.js hutongSetup),
+ * setModel(T) and setNotes(notes); splash0: the splash at load (?splash=).
+ */
+export function htApp(env, splash0) {
+  const { scene, world, root, card, R, S, main } = env;
+  const htSet = env.setup;
+  let thermal = env.thermal;
+  const st = { splash: splash0 };
+  // numbers for notes, cards and glossary; the splash comparison once, the 15:00 numbers per model (splash on / off)
+  let htFixed = null;
+  const htCache = new Map();
+  const ht = () => {
+    if (!htFixed) {
+      const noon = solarNoon(scene.site);
+      const lanes = lanesOf(world, noon);
+      const band = lanes.filter((l) => l.splash).flatMap((l) => l.cells);
+      const dry = htSet.base();
+      const wet = htSet.splash();
+      htFixed = { noon, lanes, band, dry, wet, s: splashStats(world, dry, wet, band, htSet.cells), sens: null, ef: null };
+    }
+    const key = st.splash ? 1 : 0;
+    if (!htCache.has(key)) htCache.set(key, { roof: roofStats(world, thermal, 15), court: courtyardStats(world, thermal, 15), trees: treeStats(world, thermal, 15), shaded: shadedLanes(world, thermal, 15) });
+    return { ...htFixed, ...htCache.get(key) };
+  };
+  /** Lazily: beta_wet sensitivity and the old EF path alone, on the splashed lanes (small runs). */
+  const htExtra = () => {
+    const h = ht();
+    if (!htFixed.sens) htFixed.sens = splashSensitivity(world, htSet.slots, h.dry, h.band);
+    if (!htFixed.ef) htFixed.ef = efPathStats(h.dry, efPathRun(world, htSet.slots, h.band), h.band);
+    return { sens: htFixed.sens, ef: htFixed.ef };
+  };
+  function noteData() {
+    const h = ht();
+    const l5 = h.lanes.find((l) => l.id === 'jujube');
+    const mainK = scene.ground.findIndex((g) => g.id === 'main');
+    const mc = [];
+    for (let i = 0; i < world.n * world.n; i++) if (world.bld[i] < 0 && world.parcel[i] === mainK) mc.push(i);
+    const m = (a) => a.reduce((x, i) => x + thermal.tmrt(i, 15), 0) / Math.max(1, a.length);
+    return {
+      laneHw: l5.hw,
+      laneNoon: l5.noon.sunlit,
+      roof15: h.roof.mean,
+      awningTmrt: h.court.awning.tmrt,
+      sunTmrt: h.court.sun.tmrt,
+      d20: h.s.d20,
+      d23: h.s.d23,
+      treeTmrt: m(mc.filter((i) => thermal.sunlit(i, 15) <= 0.5)),
+      laneSunTmrt: m(mc.filter((i) => thermal.sunlit(i, 15) > 0.95)),
+    };
+  }
+  const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
+  root.body.insertAdjacentHTML(
+    'beforeend',
+    `<div id="hutong" aria-label="Hutong controls">
+        <div class="seg">${btn('data-splash', '1', 'splash at 19:00 (P)')}</div>
+        <div class="measures"><div class="hand">Cards</div>${HT_CARDS.map(([id, label]) => btn('data-card', id, label)).join('')}</div>
+      </div>`,
+  );
+  const el = root.getElementById('hutong');
+  el.addEventListener('click', (e) => {
+    const b = e.target.closest ? e.target.closest('button') : null;
+    if (!b) return;
+    if (b.dataset.splash) setSplash(!st.splash);
+    else if (b.dataset.card) show(b.dataset.card, b);
+  });
+  function sync() {
+    el.querySelector('[data-splash]').setAttribute('aria-pressed', String(!!st.splash));
+    root.body.dataset.splash = st.splash ? '1' : '0';
+  }
+  function setSplash(on) {
+    if (!!on === st.splash) return;
+    st.splash = !!on;
+    thermal = htSet.model(st.splash);
+    env.setModel(thermal);
+    env.setNotes(htNotes(scene, noteData()));
+    sync();
+    env.reopen();
+    env.redraw();
+  }
+  function html(id) {
+    const h = ht();
+    if (id === 'lanes') return lanesCard({ lanes: h.lanes, noon: h.noon });
+    if (id === 'courtyard') return courtyardCard({ court: h.court });
+    if (id === 'tianpeng') return tianpengCard({ court: h.court });
+    if (id === 'splash') return splashCard({ s: h.s, ...htExtra(), on: st.splash });
+    return treesCard({ trees: h.trees, court: h.court });
+  }
+  function show(id, anchor) {
+    card.innerHTML = html(id);
+    card.querySelector('.x').onclick = env.hideCard;
+    card._pick = null;
+    card._measure = `blk:${id}`;
+    card.dataset.open = '1';
+    card.dataset.kind = id;
+    card.style.display = 'block';
+    const r = anchor ? anchor.getBoundingClientRect() : { top: 120 };
+    const panel = el.getBoundingClientRect();
+    card.style.left = `${Math.min(window.innerWidth - card.offsetWidth - 10, panel.right + 12)}px`;
+    card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
+  }
+  let wetSet = null;
+  return {
+    notes: () => htNotes(scene, noteData()),
+    look: () => ({}),
+    sync,
+    html,
+    /** Keyboard: P toggles the splash; true if the key was the block's. */
+    key(k) {
+      if (k !== 'p' && k !== 'P') return false;
+      setSplash(!st.splash);
+      return true;
+    },
+    /** Heat card: water on a splashed ground cell now. */
+    cardKey: 'water',
+    cardInfo: (cells, tmrtCell, h) => (tmrtCell !== null && (wetSet ??= new Set(htSet.cells)).has(tmrtCell) ? { now: thermal.water(tmrtCell, h), on: !!st.splash } : null),
+    cardRows: (w) => `<tr><td>${gl('waterStore', 'water on the paving')} now</td><td>${w.now.toFixed(2)} mm${w.on ? ' (splashed at 19:00)' : ' (splash off: P)'}</td></tr>`,
+    glossary: () => ({ hutong: hutongGlossary(world, thermal, ht()) }),
+    /**
+     * Hutong block (block 5) only: state {splash}; set() it; numbers for the
+     * bands and cards; card HTML; water on the paving at a point; dwellers by
+     * the shade class of their spot.
+     */
+    api: {
+      state: () => ({ splash: !!st.splash }),
+      set(o) {
+        if (o.splash !== undefined) setSplash(!!o.splash);
+      },
+      stats: () => {
+        const h = ht();
+        const strip = (o) => Object.fromEntries(Object.entries(o).filter(([k]) => k !== 'cells'));
+        return { noon: { h: h.noon.h, alt: h.noon.alt }, lanes: h.lanes.map(strip), s: { ...h.s, curve: undefined, marginAt: undefined }, roof: h.roof, court: h.court, trees: h.trees, shaded: strip(h.shaded), cells: htSet.cells.length };
+      },
+      extra: () => htExtra(),
+      html: (id) => html(id),
+      show: (id) => show(id, root.querySelector(`#hutong [data-card="${id}"]`)),
+      water: (x, y, h = S.hour) => thermal.water(world.cellIndex(x, y), h),
+      dwell: (frame = S.frame, hour = S.hour) => {
+        const hq = quantHour(hour);
+        return dwellShade(main.life, main.shadeFor(hq), hq);
+      },
+      models: () => htSet.cached(),
+    },
+  };
+}

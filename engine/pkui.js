@@ -272,7 +272,8 @@ export function pkApp(env) {
       return true;
     },
     /** Heat-card numbers of cells: G now and at 23:00, the car share and the canopy of a ground cell. */
-    cardInfo: (cells, tmrtCell, h) => ({ now: cells.reduce((a, i) => a + thermal.flux(i, h), 0) / cells.length, g23: cells.reduce((a, i) => a + thermal.flux(i, 23), 0) / cells.length, cars: tmrtCell !== null ? world.parking.share[tmrtCell] : 0, pv: tmrtCell !== null ? !!world.parking.pv[tmrtCell] : false }),
+    cardKey: 'flux',
+    cardInfo: (cells, tmrtCell, h, leaf) => (leaf ? null : { now: cells.reduce((a, i) => a + thermal.flux(i, h), 0) / cells.length, g23: cells.reduce((a, i) => a + thermal.flux(i, 23), 0) / cells.length, cars: tmrtCell !== null ? world.parking.share[tmrtCell] : 0, pv: tmrtCell !== null ? !!world.parking.pv[tmrtCell] : false }),
     cardRows: (f) => `<tr class="t"><td>${gl('groundFlux', 'ground heat flux G')} now / 23:00</td><td>${Math.round(f.now)} / ${Math.round(f.g23)} W m⁻² (${f.now < 0 ? 'giving heat back' : 'taking heat in'})</td></tr>${f.cars > 0 ? `<tr><td>share of the cell under cars</td><td>${Math.round(f.cars * 100)}% (shade and sky view, sub-grid)</td></tr>` : ''}${f.pv ? `<tr><td>under the PV canopy</td><td>yes (sky view ${MODEL.pvSvf.value} before cars, Golden et al. 2007)</td></tr>` : ''}`,
     glossary: () => ({ parking: parkingGlossary(pk().st) }),
     /** Car park block (block 6) only: state {flux}; set() it; numbers for the bands and cards; card HTML; G at a point; the overlay's samples. */
