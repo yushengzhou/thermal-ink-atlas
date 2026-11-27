@@ -113,7 +113,7 @@ EF·max(Q*, 0) as everywhere else); the watered turf cells are a second run of j
 ${wrows.join('\n')}
 
 The largest cooling, ${f1(-water.min.d)} K at ${hm(water.min.h)}, leaves the turf ${f1(water.min.wet - water.min.air)} K above the air: the measured drops to near the air
-(Brigham Young University 79 → 29 °C [nydoh]; Penn State 54–71 → 24 °C [mcnitt2008]) are **not reproduced** (band 9 missed). EF caps the
+(Brigham Young University 79 → 29 °C [nydoh]; Penn State 54–71 → 24 °C [mcnitt2008]) are **not reproduced** (band 9 missed), likely because EF caps the
 evaporation at ${CP.efPeak.value} of the net radiation (a few hundred W m⁻² in the early afternoon), while real sprinkler water cools the infill with its own heat
 capacity and evaporates from a 70 °C surface far faster than the net radiation alone allows. The recovery is inside the band
 (${Math.round(water.recovered * 100)}% of the cooling gone 30 min later; ${f2(water.residual)} K left after 3 h), but of a small drop. Not tuned.

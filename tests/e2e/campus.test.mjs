@@ -230,7 +230,7 @@ test('cards: turf, playground, sails, watering, children, track and courts, burn
   assert.ok(html.water.includes('79 °C') && /Band missed/.test(html.water) && html.water.includes('McNitt'));
   assert.ok(/Qualitative only/.test(html.kids) && !/child-height Tmrt of/.test(html.kids));
   assert.ok(/band missed/.test(html.courts) && html.courts.includes('vendor'), 'courts card states the miss');
-  assert.ok(html.burn.includes('ISO 13732-1') && html.burn.includes('51 °C') && html.burn.includes('56 °C') && html.burn.includes('60 °C') && html.burn.includes('48 °C'));
+  assert.ok(html.burn.includes('ISO 13732-1') && html.burn.includes('51 °C') && html.burn.includes('56 °C') && html.burn.includes('60 °C') && html.burn.includes('48 °C') && html.burn.includes('healthy adult skin') && !/pulls away/.test(html.burn));
   for (const h of Object.values(html)) assert.ok(!/https?:/.test(h));
   const d = await page.evaluate(() => [window.atlas.card('ground', 155, 125), window.atlas.card('ground', 130, 252.5), window.atlas.card('ground', 302.5, 187.5)]);
   assert.ok(d[0].campus && d[0].campus.limit === 60 && d[0].campus.over, JSON.stringify(d[0].campus));

@@ -116,9 +116,13 @@ export function pageSourceKeys(sceneText, ownText, coreText) {
  * Block-only material groups in materials.js: an Object.assign(MATERIALS, {...})
  * block whose heading comment names its page ("@page <city>"). Returns
  * [{city, text}] (text: the comment line through the closing "});" and its newline).
+ * Throws if a group holds code (`function` or `=>` outside strings): groups are data only.
  */
 export function pageMaterialGroups(src) {
-  return [...src.matchAll(/^\/\/ [^\n]*@page ([\w-]+)[^\n]*\n(?:\/\/[^\n]*\n)*Object\.assign\(MATERIALS, \{\n[\s\S]*?\n\}\);\n\n?/gm)].map((m) => ({ city: m[1], text: m[0] }));
+  const groups = [...src.matchAll(/^\/\/ [^\n]*@page ([\w-]+)[^\n]*\n(?:\/\/[^\n]*\n)*Object\.assign\(MATERIALS, \{\n[\s\S]*?\n\}\);\n\n?/gm)].map((m) => ({ city: m[1], text: m[0] }));
+  // data only: code in a group would leave the shared-core count on its page
+  for (const g of groups) if (/\bfunction\b|=>/.test(g.text.replace(/'(?:[^'\\\n]|\\.)*'/g, "''"))) throw new Error(`materials.js: the @page ${g.city} group holds code (function or =>); material groups are data only`);
+  return groups;
 }
 
 /** materials.js for one page: other pages' material groups cut, SOURCES cut to keys, parameter notes dropped. */

@@ -198,6 +198,11 @@ test('build: the block\'s materials are one @page campus group, carried by the c
   const src = readFileSync(new URL('../../engine/materials.js', import.meta.url), 'utf8');
   const g = pageMaterialGroups(src);
   assert.deepEqual(g.map((x) => x.city), ['campus']);
+  // groups are data only: code in one (function or arrow) is refused, text in strings is not
+  const grp = (body) => `// ---- test (@page campus) ----\nObject.assign(MATERIALS, {\n${body}\n});\n`;
+  assert.throws(() => pageMaterialGroups(grp("  x: { f: () => 1, name: 'x' },")), /data only/);
+  assert.throws(() => pageMaterialGroups(grp('  x: { f: function () { return 1; } },')), /data only/);
+  assert.equal(pageMaterialGroups(grp("  x: { name: 'a function => in text' },")).length, 1);
   for (const id of ['turf', 'track', 'acrylic', 'rubber', 'shadeSail']) assert.ok(g[0].text.includes(`  ${id}: {`), id);
   const keys = new Set(['oke']);
   assert.ok(!trimMaterials(src, keys, 'estate').includes('turf: {'));

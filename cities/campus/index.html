@@ -5774,7 +5774,7 @@ function waterCard(d) {
     </table>
     <p class="note">The water takes the heat of the sun into evaporation for a few minutes, then the turf dries and heats again: the pitch is ${fmt(-w.min.d)} K cooler at ${hm(w.min.h)}, ${fmt(-w.later.d)} K half an hour later, and ${fmt(w.residual)} K three hours on.</p>
     <p class="lit">Brigham Young University: watering took turf from 79 °C to 29 °C; it was back at 49 °C after 5 min and 73 °C after 20 min (via the New York State health department). Penn State: 54–71 °C down to 24 °C, 32–49 °C within 30 min, then about steady for 3 h (McNitt et al. 2008).</p>
-    <p class="caveat">${w.min.wet - w.min.air > 5 ? `The measured drop to near the air is far deeper than this model gives (${fmt(w.min.wet - w.min.air)} K above the air at its coolest, against within 5 K): the brief's pulse spends at most ${CP.efPeak.value} of the net radiation on evaporation, while real sprinkler water also cools the turf with its own heat and evaporates far faster from a hot surface. Band missed (see docs/sources.md); not tuned. ` : ''}Turf cells only, every 15 min; the air is not cooled.</p>
+    <p class="caveat">${w.min.wet - w.min.air > 5 ? `The measured drop to near the air is far deeper than this model gives (${fmt(w.min.wet - w.min.air)} K above the air at its coolest, against within 5 K): likely because the brief's pulse spends at most ${CP.efPeak.value} of the net radiation on evaporation, while real sprinkler water probably also cools the turf with its own heat and evaporates faster from a hot surface than the net radiation allows. Band missed (see docs/sources.md); not tuned. ` : ''}Turf cells only, every 15 min; the air is not cooled.</p>
     ${srcLine(['nydoh', 'mcnitt2008', 'brief8'])}`;
 }
 
@@ -5831,9 +5831,9 @@ function burnCard(d) {
     <table class="cmp">
       <tr><td>ground above its 1-min limit at 15:00</td><td>${Object.entries(by).map(([id, n]) => `${name(id)} ${n}`).join(' · ') || 'none'}</td></tr>
     </table>
-    <p class="note">Press <kbd>U</kbd>: every ground cell above its 1-min limit at this hour is hatched. A child sitting on the turf or sliding on sunny metal is in contact for longer than a minute and pulls away more slowly than an adult, so the lower 10-minute limit of ${CP.burn10min.value} °C${tag(CP.burn10min)} is the safer reading for children.</p>
+    <p class="note">Press <kbd>U</kbd>: every ground cell above its 1-min limit at this hour is hatched. A child sitting on the turf or sliding on sunny metal can stay in contact for longer than a minute, so the lower 10-minute limit of ${CP.burn10min.value} °C${tag(CP.burn10min)} is the safer reading for children.</p>
     <p class="lit">Press coverage of Vanos's studies: 60 °C burns skin in 1 min, 74 °C in 5 s and 77 °C in 3 s (the standard not named). Gilbert, Arizona: a metal slide 71.7 °C in sun (Vanos et al. 2016).</p>
-    <p class="caveat">The limits depend on the material and the contact time; the model gives surface temperatures, not skin. The slide is drawn but not modelled; no metal ground is hatched.</p>
+    <p class="caveat">The ISO 13732-1 values are for healthy adult skin; children's skin may burn sooner. The limits depend on the material and the contact time; the model gives surface temperatures, not skin. The slide is drawn but not modelled; no metal ground is hatched.</p>
     ${srcLine(['iso13732', 'vanosPress', 'vanos2016', 'brief8'])}`;
 }
 
