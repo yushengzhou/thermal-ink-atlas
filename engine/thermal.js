@@ -395,7 +395,13 @@ export function runModel(world, opts = {}) {
   // opts.warm (block 3): this many coarse days (10-min steps) first, to bring
   // the deep temperature close before the 1-min days; the convergence test
   // below is unchanged and counts only 1-min days (still at least minDays).
-  for (let k = 0; k < (opts.warm ?? 0); k++) runDay(10, false);
+  // Guard: the coarse step is explicit, so it is used only where it is
+  // comfortably stable: max over cells of 600 s x (cap (4 eps sigma T^3 + hc)
+  // + restore) < 0.5 with T = 340 K (membrane roofs 0.31; thin metal roofs
+  // about 0.96, so a block with them falls back to the plain start).
+  const warmFactor = opts.warm ? coarseStability(C, 600) : 0;
+  const warmUsed = !!opts.warm && warmFactor < 0.5;
+  if (warmUsed) for (let k = 0; k < opts.warm; k++) runDay(10, false);
   while (days < maxDays && (days < minDays || maxDelta >= tol)) {
     maxDelta = runDay(dt / 60, true);
     days++;
@@ -405,7 +411,18 @@ export function runModel(world, opts = {}) {
     idx.forEach((i, c) => full.set(store.subarray(c * STORE, (c + 1) * STORE), i * STORE));
     store = full;
   }
-  return new Thermal(world, store, slots, { rise, taMean, hc, site, ta, days, maxDelta, mats, cells: idx, refl: reflFull, glass, warm: opts.warm ?? 0 });
+  return new Thermal(world, store, slots, { rise, taMean, hc, site, ta, days, maxDelta, mats, cells: idx, refl: reflFull, glass, warm: warmUsed ? opts.warm : 0, warmFactor });
+}
+
+/** Largest explicit-step stability factor over the cells for a step of dtS seconds (T = 340 K). */
+export function coarseStability(C, dtS) {
+  const T3 = 340 ** 3;
+  let max = 0;
+  for (let i = 0; i < C.NN; i++) {
+    if (C.water[i]) continue;
+    max = Math.max(max, dtS * (C.cap[i] * (4 * C.eps[i] * SIGMA * T3 + C.hc) + C.restore[i]));
+  }
+  return max;
 }
 
 /** One model minute for every cell (blocks without glass). */

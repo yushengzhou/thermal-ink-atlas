@@ -428,6 +428,7 @@ const SOURCES = {
   middel2021: 'Middel et al. (2021) Bull. Amer. Meteor. Soc., doi 10.1175/BAMS-D-20-0193.1, shade and Tmrt in Phoenix',
   brief3: 'Research brief docs/research/cbd-brief.md (block 3; values compiled from the sources below, items marked unverified there are flagged here)',
   fresnel: 'Fresnel equations for uncoated float glass, n = 1.52, two surfaces (computed); LBNL (Furler; Rubin et al.): ASHRAE-style angular fit within 1.5% for clear glass, coated glass up to about 8% off at 60 deg',
+  energyplus: 'EnergyPlus Engineering Reference, Window Calculation Module, Angular Properties for Coated Glass: R(phi) = R(0) (1 - rho_bar(phi)) + rho_bar(phi), rho_bar a normalised clear-glass curve (polynomial fit in cos phi); origin given as Finlayson et al. 1993, WINDOW 4.0 documentation, LBL-33943 (not checked)',
   igdb: 'LBNL International Glazing Database (IGDB) suggested for product reflectances; no datasheet was checked for the low-e or mirror values',
   bca: 'Singapore BCA Approved Document, Section P: glass daylight reflectance at most 20% (via the block-3 brief)',
   en673: 'EN 673 glass outer-surface emissivity about 0.84 (via the block-3 brief)',
@@ -681,7 +682,7 @@ const MODEL = {
   youngTreeCrown: v('crown radius 2.6 m, crown centre 4.4 m', 'engine', 'engine', false, 'scene assumption for newly planted street trees (cities/sponge-retrofit/scene.js)'),
   latentHeat: v('2.45e6 J kg-1', 'brief2', 'cited', true, 'evaporated depth = sum of EF x max(Q*, 0) x dt / 2.45e6'),
   wallAlbedo: v(0.3, 'brief3', 'range', false, 'opaque walls; brief: 0.3 (0.2-0.5, Oke range unverified); SOLWEIG uses 0.5 [wallenberg2026]'),
-  wallLit: v(0.5, 'engine', 'engine', false, 'share of a wall in sun, f_lit, for the wall-reflection and glass-temperature terms'),
+  wallLit: v(0.5, 'engine', 'engine', false, 'share of a wall in sun, f_lit, for the diffuse wall-reflection term (not used for glass temperature, which follows the brief)'),
   wallReflection: v('K_wr = a_w (1 - SVF) K_wall', 'brief3', 'interp', false, 'K_wall = f_lit I cos(beta)/pi + 0.5 D + 0.5 a_g G; SOLWEIG form a_w G (1 - psi) recalled from memory in the brief'),
   glassHo: v(20, 'brief3', 'range', false, 'outside film coefficient h_o, brief 15-25 W m-2 K-1'),
   glassHi: v(7.7, 'iso6946', 'interp', false, 'inside film coefficient h_i,eff, W m-2 K-1, read as 1 / 0.13'),
@@ -872,32 +873,53 @@ function reflectField(world, sun, grid, ground, opts = {}) {
     }
     const front = (x, y) => x * nx + y * ny > f.c0;
     const trees = world.trees.filter((T) => front(T.x, T.y));
-    const polys = [hullFlat(pts)];
+    // Coverage across the façade normal is clipped analytically: the
+    // reflected strip covers plane distances [z0 q, z1 q] in front of the
+    // façade (q = -(s'.n) / s'_z); a sample stands for a square of side a, so
+    // it is lit over the overlap of its extent [d - a/2, d + a/2] with the
+    // strip, and the ray tests are made at the middle of that overlap. A strip
+    // thinner than a sample (grazing incidence) is then counted with its true
+    // area instead of whole samples. The polygon is widened by a/2 along the
+    // normal so samples whose centre lies just outside the strip are visited.
+    const a = cell / S;
+    const sn = rx * nx + ry * ny; // < 0
+    const q = -sn / rz;
+    const d0 = f.z[0] * q;
+    const d1 = f.z[1] * q;
+    const wide = [];
+    for (let k = 0; k < pts.length; k += 2) wide.push(pts[k] + (nx * a) / 2, pts[k + 1] + (ny * a) / 2, pts[k] - (nx * a) / 2, pts[k + 1] - (ny * a) / 2);
+    const polys = [hullFlat(wide)];
     rasterise(polys, { nx: n, ny: n, cell }, (i, p, s) => {
       if (!ground(i)) return;
-      const x = ((i % n) + ((s % S) + 0.5) / S) * cell;
-      const y = (Math.floor(i / n) + (Math.floor(s / S) + 0.5) / S) * cell;
+      const xc = ((i % n) + ((s % S) + 0.5) / S) * cell;
+      const yc = (Math.floor(i / n) + (Math.floor(s / S) + 0.5) / S) * cell;
+      const dc = xc * nx + yc * ny - f.c0; // distance in front of the façade
+      const lo = Math.max(dc - a / 2, d0);
+      const hi = Math.min(dc + a / 2, d1);
+      if (!(hi > lo)) return;
+      const cover = (hi - lo) / a;
+      const shift = (lo + hi) / 2 - dc;
+      const x = xc + shift * nx;
+      const y = yc + shift * ny;
       // distance along s' to the façade plane
-      const pn = x * nx + y * ny;
-      const sn = rx * nx + ry * ny; // < 0
-      const t = (f.c0 - pn) / sn;
+      const t = (f.c0 - (x * nx + y * ny)) / sn;
       if (!(t > 0)) return;
       const hx = x + t * rx;
       const hy = y + t * ry;
       const hz = t * rz;
       const hu = along ? hx : hy;
-      if (hu < f.u[0] || hu > f.u[1] || hz < f.z[0] || hz > f.z[1]) return;
+      if (hu < f.u[0] || hu > f.u[1]) return;
       // reflected path p -> glass, then glass -> sun
-      for (const q of blk) if (rayBox(x, y, 0, rx, ry, rz, q[0], q[1], q[2], q[3], q[4], q[5], 1e-6, t - 1e-6) < Infinity) return;
-      for (const q of blk) if (rayBox(hx, hy, hz, sv[0], sv[1], sv[2], q[0], q[1], q[2], q[3], q[4], q[5], 1e-6, 1e5) < Infinity) return;
+      for (const b of blk) if (rayBox(x, y, 0, rx, ry, rz, b[0], b[1], b[2], b[3], b[4], b[5], 1e-6, t - 1e-6) < Infinity) return;
+      for (const b of blk) if (rayBox(hx, hy, hz, sv[0], sv[1], sv[2], b[0], b[1], b[2], b[3], b[4], b[5], 1e-6, 1e5) < Infinity) return;
       const tr = trees.length ? crownTransmission(trees, x, y, 0, rx, ry, rz, t) : 1;
       if (!A) {
         A = new Float32Array(n * n);
         Bf = new Float32Array(n * n);
       }
-      A[i] += w * tr;
-      Bf[i] += w * tr * g;
-      if (opts.trace) opts.trace(i, x, y, f, g, tr);
+      A[i] += w * tr * cover;
+      Bf[i] += w * tr * cover * g;
+      if (opts.trace) opts.trace(i, x, y, f, g, tr, cover);
     }, S);
   }
   return A ? { A, B: Bf } : null;
@@ -959,11 +981,12 @@ function reflectFor(rs, rho0) {
 
 /**
  * Glass outer-surface temperature (deg C) for one façade orientation:
- * Tg = Ta + a_g I_f / (h_o + h_i), I_f = f_lit I max(0, cos theta) + 0.5 D
- * (brief equation; f_lit as for the wall term; an assumption, no measurement found).
+ * Tg = Ta + a_g I_f / (h_o + h_i), I_f = I max(0, cos theta) + 0.5 D
+ * (the brief's equation; an assumption, no measurement found; the whole
+ * façade is taken as sunlit when it faces the sun).
  */
 function glassTemp(ta, beam, diffuse, cosT, absorb) {
-  const If = MODEL.wallLit.value * beam * Math.max(0, cosT) + 0.5 * diffuse;
+  const If = beam * Math.max(0, cosT) + 0.5 * diffuse;
   return ta + (absorb * If) / (MODEL.glassHo.value + MODEL.glassHi.value);
 }
 
@@ -1368,7 +1391,13 @@ function runModel(world, opts = {}) {
   // opts.warm (block 3): this many coarse days (10-min steps) first, to bring
   // the deep temperature close before the 1-min days; the convergence test
   // below is unchanged and counts only 1-min days (still at least minDays).
-  for (let k = 0; k < (opts.warm ?? 0); k++) runDay(10, false);
+  // Guard: the coarse step is explicit, so it is used only where it is
+  // comfortably stable: max over cells of 600 s x (cap (4 eps sigma T^3 + hc)
+  // + restore) < 0.5 with T = 340 K (membrane roofs 0.31; thin metal roofs
+  // about 0.96, so a block with them falls back to the plain start).
+  const warmFactor = opts.warm ? coarseStability(C, 600) : 0;
+  const warmUsed = !!opts.warm && warmFactor < 0.5;
+  if (warmUsed) for (let k = 0; k < opts.warm; k++) runDay(10, false);
   while (days < maxDays && (days < minDays || maxDelta >= tol)) {
     maxDelta = runDay(dt / 60, true);
     days++;
@@ -1378,7 +1407,18 @@ function runModel(world, opts = {}) {
     idx.forEach((i, c) => full.set(store.subarray(c * STORE, (c + 1) * STORE), i * STORE));
     store = full;
   }
-  return new Thermal(world, store, slots, { rise, taMean, hc, site, ta, days, maxDelta, mats, cells: idx, refl: reflFull, glass, warm: opts.warm ?? 0 });
+  return new Thermal(world, store, slots, { rise, taMean, hc, site, ta, days, maxDelta, mats, cells: idx, refl: reflFull, glass, warm: warmUsed ? opts.warm : 0, warmFactor });
+}
+
+/** Largest explicit-step stability factor over the cells for a step of dtS seconds (T = 340 K). */
+function coarseStability(C, dtS) {
+  const T3 = 340 ** 3;
+  let max = 0;
+  for (let i = 0; i < C.NN; i++) {
+    if (C.water[i]) continue;
+    max = Math.max(max, dtS * (C.cap[i] * (4 * C.eps[i] * SIGMA * T3 + C.hc) + C.restore[i]));
+  }
+  return max;
 }
 
 /** One model minute for every cell (blocks without glass). */
@@ -1709,7 +1749,7 @@ function paletteLut() {
 }
 
 
-return { SIGMA, SLOTS, STORE, LATENT, daylight, airTemp, irradiance, skyEmissivity, svfAt, shadowPolys, buildingMask, sunlitField, shadeClassField, sunSlots, cellMat, runModel, wallTemp, wallReflectCoef, wallShortwave, glassLongwave, Thermal, PALETTE_STOPS, heatRgb, paletteLut };
+return { SIGMA, SLOTS, STORE, LATENT, daylight, airTemp, irradiance, skyEmissivity, svfAt, shadowPolys, buildingMask, sunlitField, shadeClassField, sunSlots, cellMat, runModel, coarseStability, wallTemp, wallReflectCoef, wallShortwave, glassLongwave, Thermal, PALETTE_STOPS, heatRgb, paletteLut };
 })();
 
 __m['world'] = (() => {
@@ -3321,7 +3361,7 @@ class Renderer {
     const si = this.spotImage(hc);
     if (!si) return;
     const s0 = si.bb;
-    if (bb && (s0[2] < bb[0] || s0[0] > bb[2] || s0[3] < bb[1] || s0[1] > bb[3])) return; // no spot on this tile
+    if (bb && this.spotSkip !== false && (s0[2] < bb[0] || s0[0] > bb[2] || s0[3] < bb[1] || s0[1] > bb[3])) return; // no spot on this tile
     if (!this.spotScratch) {
       this.spotScratch = makeCanvas(TILE, TILE);
       this.hatchScratch = makeCanvas(TILE, TILE);
@@ -5240,8 +5280,8 @@ function glassCard(id, st, face) {
     <p class="sub">ΔTmrt: the same glass with its mirror reflection switched off, same cells.</p>
     <p class="note">${g.note}</p>
     ${id === 'lowe' ? `<p class="lit">Singapore caps the daylight reflectance of façade glass at 20% (BCA Approved Document, Section P).</p>` : ''}
-    <p class="caveat">Low-e and mirror reflectances are mid-range values from the brief; no product datasheet was checked (see the LBNL IGDB). The angular shape is Fresnel for clear glass; coated glass can differ by up to about 8% at 60°. Glass surface temperature is the brief's simple balance, Ta + a_g I_f / (h_o + h_i), with no measurement behind it. <span class="unv">unverified</span></p>
-    ${srcLine(['fresnel', 'igdb', 'bca', 'en673', 'brief3'])}`;
+    <p class="caveat">Low-e and mirror reflectances are mid-range values from the brief; no product datasheet was checked (see the LBNL IGDB). The angular shape is exact Fresnel for clear glass, applied to coated glass in the EnergyPlus form R(0)(1 − ρ̄) + ρ̄ (EnergyPlus would use a bronze-glass curve for some coated products); coated glass can differ by up to about 8% at 60°. Glass surface temperature is the brief's simple balance, Ta + a_g I_f / (h_o + h_i) with I_f = I cosθ + 0.5 D, with no measurement behind it. <span class="unv">unverified</span></p>
+    ${srcLine(['fresnel', 'energyplus', 'igdb', 'bca', 'en673', 'brief3'])}`;
 }
 
 /** The reflection-spot card: out of the sun, still hot. st: spotStats() at 15:00 for the current glass. */
@@ -5262,7 +5302,7 @@ function spotCard(st, id) {
     </table>
     <p class="note">A flat glass façade in sun acts as a second, dimmer sun low in the sky. Its ${gl('specular', 'mirror reflection')} lands as a moving patch on the street, often in the shade of another building: people there are out of the sun but still take in much of its heat. Walkers here treat a spot as partly sunny and keep out of it when they can.</p>
     <p class="lit">Field data (Chengdu, Chunxi Road, August 2023): reflection zones Tmrt +4 to +13 °C, air +1–2 °C, UTCI +2–5 °C, peak Tmrt 73.9 °C (Du et al. 2025). SOLWEIG with reflective walls also puts the highest Tmrt in front of sunlit façades (Wallenberg et al. 2026).</p>
-    <p class="caveat">${st.dTmrtMax > 13 ? `The largest rise here (${K(st.dTmrtMax)}) is above the field range. ` : ''}Glass here is ideally flat and frameless, and Fresnel reflectance climbs steeply at grazing angles (over 0.5 beyond 80°), so façades lit edge-on send strong, thin spots; mullions and pane distortion that break these up are not modelled. The ground under a spot also warms, which adds to Tmrt. Single bounce only (a second bounce off the opposite façade, ρ² of the beam, is ignored); air temperature is fixed (the measured air warming is not modelled). <span class="unv">unverified</span></p>
+    <p class="caveat">${st.dTmrtMax > 13 ? `The largest rise here (${K(st.dTmrtMax)}) is above the field range. ` : ''}Glass here is ideally flat and frameless, and Fresnel reflectance climbs steeply at grazing angles (over 0.5 beyond 80°), so façades lit edge-on send strong, thin spots, and a cell can be lit by two façades at once; mullions and pane distortion that break these up are not modelled. The ground under a spot also warms, which adds to Tmrt. Single bounce only (a second bounce off the opposite façade, ρ² of the beam, is ignored); air temperature is fixed (the measured air warming is not modelled). <span class="unv">unverified</span></p>
     ${srcLine(['du2025', 'wallenberg2026', 'fresnel', 'brief3'])}`;
 }
 
@@ -5448,6 +5488,8 @@ function boot(scene, root = document) {
   const main = V.main ?? V.after;
   // ?glint=0 (checks): no glint wash in the day view; spots still act on walkers
   if (glassMode && q.get('glint') === '0') main.R.spotFor = null;
+  // ?spotskip=0 (checks): draw the glint on every tile, without the bounding-box skip
+  if (glassMode && q.get('spotskip') === '0') main.R.spotSkip = false;
   const R = main.R;
   const display = main.display;
   const t3 = performance.now();

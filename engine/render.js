@@ -321,7 +321,7 @@ export class Renderer {
     const si = this.spotImage(hc);
     if (!si) return;
     const s0 = si.bb;
-    if (bb && (s0[2] < bb[0] || s0[0] > bb[2] || s0[3] < bb[1] || s0[1] > bb[3])) return; // no spot on this tile
+    if (bb && this.spotSkip !== false && (s0[2] < bb[0] || s0[0] > bb[2] || s0[3] < bb[1] || s0[1] > bb[3])) return; // no spot on this tile
     if (!this.spotScratch) {
       this.spotScratch = makeCanvas(TILE, TILE);
       this.hatchScratch = makeCanvas(TILE, TILE);

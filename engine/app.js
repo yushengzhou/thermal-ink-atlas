@@ -138,6 +138,8 @@ export function boot(scene, root = document) {
   const main = V.main ?? V.after;
   // ?glint=0 (checks): no glint wash in the day view; spots still act on walkers
   if (glassMode && q.get('glint') === '0') main.R.spotFor = null;
+  // ?spotskip=0 (checks): draw the glint on every tile, without the bounding-box skip
+  if (glassMode && q.get('spotskip') === '0') main.R.spotSkip = false;
   const R = main.R;
   const display = main.display;
   const t3 = performance.now();

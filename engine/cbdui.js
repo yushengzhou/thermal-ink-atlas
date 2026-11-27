@@ -83,8 +83,8 @@ export function glassCard(id, st, face) {
     <p class="sub">ΔTmrt: the same glass with its mirror reflection switched off, same cells.</p>
     <p class="note">${g.note}</p>
     ${id === 'lowe' ? `<p class="lit">Singapore caps the daylight reflectance of façade glass at 20% (BCA Approved Document, Section P).</p>` : ''}
-    <p class="caveat">Low-e and mirror reflectances are mid-range values from the brief; no product datasheet was checked (see the LBNL IGDB). The angular shape is Fresnel for clear glass; coated glass can differ by up to about 8% at 60°. Glass surface temperature is the brief's simple balance, Ta + a_g I_f / (h_o + h_i), with no measurement behind it. <span class="unv">unverified</span></p>
-    ${srcLine(['fresnel', 'igdb', 'bca', 'en673', 'brief3'])}`;
+    <p class="caveat">Low-e and mirror reflectances are mid-range values from the brief; no product datasheet was checked (see the LBNL IGDB). The angular shape is exact Fresnel for clear glass, applied to coated glass in the EnergyPlus form R(0)(1 − ρ̄) + ρ̄ (EnergyPlus would use a bronze-glass curve for some coated products); coated glass can differ by up to about 8% at 60°. Glass surface temperature is the brief's simple balance, Ta + a_g I_f / (h_o + h_i) with I_f = I cosθ + 0.5 D, with no measurement behind it. <span class="unv">unverified</span></p>
+    ${srcLine(['fresnel', 'energyplus', 'igdb', 'bca', 'en673', 'brief3'])}`;
 }
 
 /** The reflection-spot card: out of the sun, still hot. st: spotStats() at 15:00 for the current glass. */
@@ -105,7 +105,7 @@ export function spotCard(st, id) {
     </table>
     <p class="note">A flat glass façade in sun acts as a second, dimmer sun low in the sky. Its ${gl('specular', 'mirror reflection')} lands as a moving patch on the street, often in the shade of another building: people there are out of the sun but still take in much of its heat. Walkers here treat a spot as partly sunny and keep out of it when they can.</p>
     <p class="lit">Field data (Chengdu, Chunxi Road, August 2023): reflection zones Tmrt +4 to +13 °C, air +1–2 °C, UTCI +2–5 °C, peak Tmrt 73.9 °C (Du et al. 2025). SOLWEIG with reflective walls also puts the highest Tmrt in front of sunlit façades (Wallenberg et al. 2026).</p>
-    <p class="caveat">${st.dTmrtMax > 13 ? `The largest rise here (${K(st.dTmrtMax)}) is above the field range. ` : ''}Glass here is ideally flat and frameless, and Fresnel reflectance climbs steeply at grazing angles (over 0.5 beyond 80°), so façades lit edge-on send strong, thin spots; mullions and pane distortion that break these up are not modelled. The ground under a spot also warms, which adds to Tmrt. Single bounce only (a second bounce off the opposite façade, ρ² of the beam, is ignored); air temperature is fixed (the measured air warming is not modelled). <span class="unv">unverified</span></p>
+    <p class="caveat">${st.dTmrtMax > 13 ? `The largest rise here (${K(st.dTmrtMax)}) is above the field range. ` : ''}Glass here is ideally flat and frameless, and Fresnel reflectance climbs steeply at grazing angles (over 0.5 beyond 80°), so façades lit edge-on send strong, thin spots, and a cell can be lit by two façades at once; mullions and pane distortion that break these up are not modelled. The ground under a spot also warms, which adds to Tmrt. Single bounce only (a second bounce off the opposite façade, ρ² of the beam, is ignored); air temperature is fixed (the measured air warming is not modelled). <span class="unv">unverified</span></p>
     ${srcLine(['du2025', 'wallenberg2026', 'fresnel', 'brief3'])}`;
 }
 

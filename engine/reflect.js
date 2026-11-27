@@ -175,32 +175,53 @@ export function reflectField(world, sun, grid, ground, opts = {}) {
     }
     const front = (x, y) => x * nx + y * ny > f.c0;
     const trees = world.trees.filter((T) => front(T.x, T.y));
-    const polys = [hullFlat(pts)];
+    // Coverage across the façade normal is clipped analytically: the
+    // reflected strip covers plane distances [z0 q, z1 q] in front of the
+    // façade (q = -(s'.n) / s'_z); a sample stands for a square of side a, so
+    // it is lit over the overlap of its extent [d - a/2, d + a/2] with the
+    // strip, and the ray tests are made at the middle of that overlap. A strip
+    // thinner than a sample (grazing incidence) is then counted with its true
+    // area instead of whole samples. The polygon is widened by a/2 along the
+    // normal so samples whose centre lies just outside the strip are visited.
+    const a = cell / S;
+    const sn = rx * nx + ry * ny; // < 0
+    const q = -sn / rz;
+    const d0 = f.z[0] * q;
+    const d1 = f.z[1] * q;
+    const wide = [];
+    for (let k = 0; k < pts.length; k += 2) wide.push(pts[k] + (nx * a) / 2, pts[k + 1] + (ny * a) / 2, pts[k] - (nx * a) / 2, pts[k + 1] - (ny * a) / 2);
+    const polys = [hullFlat(wide)];
     rasterise(polys, { nx: n, ny: n, cell }, (i, p, s) => {
       if (!ground(i)) return;
-      const x = ((i % n) + ((s % S) + 0.5) / S) * cell;
-      const y = (Math.floor(i / n) + (Math.floor(s / S) + 0.5) / S) * cell;
+      const xc = ((i % n) + ((s % S) + 0.5) / S) * cell;
+      const yc = (Math.floor(i / n) + (Math.floor(s / S) + 0.5) / S) * cell;
+      const dc = xc * nx + yc * ny - f.c0; // distance in front of the façade
+      const lo = Math.max(dc - a / 2, d0);
+      const hi = Math.min(dc + a / 2, d1);
+      if (!(hi > lo)) return;
+      const cover = (hi - lo) / a;
+      const shift = (lo + hi) / 2 - dc;
+      const x = xc + shift * nx;
+      const y = yc + shift * ny;
       // distance along s' to the façade plane
-      const pn = x * nx + y * ny;
-      const sn = rx * nx + ry * ny; // < 0
-      const t = (f.c0 - pn) / sn;
+      const t = (f.c0 - (x * nx + y * ny)) / sn;
       if (!(t > 0)) return;
       const hx = x + t * rx;
       const hy = y + t * ry;
       const hz = t * rz;
       const hu = along ? hx : hy;
-      if (hu < f.u[0] || hu > f.u[1] || hz < f.z[0] || hz > f.z[1]) return;
+      if (hu < f.u[0] || hu > f.u[1]) return;
       // reflected path p -> glass, then glass -> sun
-      for (const q of blk) if (rayBox(x, y, 0, rx, ry, rz, q[0], q[1], q[2], q[3], q[4], q[5], 1e-6, t - 1e-6) < Infinity) return;
-      for (const q of blk) if (rayBox(hx, hy, hz, sv[0], sv[1], sv[2], q[0], q[1], q[2], q[3], q[4], q[5], 1e-6, 1e5) < Infinity) return;
+      for (const b of blk) if (rayBox(x, y, 0, rx, ry, rz, b[0], b[1], b[2], b[3], b[4], b[5], 1e-6, t - 1e-6) < Infinity) return;
+      for (const b of blk) if (rayBox(hx, hy, hz, sv[0], sv[1], sv[2], b[0], b[1], b[2], b[3], b[4], b[5], 1e-6, 1e5) < Infinity) return;
       const tr = trees.length ? crownTransmission(trees, x, y, 0, rx, ry, rz, t) : 1;
       if (!A) {
         A = new Float32Array(n * n);
         Bf = new Float32Array(n * n);
       }
-      A[i] += w * tr;
-      Bf[i] += w * tr * g;
-      if (opts.trace) opts.trace(i, x, y, f, g, tr);
+      A[i] += w * tr * cover;
+      Bf[i] += w * tr * cover * g;
+      if (opts.trace) opts.trace(i, x, y, f, g, tr, cover);
     }, S);
   }
   return A ? { A, B: Bf } : null;
@@ -262,10 +283,11 @@ export function reflectFor(rs, rho0) {
 
 /**
  * Glass outer-surface temperature (deg C) for one façade orientation:
- * Tg = Ta + a_g I_f / (h_o + h_i), I_f = f_lit I max(0, cos theta) + 0.5 D
- * (brief equation; f_lit as for the wall term; an assumption, no measurement found).
+ * Tg = Ta + a_g I_f / (h_o + h_i), I_f = I max(0, cos theta) + 0.5 D
+ * (the brief's equation; an assumption, no measurement found; the whole
+ * façade is taken as sunlit when it faces the sun).
  */
 export function glassTemp(ta, beam, diffuse, cosT, absorb) {
-  const If = MODEL.wallLit.value * beam * Math.max(0, cosT) + 0.5 * diffuse;
+  const If = beam * Math.max(0, cosT) + 0.5 * diffuse;
   return ta + (absorb * If) / (MODEL.glassHo.value + MODEL.glassHi.value);
 }
