@@ -88,7 +88,7 @@
 <div id="bar">
   <input id="hour" type="range" min="0" max="23.75" step="0.25" value="15" aria-label="hour of day">
   <span id="hourLabel" class="hand"></span>
-  <span id="keys"><kbd>T</kbd> heat · <kbd>H</kbd> hour · <kbd>R</kbd> white roofs · <kbd>O</kbd> under the roof · drag · wheel · click a parcel</span>
+  <span id="keys"><kbd>T</kbd> heat · <kbd>H</kbd> hour · <kbd>W</kbd> white roofs · <kbd>O</kbd> under the roof · drag · wheel · click a parcel</span>
   <button id="termsBtn" type="button" aria-expanded="false" aria-controls="terms">terms</button>
 </div>
 <div id="terms" role="dialog" aria-label="Glossary of terms" hidden>
@@ -5402,7 +5402,7 @@ __m['village'] = (() => {
 //   air (illustrative): dT = h_ci (T_roof - Ta) / (h_ci + rho c_p n h / 3600),
 //   n calibrated (as the brief says) so the bare rusty-iron rooms peak at +3 K,
 //   never shown beyond +-5 K.
-// The residents' white roofs (R) repaint the marked bare sheets (paint: true)
+// The residents' white roofs (W) repaint the marked bare sheets (paint: true)
 // and run those roof cells again. The air temperature is fixed.
 const { runModel, Thermal, sunSlots, cellMat, STORE, SIGMA, coarseStability } = __m['thermal'];
 const { DEG, clamp } = __m['core'];
@@ -5927,16 +5927,16 @@ function whiteCard(d) {
   return `
     ${close}
     <h3>The residents' white roofs</h3>
-    <div class="mat">${c.n} bare iron roofs repainted white (R) · ${d.on ? 'white roofs on' : 'white roofs off (R to show them)'}</div>
+    <div class="mat">${c.n} bare iron roofs repainted white (W) · ${d.on ? 'white roofs on' : 'white roofs off (W to show them)'}</div>
     <table class="cmp">
-      <tr><td>roofs painted (R)</td><td>bare</td><td>new white paint</td><td>change</td></tr>
+      <tr><td>roofs painted (W)</td><td>bare</td><td>new white paint</td><td>change</td></tr>
       ${rr ? `<tr class="t"><td>rusty iron rooms, roof at 15:00</td><td>${fmt(rr.ts15)} °C</td><td>${fmt(rr.cool15)} °C</td><td>${K(rr.d15)}${dMiss ? MISS : ''}</td></tr>
       <tr><td>the same, radiant under the roof 15:00</td><td>${fmt(rr.rad15)} °C</td><td>${fmt(rr.radW15)} °C</td><td>${K(rr.dRad15)}</td></tr>
       <tr class="t"><td>the same, air (illustrative), day's peak</td><td>${sAir(rr.airPeakBare)}</td><td>${sAir(rr.airPeakWhite)}</td><td>${K(rr.dAirPeak)}${aMiss ? MISS : ''}</td></tr>` : ''}
       <tr><td>all ${all.n} painted roofs, 15:00</td><td>${fmt(all.ts15)} °C</td><td>${fmt(all.cool15)} °C</td><td>${K(all.d15)}</td></tr>
       ${aged && rust ? `<tr><td colspan="4" class="sub">Painted years ago (weathered, α ${MATERIALS.whiteTinAged.alpha.value}): ${fmt(aged.ts15)} °C at 15:00 against ${fmt(rust.ts15)} °C for bare rusty iron.</td></tr>` : ''}
     </table>
-    <p class="note">Painting a roof white is one of the few changes residents can make themselves, and many do, often together: in this block some roofs are already white, and R paints the rest of the bare iron. New white paint (${gl('albedo', 'albedo')} ${MATERIALS.whiteTin.alpha.value}${tag(MATERIALS.whiteTin.alpha)}) turns back most of the sun, so the sheet and the ceiling under it stay far cooler.</p>
+    <p class="note">Painting a roof white is one of the few changes residents can make themselves, and many do, often together: in this block some roofs are already white, and W paints the rest of the bare iron. New white paint (${gl('albedo', 'albedo')} ${MATERIALS.whiteTin.alpha.value}${tag(MATERIALS.whiteTin.alpha)}) turns back most of the sun, so the sheet and the ceiling under it stay far cooler.</p>
     <p class="lit">In 16 homes in Ahmedabad, white paint on a tin roof cooled the room by about 1.1 K, a cool-roof sheet by 2.0 K and insulation under an asbestos roof by 2.4 K (Vellingiri et al. 2020, with MHT and IIPH). Simulated for 17 cities, cool roofs cut the hours of heat stress indoors by up to 91% (Nutkiewicz et al. 2022). A cluster randomised trial of cool roofs in Burkina Faso has published its protocol (Bunker et al. 2024); its results were found in the press only.</p>
     <p class="caveat">Paint ages: the brief gives albedo 0.65 new and 0.50 weathered. The room figures are the proxies of the "Under the roof" card. ${dMiss || aMiss ? 'Where a band is missed, the likely cause is named in docs/sources.md (Block 10).' : ''}</p>
     ${srcLine(['vellingiri2020', 'nutkiewicz2022', 'bunker2024', 'brief10'])}`;
@@ -6063,7 +6063,7 @@ function vgApp(env) {
   root.body.insertAdjacentHTML(
     'beforeend',
     `<div id="village" class="blockpanel" aria-label="Urban village controls">
-        <div class="seg">${btn('data-cool', '1', 'white roofs (R)')}${btn('data-under', '1', 'under the roof (O)')}</div>
+        <div class="seg">${btn('data-cool', '1', 'white roofs (W)')}${btn('data-under', '1', 'under the roof (O)')}</div>
         <div class="measures"><div class="hand">Cards</div>${VG_CARDS.map(([id, label]) => btn('data-card', id, label)).join('')}</div>
       </div>`,
   );
@@ -6148,9 +6148,9 @@ function vgApp(env) {
     look: () => ({ under: st.under, budget: 1 }),
     sync,
     html,
-    /** Keyboard: R paints the residents' white roofs, O shows the room under the roof; true if the key was the block's. */
+    /** Keyboard: W paints the residents' white roofs, O shows the room under the roof; true if the key was the block's. */
     key(k) {
-      if (k === 'r' || k === 'R') setCool(!st.cool);
+      if (k === 'w' || k === 'W') setCool(!st.cool);
       else if (k === 'o' || k === 'O') setUnder(!st.under);
       else return false;
       return true;
@@ -6177,7 +6177,7 @@ function vgApp(env) {
       if (f.slab) return '<tr><td colspan="2" class="sub">The room under a concrete slab is not computed (its heat store is in the slab).</td></tr>';
       const u = f.under;
       const s = airShown(u.peak);
-      return `<tr><td>${gl('indoorRadiant', 'radiant temperature under the roof')} now (proxy)</td><td>${fmt(u.radiant)} °C</td></tr><tr><td>room air now / day's peak (illustrative)</td><td>${K(u.value)}${u.capped ? ' (capped)' : ''} / ${K(s.value)}${s.capped ? ' (capped)' : ''} on the outdoor air</td></tr>${u.painted ? '<tr><td colspan="2" class="sub">Painted white by the residents (R).</td></tr>' : ''}`;
+      return `<tr><td>${gl('indoorRadiant', 'radiant temperature under the roof')} now (proxy)</td><td>${fmt(u.radiant)} °C</td></tr><tr><td>room air now / day's peak (illustrative)</td><td>${K(u.value)}${u.capped ? ' (capped)' : ''} / ${K(s.value)}${s.capped ? ' (capped)' : ''} on the outdoor air</td></tr>${u.painted ? '<tr><td colspan="2" class="sub">Painted white by the residents (W).</td></tr>' : ''}`;
     },
     /**
      * The shared sky-view and night-lag footnotes quote a block's own lines when it has no open lawn
@@ -6694,7 +6694,7 @@ function boot(scene, root = document) {
     return `rgb(${c.map(Math.round).join(',')}) ${(((t - lo) / (hi - lo)) * 100).toFixed(1)}%`;
   }).join(', ')})`;
   $('legendLo').textContent = `${lo} °C`;
-  $('legendHi').textContent = `${hi} °C`;
+  $('legendHi').textContent = `≥ ${hi} °C`;
 
   const setHour = (h, scrub = false) => {
     S.hour = ((Math.round(h / 0.25) * 0.25) % 24 + 24) % 24;

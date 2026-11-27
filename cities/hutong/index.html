@@ -6359,7 +6359,7 @@ function boot(scene, root = document) {
     return `rgb(${c.map(Math.round).join(',')}) ${(((t - lo) / (hi - lo)) * 100).toFixed(1)}%`;
   }).join(', ')})`;
   $('legendLo').textContent = `${lo} °C`;
-  $('legendHi').textContent = `${hi} °C`;
+  $('legendHi').textContent = `≥ ${hi} °C`;
 
   const setHour = (h, scrub = false) => {
     S.hour = ((Math.round(h / 0.25) * 0.25) % 24 + 24) % 24;
