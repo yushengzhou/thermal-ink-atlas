@@ -180,8 +180,12 @@ export function drawBurn(R, ctx, cam, W, H, alpha, hq) {
   const E = R.campus;
   const [ox, oy, Z] = R.origin(cam, W, H);
   const d = R.dpr;
-  const key = `${hq}|${E.modelKey()}|${cam.z}|${cam.cx}|${cam.cy}|${W}|${H}|${d}`;
-  if (!E.layer || E.layer.key !== key) {
+  const view = `${cam.z}|${cam.cx}|${cam.cy}|${W}|${H}|${d}`;
+  const key = `${hq}|${E.modelKey()}|${view}`;
+  // while a slider-drag frame is still a preview (tiles pending), keep the layer of the last hour drawn;
+  // it is rebuilt on the first frame whose tiles are exact, so the settled frame is exact
+  const stale = E.layer && E.layer.key !== key && R.scrub && R.stats.preview && E.layer.view === view;
+  if (!stale && (!E.layer || E.layer.key !== key)) {
     const c = E.layer?.c && E.layer.c.width === W && E.layer.c.height === H ? E.layer.c : (typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(W, H) : Object.assign(document.createElement('canvas'), { width: W, height: H }));
     const g = c.getContext('2d');
     g.setTransform(1, 0, 0, 1, 0, 0);
@@ -224,7 +228,7 @@ export function drawBurn(R, ctx, cam, W, H, alpha, hq) {
     g.lineWidth = Math.max(1.1 * d, 0.32 * Z);
     g.lineCap = 'round';
     g.stroke();
-    E.layer = { key, c, n: cells.length, drawn };
+    E.layer = { key, view, c, n: cells.length, drawn };
   }
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
