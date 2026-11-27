@@ -12,7 +12,7 @@ import { base, targetRows, sensitivity, TIERS } from './regions.mjs';
 import { GLOSSARY, glossaryStats, rangeLine } from '../engine/glossary.js';
 import { base2, bandRows, water, sensitivity2, diagnostics } from './retrofit.mjs';
 import { MEASURES, D_DEFAULT, D_MAX, decay } from '../engine/retrofit.js';
-import { cbdMarkdown } from './cbd-docs.mjs';
+import { cbdMarkdown, cbdGlossaryStats } from './cbd-docs.mjs';
 
 const UNITS = { mu: ' J m⁻² s⁻½ K⁻¹', muWet: ' J m⁻² s⁻½ K⁻¹', thinC: ' J m⁻² K⁻¹', tau: ' d', storage: ' mm' };
 const cell = (p, k = '') =>
@@ -57,8 +57,10 @@ ${rows.join('\n')}`;
 
 export function glossaryMarkdown(world, model) {
   const st = glossaryStats(world, model);
+  // block-3-only terms computed from the model are quoted with block 3's numbers (as on that page)
+  const st3 = cbdGlossaryStats();
   return Object.entries(GLOSSARY)
-    .map(([k, g]) => `- **${g.term}**${g.scenes ? ` (${g.scenes.join(', ')} only)` : ''}: ${rangeLine(k, st)} ${g.model ? '[this model]' : `[${g.src}]`}`)
+    .map(([k, g]) => `- **${g.term}**${g.scenes ? ` (${g.scenes.join(', ')} only)` : ''}: ${rangeLine(k, g.model && g.scenes && g.scenes.includes('glass-cbd') ? st3 : st)} ${g.model ? '[this model]' : `[${g.src}]`}`)
     .join('\n');
 }
 

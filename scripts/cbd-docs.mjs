@@ -3,7 +3,8 @@
 import { GLASS, GLASS_IDS, GLASS_DEFAULT, MODEL, BASIS } from '../engine/materials.js';
 import { base3, canyonSvfRows, fresnelRows, specularCheck, SPECULAR_CASES, spotRows, canyons, wallBound, walkers, bands3, dTmrtByRho } from './cbd.mjs';
 import { glassRho } from '../engine/reflect.js';
-import { SPOT_MIN, WARM } from '../engine/cbd.js';
+import { SPOT_MIN, WARM, spotClasses, canyonStats } from '../engine/cbd.js';
+import { glossaryStats } from '../engine/glossary.js';
 import { AC } from '../engine/cbd.js';
 import { diagnostics } from './retrofit.mjs';
 import { glassTemp } from '../engine/reflect.js';
@@ -22,6 +23,18 @@ const f2 = (x) => x.toFixed(2);
 const f3 = (x) => x.toFixed(3);
 const signed = (x, d = 1) => `${x < 0 ? '−' : '+'}${Math.abs(x).toFixed(d)}`;
 const cell = (p) => `${p.value} [${p.source}] *${BASIS[p.basis]}*${p.verified ? '' : ', unverified'}${p.note ? ` (${p.note})` : ''}`;
+
+/** Glossary numbers for block 3, computed as on the page (app.js). */
+export function cbdGlossaryStats() {
+  const { world, setup, scene, refs } = base3();
+  const T = setup.model(GLASS_DEFAULT);
+  const c = spotClasses(world, T, 15);
+  const m = (a) => a.reduce((x, i) => x + T.tmrt(i, 15), 0) / Math.max(1, a.length);
+  return glossaryStats(world, T, {
+    canyon: canyonStats(world, T, scene.canyons.lane, refs.stone),
+    spot: { tmrtShade: m(c.shade), tmrtSun: m(c.sun), tmrtSpotShade: m(c.spotShade), tmrtSpotSun: m(c.spotSun), glassName: GLASS[GLASS_DEFAULT].name.toLowerCase() },
+  });
+}
 
 /** Block 3 acceptance table (also checked by the tests). */
 export function bands3Markdown(rows) {

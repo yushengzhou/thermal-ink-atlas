@@ -162,7 +162,7 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Glass curtain wall** (glass-cbd only): Typical: Normal-incidence solar reflectance: clear float glass about 0.08, solar-control low-e 0.15–0.35, reflective (mirror) glass 0.25–0.45; outer-surface emissivity about 0.84. [fresnel, brief3, en673]
 - **Specular reflection** (glass-cbd only): Typical: Scale models: flat mirror façades more than double the sunshine at pedestrian level; diffuse façades add at most about 30%; concave façades more than 300%. [speroni2022]
 - **Fresnel reflection** (glass-cbd only): Typical: Clear float glass (n = 1.52, two surfaces): 0.082 at 0°, 0.10 at 45°, 0.17 at 60°, 0.30 at 70°, 0.41 at 75°, 0.56 at 80°. [fresnel]
-- **Reflection spot** (glass-cbd only): In this model: undefined [this model]
+- **Reflection spot** (glass-cbd only): In this model: At 3 pm with solar-control low-e glass: Tmrt 48 °C in shaded spots vs 40 °C in plain shade and 71 °C in sun. [this model]
 - **Street canyon (H/W)** (glass-cbd only): Typical: Sky view factor at the centre of a long canyon: 1/√(1 + (2H/W)²), i.e. 0.45 at H/W 1, 0.24 at 2, 0.16 at 3, 0.10 at 5. Oke (1981): calm-night urban–rural air difference about 7.45 + 3.97 ln(H/W) K (secondary source). [brief3, oke1981]
 - **Low-e glass** (glass-cbd only): Typical: Solar reflectance about 0.15–0.35 head-on; Singapore caps glass daylight reflectance at 20%. [brief3, bca]
 - **AC waste heat** (glass-cbd only): Typical: Dense urban areas 20–70 W m⁻² of ground area, sometimes over 100; central Tokyo over 400 W m⁻² by day. [xie2016, sailor2011]
