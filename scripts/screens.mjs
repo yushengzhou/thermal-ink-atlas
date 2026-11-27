@@ -15,6 +15,7 @@ const SR = 'sponge-retrofit';
 const GC = 'glass-cbd';
 const WF = 'waterfront';
 const HT = 'hutong';
+const PK = 'parking';
 const shots = [
   [AP, 'docs/media/day-1500.jpg', 'hour=15&f=400', { width: 1280, height: 800 }],
   [AP, 'docs/media/thermal-1500.jpg', 'thermal&hour=15&f=400', { width: 1280, height: 800 }],
@@ -97,6 +98,22 @@ const shots = [
     },
   ],
   [HT, 'thumbs/hutong.jpg', 'hour=15&f=400&notes=0&ui=0&cam=3.5,125,245', { width: 640, height: 400 }],
+  // block 6: the car park by day, thermal at 15:00 and at 23:00 with the night-release strokes, the PV canopy close up, the storage card
+  [PK, 'docs/media/pk-day-1500.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
+  [PK, 'docs/media/pk-thermal-1500.jpg', 'thermal&hour=15&f=640', { width: 1280, height: 800 }],
+  [PK, 'docs/media/pk-thermal-2300-release.jpg', 'thermal&hour=23&f=640&flux=1', { width: 1280, height: 800 }],
+  [PK, 'docs/media/pk-thermal-2300-close.jpg', 'thermal&hour=23&f=640&flux=1&notes=0&cam=4,140,170', { width: 1280, height: 800 }],
+  [PK, 'docs/media/pk-day-1500-pv.jpg', 'hour=15&f=640&notes=0&cam=5,70,150', { width: 1280, height: 800 }],
+  [
+    PK,
+    'docs/media/pk-storage-card.jpg',
+    'thermal&hour=23&f=640&flux=1&notes=0',
+    { width: 1280, height: 800 },
+    async (page) => {
+      await page.click('#parking [data-card="storage"]');
+    },
+  ],
+  [PK, 'thumbs/parking.jpg', 'hour=15&f=400&notes=0&ui=0&cam=3,110,140', { width: 640, height: 400 }],
 ];
 const browser = await chromium.launch();
 for (const [city, out, q, viewport, act] of shots) {

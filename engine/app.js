@@ -881,7 +881,8 @@ export function boot(scene, root = document) {
     const st = P.st;
     if (id === 'storage') {
       const C = st.C;
-      const curve = [9, 12, 15, 18, 20, 23, 2, 5].map((h) => ({ h, asphalt: tsMean(thermal, C.openAsphalt, h), gA: fluxMean(thermal, C.openAsphalt, h), concrete: tsMean(thermal, C.yard, h), gC: fluxMean(thermal, C.yard, h), soil: tsMean(thermal, C.soil, h), gS: fluxMean(thermal, C.soil, h), shed: tsMean(thermal, C.shed, h), gSh: fluxMean(thermal, C.shed, h), air: thermal.air(h) }));
+      const K = { asphalt: C.openAsphalt, concrete: C.yard, soil: C.soil, lawn: C.lawn, shed: C.shed };
+      const curve = [12, 15, 20, 23, 4].map((h) => ({ h, air: thermal.air(h), rows: Object.fromEntries(Object.entries(K).map(([k, c]) => [k, [tsMean(thermal, c, h), fluxMean(thermal, c, h)]])) }));
       return storageCard({ st, curve, slabs: { hma: slab(STEMPIHAR.hma.k, STEMPIHAR.hma.rho, STEMPIHAR.hma.c), pcc: slab(STEMPIHAR.pcc.k, STEMPIHAR.pcc.rho, STEMPIHAR.pcc.c) }, flux: !!S.flux });
     }
     if (id === 'pv') return pvCard({ pv: pkPv() });

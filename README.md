@@ -16,6 +16,12 @@ Hand-inked isometric city blocks that show urban heat through one heat-wave day:
   low lanes stay in the sun at noon; trees, vine pergolas and the summer mat
   awning (天棚) give the shade, and a splash of water at 19:00 cools the paving
   for a few hours (a bilingual card tells the custom).
+- Block 6, `parking`: a big open-air car park (open rows, rows with trees,
+  rows under solar canopies), a concrete yard, rusty steel sheds, rail sidings
+  and a dry brownfield. Thick asphalt and concrete store the day's heat and
+  give it back all night (press `G` for the night-release strokes); the sheds
+  and the bare soil cool much sooner. A hot-car card quotes measured cabin
+  temperatures (information only, not modelled).
 
 Live: https://yushengzhou.github.io/thermal-ink-atlas/
 
@@ -28,7 +34,8 @@ modelled with a simple surface energy-balance model, not measured.
 
 - Double-click `cities/asphalt-park/index.html`,
   `cities/sponge-retrofit/index.html`, `cities/glass-cbd/index.html`,
-  `cities/waterfront/index.html` or `cities/hutong/index.html`.
+  `cities/waterfront/index.html`, `cities/hutong/index.html` or
+  `cities/parking/index.html`.
   Each is one offline file.
 - Or serve the folder and open <http://localhost:8000/>:
 
@@ -50,6 +57,7 @@ modelled with a simple surface energy-balance model, not measured.
 | `G` / `Shift+G` (block 3) | next / previous glass type |
 | `W` / `A` (block 4) | wind lines / water's air overlay on or off |
 | `P` (block 5) | evening splash at 19:00 on or off |
+| `G` (block 6) | night-release strokes (ground heat flux) on or off |
 
 ## Build and test
 
@@ -87,6 +95,10 @@ Key sources per block:
 - Block 5, `hutong`: Hendel et al. 2015 and 2016 (pavement watering, Paris);
   Takebayashi et al. 2023 (Kobe); Lin et al. 2019 (Harbin courtyards);
   Johansson 2006 (Fez); Deng Yunxiang, 天棚遮阴 (the mat awning).
+- Block 6, `parking`: Golden et al. 2007 (PV canopy, Phoenix); Stempihar et
+  al. 2012 (pavement thickness); Takebayashi & Moriyama 2009 (grass parking);
+  Scott, Simpson & McPherson 1999 (lot trees); Vanos et al. 2018 and McLaren,
+  Null & Quinn 2005 (hot cars).
 
 ## Licence
 

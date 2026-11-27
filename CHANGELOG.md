@@ -58,6 +58,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions: [Sem
 - Every block page's terms panel now links to `references.html` (a relative link inside the repository) (#10).
 - Check that block 4 renders the same pixels as before block 5 (`tests/e2e/regression.test.mjs`, fixture from the block 4 branch) (#10).
 - Gallery card for block 5 (#10).
+- Sixth block, `parking`: an invented car park and industrial brownfield (848 parked cars in an open section, a section with trees on the footpaths between the bays and a section under solar canopies; a concrete loading yard, rusty corrugated steel sheds, rail sidings on ballast, an irrigated lawn, bare compacted soil and scrubby dry vegetation), as one offline HTML file (#11).
+- Ground heat flux G kept by the model (opt-in `stepFlux`, the same arithmetic as the plain step; blocks 1–5 unchanged pixel for pixel) and a night-release overlay that draws it as rising strokes where the ground gives heat back and down-ticks where it takes heat in (`G`, panel button, `?flux=0|1`, default off) (#11).
+- Parked cars as a sub-grid shade (the share of a cell under car footprints loses its direct sun by day and its sky view at night) and the ground under the PV canopy with the measured sky view 0.11 (Golden et al. 2007) (#11).
+- Cards: thick pavement storage and the night release (Ts and G through the day, damping depth), the solar canopy (with Golden et al.'s numbers and the band miss), lot trees, the rusty shed, the brownfield ground, and a hot-car card that quotes measured cabin temperatures (information only, not modelled); heat cards show G now and at 23:00 and the share of a cell under cars (#11).
+- Glossary terms: heat storage, damping depth, ground heat flux, thermal inertia (#11).
+- `docs/sources.md`: block 6 section (materials, cars and the PV canopy in the model, the 23:00 picture with G, the PV comparison, lot trees, shed cooling, thin layer and sensitivity, walkers, acceptance bands with the rows outside disclosed, disclosures); research brief in `docs/research/parking-brief.md` (#11).
+- Check that block 5 renders the same pixels as before block 6 (`tests/e2e/regression.test.mjs`, fixture from the block 5 branch) (#11).
+- Gallery card for block 6 (#11).
 
 ### Changed
 - Engine: faster shadow masks (same results), per-tree crown transmission, a model run over a subset of cells, and a renderer that can draw into one band of a shared canvas. Block 1 renders the same pixels and loads faster (#5).
@@ -70,6 +78,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions: [Sem
 - Engine: a per-cell surface water store (empty unless a block splashes), flat screens with their own transmission, per-species crown transmission, an optional 4 × 4 shade sampling with a ray-marched building mask and a scanline rasteriser, an optional exact grid sky-view scan, multi-shape and multi-stroke pen items, and renderer options to skip edge pooling and off-tile shadow polygons. Only block 5 uses them; blocks 1–4 render the same pixels as before (#10).
 - Build: the external-reference check now allows relative links inside the repository (such as `../../references.html`) and still rejects any link with a scheme, a host or a root path, and any `src`, `@import` or `url()` that is not `data:` or `#` (#10).
 - Pages are 339–382 KB (block 5: 368 KB), up from 288–331 KB, because the shared engine carries the new code paths (#10).
+- Engine: the model can keep the ground heat flux G (`opts.flux`), the depth sort takes an opt-in `front` flag for overhead screens over overlapping objects, three ground materials are appended (ballast, dry soil, scrub), and the renderer draws lot cars and PV canopies and the night-release overlay. Only block 6 uses them; blocks 1–5 render the same pixels as before (#11).
+- Pages are 369–412 KB (block 6: 397 KB), up from 339–382 KB plus block 5, because the shared engine and its stubs carry the new code paths (#11).
 
 ### Fixed
 - The glossary entry "Reflection spot" in `docs/sources.md` no longer reads "In this model: undefined"; block-3-only terms are quoted with block 3's numbers (#8).

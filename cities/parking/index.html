@@ -6447,18 +6447,21 @@ function pkNotes(scene, d) {
   return scene.notes.slice(0, 5).map((n) => ({ ...n, text: text[n.key], terms: terms[n.key] }));
 }
 
-/** Thick pavement storage and the night release. d: {st (parking.js parkingStats), curve: [{h, asphalt, gA, concrete, gC, soil, gS, shed, gSh, lawn, gL, air}], slabs: {hma, pcc}, flux}. */
+/** Thick pavement storage and the night release. d: {st (parking.js parkingStats), curve: [{h, air, rows: {asphalt, concrete, soil, shed, lawn: [Ts, G]}}], slabs: {hma, pcc}, flux}. */
 function storageCard(d) {
   const t = d.st.table;
-  const rows = d.curve.map((c) => `<tr><td>${hhmm(c.h)}</td><td>${fmt(c.asphalt)} / ${r0(c.gA)}</td><td>${fmt(c.concrete)} / ${r0(c.gC)}</td><td>${fmt(c.soil)} / ${r0(c.gS)}</td><td>${fmt(c.shed)} / ${r0(c.gSh)}</td><td>${fmt(c.air)}</td></tr>`).join('');
+  const NAMES = [['asphalt', 'open asphalt'], ['concrete', 'concrete yard'], ['soil', 'bare soil'], ['lawn', 'lawn'], ['shed', 'shed roof']];
+  const head = d.curve.map((c) => `<td>${String(c.h).padStart(2, '0')} h</td>`).join('');
+  const rows = NAMES.map(([k, name]) => `<tr><td>${name}</td>${d.curve.map((c) => `<td>${fmt(c.rows[k][0])}<br><span class="sub">${r0(c.rows[k][1])}</span></td>`).join('')}</tr>`).join('');
   const lead = (d.st.ranges.openAsphalt.hMax - d.st.peakG.h + 24) % 24;
   return `
     ${close}
     <h3>${gl('heatStorage', 'Thick pavement')}: hot by day, warm all night</h3>
     <div class="mat">${gl('groundFlux', 'Ground heat flux G')}: + into the ground, − given back · ${d.flux ? 'night-release strokes on (G)' : 'press G for the night-release strokes'}</div>
     <table class="cmp">
-      <tr><td></td><td>asphalt °C / W m⁻²</td><td>concrete</td><td>bare soil</td><td>shed roof</td><td>air</td></tr>
+      <tr><td>°C (G in W m⁻² below)</td>${head}</tr>
       ${rows}
+      <tr><td>air</td>${d.curve.map((c) => `<td>${fmt(c.air)}</td>`).join('')}</tr>
     </table>
     <p class="note">By day the dense asphalt and concrete soak heat down into the slab (G up to ${W(d.st.peakG.g)} at ${hhmm(d.st.peakG.h)}). After sunset the slab gives it back: at 23:00 open asphalt still sends ${W(-t.openAsphalt.g23)} up to its surface, so it stays ${K(t.openAsphalt.t23 - d.st.air.t23)} above the air and ${K(t.openAsphalt.t23 - t.soil.t23)} above the bare soil. The rusty shed roof stores almost nothing (${W(t.shed.g23)}): it is already below the air.</p>
     <table class="cmp">
@@ -7472,7 +7475,8 @@ function boot(scene, root = document) {
     const st = P.st;
     if (id === 'storage') {
       const C = st.C;
-      const curve = [9, 12, 15, 18, 20, 23, 2, 5].map((h) => ({ h, asphalt: tsMean(thermal, C.openAsphalt, h), gA: fluxMean(thermal, C.openAsphalt, h), concrete: tsMean(thermal, C.yard, h), gC: fluxMean(thermal, C.yard, h), soil: tsMean(thermal, C.soil, h), gS: fluxMean(thermal, C.soil, h), shed: tsMean(thermal, C.shed, h), gSh: fluxMean(thermal, C.shed, h), air: thermal.air(h) }));
+      const K = { asphalt: C.openAsphalt, concrete: C.yard, soil: C.soil, lawn: C.lawn, shed: C.shed };
+      const curve = [12, 15, 20, 23, 4].map((h) => ({ h, air: thermal.air(h), rows: Object.fromEntries(Object.entries(K).map(([k, c]) => [k, [tsMean(thermal, c, h), fluxMean(thermal, c, h)]])) }));
       return storageCard({ st, curve, slabs: { hma: slab(STEMPIHAR.hma.k, STEMPIHAR.hma.rho, STEMPIHAR.hma.c), pcc: slab(STEMPIHAR.pcc.k, STEMPIHAR.pcc.rho, STEMPIHAR.pcc.c) }, flux: !!S.flux });
     }
     if (id === 'pv') return pvCard({ pv: pkPv() });
