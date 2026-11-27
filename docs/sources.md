@@ -79,7 +79,7 @@ Shown on the heat cards as a caveat:
 | `windFmax` | 1.2 [brief4] *engine assumption (no source)*, unverified (f_max: upper clamp of f_w) |
 | `alignCut` | 30 deg [corridor] *cited value*, unverified (channelling only in streets whose axis is within 30 deg of the wind) |
 | `channelHw` | 0.4 [oke1988] *interpretation of the source*, unverified (channelling only where the street H/W > 0.4 (read from the Oke 1988 regime thresholds, about 0.3-0.4, unverified)) |
-| `windHc` | h_c = 5.7 + 3.8 u_site f_w [brief4] *interpretation of the source*, unverified (the same h_c formula [oke] with the local wind u_i = u_site f_w per cell (roofs and blocks without a wind direction: f_w = 1)) |
+| `windHc` | h_c = 5.7 + 3.8 u_site f_w [brief4] *interpretation of the source*, unverified (the same h_c formula [oke] with the local wind u_i = u_site f_w per cell (roofs and blocks without a wind direction: f_w = 1). The formula is a near-surface flat-plate fit fed here with the 10 m wind x f_w, which overstates street-level h_c and its wind sensitivity) |
 | `riverCurve` | Ta_mean - 2 K + 0.5 K sin(2 pi (h - 9) / 24) [brief4] *engine assumption (no source)*, unverified (prescribed river surface; range 1 K (large rivers: smallest daily range [webb2008]); the -2 K offset and 0.5 K amplitude are assumptions) |
 | `pondCurve` | Ta_mean - 0.5 K + 2 K sin(2 pi (h - 10) / 24) [brief4] *engine assumption (no source)*, unverified (prescribed shallow pond surface; range 4 K; warmer than the air at night is cited [solcerova2019], the numbers are assumptions) |
 | `airDay` | 1 [brief4] *cited range*, unverified (overlay only: dTa at the bank by day, -1.0 K (cited range 0.2-1.5 K [hathway2012, cheonggyecheon, jacobs2020])) |
@@ -87,8 +87,8 @@ Shown on the heat cards as a caveat:
 | `airLaligned` | 60 [brief4] *interpretation of the source*, unverified (overlay only: decay length in streets aligned with the wind, m, chosen so the effect is below 0.2 K by 150 m (the brief reads the Ota River 150-500 m [ota] as at most 150 m here)) |
 | `airNight` | 0.3 [brief4] *engine assumption (no source)*, unverified (overlay only: dTa at the bank at night, +0.3 K (range 0-1 K assumed; the sign is cited [steeneveld2014, solcerova2019])) |
 | `airPond` | 0.2 [jacobs2020] *cited value*, unverified (overlay only: dTa next to the small pond by day, -0.2 K (Jacobs et al. typical afternoon value)) |
-| `apparentTemp` | AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25 [steadman1994] *cited value*, unverified (comfort for the walkers in block 4 (a stand-in for UTCI, which is not implemented); ws = u_10 f_w clamped to 0.5-17 m/s as the brief gives for UTCI) |
-| `atRadiation` | Q = 6.1 W m-2 K-1 x (Tmrt - Ta) [steadman1994] *interpretation of the source*, unverified (extra radiation absorbed by a person, linearised: 4 eps sigma T^3 with eps 0.97 and T 303 K) |
+| `apparentTemp` | AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25 [bom] *cited value* (Steadman (1994) [steadman1994], coefficients checked against the BoM page; comfort for the walkers in block 4 (a stand-in for UTCI, which is not implemented); ws = u_10 f_w clamped to 0.5-17 m/s as the brief gives for UTCI) |
+| `atRadiation` | Q = 6.1 W m-2 K-1 x (Tmrt - Ta) [bom] *interpretation of the source*, unverified (extra radiation absorbed by a person, linearised: 4 eps sigma T^3 with eps 0.97 and T 303 K over the whole body surface. At a sunlit Tmrt near 68 C (341 K) 4 eps sigma T^3 is about 8.7, so Q is understated by about 30% there; a standing person radiates over only about 0.7 of the body surface (ASHRAE effective radiating area), which errs the other way. Route weights divide by the sun-shade AT gap, so this largely cancels for the walkers; absolute AT on the cards carries it) |
 | `windLines` | seeds every 20 m upwind, RK2 2.5 m steps, slide along buildings [brief4] *engine assumption (no source)*, unverified (drawing only: assumed direction x shelter factor, not computed flow; dash spacing and speed proportional to u_i (speed drawn 4x)) |
 
 The wall term's daytime part peaks at 6.8 K on the design day (total wall excess up to 8.8 K above air).
@@ -146,7 +146,8 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[wake]** Building Simulation (Springer), doi 10.1007/s12273-024-1103-z: building wake recirculation length about 1.6-2.6 x building width
 - **[solcerova2019]** Solcerova et al. (2019) Frontiers in Earth Science 7, 156, doi 10.3389/feart.2019.00156: a Delft pond is warmer than the air at night and releases about 2.7 MJ m-2 per night (43% longwave, 39% latent, 11% sensible)
 - **[webb2008]** Webb et al. (2008) Hydrological Processes, river water temperature review: large deep rivers have the smallest daily range ("< 1 K" unverified)
-- **[steadman1994]** Steadman (1994) Australian Meteorological Magazine 43, apparent temperature with radiation: AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25 (as used by the Australian Bureau of Meteorology; coefficients from memory, not checked)
+- **[steadman1994]** Steadman (1994) Australian Meteorological Magazine 43, apparent temperature with radiation (the paper itself was not read; formula via [bom])
+- **[bom]** Australian Bureau of Meteorology, Thermal stress: About the formula for the apparent temperature (bom.gov.au/info/thermal_stress/): AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25, ws the 10 m wind, Q the net radiation absorbed per unit area of body surface (W m-2); coefficients checked against this page
 - **[noaa]** NOAA Global Monitoring Laboratory, General Solar Position Calculations (solareqns.PDF)
 - **[brutsaert]** Brutsaert (1975) Water Resources Research 11(5) 742-744, clear-sky emissivity
 - **[meinel]** Meinel & Meinel (1976) Applied Solar Energy, clear-sky beam irradiance
@@ -207,7 +208,7 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Ventilation corridor** (waterfront only): Typical: Planning guides ask for corridors within about 30° of the prevailing wind; along the Ota River (Hiroshima) river cooling was detected 150–500 m inland along streets perpendicular to the river (unverified). [corridor, ota]
 - **Fetch** (waterfront only): Typical: River Don, Sheffield: about 30 m with open banks; Cheonggyecheon, Seoul: 30–80 m; small water bodies: −0.2 K typical in the afternoon. [hathway2012, cheonggyecheon, jacobs2020]
 - **Sheltering (lee)** (waterfront only): Typical: Recirculation behind a building about 1.6–2.6 times its width; recovery to the open wind after about 5 building heights is an assumption of this model. [wake, brief4]
-- **Apparent temperature** (waterfront only): Typical: AT = Ta + 0.348 e − 0.70 ws + 0.70 Q/(ws + 10) − 4.25 (e in hPa, ws the 10 m wind in m/s, Q in W m⁻²; coefficients from memory, not checked). [steadman1994]
+- **Apparent temperature** (waterfront only): Typical: AT = Ta + 0.348 e − 0.70 ws + 0.70 Q/(ws + 10) − 4.25 (e in hPa, ws the 10 m wind in m/s, Q in W m⁻²; as given by the Australian Bureau of Meteorology). [bom, steadman1994]
 - **Permeable paving** (sponge-retrofit only): Typical: Wetted permeable pavement 15–35 °C cooler than dense asphalt in the early afternoon, 2–7 °C cooler about a day later; dry porous asphalt about 5 °C warmer. [li2013]
 - **Green roof** (sponge-retrofit only): Typical: Albedo about 0.15–0.25; up to 18 °C cooler than a black roof in a New York case; Bowen ratio about 1–2. [brief2, noaaGreen, heusinger]
 - **Rain garden** (sponge-retrofit only): Typical: No measured cooling figure in our sources; this block uses engine assumptions (evaporative fraction 0.8 wet, 0.35 dry, 3-day drying). [engine, mccoll]
@@ -705,7 +706,7 @@ river f_w = 1.00–1.00; Quay and Willow Streets 1.20 (mean); the streets across
 | `windFmax` | 1.2 [brief4] *engine assumption (no source)*, unverified (f_max: upper clamp of f_w) |
 | `alignCut` | 30 deg [corridor] *cited value*, unverified (channelling only in streets whose axis is within 30 deg of the wind) |
 | `channelHw` | 0.4 [oke1988] *interpretation of the source*, unverified (channelling only where the street H/W > 0.4 (read from the Oke 1988 regime thresholds, about 0.3-0.4, unverified)) |
-| `windHc` | h_c = 5.7 + 3.8 u_site f_w [brief4] *interpretation of the source*, unverified (the same h_c formula [oke] with the local wind u_i = u_site f_w per cell (roofs and blocks without a wind direction: f_w = 1)) |
+| `windHc` | h_c = 5.7 + 3.8 u_site f_w [brief4] *interpretation of the source*, unverified (the same h_c formula [oke] with the local wind u_i = u_site f_w per cell (roofs and blocks without a wind direction: f_w = 1). The formula is a near-surface flat-plate fit fed here with the 10 m wind x f_w, which overstates street-level h_c and its wind sensitivity) |
 | `riverCurve` | Ta_mean - 2 K + 0.5 K sin(2 pi (h - 9) / 24) [brief4] *engine assumption (no source)*, unverified (prescribed river surface; range 1 K (large rivers: smallest daily range [webb2008]); the -2 K offset and 0.5 K amplitude are assumptions) |
 | `pondCurve` | Ta_mean - 0.5 K + 2 K sin(2 pi (h - 10) / 24) [brief4] *engine assumption (no source)*, unverified (prescribed shallow pond surface; range 4 K; warmer than the air at night is cited [solcerova2019], the numbers are assumptions) |
 | `airDay` | 1 [brief4] *cited range*, unverified (overlay only: dTa at the bank by day, -1.0 K (cited range 0.2-1.5 K [hathway2012, cheonggyecheon, jacobs2020])) |
@@ -713,8 +714,8 @@ river f_w = 1.00–1.00; Quay and Willow Streets 1.20 (mean); the streets across
 | `airLaligned` | 60 [brief4] *interpretation of the source*, unverified (overlay only: decay length in streets aligned with the wind, m, chosen so the effect is below 0.2 K by 150 m (the brief reads the Ota River 150-500 m [ota] as at most 150 m here)) |
 | `airNight` | 0.3 [brief4] *engine assumption (no source)*, unverified (overlay only: dTa at the bank at night, +0.3 K (range 0-1 K assumed; the sign is cited [steeneveld2014, solcerova2019])) |
 | `airPond` | 0.2 [jacobs2020] *cited value*, unverified (overlay only: dTa next to the small pond by day, -0.2 K (Jacobs et al. typical afternoon value)) |
-| `apparentTemp` | AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25 [steadman1994] *cited value*, unverified (comfort for the walkers in block 4 (a stand-in for UTCI, which is not implemented); ws = u_10 f_w clamped to 0.5-17 m/s as the brief gives for UTCI) |
-| `atRadiation` | Q = 6.1 W m-2 K-1 x (Tmrt - Ta) [steadman1994] *interpretation of the source*, unverified (extra radiation absorbed by a person, linearised: 4 eps sigma T^3 with eps 0.97 and T 303 K) |
+| `apparentTemp` | AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25 [bom] *cited value* (Steadman (1994) [steadman1994], coefficients checked against the BoM page; comfort for the walkers in block 4 (a stand-in for UTCI, which is not implemented); ws = u_10 f_w clamped to 0.5-17 m/s as the brief gives for UTCI) |
+| `atRadiation` | Q = 6.1 W m-2 K-1 x (Tmrt - Ta) [bom] *interpretation of the source*, unverified (extra radiation absorbed by a person, linearised: 4 eps sigma T^3 with eps 0.97 and T 303 K over the whole body surface. At a sunlit Tmrt near 68 C (341 K) 4 eps sigma T^3 is about 8.7, so Q is understated by about 30% there; a standing person radiates over only about 0.7 of the body surface (ASHRAE effective radiating area), which errs the other way. Route weights divide by the sun-shade AT gap, so this largely cancels for the walkers; absolute AT on the cards carries it) |
 | `windLines` | seeds every 20 m upwind, RK2 2.5 m steps, slide along buildings [brief4] *engine assumption (no source)*, unverified (drawing only: assumed direction x shelter factor, not computed flow; dash spacing and speed proportional to u_i (speed drawn 4x)) |
 
 ### Water
@@ -750,11 +751,15 @@ This run: 20 lines, 1723 vertices, 0 inside a building, hash `65d58117`. Toggle 
 
 Walkers use the block 1 route rule (Melnikov shade weights, scaled by heat) with a wind term
 (`engine/waterfront.js` comfortShade): per 2 m pixel, w = w_class + (1 − w_b)·(AT(u·f_w) − AT(u))/(AT_sun − AT_shade),
-with AT the apparent temperature with radiation [steadman1994] from the pixel's Tmrt (sun, building shade or tree shade
+with AT the apparent temperature with radiation [steadman1994, bom] from the pixel's Tmrt (sun, building shade or tree shade
 of its 5 m cell) and the local wind (u_10·f_w clamped to 0.5–17 m/s as the brief gives for UTCI), and AT_sun − AT_shade
 the mean gap between sunlit and building-shaded walkable ground at f_w = 1 (8.2 K at 15:00, 3 m/s). At f_w = 1 the
 weights are exactly those of blocks 1–3; a breezier pixel weighs less, a sheltered one more. UTCI is not implemented;
-apparent temperature is a simpler stand-in (coefficients from memory, unverified). The sweat cue is unchanged (Tmrt only).
+apparent temperature is a simpler stand-in (coefficients checked against the Bureau of Meteorology page; Steadman's paper
+itself not read). The extra radiation Q = 6.1·(Tmrt − Ta) is a linearisation (4εσT³ at 303 K over the whole body
+surface): at a sunlit Tmrt near 68 °C it understates Q by about 30 %, while counting the whole body surface (rather than
+the ≈ 0.7 that radiates, ASHRAE) overstates it; the walkers' weights divide by the sun–shade AT gap, so this largely
+cancels in routing, but the absolute apparent temperatures on the cards carry it. The sweat cue is unchanged (Tmrt only).
 
 At 15:00 (3 m/s) all 14 walkers on the stroll route take the tree-shaded, breezy riverside (cost 373.8) over sunny,
 sheltered Rope Walk (423.1). Across all routes the wind term moves walkers only a little: mean f_w where people walk
@@ -818,6 +823,15 @@ Notes on the rows outside:
   was found.
 - **Tmrt change with u: 4.5 K at most, 2.2 K on average in sun (band ≤ 2 K).** Wind does not enter Tmrt directly;
   at 1 m/s the ground runs hotter and its longwave raises Tmrt. The largest change is on sunlit asphalt.
+- **What drives both misses: h_c = 5.7 + 3.8 u is a flat-plate fit fed with the 10 m wind × f_w.** The Jürges / McAdams
+  form [oke] is a fit for the wind just above a surface; here it is fed with the site's 10 m reference wind times f_w,
+  although street-level wind is usually well below the 10 m value even before any shelter. That overstates street-level
+  h_c and, above all, its sensitivity to wind (3.8 W m⁻² K⁻¹ per m/s across the 0.3–1.2 range of f_w), which is what makes
+  the +11.1 K asphalt contrast and the 4.5 K Tmrt change. A reference-height correction (a factor below 1 on u
+  before h_c) would shrink both. Blocks 1–3 use the same convention with one site wind, so their numbers carry the same
+  bias but no contrast. **Decision:** these misses are accepted as disclosed engine findings and the bands are kept as
+  written (project lead, under the maintainer's standing instruction); a wind-height correction is left to a follow-up
+  issue and is not made here.
 
 ### Disclosures (block 4)
 
@@ -826,12 +840,13 @@ Notes on the rows outside:
   within 30–80 m [hathway2012, cheonggyecheon, jacobs2020]; reviews that report about 2.5 K are inflated by remote-sensing
   surface temperatures [volker2013]) and can warm the night [steeneveld2014, theeuwes2013, solcerova2019].
 - **One wind direction and speed; a geometric heuristic, not CFD:** no vortices, downdraughts, corner jets, river or sea
-  breezes, gusts or humidity. Wakes are straight shadows of the footprint along the wind; oblique winds would also
+  breezes, gusts or humidity. h_c uses the 10 m wind × f_w in a near-surface flat-plate fit, which overstates street-level
+  convection and its wind sensitivity (see the notes above). Wakes are straight shadows of the footprint along the wind; oblique winds would also
   shelter the corridors' edges. Trees do not slow the wind. Roofs keep f_w = 1.
 - **Prescribed water curves** for the river and pond (not a water energy balance).
 - **Shade is the biggest comfort lever near water** [jacobs2020: PET −1 to −7 K for shade vs −0.6 K typical next to small
   water bodies]; the riverside-shade card says so.
-- **Comfort** uses apparent temperature [steadman1994] (from memory, unverified), not UTCI.
+- **Comfort** uses apparent temperature [steadman1994, bom], not UTCI; Q is linearised (see Comfort and walkers).
 - Unverified: the Hathway & Sharples numbers (secondary sources), the Ota River reach, the Oke (1988) thresholds, the decay
-  length 30–80 m, the "< 1 K" river range; f_min, c_ch, f_max, the 5 H recovery, the water curves and the night overlay
+  length 30–80 m, the "< 1 K" river range, the Q linearisation; f_min, c_ch, f_max, the 5 H recovery, the water curves and the night overlay
   are assumptions.

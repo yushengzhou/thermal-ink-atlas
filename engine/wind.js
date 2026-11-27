@@ -30,8 +30,8 @@ export const MARGIN = 1.5; // m kept between a wind line and a wall
 export const JOIN = 1.5; // m: grid on which a line that meets an earlier line is ended
 export const SPEEDS = [1, 3]; // calm / breezy presets, m/s
 export const DASH_PER_U = 4; // dash period (m) per m/s of local wind
-export const DRAW_SPEED = 4;
-export const FACE = 15; // m: a wall faces a street if it stands within this distance of the kerb // dashes move at DRAW_SPEED x u_i (drawn faster than life)
+export const DRAW_SPEED = 4; // dashes move at DRAW_SPEED x u_i (drawn faster than life)
+export const FACE = 15; // m: a wall faces a street if it stands within this distance of the kerb
 
 /** True if a scene declares a wind direction (block 4). */
 export const isWindBlock = (scene) => !!(scene.windBlock && scene.wind);
@@ -412,8 +412,8 @@ export function penLines(pen, lines) {
 // ---- comfort (walkers) -------------------------------------------------------
 
 /**
- * Apparent temperature with radiation (Steadman 1994, as used by the
- * Australian Bureau of Meteorology): AT = Ta + 0.348 e - 0.70 ws + 0.70 Q /
+ * Apparent temperature with radiation (Steadman 1994; coefficients checked
+ * against the Australian Bureau of Meteorology's thermal-stress page): AT = Ta + 0.348 e - 0.70 ws + 0.70 Q /
  * (ws + 10) - 4.25, with e the vapour pressure (hPa), ws the 10 m wind (m/s,
  * here u_10 f_w clamped to 0.5-17 m/s) and Q the extra radiation a person
  * absorbs, linearised as 6.1 W m-2 K-1 x (Tmrt - Ta). A simpler stand-in for

@@ -470,7 +470,8 @@ const SOURCES = {
   wake: 'Building Simulation (Springer), doi 10.1007/s12273-024-1103-z: building wake recirculation length about 1.6-2.6 x building width',
   solcerova2019: 'Solcerova et al. (2019) Frontiers in Earth Science 7, 156, doi 10.3389/feart.2019.00156: a Delft pond is warmer than the air at night and releases about 2.7 MJ m-2 per night (43% longwave, 39% latent, 11% sensible)',
   webb2008: 'Webb et al. (2008) Hydrological Processes, river water temperature review: large deep rivers have the smallest daily range ("< 1 K" unverified)',
-  steadman1994: 'Steadman (1994) Australian Meteorological Magazine 43, apparent temperature with radiation: AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25 (as used by the Australian Bureau of Meteorology; coefficients from memory, not checked)',
+  steadman1994: 'Steadman (1994) Australian Meteorological Magazine 43, apparent temperature with radiation (the paper itself was not read; formula via [bom])',
+  bom: 'Australian Bureau of Meteorology, Thermal stress: About the formula for the apparent temperature (bom.gov.au/info/thermal_stress/): AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25, ws the 10 m wind, Q the net radiation absorbed per unit area of body surface (W m-2); coefficients checked against this page',
 };
 
 /** How a value relates to its source. */
@@ -741,7 +742,7 @@ const MODEL = {
   windFmax: v(1.2, 'brief4', 'engine', false, 'f_max: upper clamp of f_w'),
   alignCut: v('30 deg', 'corridor', 'cited', false, 'channelling only in streets whose axis is within 30 deg of the wind'),
   channelHw: v(0.4, 'oke1988', 'interp', false, 'channelling only where the street H/W > 0.4 (read from the Oke 1988 regime thresholds, about 0.3-0.4, unverified)'),
-  windHc: v('h_c = 5.7 + 3.8 u_site f_w', 'brief4', 'interp', false, 'the same h_c formula [oke] with the local wind u_i = u_site f_w per cell (roofs and blocks without a wind direction: f_w = 1)'),
+  windHc: v('h_c = 5.7 + 3.8 u_site f_w', 'brief4', 'interp', false, 'the same h_c formula [oke] with the local wind u_i = u_site f_w per cell (roofs and blocks without a wind direction: f_w = 1). The formula is a near-surface flat-plate fit fed here with the 10 m wind x f_w, which overstates street-level h_c and its wind sensitivity'),
   riverCurve: v('Ta_mean - 2 K + 0.5 K sin(2 pi (h - 9) / 24)', 'brief4', 'engine', false, 'prescribed river surface; range 1 K (large rivers: smallest daily range [webb2008]); the -2 K offset and 0.5 K amplitude are assumptions'),
   pondCurve: v('Ta_mean - 0.5 K + 2 K sin(2 pi (h - 10) / 24)', 'brief4', 'engine', false, 'prescribed shallow pond surface; range 4 K; warmer than the air at night is cited [solcerova2019], the numbers are assumptions'),
   airDay: v(1.0, 'brief4', 'range', false, 'overlay only: dTa at the bank by day, -1.0 K (cited range 0.2-1.5 K [hathway2012, cheonggyecheon, jacobs2020])'),
@@ -749,8 +750,8 @@ const MODEL = {
   airLaligned: v(60, 'brief4', 'interp', false, 'overlay only: decay length in streets aligned with the wind, m, chosen so the effect is below 0.2 K by 150 m (the brief reads the Ota River 150-500 m [ota] as at most 150 m here)'),
   airNight: v(0.3, 'brief4', 'engine', false, 'overlay only: dTa at the bank at night, +0.3 K (range 0-1 K assumed; the sign is cited [steeneveld2014, solcerova2019])'),
   airPond: v(0.2, 'jacobs2020', 'cited', false, 'overlay only: dTa next to the small pond by day, -0.2 K (Jacobs et al. typical afternoon value)'),
-  apparentTemp: v('AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25', 'steadman1994', 'cited', false, 'comfort for the walkers in block 4 (a stand-in for UTCI, which is not implemented); ws = u_10 f_w clamped to 0.5-17 m/s as the brief gives for UTCI'),
-  atRadiation: v('Q = 6.1 W m-2 K-1 x (Tmrt - Ta)', 'steadman1994', 'interp', false, 'extra radiation absorbed by a person, linearised: 4 eps sigma T^3 with eps 0.97 and T 303 K'),
+  apparentTemp: v('AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25', 'bom', 'cited', true, 'Steadman (1994) [steadman1994], coefficients checked against the BoM page; comfort for the walkers in block 4 (a stand-in for UTCI, which is not implemented); ws = u_10 f_w clamped to 0.5-17 m/s as the brief gives for UTCI'),
+  atRadiation: v('Q = 6.1 W m-2 K-1 x (Tmrt - Ta)', 'bom', 'interp', false, 'extra radiation absorbed by a person, linearised: 4 eps sigma T^3 with eps 0.97 and T 303 K over the whole body surface. At a sunlit Tmrt near 68 C (341 K) 4 eps sigma T^3 is about 8.7, so Q is understated by about 30% there; a standing person radiates over only about 0.7 of the body surface (ASHRAE effective radiating area), which errs the other way. Route weights divide by the sun-shade AT gap, so this largely cancels for the walkers; absolute AT on the cards carries it'),
   windLines: v('seeds every 20 m upwind, RK2 2.5 m steps, slide along buildings', 'brief4', 'engine', false, 'drawing only: assumed direction x shelter factor, not computed flow; dash spacing and speed proportional to u_i (speed drawn 4x)'),
 };
 
@@ -1924,8 +1925,8 @@ const MARGIN = 1.5; // m kept between a wind line and a wall
 const JOIN = 1.5; // m: grid on which a line that meets an earlier line is ended
 const SPEEDS = [1, 3]; // calm / breezy presets, m/s
 const DASH_PER_U = 4; // dash period (m) per m/s of local wind
-const DRAW_SPEED = 4;
-const FACE = 15; // m: a wall faces a street if it stands within this distance of the kerb // dashes move at DRAW_SPEED x u_i (drawn faster than life)
+const DRAW_SPEED = 4; // dashes move at DRAW_SPEED x u_i (drawn faster than life)
+const FACE = 15; // m: a wall faces a street if it stands within this distance of the kerb
 
 /** True if a scene declares a wind direction (block 4). */
 const isWindBlock = (scene) => !!(scene.windBlock && scene.wind);
@@ -2306,8 +2307,8 @@ function penLines(pen, lines) {
 // ---- comfort (walkers) -------------------------------------------------------
 
 /**
- * Apparent temperature with radiation (Steadman 1994, as used by the
- * Australian Bureau of Meteorology): AT = Ta + 0.348 e - 0.70 ws + 0.70 Q /
+ * Apparent temperature with radiation (Steadman 1994; coefficients checked
+ * against the Australian Bureau of Meteorology's thermal-stress page): AT = Ta + 0.348 e - 0.70 ws + 0.70 Q /
  * (ws + 10) - 4.25, with e the vapour pressure (hPa), ws the 10 m wind (m/s,
  * here u_10 f_w clamped to 0.5-17 m/s) and Q the extra radiation a person
  * absorbs, linearised as 6.1 W m-2 K-1 x (Tmrt - Ta). A simpler stand-in for
@@ -5199,8 +5200,8 @@ const GLOSSARY = {
   apparentTemp: {
     term: 'Apparent temperature',
     text: 'A feels-like temperature from air temperature, humidity, wind and the extra radiation a person absorbs (Steadman 1994). Used here as a simple stand-in for UTCI.',
-    range: 'AT = Ta + 0.348 e − 0.70 ws + 0.70 Q/(ws + 10) − 4.25 (e in hPa, ws the 10 m wind in m/s, Q in W m⁻²; coefficients from memory, not checked).',
-    src: 'steadman1994',
+    range: 'AT = Ta + 0.348 e − 0.70 ws + 0.70 Q/(ws + 10) − 4.25 (e in hPa, ws the 10 m wind in m/s, Q in W m⁻²; as given by the Australian Bureau of Meteorology).',
+    src: 'bom, steadman1994',
     why: 'It lets the walkers weigh a breeze against shade: both make a hot afternoon feel cooler.',
     scenes: ['waterfront'],
   },
@@ -5856,7 +5857,7 @@ function shelterCard(d) {
     </table>
     <p class="note">Behind a row of buildings the wind drops and only slowly recovers. With less wind the sunlit asphalt keeps more of its heat: in this model it runs ${fmt(d.ac.diff)} K hotter than exposed asphalt at 3 pm.</p>
     <p class="lit">Wind tunnel and CFD studies put the recirculation behind a building at about 1.6–2.6 times its width; streets switch flow regime at H/W about 0.3–0.4 and 0.65–0.7 (Oke 1988, unverified).</p>
-    <p class="caveat">S rises linearly from 0.3 at the wall to 1 at 5 building heights downwind; the 5H recovery and f_min 0.3 are assumptions${tag(MODEL.windFmin)}. Part of the difference comes from the narrower street (sky view ${f2(d.ac.sheltered.svf)} vs ${f2(d.ac.exposed.svf)}).${d.ac.diff > 8 || d.ac.diff < 2 ? ` The difference is outside the brief's 2–8 K engine-plausibility band at ${d.u} m/s (reported, not tuned; see docs/sources.md).` : ''}</p>
+    <p class="caveat">S rises linearly from 0.3 at the wall to 1 at 5 building heights downwind; the 5H recovery and f_min 0.3 are assumptions${tag(MODEL.windFmin)}. Part of the difference comes from the narrower street (sky view ${f2(d.ac.sheltered.svf)} vs ${f2(d.ac.exposed.svf)}). Most of it comes from h_c = 5.7 + 3.8 u, a flat-plate fit for the wind just above a surface, fed here with the 10 m wind × f_w: that overstates street-level convection and how strongly it changes with wind, so this contrast is likely too large.${d.ac.diff > 8 || d.ac.diff < 2 ? ` The difference is outside the brief's 2–8 K engine-plausibility band at ${d.u} m/s (reported, not tuned; see docs/sources.md).` : ''}</p>
     ${srcLine(['wake', 'oke1988', 'brief4'])}`;
 }
 
@@ -5875,8 +5876,8 @@ function shadeCard(d) {
     </table>
     <p class="note">The breeze off the river is welcome, but what makes the promenade bearable at 3 pm is the shade of its trees. Walkers here take the tree-shaded, breezy riverside over sunny, sheltered Rope Walk.</p>
     <p class="lit">Jacobs et al. (2020): next to small urban water bodies, PET fell by 0.6 K typically (1.9 K at most), while shade lowered PET by 1–7 K.</p>
-    <p class="caveat">Apparent temperature (Steadman 1994, coefficients from memory) stands in for UTCI, which is not implemented; wind at the person is u_site × f_w, clamped to 0.5–17 m/s. The air temperature is fixed.</p>
-    ${srcLine(['jacobs2020', 'steadman1994', 'brief4'])}`;
+    <p class="caveat">Apparent temperature (Steadman 1994, coefficients as given by the Australian Bureau of Meteorology) stands in for UTCI, which is not implemented; wind at the person is u_site × f_w, clamped to 0.5–17 m/s. The extra radiation is linearised as Q = 6.1 (Tmrt − Ta)${tag(MODEL.atRadiation)}: about 30% low in full sun, partly offset by counting the whole body surface, so the absolute apparent temperatures are approximate. The air temperature is fixed.</p>
+    ${srcLine(['jacobs2020', 'bom', 'steadman1994', 'brief4'])}`;
 }
 
 /** Button labels for the wind panel cards. */

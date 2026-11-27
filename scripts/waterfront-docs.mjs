@@ -127,11 +127,15 @@ This run: ${ls.n} lines, ${ls.verts} vertices, ${ls.inside} inside a building, h
 
 Walkers use the block 1 route rule (Melnikov shade weights, scaled by heat) with a wind term
 (\`engine/waterfront.js\` comfortShade): per 2 m pixel, w = w_class + (1 − w_b)·(AT(u·f_w) − AT(u))/(AT_sun − AT_shade),
-with AT the apparent temperature with radiation [steadman1994] from the pixel's Tmrt (sun, building shade or tree shade
+with AT the apparent temperature with radiation [steadman1994, bom] from the pixel's Tmrt (sun, building shade or tree shade
 of its 5 m cell) and the local wind (u_10·f_w clamped to 0.5–17 m/s as the brief gives for UTCI), and AT_sun − AT_shade
 the mean gap between sunlit and building-shaded walkable ground at f_w = 1 (${f1(wk.atGap)} K at 15:00, 3 m/s). At f_w = 1 the
 weights are exactly those of blocks 1–3; a breezier pixel weighs less, a sheltered one more. UTCI is not implemented;
-apparent temperature is a simpler stand-in (coefficients from memory, unverified). The sweat cue is unchanged (Tmrt only).
+apparent temperature is a simpler stand-in (coefficients checked against the Bureau of Meteorology page; Steadman's paper
+itself not read). The extra radiation Q = 6.1·(Tmrt − Ta) is a linearisation (4εσT³ at 303 K over the whole body
+surface): at a sunlit Tmrt near 68 °C it understates Q by about 30 %, while counting the whole body surface (rather than
+the ≈ 0.7 that radiates, ASHRAE) overstates it; the walkers' weights divide by the sun–shade AT gap, so this largely
+cancels in routing, but the absolute apparent temperatures on the cards carry it. The sweat cue is unchanged (Tmrt only).
 
 At 15:00 (3 m/s) all ${wk.strollN} walkers on the stroll route take the tree-shaded, breezy riverside (cost ${f1(wk.costs[0])}) over sunny,
 sheltered Rope Walk (${f1(wk.costs[1])}). Across all routes the wind term moves walkers only a little: mean f_w where people walk
@@ -158,6 +162,15 @@ Notes on the rows outside:
   was found.
 - **Tmrt change with u: ${f1(tm.max)} K at most, ${f1(tm.meanSun)} K on average in sun (band ≤ 2 K).** Wind does not enter Tmrt directly;
   at ${SPEEDS[0]} m/s the ground runs hotter and its longwave raises Tmrt. The largest change is on sunlit asphalt.
+- **What drives both misses: h_c = 5.7 + 3.8 u is a flat-plate fit fed with the 10 m wind × f_w.** The Jürges / McAdams
+  form [oke] is a fit for the wind just above a surface; here it is fed with the site's 10 m reference wind times f_w,
+  although street-level wind is usually well below the 10 m value even before any shelter. That overstates street-level
+  h_c and, above all, its sensitivity to wind (3.8 W m⁻² K⁻¹ per m/s across the 0.3–1.2 range of f_w), which is what makes
+  the ${signed(ac.diff)} K asphalt contrast and the ${f1(tm.max)} K Tmrt change. A reference-height correction (a factor below 1 on u
+  before h_c) would shrink both. Blocks 1–3 use the same convention with one site wind, so their numbers carry the same
+  bias but no contrast. **Decision:** these misses are accepted as disclosed engine findings and the bands are kept as
+  written (project lead, under the maintainer's standing instruction); a wind-height correction is left to a follow-up
+  issue and is not made here.
 
 ### Disclosures (block 4)
 
@@ -166,14 +179,15 @@ Notes on the rows outside:
   within 30–80 m [hathway2012, cheonggyecheon, jacobs2020]; reviews that report about 2.5 K are inflated by remote-sensing
   surface temperatures [volker2013]) and can warm the night [steeneveld2014, theeuwes2013, solcerova2019].
 - **One wind direction and speed; a geometric heuristic, not CFD:** no vortices, downdraughts, corner jets, river or sea
-  breezes, gusts or humidity. Wakes are straight shadows of the footprint along the wind; oblique winds would also
+  breezes, gusts or humidity. h_c uses the 10 m wind × f_w in a near-surface flat-plate fit, which overstates street-level
+  convection and its wind sensitivity (see the notes above). Wakes are straight shadows of the footprint along the wind; oblique winds would also
   shelter the corridors' edges. Trees do not slow the wind. Roofs keep f_w = 1.
 - **Prescribed water curves** for the river and pond (not a water energy balance).
 - **Shade is the biggest comfort lever near water** [jacobs2020: PET −1 to −7 K for shade vs −0.6 K typical next to small
   water bodies]; the riverside-shade card says so.
-- **Comfort** uses apparent temperature [steadman1994] (from memory, unverified), not UTCI.
+- **Comfort** uses apparent temperature [steadman1994, bom], not UTCI; Q is linearised (see Comfort and walkers).
 - Unverified: the Hathway & Sharples numbers (secondary sources), the Ota River reach, the Oke (1988) thresholds, the decay
-  length 30–80 m, the "< 1 K" river range; f_min, c_ch, f_max, the 5 H recovery, the water curves and the night overlay
+  length 30–80 m, the "< 1 K" river range, the Q linearisation; f_min, c_ch, f_max, the 5 H recovery, the water curves and the night overlay
   are assumptions.
 `;
 }

@@ -58,7 +58,8 @@ export const SOURCES = {
   wake: 'Building Simulation (Springer), doi 10.1007/s12273-024-1103-z: building wake recirculation length about 1.6-2.6 x building width',
   solcerova2019: 'Solcerova et al. (2019) Frontiers in Earth Science 7, 156, doi 10.3389/feart.2019.00156: a Delft pond is warmer than the air at night and releases about 2.7 MJ m-2 per night (43% longwave, 39% latent, 11% sensible)',
   webb2008: 'Webb et al. (2008) Hydrological Processes, river water temperature review: large deep rivers have the smallest daily range ("< 1 K" unverified)',
-  steadman1994: 'Steadman (1994) Australian Meteorological Magazine 43, apparent temperature with radiation: AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25 (as used by the Australian Bureau of Meteorology; coefficients from memory, not checked)',
+  steadman1994: 'Steadman (1994) Australian Meteorological Magazine 43, apparent temperature with radiation (the paper itself was not read; formula via [bom])',
+  bom: 'Australian Bureau of Meteorology, Thermal stress: About the formula for the apparent temperature (bom.gov.au/info/thermal_stress/): AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25, ws the 10 m wind, Q the net radiation absorbed per unit area of body surface (W m-2); coefficients checked against this page',
 };
 
 /** How a value relates to its source. */
@@ -329,7 +330,7 @@ export const MODEL = {
   windFmax: v(1.2, 'brief4', 'engine', false, 'f_max: upper clamp of f_w'),
   alignCut: v('30 deg', 'corridor', 'cited', false, 'channelling only in streets whose axis is within 30 deg of the wind'),
   channelHw: v(0.4, 'oke1988', 'interp', false, 'channelling only where the street H/W > 0.4 (read from the Oke 1988 regime thresholds, about 0.3-0.4, unverified)'),
-  windHc: v('h_c = 5.7 + 3.8 u_site f_w', 'brief4', 'interp', false, 'the same h_c formula [oke] with the local wind u_i = u_site f_w per cell (roofs and blocks without a wind direction: f_w = 1)'),
+  windHc: v('h_c = 5.7 + 3.8 u_site f_w', 'brief4', 'interp', false, 'the same h_c formula [oke] with the local wind u_i = u_site f_w per cell (roofs and blocks without a wind direction: f_w = 1). The formula is a near-surface flat-plate fit fed here with the 10 m wind x f_w, which overstates street-level h_c and its wind sensitivity'),
   riverCurve: v('Ta_mean - 2 K + 0.5 K sin(2 pi (h - 9) / 24)', 'brief4', 'engine', false, 'prescribed river surface; range 1 K (large rivers: smallest daily range [webb2008]); the -2 K offset and 0.5 K amplitude are assumptions'),
   pondCurve: v('Ta_mean - 0.5 K + 2 K sin(2 pi (h - 10) / 24)', 'brief4', 'engine', false, 'prescribed shallow pond surface; range 4 K; warmer than the air at night is cited [solcerova2019], the numbers are assumptions'),
   airDay: v(1.0, 'brief4', 'range', false, 'overlay only: dTa at the bank by day, -1.0 K (cited range 0.2-1.5 K [hathway2012, cheonggyecheon, jacobs2020])'),
@@ -337,8 +338,8 @@ export const MODEL = {
   airLaligned: v(60, 'brief4', 'interp', false, 'overlay only: decay length in streets aligned with the wind, m, chosen so the effect is below 0.2 K by 150 m (the brief reads the Ota River 150-500 m [ota] as at most 150 m here)'),
   airNight: v(0.3, 'brief4', 'engine', false, 'overlay only: dTa at the bank at night, +0.3 K (range 0-1 K assumed; the sign is cited [steeneveld2014, solcerova2019])'),
   airPond: v(0.2, 'jacobs2020', 'cited', false, 'overlay only: dTa next to the small pond by day, -0.2 K (Jacobs et al. typical afternoon value)'),
-  apparentTemp: v('AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25', 'steadman1994', 'cited', false, 'comfort for the walkers in block 4 (a stand-in for UTCI, which is not implemented); ws = u_10 f_w clamped to 0.5-17 m/s as the brief gives for UTCI'),
-  atRadiation: v('Q = 6.1 W m-2 K-1 x (Tmrt - Ta)', 'steadman1994', 'interp', false, 'extra radiation absorbed by a person, linearised: 4 eps sigma T^3 with eps 0.97 and T 303 K'),
+  apparentTemp: v('AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25', 'bom', 'cited', true, 'Steadman (1994) [steadman1994], coefficients checked against the BoM page; comfort for the walkers in block 4 (a stand-in for UTCI, which is not implemented); ws = u_10 f_w clamped to 0.5-17 m/s as the brief gives for UTCI'),
+  atRadiation: v('Q = 6.1 W m-2 K-1 x (Tmrt - Ta)', 'bom', 'interp', false, 'extra radiation absorbed by a person, linearised: 4 eps sigma T^3 with eps 0.97 and T 303 K over the whole body surface. At a sunlit Tmrt near 68 C (341 K) 4 eps sigma T^3 is about 8.7, so Q is understated by about 30% there; a standing person radiates over only about 0.7 of the body surface (ASHRAE effective radiating area), which errs the other way. Route weights divide by the sun-shade AT gap, so this largely cancels for the walkers; absolute AT on the cards carries it'),
   windLines: v('seeds every 20 m upwind, RK2 2.5 m steps, slide along buildings', 'brief4', 'engine', false, 'drawing only: assumed direction x shelter factor, not computed flow; dash spacing and speed proportional to u_i (speed drawn 4x)'),
 };
 

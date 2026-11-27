@@ -118,7 +118,7 @@ export function shelterCard(d) {
     </table>
     <p class="note">Behind a row of buildings the wind drops and only slowly recovers. With less wind the sunlit asphalt keeps more of its heat: in this model it runs ${fmt(d.ac.diff)} K hotter than exposed asphalt at 3 pm.</p>
     <p class="lit">Wind tunnel and CFD studies put the recirculation behind a building at about 1.6–2.6 times its width; streets switch flow regime at H/W about 0.3–0.4 and 0.65–0.7 (Oke 1988, unverified).</p>
-    <p class="caveat">S rises linearly from 0.3 at the wall to 1 at 5 building heights downwind; the 5H recovery and f_min 0.3 are assumptions${tag(MODEL.windFmin)}. Part of the difference comes from the narrower street (sky view ${f2(d.ac.sheltered.svf)} vs ${f2(d.ac.exposed.svf)}).${d.ac.diff > 8 || d.ac.diff < 2 ? ` The difference is outside the brief's 2–8 K engine-plausibility band at ${d.u} m/s (reported, not tuned; see docs/sources.md).` : ''}</p>
+    <p class="caveat">S rises linearly from 0.3 at the wall to 1 at 5 building heights downwind; the 5H recovery and f_min 0.3 are assumptions${tag(MODEL.windFmin)}. Part of the difference comes from the narrower street (sky view ${f2(d.ac.sheltered.svf)} vs ${f2(d.ac.exposed.svf)}). Most of it comes from h_c = 5.7 + 3.8 u, a flat-plate fit for the wind just above a surface, fed here with the 10 m wind × f_w: that overstates street-level convection and how strongly it changes with wind, so this contrast is likely too large.${d.ac.diff > 8 || d.ac.diff < 2 ? ` The difference is outside the brief's 2–8 K engine-plausibility band at ${d.u} m/s (reported, not tuned; see docs/sources.md).` : ''}</p>
     ${srcLine(['wake', 'oke1988', 'brief4'])}`;
 }
 
@@ -137,8 +137,8 @@ export function shadeCard(d) {
     </table>
     <p class="note">The breeze off the river is welcome, but what makes the promenade bearable at 3 pm is the shade of its trees. Walkers here take the tree-shaded, breezy riverside over sunny, sheltered Rope Walk.</p>
     <p class="lit">Jacobs et al. (2020): next to small urban water bodies, PET fell by 0.6 K typically (1.9 K at most), while shade lowered PET by 1–7 K.</p>
-    <p class="caveat">Apparent temperature (Steadman 1994, coefficients from memory) stands in for UTCI, which is not implemented; wind at the person is u_site × f_w, clamped to 0.5–17 m/s. The air temperature is fixed.</p>
-    ${srcLine(['jacobs2020', 'steadman1994', 'brief4'])}`;
+    <p class="caveat">Apparent temperature (Steadman 1994, coefficients as given by the Australian Bureau of Meteorology) stands in for UTCI, which is not implemented; wind at the person is u_site × f_w, clamped to 0.5–17 m/s. The extra radiation is linearised as Q = 6.1 (Tmrt − Ta)${tag(MODEL.atRadiation)}: about 30% low in full sun, partly offset by counting the whole body surface, so the absolute apparent temperatures are approximate. The air temperature is fixed.</p>
+    ${srcLine(['jacobs2020', 'bom', 'steadman1994', 'brief4'])}`;
 }
 
 /** Button labels for the wind panel cards. */

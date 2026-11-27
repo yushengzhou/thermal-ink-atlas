@@ -161,7 +161,7 @@ test('acceptance bands: values, pinned deviations, docs table in sync', () => {
   assert.deepEqual(Object.keys(outside).sort(), Object.keys(PINNED_OUTSIDE).sort(), 'the set of rows outside a band changed');
   for (const [k, v] of Object.entries(outside)) assert.ok(Math.abs(v - PINNED_OUTSIDE[k]) <= 0.25, `${k}: ${v} (pinned ${PINNED_OUTSIDE[k]})`);
   assert.ok(md.includes(bands4Markdown(rows)), 'run `node scripts/sources.mjs` to refresh the table');
-  for (const s of ['Air fixed:', 'One wind direction and speed; a geometric heuristic, not CFD', 'Prescribed water curves', 'Shade is the biggest comfort lever near water', 'engine plausibility band to be calibrated from a run', 'was **not** widened']) assert.ok(md.includes(s), `disclosure missing: ${s}`);
+  for (const s of ['Air fixed:', 'One wind direction and speed; a geometric heuristic, not CFD', 'Prescribed water curves', 'Shade is the biggest comfort lever near water', 'engine plausibility band to be calibrated from a run', 'was **not** widened', 'flat-plate fit fed with the 10 m wind × f_w', 'accepted as disclosed engine findings']) assert.ok(md.includes(s), `disclosure missing: ${s}`);
 });
 
 test('every block-4 value has a source and a basis tag; river and pond are prescribed', () => {
@@ -171,7 +171,7 @@ test('every block-4 value has a source and a basis tag; river and pond are presc
     assert.ok(md.includes(`\`${k}\``), `${k} missing in sources.md`);
   }
   for (const id of ['river', 'pond']) assert.ok(MATERIALS[id].prescribed, id);
-  for (const k of ['brief4', 'volker2013', 'hathway2012', 'steeneveld2014', 'theeuwes2013', 'jacobs2020', 'cheonggyecheon', 'ota', 'corridor', 'oke1988', 'wake', 'solcerova2019', 'webb2008', 'steadman1994']) assert.ok(md.includes(`**[${k}]**`), k);
+  for (const k of ['brief4', 'volker2013', 'hathway2012', 'steeneveld2014', 'theeuwes2013', 'jacobs2020', 'cheonggyecheon', 'ota', 'corridor', 'oke1988', 'wake', 'solcerova2019', 'webb2008', 'steadman1994', 'bom']) assert.ok(md.includes(`**[${k}]**`), k);
 });
 
 test('scene: river on the upwind edge, corridors along the wind, streets across it, a pond, at most five notes', () => {

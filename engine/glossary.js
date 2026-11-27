@@ -188,8 +188,8 @@ export const GLOSSARY = {
   apparentTemp: {
     term: 'Apparent temperature',
     text: 'A feels-like temperature from air temperature, humidity, wind and the extra radiation a person absorbs (Steadman 1994). Used here as a simple stand-in for UTCI.',
-    range: 'AT = Ta + 0.348 e − 0.70 ws + 0.70 Q/(ws + 10) − 4.25 (e in hPa, ws the 10 m wind in m/s, Q in W m⁻²; coefficients from memory, not checked).',
-    src: 'steadman1994',
+    range: 'AT = Ta + 0.348 e − 0.70 ws + 0.70 Q/(ws + 10) − 4.25 (e in hPa, ws the 10 m wind in m/s, Q in W m⁻²; as given by the Australian Bureau of Meteorology).',
+    src: 'bom, steadman1994',
     why: 'It lets the walkers weigh a breeze against shade: both make a hot afternoon feel cooler.',
     scenes: ['waterfront'],
   },
