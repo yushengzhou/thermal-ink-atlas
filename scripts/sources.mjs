@@ -16,6 +16,8 @@ import { cbdMarkdown, cbdGlossaryStats } from './cbd-docs.mjs';
 import { waterfrontMarkdown, wfGlossaryStats } from './waterfront-docs.mjs';
 import { hutongMarkdown } from './hutong-docs.mjs';
 import { htGlossaryStats } from './hutong.mjs';
+import { parkingMarkdown } from './parking-docs.mjs';
+import { pkGlossaryStats } from './parking.mjs';
 
 const UNITS = { mu: ' J m⁻² s⁻½ K⁻¹', muWet: ' J m⁻² s⁻½ K⁻¹', thinC: ' J m⁻² K⁻¹', tau: ' d', storage: ' mm' };
 const cell = (p, k = '') =>
@@ -66,7 +68,9 @@ export function glossaryMarkdown(world, model) {
   const st4 = wfGlossaryStats();
   // block-5-only terms likewise with block 5's numbers
   const st5 = { ...st, ...htGlossaryStats() };
-  const statsFor = (g) => (g.model && g.scenes && g.scenes.includes('glass-cbd') ? st3 : g.model && g.scenes && g.scenes.includes('waterfront') ? st4 : g.model && g.scenes && g.scenes.includes('hutong') ? st5 : st);
+  // block-6-only terms likewise with block 6's numbers
+  const st6 = { ...st, ...pkGlossaryStats() };
+  const statsFor = (g) => (g.model && g.scenes && g.scenes.includes('glass-cbd') ? st3 : g.model && g.scenes && g.scenes.includes('waterfront') ? st4 : g.model && g.scenes && g.scenes.includes('hutong') ? st5 : g.model && g.scenes && g.scenes.includes('parking') ? st6 : st);
   return Object.entries(GLOSSARY)
     .map(([k, g]) => `- **${g.term}**${g.scenes ? ` (${g.scenes.join(', ')} only)` : ''}: ${rangeLine(k, statsFor(g))} ${g.model ? '[this model]' : `[${g.src}]`}`)
     .join('\n');
@@ -285,6 +289,7 @@ ${Object.entries(SOURCES).map(([k, v]) => `- **[${k}]** ${v}`).join('\n')}
 - Convection: h_c = 5.7 + 3.8·u [oke], the same for roofs and ground.
 - Water: Ts = daily mean Ta − 1 K + 1 K·sin(2π(t − 9 h)/24) [brief] (blocks 1–3; block 4's river and pond: see Block 4).
 - Convection, block 4: h_c = 5.7 + 3.8·u_site·f_w per cell, f_w the wind factor (see Block 4); blocks 1–3 have f_w = 1.
+- Ground heat flux, block 6: G (the flux into the surface above, thin layers C·dTs/dt) is stored every 15 min when a block asks for it (\`opts.flux\`, see Block 6) [deardorff]; parked cars shade the cells beneath them as a sub-grid share (see Block 6).
 - Surface water store, block 5: G also loses LE = L·β(W)·(h_c/c_p)·max(0, q_sat(Ts) − q_a) on cells holding splashed water W (see Block 5); empty, and never computed, in blocks 1–4.
 - Tree leaves: air + 2.5 K·(K↓/900) by day, air − 0.5 K at night (*engine assumption*; brief: air +0–3 K).
 - Air temperature [brief]: sinusoid with Ta,min at sunrise and Ta,max at 15:00, implemented as two half-cosines (rise and fall).
@@ -321,7 +326,8 @@ ${sensitivityMarkdown(sensitivity())}
 ${retrofitMarkdown()}
 ${cbdMarkdown()}
 ${waterfrontMarkdown()}
-${hutongMarkdown()}`;
+${hutongMarkdown()}
+${parkingMarkdown()}`;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
