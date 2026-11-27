@@ -129,6 +129,23 @@ export class Pen {
   }
 
   /**
+   * Many short strokes as one item (block 5: tile rows, brick courses,
+   * hatching): segs is [[a, b], ...] of world points; each segment gets its
+   * own wobble and overshoot, separated by pen-up breaks.
+   */
+  lines(segs, opts = {}) {
+    const k = this._k();
+    const sp = [];
+    segs.forEach(([a, b], n) => {
+      const p = iso(a[0], a[1], a[2] ?? 0);
+      const q = iso(b[0], b[1], b[2] ?? 0);
+      this._edge(sp, p[0], p[1], q[0], q[1], k + n * 31, opts.over ?? 1);
+    });
+    const it = { f: null, s: opts.stroke ?? 1, lw: opts.lw ?? 1, fp: null, sp: new Float32Array(sp), t: opts.t, a: opts.a };
+    return this._push(it, sp);
+  }
+
+  /**
    * One continuous hand-drawn stream line (block 4 wind lines) from a flat
    * world array [x0, y0, x1, y1, ...] at height opts.z: projected, with a
    * slow seeded wobble across the line (no overshoot, no breaks), so it can

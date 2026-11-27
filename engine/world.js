@@ -1,11 +1,12 @@
 // world: parcels -> grids (5 m model grid, 2 m fine grid), sky view factor,
 // and a back-to-front depth order for objects by footprint.
 import { inPoly } from './core.js';
-import { svfAt } from './thermal.js';
+import { svfAt, svfGridAt } from './thermal.js';
 import { windField, isWindBlock } from './wind.js';
+import { MATERIALS } from './materials.js';
 
-export const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water', 'pavers', 'porousAsphalt', 'coolPave', 'raingarden', 'river', 'pond'];
-const WALKABLE = { concrete: 1, stone: 1, grass: 1, pavers: 1 };
+export const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water', 'pavers', 'porousAsphalt', 'coolPave', 'raingarden', 'river', 'pond', 'greyBrick'];
+const WALKABLE = { concrete: 1, stone: 1, grass: 1, pavers: 1, greyBrick: 1 };
 
 /** Shopfront segments [s0, s1] (metres along a face) for a shop building. */
 export function shopSegments(B, face) {
@@ -39,8 +40,11 @@ export function buildWorld(scene, opts = {}) {
   const n = Math.round(size / cell);
   const N = n * n;
   const buildings = scene.buildings.map((b, i) => ({ ...b, index: i }));
-  const trees = scene.trees.map((t, i) => ({ ...t, index: i }));
+  // block 5: trees of a named species take its crown transmission (materials.js tr)
+  const trees = scene.trees.map((t, i) => (t.species ? { ...t, tr: t.tr ?? MATERIALS[t.species].tr.value, index: i } : { ...t, index: i }));
   const awnings = buildings.flatMap(awningsOf);
+  // block 5: flat screens (vine pergolas, mat awnings) with their material's transmission
+  const screens = scene.screens ? scene.screens.map((P, i) => ({ ...P, tr: MATERIALS[P.kind].tr.value, index: i })) : null;
 
   const parcelAt = (x, y) => {
     for (let k = scene.ground.length - 1; k >= 0; k--) {
@@ -77,6 +81,8 @@ export function buildWorld(scene, opts = {}) {
         const d = Math.hypot(t.x - x, t.y - y);
         if (d < t.r) cover = Math.max(cover, 1 - (d / t.r) ** 2 * 0.5);
       }
+      // a screen counts as full cover over the cells whose centre it spans (sky view, wall reflection)
+      if (screens) for (const P of screens) if (x > P.x0 && x < P.x1 && y > P.y0 && y < P.y1) cover = 1;
       canopy[k] = cover;
     }
   }
@@ -125,7 +131,8 @@ export function buildWorld(scene, opts = {}) {
         const wall = 1 - v0;
         for (let o = 0; o < 4; o++) gview[k * 4 + o] = wall > 1e-6 ? g[o] / wall : 0;
       }
-      let v = opts.svfFrom ? svfOpen[k] : onDir ? v0 : svfAt(heightAt, x, y, z0 + 0.01, nDirs, 160, cell / 2);
+      // block 5 (svfExact): grid traversal, walls at their true distance in 5 m lanes
+      let v = opts.svfFrom ? svfOpen[k] : onDir ? v0 : scene.svfExact ? svfGridAt({ n, cell, height }, x, y, z0 + 0.01, nDirs, 160) : svfAt(heightAt, x, y, z0 + 0.01, nDirs, 160, cell / 2);
       svfOpen[k] = v;
       if (bld[k] < 0) v *= 1 - 0.75 * canopy[k];
       svf[k] = v;
@@ -164,6 +171,8 @@ export function buildWorld(scene, opts = {}) {
     buildings,
     trees,
     awnings,
+    ...(screens ? { screens } : {}),
+    ...(scene.shadeSamples ? { shadeS: scene.shadeSamples } : {}),
     cellIndex,
     heightAt,
     parcelAt,
