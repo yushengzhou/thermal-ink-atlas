@@ -189,7 +189,8 @@ test('glossary: artificial turf, crumb rubber, contact burn, shade sail, on the 
   const keys = termsFor('campus');
   for (const k of ['artificialTurf', 'crumbRubber', 'contactBurn', 'shadeSail']) {
     assert.ok(keys.includes(k), k);
-    assert.deepEqual(GLOSSARY[k].scenes, ['campus']);
+    // block 11 shows the shade sail too
+    assert.deepEqual(GLOSSARY[k].scenes, k === 'shadeSail' ? ['campus', 'desert'] : ['campus']);
     for (const c of ['asphalt-park', 'estate']) assert.ok(!termsFor(c).includes(k), `${k} on ${c}`);
   }
 });
@@ -214,8 +215,8 @@ test('build: the block\'s materials are one @page campus group, carried by the c
   }
   assert.ok(readFileSync(new URL('../../cities/campus/index.html', import.meta.url), 'utf8').includes('Artificial turf (crumb-rubber infill)'));
   assert.ok(pageParts('campus').matBytes > 1000);
-  // the new ground materials are appended after blocks 1-7's
-  assert.deepEqual(GROUND_MATS.slice(15), ['turf', 'track', 'acrylic', 'rubber']);
+  // the new ground materials are appended after blocks 1-7's (block 11 appends its own after them)
+  assert.deepEqual(GROUND_MATS.slice(15, 19), ['turf', 'track', 'acrylic', 'rubber']);
 });
 
 test('scene: at most five notes, equal-length route variants, a standard track; blocks 1-7 are not the campus', () => {

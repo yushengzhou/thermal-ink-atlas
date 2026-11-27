@@ -282,8 +282,9 @@ test('build: the block\'s materials are one @page busstop group, carried by the 
   }
   assert.ok(readFileSync(new URL('../../cities/busstop/index.html', import.meta.url), 'utf8').includes('Opal polycarbonate shelter roof'));
   assert.ok(pageParts('busstop').matBytes > 1000);
-  // no new ground materials
-  assert.equal(GROUND_MATS.length, 19);
+  // no new ground materials (the next ones appended are block 11's)
+  assert.equal(GROUND_MATS.indexOf('rubber'), 18);
+  assert.deepEqual(GROUND_MATS.slice(19), ['gravel', 'desertLawn', 'coolCoat']);
 });
 
 test('scene: at most five notes, equal-length route variants, stops on the sidewalks; blocks 1-8 are not the bus stop block and keep their world', () => {

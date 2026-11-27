@@ -44,7 +44,7 @@ test('every key in SOURCES and in the docs/sources.md key list appears, and only
 
 test('groups: model and methods first, then one group per block in order', () => {
   const ids = groups().map((g) => g.id).filter((id) => id !== 'other');
-  assert.deepEqual(ids, ['methods', 'asphalt-park', 'sponge-retrofit', 'glass-cbd', 'waterfront', 'hutong', 'parking', 'estate', 'campus', 'busstop', 'village']);
+  assert.deepEqual(ids, ['methods', 'asphalt-park', 'sponge-retrofit', 'glass-cbd', 'waterfront', 'hutong', 'parking', 'estate', 'campus', 'busstop', 'village', 'desert']);
   for (const id of ids) assert.ok(html.includes(`<section id="${id}">`), id);
   const methods = groups()[0].keys;
   for (const k of ['deardorff', 'noaa', 'brutsaert', 'meinel', 'oke', 'solweig', 'energyplus']) assert.ok(methods.includes(k), k);
