@@ -45,6 +45,20 @@ export const SOURCES = {
   xie2016: 'Xie et al. (2016) Atmos. Chem. Phys. 16, 6071, doi 10.5194/acp-16-6071-2016: dense urban anthropogenic heat 20-70 W m-2 of ground area, occasionally > 100',
   sailor2011: 'Sailor (2011) Int. J. Climatol., doi 10.1002/joc.2106, anthropogenic heat review; Sailor et al. (2015) citing Ichinose (1999): central Tokyo > 400 W m-2 by day',
   sponge2015: 'State Council General Office (2015) Guiding Opinions on Promoting Sponge City Construction, Guo Ban Fa [2015] No. 75 (English notice, gov.cn, 2015-10-16; reprint waizi.org.cn/law/6860.html; MOHURD interpretation via cs.com.cn; the primary Chinese text was not located)',
+  brief4: 'Research brief docs/research/waterfront-brief.md (block 4; values compiled from the sources below, items marked unverified there are flagged here)',
+  volker2013: 'Völker et al. (2013) Erdkunde 67(4), review of 27 studies: urban blue space about 2.5 K (95% CI 1.9-3.2) cooler May-October, inflated by remote-sensing surface temperatures',
+  hathway2012: 'Hathway & Sharples (2012) Building and Environment, River Don, Sheffield: river about 1 K cooler than the city reference, vegetated banks about 2 K cooler than paved, reach about 30 m with open banks (via secondary sources, unverified)',
+  steeneveld2014: 'Steeneveld et al. (2014) Landscape and Urban Planning, doi 10.1016/j.landurbplan.2013.09.001: in Rotterdam, water bodies raise the 95th percentile of the daily maximum UHI (warm after sunset)',
+  theeuwes2013: 'Theeuwes et al. (2013) J. Geophys. Res. Atmos., doi 10.1002/jgrd.50704 (WRF): water warmer than the air at night worsens night-time comfort',
+  jacobs2020: 'Jacobs et al. (2020) Are urban water bodies really cooling? Urban Climate (ENVI-met, small Dutch water bodies): afternoon air -0.2 K typical, -0.6 K at most; PET -0.6 typical, -1.9 at most; shade gives PET -1 to -7 K',
+  cheonggyecheon: 'Cheonggyecheon, Seoul (TMU repository; AMS abstract): more than 1 K cooler to 70-80 m (north side), about 0.5 K to 30-50 m (south side); before / after -0.1 to -0.9 K',
+  ota: 'Murakawa group, Ota River, Hiroshima (AIJ papers, J-STAGE aijax 415): river cooling detectable 150-500 m inland along streets perpendicular to the river, more with wind, wider streets and lower density (unverified)',
+  corridor: 'Ventilation-corridor planning criteria: corridors within 30 deg of the prevailing wind (Chinese planning criteria and Givoni 20-30 deg, via Ren et al. 2018 (CUHK) and MDPI Buildings 14(2):348)',
+  oke1988: 'Oke (1988) Energy and Buildings 11, street-canyon flow regimes, thresholds about 0.3-0.4 and 0.65-0.7 H/W (unverified)',
+  wake: 'Building Simulation (Springer), doi 10.1007/s12273-024-1103-z: building wake recirculation length about 1.6-2.6 x building width',
+  solcerova2019: 'Solcerova et al. (2019) Frontiers in Earth Science 7, 156, doi 10.3389/feart.2019.00156: a Delft pond is warmer than the air at night and releases about 2.7 MJ m-2 per night (43% longwave, 39% latent, 11% sensible)',
+  webb2008: 'Webb et al. (2008) Hydrological Processes, river water temperature review: large deep rivers have the smallest daily range ("< 1 K" unverified)',
+  steadman1994: 'Steadman (1994) Australian Meteorological Magazine 43, apparent temperature with radiation: AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25 (as used by the Australian Bureau of Meteorology; coefficients from memory, not checked)',
 };
 
 /** How a value relates to its source. */
@@ -143,6 +157,28 @@ export const MATERIALS = {
     note: 'Leaves stay within a few degrees of the air; the ground beneath sits in their shade.',
   },
 };
+
+// ---- block 4: water with its own prescribed curves -------------------------
+Object.assign(MATERIALS, {
+  river: {
+    name: 'River (open water)',
+    alpha: v(0.06, 'oke', 'range', false, 'cited 0.03-0.10'),
+    eps: v(0.96, 'oke', 'range', false, 'cited 0.92-0.97'),
+    mu: v(1545, 'oke', 'cited'),
+    ef: v(1, 'engine', 'engine'),
+    prescribed: 'Not used by the grid model: the river is held at daily mean air - 2 K, +-0.5 K (peak at 15:00), so it stays below the air all afternoon (research brief, block 4; offset and amplitude are assumptions).',
+    note: 'A large, deep, flowing river barely warms through the day: it stays below the afternoon air.',
+  },
+  pond: {
+    name: 'Still pond (shallow)',
+    alpha: v(0.06, 'oke', 'range', false, 'cited 0.03-0.10'),
+    eps: v(0.96, 'oke', 'range', false, 'cited 0.92-0.97'),
+    mu: v(1545, 'oke', 'cited'),
+    ef: v(1, 'engine', 'engine'),
+    prescribed: 'Not used by the grid model: the pond is held at daily mean air - 0.5 K, +-2 K (peak at 16:00): cooler than the afternoon air, warmer than the air before dawn (research brief, block 4; numbers are assumptions, the warm night is cited).',
+    note: 'A shallow still pond stores the day\'s heat and gives it back at night: before dawn it is warmer than the air.',
+  },
+});
 
 // ---- block 2: retrofit materials ------------------------------------------
 // Wetted materials carry efWet / efDry and tau (days); green roof also muWet.
@@ -286,6 +322,24 @@ export const MODEL = {
   glassHo: v(20, 'brief3', 'range', false, 'outside film coefficient h_o, brief 15-25 W m-2 K-1'),
   glassHi: v(7.7, 'iso6946', 'interp', false, 'inside film coefficient h_i,eff, W m-2 K-1, read as 1 / 0.13'),
   sweatCue: v('Tmrt 65 -> 70 C', 'engine', 'engine', false, 'visual cue only: droplets on people in sun, strength rising from Tmrt 65 C to full at 70 C (separates sunlit pavement from sunlit lawn in this model); no physiological model'),
+  // ---- block 4 (waterfront): wind factor, water curves, air overlay, comfort ----
+  windFmin: v(0.3, 'brief4', 'engine', false, 'f_min: wind factor right behind an obstacle (leeward face); also the lower clamp of f_w'),
+  shelterReach: v('5 H', 'brief4', 'engine', false, 'shelter recovers linearly to 1 at 5 building heights downwind ("5H recovery" is an assumption in the brief; wake recirculation 1.6-2.6 x building width is cited [wake])'),
+  channelC: v(0.2, 'brief4', 'engine', false, 'c_ch: channelling gain in streets aligned with the wind, C = 1 + c_ch max(0, cos 3 delta)'),
+  windFmax: v(1.2, 'brief4', 'engine', false, 'f_max: upper clamp of f_w'),
+  alignCut: v('30 deg', 'corridor', 'cited', false, 'channelling only in streets whose axis is within 30 deg of the wind'),
+  channelHw: v(0.4, 'oke1988', 'interp', false, 'channelling only where the street H/W > 0.4 (read from the Oke 1988 regime thresholds, about 0.3-0.4, unverified)'),
+  windHc: v('h_c = 5.7 + 3.8 u_site f_w', 'brief4', 'interp', false, 'the same h_c formula [oke] with the local wind u_i = u_site f_w per cell (roofs and blocks without a wind direction: f_w = 1)'),
+  riverCurve: v('Ta_mean - 2 K + 0.5 K sin(2 pi (h - 9) / 24)', 'brief4', 'engine', false, 'prescribed river surface; range 1 K (large rivers: smallest daily range [webb2008]); the -2 K offset and 0.5 K amplitude are assumptions'),
+  pondCurve: v('Ta_mean - 0.5 K + 2 K sin(2 pi (h - 10) / 24)', 'brief4', 'engine', false, 'prescribed shallow pond surface; range 4 K; warmer than the air at night is cited [solcerova2019], the numbers are assumptions'),
+  airDay: v(1.0, 'brief4', 'range', false, 'overlay only: dTa at the bank by day, -1.0 K (cited range 0.2-1.5 K [hathway2012, cheonggyecheon, jacobs2020])'),
+  airL: v(30, 'brief4', 'range', false, 'overlay only: decay length L, m (cited 30-80 m [hathway2012, cheonggyecheon], unverified)'),
+  airLaligned: v(60, 'brief4', 'interp', false, 'overlay only: decay length in streets aligned with the wind, m, chosen so the effect is below 0.2 K by 150 m (the brief reads the Ota River 150-500 m [ota] as at most 150 m here)'),
+  airNight: v(0.3, 'brief4', 'engine', false, 'overlay only: dTa at the bank at night, +0.3 K (range 0-1 K assumed; the sign is cited [steeneveld2014, solcerova2019])'),
+  airPond: v(0.2, 'jacobs2020', 'cited', false, 'overlay only: dTa next to the small pond by day, -0.2 K (Jacobs et al. typical afternoon value)'),
+  apparentTemp: v('AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25', 'steadman1994', 'cited', false, 'comfort for the walkers in block 4 (a stand-in for UTCI, which is not implemented); ws = u_10 f_w clamped to 0.5-17 m/s as the brief gives for UTCI'),
+  atRadiation: v('Q = 6.1 W m-2 K-1 x (Tmrt - Ta)', 'steadman1994', 'interp', false, 'extra radiation absorbed by a person, linearised: 4 eps sigma T^3 with eps 0.97 and T 303 K'),
+  windLines: v('seeds every 20 m upwind, RK2 2.5 m steps, slide along buildings', 'brief4', 'engine', false, 'drawing only: assumed direction x shelter factor, not computed flow; dash spacing and speed proportional to u_i (speed drawn 4x)'),
 };
 
 /** Parameter keys a material uses (for cards and docs). */

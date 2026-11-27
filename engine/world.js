@@ -2,8 +2,9 @@
 // and a back-to-front depth order for objects by footprint.
 import { inPoly } from './core.js';
 import { svfAt } from './thermal.js';
+import { windField, isWindBlock } from './wind.js';
 
-export const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water', 'pavers', 'porousAsphalt', 'coolPave', 'raingarden'];
+export const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water', 'pavers', 'porousAsphalt', 'coolPave', 'raingarden', 'river', 'pond'];
 const WALKABLE = { concrete: 1, stone: 1, grass: 1, pavers: 1 };
 
 /** Shopfront segments [s0, s1] (metres along a face) for a shop building. */
@@ -146,7 +147,7 @@ export function buildWorld(scene, opts = {}) {
     }
   }
 
-  return {
+  const W = {
     scene,
     size,
     cell,
@@ -169,6 +170,12 @@ export function buildWorld(scene, opts = {}) {
     buildingAt,
     fine: { n: fn, cell: fcell, mat: fmat, walk },
   };
+  // block 4: per-cell wind factor (wind.js); other blocks have none (f_w = 1)
+  if (isWindBlock(scene)) {
+    W.wind = windField(W);
+    W.fw = W.wind.fw;
+  }
+  return W;
 }
 
 /**

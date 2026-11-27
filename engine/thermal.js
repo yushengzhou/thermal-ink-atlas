@@ -28,6 +28,23 @@ export const SLOTS = 144; // sun / shade samples per day (10 min)
 export const STORE = 96; // stored temperature samples per day (15 min)
 export const LATENT = 2.45e6; // latent heat of vaporisation, J kg-1
 
+/** Prescribed water kinds: 1 pond of blocks 1-3 ('water'), 2 river, 3 still pond (block 4). */
+export const WATER_KIND = { water: 1, river: 2, pond: 3 };
+export const isWater = (id) => !!WATER_KIND[id];
+
+/**
+ * Prescribed water surface temperature (deg C) of a water kind at clock hour
+ * h, for the daily mean air temperature taMean:
+ *   water (blocks 1-3): taMean - 1 + sin(2 pi (h - 9) / 24)
+ *   river (block 4):    taMean - 2 + 0.5 sin(2 pi (h - 9) / 24)
+ *   pond (block 4):     taMean - 0.5 + 2 sin(2 pi (h - 10) / 24)
+ */
+export function waterTemp(kind, taMean, h) {
+  if (kind === 2) return taMean - 2 + 0.5 * Math.sin((2 * Math.PI * (h - 9)) / 24);
+  if (kind === 3) return taMean - 0.5 + 2 * Math.sin((2 * Math.PI * (h - 10)) / 24);
+  return taMean - 1 + Math.sin((2 * Math.PI * (h - 9)) / 24);
+}
+
 /** Sunrise and sunset clock hours for the site (scan at 1-min steps). */
 export function daylight(site) {
   let rise = 6;
@@ -256,7 +273,12 @@ export function runModel(world, opts = {}) {
   const N = n * n;
   const { rise } = daylight(site);
   const slots = opts.slots ?? sunSlots(world);
-  const hc = 5.7 + 3.8 * site.wind;
+  // opts.wind (block 4 presets) overrides the site wind speed u_site
+  const uSite = opts.wind ?? site.wind;
+  const hc = 5.7 + 3.8 * uSite;
+  // block 4: per-cell wind factor f_w (wind.js) -> h_c = 5.7 + 3.8 u_site f_w.
+  // Blocks without a wind direction have no f_w and keep the scalar h_c.
+  const fwFull = opts.fw ?? world.fw ?? null;
   const tauFac = (2 * Math.PI) / TAU;
   const sqrtTau = Math.sqrt(TAU);
   // block 3: specular reflection fields per slot (reflect.js reflectFor) and the glass type
@@ -281,7 +303,7 @@ export function runModel(world, opts = {}) {
   for (let i = 0; i < NN; i++) {
     const id = cellMat(world, idx ? idx[i] : i);
     const m = mats[id];
-    water[i] = id === 'water' ? 1 : 0;
+    water[i] = WATER_KIND[id] ?? 0;
     if (water[i]) continue; // prescribed temperature
     alpha[i] = m.alpha.value;
     eps[i] = m.eps.value;
@@ -315,6 +337,14 @@ export function runModel(world, opts = {}) {
     cwa[i] = cw[i] * alpha[i];
   }
   const [g0, g1, g2, g3] = gv ?? [];
+  // per-cell h_c (block 4) and whether any river / still-pond cell exists
+  let hcA = null;
+  if (fwFull) {
+    if (gv) throw new Error('per-cell wind is not supported together with glass walls');
+    hcA = new Float64Array(NN);
+    for (let i = 0; i < NN; i++) hcA[i] = 5.7 + 3.8 * uSite * fwFull[idx ? idx[i] : i];
+  }
+  const kinds = water.some((k) => k > 1);
 
   // per-minute forcing
   const M = 1440;
@@ -347,7 +377,7 @@ export function runModel(world, opts = {}) {
   const stepsPerStore = M / STORE;
 
   // per-cell inputs and state for the step functions (one minute, all cells)
-  const C = { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, dt, gOpaque, g0, g1, g2, g3 };
+  const C = { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, hcA, dt, gOpaque, g0, g1, g2, g3, wt: new Float64Array(4) };
   let days = 0;
   let maxDelta = Infinity;
   /** One design day with steps of stepMin minutes; returns max |change of Td| over cells. */
@@ -377,7 +407,10 @@ export function runModel(world, opts = {}) {
       const kg = kwG[m];
       const waterT = taMean - 1 + Math.sin((2 * Math.PI * (h - 9)) / 24) + K0;
       if (gv) stepGlass(C, f0, f1, st, r0, r1, bh, df, k0, kg, lsky, lwall, lglass[m * 4], lglass[m * 4 + 1], lglass[m * 4 + 2], lglass[m * 4 + 3], taK, waterT);
-      else stepPlain(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT);
+      else if (hcA || kinds) {
+        for (let k = 1; k <= 3; k++) C.wt[k] = waterTemp(k, taMean, h) + K0;
+        stepWind(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK);
+      } else stepPlain(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT);
       if (keep && m % stepsPerStore === 0) {
         const k = m / stepsPerStore;
         for (let i = 0; i < NN; i++) store[i * STORE + k] = Ts[i] - K0;
@@ -411,7 +444,7 @@ export function runModel(world, opts = {}) {
     idx.forEach((i, c) => full.set(store.subarray(c * STORE, (c + 1) * STORE), i * STORE));
     store = full;
   }
-  return new Thermal(world, store, slots, { rise, taMean, hc, site, ta, days, maxDelta, mats, cells: idx, refl: reflFull, glass, warm: warmUsed ? opts.warm : 0, warmFactor });
+  return new Thermal(world, store, slots, { rise, taMean, hc, fw: fwFull, wind: uSite, site, ta, days, maxDelta, mats, cells: idx, refl: reflFull, glass, warm: warmUsed ? opts.warm : 0, warmFactor });
 }
 
 /** Largest explicit-step stability factor over the cells for a step of dtS seconds (T = 340 K). */
@@ -420,7 +453,7 @@ export function coarseStability(C, dtS) {
   let max = 0;
   for (let i = 0; i < C.NN; i++) {
     if (C.water[i]) continue;
-    max = Math.max(max, dtS * (C.cap[i] * (4 * C.eps[i] * SIGMA * T3 + C.hc) + C.restore[i]));
+    max = Math.max(max, dtS * (C.cap[i] * (4 * C.eps[i] * SIGMA * T3 + (C.hcA ? C.hcA[i] : C.hc)) + C.restore[i]));
   }
   return max;
 }
@@ -440,6 +473,32 @@ function stepPlain(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT) {
       const t4 = t * t * t * t;
       const qstar = (1 - alpha[i]) * K + eps[i] * L - eps[i] * SIGMA * t4;
       const G = qstar - hc * (t - taK) - (qstar > 0 ? ef[i] * qstar : 0);
+      Ts[i] = t + dt * (cap[i] * G - restore[i] * (t - Td[i]));
+    }
+    sumDay[i] += Ts[i];
+  }
+}
+
+/**
+ * One model minute for every cell with a per-cell h_c and / or several water
+ * kinds (block 4). The same arithmetic as stepPlain, with hcA[i] for hc (or
+ * the scalar hc when there is no wind factor) and C.wt[kind] for the water.
+ */
+function stepWind(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK) {
+  const { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, hcA, dt, wt } = C;
+  for (let i = 0; i < NN; i++) {
+    if (water[i]) {
+      Ts[i] = wt[water[i]];
+    } else {
+      const sl = f0[i] + (f1[i] - f0[i]) * st;
+      const v = svf[i];
+      const K = sl * bh + v * df + cw[i] * k0 + cwa[i] * kg;
+      const L = v * lsky + (1 - v) * lwall;
+      const t = Ts[i];
+      const t4 = t * t * t * t;
+      const qstar = (1 - alpha[i]) * K + eps[i] * L - eps[i] * SIGMA * t4;
+      const h = hcA ? hcA[i] : hc;
+      const G = qstar - h * (t - taK) - (qstar > 0 ? ef[i] * qstar : 0);
       Ts[i] = t + dt * (cap[i] * G - restore[i] * (t - Td[i]));
     }
     sumDay[i] += Ts[i];
@@ -515,6 +574,16 @@ export class Thermal {
     this.store = store;
     this.slots = slots;
     this.info = info;
+  }
+
+  /** Wind factor f_w of cell i (1 for blocks without a wind direction). */
+  fw(i) {
+    return this.info.fw ? this.info.fw[i] : 1;
+  }
+
+  /** Convective coefficient h_c of cell i, W m-2 K-1 (as in runModel). */
+  hcAt(i) {
+    return this.info.fw ? 5.7 + 3.8 * this.info.wind * this.info.fw[i] : this.info.hc;
   }
 
   /** Air temperature at clock hour h. */
@@ -654,7 +723,7 @@ export class Thermal {
   evaporation(i) {
     const site = this.info.site;
     const m = (this.info.mats ?? MATERIALS)[cellMat(this.world, i)];
-    if (!m || !m.ef || cellMat(this.world, i) === 'water') return 0;
+    if (!m || !m.ef || isWater(cellMat(this.world, i))) return 0;
     const v = this.world.svf[i];
     let sum = 0;
     for (let k = 0; k < STORE; k++) {
@@ -686,10 +755,11 @@ export class Thermal {
    * r I from the mirrored direction, same altitude, so the same f_p) and emit
    * at the glass temperature.
    */
-  tmrt(i, h) {
+  tmrt(i, h, slIn) {
+    // slIn (block 4 walkers): sunlit share of a 2 m pixel instead of the cell's
     const sw = this.shortwave(i, h);
     const s = sw.sun;
-    const sl = this.sunlit(i, h);
+    const sl = slIn ?? this.sunlit(i, h);
     const v = this.world.svf[i];
     const mat = (this.info.mats ?? MATERIALS)[cellMat(this.world, i)];
     const tg = this.ts(i, h) + K0;
