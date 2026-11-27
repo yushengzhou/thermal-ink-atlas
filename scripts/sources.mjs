@@ -14,6 +14,8 @@ import { base2, bandRows, water, sensitivity2, diagnostics } from './retrofit.mj
 import { MEASURES, D_DEFAULT, D_MAX, decay } from '../engine/retrofit.js';
 import { cbdMarkdown, cbdGlossaryStats } from './cbd-docs.mjs';
 import { waterfrontMarkdown, wfGlossaryStats } from './waterfront-docs.mjs';
+import { hutongMarkdown } from './hutong-docs.mjs';
+import { htGlossaryStats } from './hutong.mjs';
 
 const UNITS = { mu: ' J m⁻² s⁻½ K⁻¹', muWet: ' J m⁻² s⁻½ K⁻¹', thinC: ' J m⁻² K⁻¹', tau: ' d', storage: ' mm' };
 const cell = (p, k = '') =>
@@ -62,7 +64,9 @@ export function glossaryMarkdown(world, model) {
   const st3 = cbdGlossaryStats();
   // block-4-only terms likewise with block 4's numbers
   const st4 = wfGlossaryStats();
-  const statsFor = (g) => (g.model && g.scenes && g.scenes.includes('glass-cbd') ? st3 : g.model && g.scenes && g.scenes.includes('waterfront') ? st4 : st);
+  // block-5-only terms likewise with block 5's numbers
+  const st5 = { ...st, ...htGlossaryStats() };
+  const statsFor = (g) => (g.model && g.scenes && g.scenes.includes('glass-cbd') ? st3 : g.model && g.scenes && g.scenes.includes('waterfront') ? st4 : g.model && g.scenes && g.scenes.includes('hutong') ? st5 : st);
   return Object.entries(GLOSSARY)
     .map(([k, g]) => `- **${g.term}**${g.scenes ? ` (${g.scenes.join(', ')} only)` : ''}: ${rangeLine(k, statsFor(g))} ${g.model ? '[this model]' : `[${g.src}]`}`)
     .join('\n');
@@ -219,7 +223,7 @@ export function sourcesMarkdown() {
   const rows = Object.entries(MATERIALS).map(([id, m]) => {
     const ks = paramKeys(m);
     const heat = m.thinC ? `C ${cell(m.thinC, 'thinC')}` : m.mu ? `μ ${cell(m.mu, 'mu')}` : '—';
-    const wet = ['efWet', 'muWet', 'tau', 'storage'].filter((k) => m[k]).map((k) => `${{ efWet: 'EF wet', muWet: 'μ wet', tau: 'τ', storage: 'storage' }[k]} ${cell(m[k], k)}`);
+    const wet = ['efWet', 'muWet', 'tau', 'storage', 'tr'].filter((k) => m[k]).map((k) => `${{ efWet: 'EF wet', muWet: 'μ wet', tau: 'τ', storage: 'storage', tr: 'sun let through, tr' }[k]} ${cell(m[k], k)}`);
     return `| ${m.name} (\`${id}\`) | ${cell(m.alpha)} | ${cell(m.eps)} | ${heat} | ${ks.includes('ef') ? `${m.efWet ? 'dry ' : ''}${cell(m.ef)}` : '—'} | ${wet.length ? wet.join('; ') : '—'} |`;
   });
   const prescribed = Object.entries(MATERIALS).filter(([, m]) => m.prescribed).map(([id, m]) => `- \`${id}\`: ${m.prescribed}`);
@@ -240,7 +244,7 @@ the sources listed below without checking them.
 
 ## Surface parameters
 
-| Material | albedo α | emissivity ε | heat storage (μ, or thin-layer C) | evaporative fraction | wet after rain, drying time, water held (block 2) |
+| Material | albedo α | emissivity ε | heat storage (μ, or thin-layer C) | evaporative fraction | wet after rain, drying time, water held (block 2); crown transmission (block 5) |
 |---|---|---|---|---|---|
 ${rows.join('\n')}
 
@@ -281,6 +285,7 @@ ${Object.entries(SOURCES).map(([k, v]) => `- **[${k}]** ${v}`).join('\n')}
 - Convection: h_c = 5.7 + 3.8·u [oke], the same for roofs and ground.
 - Water: Ts = daily mean Ta − 1 K + 1 K·sin(2π(t − 9 h)/24) [brief] (blocks 1–3; block 4's river and pond: see Block 4).
 - Convection, block 4: h_c = 5.7 + 3.8·u_site·f_w per cell, f_w the wind factor (see Block 4); blocks 1–3 have f_w = 1.
+- Surface water store, block 5: G also loses LE = L·β(W)·(h_c/c_p)·max(0, q_sat(Ts) − q_a) on cells holding splashed water W (see Block 5); empty, and never computed, in blocks 1–4.
 - Tree leaves: air + 2.5 K·(K↓/900) by day, air − 0.5 K at night (*engine assumption*; brief: air +0–3 K).
 - Air temperature [brief]: sinusoid with Ta,min at sunrise and Ta,max at 15:00, implemented as two half-cosines (rise and fall).
 - Sky view factor: horizon scan, SVF = mean over 16 azimuths of cos²(horizon elevation); canyon check against cos(arctan(2H/W)).
@@ -315,7 +320,8 @@ ${sensitivityMarkdown(sensitivity())}
 
 ${retrofitMarkdown()}
 ${cbdMarkdown()}
-${waterfrontMarkdown()}`;
+${waterfrontMarkdown()}
+${hutongMarkdown()}`;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

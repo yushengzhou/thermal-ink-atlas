@@ -16,7 +16,7 @@ the sources listed below without checking them.
 
 ## Surface parameters
 
-| Material | albedo α | emissivity ε | heat storage (μ, or thin-layer C) | evaporative fraction | wet after rain, drying time, water held (block 2) |
+| Material | albedo α | emissivity ε | heat storage (μ, or thin-layer C) | evaporative fraction | wet after rain, drying time, water held (block 2); crown transmission (block 5) |
 |---|---|---|---|---|---|
 | Aged asphalt (`asphalt`) | 0.12 [lbnl] *cited value* (LBNL aged asphalt 0.12-0.15) | 0.95 [oke] *cited value*, unverified | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Concrete paving (`concrete`) | 0.3 [oke] *cited range*, unverified (cited 0.10-0.35) | 0.9 [oke] *edge of cited range*, unverified (cited 0.71-0.90) | μ 1785 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 0 [brief] *cited value*, unverified (dry impervious) | — |
@@ -38,6 +38,13 @@ the sources listed below without checking them.
 | Cool pavement coating, new (`coolPaveNew`) | 0.25 [middel2020] *cited value*, unverified | 0.92 [brief2] *cited value*, unverified | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified (the asphalt underneath) | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Rain garden (`raingarden`) | 0.2 [engine] *engine assumption (no source)*, unverified | 0.95 [engine] *engine assumption (no source)*, unverified | μ 1400 J m⁻² s⁻½ K⁻¹ [engine] *engine assumption (no source)*, unverified | dry 0.35 [engine] *engine assumption (no source)*, unverified (dry) | EF wet 0.8 [engine] *engine assumption (no source)*, unverified (wet); τ 3 d [mccoll] *interpretation of the source*, unverified (soil drydown, days; median not checked); storage 40 mm [engine] *engine assumption (no source)*, unverified (ponding and soil, assumed) |
 | Young street tree (`youngCanopy`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.7 [brief] *cited range*, unverified (cited 0.6-0.8) | — |
+| Grey brick paving (青砖) (`greyBrick`) | 0.2 [brief5] *cited range*, unverified (brief 0.20 (0.15-0.30); brick absorptance 0.45 light grey to 0.90 slate grey [midlandBrick]) | 0.92 [brief5] *cited value*, unverified | μ 1100 J m⁻² s⁻½ K⁻¹ [brief5] *cited value*, unverified | 0.02 [brief5] *cited value*, unverified (dry, porous brick) | — |
+| Grey tile roof on a mud and lime back (`greyTile`) | 0.18 [brief5] *cited range*, unverified (brief 0.18 (0.12-0.25); light terracotta clay tile 0.40-0.50 [carb], grey reduced-fired tile darker (unverified)) | 0.9 [brief5] *cited value*, unverified (clay tile 0.80-0.90 [carb]) | μ 1000 J m⁻² s⁻½ K⁻¹ [brief5] *cited value*, unverified (tiles bedded on a mud and lime back, not ventilated [sohuRoof]; the ventilated-tile result [miller2007] does not apply) | 0 [brief5] *cited value*, unverified (dry) | — |
+| Jujube tree (枣树) (`jujube`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.6 [brief5] *cited value*, unverified (brief value) | sun let through, tr 0.37 [brief5] *interpretation of the source*, unverified (exp(-0.5 x 2.0); brief LAI 1.5-2.5 (no measured LAI for jujube), i.e. 0.29-0.47) |
+| Pomegranate (石榴) (`pomegranate`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.6 [brief5] *cited value*, unverified (brief value) | sun let through, tr 0.29 [brief5] *interpretation of the source*, unverified (exp(-0.5 x 2.5); brief LAI 2-3, i.e. 0.22-0.37) |
+| Pagoda tree (国槐) (`pagodaTree`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.7 [brief5] *cited value*, unverified (brief value) | sun let through, tr 0.17 [brief5] *interpretation of the source*, unverified (exp(-0.5 x 3.5); brief LAI 3-4 (no measured LAI), i.e. 0.14-0.22) |
+| Vine pergola (葡萄架) (`pergola`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.6 [brief5] *cited value*, unverified (brief value) | sun let through, tr 0.29 [jjshs] *interpretation of the source*, unverified (exp(-0.5 x 2.5); pergola vines LAI 2-3 [jjshs], overhead arbours > 90% cover [ucdavis]) |
+| Summer mat awning (天棚) (`awning`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used: only the transmission of the mat matters here) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0.2 [brief5] *cited range*, unverified (brief 0.1-0.3 for reed mats (unverified)) |
 
 Not used by the grid model:
 
@@ -46,6 +53,11 @@ Not used by the grid model:
 - `river`: Not used by the grid model: the river is held at daily mean air - 2 K, +-0.5 K (peak at 15:00), so it stays below the air all afternoon (research brief, block 4; offset and amplitude are assumptions).
 - `pond`: Not used by the grid model: the pond is held at daily mean air - 0.5 K, +-2 K (peak at 16:00): cooler than the afternoon air, warmer than the air before dawn (research brief, block 4; numbers are assumptions, the warm night is cited).
 - `youngCanopy`: Not used by the grid model: leaf temperature as for mature trees. Its thin crown lets through exp(-0.5 x 1.5) = 0.47 of the sun (see youngTreeTransmission).
+- `jujube`: Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.
+- `pomegranate`: Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.
+- `pagodaTree`: Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.
+- `pergola`: Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.
+- `awning`: Not used by the grid model as a surface: a flat screen above the eaves that lets through tr of the sun; the cells under it count as fully covered for the sky view (crown factor).
 
 Shown on the heat cards as a caveat:
 
@@ -90,6 +102,14 @@ Shown on the heat cards as a caveat:
 | `apparentTemp` | AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25 [bom] *cited value* (Steadman (1994) [steadman1994], coefficients checked against the BoM page; comfort for the walkers in block 4 (a stand-in for UTCI, which is not implemented); ws = u_10 f_w clamped to 0.5-17 m/s as the brief gives for UTCI) |
 | `atRadiation` | Q = 6.1 W m-2 K-1 x (Tmrt - Ta) [bom] *interpretation of the source*, unverified (extra radiation absorbed by a person, linearised: 4 eps sigma T^3 with eps 0.97 and T 303 K over the whole body surface. At a sunlit Tmrt near 68 C (341 K) 4 eps sigma T^3 is about 8.7, so Q is understated by about 30% there; a standing person radiates over only about 0.7 of the body surface (ASHRAE effective radiating area), which errs the other way. Route weights divide by the sun-shade AT gap, so this largely cancels for the walkers; absolute AT on the cards carries it) |
 | `windLines` | seeds every 20 m upwind, RK2 2.5 m steps, slide along buildings [brief4] *engine assumption (no source)*, unverified (drawing only: assumed direction x shelter factor, not computed flow; dash spacing and speed proportional to u_i (speed drawn 4x)) |
+| `waterStore` | LE = L beta(W) (h_c / c_p) max(0, q_sat(Ts) - q_a), dW/dt = -LE / L [brief5] *cited value*, unverified (bulk evaporation from the splashed paving; beta(W) = beta_wet min(1, W / W_c); c_p 1005 J kg-1 K-1, p 1013.25 hPa, q = 0.622 e / (p - 0.378 e); adds to the EF term, which is zero after sunset) |
+| `satVapour` | e_s = 6.112 exp(17.67 T / (T + 243.5)) hPa [bolton1980] *cited value*, unverified (saturation vapour pressure over water) |
+| `splashW0` | 1 [brief5] *edge of cited range*, unverified (W0, mm of evaporable water left on the paving by one splash; brief 0.5-1.0 mm of the 1-2 L m-2 thrown (about 1 L m-2 per cycle in Paris [hendel2015])) |
+| `splashBeta` | 0.5 [brief5] *cited range*, unverified (beta_wet, the wetness factor of splashed brick; brief 0.3-1 (unverified); Kobe asphalt 0.15 [takebayashi2023]) |
+| `splashWc` | 0.2 [brief5] *cited value*, unverified (W_c, mm: below it the wet patch dries up and beta falls in proportion) |
+| `splashHour` | 19 [brief5] *cited value*, unverified (the evening splash, every evening of the repeated design day (evening watering recommended [takebayashi2023]; the uchimizu custom [nippon])) |
+| `shadeSamples` | 4 x 4 per 5 m cell [engine] *engine assumption (no source)*, unverified (block 5 only: shade sampled every 1.25 m, so the 1.2 m wall shadow of a 5 m lane at noon registers (blocks 1-4: 2 x 2)) |
+| `screenCover` | SVF x (1 - 0.75) [engine] *engine assumption (no source)*, unverified (cells under a pergola or awning take the crown factor of a full tree crown for the sky view and wall reflection, as cells under trees do) |
 
 The wall term's daytime part peaks at 6.8 K on the design day (total wall excess up to 8.8 K above air).
 
@@ -148,6 +168,24 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[webb2008]** Webb et al. (2008) Hydrological Processes, river water temperature review: large deep rivers have the smallest daily range ("< 1 K" unverified)
 - **[steadman1994]** Steadman (1994) Australian Meteorological Magazine 43, apparent temperature with radiation (the paper itself was not read; formula via [bom])
 - **[bom]** Australian Bureau of Meteorology, Thermal stress: About the formula for the apparent temperature (bom.gov.au/info/thermal_stress/): AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25, ws the 10 m wind, Q the net radiation absorbed per unit area of body surface (W m-2); coefficients checked against this page
+- **[brief5]** Research brief docs/research/hutong-brief.md (block 5; values compiled from the sources below, items marked unverified there are flagged here)
+- **[hendel2015]** Hendel et al. (2015) J. Sustain. Dev. Energy Water Environ. Syst., doi 10.13044/j.sdewes.2015.03.0001: watering the Rue du Louvre, Paris, about 1 L m-2 per cycle; surface -7.5 K at 19:30 and -6 K at 20:30, lasting several hours
+- **[hendel2016]** Hendel et al. (2016) Urban Climate, doi 10.1016/j.uclim.2016.02.003: pavement watering in Paris, air -0.79 K at most, Tmrt -1.76 K
+- **[takebayashi2023]** Takebayashi et al. (2023) Atmosphere 14, 1014, doi 10.3390/atmos14061014: road watering in Kobe, 0.025 mm per pass, -2 to -4 K at once, about 6 K on average, gone within 30 min in sun, evening watering recommended; lE = l beta alpha_w (X_s - X_a) with beta 0.15 on asphalt
+- **[kato2008]** Kato et al. (2008), via the block-5 brief: a watered road 50 -> 40 C in about 60 min (unverified)
+- **[nippon]** nippon.com feature on uchimizu (via the block-5 brief): sprinkling water in the evening and in shade, a custom since the Edo period
+- **[lin2019]** Lin et al. (2019) Int. J. Environ. Res. Public Health 16, 2986, doi 10.3390/ijerph16162986: traditional block in Harbin, SVF lanes 0.09-0.27, courtyards 0.22-0.37; lower-SVF courtyards 0.3 K cooler air (at most 0.6 K) and 0.4 K globe (at most 1.0 K)
+- **[spainCourtyard]** Cordoba and Seville courtyard studies, MDPI Proceedings 2(22) 1390 and 1381, 38(1) 17 (abstracts only, unverified): courtyards 3-6 K below the outdoor air on hot days, up to 11-15 K at 40-45 C
+- **[yang2024]** Yang & Wang (2024) J. Beijing Forestry Univ., doi 10.12171/j.1000-1522.20240012 (abstract only): Beijing street-tree shade -1.0 to -2.1 K air and -481 to -789 W m-2; pagoda tree second for comfort
+- **[carb]** California Air Resources Board cool-roof data, via the block-5 brief: clay tile solar reflectance 0.40-0.50, emissivity 0.80-0.90 (light terracotta; grey reduced-fired tile is darker, unverified)
+- **[midlandBrick]** Midland Brick product data, via the block-5 brief: brick solar absorptance 0.45 (light grey) to 0.90 (slate grey)
+- **[sohuRoof]** Web article (sohu), via the block-5 brief: northern roofs of paired tiles on a mud or lime back, not ventilated (secondary, unverified)
+- **[miller2007]** Miller (2007), Oak Ridge National Laboratory, via the block-5 brief: ventilated tile roofs run cooler; does not apply to mud-backed, unventilated roofs
+- **[ucdavis]** UC Davis guidance, via the block-5 brief: overhead vine arbours give more than 90% cover
+- **[jjshs]** J. Japan. Soc. Hort. Sci. 54(3) 293, via the block-5 brief: pergola vines need LAI 2 or more, ideally 3
+- **[deng]** Deng Yunxiang, Tianpeng zheyin (The Paper, newsDetail_forward_18319465), via the block-5 brief: summer mat awnings over Beijing courtyards; Li Binsheng's "tianpeng, fish bowl, pomegranate tree"
+- **[visitBeijing]** Visit Beijing (official tourism site), via the block-5 brief: jujube and pagoda trees in courtyards; the pomegranate stands for many children
+- **[bolton1980]** Bolton (1980) Monthly Weather Review 108, 1046-1053: saturation vapour pressure e_s = 6.112 exp(17.67 T / (T + 243.5)) hPa (formula from memory, not checked)
 - **[noaa]** NOAA Global Monitoring Laboratory, General Solar Position Calculations (solareqns.PDF)
 - **[brutsaert]** Brutsaert (1975) Water Resources Research 11(5) 742-744, clear-sky emissivity
 - **[meinel]** Meinel & Meinel (1976) Applied Solar Energy, clear-sky beam irradiance
@@ -166,6 +204,7 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - Convection: h_c = 5.7 + 3.8·u [oke], the same for roofs and ground.
 - Water: Ts = daily mean Ta − 1 K + 1 K·sin(2π(t − 9 h)/24) [brief] (blocks 1–3; block 4's river and pond: see Block 4).
 - Convection, block 4: h_c = 5.7 + 3.8·u_site·f_w per cell, f_w the wind factor (see Block 4); blocks 1–3 have f_w = 1.
+- Surface water store, block 5: G also loses LE = L·β(W)·(h_c/c_p)·max(0, q_sat(Ts) − q_a) on cells holding splashed water W (see Block 5); empty, and never computed, in blocks 1–4.
 - Tree leaves: air + 2.5 K·(K↓/900) by day, air − 0.5 K at night (*engine assumption*; brief: air +0–3 K).
 - Air temperature [brief]: sinusoid with Ta,min at sunrise and Ta,max at 15:00, implemented as two half-cosines (rise and fall).
 - Sky view factor: horizon scan, SVF = mean over 16 azimuths of cos²(horizon elevation); canyon check against cos(arctan(2H/W)).
@@ -201,7 +240,7 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Specular reflection** (glass-cbd only): Typical: Scale models: flat mirror façades more than double the sunshine at pedestrian level; diffuse façades add at most about 30%; concave façades more than 300%. [speroni2022]
 - **Fresnel reflection** (glass-cbd only): Typical: Clear float glass (n = 1.52, two surfaces): 0.082 at 0°, 0.10 at 45°, 0.17 at 60°, 0.30 at 70°, 0.41 at 75°, 0.56 at 80°. [fresnel]
 - **Reflection spot** (glass-cbd only): In this model: At 3 pm with solar-control low-e glass: Tmrt 49 °C in shaded spots vs 40 °C in plain shade and 71 °C in sun. [this model]
-- **Street canyon (H/W)** (glass-cbd only): Typical: Sky view factor at the centre of a long canyon: 1/√(1 + (2H/W)²), i.e. 0.45 at H/W 1, 0.24 at 2, 0.16 at 3, 0.10 at 5. Oke (1981): calm-night urban–rural air difference about 7.45 + 3.97 ln(H/W) K (secondary source). [brief3, oke1981]
+- **Street canyon (H/W)** (glass-cbd, hutong only): Typical: Sky view factor at the centre of a long canyon: 1/√(1 + (2H/W)²), i.e. 0.45 at H/W 1, 0.24 at 2, 0.16 at 3, 0.10 at 5. Oke (1981): calm-night urban–rural air difference about 7.45 + 3.97 ln(H/W) K (secondary source). [brief3, oke1981]
 - **Low-e glass** (glass-cbd only): Typical: Solar reflectance about 0.15–0.35 head-on; Singapore caps glass daylight reflectance at 20%. [brief3, bca]
 - **AC waste heat** (glass-cbd only): Typical: Dense urban areas 20–70 W m⁻² of ground area, sometimes over 100; central Tokyo over 400 W m⁻² by day. [xie2016, sailor2011]
 - **Wind factor (f_w)** (waterfront only): In this model: Over the river 1.00; along Quay Street 1.20; Rope Walk, behind the warehouses, 0.46 (mean), 0.37 within one building height of the wall. [this model]
@@ -209,6 +248,10 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Fetch** (waterfront only): Typical: River Don, Sheffield: about 30 m with open banks; Cheonggyecheon, Seoul: 30–80 m; small water bodies: −0.2 K typical in the afternoon. [hathway2012, cheonggyecheon, jacobs2020]
 - **Sheltering (lee)** (waterfront only): Typical: Recirculation behind a building about 1.6–2.6 times its width; recovery to the open wind after about 5 building heights is an assumption of this model. [wake, brief4]
 - **Apparent temperature** (waterfront only): Typical: AT = Ta + 0.348 e − 0.70 ws + 0.70 Q/(ws + 10) − 4.25 (e in hPa, ws the 10 m wind in m/s, Q in W m⁻²; as given by the Australian Bureau of Meteorology). [bom, steadman1994]
+- **Siheyuan (四合院)** (hutong only): In this model: Courtyard sky view 0.21–0.87 (10th–90th percentile), under a mat awning 0.18; Harbin's traditional courtyards measured 0.22–0.37. [this model]
+- **Tianpeng (天棚), the summer mat awning** (hutong only): Typical: Reed mats let through about 10–30% of the sun (the brief, unverified); this model uses 20%. [deng, brief5]
+- **Surface water store (W)** (hutong only): In this model: Each splash leaves 1 mm at 19:00; on the splashed lanes 0.49 mm is left at 21:00 and 0.20 mm at 23:00, and it is gone by morning. [this model]
+- **Wet-bulb temperature** (hutong only): In this model: At 21:00 the air is 31.0 °C and its wet-bulb 23.9 °C; the coolest wet paving stays 2.7 K above the wet-bulb. [this model]
 - **Permeable paving** (sponge-retrofit only): Typical: Wetted permeable pavement 15–35 °C cooler than dense asphalt in the early afternoon, 2–7 °C cooler about a day later; dry porous asphalt about 5 °C warmer. [li2013]
 - **Green roof** (sponge-retrofit only): Typical: Albedo about 0.15–0.25; up to 18 °C cooler than a black roof in a New York case; Bowen ratio about 1–2. [brief2, noaaGreen, heusinger]
 - **Rain garden** (sponge-retrofit only): Typical: No measured cooling figure in our sources; this block uses engine assumptions (evaporative fraction 0.8 wet, 0.35 dry, 3-day drying). [engine, mccoll]
@@ -850,3 +893,221 @@ Notes on the rows outside:
 - Unverified: the Hathway & Sharples numbers (secondary sources), the Ota River reach, the Oke (1988) thresholds, the decay
   length 30–80 m, the "< 1 K" river range, the Q linearisation; f_min, c_ch, f_max, the 5 H recovery, the water curves and the night overlay
   are assumptions.
+
+## Block 5: hutong lanes and courtyards
+
+The fifth block (`cities/hutong`) is an invented 400 m block in the manner of old Beijing: six bands of single-storey
+courtyard houses (siheyuan), two rows to a band, back to back, between east–west lanes (hutong) 5 m wide, a 10 m main
+lane with pagoda trees (Pagoda Tree Hutong, asphalt) and one north–south lane (Bell Lane). Every house is a 4 m
+grey-brick box with a grey tile roof on a mud and lime back; each courtyard has a jujube, a pair of pomegranates or a
+pagoda tree, 33 have a vine pergola, and 15 the summer mat awning (tianpeng, 天棚) over
+the whole yard. 67 of the 167 courtyards (about two households in five, an assumption) and two
+lanes (Jujube Lane and Lantern Lane) are splashed with water at 19:00. The design day is 21 June (the solstice) at
+39.9° N, air 25–35 °C, vapour pressure 25 hPa, wind 1 m/s: the brief's band conditions. Its research brief is
+[`docs/research/hutong-brief.md`](research/hutong-brief.md).
+
+The splash is shown with `P`, the panel button or `?splash=0|1` (default on).
+
+### Materials and screens
+
+- `greyBrick`: Grey brick paving (青砖). Lanes and courtyards are paved with fired grey brick: darker than stone, a little porous, and it holds the day's heat into the evening.
+- `greyTile`: Grey tile roof on a mud and lime back. Paired grey tiles laid on a thick mud and lime bed: dark and heavy, the roof bakes in the afternoon and gives the heat back slowly.
+- `jujube`: Jujube tree (枣树). A small courtyard tree with an open, airy crown: patchy shade.
+- `pomegranate`: Pomegranate (石榴). A low, dense courtyard tree; its fruit stands for many children.
+- `pagodaTree`: Pagoda tree (国槐). The big shade tree of the Beijing lanes: a wide, dense crown high above the roofs.
+- `pergola`: Vine pergola (葡萄架). A grape vine trained over a trellis at head height: dappled shade over the courtyard path.
+- `awning`: Summer mat awning (天棚). A shed of reed mats on poles, built over the whole courtyard each summer, higher than the eaves; its side mats roll up to let the air through.
+
+Their values and basis tags are in the Surface parameters table above. The brief's paving and roof values sit
+inside wider product ranges: brick solar absorptance 0.45 (light grey) to 0.90 (slate grey) [midlandBrick]; clay
+tile reflectance 0.40–0.50 for light terracotta, grey reduced-fired tile darker [carb]; northern roofs bed the tiles
+on a mud and lime back, not ventilated [sohuRoof], so the cooler ventilated-tile result [miller2007] does not apply.
+Tree species shade with their own crown
+transmission tr = exp(−0.5 LAI) (LAI from the brief, unverified; no measured LAI for jujube or the pagoda tree was found).
+Pergolas and awnings are flat screens: their cast shadow (a thin box at z 2.4 m or
+6.5 m) multiplies in their transmission; the cells under them count as fully covered for the sky view and
+the wall reflection, with the crown factor 1 − 0.75 used for trees in every block. Trees enter the sky view the same
+way, so the sky view here does **not** ignore trees (it is a crude crown factor, not a ray trace through leaves).
+
+### Lanes
+
+Lane geometry, from the model's grid (interior cells: walls on both sides, nothing overhead). Sky view: the model,
+the endless canyon at the same cell centres (0.5/√(1 + (H/d₁)²) + 0.5/√(1 + (H/d₂)²)) and on the centre line
+(cos(atan(2H/W))). Noon: the model's sunlit share at solar noon (12:16, sun 73.5° high) vs 1 − (H/tan β)/W.
+
+| Lane | Paving | W m | H m | H/W | n | SVF model | SVF canyon at cells | SVF centre line | noon sunlit model / formula | splashed |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Jujube Lane (`jujube`) | greyBrick | 5 | 4.0 | 0.80 | 5 | 0.54 | 0.53 | 0.53 | 0.75 / 0.76 | yes |
+| Pagoda Tree Hutong (`main`) | asphalt | 10 | 4.0 | 0.40 | 14 | 0.71 | 0.71 | 0.78 | 0.86 / 0.88 | no |
+| Lantern Lane (`lantern`) | greyBrick | 5 | 4.0 | 0.80 | 5 | 0.54 | 0.53 | 0.53 | 0.75 / 0.76 | yes |
+| Well Lane (`well`) | greyBrick | 5 | 4.0 | 0.80 | 11 | 0.54 | 0.53 | 0.53 | 0.75 / 0.76 | no |
+| Brick Lane (`brick`) | greyBrick | 5 | 4.0 | 0.80 | 5 | 0.54 | 0.53 | 0.53 | 0.75 / 0.76 | no |
+| Bell Lane (`bell`) | greyBrick | 5 | 4.0 | 0.80 | 55 | 0.53 | 0.53 | 0.53 | — | no |
+
+Two grid changes make 5 m lanes come out right; both are used only by this block (`scene.shadeSamples`, `scene.svfExact`):
+
+- **Shade sampled every 1.25 m** (4 × 4 per 5 m cell instead of 2 × 2): at noon a 4 m wall casts 1.18 m of shadow, which
+  the 2.5 m samples of blocks 1–4 miss entirely. The building shade is found by marching each sample's ray toward the
+  sun over the height grid (`buildingMaskRay`), which gives the same samples as the cast-shadow polygons (checked on
+  every ground sample of the block for 48 sun positions) without visiting the footprints; the crown and screen shadows
+  use a scanline version of the polygon rasteriser with the same inside rule (`rasteriseScan`).
+- **Exact horizon scan** (`svfGridAt`): the 2.5 m horizon-scan step of blocks 1–4, started from the cell centre, lands
+  exactly on a 5 m lane's wall line and sees the wall at 5 m on one side instead of 2.5 m (sky view 0.71 for the 5 m
+  lanes instead of the canyon's 0.53). Here each ray steps from cell edge to cell edge and sees each wall at its true
+  distance; 32 azimuths.
+- The 10 m lane has no cell on its centre line: its cells sit 2.5 m from one wall, so the model's sky view (0.71) is
+  that of those points, not of the centre line (0.78). The acceptance row against the centre-line formula is outside (below) for this reason.
+- Lanes narrower than the 5 m grid cannot be shown. Houses are boxes at eave height: the pitched roofs are drawn but
+  are not in the shade or sky-view calculation (the brief: roof tilt negligible for pedestrian metrics).
+
+### Evening splash: the surface water store
+
+The model's evaporation term EF·max(Q*, 0) needs positive net radiation, which is gone after sunset: switched on
+at 19:00 (EF := 1 on the splashed lanes, no store) it changes the lane paving by at most 0.00 K. So block 5
+adds a per-cell water store W, engine-wide but empty unless a block asks for it (blocks 1–4 never enter the step;
+their pages render the same pixels as before, `tests/e2e/regression.test.mjs`):
+
+- LE = L·β(W)·(h_c/c_p)·max(0, q_sat(Ts) − q_a), β(W) = β_wet·min(1, W/W_c), dW/dt = −LE/L, W := W0 at 19:00 every day;
+  G = (1 − α)K + εL↓ − εσTs⁴ − h_c(Ts − Ta) − EF·max(Q*, 0) − LE (thermal.js `stepSplash`).
+- q = 0.622·e/(p − 0.378·e) with p = 1013.25 hPa; e_s = 6.112·exp(17.67·T/(T + 243.5)) hPa [bolton1980]; in the
+  1-min step q_sat comes from a 0.02 K table of the same formula (linear between entries, within 2e-7 kg kg⁻¹; Math.exp per
+  cell and minute was the slow part). The wet-bulb check uses the formula itself.
+- Evaporation is explicit and capped so W never goes below 0. The splash model runs the wet-able cells (n 1138) again
+  with the store (6 coarse spin-up days, the coarse-step guard including the latent coupling at 40 °C; this run:
+  3 1-min days, max |ΔTd| 0.001 K); the other cells are those of the dry model (no lateral
+  coupling in this model).
+- The design day repeats with a splash **every evening**, so the paving's daily mean is lower and the splashed lanes
+  are 0.52 K cooler even at 18:45, before the splash, and 0.51 K the next afternoon.
+
+| Constant | Value |
+|---|---|
+| `waterStore` | LE = L beta(W) (h_c / c_p) max(0, q_sat(Ts) - q_a), dW/dt = -LE / L [brief5] *cited value*, unverified (bulk evaporation from the splashed paving; beta(W) = beta_wet min(1, W / W_c); c_p 1005 J kg-1 K-1, p 1013.25 hPa, q = 0.622 e / (p - 0.378 e); adds to the EF term, which is zero after sunset) |
+| `satVapour` | e_s = 6.112 exp(17.67 T / (T + 243.5)) hPa [bolton1980] *cited value*, unverified (saturation vapour pressure over water) |
+| `splashW0` | 1 [brief5] *edge of cited range*, unverified (W0, mm of evaporable water left on the paving by one splash; brief 0.5-1.0 mm of the 1-2 L m-2 thrown (about 1 L m-2 per cycle in Paris [hendel2015])) |
+| `splashBeta` | 0.5 [brief5] *cited range*, unverified (beta_wet, the wetness factor of splashed brick; brief 0.3-1 (unverified); Kobe asphalt 0.15 [takebayashi2023]) |
+| `splashWc` | 0.2 [brief5] *cited value*, unverified (W_c, mm: below it the wet patch dries up and beta falls in proportion) |
+| `splashHour` | 19 [brief5] *cited value*, unverified (the evening splash, every evening of the repeated design day (evening watering recommended [takebayashi2023]; the uchimizu custom [nippon])) |
+| `shadeSamples` | 4 x 4 per 5 m cell [engine] *engine assumption (no source)*, unverified (block 5 only: shade sampled every 1.25 m, so the 1.2 m wall shadow of a 5 m lane at noon registers (blocks 1-4: 2 x 2)) |
+| `screenCover` | SVF x (1 - 0.75) [engine] *engine assumption (no source)*, unverified (cells under a pergola or awning take the crown factor of a full tree crown for the sky view and wall reflection, as cells under trees do) |
+
+The splashed lanes (n 10, sky view 0.54), dry vs splash, °C:
+
+| Time | dry | splash | ΔTs | W mm | air | wet-bulb |
+|---|---|---|---|---|---|---|
+| 19:00 | 40.7 | 40.0 | −0.77 | 0.99 | 33.1 | 24.4 |
+| 19:30 | 38.6 | 33.7 | −4.88 | 0.79 | 32.6 | 24.3 |
+| 20:00 | 37.0 | 31.0 | −6.02 | 0.67 | 32.1 | 24.2 |
+| 20:30 | 35.9 | 29.7 | −6.19 | 0.57 | 31.6 | 24.1 |
+| 21:00 | 35.0 | 29.0 | −6.03 | 0.49 | 31.0 | 23.9 |
+| 21:30 | 34.3 | 28.6 | −5.79 | 0.41 | 30.5 | 23.8 |
+| 22:00 | 33.8 | 28.2 | −5.53 | 0.34 | 29.9 | 23.6 |
+| 22:30 | 33.3 | 28.0 | −5.29 | 0.27 | 29.3 | 23.5 |
+| 23:00 | 32.8 | 27.7 | −5.08 | 0.20 | 28.8 | 23.3 |
+| 23:30 | 32.4 | 27.7 | −4.68 | 0.14 | 28.3 | 23.1 |
+| 00:00 | 32.0 | 27.9 | −4.10 | 0.10 | 27.7 | 23.0 |
+
+- Largest ΔTs within 1 h: −6.02 K at 20:00; −5.08 K at 23:00; ΔTmrt −2.87 K at 20:00 and −2.86 K at 21:00.
+- Water: one splash evaporates at most 1.00 of its 1 mm before the next (what is left at 19:00 is topped up, not
+  added); the day's evaporation balances the store to 2.0e-15 mm; the store's day-to-day drift is
+  1.8e-4 mm (the model day is not exactly periodic). W is never negative.
+- The wet paving stays at least 2.71 K above the air's wet-bulb temperature while water is left.
+- Literature: Paris, about 1 L m⁻² per cycle, surface −7.5 K at 19:30 and −6 K at 20:30, lasting several hours
+  [hendel2015]; air −0.79 K at most and Tmrt −1.76 K [hendel2016]; Kobe, 0.025 mm per pass, −2 to −4 K at once, gone
+  within 30 min in sun, evening recommended [takebayashi2023]; a road 50 → 40 °C in about 60 min [kato2008].
+
+**β_wet sensitivity** (the brief's range 0.3–1; shipped 0.5), splashed lanes:
+
+| β_wet | largest ΔTs within 1 h | ΔTs 23:00 | ΔTmrt 20:00 |
+|---|---|---|---|
+| 0.5 (shipped) | −6.02 K | −5.08 K | −2.87 K |
+| 0.3 | −4.31 K | −3.87 K | −2.06 K |
+| 1 | −8.84 K | −4.09 K | −4.18 K |
+
+At β_wet 1 the largest ΔTs (−8.84 K) and ΔTmrt (−4.18 K) fall outside the spec's bands;
+0.5 (near the middle of the brief's range; the geometric mean of 0.3 and 1 is 0.55) was set in the code
+before the first model run and was not changed after the bands were checked; 0.3 also passes, 1 does not.
+
+### Roofs, shaded lanes, courtyards
+
+- Grey tile roofs at 15:00: 66.9 °C (all 3064 roof cells alike: same material, all open to the sky),
+  **outside** the brief's 50–62 °C. Across the cited albedo range the roof is 69.4 °C at 0.12 and 63.8 °C at 0.25, outside
+  at every value; the light 1 m/s wind (h_c 9.5 W m⁻² K⁻¹) and the brief's admittance 1000 for the tile and mud back keep the
+  roof hot. Not tuned.
+- Lane floor in shade at 15:00 (sunlit share ≤ 0.3, n 10): 49.2 °C, Ta +14.2 K,
+  **outside** the brief's Ta to Ta + 8 K; floor shaded at 13:00, 14:00 and 15:00 (n 2): Ta +10.2 K, also
+  outside. In these low lanes the floor is in sun most of the day (the point of this block), a 5 m cell is one lane
+  width (its shaded share mixes with sun), and the brick (μ 1100) keeps the midday heat; the wall term (Ta + 2 K +
+  6 K·K/900) adds longwave. Not tuned.
+- Courtyards at 15:00 (Tmrt): under a mat awning 49.2 °C, under a pergola 46.2 °C, under crowns 60.1 °C,
+  open and sunlit 72.2 °C; paving 44.2, 42.8, 52.8 and 64.5 °C. Courtyard sky view
+  0.21–0.87 (10th–90th percentile; Harbin's traditional courtyards 0.22–0.37, lanes 0.09–0.27 [lin2019]).
+- Courtyard air ("cool pond") is **quoted, not simulated**: Córdoba and Seville 3–6 K below the outdoor air, up to
+  11–15 K at 40–45 °C [spainCourtyard] (abstracts only, unverified); Harbin 0.3 K (at most 0.6 K) [lin2019]; the Fez medina
+  about 10 K cooler in the early afternoon, 2–4 K warmer before dawn [johansson2006]. The air temperature is fixed.
+
+Trees by species at 15:00 (ground cell at the trunk; at 3 pm the shade falls east of it):
+
+| Species | trees | tr | sunlit share | Tmrt °C |
+|---|---|---|---|---|
+| Pagoda tree (国槐) (`pagodaTree`) | 54 | 0.17 | 0.71 | 63.5 |
+| Pomegranate (石榴) (`pomegranate`) | 108 | 0.29 | 0.71 | 64.0 |
+| Jujube tree (枣树) (`jujube`) | 98 | 0.37 | 0.52 | 57.8 |
+
+Beijing street-tree shade: air −1.0 to −2.1 K, −481 to −789 W m⁻², the pagoda tree second for comfort [yang2024]
+(abstract only).
+
+### Walkers
+
+Walkers use the lanes with the shade weights of blocks 1–3 [melnikov]; pergolas and awnings count as crown shade
+(weight 0.92 at full heat). Of the 16 people resting in courtyards and Well Square at 15:00, 16 sit in shade
+(16 under crowns or screens); walkers' density in shade is 5.5 times that in sun. The sweat cue is as before.
+
+### Acceptance bands (block 5)
+
+| Check (spec #10) | Model | Band | Source | |
+|---|---|---|---|---|
+| Splashed lanes (n 10, SVF 0.54), W0 1 mm: largest ΔTs within 1 h of the splash (at 20.00 h) | −6.02 K | -8 to -3 | brief5 | inside |
+| Splashed lanes: ΔTs at 23:00 | −5.08 K | -6 to -1 | brief5 | inside |
+| Splashed lanes: |ΔTs| the next afternoon (15:00 of the repeated day) | +0.51 K | ≤ 1.5 | brief5 | inside |
+| Water evaporated from one splash before the next, largest over the wet-able cells (n 1138), minus W0 | 0 mm | ≤ 0 | brief5 | inside |
+| Water store: mass balance error, |evaporated − (start − before the splash + W0 − end)|, largest cell | 0 mm | ≤ 0 | engine | inside |
+| Water store: smallest W over the day (never negative) | 0 mm | ≥ 0 | engine | inside |
+| Wet paving minus the wet-bulb temperature of the air, smallest while water is left | +2.71 K | ≥ 0 | brief5 | inside |
+| The old evaporation term alone (EF := 1 from 19:00, no water store): largest |ΔTs| on the splashed lanes, 19:00–24:00 | 0 K | ≤ 0.5 | brief5 | inside |
+| Splashed lanes: ΔTmrt at 20:00 | −2.87 K | -3.5 to -0.5 | brief5 | inside |
+| Splashed lanes: ΔTmrt at 21:00 | −2.86 K | -3.5 to -0.5 | brief5 | inside |
+| Jujube Lane (W 5 m, H 4 m, n 5): noon sunlit share minus 1 − (H/tan β)/W = 0.764 | -0.014 | -0.05 to 0.05 | brief5 | inside |
+| Pagoda Tree Hutong (W 10 m, H 4 m, n 14): noon sunlit share minus 1 − (H/tan β)/W = 0.882 | -0.025 | -0.05 to 0.05 | brief5 | inside |
+| Lantern Lane (W 5 m, H 4 m, n 5): noon sunlit share minus 1 − (H/tan β)/W = 0.764 | -0.014 | -0.05 to 0.05 | brief5 | inside |
+| Well Lane (W 5 m, H 4 m, n 11): noon sunlit share minus 1 − (H/tan β)/W = 0.764 | -0.014 | -0.05 to 0.05 | brief5 | inside |
+| Brick Lane (W 5 m, H 4 m, n 5): noon sunlit share minus 1 − (H/tan β)/W = 0.764 | -0.014 | -0.05 to 0.05 | brief5 | inside |
+| Jujube Lane: sky view (model 0.537) minus the endless canyon at the same cell centres | 0.007 | -0.05 to 0.05 | brief5 | inside |
+| Pagoda Tree Hutong: sky view (model 0.711) minus the endless canyon at the same cell centres | 0.005 | -0.05 to 0.05 | brief5 | inside |
+| Lantern Lane: sky view (model 0.537) minus the endless canyon at the same cell centres | 0.007 | -0.05 to 0.05 | brief5 | inside |
+| Well Lane: sky view (model 0.536) minus the endless canyon at the same cell centres | 0.006 | -0.05 to 0.05 | brief5 | inside |
+| Brick Lane: sky view (model 0.537) minus the endless canyon at the same cell centres | 0.007 | -0.05 to 0.05 | brief5 | inside |
+| Bell Lane: sky view (model 0.533) minus the endless canyon at the same cell centres | 0.003 | -0.05 to 0.05 | brief5 | inside |
+| Pagoda Tree Hutong: sky view (model, cells 2.5 m off the centre line) minus cos(atan(2H/W)) = 0.781 on the centre line | -0.069 | -0.05 to 0.05 | brief5 | **outside** |
+| Grey tile roofs at 15:00 (n 3064) | 66.862 °C | 50 to 62 | brief5 | **outside** |
+| Lane floor in shade at 15:00 (sunlit share ≤ 0.3, n 10) minus the air | +14.16 K | 0 to 8 | brief5 | **outside** |
+| Lane floor in shade at 13:00, 14:00 and 15:00 (n 2) minus the air at 15:00 | +10.25 K | 0 to 8 | brief5 | **outside** |
+| Dwellers at 15:00 resting in shade (walls, crowns, pergolas, awnings), n 16 | 1 | ≥ 0.5 | melnikov | inside |
+
+4 of 26 checks fall outside their band. They are reported, not tuned away: no input was moved to pass a band.
+
+### Disclosures (block 5)
+
+- **Air fixed:** the splash cools the paving and the radiation people feel, not the air (Paris: −0.79 K at most);
+  courtyard air cooling is quoted, not simulated.
+- **Grid:** 5 m cells; lanes narrower than 5 m cannot be shown; the 10 m lane's cells sit off its centre line.
+- **Houses are boxes at eave height** (4 m); the pitched roofs are drawing only.
+- **Sky view includes trees and screens** through the crown factor (every block does the same for trees); it is not
+  a ray trace through leaves.
+- **Daily splash:** the repeated design day is splashed every evening (see above); the custom itself in Beijing has
+  no citable source in the brief (unverified); the Japanese uchimizu parallel is [nippon].
+- **Dimensions and materials unverified:** plot widths, 4 m eaves, lane widths, grey brick and tile values, LAI of the
+  trees and the awning's transmission are the brief's, unverified; the Spanish courtyard numbers are abstracts only.
+- **Misses:** the grey roof, the shaded lane floor and the 10 m lane's centre-line sky view fall outside their bands
+  (table above); β_wet 1 would push the splash outside its band.
+- **The 4 × 4 shade samples, ray-marched building shade and exact horizon scan are used only by this block;** blocks
+  1–4 keep 2 × 2 samples, the polygon masks and the 2.5 m horizon scan, and render the same pixels as before.

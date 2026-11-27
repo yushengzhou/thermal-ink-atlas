@@ -287,4 +287,83 @@ export const REFS = {
     venue: 'Web page (coefficients checked against it)',
     url: 'bom.gov.au/info/thermal_stress/',
   },
+  // ---- block 5 ----
+  brief5: {
+    authors: 'This project', year: 2026, title: 'Research brief: hutong lanes and courtyards (block 5)',
+    venue: 'docs/research/hutong-brief.md', link: 'docs/research/hutong-brief.md',
+  },
+  hendel2015: {
+    authors: 'Hendel, M. et al.', year: 2015, title: null,
+    venue: 'Journal of Sustainable Development of Energy, Water and Environment Systems (watering the Rue du Louvre, Paris)',
+    doi: '10.13044/j.sdewes.2015.03.0001',
+  },
+  hendel2016: {
+    authors: 'Hendel, M. et al.', year: 2016, title: null,
+    venue: 'Urban Climate (pavement watering in Paris)',
+    doi: '10.1016/j.uclim.2016.02.003',
+  },
+  takebayashi2023: {
+    authors: 'Takebayashi, H. et al.', year: 2023, title: null,
+    venue: 'Atmosphere 14(6), 1014 (road watering in Kobe)',
+    doi: '10.3390/atmos14061014',
+  },
+  kato2008: {
+    authors: 'Kato, S. et al.', year: 2008, title: null,
+    venue: 'Watered road surface temperatures (via the block-5 brief)',
+  },
+  nippon: {
+    authors: 'nippon.com', year: null, title: null,
+    venue: 'Feature on uchimizu, sprinkling water in summer (web; via the block-5 brief)',
+  },
+  lin2019: {
+    authors: 'Lin et al.', year: 2019, title: null,
+    venue: 'International Journal of Environmental Research and Public Health 16, 2986 (traditional block in Harbin)',
+    doi: '10.3390/ijerph16162986',
+  },
+  spainCourtyard: {
+    authors: 'Several authors', year: null, title: null,
+    venue: 'MDPI Proceedings 2(22) 1390 and 1381; 38(1) 17 (courtyards in Córdoba and Seville; abstracts only)',
+  },
+  yang2024: {
+    authors: 'Yang & Wang', year: 2024, title: null,
+    venue: 'Journal of Beijing Forestry University (Beijing street trees; abstract only)',
+    doi: '10.12171/j.1000-1522.20240012',
+  },
+  carb: {
+    authors: 'California Air Resources Board', year: null, title: null,
+    venue: 'Cool-roof product data (via the block-5 brief)',
+  },
+  midlandBrick: {
+    authors: 'Midland Brick', year: null, title: null,
+    venue: 'Brick product data (via the block-5 brief)',
+  },
+  sohuRoof: {
+    authors: 'Sohu', year: null, title: null,
+    venue: 'Web article on northern tile roofs (via the block-5 brief)',
+  },
+  miller2007: {
+    authors: 'Miller, W. A.', year: 2007, title: null,
+    venue: 'Oak Ridge National Laboratory, tile roofs (via the block-5 brief)',
+  },
+  ucdavis: {
+    authors: 'University of California, Davis', year: null, title: null,
+    venue: 'Guidance on vine arbours (via the block-5 brief)',
+  },
+  jjshs: {
+    authors: null, year: null, title: null,
+    venue: 'Journal of the Japanese Society for Horticultural Science 54(3), 293 (via the block-5 brief)',
+  },
+  deng: {
+    authors: 'Deng Yunxiang (邓云乡)', year: null, title: '天棚遮阴 (Tianpeng zheyin)',
+    venue: 'The Paper (澎湃新闻), newsDetail_forward_18319465 (via the block-5 brief)',
+  },
+  visitBeijing: {
+    authors: 'Visit Beijing', year: null, title: null,
+    venue: 'Official tourism site of Beijing (via the block-5 brief)',
+  },
+  bolton1980: {
+    authors: 'Bolton, D.', year: 1980,
+    title: 'The computation of equivalent potential temperature',
+    venue: 'Monthly Weather Review 108, 1046–1053',
+  },
 };
