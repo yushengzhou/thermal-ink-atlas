@@ -7,7 +7,7 @@ import { SCENE } from '../cities/nightmarket/scene.js';
 import { buildWorld } from '../engine/world.js';
 import { shadeClassField, runModel, STORE } from '../engine/thermal.js';
 import { MATERIALS } from '../engine/materials.js';
-import { NM, marketSetup, marketStats, heatParts, grillAt, grillFlux, withFlux, crowdShape, density, personW, isOpen, release, mean, centre } from '../engine/market.js';
+import { NM, marketSetup, marketStats, heatParts, stallPower, grillAt, grillFlux, withFlux, crowdShape, density, personW, isOpen, release, mean, centre } from '../engine/market.js';
 import { crowdAt } from '../engine/nmui.js';
 import { solarPosition } from '../engine/sun.js';
 import SunCalc from 'suncalc';
@@ -103,7 +103,8 @@ export function crowd12() {
         let d = Infinity;
         for (const g of world.nm.grills) d = Math.min(d, Math.hypot(g.x - a.x, g.y - a.y));
         if (a.cook) {
-          if (d < 0.6) {
+          // the cooks of the grill stalls (the others stand far from any coals)
+          if (d < 1.2) {
             cook = Math.min(cook, d);
             cookFar = Math.max(cookFar, d);
             cooks++;
@@ -207,11 +208,11 @@ export function bands12() {
   add('5. Supplementary: Tmrt 2 m from a grill at 21:00 (the brief: about 48 °C), °C', g(2).tmrt, null, null, 'brief12', '°C', { supp: true });
   add('5. Supplementary: distance where the uncut term falls below 5 K, m', st.under5, null, null, 'brief12', 'm', { supp: true });
   // 6-9: the overlays' bookkeeping (by construction)
-  add('6. Crowd heat = ρ_p × M (by construction): largest |difference| over the market cells, every 15 min, W m⁻²', o.crowdErr, 0, 1e-9, 'brief12', 'W m⁻²');
+  add('6. Crowd heat = ρ_p × M (by construction): largest absolute difference over the market cells, every 15 min, W m⁻²', o.crowdErr, 0, 1e-9, 'brief12', 'W m⁻²');
   add('7. Density ≤ 2 (by construction): largest anywhere, any time, people per m²', o.rhoMax, 0, 2, 'crowdLimits', 'm⁻²');
   add('7. Zero before 16:00 and after midnight (by construction): largest crowd, stall or light value outside the hours or closed', o.rhoClosed, 0, 0, 'travelTaipei', '');
   add('8. Overlays leave the model bit-identical (by construction): changed Ts, Tmrt or stored values', o.changed, 0, 0, 'brief12', '');
-  add('9. Overlay total = sum of its parts (by construction): largest |difference|, W m⁻²', o.sumErr, 0, 1e-6, 'brief12', 'W m⁻²');
+  add('9. Overlay total = sum of its parts (by construction): largest absolute difference, W m⁻²', o.sumErr, 0, 1e-6, 'brief12', 'W m⁻²');
   const wk = walkers12(NM.day.value);
   add('Walkers at 15:00: density in shade over density in sun', wk.ratio, 2, null, 'melnikov');
   add(`People dwelling at 15:00 (n ${wk.dwellers}) whose place is in shade`, wk.shade, 0.5, null, 'melnikov');
@@ -277,7 +278,7 @@ export function sensitivity12() {
   const cellsRun = (mats, o = {}) => runModel(world, { slots: o.slots ?? T.slots, warm: NM.warm.value, cells: stone, materials: { ...MATERIALS, ...mats }, ...(o.wind ? { wind: o.wind } : {}) });
   const model = [row('shipped', T)];
   for (const x of [0.2, 0.4]) model.push(row(`stone α ${x} (cited 0.20–0.40)`, cellsRun(patch('stone', { alpha: x }))));
-  for (const x of [1065, 2220]) model.push(row(`stone admittance ${x} (brick, solid stone)`, cellsRun(patch('stone', { mu: x }))));
+  for (const x of [1065, 2220]) model.push(row(`stone admittance ${x} (${x < 1500 ? 'brick' : 'solid stone'})`, cellsRun(patch('stone', { mu: x }))));
   model.push(row('site wind 1.5 m/s (h_c 11.4)', cellsRun({}, { wind: 1.5 })));
   model.push(row('direct sun 7% weaker (the engine\'s noon sun is likely a few per cent strong)', cellsRun({}, { slots: { suns: T.slots.suns, fields: T.slots.fields.map((f) => Float32Array.from(f, (x) => x * 0.93)) } })));
   const vap = runWith({ scene: { ...SCENE, site: { ...SCENE.site, vapourHpa: 25 } } });
@@ -290,8 +291,12 @@ export function sensitivity12() {
       const sum = { crowd: 0, stall: 0, light: 0 };
       for (const i of F.street) {
         const p = heatParts(world, T, i, h);
-        for (const k of Object.keys(sum)) sum[k] += p[k] / F.street.length;
+        sum.crowd += p.crowd / F.street.length;
+        sum.light += p.light / F.street.length;
       }
+      // the stalls at these powers (world.nm.stallW holds the shipped ones)
+      const street = world.nm.stalls.filter((x) => world.nm.F.street.includes(world.cellIndex(x.x, x.y)));
+      sum.stall = street.reduce((a, x) => a + stallPower(x.type), 0) / (F.street.length * world.cell * world.cell);
       return sum;
     } finally {
       for (const [k, x] of Object.entries(keep)) NM[k].value = x;
@@ -345,3 +350,39 @@ export function hours12() {
 }
 
 export { centre };
+
+let causes = null;
+/**
+ * The misses' causes, tested (docs only, added after the first band run;
+ * nothing shipped changes):
+ * - band 5: the brief's own formula with its own coal bed, at 1 m and 3 m
+ *   (does it give both its +490 W m⁻² at 1 m and its "< 5 K at 3 m"?);
+ * - the awnings' net release (a supplementary row below 30 W m⁻²): the
+ *   awning cells run again with what they see overhead and around (the
+ *   canvas, the shopfront) at the air temperature after dark instead of the
+ *   shared warm wall (air + 2 K), and the brief's own formula at the
+ *   awnings' sky view and surface.
+ */
+export function causes12() {
+  if (causes) return causes;
+  const { world, T, st } = base12();
+  const F = world.nm.F;
+  const h = NM.hour.value;
+  const ta = T.air(h);
+  const g1 = grillFlux(1, ta);
+  const g3 = grillFlux(3, ta);
+  const t0 = st.place.stallRow[h].tmrt;
+  const M = runModel(world, { slots: T.slots, warm: NM.warm.value, cells: F.awning, wallTemp: (taK, K) => (K > 0 ? taK + 2 + (6 * K) / 900 : taK) });
+  const cool = { net: mean(F.awning.map((i) => release(M, i, h).net)), dTs: mean(F.awning.map((i) => M.ts(i, h))) - ta };
+  // the brief's formula at the awnings' sky view and surface (walls at air + 2 K, eps 0.92, h_c as here)
+  const A = st.place.awning[h];
+  const K0 = 273.15;
+  const S = 5.670374e-8;
+  const lsky = T.hourConst(h).lsky;
+  const briefAt = (svf, dTs, tw) => 0.92 * (S * (ta + dTs + K0) ** 4 - (svf * lsky + (1 - svf) * S * (ta + tw + K0) ** 4)) + T.info.hc * dTs;
+  causes = {
+    grill: { at1: g1, at3: g3, dT1: withFlux(t0, g1) - t0, dT3: withFlux(t0, g3) - t0, under5: st.under5 },
+    awning: { shipped: A.net, dTs: A.dTs, svf: A.svf, cool, brief: briefAt(A.svf, A.dTs, 2), briefCool: briefAt(A.svf, A.dTs, 0), brief04: briefAt(0.4, 2, 2) },
+  };
+  return causes;
+}

@@ -43,7 +43,7 @@ export function nmNotes(scene, d) {
     square: [`The open square at 9 pm feels ${deg(d.squareDT)}`, `than the air: the clear sky draws heat away`],
     awning: ['Under the awnings it feels', `${Math.abs(d.awningDT) < 1 ? 'about as warm as the air' : deg(d.awningDT) + ' than the air'}: the canvas hides the sky`],
     grill: [`1 m from a charcoal grill it feels like ${r0(d.grill1)} °C;`, `3 m away, still ${fmt(d.grill3)} degrees more (an upper bound)`],
-    crowd: [`The crowd at 9 pm: about ${r0(d.crowd)} watts per m² of body heat,`, 'shown, not felt: the air here is fixed'],
+    crowd: [`The crowd at 9 pm: ${r0(d.crowd)} watts per m²`, 'of body heat, shown, not felt'],
   };
   const terms = {
     stone: [['netLongwave', 'still giving off']],
@@ -181,7 +181,7 @@ export function grillCard(d) {
     <table class="cmp">
       <tr><td>9 pm, from the coals</td><td>feels like</td><td>extra</td></tr>
       ${rows}
-      <tr><td colspan="3" class="sub">Beyond 3 m the page adds nothing; when the market is closed, nothing at all.${miss ? ` At 3 m the extra heat is ${fmt(g(3).dT)} degrees, more than the less than 5 expected: likely because the formula treats the coal bed as a glowing patch facing you from every side, with nothing in the way; it falls below 5 degrees only about ${fmt(st.under5)} m away.` : ''}</td></tr>
+      <tr><td colspan="3" class="sub">Beyond 3 m the page adds nothing; when the market is closed, nothing at all.${miss ? ` At 3 m the extra heat is ${fmt(g(3).dT)} degrees, more than the less than 5 expected: the same formula that gives about ${r0(g(1).tmrt)} °C at 1 m gives this at 3 m, because it treats the coal bed as a glowing patch facing you from every side with nothing in the way (an upper bound); it falls below 5 degrees only about ${fmt(st.under5)} m away.` : ''}</td></tr>
     </table>
     <p class="note">This is an upper bound and only illustrative: a real grill is partly hidden by its own rim and the food on it, and the cook moves. It is the only stall heat this page lets reach a person, and only for people standing near a grill, not for the 5 m squares of the heat view. Cooks at the grill sweat; the crowd keeps a little distance.</p>
     ${experts(`<p class="lit">ΔS = ε_c·σ·(T_c⁴ − T_b⁴)·A_c / (4πd²), d ≥ ${NM.grillMin.value} m, summed over the open grills within ${NM.grillMax.value} m; Tmrt' = (Tmrt⁴ + ΔS/σ)^¼. Coal bed ${NM.coalArea.value} m²${tag(NM.coalArea)} at ${NM.coalTemp.value} °C${tag(NM.coalTemp)}, ε_c ${NM.coalEps.value}${tag(NM.coalEps)}, T_b the air. The brief: about +490 W m⁻² at 1 m (Tmrt about 88 °C) and about +120 at 2 m (about 48 °C), an upper bound. Here at 1 m +${r0(g(1).dS)} W m⁻², at 2 m +${r0(g(2).dS)}, at 3 m +${r0(g(3).dS)}.</p>
