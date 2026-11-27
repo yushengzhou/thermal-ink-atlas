@@ -2927,7 +2927,7 @@ At 15:00 (the brief's bands), "after sunset" 21:00, the open reference as above.
 | Walkers at 15:00: density in shade over density in sun | 5.515 | ≥ 2 | melnikov | inside |
 | People dwelling at 15:00 (n 14) whose place is in shade | 1.000 | ≥ 0.5 | melnikov | inside |
 
-9 of 16 counted checks fall outside their band; 13 supplementary rows are not counted. By the brief's ten bands: 5 of 10 met (2, 3, 4, 5, 8); missed: 1, 6, 7, 9, 10. Band 7's only counted row (the palo verdes) is semi-constructed: their crown is the mesquite's, calibrated to the measured −16.7 K (the mesquite row is by construction and supplementary), so band 7 does not test the model independently. They are reported, not tuned away: every other parameter value is the brief's central value (or the shared value the brief names), committed before the first band run.
+9 of 16 counted checks fall outside their band; 13 supplementary rows are not counted. By the brief's ten bands: 5 of 9 independent bands met (2, 3, 4, 5, 8); missed: 1, 6, 9, 10; band 7 semi-constructed (missed). Band 7's only counted row (the palo verdes) is semi-constructed: their crown is the mesquite's, calibrated to the measured −16.7 K (the mesquite row is by construction and supplementary), so band 7 does not test the model independently. They are reported, not tuned away: every other parameter value is the brief's central value (or the shared value the brief names), committed before the first band run.
 
 Misses:
 - **Band 1** (sunlit gravel 65.9 °C against 55–63 °C): likely the engine's strong clear-sky sun and the warmer design-day air (tested

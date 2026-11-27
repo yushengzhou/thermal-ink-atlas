@@ -24,13 +24,16 @@ export function bands11Markdown(rows) {
   const counted = rows.filter((r) => !r.supp);
   const out = counted.filter((r) => !r.inside).length;
   const bv = bandVerdicts(rows);
-  const met = Object.keys(bv).filter((k) => bv[k]);
-  const missed = Object.keys(bv).filter((k) => !bv[k]);
+  // band 7 is semi-constructed (the palo verdes take the mesquite's calibrated crown): not counted as independent
+  const SEMI = ['7'];
+  const met = Object.keys(bv).filter((k) => bv[k] && !SEMI.includes(k));
+  const missed = Object.keys(bv).filter((k) => !bv[k] && !SEMI.includes(k));
+  const semi = SEMI.map((k) => `band ${k} semi-constructed (${bv[k] ? 'met' : 'missed'})`).join('; ');
   return `| Check (spec #17) | Model | Band | Source | |
 |---|---|---|---|---|
 ${lines.join('\n')}
 
-${out} of ${counted.length} counted checks fall outside their band; ${rows.length - counted.length} supplementary rows are not counted. By the brief's ten bands: ${met.length} of ${met.length + missed.length} met (${met.join(', ')})${missed.length ? `; missed: ${missed.join(', ')}` : ''}. Band 7's only counted row (the palo verdes) is semi-constructed: their crown is the mesquite's, calibrated to the measured −16.7 K (the mesquite row is by construction and supplementary), so band 7 does not test the model independently. They are reported, not tuned away: every other parameter value is the brief's central value (or the shared value the brief names), committed before the first band run.`;
+${out} of ${counted.length} counted checks fall outside their band; ${rows.length - counted.length} supplementary rows are not counted. By the brief's ten bands: ${met.length} of ${met.length + missed.length} independent bands met (${met.join(', ')})${missed.length ? `; missed: ${missed.join(', ')}` : ''}; ${semi}. Band 7's only counted row (the palo verdes) is semi-constructed: their crown is the mesquite's, calibrated to the measured −16.7 K (the mesquite row is by construction and supplementary), so band 7 does not test the model independently. They are reported, not tuned away: every other parameter value is the brief's central value (or the shared value the brief names), committed before the first band run.`;
 }
 
 export function desertMarkdown() {

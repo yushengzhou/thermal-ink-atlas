@@ -212,7 +212,7 @@ test('acceptance bands: every row pinned; misses 1, 6, 7, 9, 10; verdicts; docs 
   assert.equal(out.length, 5, out.join(' | '));
   const md = read('docs/sources.md');
   assert.ok(md.includes(bands11Markdown(rows)), 'run `node scripts/sources.mjs` and commit docs/sources.md');
-  assert.ok(md.includes('5 of 10 met (2, 3, 4, 5, 8); missed: 1, 6, 7, 9, 10'));
+  assert.ok(md.includes('5 of 9 independent bands met (2, 3, 4, 5, 8); missed: 1, 6, 9, 10; band 7 semi-constructed (missed).'));
 });
 
 test('the misses\' causes (docs only) and the numbers the cards quote from them', () => {
