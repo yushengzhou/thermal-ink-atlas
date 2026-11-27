@@ -36,6 +36,17 @@ Hand-inked isometric city blocks that show urban heat through one heat-wave day:
   14:00 (`I`) helps for minutes, and only a little in this model; `U`
   hatches every surface above its 1-min contact-burn limit (ISO 13732-1).
   Children come out at play times and look for shade.
+- Block 9, `busstop`: an avenue crossed by a street, with five bus stops
+  (an opaque metal roof, clear and opal polycarbonate, trees and no
+  shelter, a glass box) and two steel footbridges, one covered. People
+  waiting are computed at their own places, below the 5 m grid: the opaque
+  roof takes about 34 K of Tmrt off them at 15:00, translucent roofs much
+  less, and from 15 to 17 h the low western sun gets in from the side,
+  where a west screen helps more than a bigger roof. Buses come on a
+  headway schedule; `K` shows which waiting places have the sun on the
+  head, `U` flags benches, handrails and decks above their contact-burn
+  limit. The open steel deck is about 30 K hotter in Tmrt than the
+  covered one.
 
 Live: https://yushengzhou.github.io/thermal-ink-atlas/
 
@@ -49,8 +60,8 @@ modelled with a simple surface energy-balance model, not measured.
 - Double-click `cities/asphalt-park/index.html`,
   `cities/sponge-retrofit/index.html`, `cities/glass-cbd/index.html`,
   `cities/waterfront/index.html`, `cities/hutong/index.html`,
-  `cities/parking/index.html`, `cities/estate/index.html` or
-  `cities/campus/index.html`.
+  `cities/parking/index.html`, `cities/estate/index.html`,
+  `cities/campus/index.html` or `cities/busstop/index.html`.
   Each is one offline file.
 - Or serve the folder and open <http://localhost:8000/>:
 
@@ -75,6 +86,7 @@ modelled with a simple surface energy-balance model, not measured.
 | `G` (block 6) | night-release strokes (ground heat flux) on or off |
 | `S` / `C` (block 7) | 大寒 (20 January) shadows and sill tallies / condenser plumes on or off |
 | `I` / `U` (block 8) | water the pitch at 14:00 / contact-burn hatching on or off |
+| `K` / `U` (block 9) | waiting places (head in sun or shade) / contact-burn flags on or off |
 
 ## Build and test
 
@@ -125,6 +137,12 @@ Key sources per block:
   (playgrounds, shade sails); Pfautsch et al. 2020 (school shade, New South
   Wales); McNitt et al. 2008 (watering turf); ISO 13732-1 via CENELEC Guide
   29 (contact-burn limits; unverified).
+- Block 9, `busstop`: Dzyuban et al. 2022 (Phoenix bus stops); Middel et
+  al. 2021 (shade and Tmrt, Tempe); Lanza et al. 2025 (Houston stops, glass
+  shelters); Chen et al. 2024 (covered walkway, Hong Kong); Hong Kong
+  Highways Department BS/GN/047 (shelter guidance); a polycarbonate
+  datasheet (transmission); ISO 13732-1 via CENELEC Guide 29. Most were read
+  through the research brief and are flagged unverified.
 
 ## Licence
 

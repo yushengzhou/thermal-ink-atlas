@@ -18,6 +18,7 @@ const HT = 'hutong';
 const PK = 'parking';
 const ES = 'estate';
 const CPS = 'campus';
+const BSS = 'busstop';
 const shots = [
   [AP, 'docs/media/day-1500.jpg', 'hour=15&f=400', { width: 1280, height: 800 }],
   [AP, 'docs/media/thermal-1500.jpg', 'thermal&hour=15&f=400', { width: 1280, height: 800 }],
@@ -148,6 +149,22 @@ const shots = [
     },
   ],
   [CPS, 'thumbs/campus.jpg', 'hour=15&f=400&notes=0&ui=0&cam=2.5,250,170', { width: 640, height: 400 }],
+  // block 9: day and thermal at 15:00, stop C with the waiting places at 17:00 and the screen card, stop A with its bus, the burn flags on the open footbridge
+  [BSS, 'docs/media/bs-day-1500.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
+  [BSS, 'docs/media/bs-thermal-1500.jpg', 'thermal&hour=15&f=640', { width: 1280, height: 800 }],
+  [BSS, 'docs/media/bs-spots-1700.jpg', 'hour=17&f=640&spots=1&notes=0&cam=7.5,265,190', { width: 1280, height: 800 }],
+  [BSS, 'docs/media/bs-stop-a-1500.jpg', 'hour=15&f=1650&spots=1&notes=0&cam=7.5,305,209', { width: 1280, height: 800 }],
+  [BSS, 'docs/media/bs-burn-1500.jpg', 'hour=15&f=900&burn=1&notes=0&cam=4,200,262', { width: 1280, height: 800 }],
+  [
+    BSS,
+    'docs/media/bs-screen-card.jpg',
+    'hour=17&f=640&spots=1&notes=0&cam=5.5,262,190',
+    { width: 1280, height: 800 },
+    async (page) => {
+      await page.click('#busstop [data-card="screen"]');
+    },
+  ],
+  [BSS, 'thumbs/busstop.jpg', 'hour=15&f=1650&notes=0&ui=0&cam=3,250,200', { width: 640, height: 400 }],
 ];
 const browser = await chromium.launch();
 for (const [city, out, q, viewport, act] of shots) {
