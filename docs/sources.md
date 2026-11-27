@@ -1111,3 +1111,6 @@ Walkers use the lanes with the shade weights of blocks 1–3 [melnikov]; pergola
   (table above); β_wet 1 would push the splash outside its band.
 - **The 4 × 4 shade samples, ray-marched building shade and exact horizon scan are used only by this block;** blocks
   1–4 keep 2 × 2 samples, the polygon masks and the 2.5 m horizon scan, and render the same pixels as before.
+- **Drawing only, for bake time:** this block skips the pigment pooling at the edge of washes and draws only the
+  shadow polygons that reach a tile (tried for every block, but culling changes how the shadow union is
+  anti-aliased, so blocks 1–4 keep drawing all of them); during a slider drag it bakes one tile per frame, as block 3.
