@@ -165,7 +165,7 @@ export const MEASURES = [
     young: true,
     name: 'Young street trees',
     line: 'New trees along Canal Street, Willow Lane, Market Road, Bridge Road and on the square. Their crowns are small and thin for now (about half the sun gets through), but walkers already use the patchy shade.',
-    lesson: 'Shade is what cools people. In this model the drop in sweating walkers After comes entirely from these young trees: the roofs do not touch pedestrians, and the sponge measures and reflective paving alone leave walkers as hot or slightly hotter (the lighter pavers add about +3.6 K Tmrt at noon).',
+    lesson: 'Shade is what cools people. In this model the drop in sweating walkers After comes entirely from these young trees: the roofs do not touch pedestrians, and the sponge measures and reflective paving alone leave walkers as hot or slightly hotter (the lighter pavers add about +3.7 K Tmrt at noon).',
     lit: 'Literature: modelled −7 K Tmrt under trees in Phoenix; block cooling grows strongly above about 40% canopy cover.',
     sources: ['middel2021', 'brief2'],
   },

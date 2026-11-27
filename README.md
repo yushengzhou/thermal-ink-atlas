@@ -5,18 +5,22 @@ Hand-inked isometric city blocks that show urban heat through one heat-wave day:
 - Block 1, `asphalt-park`: an old asphalt street next to a shady pocket park.
 - Block 2, `sponge-retrofit`: one block Before and After a sponge-city and
   cool-roof retrofit, with a draggable divider and a days-since-rain slider.
+- Block 3, `glass-cbd`: glass towers and street canyons. Deep streets shade
+  by day and cool slowly at night; glass façades throw reflected sun onto the
+  street. Switch the glass between clear, low-e and mirror.
 
 Live: https://yushengzhou.github.io/thermal-ink-atlas/
 
-Both blocks are simulated and invented (no real addresses). Temperatures are
+All blocks are simulated and invented (no real addresses). Temperatures are
 modelled with a simple surface energy-balance model, not measured.
 
 ![Thermal view of block 1 at 15:00](docs/media/thermal-1500.jpg)
 
 ## Open it
 
-- Double-click `cities/asphalt-park/index.html` or
-  `cities/sponge-retrofit/index.html`. Each is one offline file.
+- Double-click `cities/asphalt-park/index.html`,
+  `cities/sponge-retrofit/index.html` or `cities/glass-cbd/index.html`.
+  Each is one offline file.
 - Or serve the folder and open <http://localhost:8000/>:
 
   ```sh
@@ -34,6 +38,7 @@ modelled with a simple surface energy-balance model, not measured.
 | click a parcel | heat card (material, temperatures, source) |
 | `terms` button | glossary of terms |
 | `B` (block 2) | swap Before / After |
+| `G` / `Shift+G` (block 3) | next / previous glass type |
 
 ## Build and test
 

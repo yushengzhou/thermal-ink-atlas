@@ -47,7 +47,7 @@ export const GLOSSARY = {
   svf: {
     term: 'Sky view factor (SVF)',
     text: 'How much of the sky a spot can see, from 1 (open field) to 0 (fully enclosed).',
-    model: (S) => `Open lawn ${S.svfLawn}; paved ground near buildings ${S.svfPave}.`,
+    model: (S) => S.svfLine,
     why: 'A low sky view traps heat at night, because surfaces cannot radiate it away to the cold sky.',
   },
   surfaceTemp: {
@@ -72,7 +72,7 @@ export const GLOSSARY = {
   nightLag: {
     term: 'Thermal inertia / night lag',
     text: 'Heavy materials store heat during the day and release it after sunset, so they stay warm into the night.',
-    model: (S) => `At 11 pm asphalt is ${S.lagAsphalt} °C and concrete ${S.lagConcrete} °C warmer than the open lawn.`,
+    model: (S) => S.lagLine,
     why: 'Night lag keeps cities warm at night, when people most need to cool down.',
   },
   coolRoof: {
@@ -89,6 +89,69 @@ export const GLOSSARY = {
     src: 'brief',
     why: 'Water evaporating from wet paving cools it, but only while there is water left to evaporate.',
     scenes: ['asphalt-park'],
+  },
+  wallReflection: {
+    term: 'Wall reflection',
+    text: 'Sunlight that building walls bounce back onto the street and onto people. Opaque walls scatter it in all directions (diffuse); glass reflects it like a mirror (specular).',
+    range: 'Opaque wall albedo about 0.2–0.5 (this model: 0.3); SOLWEIG uses 0.5.',
+    src: 'brief3, wallenberg2026',
+    why: 'In a street with tall walls, the walls add sunshine to the pavement even where the sky is hidden.',
+  },
+  // ---- block 3 (glass-cbd) ---------------------------------------------------
+  curtainWall: {
+    term: 'Glass curtain wall',
+    text: 'A non-structural outer wall of glass panes in a metal frame, hung on the front of an office tower.',
+    range: 'Normal-incidence solar reflectance: clear float glass about 0.08, solar-control low-e 0.15–0.35, reflective (mirror) glass 0.25–0.45; outer-surface emissivity about 0.84.',
+    src: 'fresnel, brief3, en673',
+    why: 'Flat glass reflects the sun like a mirror, so a tower can throw a patch of sunshine onto a street it does not shade.',
+    scenes: ['glass-cbd'],
+  },
+  specular: {
+    term: 'Specular reflection',
+    text: 'Mirror-like reflection: light leaves at the same angle it arrived, so a flat façade sends a bright copy of the sun in one direction.',
+    range: 'Scale models: flat mirror façades more than double the sunshine at pedestrian level; diffuse façades add at most about 30%; concave façades more than 300%.',
+    src: 'speroni2022',
+    why: 'It concentrates the extra heat into a sharp spot, instead of spreading it thinly as an opaque wall does.',
+    scenes: ['glass-cbd'],
+  },
+  fresnel: {
+    term: 'Fresnel reflection',
+    text: 'Glass reflects more the more glancing the sunlight is (the Fresnel equations): clear glass reflects about 8% head-on and over half at a grazing angle.',
+    range: 'Clear float glass (n = 1.52, two surfaces): 0.082 at 0°, 0.10 at 45°, 0.17 at 60°, 0.30 at 70°, 0.41 at 75°, 0.56 at 80°.',
+    src: 'fresnel',
+    why: 'A façade lit at a grazing angle can glare onto the street even with ordinary clear glass.',
+    scenes: ['glass-cbd'],
+  },
+  reflectionSpot: {
+    term: 'Reflection spot',
+    text: 'The patch of ground where a sunlit glass façade sends its reflected sunshine. It moves through the day and can fall in the shade of other buildings.',
+    model: (S) => S.spotLine,
+    why: 'Someone standing in a spot is out of the sun and still feels much of its heat.',
+    scenes: ['glass-cbd'],
+  },
+  canyon: {
+    term: 'Street canyon (H/W)',
+    text: 'A street lined by buildings on both sides. Its aspect ratio H/W is the building height divided by the street width.',
+    range: 'Sky view factor at the centre of a long canyon: 1/√(1 + (2H/W)²), i.e. 0.45 at H/W 1, 0.24 at 2, 0.16 at 3, 0.10 at 5. Oke (1981): calm-night urban–rural air difference about 7.45 + 3.97 ln(H/W) K (secondary source).',
+    src: 'brief3, oke1981',
+    why: 'Deep canyons shade the street by day but see little cold sky at night, so they cool slowly after dark.',
+    scenes: ['glass-cbd'],
+  },
+  lowE: {
+    term: 'Low-e glass',
+    text: 'Glass with a thin metal-oxide coating that keeps out much of the sun’s heat (solar control) and holds in indoor heat (low emissivity on the coated face).',
+    range: 'Solar reflectance about 0.15–0.35 head-on; Singapore caps glass daylight reflectance at 20%.',
+    src: 'brief3, bca',
+    why: 'What keeps heat out of the offices goes somewhere: more of it is reflected onto the street.',
+    scenes: ['glass-cbd'],
+  },
+  acHeat: {
+    term: 'AC waste heat',
+    text: 'Air conditioners move heat from inside to outside and add their own electricity: rejected heat = cooling × (1 + 1/COP).',
+    range: 'Dense urban areas 20–70 W m⁻² of ground area, sometimes over 100; central Tokyo over 400 W m⁻² by day.',
+    src: 'xie2016, sailor2011',
+    why: 'It warms the street air; this model holds the air temperature fixed, so the heat is shown but not felt.',
+    scenes: ['glass-cbd'],
   },
   // ---- block 2 (sponge-retrofit) --------------------------------------------
   permeablePaving: {
@@ -159,7 +222,7 @@ const q = (a, p) => {
 const mean = (a) => a.reduce((x, y) => x + y, 0) / a.length;
 
 /** Model-derived numbers quoted in the glossary (computed at load and in docs). */
-export function glossaryStats(world, thermal) {
+export function glossaryStats(world, thermal, extra = {}) {
   const N = world.n * world.n;
   const sun = [];
   const shade = [];
@@ -184,15 +247,32 @@ export function glossaryStats(world, thermal) {
   const r0 = (x) => Math.round(x);
   const r1 = (x) => x.toFixed(1);
   const r2 = (x) => x.toFixed(2);
-  return {
+  const out = {
     tmrtSun: `${r0(q(sun, 0.05))}–${r0(q(sun, 0.95))}`,
     tmrtShade: `${r0(q(shade, 0.05))}–${r0(q(shade, 0.95))}`,
-    svfLawn: `about ${r2(q(lawn, 0.5))}`,
-    svfPave: `${r2(q(pave, 0.1))}–${r2(q(pave, 0.9))}`,
-    lagAsphalt: r1(mean(a23) - mean(l23)),
-    lagConcrete: r1(mean(c23) - mean(l23)),
     days: thermal.info.days,
   };
+  if (lawn.length && l23.length) {
+    out.svfLawn = `about ${r2(q(lawn, 0.5))}`;
+    out.svfPave = `${r2(q(pave, 0.1))}–${r2(q(pave, 0.9))}`;
+    out.lagAsphalt = r1(mean(a23) - mean(l23));
+    out.lagConcrete = r1(mean(c23) - mean(l23));
+    out.svfLine = `Open lawn ${out.svfLawn}; paved ground near buildings ${out.svfPave}.`;
+    out.lagLine = `At 11 pm asphalt is ${out.lagAsphalt} °C and concrete ${out.lagConcrete} °C warmer than the open lawn.`;
+  }
+  // a glass block (no lawn): canyon numbers passed in by the caller
+  if (extra.canyon) {
+    const c = extra.canyon;
+    const ground = [];
+    for (let i = 0; i < N; i++) if (world.bld[i] < 0) ground.push(world.svf[i]);
+    out.svfLine = `Street-level ground ${r2(q(ground, 0.1))}–${r2(q(ground, 0.9))}; Silk Lane floor ${r2(c.svf)} (an endless canyon of the same H/W: ${r2(c.svfCanyon)}).`;
+    out.lagLine = `At 5 am the Silk Lane floor is ${r1(c.lag05)} °C warmer than an open stone surface (walls fixed at air + 2 K at night, an engine assumption).`;
+  }
+  if (extra.spot) {
+    const s = extra.spot;
+    out.spotLine = `At 3 pm with ${s.glassName}: Tmrt ${r0(s.tmrtSpotShade)} °C in shaded spots vs ${r0(s.tmrtShade)} °C in plain shade and ${r0(s.tmrtSun)} °C in sun.`;
+  }
+  return out;
 }
 
 /** Footnote "range" line: literature range or model-derived numbers. */

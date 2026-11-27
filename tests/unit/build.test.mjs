@@ -6,7 +6,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
-const CITIES = ['asphalt-park', 'sponge-retrofit'];
+const CITIES = ['asphalt-park', 'glass-cbd', 'sponge-retrofit'];
 const file = (c) => `${root}cities/${c}/index.html`;
 
 test('build succeeds and the committed files are current', () => {

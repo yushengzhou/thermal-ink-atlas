@@ -12,6 +12,7 @@ mkdirSync(`${root}thumbs`, { recursive: true });
 
 const AP = 'asphalt-park';
 const SR = 'sponge-retrofit';
+const GC = 'glass-cbd';
 const shots = [
   [AP, 'docs/media/day-1500.jpg', 'hour=15&f=400', { width: 1280, height: 800 }],
   [AP, 'docs/media/thermal-1500.jpg', 'thermal&hour=15&f=400', { width: 1280, height: 800 }],
@@ -47,6 +48,22 @@ const shots = [
     },
   ],
   [SR, 'thumbs/sponge-retrofit.jpg', 'hour=15&f=400&notes=0&ui=0&cam=3,260,215', { width: 640, height: 400 }],
+  // block 3: the day view with a reflection spot, thermal clear vs mirror, the canyon at 05:00, the spot card
+  [GC, 'docs/media/cbd-day-1500.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
+  [GC, 'docs/media/cbd-day-1500-spot.jpg', 'hour=15&f=640&notes=0&cam=5.5,160,222', { width: 1280, height: 800 }],
+  [GC, 'docs/media/cbd-thermal-1500-clear.jpg', 'thermal&hour=15&f=640&glass=clear&notes=0&cam=4.5,160,222', { width: 1280, height: 800 }],
+  [GC, 'docs/media/cbd-thermal-1500-mirror.jpg', 'thermal&hour=15&f=640&glass=mirror&notes=0&cam=4.5,160,222', { width: 1280, height: 800 }],
+  [GC, 'docs/media/cbd-thermal-0500-canyon.jpg', 'thermal&hour=5&f=640&cam=4.5,150,280', { width: 1280, height: 800 }],
+  [
+    GC,
+    'docs/media/cbd-spot-card.jpg',
+    'hour=15&f=640',
+    { width: 1280, height: 800 },
+    async (page) => {
+      await page.click('#glass [data-card="spot"]');
+    },
+  ],
+  [GC, 'thumbs/glass-cbd.jpg', 'hour=15&f=400&notes=0&ui=0&cam=2.5,215,205', { width: 640, height: 400 }],
 ];
 const browser = await chromium.launch();
 for (const [city, out, q, viewport, act] of shots) {

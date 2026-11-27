@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { MATERIALS, MODEL, SOURCES, BASIS, paramKeys } from '../../engine/materials.js';
+import { MATERIALS, MODEL, SOURCES, BASIS, GLASS, paramKeys } from '../../engine/materials.js';
 import { sourcesMarkdown } from '../../scripts/sources.mjs';
 
 const md = readFileSync(new URL('../../docs/sources.md', import.meta.url), 'utf8');
@@ -27,6 +27,10 @@ test('every card parameter has a known source, a basis tag and a verified flag',
   for (const [k, p] of Object.entries(MODEL)) {
     assert.ok(p.basis in BASIS && p.source in SOURCES, k);
     assert.ok(md.includes(`\`${k}\``), `${k} missing`);
+  }
+  for (const [id, g] of Object.entries(GLASS)) {
+    assert.ok(md.includes(`\`${id}\``), `glass ${id} row missing`);
+    for (const k of ['rho0', 'absorb', 'eps']) assert.ok(md.includes(`**[${g[k].source}]**`), `${g[k].source} missing in sources.md`);
   }
 });
 

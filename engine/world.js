@@ -22,6 +22,16 @@ export function awningsOf(B) {
   return shopSegments(B, 'S').map(([a, b]) => ({ x0: B.x0 + a, y0: B.y1, x1: B.x0 + b, y1: B.y1 + 1.6, z0: 2.6, z1: 3.2, b: B.index }));
 }
 
+const FACE_INDEX = { S: 0, N: 1, E: 2, W: 3 };
+
+/** Face of box B that a ray from (x, y) along (dx, dy) enters ('S', 'N', 'E' or 'W'). */
+export function entryFace(B, x, y, dx, dy) {
+  const tx = Math.abs(dx) < 1e-12 ? -Infinity : ((dx > 0 ? B.x0 : B.x1) - x) / dx;
+  const ty = Math.abs(dy) < 1e-12 ? -Infinity : ((dy > 0 ? B.y0 : B.y1) - y) / dy;
+  if (tx >= ty) return dx > 0 ? 'W' : 'E';
+  return dy > 0 ? 'N' : 'S';
+}
+
 export function buildWorld(scene, opts = {}) {
   const size = scene.size;
   const cell = opts.cell ?? 5;
@@ -84,14 +94,37 @@ export function buildWorld(scene, opts = {}) {
   // canopies block most of the sky directly beneath them.
   // opts.svfFrom: a world with the same buildings (Before / After states)
   // whose open-sky horizon scan is reused.
+  // Glass scenes (block 3) also record, per cell, which share of the walls it
+  // sees is glass of each orientation (gview, 4 per cell: S, N, E, W): in each
+  // scan direction the building that sets the horizon takes that direction's
+  // wall view sin^2(horizon elevation), through the face the ray enters.
   const svf = new Float32Array(N);
   const svfOpen = opts.svfFrom ? opts.svfFrom.svfOpen : new Float32Array(N);
+  const hasGlass = buildings.some((b) => b.glass);
+  const gview = hasGlass ? (opts.svfFrom ? opts.svfFrom.gview : new Float32Array(N * 4)) : null;
+  const nDirs = scene.svfDirs ?? 16;
   if (opts.svf !== false) {
     for (let k = 0; k < N; k++) {
       const x = ((k % n) + 0.5) * cell;
       const y = (Math.floor(k / n) + 0.5) * cell;
       const z0 = height[k];
-      let v = opts.svfFrom ? svfOpen[k] : svfAt(heightAt, x, y, z0 + 0.01, 16, 160, cell / 2);
+      let onDir = null;
+      let v0 = 0;
+      if (hasGlass && !opts.svfFrom) {
+        const g = [0, 0, 0, 0];
+        onDir = (dx, dy, t, d) => {
+          if (!d) return;
+          const b = bld[cellIndex(x + dx * d, y + dy * d)];
+          if (b < 0 || !buildings[b].glass) return;
+          const face = entryFace(buildings[b], x, y, dx, dy);
+          const faces = buildings[b].glass === true ? ['S', 'N', 'E', 'W'] : buildings[b].glass;
+          if (faces.includes(face)) g[FACE_INDEX[face]] += (t * t) / (1 + t * t) / nDirs;
+        };
+        v0 = svfAt(heightAt, x, y, z0 + 0.01, nDirs, 160, cell / 2, onDir);
+        const wall = 1 - v0;
+        for (let o = 0; o < 4; o++) gview[k * 4 + o] = wall > 1e-6 ? g[o] / wall : 0;
+      }
+      let v = opts.svfFrom ? svfOpen[k] : onDir ? v0 : svfAt(heightAt, x, y, z0 + 0.01, nDirs, 160, cell / 2);
       svfOpen[k] = v;
       if (bld[k] < 0) v *= 1 - 0.75 * canopy[k];
       svf[k] = v;
@@ -126,6 +159,7 @@ export function buildWorld(scene, opts = {}) {
     canopy,
     svf,
     svfOpen,
+    gview,
     buildings,
     trees,
     awnings,

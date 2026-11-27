@@ -60,10 +60,13 @@ test('model vs literature: exact brief ranges, table in docs/sources.md is in sy
 // Regression guard for the documented deviations: the set of rows outside the
 // brief is pinned, and each may sit at most PIN_SLACK beyond its distance when
 // pinned. Changing this list is a deliberate, reviewed act (update the docs too).
+// Re-pinned in #8 after diffuse wall reflection was added engine-wide: asphalt
+// at 15:00 1.7 -> 2.1 K and shaded paving 0.6 -> 1.6 K beyond their ranges
+// (same rows outside; disclosed in CHANGELOG and docs/sources.md).
 const PINNED_OUTSIDE = {
-  'Aged asphalt (sunlit at 15:00) @15': 1.7,
+  'Aged asphalt (sunlit at 15:00) @15': 2.1,
   'Aged asphalt (sunlit at 15:00) @23': 0.6,
-  'Shaded paving @15': 0.6,
+  'Shaded paving @15': 1.6,
   'Cool roof @23': 1.2,
   'Irrigated grass (sunlit at 15:00) @23': 3.9,
   'Open water @23': 0.5,

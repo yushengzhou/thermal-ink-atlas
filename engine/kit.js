@@ -237,6 +237,7 @@ export function drawDecor(pen, world, D) {
     else if (m === 'coolPave') speckle(pen, x0, y0, x1, y1, Math.round(((x1 - x0) * (y1 - y0)) / 16), 43, hexRgb('#e9e4d8'));
     else if (m === 'raingarden') plants(pen, x0, y0, x1, y1, g.id.length * 5 + 1);
   }
+  for (const [x0, y0, x1, y1] of D.paving ?? []) stonePaving(pen, x0, y0, x1, y1);
   for (const c of D.cracks ?? []) cracks(pen, ...c);
   for (const p of D.patches ?? []) patches(pen, ...p);
   for (const d of D.dashes ?? []) centreDashes(pen, ...d);
@@ -280,6 +281,16 @@ function bboxOf(p) {
     y1 = Math.max(y1, p[i + 1]);
   }
   return [x0, y0, x1, y1];
+}
+
+/** Large stone flags: a 3 m grid of joints, offset every other row. */
+function stonePaving(pen, x0, y0, x1, y1) {
+  pen.tag = 'gm';
+  const ink = hexRgb('#9d8f76');
+  for (let y = y0 + 3; y < y1; y += 3) pen.line([[x0, y], [x1, y]], { lw: 0.35, stroke: ink, a: 0.35, over: 0 });
+  for (let y = y0, row = 0; y < y1; y += 3, row++) {
+    for (let x = x0 + (row % 2 ? 1.5 : 3); x < x1; x += 3) pen.line([[x, y], [x, Math.min(y1, y + 3)]], { lw: 0.35, stroke: ink, a: 0.3, over: 0 });
+  }
 }
 
 /** Permeable pavers: a running-bond grid of joints (gravel-filled, drawn light). */
@@ -362,19 +373,52 @@ function windowsOnFace(pen, B, face, k0) {
   }
 }
 
+/** True if face ('S', 'N', 'E', 'W') of building B is a glass curtain wall. */
+export const isGlassFace = (B, face) => !!B.glass && (B.glass === true || B.glass.includes(face));
+
+/**
+ * Glass curtain wall: mullions every 3 m, a floor band every 4 m, and a few
+ * pale sky streaks; the pane colour depends on the glass type and is resolved
+ * when the face is painted (render.js fillOf, fill kind 'glass').
+ */
+function curtainWall(pen, B, face, k0) {
+  const along = face === 'S' ? B.x1 - B.x0 : B.y1 - B.y0;
+  const pt = (s, z) => (face === 'S' ? [B.x0 + s, B.y1, z] : [B.x1, B.y1 - s, z]);
+  pen.tag = 'mull';
+  const nm = Math.max(1, Math.round(along / 3));
+  for (let i = 1; i < nm; i++) pen.line([pt((i * along) / nm, 0), pt((i * along) / nm, B.h - 0.6)], { lw: i % 4 === 0 ? 0.5 : 0.3, a: i % 4 === 0 ? 0.55 : 0.32, over: 0.05, t: 'mull' });
+  for (let z = 4; z < B.h - 1; z += 4) pen.line([pt(0, z), pt(along, z)], { lw: 0.35, a: 0.4, over: 0.05, t: 'mull' });
+  // sky streaks: short diagonal highlights on the panes
+  for (let k = 0; k < Math.round(along / 9); k++) {
+    const s = along * hash3(k0, k, 21);
+    const z = (B.h - 8) * hash3(k0, k, 22) + 3;
+    const l = 2 + 4 * hash3(k0, k, 23);
+    if (s + l > along) continue;
+    pen.line([pt(s, z), pt(s + l, z + l * 0.8)], { lw: 0.8, stroke: hexRgb('#f4f7f6'), a: 0.45, over: 0, t: 'glint' });
+  }
+  // lobby doors at street level on the south face
+  if (face === 'S') {
+    const s = along * (0.35 + 0.3 * hash3(k0, 5));
+    pen.shape([pt(s, 0), pt(s + 3, 0), pt(s + 3, 3.2), pt(s, 3.2)], scaleRgb(hexRgb('#4e5a61'), 1), { lw: 0.6, t: 'win' });
+  }
+}
+
 export function building(pen, B, world = null) {
   pen.b = B.index;
   const { x0, y0, x1, y1, h } = B;
   const wall = jitter(hexRgb(B.wall), B.index * 3, 0.05);
   const roof = jitter(ROOF_RGB[world ? colourId(world, B.roof) : B.roof], B.index * 5, 0.06);
+  const gS = isGlassFace(B, 'S');
+  const gE = isGlassFace(B, 'E');
   pen.tag = 'w';
-  pen.shape([[x0, y1, 0], [x1, y1, 0], [x1, y1, h], [x0, y1, h]], { k: 'wall', c: wall, n: [0, 1] }, { lw: 1.15, t: 'w' });
-  pen.shape([[x1, y1, 0], [x1, y0, 0], [x1, y0, h], [x1, y1, h]], { k: 'wall', c: wall, n: [1, 0] }, { lw: 1.15, t: 'w' });
+  pen.shape([[x0, y1, 0], [x1, y1, 0], [x1, y1, h], [x0, y1, h]], gS ? { k: 'glass', c: wall, n: [0, 1] } : { k: 'wall', c: wall, n: [0, 1] }, { lw: 1.15, t: 'w' });
+  pen.shape([[x1, y1, 0], [x1, y0, 0], [x1, y0, h], [x1, y1, h]], gE ? { k: 'glass', c: wall, n: [1, 0] } : { k: 'wall', c: wall, n: [1, 0] }, { lw: 1.15, t: 'w' });
   // shade hatching, drawn only when the face is turned from the sun
   pen.tag = 'hatch';
   for (const face of ['S', 'E']) {
     const len = face === 'S' ? x1 - x0 : y1 - y0;
-    for (let s = 1.2; s < len + h; s += 1.6) {
+    const step = h > 45 ? 3.2 : 1.6; // tall towers: sparser hatching
+    for (let s = 1.2; s < len + h; s += step) {
       const a = Math.max(0, s - h);
       const b = Math.min(len, s);
       if (b - a < 0.5) continue;
@@ -382,8 +426,10 @@ export function building(pen, B, world = null) {
       pen.line([P(a, s - a), P(b, s - b)], { lw: 0.4, a: 0.28, over: 0.1, t: face === 'S' ? 'hatchS' : 'hatchE' });
     }
   }
-  windowsOnFace(pen, B, 'S', B.index * 2);
-  windowsOnFace(pen, B, 'E', B.index * 2 + 1);
+  if (gS) curtainWall(pen, B, 'S', B.index * 2);
+  else windowsOnFace(pen, B, 'S', B.index * 2);
+  if (gE) curtainWall(pen, B, 'E', B.index * 2 + 1);
+  else windowsOnFace(pen, B, 'E', B.index * 2 + 1);
   // cornice line
   pen.tag = 'w';
   pen.line([[x0, y1, h - 0.6], [x1, y1, h - 0.6], [x1, y0, h - 0.6]], { lw: 0.5, a: 0.6, t: 'w' });

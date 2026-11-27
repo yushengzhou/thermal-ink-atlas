@@ -93,7 +93,7 @@ export function tradeoffCard(st, matsNew, matsAged) {
     </table>
     <p class="note">The light coating sends more sunshine back up, and part of it lands on people. The road gets cooler; a person standing on it gets more radiant heat at midday. Pair reflective paving with shade, such as trees or awnings.</p>
     <p class="lit">Literature (Los Angeles): road −4 to −6 K, pedestrian Tmrt about +4 K at midday, with +118 W m⁻² more reflected sunshine (Middel et al. 2020). Neighbourhood scale: surface up to −5 K in the afternoon, air only −0.2 K (Ko et al. 2022).</p>
-    <p class="caveat">Known under-estimate: walls reflect no sunlight in this model, so light bounced onto the pavements from building faces is missing (Middel saw +20–30 W m⁻² on sidewalks in the evening). Coating albedos are <span class="unv">unverified</span></p>
+    <p class="caveat">Walls bounce sunlight onto the pavements here only in a simple, street-averaged way (${gl('wallReflection', 'diffuse wall reflection')}, wall albedo 0.3, an unverified mid-range value), so the effect next to bright walls can be larger (Middel saw +20–30 W m⁻² on sidewalks in the evening). Coating albedos are <span class="unv">unverified</span></p>
     ${srcLine(['middel2020', 'ko2022'])}`;
 }
 

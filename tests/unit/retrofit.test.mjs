@@ -107,10 +107,12 @@ test('water budget: daily evaporated depth never exceeds the stated storage', ()
 // Acceptance bands. Rows outside a band are known deviations: they are pinned
 // here (same rows, within 0.1 K of the pinned distance, either way) and disclosed in
 // docs/sources.md. Never tune an input outside its cited range to pass.
+// Re-pinned in #8 (diffuse wall reflection engine-wide): new coating ΔTmrt
+// 0.4 -> 0.1 K short of Middel's band (moved toward it, still outside).
 const PINNED_OUTSIDE = {
-  'Cool pavement coating, new (α 0.25), pedestrian ΔTmrt at 12:00': 0.4,
-  'Cool pavement coating, 1 year (α 0.18), ΔTs at 12:00': 1.9,
-  'Cool pavement coating, 1 year (α 0.18), pedestrian ΔTmrt at 12:00': 2.0,
+  'Cool pavement coating, new (α 0.25), pedestrian ΔTmrt at 12:00': 0.1,
+  'Cool pavement coating, 1 year (α 0.18), ΔTs at 12:00': 2.0,
+  'Cool pavement coating, 1 year (α 0.18), pedestrian ΔTmrt at 12:00': 1.9,
   'Permeable pavers vs dense asphalt, ΔTs at 15:00, d = 0': 0.4,
   'Permeable pavers vs dense asphalt, ΔTs at 15:00, d = 1': 0.5,
 };

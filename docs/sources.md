@@ -63,6 +63,11 @@ Shown on the heat cards as a caveat:
 | `youngTreeTransmission` | 0.47 [brief2] *interpretation of the source*, unverified (exp(-0.5 LAI) with LAI 1.5; brief range 0.37-0.61 for LAI 1-2) |
 | `youngTreeCrown` | crown radius 2.6 m, crown centre 4.4 m [engine] *engine assumption (no source)*, unverified (scene assumption for newly planted street trees (cities/sponge-retrofit/scene.js)) |
 | `latentHeat` | 2.45e6 J kg-1 [brief2] *cited value* (evaporated depth = sum of EF x max(Q*, 0) x dt / 2.45e6) |
+| `wallAlbedo` | 0.3 [brief3] *cited range*, unverified (opaque walls; brief: 0.3 (0.2-0.5, Oke range unverified); SOLWEIG uses 0.5 [wallenberg2026]) |
+| `wallLit` | 0.5 [engine] *engine assumption (no source)*, unverified (share of a wall in sun, f_lit, for the diffuse wall-reflection term (not used for glass temperature, which follows the brief)) |
+| `wallReflection` | K_wr = a_w (1 - SVF) K_wall [brief3] *interpretation of the source*, unverified (K_wall = f_lit I cos(beta)/pi + 0.5 D + 0.5 a_g G; SOLWEIG form a_w G (1 - psi) recalled from memory in the brief) |
+| `glassHo` | 20 [brief3] *cited range*, unverified (outside film coefficient h_o, brief 15-25 W m-2 K-1) |
+| `glassHi` | 7.7 [iso6946] *interpretation of the source*, unverified (inside film coefficient h_i,eff, W m-2 K-1, read as 1 / 0.13) |
 | `sweatCue` | Tmrt 65 -> 70 C [engine] *engine assumption (no source)*, unverified (visual cue only: droplets on people in sun, strength rising from Tmrt 65 C to full at 70 C (separates sunlit pavement from sunlit lawn in this model); no physiological model) |
 
 The wall term's daytime part peaks at 6.8 K on the design day (total wall excess up to 8.8 K above air).
@@ -87,6 +92,25 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[ko2022]** Ko et al. (2022) Environ. Res. Lett. 17 044027, cool pavement at neighbourhood scale, albedo 0.26 -> 0.18 in one year
 - **[mccoll]** McColl et al. (2017) Geophys. Res. Lett., doi 10.1002/2017GL072819, global soil-moisture drydown timescales
 - **[middel2021]** Middel et al. (2021) Bull. Amer. Meteor. Soc., doi 10.1175/BAMS-D-20-0193.1, shade and Tmrt in Phoenix
+- **[brief3]** Research brief docs/research/cbd-brief.md (block 3; values compiled from the sources below, items marked unverified there are flagged here)
+- **[fresnel]** Fresnel equations for uncoated float glass, n = 1.52, two surfaces (computed); LBNL (Furler; Rubin et al.): ASHRAE-style angular fit within 1.5% for clear glass, coated glass up to about 8% off at 60 deg
+- **[energyplus]** EnergyPlus Engineering Reference, Window Calculation Module, Angular Properties for Coated Glass: R(phi) = R(0) (1 - rho_bar(phi)) + rho_bar(phi), rho_bar a normalised clear-glass curve (polynomial fit in cos phi); origin given as Finlayson et al. 1993, WINDOW 4.0 documentation, LBL-33943 (not checked)
+- **[igdb]** LBNL International Glazing Database (IGDB) suggested for product reflectances; no datasheet was checked for the low-e or mirror values
+- **[bca]** Singapore BCA Approved Document, Section P: glass daylight reflectance at most 20% (via the block-3 brief)
+- **[en673]** EN 673 glass outer-surface emissivity about 0.84 (via the block-3 brief)
+- **[iso6946]** EN ISO 6946 internal surface resistance 0.13 m2 K W-1, i.e. about 7.7 W m-2 K-1 (from memory)
+- **[oke1981]** Oke (1981) J. Climatol. 1, 237-254, doi 10.1002/joc.3370010304: max nocturnal UHI = 7.45 + 3.97 ln(H/W) (coefficients via a secondary source, redalyc 283230157011)
+- **[theeuwes2014]** Theeuwes et al. (2014) Q. J. R. Meteorol. Soc., doi 10.1002/qj.2289: the Oke relation breaks down at high H/W
+- **[johansson2006]** Johansson (2006) Building and Environment, doi 10.1016/j.buildenv.2005.05.022: Fez deep canyon (H/W about 10) about 6 K, up to 10 K, cooler by day
+- **[zhu2018]** Zhu, Jahn & Rein (2018) J. Building Performance Simulation, doi 10.1080/19401493.2018.1538389: 20 Fenchurch St simulated peak 3,384 W m-2 (worst 4,176)
+- **[vdara]** Vdara hotel, Las Vegas, 2010 pool-deck hot zone (NBC News; Architectural Record): anecdotal
+- **[speroni2022]** Speroni et al. (2022) Sustainability 14, 5781, doi 10.3390/su14105781 (abstract only): scale models, diffuse façades <= +30%, flat mirror > +100%, concave > +300% at pedestrian level
+- **[du2025]** Du et al. (2025) J. Harbin Inst. Tech. 57(9), doi 10.11918/202406062: Chengdu Chunxi Road, Aug 2023, reflection zones Tmrt +4 to +13 C, air +1-2 C, UTCI +2-5 C, peak Tmrt 73.9 C
+- **[chen2024]** Chen et al. (2024) Energy and Buildings, doi 10.1016/j.enbuild.2024.114926: reflective façades lower cooling energy but raise canyon UTCI
+- **[sanagar2025]** Sanagar Darbani et al. (2025) Developments in the Built Environment, doi 10.1016/j.dibe.2025.100758: low-emissivity glass cuts Tmrt by up to 5 K (simulation)
+- **[wallenberg2026]** Wallenberg et al. (2026) Geosci. Model Dev. 19, 1321, doi 10.5194/gmd-19-1321-2026: SOLWEIG wall albedo 0.5 with reflected shortwave; highest Tmrt in front of sunlit façades
+- **[xie2016]** Xie et al. (2016) Atmos. Chem. Phys. 16, 6071, doi 10.5194/acp-16-6071-2016: dense urban anthropogenic heat 20-70 W m-2 of ground area, occasionally > 100
+- **[sailor2011]** Sailor (2011) Int. J. Climatol., doi 10.1002/joc.2106, anthropogenic heat review; Sailor et al. (2015) citing Ichinose (1999): central Tokyo > 400 W m-2 by day
 - **[sponge2015]** State Council General Office (2015) Guiding Opinions on Promoting Sponge City Construction, Guo Ban Fa [2015] No. 75 (English notice, gov.cn, 2015-10-16; reprint waizi.org.cn/law/6860.html; MOHURD interpretation via cs.com.cn; the primary Chinese text was not located)
 - **[noaa]** NOAA Global Monitoring Laboratory, General Solar Position Calculations (solareqns.PDF)
 - **[brutsaert]** Brutsaert (1975) Water Resources Research 11(5) 742-744, clear-sky emissivity
@@ -99,16 +123,22 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - Surface energy balance, force-restore [deardorff]:
   dTs/dt = (2√π / (μ√τ))·G − (2π/τ)·(Ts − Td), τ = 86400 s, Td = previous-day mean of Ts.
   Thin layers (sheet-metal roofs) use dTs/dt = G / C with no restore term [brief].
-  1-min steps; the design day repeats until max |ΔTd| < 0.05 K (at least 3 days; this scene converges after 7 days, final max |ΔTd| = 0.029 K).
+  1-min steps; the design day repeats until max |ΔTd| < 0.05 K (at least 3 days; this scene converges after 7 days, final max |ΔTd| = 0.030 K).
   G = (1−α)·K↓ + ε·L↓ − εσTs⁴ − h_c·(Ts − Ta) − EF·max(Q*, 0). The brief writes EF·Q*; clipping at 0 is an *engine assumption* so latent heat never warms a surface at night.
-- Shortwave: K↓ = sunlit·I_b·sinβ + SVF·D, I_b = 1361·0.7^(AM^0.678) [meinel], D = 0.12·I_b·sinβ [brief]; tree shade transmits exp(−0.5·LAI) ≈ 0.17 (LAI 3.5 is an *engine assumption*).
-- Longwave: L↓ = SVF·ε_sky·σTa⁴ + (1−SVF)·σT_wall⁴, ε_sky = 1.24·(e_a/Ta)^(1/7) [brutsaert], T_wall = Ta + 2 K + 6 K·(K↓/900) (*engine assumption*, peaks at 6.8 K + 2 K, ignores wall orientation).
+- Shortwave: K↓ = sunlit·I_b·sinβ + SVF·D + K_wr (+ r·I_b·sinβ off glass, block 3), I_b = 1361·0.7^(AM^0.678) [meinel], D = 0.12·I_b·sinβ [brief]; tree shade transmits exp(−0.5·LAI) ≈ 0.17 (LAI 3.5 is an *engine assumption*).
+- Longwave: L↓ = SVF·ε_sky·σTa⁴ + (1−SVF)·L_wall, L_wall = σT_wall⁴ for opaque walls (glass walls: block 3), ε_sky = 1.24·(e_a/Ta)^(1/7) [brutsaert], T_wall = Ta + 2 K + 6 K·(K↓/900) (*engine assumption*, peaks at 6.8 K + 2 K, ignores wall orientation).
 - Convection: h_c = 5.7 + 3.8·u [oke], the same for roofs and ground.
 - Water: Ts = daily mean Ta − 1 K + 1 K·sin(2π(t − 9 h)/24) [brief].
 - Tree leaves: air + 2.5 K·(K↓/900) by day, air − 0.5 K at night (*engine assumption*; brief: air +0–3 K).
 - Air temperature [brief]: sinusoid with Ta,min at sunrise and Ta,max at 15:00, implemented as two half-cosines (rise and fall).
 - Sky view factor: horizon scan, SVF = mean over 16 azimuths of cos²(horizon elevation); canyon check against cos(arctan(2H/W)).
-- Mean radiant temperature [solweig], simplified six-direction sum: Tmrt = ((S_str + L_str)/(a_p·σ))^¼ − 273.15, a_k = 0.7, a_p = 0.97, f_p = 0.308·cos(β(1 − β²/48402)); walls reflect no shortwave.
+- Shortwave reflected by opaque walls (all blocks, added in #8) [brief3]: K_wr = α_w·(1 − SVF_open)·c·K_wall with
+  K_wall = f_lit·I_b·cosβ/π + 0.5·D + 0.5·α_g·G, α_w = 0.3 (*cited range*, unverified), f_lit = 0.5 (*engine assumption*),
+  α_g the cell's own albedo, G = I_b·sinβ + D unshaded, SVF_open the building-only sky view factor and c = 1 − 0.75·crown cover
+  (as for the sky). The brief gives the SOLWEIG form α_w·G·(1 − ψ) from memory; this is an *interpretation*. Glass walls are
+  left out of it (they reflect specularly, block 3). K_wr adds to K↓ and to a person's sides.
+- Mean radiant temperature [solweig], simplified six-direction sum: Tmrt = ((S_str + L_str)/(a_p·σ))^¼ − 273.15, a_k = 0.7, a_p = 0.97, f_p = 0.308·cos(β(1 − β²/48402));
+  K_lat = 0.5·K_sky + 0.5·α·K↓ + 0.5·K_wr; glass adds a beam r·I_b from the mirrored sun (same altitude, same f_p).
 - Pedestrian route cost [melnikov]: sun distance + w_b × building-shade distance + w_t × tree-shade distance, with w_b = 1 − 0.16·s and w_t = 1 − 0.08·s.
   w_b = 0.84 at full heat is cited; w_t = 0.92 is an *interpretation* of "tree shade about half as effective"; the heat factor s rises linearly from 0 at air ≤ 26 °C to 1 at air ≥ 32 °C (*engine assumption*, not in the source). The same weights drive the sideways drift toward shade within a pavement (only when air > 28 °C).
 
@@ -124,11 +154,19 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Evaporative fraction**: Typical: Dry paving 0; watered lawns and tree leaves 0.6–0.8. [brief]
 - **Sky view factor (SVF)**: In this model: Open lawn about 0.98; paved ground near buildings 0.54–0.87. [this model]
 - **Surface temperature**: Typical: On a hot afternoon (air 25–35 °C): lawn 30–40 °C, shaded paving 34–40 °C, aged asphalt 55–62 °C, fresh asphalt 60–68 °C. [brief]
-- **Mean radiant temperature (Tmrt)**: In this model: At 3 pm: 37–45 °C in building shade, 61–71 °C on sunlit ground (5th–95th percentile). [this model]
+- **Mean radiant temperature (Tmrt)**: In this model: At 3 pm: 39–46 °C in building shade, 62–72 °C on sunlit ground (5th–95th percentile). [this model]
 - **Force-restore model (simulation)**: In this model: 5 m grid, 1-minute steps, the design day repeated 7 times until it settles. [this model]
-- **Thermal inertia / night lag**: In this model: At 11 pm asphalt is 3.6 °C and concrete 4.3 °C warmer than the open lawn. [this model]
+- **Thermal inertia / night lag**: In this model: At 11 pm asphalt is 3.6 °C and concrete 4.4 °C warmer than the open lawn. [this model]
 - **Cool roof**: Typical: Albedo 0.65 or more when new, about 0.5–0.6 after weathering. [brief]
 - **Permeable paving** (asphalt-park only): Typical: Albedo 0.15–0.30; 5–10 °C cooler than concrete while wet (not modelled in this block). [brief]
+- **Wall reflection**: Typical: Opaque wall albedo about 0.2–0.5 (this model: 0.3); SOLWEIG uses 0.5. [brief3, wallenberg2026]
+- **Glass curtain wall** (glass-cbd only): Typical: Normal-incidence solar reflectance: clear float glass about 0.08, solar-control low-e 0.15–0.35, reflective (mirror) glass 0.25–0.45; outer-surface emissivity about 0.84. [fresnel, brief3, en673]
+- **Specular reflection** (glass-cbd only): Typical: Scale models: flat mirror façades more than double the sunshine at pedestrian level; diffuse façades add at most about 30%; concave façades more than 300%. [speroni2022]
+- **Fresnel reflection** (glass-cbd only): Typical: Clear float glass (n = 1.52, two surfaces): 0.082 at 0°, 0.10 at 45°, 0.17 at 60°, 0.30 at 70°, 0.41 at 75°, 0.56 at 80°. [fresnel]
+- **Reflection spot** (glass-cbd only): In this model: At 3 pm with solar-control low-e glass: Tmrt 49 °C in shaded spots vs 40 °C in plain shade and 71 °C in sun. [this model]
+- **Street canyon (H/W)** (glass-cbd only): Typical: Sky view factor at the centre of a long canyon: 1/√(1 + (2H/W)²), i.e. 0.45 at H/W 1, 0.24 at 2, 0.16 at 3, 0.10 at 5. Oke (1981): calm-night urban–rural air difference about 7.45 + 3.97 ln(H/W) K (secondary source). [brief3, oke1981]
+- **Low-e glass** (glass-cbd only): Typical: Solar reflectance about 0.15–0.35 head-on; Singapore caps glass daylight reflectance at 20%. [brief3, bca]
+- **AC waste heat** (glass-cbd only): Typical: Dense urban areas 20–70 W m⁻² of ground area, sometimes over 100; central Tokyo over 400 W m⁻² by day. [xie2016, sailor2011]
 - **Permeable paving** (sponge-retrofit only): Typical: Wetted permeable pavement 15–35 °C cooler than dense asphalt in the early afternoon, 2–7 °C cooler about a day later; dry porous asphalt about 5 °C warmer. [li2013]
 - **Green roof** (sponge-retrofit only): Typical: Albedo about 0.15–0.25; up to 18 °C cooler than a black roof in a New York case; Bowen ratio about 1–2. [brief2, noaaGreen, heusinger]
 - **Rain garden** (sponge-retrofit only): Typical: No measured cooling figure in our sources; this block uses engine assumptions (evaporative fraction 0.8 wet, 0.35 dry, 3-day drying). [engine, mccoll]
@@ -141,18 +179,18 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 
 | Surface (model region mean) | Hour | Model °C | Brief range °C | |
 |---|---|---|---|---|
-| Aged asphalt (sunlit at 15:00) | 15:00 | 63.7 | 55–62 | **outside** |
-| Aged asphalt (sunlit at 15:00) | 23:00 | 31.4 | 32–37 | **outside** |
-| Concrete paving (sunlit at 15:00) | 15:00 | 55.1 | 45–60 | inside |
-| Concrete paving (sunlit at 15:00) | 23:00 | 32.3 | 31–36 | inside |
-| Shaded paving | 15:00 | 40.6 | 34–40 | **outside** |
+| Aged asphalt (sunlit at 15:00) | 15:00 | 64.1 | 55–62 | **outside** |
+| Aged asphalt (sunlit at 15:00) | 23:00 | 31.5 | 32–37 | **outside** |
+| Concrete paving (sunlit at 15:00) | 15:00 | 55.6 | 45–60 | inside |
+| Concrete paving (sunlit at 15:00) | 23:00 | 32.5 | 31–36 | inside |
+| Shaded paving | 15:00 | 41.6 | 34–40 | **outside** |
 | Dark membrane roof | 15:00 | 67.2 | 60–75 | inside |
 | Dark membrane roof | 23:00 | 27.8 | 24–28 | inside |
 | Dark metal roof | 15:00 | 67.1 | 65–80 | inside |
 | Dark metal roof | 23:00 | 25.2 | 22–26 | inside |
 | Cool roof | 15:00 | 38.9 | 38–45 | inside |
 | Cool roof | 23:00 | 26.2 | 22–25 | **outside** |
-| Irrigated grass (sunlit at 15:00) | 15:00 | 38.3 | 30–40 | inside |
+| Irrigated grass (sunlit at 15:00) | 15:00 | 38.4 | 30–40 | inside |
 | Irrigated grass (sunlit at 15:00) | 23:00 | 27.9 | 18–24 | **outside** |
 | Open water | 15:00 | 30.0 | 26–30 | inside |
 | Open water | 23:00 | 28.5 | 25–28 | **outside** |
@@ -172,12 +210,12 @@ Moving any one of them toward the middle of its cited range breaks it. Region me
 
 | Case (one change) | tree shade | water | grass | cool roof | shaded paving | asphalt | dark roof | 15:00 order |
 |---|---|---|---|---|---|---|---|---|
-| as shipped | 35.0 | 30.0 | 38.3 | 38.9 | 40.6 | 63.7 | 67.2 | order holds |
-| grass EF 0.7 (mid cited range) | 36.5 | 30.0 | 41.5 | 38.9 | 40.6 | 63.7 | 67.2 | grass ≥ shadedPaving |
-| grass EF 0.6 (bottom of cited range) | 37.9 | 30.0 | 44.4 | 38.9 | 40.6 | 63.7 | 67.2 | grass ≥ shadedPaving |
-| cool roof albedo 0.70 | 35.0 | 30.0 | 38.3 | 43.2 | 40.6 | 63.7 | 67.2 | coolRoof ≥ shadedPaving |
-| cool roof albedo 0.65 (cited minimum, new) | 35.0 | 30.0 | 38.3 | 45.4 | 40.6 | 63.7 | 67.2 | coolRoof ≥ shadedPaving |
-| grass mu 600 (bottom of cited soil range) | 36.1 | 30.0 | 40.9 | 38.9 | 40.6 | 63.7 | 67.2 | grass ≥ shadedPaving |
+| as shipped | 35.0 | 30.0 | 38.4 | 38.9 | 41.6 | 64.1 | 67.2 | order holds |
+| grass EF 0.7 (mid cited range) | 36.5 | 30.0 | 41.5 | 38.9 | 41.6 | 64.1 | 67.2 | order holds |
+| grass EF 0.6 (bottom of cited range) | 37.9 | 30.0 | 44.4 | 38.9 | 41.6 | 64.1 | 67.2 | grass ≥ shadedPaving |
+| cool roof albedo 0.70 | 35.0 | 30.0 | 38.4 | 43.2 | 41.6 | 64.1 | 67.2 | coolRoof ≥ shadedPaving |
+| cool roof albedo 0.65 (cited minimum, new) | 35.0 | 30.0 | 38.4 | 45.4 | 41.6 | 64.1 | 67.2 | coolRoof ≥ shadedPaving |
+| grass mu 600 (bottom of cited soil range) | 36.1 | 30.0 | 40.9 | 38.9 | 41.6 | 64.1 | 67.2 | order holds |
 
 ## Block 2: retrofit parameters
 
@@ -199,7 +237,7 @@ parameter table above (`coolroofAged`, `coolroofNew`, `greenroof`, `pavers`, `po
   unverified); mature trees keep 0.17.
 - **Shared run.** Before is run in full. After reuses every Before cell whose inputs (material parameters, sky view
   factor, sunlit share in all 144 sun slots) are identical, and runs the other 2937 cells with the same
-  force-restore scheme and convergence test (this run: 7 days, final max |ΔTd| = 0.027 K).
+  force-restore scheme and convergence test (this run: 7 days, final max |ΔTd| = 0.028 K).
   After is always derived from the same Before run, so a state does not depend on the order the controls were used.
 - **Air temperature is a fixed forcing**, identical in both states: the model cannot show air cooling, and the
   page does not claim any. Air-temperature effects on the cards are quoted from the literature and labelled so.
@@ -226,10 +264,10 @@ person standing on those cells (roofs have none).
 |---|---|---|---|---|---|
 | Cool roof, aged (α 0.60) vs dark membrane, ΔTs at 15:00 | −19.7 | −30.0 to −15.0 | acceptance | brief2 target | inside |
 | Cool roof, new (α 0.80) vs dark membrane, ΔTs at 15:00 | −28.3 | −33.0 to −28.0 | literature | lbnlRoof (white 0.80 vs grey 0.20 −28 K; EPA −28 to −33 K) | inside |
-| Cool pavement coating, new (α 0.25), ΔTs at 12:00 | −4.9 | −6.0 to −4.0 | acceptance | middel2020 | inside |
-| Cool pavement coating, new (α 0.25), pedestrian ΔTmrt at 12:00 | +2.6 | +3.0 to +5.0 | acceptance | middel2020 | **outside** |
-| Cool pavement coating, 1 year (α 0.18), ΔTs at 12:00 | −2.1 | −6.0 to −4.0 | literature | middel2020 band for a fresh coating; ko2022 ageing | **outside** |
-| Cool pavement coating, 1 year (α 0.18), pedestrian ΔTmrt at 12:00 | +1.0 | +3.0 to +5.0 | literature | middel2020 band for a fresh coating | **outside** |
+| Cool pavement coating, new (α 0.25), ΔTs at 12:00 | −4.8 | −6.0 to −4.0 | acceptance | middel2020 | inside |
+| Cool pavement coating, new (α 0.25), pedestrian ΔTmrt at 12:00 | +2.9 | +3.0 to +5.0 | acceptance | middel2020 | **outside** |
+| Cool pavement coating, 1 year (α 0.18), ΔTs at 12:00 | −2.0 | −6.0 to −4.0 | literature | middel2020 band for a fresh coating; ko2022 ageing | **outside** |
+| Cool pavement coating, 1 year (α 0.18), pedestrian ΔTmrt at 12:00 | +1.1 | +3.0 to +5.0 | literature | middel2020 band for a fresh coating | **outside** |
 | Permeable pavers vs dense asphalt, ΔTs at 15:00, d = 0 | −14.6 | −35.0 to −15.0 | acceptance | li2013 | **outside** |
 | Permeable pavers vs dense asphalt, ΔTs at 15:00, d = 1 | −7.5 | −7.0 to −2.0 | acceptance | li2013 | **outside** |
 | Dry porous asphalt (d = 7) vs dense asphalt, ΔTs at 15:00 (> 0) | +2.5 | > +0.0 | acceptance | li2013 (about +5 K) | inside |
@@ -240,14 +278,16 @@ person standing on those cells (roofs have none).
 Notes on the rows outside:
 
 - **Coating, pedestrian Tmrt — a structural limit of this model.** No single coating albedo meets both Middel bands
-  here. The new coating (α 0.25) gives ΔTs −4.9 K (inside) but ΔTmrt +2.6 K (short);
-  α 0.30, the brief's step, gives ΔTmrt +3.8 K (inside) but ΔTs −6.9 K (beyond −6 K).
-  The model raises Tmrt by about 0.54 K per K of surface cooling, against about 0.8 in Middel's
-  measurements (+4 K Tmrt for −4 to −6 K surface). The likely reason is that walls reflect no shortwave in this
-  model, so sunshine bounced off building faces onto people is missing.
+  here. The new coating (α 0.25) gives ΔTs −4.8 K (inside) but ΔTmrt +2.9 K (short);
+  α 0.30, the brief's step, gives ΔTmrt +4.1 K (inside) but ΔTs −6.8 K (beyond −6 K).
+  The model raises Tmrt by about 0.60 K per K of surface cooling, against about 0.8 in Middel's
+  measurements (+4 K Tmrt for −4 to −6 K surface). Diffuse wall reflection (added engine-wide in #8, wall albedo
+  0.3) moved the new coating's ΔTmrt from +2.6 K to +2.9 K, toward the band but not into it: the
+  extra sunshine the walls bounce onto people is now in the model, but walls here are scattered, not mirrors, and
+  the wall term uses one albedo and a half-sunlit wall for every street (an engine assumption).
 - **Permeable pavers.** At d = 0 the model is just short of the −15 K end of Li 2013's range (−14.6 K);
   at d = 1 it is just beyond the −7 K end (−7.5 K). Two things drive the d = 1 miss:
-  (1) the albedo step 0.12 → 0.26 alone makes dry pavers (d = 7) −4.2 K cooler than asphalt, so most of the
+  (1) the albedo step 0.12 → 0.26 alone makes dry pavers (d = 7) −4.1 K cooler than asphalt, so most of the
   d = 1 difference is the albedo floor and only the rest is moisture; (2) τ = 1 d, which the brief describes as
   "calibrated to Li 2013", does not reproduce Li in this model: τ ≈ 0.8 d would (d = 0 −14.6 K, d = 1 −6.7 K).
   τ = 1 d is the approved brief value and is kept; it is not re-calibrated. The pavers' μ (870, an engine assumption
@@ -258,11 +298,11 @@ Notes on the rows outside:
 ### Who cools the walkers
 
 At 15:00 the share of route sample points (every 2 m along both pavements of every walker route) where a person's
-Tmrt is 65 °C or more — the sweat-cue threshold — is 67.9% Before, 63.7% After, and
-67.9% for After **without the young street trees** (mean Tmrt 63.9, 63.4 and 64.0 °C).
+Tmrt is 65 °C or more — the sweat-cue threshold — is 69.9% Before, 66.3% After, and
+69.9% for After **without the young street trees** (mean Tmrt 65.0, 64.5 and 65.2 °C).
 **The drop in sweating walkers After comes entirely from the young trees.** The roofs do not touch pedestrians, nobody
 walks on the coated road, and the sponge measures and reflective paving alone leave walkers as hot or slightly hotter
-(the lighter pavers add +3.6 K Tmrt at noon). Shade is what cools people; the young-trees card says so.
+(the lighter pavers add +3.7 K Tmrt at noon). Shade is what cools people; the young-trees card says so.
 The trees' crown size (radius 2.6 m, centre 4.4 m) is an engine (scene) assumption, their transmission 0.47 the
 brief's mid value, and their kerb-side placement a design choice of this invented block.
 
@@ -275,13 +315,13 @@ water than the material holds after rain (storage values: brief, or engine assum
 | Material | storage mm | d = 0 | d = 1 | d = 2 | d = 3 | d = 4 | d = 5 | d = 6 | d = 7 | sum d = 0–7 |
 |---|---|---|---|---|---|---|---|---|---|---|
 | `greenroof` | 30 | 3.5 | 3.0 | 2.7 | 2.4 | 2.2 | 2.1 | 1.9 | 1.8 | 19.7 |
-| `pavers` | 5 | 3.3 | 1.1 | 0.5 | 0.2 | 0.2 | 0.1 | 0.1 | 0.1 | 5.6 |
-| `porousAsphalt` | 5 | 4.1 | 1.4 | 0.6 | 0.3 | 0.2 | 0.2 | 0.1 | 0.1 | 7.0 |
-| `raingarden` | 40 | 6.3 | 5.1 | 4.2 | 3.7 | 3.3 | 3.0 | 2.8 | 2.7 | 31.2 |
+| `pavers` | 5 | 3.3 | 1.2 | 0.5 | 0.2 | 0.2 | 0.1 | 0.1 | 0.1 | 5.8 |
+| `porousAsphalt` | 5 | 4.2 | 1.4 | 0.6 | 0.3 | 0.2 | 0.2 | 0.1 | 0.1 | 7.1 |
+| `raingarden` | 40 | 6.6 | 5.3 | 4.4 | 3.8 | 3.4 | 3.1 | 2.9 | 2.8 | 32.3 |
 
 The daily check holds, but only because the brief's "a few mm" for pavers and porous asphalt is read as 5 mm: porous
-asphalt evaporates up to 4.07 mm and pavers 3.26 mm at d = 0, so a storage of 4 mm would fail for porous
-asphalt and 3 mm for both. Summed over a whole dry week, `pavers` (5.6 mm vs 5 mm) and `porousAsphalt` (7.0 mm vs 5 mm) evaporate more than they hold: the decay rule does not stop when the stored water runs out, and the dry evaporative fraction (0.02) keeps drawing a little water. The excess is small and comes after the surfaces are effectively dry, but it is a known inconsistency of the simple rule.
+asphalt evaporates up to 4.15 mm and pavers 3.33 mm at d = 0, so a storage of 4 mm would fail for porous
+asphalt and 3 mm for both. Summed over a whole dry week, `pavers` (5.8 mm vs 5 mm) and `porousAsphalt` (7.1 mm vs 5 mm) evaporate more than they hold: the decay rule does not stop when the stored water runs out, and the dry evaporative fraction (0.02) keeps drawing a little water. The excess is small and comes after the surfaces are effectively dry, but it is a known inconsistency of the simple rule.
 
 ### Sensitivity (block 2)
 
@@ -291,10 +331,10 @@ asphalt and 3 mm for both. Summed over a whole dry week, `pavers` (5.6 mm vs 5 m
 | aged cool roof α 0.70 (top of aged range) | coolRoof, 15:00, d = 3 | −19.7 | −24.0 |
 | green roof α 0.15 | greenRoof, 15:00, d = 3 | −13.4 | −11.9 |
 | green roof α 0.25 | greenRoof, 15:00, d = 3 | −13.4 | −14.8 |
-| pavers μ 1200 (as asphalt; μ is an engine assumption) | pavers, 15:00, d = 0 | −14.6 | −15.8 |
+| pavers μ 1200 (as asphalt; μ is an engine assumption) | pavers, 15:00, d = 0 | −14.6 | −15.9 |
 | pavers μ 1200, d = 1 | pavers, 15:00, d = 1 | −7.5 | −8.7 |
-| young-tree transmission 0.37 (LAI 2) | trees, 15:00, d = 3 | −5.7 | −6.6 |
-| young-tree transmission 0.61 (LAI 1) | trees, 15:00, d = 3 | −5.7 | −4.5 |
+| young-tree transmission 0.37 (LAI 2) | trees, 15:00, d = 3 | −5.8 | −6.7 |
+| young-tree transmission 0.61 (LAI 1) | trees, 15:00, d = 3 | −5.8 | −4.6 |
 
 ## Sponge city
 
@@ -312,10 +352,259 @@ unverified on the card. Rain, runoff and flooding are not modelled.
 - **Reflective (cool) pavement cools the road, not the person.** The model's Tmrt already includes sunshine reflected
   up from the ground, so a lighter street raises a pedestrian's midday Tmrt while its surface cools (Middel et al.
   2020 measured about +4 K Tmrt and −4 to −6 K surface in Los Angeles). The card says so and pairs it with shade.
-  Walls reflect no shortwave in this model, so the real effect on pavements next to buildings is under-estimated
-  (Middel saw +20–30 W m⁻² on sidewalks in the evening).
+  Walls now reflect sunshine diffusely (wall albedo 0.3, half the wall taken as sunlit; #8), so light bounced onto
+  the pavements from building faces is included in a simple, street-averaged form (Middel saw +20–30 W m⁻² on
+  sidewalks in the evening).
 - **Porous asphalt is hotter when dry.** It is darker (α 0.08) and lighter-weight than dense asphalt, so it only
   cools in the first day or two after rain (Li et al. 2013: dry porous asphalt about +5 K).
 - **Pavers are lighter, so they also reflect more sun onto people** at midday once dry; the pavers card shows ΔTmrt.
 - **Ageing:** a coating that starts at 0.26 is about 0.18 after a year (Ko et al. 2022); in-service cool roofs often sit
   below their aged rating (LBNL-6714E). The page defaults to aged values.
+
+## Block 3: glass CBD
+
+The third block (`cities/glass-cbd`) is an invented 400 m CBD block: glass curtain-wall towers (40–120 m) along Meridian
+Avenue, a small plaza around the 80 m Plaza Tower, and stone-clad mid-rise blocks either side of Silk Lane. Its research
+brief is [`docs/research/cbd-brief.md`](research/cbd-brief.md). Canyons: Exchange Street between the Guild Building
+(60 m) and the Exchange Tower (120 m), H/W 2.6; Silk Lane, 30 m and 26 m stone walls 12 m apart, H/W 2.3.
+The rows south and east of the plaza are kept low so the avenue and plaza stay in view (an isometric view from the
+south-east hides any street floor behind a building taller than the street is wide).
+
+- **Glass type** (`?glass=clear|lowe|mirror`, buttons, `G`): every curtain wall in the block uses the chosen glass;
+  the page opens on solar-control low-e glass. Each type is its own model run, so changing it re-runs the model.
+- **Model run.** Block 3 starts each run with 6 coarse days (10-min steps) before the 1-min days, to bring the deep
+  temperature close sooner; the convergence test is unchanged and counts only 1-min days (this run: 3 days,
+  final max |ΔTd| = 0.007 K); it lands at least as close to a 30-day reference run as the plain start (checked in
+  `tests/unit/cbd.test.mjs`).
+  The horizon scan uses 32 directions here (16 in blocks 1 and 2).
+- **Air temperature is fixed**, as in blocks 1 and 2: canyon air heating, AC waste heat and the air warming measured in
+  reflection zones are not modelled.
+
+### Glass parameters
+
+| Glass | reflectance ρ₀ (head-on) | ρ at 45° / 70° / 80° | solar absorptance a_g | outer emissivity ε |
+|---|---|---|---|---|
+| Clear float glass (`clear`) | 0.08 [fresnel] *cited value* (Fresnel calculation, n = 1.52, two surfaces: 0.082) | 0.10 / 0.27 / 0.54 | 0.1 [brief3] *cited value*, unverified (brief: a_g 0.1 for clear glass, marked an assumption) | 0.84 [en673] *cited value*, unverified |
+| Solar-control low-e glass (`lowe`) | 0.2 [brief3] *cited range*, unverified (brief range 0.15-0.35; no datasheet checked (LBNL IGDB) [igdb]) | 0.21 / 0.37 / 0.60 | 0.3 [brief3] *edge of cited range*, unverified (brief: 0.3-0.45 for coated glass, marked an assumption) | 0.84 [en673] *cited value*, unverified (outer surface; the low-e coating faces the cavity) |
+| Reflective (mirror) glass (`mirror`) | 0.35 [brief3] *cited range*, unverified (brief range 0.25-0.45; no datasheet checked (LBNL IGDB) [igdb]) | 0.36 / 0.49 / 0.68 | 0.4 [brief3] *cited range*, unverified (brief: 0.3-0.45 for coated glass, marked an assumption) | 0.84 [en673] *cited value*, unverified |
+
+Wall and glass constants: wall albedo α_w 0.3 [brief3] *cited range*, unverified (opaque walls; brief: 0.3 (0.2-0.5, Oke range unverified); SOLWEIG uses 0.5 [wallenberg2026]); sunlit share of a wall f_lit 0.5 [engine] *engine assumption (no source)*, unverified (share of a wall in sun, f_lit, for the diffuse wall-reflection term (not used for glass temperature, which follows the brief));
+glass outside film coefficient h_o 20 [brief3] *cited range*, unverified (outside film coefficient h_o, brief 15-25 W m-2 K-1); inside film coefficient h_i 7.7 [iso6946] *interpretation of the source*, unverified (inside film coefficient h_i,eff, W m-2 K-1, read as 1 / 0.13).
+Singapore caps the daylight reflectance of façade glass at 20% [bca]; the low-e value sits at that cap.
+
+### Street canyons
+
+Sky view factor at the centre of an endless canyon is 1/√(1 + (2H/W)²). The engine's horizon scan (mean cos² of the
+horizon elevation) reproduces it in the limit; at page settings (2.5 m steps, 160 m reach) it is coarser:
+
+| H/W | 1/√(1+(2H/W)²) | scan in the limit (180 directions, 0.25 m) | block 3 page (32 directions) | blocks 1–2 page (16 directions) |
+|---|---|---|---|---|
+| 1 | 0.447 | 0.450 | 0.489 | 0.484 |
+| 2 | 0.243 | 0.244 | 0.262 | 0.253 |
+| 3 | 0.164 | 0.165 | 0.173 | 0.154 |
+| 5 | 0.100 | 0.100 | 0.096 | 0.071 |
+
+| Canyon | H/W | floor SVF (model) | endless canyon | floor at 15:00 in shade | open surface at 15:00 | floor at 05:00 | open surface at 05:00 | night lag |
+|---|---|---|---|---|---|---|---|---|
+| Silk Lane (stone) | 2.3 | 0.23 | 0.21 | not in shade | 55.2 °C | 29.9 °C | 27.7 °C | +2.3 K |
+| Exchange Street (asphalt) | 2.6 | 0.39 | 0.19 | 48.6 °C (reflection off 42.0 °C) | 63.5 °C | 27.4 °C | 27.6 °C | −0.2 K |
+
+"Open surface" is a reference cell of the same material with SVF 1 and no shade or walls, run on the same design day.
+The floors' SVF sits above the endless-canyon value because the streets are short and open at their ends.
+
+- **Night lag is an engine result** (the spec's +2 to +6 K band is engine-derived): at night walls are held at air + 2 K
+  (they store no heat), so the lag comes only from walls replacing the cold sky, less the heat the floor missed while
+  shaded by day. Exchange Street, shaded most of the day, ends up no warmer than open asphalt at 05:00.
+- **Oke (1981)** [oke1981]: calm-night maximum urban–rural *air* difference ≈ 7.45 + 3.97 ln(H/W) K, about 10.8 K at
+  H/W 2.3. It compares city air with rural air, not one surface with another, and the coefficients come from a secondary
+  source (unverified); Theeuwes et al. (2014) [theeuwes2014] show it breaks down at high H/W. Quoted on the canyon card, not modelled.
+- **Daytime:** Fez (H/W about 10) was about 6 K, up to 10 K, cooler than open streets by day (Johansson 2006) [johansson2006].
+  Exchange Street's floor is in shade at 15:00 but got about two hours of sun around noon and, in the early afternoon, the reflected
+  sun of the Exchange Tower's west face; it reads 48.6 °C, outside the brief's 34–40 °C for shaded paving
+  (with the reflection off: 42.0 °C). Block 1's shaded paving is outside the same band (see above).
+
+### Glass optics
+
+Fresnel reflectance of an uncoated float-glass pane, n = 1.52, two surfaces, non-absorbing, with multiple reflections
+between the surfaces, computed per polarisation and then averaged (unpolarised sun) [fresnel]:
+
+| θ | brief | Fresnel (this model) | clear (ρ₀ 0.08) | low-e (ρ₀ 0.20) | mirror (ρ₀ 0.35) |
+|---|---|---|---|---|---|
+| 0° | 0.082 | 0.082 | 0.080 | 0.200 | 0.350 |
+| 45° | 0.1 | 0.097 | 0.096 | 0.214 | 0.361 |
+| 60° | 0.17 | 0.157 | 0.155 | 0.265 | 0.403 |
+| 70° | 0.3 | 0.275 | 0.274 | 0.369 | 0.487 |
+| 75° | 0.41 | 0.385 | 0.384 | 0.464 | 0.565 |
+| 80° | 0.56 | 0.544 | 0.543 | 0.603 | 0.677 |
+
+The brief's table is a little higher at 60–80° (0.41 vs 0.385 at 75°): it matches applying the two-surface
+formula 2R/(1 + R) to the polarisation-averaged single-surface R. Both are inside the acceptance band at 75° (0.41 ± 0.03).
+Coated glass keeps the clear-glass angular shape, scaled so that ρ(0) = ρ₀ and ρ(90°) = 1:
+ρ(θ) = ρ₀·(1 − ρ̄(θ)) + ρ̄(θ), ρ̄(θ) = (R(θ) − R(0))/(1 − R(0)). This is the EnergyPlus form for coated glass [energyplus]
+(origin given there as Finlayson et al. 1993, WINDOW 4.0 documentation, LBL-33943; not checked), with two differences:
+the engine uses exact normalised Fresnel for ρ̄ instead of EnergyPlus's 4th-order polynomial fit in cos θ (largest
+difference 0.032 at 84°, the fit is a little lower), and EnergyPlus switches to a bronze-glass curve when the normal
+transmittance is ≤ 0.645 (likely for low-e and mirror products), while the engine always uses the clear shape. LBNL finds
+coated glass up to about 8% off the clear-glass shape at 60°. **At grazing incidence every glass reflects strongly**: at 15:00 the sun is
+at azimuth 261°, so the south faces are lit at about 84° and reflect 0.7–0.8 of the beam whatever the glass type.
+
+### Specular reflection
+
+Single bounce of the direct beam off every sunlit glass façade [brief3]: mirrored sun vector s′ = s − 2(s·n)n (same
+altitude, mirrored azimuth); for each ground sample p, if the ray from p along s′ first hits glass of façade f at a point
+that is itself in sun (both rays tested against every other building, clipped to the space in front of the façade, and
+crowns transmitting as for shade), p receives ρ(θ)·I_b·sinβ on the ground and a person there an extra beam ρ(θ)·I_b
+(S_str += a_k·f_p·ρ·I_b). The reflected beam is evaluated where it reaches the ground (z = 0), not at a person's height,
+a negligible shift (about 1 m along the beam). Coverage across the façade normal is clipped analytically: a sample stands
+for a square, and a strip thinner than a sample (grazing incidence) is counted with its true area, so no façade lights more
+ground than its unobstructed area A·cosθ/sinβ (checked in the block, 8:00–17:00). Samples: 2 × 2 per 5 m cell, every 10-min sun slot, only under each sunlit façade's reflected
+beam (the projection of the façade along −s′, landing up to H/tanβ away). Reflections land on the ground only (not on
+lower roofs). Flat façades do not focus: no point gets more than Σ ρ(θ)·I_b·sinβ over the façades that face it.
+
+Flat-ground checks (one 50 m × 60 m glass face on open ground, low-e glass):
+
+| Case | θ | ρ(θ) | ρ I_b sinβ (W m⁻²) | lit cell (W m⁻²) | H/tanβ | far edge (0.5 m cells) | energy closure, 0.5 m cells | energy closure, page sampling (2.5 m) |
+|---|---|---|---|---|---|---|---|---|
+| W face, 15:00 | 50.0° | 0.224 | 150.6 | 150.6 | 51.3 m | 51.3 m | 1.000 | 1.000 |
+| S face, 12:00 | 75.9° | 0.486 | 445.4 | 445.4 | 15.2 m | 15.3 m | 1.000 | 1.000 |
+| S face, 15:00 | 84.4° | 0.762 | 513.1 | 513.1 | 51.3 m | 51.7 m | 1.000 | 1.000 |
+| E face, 10:00 | 60.7° | 0.270 | 211.8 | 211.8 | 36.1 m | 36.1 m | 1.000 | 1.000 |
+| E face, 12:00 | 88.5° | 0.936 | 858.0 | 858.0 | 15.2 m | 16.8 m | 1.000 | 1.000 |
+
+At grazing incidence the spot is a thin strip (a south face at 84° throws a strip only 7.7 m deep but over
+50 m long), so the far edge along the mirrored azimuth moves in large steps per cell; measured as a distance in front of the
+façade it is within one cell (see the acceptance table).
+
+### Reflection spots (glass types)
+
+A cell is in a reflection spot when it receives at least 0.05 of the direct beam off glass (r ≥ 0.05). ΔTmrt
+compares the same glass with the specular bounce switched off (same glass temperatures), same cells.
+
+| Glass | Hour | spot cells | mean r | mean ΔTmrt | max ΔTmrt | Tmrt, spots in shade | plain shade | sun | spots in sun |
+|---|---|---|---|---|---|---|---|---|---|
+| Clear float glass | 12:00 | 450 | 0.35 | +9.7 K | +22.7 K | 48.0 °C (48) | 38.6 °C | 66.3 °C | 74.9 °C |
+| Clear float glass | 15:00 | 753 | 0.22 | +6.6 K | +22.8 K | 45.0 °C (252) | 39.6 °C | 70.6 °C | 77.4 °C |
+| Solar-control low-e glass | 12:00 | 450 | 0.40 | +11.1 K | +24.5 K | 50.4 °C (48) | 38.8 °C | 66.5 °C | 76.5 °C |
+| Solar-control low-e glass | 15:00 | 767 | 0.30 | +8.9 K | +24.0 K | 48.6 °C (256) | 39.9 °C | 70.8 °C | 79.5 °C |
+| Reflective (mirror) glass | 12:00 | 450 | 0.47 | +12.8 K | +26.8 K | 53.1 °C (48) | 38.9 °C | 66.6 °C | 78.3 °C |
+| Reflective (mirror) glass | 15:00 | 769 | 0.40 | +11.7 K | +25.6 K | 52.7 °C (258) | 40.1 °C | 70.9 °C | 81.9 °C |
+
+Field comparison: Chengdu, Chunxi Road (August 2023), reflection zones Tmrt +4 to +13 °C, air +1–2 °C, UTCI +2–5 °C,
+peak Tmrt 73.9 °C [du2025]. SOLWEIG with reflective walls also puts the highest Tmrt in front of sunlit façades [wallenberg2026].
+Reflective façades lower cooling energy but raise canyon UTCI [chen2024]; low-emissivity glass can cut Tmrt by up to 5 K
+in simulation [sanagar2025] (not modelled: glass emissivity is 0.84 for every type here).
+
+### Walkers and the sweat cue
+
+Walkers' route cost treats a reflection spot by its Tmrt: a class sits between building shade (w_b) and sun (1) in
+proportion to where its mean Tmrt sits between plain shade and plain sun at that hour, w = w_b + (1 − w_b)(Tmrt − Tmrt_shade)/(Tmrt_sun − Tmrt_shade)
+(*engine assumption* built on [melnikov]); spots in sun weigh more than 1. At 15:00 (low-e) the weights are 0.885 for a spot in shade and 1.045
+for a spot in sun (building shade 0.840). People per m² of walkable ground at 15:00: plain shade 1.770, spots in shade 1.346,
+all spots 0.764, sun 1.420 (per 1000 m²). The sweat cue follows Tmrt (65 → 70 °C) for anyone in sun or in a
+reflection spot; shaded spots stay below 65 °C here, so in practice it shows in sunlit spots.
+
+### Diffuse wall reflection (all blocks)
+
+Added engine-wide in #8 (see Equations). Bound check at the top of the wall-albedo range (α_w 0.5): the extra daily
+shortwave on the canyon floors is 21% (Silk Lane) and 9% (Exchange Street); at 15:00 17% and 17%
+(the spec allows up to 30%; with the shipped 0.3 these are three fifths as large). It changed blocks 1 and 2 a little:
+shaded paving and pavements near walls warm most (block 1 shaded paving at 15:00 went from 40.6 to 41.6 °C), and the block 2 coating's
+pedestrian ΔTmrt rose from +2.6 to +2.9 K at noon (toward Middel's +3 to +5 K, still just short).
+
+### Glass surface temperature
+
+T_g = Ta + a_g·I_f/(h_o + h_i), I_f = I_b·max(0, cos θ) + 0.5·D per façade orientation (the brief's equation, a sunlit façade taken as fully lit; *assumption*,
+no measurement found): at 15:00 on a face lit head-on, Ta + 3.3 K (clear) to Ta + 13.4 K (mirror); ≈ Ta at night. Glass walls emit
+ε_g·σT_g⁴ and reflect (1 − ε_g)·σTa⁴; each cell's wall view is split into opaque and glass (per orientation) by the horizon scan:
+in each direction the building that sets the horizon takes that direction's wall view through the face the ray enters
+(*engine assumption*: lower walls in front of it are not counted separately).
+
+### AC rejected heat (information only)
+
+Rejected heat = Q_cool·(1 + 1/COP) (at COP 3, 100 W of cooling rejects about 133 W). Dense urban areas 20–70 W m⁻² of
+ground area, occasionally > 100 [xie2016]; central Tokyo > 400 W m⁻² by day [sailor2011]. No figure per m² of CBD office
+floor was found. **The air temperature is fixed, so this heat is not felt in this model**: it is not added to any
+surface temperature or Tmrt; the overlay only marks rooftop plant.
+
+### Model vs acceptance bands (block 3)
+
+| Check (spec #8) | Model | Band | Source | |
+|---|---|---|---|---|
+| Canyon SVF, H/W 1: horizon scan in the limit minus 1/√(1+(2H/W)²) | +0.003 | -0.02 to 0.02 | brief3 | inside |
+| Canyon SVF, H/W 2: horizon scan in the limit minus 1/√(1+(2H/W)²) | +0.001 | -0.02 to 0.02 | brief3 | inside |
+| Canyon SVF, H/W 3: horizon scan in the limit minus 1/√(1+(2H/W)²) | +0.001 | -0.02 to 0.02 | brief3 | inside |
+| Canyon SVF, H/W 5: horizon scan in the limit minus 1/√(1+(2H/W)²) | +0.000 | -0.02 to 0.02 | brief3 | inside |
+| Fresnel, clear glass, ρ(0°) | +0.082 | 0.077 to 0.087 | fresnel | inside |
+| Fresnel, clear glass, ρ(75°) | +0.385 | 0.38 to 0.44 | fresnel | inside |
+| Flat ground, W face at 15:00 (θ 50°): lit cell irradiance / ρ(θ) I sinβ − 1 | +0.000 | -0.01 to 0.01 | brief3 | inside |
+| Flat ground, W face at 15:00 (θ 50°): far edge in front of the façade minus (H/tanβ) along the mirrored azimuth (m, 0.5 m cells) | +0.04 | -0.5 to 0.5 | brief3 | inside |
+| Flat ground, W face at 15:00 (θ 50°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | +0.000 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, W face at 15:00 (θ 50°): energy closure − 1 at the page's 2.5 m sampling | +0.000 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, S face at 12:00 (θ 76°): lit cell irradiance / ρ(θ) I sinβ − 1 | +0.000 | -0.01 to 0.01 | brief3 | inside |
+| Flat ground, S face at 12:00 (θ 76°): far edge in front of the façade minus (H/tanβ) along the mirrored azimuth (m, 0.5 m cells) | +0.17 | -0.5 to 0.5 | brief3 | inside |
+| Flat ground, S face at 12:00 (θ 76°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | +0.000 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, S face at 12:00 (θ 76°): energy closure − 1 at the page's 2.5 m sampling | +0.000 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, S face at 15:00 (θ 84°): lit cell irradiance / ρ(θ) I sinβ − 1 | +0.000 | -0.01 to 0.01 | brief3 | inside |
+| Flat ground, S face at 15:00 (θ 84°): far edge in front of the façade minus (H/tanβ) along the mirrored azimuth (m, 0.5 m cells) | +0.05 | -0.5 to 0.5 | brief3 | inside |
+| Flat ground, S face at 15:00 (θ 84°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | +0.000 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, S face at 15:00 (θ 84°): energy closure − 1 at the page's 2.5 m sampling | +0.000 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, E face at 10:00 (θ 61°): lit cell irradiance / ρ(θ) I sinβ − 1 | +0.000 | -0.01 to 0.01 | brief3 | inside |
+| Flat ground, E face at 10:00 (θ 61°): far edge in front of the façade minus (H/tanβ) along the mirrored azimuth (m, 0.5 m cells) | +0.00 | -0.5 to 0.5 | brief3 | inside |
+| Flat ground, E face at 10:00 (θ 61°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | +0.000 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, E face at 10:00 (θ 61°): energy closure − 1 at the page's 2.5 m sampling | +0.000 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, E face at 12:00 (θ 89°): lit cell irradiance / ρ(θ) I sinβ − 1 | +0.000 | -0.01 to 0.01 | brief3 | inside |
+| Flat ground, E face at 12:00 (θ 89°): far edge in front of the façade minus (H/tanβ) along the mirrored azimuth (m, 0.5 m cells) | +0.17 | -0.5 to 0.5 | brief3 | inside |
+| Flat ground, E face at 12:00 (θ 89°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | +0.000 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, E face at 12:00 (θ 89°): energy closure − 1 at the page's 2.5 m sampling | +0.000 | -0.03 to 0.03 | brief3 | inside |
+| In the block: largest lit ground area of any façade / its unobstructed area (8:00–17:00) | +1.000 | ≤ 1 | brief3 | inside |
+| Clear float glass, 12:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 105) | +5.2 K | 1 to 6 | brief3 | inside |
+| Clear float glass, 15:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 453) | +3.9 K | 1 to 6 | brief3 | inside |
+| Solar-control low-e glass, 12:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 105) | +5.9 K | 1 to 6 | brief3 | inside |
+| Solar-control low-e glass, 15:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 538) | +6.6 K | 1 to 6 | brief3 | **outside** |
+| Reflective (mirror) glass, 12:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 90) | +6.9 K | 1 to 6 | brief3 | **outside** |
+| Reflective (mirror) glass, 15:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 121) | +6.3 K | 1 to 6 | brief3 | **outside** |
+| Clear float glass, 12:00: mean ΔTmrt over all spot cells (r ≥ 0.05, n 450), read against the same band | +9.7 K | 1 to 6 | brief3 | **outside** |
+| Clear float glass, 15:00: mean ΔTmrt over all spot cells (r ≥ 0.05, n 753), read against the same band | +6.6 K | 1 to 6 | brief3 | **outside** |
+| Solar-control low-e glass, 12:00: mean ΔTmrt over all spot cells (r ≥ 0.05, n 450), read against the same band | +11.1 K | 1 to 6 | brief3 | **outside** |
+| Solar-control low-e glass, 15:00: mean ΔTmrt over all spot cells (r ≥ 0.05, n 767), read against the same band | +8.9 K | 1 to 6 | brief3 | **outside** |
+| Reflective (mirror) glass, 12:00: mean ΔTmrt over all spot cells (r ≥ 0.05, n 450), read against the same band | +12.8 K | 1 to 6 | brief3 | **outside** |
+| Reflective (mirror) glass, 15:00: mean ΔTmrt over all spot cells (r ≥ 0.05, n 769), read against the same band | +11.7 K | 1 to 6 | brief3 | **outside** |
+| Largest ΔTmrt in any spot cell, any glass, 12:00 or 15:00 | +26.8 K | ≤ 13 | du2025 | **outside** |
+| Wall term at a_w 0.5: extra daily shortwave on the Silk Lane floor (share) | +0.209 | 0 to 0.3 | brief3 | inside |
+| Wall term at a_w 0.5: extra daily shortwave on the Exchange Street floor (share) | +0.089 | 0 to 0.3 | brief3 | inside |
+| Night lag, Silk Lane (H/W 2.3) floor minus open stone, 05:00 | +2.3 K | 2 to 6 | engine | inside |
+| Exchange Street (H/W 2.6) floor in shade at 15:00 (°C) | 48.6 °C | 34 to 40 | brief | **outside** |
+| Walkers at 15:00: people per m² in shaded spots / in plain shade | +0.760 | ≤ 0.999 | melnikov | inside |
+
+11 of 45 checks fall outside their band. They are reported, not tuned away: every input stays at its cited value or inside its cited range.
+
+Notes on the rows outside:
+
+- **Spot ΔTmrt for ρ 0.1–0.3 and the +13 K ceiling.** The spec band counts the reflected share of the beam r = ρ(θ). The
+  model's rise comes from three parts: the reflected beam on the person, the extra sunshine the ground reflects up, and
+  the ground under the spot warming (low-e, 15:00: mean shaded-spot paving +3.6 K against reflection off).
+  The mean for r 0.1–0.3 is inside for clear glass and just above +6 K for the coated glasses (low-e at 15:00
+  +6.6 K over 538 cells); over all spot cells every glass type and hour is above +6 K (rows above). The maximum
+  (+26.8 K, reflective (mirror) glass, 12:00, a sunlit cell: Tmrt 65.6 → 92.5 °C) is far above Chengdu's +13 K.
+  That cell is lit by 2 façades: the North Tower's S face (θ 75.9°, ρ 0.582) and the Exchange Tower's E face (θ 88.5°, ρ 0.948, 63% of the cell). Façades lit at grazing angles reflect over half the beam for any glass.
+  The glass here is ideally flat and frameless; mullions, frames and pane distortion that break up grazing reflections in
+  real curtain walls are not modelled. Not tuned: ρ₀, a_g and the Fresnel shape stay at their cited values.
+- **Exchange Street shaded floor at 15:00** is above 34–40 °C for the reasons in "Street canyons" (noon sun and reflected
+  glare earlier in the afternoon; the engine's shaded paving also runs warm in block 1).
+
+### Disclosures (block 3)
+
+- **Wind:** one site wind speed (1.5 m/s) sets convection everywhere; no channelling along canyons, no vortices, no
+  tower downdraughts, no sheltering.
+- **Air temperature is fixed:** no canyon air heat island, no warming of air in reflection zones (Chengdu: +1–2 °C), no AC
+  waste heat.
+- **AC heat is shown, not felt** (see above).
+- **Second bounce ignored:** light reflected twice (off the opposite glass) carries ρ² of the beam, 0.04–0.16 of the first
+  bounce for ρ 0.2–0.4 at normal incidence, more at grazing angles.
+- **Concave façades are out of scope:** flat façades cannot focus. 20 Fenchurch Street (2013) focused up to a simulated
+  3,384 W m⁻² (worst 4,176) [zhu2018]; the Vdara pool deck (2010) is anecdotal [vdara]; in scale models concave façades
+  raised pedestrian sunshine by more than 300% [speroni2022]. The extreme-case card says so.
+- Reflections land on ground only; lower roofs next to towers receive none. Glass reflects only specularly here (its
+  diffuse part is ignored) and opaque walls only diffusely.
+- Low-e and mirror reflectances, all absorptances, glass emissivity and the glass temperature balance are unverified
+  (no datasheet or measurement was found).

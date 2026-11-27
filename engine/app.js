@@ -11,6 +11,13 @@ import { GLOSSARY, gl, glossaryStats, rangeLine, termsFor } from './glossary.js'
 import { isRetrofit, sceneState, stateMaterials, runShared, resolveId, MEASURES, measureStats, waterBudget, ALIASES, D_MAX, D_DEFAULT } from './retrofit.js';
 import { retrofitNotes, measureCard, tradeoffCard, spongeCard, drawDivider } from './retroui.js';
 import { sunSlots } from './thermal.js';
+import { GLASS, GLASS_IDS, GLASS_DEFAULT } from './materials.js';
+import { isGlass, glassSetup, glassShade, spotStats, spotClasses, openReference, canyonStats } from './cbd.js';
+import { cbdNotes, canyonCard, glassCard, spotCard, acCard, extremeCard, CBD_CARDS } from './cbdui.js';
+import { classDensity } from './life.js';
+import { glassRho, FACE_N } from './reflect.js';
+import { sunVector } from './sun.js';
+import { isGlassFace } from './kit.js';
 
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
@@ -35,16 +42,30 @@ function hashCanvas(ctx, w, h) {
  * A view: one drawn state of a scene (block 1 has one; a retrofit block has
  * Before and After) with its world, model, display list, walkers and renderer.
  */
-function makeView(id, sc, world, thermal, canvas) {
+function makeView(id, sc, world, thermal, canvas, glass = null) {
   const display = drawWorld(world, sc.seed);
   const shadeCache = new Map();
-  const shadeFor = (hq) => {
-    if (!shadeCache.has(hq)) shadeCache.set(hq, shadeClassField(world, thermal.sun(hq)));
-    return shadeCache.get(hq);
-  };
-  const life = new Life(sc, shadeFor, (h) => thermal.air(h));
+  const view = { id, scene: sc, world, thermal, display };
+  // glass block: reflection spots (2 m grid) join the shade classes (cbd.js glassShade)
+  const gs = glass ? glassShade(world, () => view.thermal, glass.type) : null;
+  const shadeFor = gs
+    ? gs.shadeFor
+    : (hq) => {
+      if (!shadeCache.has(hq)) shadeCache.set(hq, shadeClassField(world, view.thermal.sun(hq)));
+      return shadeCache.get(hq);
+    };
+  const life = new Life(sc, shadeFor, (h) => view.thermal.air(h));
   const R = new Renderer(canvas, world, display, thermal, life);
-  return { id, scene: sc, world, thermal, display, shadeFor, life, R };
+  if (gs) {
+    R.spotFor = gs.spotFor;
+    R.glass = glass.type();
+  }
+  /** Glass type changed: drop spot, shade and walker caches. */
+  view.resetGlass = () => {
+    if (gs) gs.reset();
+    life.plans.clear();
+  };
+  return Object.assign(view, { shadeFor, spotFor: gs ? gs.spotFor : null, life, R });
 }
 
 export function boot(scene, root = document) {
@@ -65,12 +86,25 @@ export function boot(scene, root = document) {
     aged: q.get('materials') !== 'new',
     swap: q.get('swap') === '1',
   };
+  // glass block (block 3): glass type from ?glass=, default low-e
+  const glassMode = isGlass(scene);
+  let glassSet = null;
+  const glassQ = { type: GLASS_IDS.includes(q.get('glass')) ? q.get('glass') : GLASS_DEFAULT, ac: q.get('ac') === '1' };
+  const glassNow = { type: glassQ.type }; // read by the view's spot field
   if (!retro) {
     world = buildWorld(scene);
     t1 = performance.now();
-    thermal = runModel(world);
+    if (glassMode) {
+      const ta = performance.now();
+      const slots = sunSlots(world);
+      const tb = performance.now();
+      glassSet = glassSetup(world, slots);
+      const tc = performance.now();
+      thermal = glassSet.model(glassQ.type);
+      glassSet.timing = { slotsMs: tb - ta, reflMs: tc - tb, runMs: performance.now() - tc };
+    } else thermal = runModel(world);
     t2 = performance.now();
-    V = { main: makeView('main', scene, world, thermal, canvas) };
+    V = { main: makeView('main', scene, world, thermal, canvas, glassMode ? { type: () => glassNow.type } : null) };
   } else {
     // Before and After share buildings: the After world reuses the horizon
     // scan and building shade masks, and its model reuses every Before cell
@@ -102,6 +136,10 @@ export function boot(scene, root = document) {
   }
   // the view the single-state code paths (notes, glossary, block 1) use
   const main = V.main ?? V.after;
+  // ?glint=0 (checks): no glint wash in the day view; spots still act on walkers
+  if (glassMode && q.get('glint') === '0') main.R.spotFor = null;
+  // ?spotskip=0 (checks): draw the glint on every tile, without the bounding-box skip
+  if (glassMode && q.get('spotskip') === '0') main.R.spotSkip = false;
   const R = main.R;
   const display = main.display;
   const t3 = performance.now();
@@ -122,6 +160,8 @@ export function boot(scene, root = document) {
     // retrofit only: which state is drawn, divider position (share of width),
     // sides swapped (After on the left), days since rain, aged materials
     ...(retro ? retroQ : {}),
+    // glass block only: glass type, AC overlay
+    ...(glassMode ? { glass: glassQ.type, ac: glassQ.ac } : {}),
   };
   if (q.get('ui') === '0') root.body.classList.add('noui');
   if (q.has('hour')) S.hour = Math.round(clamp(parseFloat(q.get('hour')) || 0, 0, 23.75) / 0.25) * 0.25;
@@ -138,7 +178,46 @@ export function boot(scene, root = document) {
   // model values used in notes and cards
   const P = scene.probes;
   const at = (k, h) => thermal.tsAt(P[k][0], P[k][1], h);
-  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : block1Notes();
+  // glass block: canyon segments for the cards, notes and glossary
+  const CANYONS = glassMode ? scene.canyons : null;
+  const openRefs = new Map();
+  const openRef = (mat) => {
+    if (!openRefs.has(mat)) openRefs.set(mat, openReference(scene, mat));
+    return openRefs.get(mat);
+  };
+  const canyons = () => ({ lane: canyonStats(world, thermal, CANYONS.lane, openRef('stone')), deep: canyonStats(world, thermal, CANYONS.deep, openRef('asphalt')) });
+  /** Incidence angle (deg) on a face of a building at hour h, or 90 if the face is turned away. */
+  const incidence = (face, h) => {
+    const s = thermal.sun(h);
+    if (s.alt <= 0) return 90;
+    const sv = sunVector(s.alt, s.az);
+    const c = sv[0] * FACE_N[face][0] + sv[1] * FACE_N[face][1];
+    return c > 0 ? Math.acos(c) / (Math.PI / 180) : 90;
+  };
+  /** Tmrt means at 15:00 by class (no reflection-off run needed). */
+  const spotTmrt = (h = 15) => {
+    const c = spotClasses(world, thermal, h);
+    const m = (a) => a.reduce((x, i) => x + thermal.tmrt(i, h), 0) / Math.max(1, a.length);
+    return { tmrtShade: m(c.shade), tmrtSun: m(c.sun), tmrtSpotShade: m(c.spotShade), tmrtSpotSun: m(c.spotSun), nSpotShade: c.spotShade.length, glassName: GLASS[S.glass].name.toLowerCase() };
+  };
+  function cbdNoteData() {
+    const lane = canyonStats(world, thermal, CANYONS.lane, openRef('stone'));
+    const st = spotTmrt(15);
+    const tower = world.buildings.find((b) => b.id === 't3');
+    const sp = world.cellIndex(P.spotStreet[0], P.spotStreet[1]);
+    return {
+      glass: S.glass,
+      spotTmrt: thermal.tmrt(sp, 15),
+      shadeTmrt: st.tmrtShade,
+      towerName: tower.name,
+      rhoNow: glassRho(GLASS[S.glass].rho0.value, incidence('S', 15)),
+      laneHw: lane.hw,
+      lane05: lane.ts05,
+      lag05: lane.lag05,
+      plaza15: at('plaza', 15),
+    };
+  }
+  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : block1Notes();
   function block1Notes() {
   const notesText = {
     asphalt: ['Kiln Street, old asphalt (albedo 0.12):', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
@@ -162,7 +241,9 @@ export function boot(scene, root = document) {
     const k = clamp((f - S.since) / FADE, 0, 1);
     return S.thermal ? k : 1 - k;
   };
-  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people, scrub: S.scrub });
+  // glass block: its tall façades make a day tile slower to bake (about 7 ms),
+  // so a slider drag bakes one tile per frame instead of two
+  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people, scrub: S.scrub, ac: !!S.ac, budget: glassMode ? 1 : undefined });
 
   // ---- sizing ------------------------------------------------------------------------------
   const resize = () => {
@@ -384,10 +465,84 @@ export function boot(scene, root = document) {
     card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
   }
   function reopenCard() {
-    if (card._measure) {
+    if (card._measure && card._measure.startsWith('cbd:')) {
+      card.innerHTML = cbdCardHtml(card._measure.slice(4));
+      card.querySelector('.x').onclick = hideCard;
+    } else if (card._measure) {
       card.innerHTML = measureHtml(card._measure);
       card.querySelector('.x').onclick = hideCard;
     } else if (card._pick) showCard(card._pick);
+  }
+
+  // ---- glass controls (block 3): glass type, AC overlay, cards ---------------------------
+  const glassUi = glassMode ? buildGlassUi() : null;
+  function buildGlassUi() {
+    const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
+    root.body.insertAdjacentHTML(
+      'beforeend',
+      `<div id="glass" aria-label="Glass controls">
+        <div class="seg" role="group" aria-label="Glass type"><span>${gl('curtainWall', 'glass')}:</span>${GLASS_IDS.map((id) => btn('data-glass', id, { clear: 'clear', lowe: 'low-e', mirror: 'mirror' }[id])).join('')}</div>
+        <div class="seg">${btn('data-ac', '1', 'AC heat overlay', 'aria-pressed="false"')}</div>
+        <div class="measures"><div class="hand">Cards</div>${CBD_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'extreme' || id === 'spot' ? 'class="warn"' : '')).join('')}</div>
+      </div>`,
+    );
+    const el = root.getElementById('glass');
+    el.addEventListener('click', (e) => {
+      const b = e.target.closest ? e.target.closest('button') : null;
+      if (!b) return;
+      if (b.dataset.glass) setGlass(b.dataset.glass);
+      else if (b.dataset.ac) setAc(!S.ac);
+      else if (b.dataset.card) showCbdCard(b.dataset.card, b);
+    });
+    return { el };
+  }
+  function syncGlass() {
+    if (!glassUi) return;
+    for (const b of glassUi.el.querySelectorAll('[data-glass]')) b.setAttribute('aria-pressed', String(b.dataset.glass === S.glass));
+    glassUi.el.querySelector('[data-ac]').setAttribute('aria-pressed', String(!!S.ac));
+    root.body.dataset.glass = S.glass;
+  }
+  function setGlass(g) {
+    if (!GLASS_IDS.includes(g) || g === S.glass) return;
+    S.glass = g;
+    glassNow.type = g;
+    thermal = glassSet.model(g);
+    main.thermal = thermal;
+    main.resetGlass();
+    R.setGlass(g, thermal);
+    notes = cbdNotes(scene, cbdNoteData());
+    syncGlass();
+    if (card.dataset.open === '1') reopenCard();
+    if (S.paused) draw();
+  }
+  function setAc(on) {
+    S.ac = !!on;
+    syncGlass();
+    if (S.paused) draw();
+  }
+  function cbdCardHtml(id) {
+    if (id === 'canyon') return canyonCard(canyons());
+    if (id === 'spot') return spotCard(spotStats(glassSet, world, S.glass, 15), S.glass);
+    if (id === 'ac') return acCard();
+    if (id === 'extreme') return extremeCard();
+    const g = id.slice(6);
+    const tower = world.buildings.find((b) => b.id === 't3');
+    const face = { name: `${tower.name}, south face`, face: 'S', theta15: incidence('S', 15), tg15: glassSet.model(g).glassTemp('S', 15) };
+    return glassCard(g, { h12: spotStats(glassSet, world, g, 12), h15: spotStats(glassSet, world, g, 15) }, face);
+  }
+  function showCbdCard(id, anchor) {
+    if (id === 'ac') setAc(true);
+    card.innerHTML = cbdCardHtml(id);
+    card.querySelector('.x').onclick = hideCard;
+    card._pick = null;
+    card._measure = `cbd:${id}`;
+    card.dataset.open = '1';
+    card.dataset.kind = id;
+    card.style.display = 'block';
+    const r = anchor ? anchor.getBoundingClientRect() : { top: 120 };
+    const panel = glassUi.el.getBoundingClientRect();
+    card.style.left = `${Math.min(window.innerWidth - card.offsetWidth - 10, panel.right + 12)}px`;
+    card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
   }
 
   const toggleThermal = () => {
@@ -402,6 +557,7 @@ export function boot(scene, root = document) {
     const k = e.key;
     if (k === 't' || k === 'T') toggleThermal();
     else if (retro && (k === 'b' || k === 'B')) swapStates();
+    else if (glassMode && (k === 'g' || k === 'G')) setGlass(GLASS_IDS[(GLASS_IDS.indexOf(S.glass) + (k === 'g' ? 1 : GLASS_IDS.length - 1)) % GLASS_IDS.length]);
     else if (k === 'h') setHour(S.hour + 1);
     else if (k === 'H') setHour(S.hour - 1);
     else if (k === 'n' || k === 'N') S.notes = !S.notes;
@@ -571,10 +727,24 @@ export function boot(scene, root = document) {
         };
       }
     }
+    // shortwave parts on the ground cell now (wall reflection, all blocks; glass, block 3)
+    const sw = tmrtCell !== null ? thermal.shortwave(tmrtCell, h) : null;
+    let glassInfo = null;
+    if (p.kind === 'building' && p.B.glass) {
+      const g = GLASS[S.glass];
+      const faces = ['S', 'E', 'W', 'N'].filter((f) => isGlassFace(p.B, f)).map((f) => {
+        const th = incidence(f, h);
+        return { face: f, theta: th, rho: th < 90 ? glassRho(g.rho0.value, th) : null, tg: thermal.glassTemp(f, h) };
+      });
+      glassInfo = { id: S.glass, name: g.name, rho0: g.rho0, absorb: g.absorb, eps: g.eps, faces };
+    }
     return {
       title,
       state: view.id,
       compare,
+      glass: glassInfo,
+      wallsNow: sw ? sw.walls : null,
+      glassNow: sw ? sw.glass : null,
       matId: resolveId(mat, S.aged),
       material: m.name,
       params: Object.fromEntries(paramKeys(m).map((k) => [k, m[k]])),
@@ -607,7 +777,7 @@ export function boot(scene, root = document) {
       : P.mu
         ? `<tr><td>${gl('admittance', 'admittance μ')}</td><td>${P.mu.value} J m⁻² s⁻½ K⁻¹${tag(P.mu)}</td></tr>`
         : '';
-    const srcs = [...new Set(Object.values(d.params).map((v) => v.source))];
+    const srcs = [...new Set(Object.values(d.params).map((v) => v.source).concat(d.glass ? [d.glass.rho0.source, d.glass.absorb.source, d.glass.eps.source] : []))];
     // wetted materials: value at the current days since rain, with the wet / dry ends and τ
     const efCell = P.ef.atD !== undefined ? `${P.ef.value.toFixed(2)} at ${gl('daysSinceRain', `d = ${P.ef.atD}`)}${tag(P.ef)}` : `${P.ef.value}${tag(P.ef)}`;
     const wet = [
@@ -636,9 +806,17 @@ export function boot(scene, root = document) {
         <tr class="t"><td>surface 15:00 / ${gl('nightLag', '23:00')}</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
         ${d.groundNow !== null ? `<tr><td>ground beneath now</td><td>${fmt(d.groundNow)} °C</td></tr>` : ''}
         ${d.tmrtNow !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} (person) now / 15:00</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
+        ${d.wallsNow !== null ? `<tr><td>sun off the ${gl('wallReflection', 'walls')} now</td><td>${Math.round(d.wallsNow)} W m⁻²</td></tr>` : ''}
+        ${d.glassNow !== null && glassMode ? `<tr><td>sun off the ${gl('specular', 'glass')} now</td><td>${Math.round(d.glassNow)} W m⁻²</td></tr>` : ''}
         <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
         ${cmp}
       </table>
+      ${d.glass ? `<table>
+        <tr><td colspan="2" class="sub">${gl('curtainWall', 'Curtain wall')}: ${d.glass.name}</td></tr>
+        <tr><td>reflectance ρ₀ head-on</td><td>${d.glass.rho0.value}${tag(d.glass.rho0)}</td></tr>
+        ${d.glass.faces.map((f) => `<tr><td>${f.face} face now</td><td>${f.rho !== null ? `${gl('fresnel', `ρ ${f.rho.toFixed(2)}`)} at θ ${Math.round(f.theta)}°` : 'not in sun'} · glass ${fmt(f.tg)} °C</td></tr>`).join('')}
+        <tr><td>glass ${gl('emissivity', 'ε')} / absorptance</td><td>${d.glass.eps.value}${tag(d.glass.eps)} / ${d.glass.absorb.value}${tag(d.glass.absorb)}</td></tr>
+      </table>` : ''}
       <p class="note">${d.note}</p>
       ${d.caveat ? `<p class="caveat">${d.caveat}</p>` : ''}
       ${d.prescribed ? `<p class="caveat">${d.prescribed}</p>` : ''}
@@ -670,7 +848,7 @@ export function boot(scene, root = document) {
   const terms = $('terms');
   const termsBtn = $('termsBtn');
   // retrofit: footnote numbers come from the Before state (the old block)
-  const gstats = retro ? glossaryStats(V.before.world, V.before.thermal) : glossaryStats(world, thermal);
+  const gstats = retro ? glossaryStats(V.before.world, V.before.thermal) : glassMode ? glossaryStats(world, thermal, { canyon: canyonStats(world, thermal, CANYONS.lane, openRef('stone')), spot: spotTmrt(15) }) : glossaryStats(world, thermal);
   let fnPinned = false;
   let fnByFocus = false;
   let fnTrigger = null;
@@ -829,6 +1007,7 @@ export function boot(scene, root = document) {
   };
   syncUi();
   syncRetro();
+  syncGlass();
   draw();
   requestAnimationFrame(loop);
 
@@ -846,6 +1025,7 @@ export function boot(scene, root = document) {
       intro: INTRO,
       views: Object.keys(V),
       changedCells: retro ? V.after.thermal.info.changed : 0,
+      ...(glassSet ? glassSet.timing : {}),
     },
     /** Pure seek: render frame N with an optional camera {z,cx,cy}; pauses the clock. */
     seek(frame, cam) {
@@ -979,6 +1159,37 @@ export function boot(scene, root = document) {
      * of them (as the controls do); measures with Before / After numbers;
      * card HTML; daily evaporated water per wetted material and d.
      */
+    /**
+     * Glass block (block 3) only: state {glass, ac}; set() them; spot numbers
+     * (with the reflection-off comparison); card HTML; walker density by class.
+     */
+    glass: glassMode
+      ? {
+        state: () => ({ glass: S.glass, ac: !!S.ac }),
+        set(o) {
+          if (o.glass !== undefined) setGlass(o.glass);
+          if (o.ac !== undefined) setAc(o.ac);
+        },
+        spot: (h = 15, g = S.glass) => {
+          const st = spotStats(glassSet, world, g, h);
+          delete st.spots;
+          return st;
+        },
+        canyons: () => {
+          const c = canyons();
+          for (const v of Object.values(c)) delete v.cells;
+          return c;
+        },
+        html: (id) => cbdCardHtml(id),
+        show: (id) => showCbdCard(id, root.querySelector(`#glass [data-card="${id}"]`)),
+        density: (frame = S.frame, hour = S.hour) => {
+          const hq = quantHour(hour);
+          return classDensity(world, main.life.at(frame / 60, hq), main.shadeFor(hq));
+        },
+        models: () => glassSet.cached(),
+        reflAt: (x, y, h = S.hour) => thermal.refl(world.cellIndex(x, y), h),
+      }
+      : null,
     retro: retro
       ? {
         state: () => ({ state: S.state, split: S.split, swap: S.swap, d: S.d, aged: S.aged }),

@@ -25,6 +25,25 @@ export const SOURCES = {
   ko2022: 'Ko et al. (2022) Environ. Res. Lett. 17 044027, cool pavement at neighbourhood scale, albedo 0.26 -> 0.18 in one year',
   mccoll: 'McColl et al. (2017) Geophys. Res. Lett., doi 10.1002/2017GL072819, global soil-moisture drydown timescales',
   middel2021: 'Middel et al. (2021) Bull. Amer. Meteor. Soc., doi 10.1175/BAMS-D-20-0193.1, shade and Tmrt in Phoenix',
+  brief3: 'Research brief docs/research/cbd-brief.md (block 3; values compiled from the sources below, items marked unverified there are flagged here)',
+  fresnel: 'Fresnel equations for uncoated float glass, n = 1.52, two surfaces (computed); LBNL (Furler; Rubin et al.): ASHRAE-style angular fit within 1.5% for clear glass, coated glass up to about 8% off at 60 deg',
+  energyplus: 'EnergyPlus Engineering Reference, Window Calculation Module, Angular Properties for Coated Glass: R(phi) = R(0) (1 - rho_bar(phi)) + rho_bar(phi), rho_bar a normalised clear-glass curve (polynomial fit in cos phi); origin given as Finlayson et al. 1993, WINDOW 4.0 documentation, LBL-33943 (not checked)',
+  igdb: 'LBNL International Glazing Database (IGDB) suggested for product reflectances; no datasheet was checked for the low-e or mirror values',
+  bca: 'Singapore BCA Approved Document, Section P: glass daylight reflectance at most 20% (via the block-3 brief)',
+  en673: 'EN 673 glass outer-surface emissivity about 0.84 (via the block-3 brief)',
+  iso6946: 'EN ISO 6946 internal surface resistance 0.13 m2 K W-1, i.e. about 7.7 W m-2 K-1 (from memory)',
+  oke1981: 'Oke (1981) J. Climatol. 1, 237-254, doi 10.1002/joc.3370010304: max nocturnal UHI = 7.45 + 3.97 ln(H/W) (coefficients via a secondary source, redalyc 283230157011)',
+  theeuwes2014: 'Theeuwes et al. (2014) Q. J. R. Meteorol. Soc., doi 10.1002/qj.2289: the Oke relation breaks down at high H/W',
+  johansson2006: 'Johansson (2006) Building and Environment, doi 10.1016/j.buildenv.2005.05.022: Fez deep canyon (H/W about 10) about 6 K, up to 10 K, cooler by day',
+  zhu2018: 'Zhu, Jahn & Rein (2018) J. Building Performance Simulation, doi 10.1080/19401493.2018.1538389: 20 Fenchurch St simulated peak 3,384 W m-2 (worst 4,176)',
+  vdara: 'Vdara hotel, Las Vegas, 2010 pool-deck hot zone (NBC News; Architectural Record): anecdotal',
+  speroni2022: 'Speroni et al. (2022) Sustainability 14, 5781, doi 10.3390/su14105781 (abstract only): scale models, diffuse façades <= +30%, flat mirror > +100%, concave > +300% at pedestrian level',
+  du2025: 'Du et al. (2025) J. Harbin Inst. Tech. 57(9), doi 10.11918/202406062: Chengdu Chunxi Road, Aug 2023, reflection zones Tmrt +4 to +13 C, air +1-2 C, UTCI +2-5 C, peak Tmrt 73.9 C',
+  chen2024: 'Chen et al. (2024) Energy and Buildings, doi 10.1016/j.enbuild.2024.114926: reflective façades lower cooling energy but raise canyon UTCI',
+  sanagar2025: 'Sanagar Darbani et al. (2025) Developments in the Built Environment, doi 10.1016/j.dibe.2025.100758: low-emissivity glass cuts Tmrt by up to 5 K (simulation)',
+  wallenberg2026: 'Wallenberg et al. (2026) Geosci. Model Dev. 19, 1321, doi 10.5194/gmd-19-1321-2026: SOLWEIG wall albedo 0.5 with reflected shortwave; highest Tmrt in front of sunlit façades',
+  xie2016: 'Xie et al. (2016) Atmos. Chem. Phys. 16, 6071, doi 10.5194/acp-16-6071-2016: dense urban anthropogenic heat 20-70 W m-2 of ground area, occasionally > 100',
+  sailor2011: 'Sailor (2011) Int. J. Climatol., doi 10.1002/joc.2106, anthropogenic heat review; Sailor et al. (2015) citing Ichinose (1999): central Tokyo > 400 W m-2 by day',
   sponge2015: 'State Council General Office (2015) Guiding Opinions on Promoting Sponge City Construction, Guo Ban Fa [2015] No. 75 (English notice, gov.cn, 2015-10-16; reprint waizi.org.cn/law/6860.html; MOHURD interpretation via cs.com.cn; the primary Chinese text was not located)',
 };
 
@@ -218,6 +237,36 @@ Object.assign(MATERIALS, {
   },
 });
 
+// ---- block 3: glass presets ---------------------------------------------------
+// rho0: normal-incidence solar reflectance (the angular shape is Fresnel, see
+// reflect.js); absorb: solar absorptance of the pane (glass temperature);
+// eps: outer-surface longwave emissivity.
+export const GLASS = {
+  clear: {
+    name: 'Clear float glass',
+    rho0: v(0.08, 'fresnel', 'cited', true, 'Fresnel calculation, n = 1.52, two surfaces: 0.082'),
+    absorb: v(0.1, 'brief3', 'cited', false, 'brief: a_g 0.1 for clear glass, marked an assumption'),
+    eps: v(0.84, 'en673', 'cited', false),
+    note: 'Ordinary clear glass reflects only about 8% of the sun head-on, but far more at a glancing angle (Fresnel).',
+  },
+  lowe: {
+    name: 'Solar-control low-e glass',
+    rho0: v(0.2, 'brief3', 'range', false, 'brief range 0.15-0.35; no datasheet checked (LBNL IGDB) [igdb]'),
+    absorb: v(0.3, 'brief3', 'edge', false, 'brief: 0.3-0.45 for coated glass, marked an assumption'),
+    eps: v(0.84, 'en673', 'cited', false, 'outer surface; the low-e coating faces the cavity'),
+    note: 'A coated glass that turns away much of the sun; at 0.20 it sits at the Singapore cap for daylight reflectance.',
+  },
+  mirror: {
+    name: 'Reflective (mirror) glass',
+    rho0: v(0.35, 'brief3', 'range', false, 'brief range 0.25-0.45; no datasheet checked (LBNL IGDB) [igdb]'),
+    absorb: v(0.4, 'brief3', 'range', false, 'brief: 0.3-0.45 for coated glass, marked an assumption'),
+    eps: v(0.84, 'en673', 'cited', false),
+    note: 'A metallic coating makes the tower a mirror: it keeps sun out of the offices and throws more of it onto the street.',
+  },
+};
+export const GLASS_IDS = ['clear', 'lowe', 'mirror'];
+export const GLASS_DEFAULT = 'lowe';
+
 /** Model constants shared by thermal.js and life.js. */
 export const MODEL = {
   hc: v('5.7 + 3.8 u', 'oke', 'cited'),
@@ -231,6 +280,11 @@ export const MODEL = {
   youngTreeTransmission: v(0.47, 'brief2', 'interp', false, 'exp(-0.5 LAI) with LAI 1.5; brief range 0.37-0.61 for LAI 1-2'),
   youngTreeCrown: v('crown radius 2.6 m, crown centre 4.4 m', 'engine', 'engine', false, 'scene assumption for newly planted street trees (cities/sponge-retrofit/scene.js)'),
   latentHeat: v('2.45e6 J kg-1', 'brief2', 'cited', true, 'evaporated depth = sum of EF x max(Q*, 0) x dt / 2.45e6'),
+  wallAlbedo: v(0.3, 'brief3', 'range', false, 'opaque walls; brief: 0.3 (0.2-0.5, Oke range unverified); SOLWEIG uses 0.5 [wallenberg2026]'),
+  wallLit: v(0.5, 'engine', 'engine', false, 'share of a wall in sun, f_lit, for the diffuse wall-reflection term (not used for glass temperature, which follows the brief)'),
+  wallReflection: v('K_wr = a_w (1 - SVF) K_wall', 'brief3', 'interp', false, 'K_wall = f_lit I cos(beta)/pi + 0.5 D + 0.5 a_g G; SOLWEIG form a_w G (1 - psi) recalled from memory in the brief'),
+  glassHo: v(20, 'brief3', 'range', false, 'outside film coefficient h_o, brief 15-25 W m-2 K-1'),
+  glassHi: v(7.7, 'iso6946', 'interp', false, 'inside film coefficient h_i,eff, W m-2 K-1, read as 1 / 0.13'),
   sweatCue: v('Tmrt 65 -> 70 C', 'engine', 'engine', false, 'visual cue only: droplets on people in sun, strength rising from Tmrt 65 C to full at 70 C (separates sunlit pavement from sunlit lawn in this model); no physiological model'),
 };
 

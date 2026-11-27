@@ -19,6 +19,10 @@ const THERMAL_WALL = hexRgb('#e7dfcd');
 const NIGHT_RGB = hexRgb('#27355a');
 const LIT = hexRgb('#f4cf7a');
 const SWEAT_CSS = 'rgba(143,182,207,0.95)';
+// glass pane colours by type (day view), and the reflection-spot glint
+export const GLASS_RGB = { clear: hexRgb('#7d9ea6'), lowe: hexRgb('#8ea4b8'), mirror: hexRgb('#b9c3c6') };
+const GLINT = [255, 246, 214];
+const AC_INK = hexRgb('#8a2f22');
 
 function makeCanvas(w, h) {
   if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(w, h);
@@ -99,6 +103,20 @@ export class Renderer {
     this.shown = {};
     this.pins = {}; // mode -> Set of `z|hour|dpr` the scrub preview needs
     this.clip = null; // [x0, x1] device px: draw only this vertical band (split view)
+    this.glass = 'lowe'; // glass type (block 3): pane colours
+    this.spotFor = null; // (hq) -> reflection spot field on the 2 m grid, or null (block 3)
+    const hs = Math.max(0, ...world.buildings.map((b) => b.h + (b.chimney ? b.chimney[2] - b.h : 0)));
+    this.topMargin = Math.max(40, hs + 8); // m above ground that tiles must cover
+  }
+
+  /** New glass type (block 3): pane colours, spots and heat change, so drop every cached bake. */
+  setGlass(g, thermal) {
+    this.glass = g;
+    if (thermal) this.thermal = thermal;
+    this.tiles.clear();
+    this.hourCache.clear();
+    this.tmrtCache = null;
+    this.scaffold = null;
   }
 
   /** New model results (days since rain changed): drop heat-dependent caches. */
@@ -160,6 +178,8 @@ export class Renderer {
       lightE: light([1, 0]),
       canopyT: this.thermal.canopyTemp(hq),
       heatImg: null,
+      spot: up && this.spotFor ? this.spotFor(hq) : null,
+      spotImg: null,
     };
     this.hourCache.set(hq, ctxh);
     if (this.hourCache.size > 40) this.hourCache.delete(this.hourCache.keys().next().value);
@@ -263,6 +283,87 @@ export class Renderer {
     return hc.heatImg;
   }
 
+  /** Reflection spots as an alpha image (2 m pixels, world-aligned): alpha grows with r up to r = 0.4. */
+  spotImage(hc) {
+    if (hc.spotImg || !hc.spot) return hc.spotImg;
+    const { n, r, cell } = hc.spot;
+    const img = makeCanvas(n, n);
+    const g = img.getContext('2d');
+    const d = g.createImageData(n, n);
+    // bounding box of the spots on the drawing plane (P units), to skip tiles without any
+    let p0 = Infinity;
+    let p1 = -Infinity;
+    let q0 = Infinity;
+    let q1 = -Infinity;
+    for (let i = 0; i < n * n; i++) {
+      if (r[i] > 0) {
+        for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) {
+          const [px, py] = iso(((i % n) + dx) * cell, (Math.floor(i / n) + dy) * cell, 0);
+          if (px < p0) p0 = px;
+          if (px > p1) p1 = px;
+          if (py < q0) q0 = py;
+          if (py > q1) q1 = py;
+        }
+      }
+      const a = clamp(r[i] / 0.4, 0, 1);
+      d.data[i * 4] = GLINT[0];
+      d.data[i * 4 + 1] = GLINT[1];
+      d.data[i * 4 + 2] = GLINT[2];
+      d.data[i * 4 + 3] = Math.round(255 * (a > 0 ? 0.25 + 0.75 * a : 0));
+    }
+    g.putImageData(d, 0, 0);
+    hc.spotImg = { img, R: hc.spot.cell, bb: [p0 - 2, q0 - 2, p1 + 2, q1 + 2] };
+    return hc.spotImg;
+  }
+
+  /** Day view: pale glint wash over the reflection spots, with a fine ink hatch. */
+  drawSpots(g, hc, Z, ox, oy, bb) {
+    const si = this.spotImage(hc);
+    if (!si) return;
+    const s0 = si.bb;
+    if (bb && this.spotSkip !== false && (s0[2] < bb[0] || s0[0] > bb[2] || s0[3] < bb[1] || s0[1] > bb[3])) return; // no spot on this tile
+    if (!this.spotScratch) {
+      this.spotScratch = makeCanvas(TILE, TILE);
+      this.hatchScratch = makeCanvas(TILE, TILE);
+      const p = makeCanvas(8, 8);
+      const pc = p.getContext('2d');
+      pc.strokeStyle = rgbCss(INK);
+      pc.lineWidth = 0.8;
+      pc.beginPath();
+      pc.moveTo(-1, 9);
+      pc.lineTo(9, -1);
+      pc.stroke();
+      this.hatchTile = p;
+    }
+    const s = this.spotScratch.getContext('2d');
+    s.setTransform(1, 0, 0, 1, 0, 0);
+    s.clearRect(0, 0, TILE, TILE);
+    const R = si.R;
+    s.setTransform(Z * ISO_C * R, Z * ISO_S * R, -Z * ISO_C * R, Z * ISO_S * R, ox, oy);
+    s.imageSmoothingEnabled = true;
+    s.imageSmoothingQuality = 'high';
+    s.drawImage(si.img, 0, 0);
+    const k = clamp(hc.sun.alt / 10, 0, 1);
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.globalCompositeOperation = 'screen';
+    g.globalAlpha = 0.45 * k;
+    g.drawImage(this.spotScratch, 0, 0);
+    g.globalCompositeOperation = 'source-over';
+    // ink hatch, clipped to the spot by its alpha
+    const hz = this.hatchScratch.getContext('2d');
+    hz.setTransform(1, 0, 0, 1, 0, 0);
+    hz.globalCompositeOperation = 'source-over';
+    hz.clearRect(0, 0, TILE, TILE);
+    hz.fillStyle = hz.createPattern(this.hatchTile, 'repeat');
+    hz.fillRect(0, 0, TILE, TILE);
+    hz.globalCompositeOperation = 'destination-in';
+    hz.drawImage(this.spotScratch, 0, 0);
+    hz.globalCompositeOperation = 'source-over';
+    g.globalAlpha = 0.4 * k;
+    g.drawImage(this.hatchScratch, 0, 0);
+    g.globalAlpha = 1;
+  }
+
   // ---- display-list replay -------------------------------------------------------
 
   /** Resolve an item's fill colour for a mode; returns rgb array or null. */
@@ -281,6 +382,7 @@ export class Renderer {
     }
     if (Array.isArray(f)) return f;
     if (f.k === 'wall') return scaleRgb(f.c, hc.light(f.n));
+    if (f.k === 'glass') return scaleRgb(mixRgb(GLASS_RGB[this.glass] ?? GLASS_RGB.lowe, f.c, 0.15), hc.light(f.n) * 1.02);
     if (f.k === 'win') return f.c;
     return null;
   }
@@ -295,6 +397,7 @@ export class Renderer {
       const b = it.bb;
       if (bb && (b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3])) continue;
       const t = it.t;
+      if (t === 'glint' && mode === 'thermal') continue;
       if (t === 'hatchS' || t === 'hatchE') {
         if (mode !== 'day') continue;
         const L = t === 'hatchS' ? hc.lightS : hc.lightE;
@@ -420,6 +523,7 @@ export class Renderer {
     } else {
       this.replay(g, ground, 'day', hc, Z, ox, oy, bb, lw);
       if (hc.shadows.length) this.drawShadows(g, hc, Z, ox, oy);
+      if (hc.spot) this.drawSpots(g, hc, Z, ox, oy, bb);
       this.replay(g, objects, 'day', hc, Z, ox, oy, bb, lw);
       if (hc.night > 0) {
         g.setTransform(1, 0, 0, 1, 0, 0);
@@ -487,7 +591,7 @@ export class Renderer {
     // world extent on the drawing plane (with margin for tall buildings)
     const minX = -S * ISO_C * Z;
     const maxX = S * ISO_C * Z;
-    const minY = -40 * ISO_Z * Z;
+    const minY = -this.topMargin * ISO_Z * Z;
     const maxY = (S + 8) * Z;
     const tx0 = Math.floor(Math.max(minX, -ox) / TILE);
     const tx1 = Math.floor(Math.min(maxX, W - ox) / TILE);
@@ -694,10 +798,12 @@ export class Renderer {
       if (intro) lifeA = clamp((f - INTRO.wash) / (INTRO.life - INTRO.wash), 0, 1);
     }
     this.stats.people = 0;
+    this.stats.ac = false;
     this.stats.sweating = 0;
     this.stats.sweatGlyphPx = 0;
     this.noteHits = [];
     if (lifeA > 0) {
+      if (look.ac) this.drawAc(ctx, f, cam, W, H, lifeA);
       if (look.people !== false) this.drawPeople(ctx, f, cam, hq, W, H, lifeA, look.thermalMix ?? 0);
       if (look.notes) this.drawNotes(ctx, cam, W, H, look.notes, lifeA);
     }
@@ -782,11 +888,78 @@ export class Renderer {
     return { tmrt: c[i], sunlit: this.thermal.sunlit(i, hq) };
   }
 
-  /** Sweat cue: hot cell (Tmrt) and the person in sun on the fine shade raster. */
+  /**
+   * Sweat cue: hot cell (Tmrt) and the person in sun on the fine shade raster.
+   * In a glass block a reflection spot counts as lit, so the cue follows Tmrt
+   * there too (class 3: spot in shade, class 4: spot in sun).
+   */
   sweatAt(a, t, hq) {
     const h = this.heatAt(a.x, a.y, hq);
-    const inSun = shadeAt(this.life.plan(hq).shade, a.x, a.y) === 0 && !this.life.plan(hq).shade.night;
-    return sweatState(a.k, t, h.tmrt, inSun ? h.sunlit : 0);
+    const sh = this.life.plan(hq).shade;
+    const c = sh.night ? -1 : shadeAt(sh, a.x, a.y);
+    const lit = c === 0 || c === 4 ? h.sunlit : c === 3 ? 1 : 0;
+    return sweatState(a.k, t, h.tmrt, lit);
+  }
+
+  /**
+   * AC overlay (block 3, information only): rooftop plant on each tall
+   * building with a rising heat plume, and one label saying the model does not
+   * feel this heat. Pure function of (frame, camera).
+   */
+  drawAc(ctx, f, cam, W, H, alpha) {
+    const [ox, oy, Z] = this.origin(cam, W, H);
+    const d = this.dpr;
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.lineCap = 'round';
+    let label = null;
+    for (const B of this.world.buildings) {
+      if (B.h < 25) continue;
+      const units = 1 + Math.floor(((B.x1 - B.x0) * (B.y1 - B.y0)) / 2500);
+      for (let u = 0; u < Math.min(3, units); u++) {
+        const x = B.x0 + (B.x1 - B.x0) * (0.25 + 0.5 * hash3(B.index, u, 61));
+        const y = B.y0 + (B.y1 - B.y0) * (0.25 + 0.5 * hash3(B.index, u, 62));
+        const p = iso(x, y, B.h + 1.5);
+        const X = ox + p[0] * Z;
+        const Y = oy + p[1] * Z;
+        if (X < -40 || X > W + 40 || Y < -80 || Y > H + 40) continue;
+        if (this.clip && (X < this.clip[0] || X > this.clip[1])) continue;
+        ctx.globalAlpha = alpha * 0.8;
+        ctx.strokeStyle = rgbCss(AC_INK);
+        ctx.lineWidth = 1.1 * d;
+        for (let k = 0; k < 3; k++) {
+          ctx.beginPath();
+          const x0 = X + (k - 1) * 4 * d;
+          for (let i = 0; i <= 10; i++) {
+            const v = i / 10;
+            const yy = Y - v * 26 * d;
+            const xx = x0 + Math.sin(v * 7 + f * 0.08 + k * 1.7 + u) * 2.2 * d * (0.4 + v);
+            if (i) ctx.lineTo(xx, yy);
+            else ctx.moveTo(xx, yy);
+          }
+          ctx.stroke();
+        }
+        if (!label || Y < label[1]) label = [X, Y - 30 * d];
+      }
+    }
+    if (label) {
+      ctx.globalAlpha = alpha;
+      ctx.font = `${Math.round(14 * d)}px "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive`;
+      ctx.textBaseline = 'bottom';
+      const text = 'AC rejected heat — not felt in this model';
+      const w = ctx.measureText(text).width;
+      const bx = clamp(label[0] - w / 2, 8 * d, W - w - 8 * d);
+      const by = Math.max(24 * d, label[1]);
+      ctx.fillStyle = 'rgba(248,243,231,0.94)';
+      ctx.fillRect(bx - 5 * d, by - 19 * d, w + 10 * d, 23 * d);
+      ctx.strokeStyle = 'rgba(138,47,34,0.7)';
+      ctx.lineWidth = 0.9 * d;
+      ctx.strokeRect(bx - 5 * d, by - 19 * d, w + 10 * d, 23 * d);
+      ctx.fillStyle = rgbCss(AC_INK);
+      ctx.fillText(text, bx, by);
+    }
+    ctx.restore();
+    this.stats.ac = !!label;
   }
 
   /**

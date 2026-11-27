@@ -218,7 +218,7 @@ test('measure cards: ΔTs and ΔTmrt at 12:00 and 15:00, unverified flags, sourc
   assert.match(text, /shade/);
   assert.match(text, /new, α 0\.25/);
   assert.match(text, /1 year, α 0\.18/);
-  assert.match(text, /walls reflect no sunlight/);
+  assert.match(text, /diffuse wall reflection/);
   const coat = await page.evaluate(() => window.atlas.retro.measure('coating').h12);
   assert.ok(coat.dTs < 0 && coat.dTmrt > 0);
   await page.click('#retro [data-measure="sponge"]');
