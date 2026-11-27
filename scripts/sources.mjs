@@ -12,6 +12,7 @@ import { base, targetRows, sensitivity, TIERS } from './regions.mjs';
 import { GLOSSARY, glossaryStats, rangeLine } from '../engine/glossary.js';
 import { base2, bandRows, water, sensitivity2, diagnostics } from './retrofit.mjs';
 import { MEASURES, D_DEFAULT, D_MAX, decay } from '../engine/retrofit.js';
+import { cbdMarkdown } from './cbd-docs.mjs';
 
 const UNITS = { mu: ' J m⁻² s⁻½ K⁻¹', muWet: ' J m⁻² s⁻½ K⁻¹', thinC: ' J m⁻² K⁻¹', tau: ' d', storage: ' mm' };
 const cell = (p, k = '') =>
@@ -139,8 +140,10 @@ Notes on the rows outside:
   here. The new coating (α 0.25) gives ΔTs ${signed(D.coatNew.dTs)} K (inside) but ΔTmrt ${signed(D.coatNew.dTmrt)} K (short);
   α 0.30, the brief's step, gives ΔTmrt ${signed(D.coat030.dTmrt)} K (inside) but ΔTs ${signed(D.coat030.dTs)} K (beyond −6 K).
   The model raises Tmrt by about ${D.ratio.toFixed(2)} K per K of surface cooling, against about 0.8 in Middel's
-  measurements (+4 K Tmrt for −4 to −6 K surface). The likely reason is that walls reflect no shortwave in this
-  model, so sunshine bounced off building faces onto people is missing.
+  measurements (+4 K Tmrt for −4 to −6 K surface). Diffuse wall reflection (added engine-wide in #8, wall albedo
+  0.3) moved the new coating's ΔTmrt from +2.6 K to ${signed(D.coatNew.dTmrt)} K, toward the band but not into it: the
+  extra sunshine the walls bounce onto people is now in the model, but walls here are scattered, not mirrors, and
+  the wall term uses one albedo and a half-sunlit wall for every street (an engine assumption).
 - **Permeable pavers.** At d = 0 the model is just short of the −15 K end of Li 2013's range (${signed(bandRows()[6].value)} K);
   at d = 1 it is just beyond the −7 K end (${signed(bandRows()[7].value)} K). Two things drive the d = 1 miss:
   (1) the albedo step 0.12 → 0.26 alone makes dry pavers (d = 7) ${signed(D.paversDry)} K cooler than asphalt, so most of the
@@ -194,8 +197,9 @@ unverified on the card. Rain, runoff and flooding are not modelled.
 - **Reflective (cool) pavement cools the road, not the person.** The model's Tmrt already includes sunshine reflected
   up from the ground, so a lighter street raises a pedestrian's midday Tmrt while its surface cools (Middel et al.
   2020 measured about +4 K Tmrt and −4 to −6 K surface in Los Angeles). The card says so and pairs it with shade.
-  Walls reflect no shortwave in this model, so the real effect on pavements next to buildings is under-estimated
-  (Middel saw +20–30 W m⁻² on sidewalks in the evening).
+  Walls now reflect sunshine diffusely (wall albedo 0.3, half the wall taken as sunlit; #8), so light bounced onto
+  the pavements from building faces is included in a simple, street-averaged form (Middel saw +20–30 W m⁻² on
+  sidewalks in the evening).
 - **Porous asphalt is hotter when dry.** It is darker (α 0.08) and lighter-weight than dense asphalt, so it only
   cools in the first day or two after rain (Li et al. 2013: dry porous asphalt about +5 K).
 - **Pavers are lighter, so they also reflect more sun onto people** at midday once dry; the pavers card shows ΔTmrt.
@@ -266,14 +270,20 @@ ${Object.entries(SOURCES).map(([k, v]) => `- **[${k}]** ${v}`).join('\n')}
   Thin layers (sheet-metal roofs) use dTs/dt = G / C with no restore term [brief].
   1-min steps; the design day repeats until max |ΔTd| < 0.05 K (at least 3 days; this scene converges after ${model.info.days} days, final max |ΔTd| = ${model.info.maxDelta.toFixed(3)} K).
   G = (1−α)·K↓ + ε·L↓ − εσTs⁴ − h_c·(Ts − Ta) − EF·max(Q*, 0). The brief writes EF·Q*; clipping at 0 is an *engine assumption* so latent heat never warms a surface at night.
-- Shortwave: K↓ = sunlit·I_b·sinβ + SVF·D, I_b = 1361·0.7^(AM^0.678) [meinel], D = 0.12·I_b·sinβ [brief]; tree shade transmits exp(−0.5·LAI) ≈ 0.17 (LAI 3.5 is an *engine assumption*).
-- Longwave: L↓ = SVF·ε_sky·σTa⁴ + (1−SVF)·σT_wall⁴, ε_sky = 1.24·(e_a/Ta)^(1/7) [brutsaert], T_wall = Ta + 2 K + 6 K·(K↓/900) (*engine assumption*, peaks at ${f1(wmax)} K + 2 K, ignores wall orientation).
+- Shortwave: K↓ = sunlit·I_b·sinβ + SVF·D + K_wr (+ r·I_b·sinβ off glass, block 3), I_b = 1361·0.7^(AM^0.678) [meinel], D = 0.12·I_b·sinβ [brief]; tree shade transmits exp(−0.5·LAI) ≈ 0.17 (LAI 3.5 is an *engine assumption*).
+- Longwave: L↓ = SVF·ε_sky·σTa⁴ + (1−SVF)·L_wall, L_wall = σT_wall⁴ for opaque walls (glass walls: block 3), ε_sky = 1.24·(e_a/Ta)^(1/7) [brutsaert], T_wall = Ta + 2 K + 6 K·(K↓/900) (*engine assumption*, peaks at ${f1(wmax)} K + 2 K, ignores wall orientation).
 - Convection: h_c = 5.7 + 3.8·u [oke], the same for roofs and ground.
 - Water: Ts = daily mean Ta − 1 K + 1 K·sin(2π(t − 9 h)/24) [brief].
 - Tree leaves: air + 2.5 K·(K↓/900) by day, air − 0.5 K at night (*engine assumption*; brief: air +0–3 K).
 - Air temperature [brief]: sinusoid with Ta,min at sunrise and Ta,max at 15:00, implemented as two half-cosines (rise and fall).
 - Sky view factor: horizon scan, SVF = mean over 16 azimuths of cos²(horizon elevation); canyon check against cos(arctan(2H/W)).
-- Mean radiant temperature [solweig], simplified six-direction sum: Tmrt = ((S_str + L_str)/(a_p·σ))^¼ − 273.15, a_k = 0.7, a_p = 0.97, f_p = 0.308·cos(β(1 − β²/48402)); walls reflect no shortwave.
+- Shortwave reflected by opaque walls (all blocks, added in #8) [brief3]: K_wr = α_w·(1 − SVF_open)·c·K_wall with
+  K_wall = f_lit·I_b·cosβ/π + 0.5·D + 0.5·α_g·G, α_w = ${MODEL.wallAlbedo.value} (*cited range*, unverified), f_lit = ${MODEL.wallLit.value} (*engine assumption*),
+  α_g the cell's own albedo, G = I_b·sinβ + D unshaded, SVF_open the building-only sky view factor and c = 1 − 0.75·crown cover
+  (as for the sky). The brief gives the SOLWEIG form α_w·G·(1 − ψ) from memory; this is an *interpretation*. Glass walls are
+  left out of it (they reflect specularly, block 3). K_wr adds to K↓ and to a person's sides.
+- Mean radiant temperature [solweig], simplified six-direction sum: Tmrt = ((S_str + L_str)/(a_p·σ))^¼ − 273.15, a_k = 0.7, a_p = 0.97, f_p = 0.308·cos(β(1 − β²/48402));
+  K_lat = 0.5·K_sky + 0.5·α·K↓ + 0.5·K_wr; glass adds a beam r·I_b from the mirrored sun (same altitude, same f_p).
 - Pedestrian route cost [melnikov]: sun distance + w_b × building-shade distance + w_t × tree-shade distance, with w_b = 1 − 0.16·s and w_t = 1 − 0.08·s.
   w_b = 0.84 at full heat is cited; w_t = 0.92 is an *interpretation* of "tree shade about half as effective"; the heat factor s rises linearly from 0 at air ≤ 26 °C to 1 at air ≥ 32 °C (*engine assumption*, not in the source). The same weights drive the sideways drift toward shade within a pavement (only when air > 28 °C).
 
@@ -296,7 +306,8 @@ Moving any one of them toward the middle of its cited range breaks it. Region me
 
 ${sensitivityMarkdown(sensitivity())}
 
-${retrofitMarkdown()}`;
+${retrofitMarkdown()}
+${cbdMarkdown()}`;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
