@@ -239,7 +239,9 @@ export function boot(scene, root = document) {
     const k = clamp((f - S.since) / FADE, 0, 1);
     return S.thermal ? k : 1 - k;
   };
-  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people, scrub: S.scrub, ac: !!S.ac });
+  // glass block: its tall façades make a day tile slower to bake (about 7 ms),
+  // so a slider drag bakes one tile per frame instead of two
+  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people, scrub: S.scrub, ac: !!S.ac, budget: glassMode ? 1 : undefined });
 
   // ---- sizing ------------------------------------------------------------------------------
   const resize = () => {

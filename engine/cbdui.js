@@ -50,7 +50,7 @@ export function canyonCard(c) {
       <tr><td>${gl('nightLag', 'night lag')}, 05:00</td><td>${K(L.lag05)}</td><td>air ${fmt(L.air05)} °C</td></tr>
     </table>
     <p class="note">Tall walls hide the street from the sun for most of the day, so its floor stays far cooler than open paving. At night the same walls hide the cold sky: the floor loses heat more slowly than open ground.</p>
-    <p class="lit">Literature: Oke (1981) found calm-night city–country air differences of about 7.45 + 3.97 ln(H/W) K, i.e. about 11.6 K at H/W 2.8 (air, not surface; coefficients from a secondary source; the relation breaks down at high H/W, Theeuwes et al. 2014). In Fez a canyon with H/W about 10 was about 6 K, up to 10 K, cooler by day (Johansson 2006).</p>
+    <p class="lit">Literature: Oke (1981) found calm-night city–country air differences of about 7.45 + 3.97 ln(H/W) K, i.e. about ${fmt(7.45 + 3.97 * Math.log(L.hw))} K at H/W ${fmt(L.hw)} (air, not surface; coefficients from a secondary source; the relation breaks down at high H/W, Theeuwes et al. 2014). In Fez a canyon with H/W about 10 was about 6 K, up to 10 K, cooler by day (Johansson 2006).</p>
     <p class="caveat">The night lag here is an engine result: walls are held at air + 2 K at night (they do not store heat), and the air temperature is fixed, so the canyon's warmer air is not modelled. One wind speed for the whole block: no channelling, vortices or tower downdraughts. Sky view factor from a 32-direction horizon scan on the 5 m grid. <span class="unv">unverified</span></p>
     ${srcLine(['oke1981', 'theeuwes2014', 'johansson2006', 'brief3'])}`;
 }

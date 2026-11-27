@@ -286,11 +286,25 @@ export class Renderer {
   /** Reflection spots as an alpha image (2 m pixels, world-aligned): alpha grows with r up to r = 0.4. */
   spotImage(hc) {
     if (hc.spotImg || !hc.spot) return hc.spotImg;
-    const { n, r } = hc.spot;
+    const { n, r, cell } = hc.spot;
     const img = makeCanvas(n, n);
     const g = img.getContext('2d');
     const d = g.createImageData(n, n);
+    // bounding box of the spots on the drawing plane (P units), to skip tiles without any
+    let p0 = Infinity;
+    let p1 = -Infinity;
+    let q0 = Infinity;
+    let q1 = -Infinity;
     for (let i = 0; i < n * n; i++) {
+      if (r[i] > 0) {
+        for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) {
+          const [px, py] = iso(((i % n) + dx) * cell, (Math.floor(i / n) + dy) * cell, 0);
+          if (px < p0) p0 = px;
+          if (px > p1) p1 = px;
+          if (py < q0) q0 = py;
+          if (py > q1) q1 = py;
+        }
+      }
       const a = clamp(r[i] / 0.4, 0, 1);
       d.data[i * 4] = GLINT[0];
       d.data[i * 4 + 1] = GLINT[1];
@@ -298,14 +312,16 @@ export class Renderer {
       d.data[i * 4 + 3] = Math.round(255 * (a > 0 ? 0.25 + 0.75 * a : 0));
     }
     g.putImageData(d, 0, 0);
-    hc.spotImg = { img, R: hc.spot.cell };
+    hc.spotImg = { img, R: hc.spot.cell, bb: [p0 - 2, q0 - 2, p1 + 2, q1 + 2] };
     return hc.spotImg;
   }
 
   /** Day view: pale glint wash over the reflection spots, with a fine ink hatch. */
-  drawSpots(g, hc, Z, ox, oy) {
+  drawSpots(g, hc, Z, ox, oy, bb) {
     const si = this.spotImage(hc);
     if (!si) return;
+    const s0 = si.bb;
+    if (bb && (s0[2] < bb[0] || s0[0] > bb[2] || s0[3] < bb[1] || s0[1] > bb[3])) return; // no spot on this tile
     if (!this.spotScratch) {
       this.spotScratch = makeCanvas(TILE, TILE);
       this.hatchScratch = makeCanvas(TILE, TILE);
@@ -507,7 +523,7 @@ export class Renderer {
     } else {
       this.replay(g, ground, 'day', hc, Z, ox, oy, bb, lw);
       if (hc.shadows.length) this.drawShadows(g, hc, Z, ox, oy);
-      if (hc.spot) this.drawSpots(g, hc, Z, ox, oy);
+      if (hc.spot) this.drawSpots(g, hc, Z, ox, oy, bb);
       this.replay(g, objects, 'day', hc, Z, ox, oy, bb, lw);
       if (hc.night > 0) {
         g.setTransform(1, 0, 0, 1, 0, 0);

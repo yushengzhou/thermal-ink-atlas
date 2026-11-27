@@ -233,7 +233,7 @@ export function walkers(g = 'lowe', hour = 15) {
  */
 export function bands3() {
   const rows = [];
-  const add = (label, value, lo, hi, src, unit = 'K') => rows.push({ label, value: Math.round(value * 100) / 100, lo, hi, unit, src, inside: (lo === null || value >= lo) && (hi === null || value <= hi) });
+  const add = (label, value, lo, hi, src, unit = 'K') => rows.push({ label, value: Math.round(value * 1000) / 1000, lo, hi, unit, src, inside: (lo === null || value >= lo) && (hi === null || value <= hi) });
   for (const r of canyonSvfRows()) add(`Canyon SVF, H/W ${r.hw}: horizon scan in the limit minus 1/√(1+(2H/W)²)`, r.fine - r.exact, -0.02, 0.02, 'brief3', '');
   add('Fresnel, clear glass, ρ(0°)', fresnelPane(0), 0.077, 0.087, 'fresnel', '');
   add('Fresnel, clear glass, ρ(75°)', fresnelPane(75), 0.38, 0.44, 'fresnel', '');

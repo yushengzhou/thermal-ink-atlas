@@ -521,24 +521,24 @@ surface temperature or Tmrt; the overlay only marks rooftop plant.
 
 | Check (spec #8) | Model | Band | Source | |
 |---|---|---|---|---|
-| Canyon SVF, H/W 1: horizon scan in the limit minus 1/√(1+(2H/W)²) | +0.000 | -0.02 to 0.02 | brief3 | inside |
-| Canyon SVF, H/W 2: horizon scan in the limit minus 1/√(1+(2H/W)²) | +0.000 | -0.02 to 0.02 | brief3 | inside |
-| Canyon SVF, H/W 3: horizon scan in the limit minus 1/√(1+(2H/W)²) | +0.000 | -0.02 to 0.02 | brief3 | inside |
+| Canyon SVF, H/W 1: horizon scan in the limit minus 1/√(1+(2H/W)²) | +0.003 | -0.02 to 0.02 | brief3 | inside |
+| Canyon SVF, H/W 2: horizon scan in the limit minus 1/√(1+(2H/W)²) | +0.001 | -0.02 to 0.02 | brief3 | inside |
+| Canyon SVF, H/W 3: horizon scan in the limit minus 1/√(1+(2H/W)²) | +0.001 | -0.02 to 0.02 | brief3 | inside |
 | Canyon SVF, H/W 5: horizon scan in the limit minus 1/√(1+(2H/W)²) | +0.000 | -0.02 to 0.02 | brief3 | inside |
-| Fresnel, clear glass, ρ(0°) | +0.080 | 0.077 to 0.087 | fresnel | inside |
-| Fresnel, clear glass, ρ(75°) | +0.390 | 0.38 to 0.44 | fresnel | inside |
+| Fresnel, clear glass, ρ(0°) | +0.082 | 0.077 to 0.087 | fresnel | inside |
+| Fresnel, clear glass, ρ(75°) | +0.385 | 0.38 to 0.44 | fresnel | inside |
 | Flat ground, W face at 15:00 (θ 50°): lit cell irradiance / ρ(θ) I sinβ − 1 | +0.000 | -0.01 to 0.01 | brief3 | inside |
 | Flat ground, W face at 15:00 (θ 50°): far edge in front of the façade minus (H/tanβ) along the mirrored azimuth (m, 0.5 m cells) | −0.47 | -0.5 to 0.5 | brief3 | inside |
-| Flat ground, W face at 15:00 (θ 50°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | +0.000 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, W face at 15:00 (θ 50°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | −0.004 | -0.03 to 0.03 | brief3 | inside |
 | Flat ground, S face at 12:00 (θ 76°): lit cell irradiance / ρ(θ) I sinβ − 1 | +0.000 | -0.01 to 0.01 | brief3 | inside |
 | Flat ground, S face at 12:00 (θ 76°): far edge in front of the façade minus (H/tanβ) along the mirrored azimuth (m, 0.5 m cells) | −0.33 | -0.5 to 0.5 | brief3 | inside |
-| Flat ground, S face at 12:00 (θ 76°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | −0.010 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, S face at 12:00 (θ 76°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | −0.005 | -0.03 to 0.03 | brief3 | inside |
 | Flat ground, S face at 15:00 (θ 84°): lit cell irradiance / ρ(θ) I sinβ − 1 | +0.000 | -0.01 to 0.01 | brief3 | inside |
 | Flat ground, S face at 15:00 (θ 84°): far edge in front of the façade minus (H/tanβ) along the mirrored azimuth (m, 0.5 m cells) | −0.45 | -0.5 to 0.5 | brief3 | inside |
-| Flat ground, S face at 15:00 (θ 84°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | −0.030 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, S face at 15:00 (θ 84°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | −0.026 | -0.03 to 0.03 | brief3 | inside |
 | Flat ground, E face at 10:00 (θ 61°): lit cell irradiance / ρ(θ) I sinβ − 1 | +0.000 | -0.01 to 0.01 | brief3 | inside |
 | Flat ground, E face at 10:00 (θ 61°): far edge in front of the façade minus (H/tanβ) along the mirrored azimuth (m, 0.5 m cells) | −0.50 | -0.5 to 0.5 | brief3 | inside |
-| Flat ground, E face at 10:00 (θ 61°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | −0.010 | -0.03 to 0.03 | brief3 | inside |
+| Flat ground, E face at 10:00 (θ 61°): energy on the ground / reflected by the façade − 1 (0.5 m cells) | −0.007 | -0.03 to 0.03 | brief3 | inside |
 | Clear float glass, 12:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 81) | +5.1 K | 1 to 6 | brief3 | inside |
 | Clear float glass, 15:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 435) | +3.8 K | 1 to 6 | brief3 | inside |
 | Solar-control low-e glass, 12:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 81) | +5.9 K | 1 to 6 | brief3 | inside |
@@ -546,11 +546,11 @@ surface temperature or Tmrt; the overlay only marks rooftop plant.
 | Reflective (mirror) glass, 12:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 80) | +6.9 K | 1 to 6 | brief3 | **outside** |
 | Reflective (mirror) glass, 15:00: mean ΔTmrt in spot cells with r 0.1–0.3 (n 102) | +6.3 K | 1 to 6 | brief3 | **outside** |
 | Largest ΔTmrt in any spot cell, any glass, 12:00 or 15:00 | +27.1 K | ≤ 13 | du2025 | **outside** |
-| Wall term at a_w 0.5: extra daily shortwave on the Silk Lane floor (share) | +0.210 | 0 to 0.3 | brief3 | inside |
-| Wall term at a_w 0.5: extra daily shortwave on the Exchange Street floor (share) | +0.090 | 0 to 0.3 | brief3 | inside |
+| Wall term at a_w 0.5: extra daily shortwave on the Silk Lane floor (share) | +0.209 | 0 to 0.3 | brief3 | inside |
+| Wall term at a_w 0.5: extra daily shortwave on the Exchange Street floor (share) | +0.089 | 0 to 0.3 | brief3 | inside |
 | Night lag, Silk Lane (H/W 2.3) floor minus open stone, 05:00 | +2.3 K | 2 to 6 | engine | inside |
 | Exchange Street (H/W 2.6) floor in shade at 15:00 (°C) | 48.4 °C | 34 to 40 | brief | **outside** |
-| Walkers at 15:00: people per m² in shaded spots / in plain shade | +0.780 | ≤ 0.999 | melnikov | inside |
+| Walkers at 15:00: people per m² in shaded spots / in plain shade | +0.777 | ≤ 0.999 | melnikov | inside |
 
 5 of 30 checks fall outside their band. They are reported, not tuned away: every input stays at its cited value or inside its cited range.
 
