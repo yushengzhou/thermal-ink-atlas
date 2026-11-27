@@ -98,6 +98,23 @@ export class Renderer {
     this.pending = {};
     this.shown = {};
     this.pins = {}; // mode -> Set of `z|hour|dpr` the scrub preview needs
+    this.clip = null; // [x0, x1] device px: draw only this vertical band (split view)
+  }
+
+  /** New model results (days since rain changed): drop heat-dependent caches. */
+  setThermal(thermal) {
+    this.thermal = thermal;
+    this.hourCache.clear();
+    this.tmrtCache = null;
+    for (const k of [...this.tiles.keys()]) if (k.startsWith('thermal|')) this.tiles.delete(k);
+  }
+
+  /** New display list (aged / new materials redrawn): drop every cached bake. */
+  setDisplay(display) {
+    this.items = display.items;
+    this.groundCount = display.groundCount;
+    this.tiles.clear();
+    this.scaffold = null;
   }
 
   // ---- hour context ------------------------------------------------------
@@ -477,7 +494,13 @@ export class Renderer {
     const ty0 = Math.floor(Math.max(minY, -oy) / TILE);
     const ty1 = Math.floor(Math.min(maxY, H - oy) / TILE);
     const out = [];
-    for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) out.push([tx, ty]);
+    const c = this.clip;
+    for (let ty = ty0; ty <= ty1; ty++) {
+      for (let tx = tx0; tx <= tx1; tx++) {
+        if (c && (ox + (tx + 1) * TILE <= c[0] || ox + tx * TILE >= c[1])) continue; // outside the split band
+        out.push([tx, ty]);
+      }
+    }
     // Tile cache cap: a 512 px tile is 1 MB, so this is about 9 hours of the
     // visible view, but never more than 160 MB (36 MB floor for tiny views).
     // On large HiDPI views 9 hours do not fit; the scrub preview then relies
@@ -637,12 +660,19 @@ export class Renderer {
     // scrub preview: at most PREVIEW_BUDGET tile bakes per frame (a tile count,
     // not a clock; what a preview frame shows still depends on the cache)
     this.scrub = !!look.scrub;
-    this.budget = this.scrub ? PREVIEW_BUDGET : Infinity;
+    this.budget = this.scrub ? (look.budget ?? PREVIEW_BUDGET) : Infinity;
+    this.clip = look.clip ?? null;
     if (!this.scrub && (Object.keys(this.pins).length || Object.keys(this.pending).length)) this.endScrub();
     this.stats.preview = false;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
+    if (this.clip) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(this.clip[0], 0, this.clip[1] - this.clip[0], H);
+      ctx.clip();
+    }
     const pat = ctx.createPattern(this.tex.paper, 'repeat');
     pat.setTransform(new DOMMatrix([1, 0, 0, 1, ((ox % 256) + 256) % 256, ((oy % 256) + 256) % 256]));
     ctx.fillStyle = pat;
@@ -671,6 +701,8 @@ export class Renderer {
       if (look.people !== false) this.drawPeople(ctx, f, cam, hq, W, H, lifeA, look.thermalMix ?? 0);
       if (look.notes) this.drawNotes(ctx, cam, W, H, look.notes, lifeA);
     }
+    if (this.clip) ctx.restore();
+    this.stats.lifeA = lifeA;
     this.stats.phase = intro && f < INTRO.pen ? 'pen' : intro && f < INTRO.wash ? 'wash' : intro && f < INTRO.life ? 'life' : 'steady';
     this.stats.frameMs = performance.now() - t0;
     return this.stats;
@@ -832,6 +864,7 @@ export class Renderer {
       const X = ox + p[0] * Z;
       const Y = oy + p[1] * Z;
       if (X < -20 || Y < -20 || X > W + 20 || Y > H + 40) continue;
+      if (this.clip && (X < this.clip[0] - 30 || X > this.clip[1] + 30)) continue;
       if (this.hidden(a.x, a.y)) continue;
       count++;
       ctx.globalAlpha = alpha;

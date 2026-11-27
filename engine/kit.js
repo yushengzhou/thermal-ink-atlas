@@ -11,11 +11,19 @@ export const GROUND_RGB = {
   stone: hexRgb('#e3d7bb'),
   grass: hexRgb('#a9b97a'),
   water: hexRgb('#87adb2'),
+  pavers: hexRgb('#c9b9a0'),
+  porousAsphalt: hexRgb('#77726d'),
+  coolPaveAged: hexRgb('#aaa59c'),
+  coolPaveNew: hexRgb('#bdb8ae'),
+  raingarden: hexRgb('#8fa56a'),
 };
 export const ROOF_RGB = {
   membrane: hexRgb('#5c5e66'),
   metal: hexRgb('#6c5f5a'),
   coolroof: hexRgb('#f3efe6'),
+  coolroofNew: hexRgb('#f3efe6'),
+  coolroofAged: hexRgb('#ddd8cc'),
+  greenroof: hexRgb('#93a865'),
 };
 const SOIL = hexRgb('#b49a77');
 const WIN = hexRgb('#5f7480');
@@ -110,18 +118,28 @@ export function drawGround(pen, world) {
     pen.tag = 'g';
     const pts = [];
     for (let i = 0; i < g.poly.length; i += 2) pts.push([g.poly[i], g.poly[i + 1], 0]);
-    const fill = jitter(GROUND_RGB[g.mat], g.id.length * 13 + pts.length, 0.04);
+    const fill = jitter(GROUND_RGB[colourId(world, g.mat)], g.id.length * 13 + pts.length, 0.04);
     let opts = { stroke: null };
     if (g.street) {
       // ink the two curbs only
       opts = g.street === 'ew' ? { edges: [true, false, true, false], lw: 1.1 } : { edges: [false, true, false, true], lw: 1.1 };
-    } else if (g.id === 'park' || g.id === 'gardens' || g.id === 'carpark') opts = { lw: 1 };
+    } else if (g.id === 'park' || g.id === 'gardens' || g.id === 'carpark' || g.outline) opts = { lw: 1 };
+    else if (g.mat === 'raingarden') opts = { lw: 0.7, a: 0.7 };
     else if (g.mat === 'water') opts = { lw: 1.3 };
     else if (g.mat === 'stone') opts = { lw: 0.5, a: 0.45 };
     else if (g.id === 'yards') opts = { lw: 1.4 };
     pen.shape(pts, fill, { ...opts, t: 'g' });
   }
 
+  if (world.scene.decor) drawDecor(pen, world, world.scene.decor);
+  else asphaltParkDecor(pen, world);
+}
+
+/** Material id used for colours (aliases such as coolPave resolve per state). */
+const colourId = (world, id) => (world.colours && world.colours[id]) || id;
+
+/** Block 1 (asphalt-park) street character, lawn texture, pond and plaza. */
+function asphaltParkDecor(pen, world) {
   // street character: old Kiln Street gets patches and cracks
   patches(pen, 4, 151, 396, 169, 16, 11);
   cracks(pen, 2, 151, 398, 169, 38, 12);
@@ -203,6 +221,98 @@ export function drawGround(pen, world) {
   groundEllipse(pen, 180, 372, 1.2, 1.2, GROUND_RGB.water, { lw: 0.5, n: 12, t: 'gm' });
 }
 
+/**
+ * Scene-driven ground marks (block 2 on): cracks, patches, centre dashes,
+ * crossings, pavement joints, car-park bays, manholes, lawn ticks and a pond
+ * rim, plus surface textures for the retrofit materials of the parcels.
+ */
+export function drawDecor(pen, world, D) {
+  const S = world.scene;
+  for (const g of S.ground) {
+    const m = g.mat;
+    const [x0, y0, x1, y1] = bboxOf(g.poly);
+    if (m === 'asphalt' && g.street) cracks(pen, x0 + 1, y0 + 1, x1 - 1, y1 - 1, Math.round(((x1 - x0) * (y1 - y0)) / 220), g.id.length * 7 + 3);
+    else if (m === 'pavers') paverJoints(pen, x0, y0, x1, y1);
+    else if (m === 'porousAsphalt') speckle(pen, x0, y0, x1, y1, Math.round(((x1 - x0) * (y1 - y0)) / 9), 41, hexRgb('#4f4a45'));
+    else if (m === 'coolPave') speckle(pen, x0, y0, x1, y1, Math.round(((x1 - x0) * (y1 - y0)) / 16), 43, hexRgb('#e9e4d8'));
+    else if (m === 'raingarden') plants(pen, x0, y0, x1, y1, g.id.length * 5 + 1);
+  }
+  for (const c of D.cracks ?? []) cracks(pen, ...c);
+  for (const p of D.patches ?? []) patches(pen, ...p);
+  for (const d of D.dashes ?? []) centreDashes(pen, ...d);
+  for (const c of D.crossings ?? []) crossing(pen, ...c);
+  for (const [x0, y0, x1, y1, along] of D.joints ?? []) sidewalkJoints(pen, x0, y0, x1, y1, along);
+  pen.tag = 'gm';
+  for (const [x, y] of D.manholes ?? []) groundEllipse(pen, x, y, 0.8, 0.8, scaleRgb(GROUND_RGB.asphalt, 0.75), { lw: 0.6, n: 12, t: 'gm' });
+  for (const [xa, xb, ya, yb] of D.bays ?? []) {
+    for (let x = xa; x <= xb; x += 6) pen.line([[x, ya], [x, yb]], { lw: 0.8, stroke: hexRgb('#efe8d6'), a: 0.7 });
+  }
+  const r = makeRng(S.seed + 21);
+  const grassInk = hexRgb('#55683a');
+  pen.tag = 'gm';
+  for (const [x0, y0, x1, y1, count] of D.lawn ?? []) {
+    for (let i = 0; i < count; i++) {
+      const x = x0 + r() * (x1 - x0);
+      const y = y0 + r() * (y1 - y0);
+      const k = world.fine.mat[Math.floor(y / 2) * world.fine.n + Math.floor(x / 2)];
+      if (world.matIds[k] !== 'grass') continue;
+      pen.line([[x - 0.35, y + 0.2], [x, y - 0.15], [x + 0.3, y + 0.25]], { lw: 0.5, stroke: grassInk, a: 0.55, over: 0.1 });
+    }
+  }
+  if (D.pond) {
+    const [cx, cy, rx, ry] = D.pond;
+    groundEllipse(pen, cx, cy, rx + 0.8, ry + 0.8, null, { lw: 0.7, a: 0.6, t: 'gm' });
+    for (const [dx, dy, w] of [[-6, -3, 3], [4, 3, 4], [8, -4, 2.5]]) {
+      pen.line([[cx + dx - w / 2, cy + dy], [cx + dx, cy + dy - 0.25], [cx + dx + w / 2, cy + dy]], { lw: 0.6, stroke: hexRgb('#e9f0ec'), a: 0.8, over: 0.2 });
+    }
+  }
+}
+
+function bboxOf(p) {
+  let x0 = Infinity;
+  let y0 = Infinity;
+  let x1 = -Infinity;
+  let y1 = -Infinity;
+  for (let i = 0; i < p.length; i += 2) {
+    x0 = Math.min(x0, p[i]);
+    x1 = Math.max(x1, p[i]);
+    y0 = Math.min(y0, p[i + 1]);
+    y1 = Math.max(y1, p[i + 1]);
+  }
+  return [x0, y0, x1, y1];
+}
+
+/** Permeable pavers: a running-bond grid of joints (gravel-filled, drawn light). */
+function paverJoints(pen, x0, y0, x1, y1) {
+  pen.tag = 'gm';
+  const ink = hexRgb('#8f7f66');
+  for (let y = y0 + 2; y < y1; y += 2) pen.line([[x0, y], [x1, y]], { lw: 0.35, stroke: ink, a: 0.4, over: 0 });
+  for (let y = y0, row = 0; y < y1; y += 2, row++) {
+    for (let x = x0 + (row % 2 ? 2 : 4); x < x1; x += 4) pen.line([[x, y], [x, Math.min(y1, y + 2)]], { lw: 0.35, stroke: ink, a: 0.35, over: 0 });
+  }
+}
+
+function speckle(pen, x0, y0, x1, y1, count, seed, ink) {
+  const r = makeRng(seed);
+  pen.tag = 'gm';
+  for (let i = 0; i < count; i++) {
+    const x = x0 + r() * (x1 - x0);
+    const y = y0 + r() * (y1 - y0);
+    pen.line([[x, y], [x + 0.3 + r() * 0.3, y + (r() - 0.5) * 0.3]], { lw: 0.5, stroke: ink, a: 0.45, over: 0 });
+  }
+}
+
+/** Rain garden planting: tufts of grasses and a pebble edge. */
+function plants(pen, x0, y0, x1, y1, seed) {
+  const r = makeRng(seed);
+  pen.tag = 'gm';
+  const ink = hexRgb('#46602f');
+  for (let x = x0 + 0.8; x < x1; x += 1.6 + r() * 1.2) {
+    const y = y0 + 0.8 + r() * (y1 - y0 - 1.6);
+    for (let k = -1; k <= 1; k++) pen.line([[x, y, 0], [x + k * 0.35, y - 0.1, 0.9 + r() * 0.5]], { lw: 0.45, stroke: ink, a: 0.75, over: 0 });
+  }
+}
+
 // ---- boxes, buildings --------------------------------------------------------
 
 /** Generic box: top, south and east faces (the visible ones). */
@@ -252,11 +362,11 @@ function windowsOnFace(pen, B, face, k0) {
   }
 }
 
-export function building(pen, B) {
+export function building(pen, B, world = null) {
   pen.b = B.index;
   const { x0, y0, x1, y1, h } = B;
   const wall = jitter(hexRgb(B.wall), B.index * 3, 0.05);
-  const roof = jitter(ROOF_RGB[B.roof], B.index * 5, 0.06);
+  const roof = jitter(ROOF_RGB[world ? colourId(world, B.roof) : B.roof], B.index * 5, 0.06);
   pen.tag = 'w';
   pen.shape([[x0, y1, 0], [x1, y1, 0], [x1, y1, h], [x0, y1, h]], { k: 'wall', c: wall, n: [0, 1] }, { lw: 1.15, t: 'w' });
   pen.shape([[x1, y1, 0], [x1, y0, 0], [x1, y0, h], [x1, y1, h]], { k: 'wall', c: wall, n: [1, 0] }, { lw: 1.15, t: 'w' });
@@ -308,13 +418,22 @@ export function building(pen, B) {
     const rng = makeRng(B.index * 101 + 7);
     if (B.roof === 'metal') {
       for (let x = x0 + 1.5; x < x1 - 1; x += 1.5) pen.line([[x, y0 + p, h], [x, y1 - p, h]], { lw: 0.4, a: 0.35, over: 0.1, t: 'rd' });
+    } else if (B.roof === 'greenroof') {
+      // sedum tufts in loose rows, and a gravel margin inside the parapet
+      const ink = hexRgb('#4f6a34');
+      for (let y = y0 + 2; y < y1 - 1.5; y += 2.2) {
+        for (let x = x0 + 1.5 + rng() * 1.5; x < x1 - 1.2; x += 2 + rng() * 1.6) {
+          pen.line([[x - 0.4, y + 0.2, h], [x, y - 0.2, h + 0.15], [x + 0.4, y + 0.2, h]], { lw: 0.4, stroke: ink, a: 0.6, over: 0, t: 'rd' });
+        }
+      }
+      pen.line([[x0 + 1.4, y0 + 1.4, h], [x1 - 1.4, y0 + 1.4, h], [x1 - 1.4, y1 - 1.4, h], [x0 + 1.4, y1 - 1.4, h], [x0 + 1.4, y0 + 1.4, h]], { lw: 0.35, a: 0.35, over: 0, t: 'rd' });
     } else {
       for (let y = y0 + 4; y < y1 - 1; y += 4) pen.line([[x0 + p, y, h], [x1 - p, y, h]], { lw: 0.35, a: 0.25, over: 0.1, t: 'rd' });
       const units = 1 + Math.floor(((x1 - x0) * (y1 - y0)) / 600);
       for (let u = 0; u < Math.min(units, 5); u++) {
         const ux = x0 + 2 + rng() * (x1 - x0 - 6);
         const uy = y0 + 2 + rng() * (y1 - y0 - 5);
-        box(pen, ux, uy, ux + 2.6, uy + 2, h, h + 1.3, B.roof === 'coolroof' ? hexRgb('#d9d4c8') : hexRgb('#a7a39c'), { t: 'rd', lw: 0.55 });
+        box(pen, ux, uy, ux + 2.6, uy + 2, h, h + 1.3, B.roof === 'coolroof' || B.roof === 'coolroofR' ? hexRgb('#d9d4c8') : hexRgb('#a7a39c'), { t: 'rd', lw: 0.55 });
       }
       if (B.h > 15) {
         const tx = x0 + (x1 - x0) * 0.7;
@@ -338,6 +457,13 @@ const LEAF = [hexRgb('#5f7d48'), hexRgb('#6f8c52'), hexRgb('#85a05f'), hexRgb('#
 
 export function tree(pen, T, i) {
   const { x, y, r, zc } = T;
+  if (T.young) {
+    // tree guard: two stakes and a tie, then a small, airy crown
+    pen.tag = 'trunk';
+    pen.line([[x - 0.7, y + 0.2, 0], [x - 0.7, y + 0.2, 1.9]], { lw: 0.55, stroke: hexRgb('#8a6a4d'), over: 0.1, t: 'trunk' });
+    pen.line([[x + 0.7, y - 0.2, 0], [x + 0.7, y - 0.2, 1.9]], { lw: 0.55, stroke: hexRgb('#8a6a4d'), over: 0.1, t: 'trunk' });
+    pen.line([[x - 0.7, y + 0.2, 1.6], [x + 0.7, y - 0.2, 1.6]], { lw: 0.45, a: 0.8, over: 0, t: 'trunk' });
+  }
   pen.tag = 'trunk';
   const trunkTop = zc - r * 0.2;
   pen.shape([[x - 0.25, y + 0.25, 0], [x + 0.25, y - 0.25, 0], [x + 0.2, y - 0.2, trunkTop], [x - 0.2, y + 0.2, trunkTop]], hexRgb('#6b5443'), { lw: 0.7, t: 'trunk' });
@@ -354,7 +480,7 @@ export function tree(pen, T, i) {
   blobs.forEach(([dx, dy, dz, rr], k) => {
     const lit = (dz / r + 0.6 - (dx + dy) / (3 * r)) * 1.4;
     const c = LEAF[Math.max(0, Math.min(3, Math.round(lit + 1)))];
-    pen.blob([x + dx, y + dy, zc + dz], rr, jitter(c, i * 31 + k, 0.08), { lw: 0.8, t: 'tree', lumpy: 0.05 });
+    pen.blob([x + dx, y + dy, zc + dz], rr, jitter(T.young ? mixRgb(c, LEAF[3], 0.45) : c, i * 31 + k, 0.08), { lw: T.young ? 0.6 : 0.8, t: 'tree', lumpy: 0.05, a: T.young ? 0.85 : undefined });
   });
   // a few leaf ticks
   pen.tag = 'gm';
@@ -404,12 +530,16 @@ export function drawWorld(world, seed = 1) {
     objs.push({ kind: 'c', o: [x, y, ax, c], i, x0: x - hx, y0: y - hy, x1: x + hx, y1: y + hy });
   });
   world.scene.benches.forEach((b, i) => objs.push({ kind: 'n', o: b, i, x0: b.x - 0.9, y0: b.y - 0.9, x1: b.x + 0.9, y1: b.y + 0.9 }));
-  const lamps = [];
-  for (let x = 12; x < 400; x += 26) if (x < 118 || (x > 147 && x < 268) || x > 297) lamps.push([x, 145.8], [x + 13, 174.2]);
-  for (let x = 20; x < 400; x += 30) if (x < 118 || x > 297) lamps.push([x, 285.8]);
+  const D = world.scene.decor;
+  let lamps = D?.lamps;
+  if (!lamps) {
+    lamps = [];
+    for (let x = 12; x < 400; x += 26) if (x < 118 || (x > 147 && x < 268) || x > 297) lamps.push([x, 145.8], [x + 13, 174.2]);
+    for (let x = 20; x < 400; x += 30) if (x < 118 || x > 297) lamps.push([x, 285.8]);
+  }
   lamps.forEach(([x, y], i) => objs.push({ kind: 'l', o: [x, y], i, x0: x - 0.2, y0: y - 0.2, x1: x + 0.2, y1: y + 0.2 }));
   // small yard sheds (drawn as plain boxes; not part of the thermal model)
-  [[60, 70, 'x'], [205, 66, 'y'], [350, 70, 'x'], [60, 205, 'x'], [345, 210, 'y']].forEach(([x, y, ax], i) => {
+  (D?.sheds ?? [[60, 70, 'x'], [205, 66, 'y'], [350, 70, 'x'], [60, 205, 'x'], [345, 210, 'y']]).forEach(([x, y, ax], i) => {
     const [w, d] = ax === 'x' ? [6, 4] : [4, 6];
     objs.push({ kind: 's', o: [x, y, x + w, y + d], i, x0: x, y0: y, x1: x + w, y1: y + d });
   });
@@ -417,7 +547,7 @@ export function drawWorld(world, seed = 1) {
   order.forEach((k, gi) => {
     const ob = objs[k];
     pen.group = gi + 1;
-    if (ob.kind === 'b') building(pen, ob.o);
+    if (ob.kind === 'b') building(pen, ob.o, world);
     else if (ob.kind === 't') tree(pen, ob.o, ob.i);
     else if (ob.kind === 'c') car(pen, ...ob.o, ob.i);
     else if (ob.kind === 'n') bench(pen, ob.o.x, ob.o.y, ob.o.a);

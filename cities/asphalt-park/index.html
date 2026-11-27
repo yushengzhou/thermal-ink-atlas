@@ -53,6 +53,21 @@
   #fn p { margin: 3px 0; }
   #fn .rng { opacity: .8; }
   #fn .why { font-style: italic; }
+  #retro { position: fixed; left: 18px; bottom: 16px; width: 212px; padding: 8px 10px 9px; background: rgba(246,240,226,.93);
+    border: 1.5px solid #2b2621; border-radius: 4px 9px 5px 8px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); font-size: 13px; }
+  #retro .seg, #retro .row { display: flex; align-items: center; gap: 4px; margin: 0 0 6px; flex-wrap: wrap; }
+  #retro button { font: 12.5px/1.2 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; background: #fbf7ee; color: #2b2621;
+    border-radius: 4px 7px 3px 6px; cursor: pointer; }
+  #retro button[aria-pressed="true"] { background: #2b2621; color: #fbf7ee; }
+  #retro input[type=range] { width: 96px; accent-color: #3f6e6a; }
+  #retro #rainLabel { font-size: 12px; flex-basis: 100%; }
+  #retro .measures { display: flex; flex-wrap: wrap; gap: 4px; border-top: 1px dashed #6d6355; padding-top: 6px; }
+  #retro .measures .hand { flex-basis: 100%; }
+  #retro .measures button { font-size: 12px; padding: 2px 6px; }
+  #retro .measures button.warn { border-color: #8a2f22; color: #8a2f22; }
+  #card .sub { font-size: 11.5px; opacity: .8; font-weight: normal; }
+  #card .lit { margin: 4px 0; font-size: 12px; }
+  .noui #retro { display: none; }
   #card .x { position: absolute; right: 6px; top: 4px; border: 0; background: none; font-size: 18px; cursor: pointer; color: #2b2621; }
 </style>
 </head>
@@ -325,10 +340,16 @@ function canopyShadow(cx, cy, zc, r, sun, n = 18) {
 
 /**
  * Rasterise polygons onto a grid. For every grid sample point inside a
- * polygon, calls visit(index, polyIndex). Samples: s x s per cell.
+ * polygon, calls visit(index, polyIndex). Samples: s x s per cell; win
+ * limits the visit to a window of cells.
  */
-function rasterise(polys, grid, visit, s = 1) {
+function rasterise(polys, grid, visit, s = 1, win = null) {
   const { nx, ny, cell } = grid;
+  // optional cell window [i0, j0, i1, j1]: only cells inside it are visited
+  const wi0 = win ? win[0] : 0;
+  const wj0 = win ? win[1] : 0;
+  const wi1 = win ? win[2] : nx - 1;
+  const wj1 = win ? win[3] : ny - 1;
   for (let p = 0; p < polys.length; p++) {
     const poly = polys[p];
     if (!poly) continue;
@@ -342,10 +363,10 @@ function rasterise(polys, grid, visit, s = 1) {
       y0 = Math.min(y0, poly[i + 1]);
       y1 = Math.max(y1, poly[i + 1]);
     }
-    const i0 = Math.max(0, Math.floor(x0 / cell));
-    const i1 = Math.min(nx - 1, Math.floor(x1 / cell));
-    const j0 = Math.max(0, Math.floor(y0 / cell));
-    const j1 = Math.min(ny - 1, Math.floor(y1 / cell));
+    const i0 = Math.max(wi0, Math.floor(x0 / cell));
+    const i1 = Math.min(wi1, Math.floor(x1 / cell));
+    const j0 = Math.max(wj0, Math.floor(y0 / cell));
+    const j1 = Math.min(wj1, Math.floor(y1 / cell));
     for (let j = j0; j <= j1; j++) {
       for (let i = i0; i <= i1; i++) {
         for (let sj = 0; sj < s; sj++) {
@@ -380,6 +401,18 @@ const SOURCES = {
   deardorff: 'Deardorff (1978) J. Geophys. Res. 83(C4) 1889-1903, force-restore method (NASA NTRS 19780019748)',
   melnikov: 'Melnikov et al. (2022) Scientific Reports 12, 2617, doi 10.1038/s41598-022-06383-5',
   engine: 'Engine assumption: no literature source',
+  brief2: 'Research brief docs/research/retrofit-brief.md (block 2; values compiled from the sources below, items marked unverified there are flagged here)',
+  lbnlRoof: 'US EPA Cool Roofs compendium with ENERGY STAR / LBNL roof data: new white roof albedo about 0.80; LBNL-6714E: in-service roofs often below their CRRC aged rating',
+  chicago: 'Chicago energy code via the block-2 brief: low-slope roofs need initial albedo >= 0.72 or 3-year aged >= 0.50',
+  santamouris: 'Santamouris (2014) Solar Energy 103, 682-703, doi 10.1016/j.solener.2012.07.003, cool roofs and pavements review',
+  noaaGreen: 'NOAA Institutional Repository noaa_57843: Javits Center green roof, NYC, up to 18.4 K cooler than a black roof',
+  heusinger: 'Heusinger & Weber (2017) Science of the Total Environment, doi 10.1016/j.scitotenv.2016.10.168, extensive green roof energy balance (Bowen ratio about <1 to 2)',
+  li2013: 'Li, Harvey et al. (2013) Environ. Res. Lett. 8 015023, permeable pavements (corrigendum not checked)',
+  middel2020: 'Middel et al. (2020) Environ. Res. Lett., doi 10.1088/1748-9326/ab87d4, reflective coating on Los Angeles streets',
+  ko2022: 'Ko et al. (2022) Environ. Res. Lett. 17 044027, cool pavement at neighbourhood scale, albedo 0.26 -> 0.18 in one year',
+  mccoll: 'McColl et al. (2017) Geophys. Res. Lett., doi 10.1002/2017GL072819, global soil-moisture drydown timescales',
+  middel2021: 'Middel et al. (2021) Bull. Amer. Meteor. Soc., doi 10.1175/BAMS-D-20-0193.1, shade and Tmrt in Phoenix',
+  sponge2015: 'State Council General Office (2015) Guiding Opinions on Promoting Sponge City Construction, Guo Ban Fa [2015] No. 75 (English notice, gov.cn, 2015-10-16; reprint waizi.org.cn/law/6860.html; MOHURD interpretation via cs.com.cn; the primary Chinese text was not located)',
 };
 
 /** How a value relates to its source. */
@@ -479,6 +512,99 @@ const MATERIALS = {
   },
 };
 
+// ---- block 2: retrofit materials ------------------------------------------
+// Wetted materials carry efWet / efDry and tau (days); green roof also muWet.
+// The value used by the model is resolved for "days since rain" d by
+// decay() in retrofit.js: X(d) = X_dry + (X_wet - X_dry) exp(-d / tau).
+// storage: water a material can hold after rain (mm), for the water-budget check.
+Object.assign(MATERIALS, {
+  coolroofAged: {
+    name: 'Cool roof, aged',
+    alpha: v(0.6, 'chicago', 'range', false, 'aged cool roofs 0.50-0.70; 0.60-0.70 unverified (brief)'),
+    eps: v(0.88, 'lbnlRoof', 'cited', false),
+    mu: v(450, 'brief', 'range', false, 'same build-up as the dark membrane'),
+    ef: v(0, 'brief', 'cited', false, 'dry impervious'),
+    note: 'A white roof after a few years of dust and weather: still far cooler than the dark membrane it replaced, but not as cool as when new.',
+  },
+  coolroofNew: {
+    name: 'Cool roof, new',
+    alpha: v(0.8, 'lbnlRoof', 'cited', true, 'new white roof about 0.80'),
+    eps: v(0.88, 'lbnlRoof', 'cited', false),
+    mu: v(450, 'brief', 'range', false, 'same build-up as the dark membrane'),
+    ef: v(0, 'brief', 'cited', false, 'dry impervious'),
+    note: 'A freshly coated white roof reflects about four fifths of the sun.',
+  },
+  greenroof: {
+    name: 'Extensive green roof',
+    alpha: v(0.2, 'brief2', 'range', false, 'cited 0.15-0.25'),
+    eps: v(0.95, 'brief2', 'cited', false),
+    mu: v(600, 'brief2', 'cited', false, 'dry substrate; wet 1200, decays with tau'),
+    muWet: v(1200, 'brief2', 'cited', false, 'wet substrate'),
+    ef: v(0.25, 'heusinger', 'interp', false, 'dry; Bowen ratio up to about 2-3'),
+    efWet: v(0.5, 'heusinger', 'interp', false, 'wet; Bowen ratio about 1'),
+    tau: v(4, 'brief2', 'cited', false, 'substrate drying time, days'),
+    storage: v(30, 'brief2', 'range', false, '100 mm substrate holds 20-40 mm'),
+    note: 'Sedum and thin soil over the roof: plants and wet substrate spend sunshine on evaporation, more so soon after rain.',
+  },
+  pavers: {
+    name: 'Permeable pavers',
+    alpha: v(0.26, 'li2013', 'cited', true),
+    eps: v(0.92, 'brief2', 'cited', false),
+    mu: v(870, 'engine', 'engine', false, 'dry, assumed'),
+    ef: v(0.02, 'brief2', 'interp', false, 'dry; calibrated to Li 2013'),
+    efWet: v(0.5, 'brief2', 'interp', false, 'wet; calibrated to Li 2013'),
+    tau: v(1, 'brief2', 'interp', false, 'days; calibrated to Li 2013'),
+    storage: v(5, 'brief2', 'interp', false, 'brief: "a few mm"'),
+    note: 'Pavers with open joints let rain soak in; the water evaporates over the next day or two and cools them while it lasts.',
+  },
+  porousAsphalt: {
+    name: 'Porous asphalt',
+    alpha: v(0.08, 'li2013', 'cited', true),
+    eps: v(0.95, 'brief2', 'cited', false),
+    mu: v(800, 'engine', 'engine', false, 'dry, assumed'),
+    ef: v(0.02, 'brief2', 'interp', false, 'dry; as pavers'),
+    efWet: v(0.5, 'brief2', 'interp', false, 'wet; as pavers'),
+    tau: v(1, 'brief2', 'interp', false, 'days; as pavers'),
+    storage: v(5, 'brief2', 'interp', false, 'brief: "a few mm"'),
+    note: 'Open-graded asphalt that drains rain: cooler while wet, but once dry it is darker and lighter-weight than dense asphalt, so it runs hotter.',
+  },
+  coolPaveAged: {
+    name: 'Cool pavement coating, 1 year old',
+    alpha: v(0.18, 'ko2022', 'cited', false, '0.26 -> 0.18 after one year'),
+    eps: v(0.92, 'brief2', 'cited', false),
+    mu: v(1200, 'oke', 'cited', false, 'the asphalt underneath'),
+    ef: v(0, 'brief', 'cited', false, 'dry impervious'),
+    note: 'A light grey coating on the old asphalt, after a year of traffic: a little cooler underfoot, and it bounces more sun onto people.',
+  },
+  coolPaveNew: {
+    name: 'Cool pavement coating, new',
+    alpha: v(0.25, 'middel2020', 'cited', false),
+    eps: v(0.92, 'brief2', 'cited', false),
+    mu: v(1200, 'oke', 'cited', false, 'the asphalt underneath'),
+    ef: v(0, 'brief', 'cited', false, 'dry impervious'),
+    note: 'A fresh light grey coating on the old asphalt: the road is cooler, but more sun bounces up onto people.',
+  },
+  raingarden: {
+    name: 'Rain garden',
+    alpha: v(0.2, 'engine', 'engine', false),
+    eps: v(0.95, 'engine', 'engine', false),
+    mu: v(1400, 'engine', 'engine', false),
+    ef: v(0.35, 'engine', 'engine', false, 'dry'),
+    efWet: v(0.8, 'engine', 'engine', false, 'wet'),
+    tau: v(3, 'mccoll', 'interp', false, 'soil drydown, days; median not checked'),
+    storage: v(40, 'engine', 'engine', false, 'ponding and soil, assumed'),
+    note: 'A shallow planted hollow that takes the street runoff; its soil stays damp for days after rain.',
+  },
+  youngCanopy: {
+    name: 'Young street tree',
+    alpha: v(0.18, 'oke', 'range', false, 'cited 0.15-0.20'),
+    eps: v(0.97, 'oke', 'range', false, 'cited 0.97-0.99'),
+    ef: v(0.7, 'brief', 'range', false, 'cited 0.6-0.8'),
+    prescribed: 'Not used by the grid model: leaf temperature as for mature trees. Its thin crown lets through exp(-0.5 x 1.5) = 0.47 of the sun (see youngTreeTransmission).',
+    note: 'A newly planted tree: its small, thin crown gives patchy shade for now; it takes years to grow a full canopy.',
+  },
+});
+
 /** Model constants shared by thermal.js and life.js. */
 const MODEL = {
   hc: v('5.7 + 3.8 u', 'oke', 'cited'),
@@ -489,11 +615,13 @@ const MODEL = {
   buildingShadeWeight: v(0.84, 'melnikov', 'cited', false, 'shade walking perceived ~16% shorter'),
   treeShadeWeight: v(0.92, 'melnikov', 'interp', false, 'tree shade ~half as effective as building shade, read as half the 16% benefit'),
   shadeHeatRamp: v('26 -> 32 C', 'engine', 'engine', false, 'shade benefit scales linearly from none at air <= 26 C to full at >= 32 C'),
+  youngTreeTransmission: v(0.47, 'brief2', 'interp', false, 'exp(-0.5 LAI) with LAI 1.5; brief range 0.37-0.61 for LAI 1-2'),
+  latentHeat: v('2.45e6 J kg-1', 'brief2', 'cited', true, 'evaporated depth = sum of EF x max(Q*, 0) x dt / 2.45e6'),
   sweatCue: v('Tmrt 65 -> 70 C', 'engine', 'engine', false, 'visual cue only: droplets on people in sun, strength rising from Tmrt 65 C to full at 70 C (separates sunlit pavement from sunlit lawn in this model); no physiological model'),
 };
 
 /** Parameter keys a material uses (for cards and docs). */
-const paramKeys = (m) => ['alpha', 'eps', m.thinC ? 'thinC' : 'mu', 'ef'].filter((k) => m[k]);
+const paramKeys = (m) => ['alpha', 'eps', m.thinC ? 'thinC' : 'mu', 'muWet', 'ef', 'efWet', 'tau', 'storage'].filter((k) => m[k]);
 
 return { SOURCES, BASIS, MATERIALS, MODEL, paramKeys };
 })();
@@ -515,6 +643,7 @@ const TAU = 86400;
 const K0 = 273.15;
 const SLOTS = 144; // sun / shade samples per day (10 min)
 const STORE = 96; // stored temperature samples per day (15 min)
+const LATENT = 2.45e6; // latent heat of vaporisation, J kg-1
 
 /** Sunrise and sunset clock hours for the site (scan at 1-min steps). */
 function daylight(site) {
@@ -591,26 +720,19 @@ function shadowPolys(world, sun, zFloor = 0) {
 }
 
 /**
- * Sunlit fraction per grid cell for one sun position (1 = full sun).
- * Building shade is opaque; canopy shade transmits MODEL.canopyTransmission.
+ * Building shade mask for one sun position: 2x2 samples per cell, 1 where a
+ * building (or awning) shades the ground or a taller building shades a roof.
  */
-function sunlitField(world, sun) {
+function buildingMask(world, sun) {
   const { n, cell } = world;
   const N = n * n;
-  const out = new Float32Array(N);
-  if (sun.alt <= 0) return out;
-  out.fill(1);
-  const S = 2; // 2x2 samples per cell
+  const S = 2;
   const grid = { nx: n, ny: n, cell };
   const bmask = new Uint8Array(N * S * S);
-  const tcount = new Uint8Array(N * S * S);
-  const { b, t } = shadowPolys(world, sun);
+  const { b } = shadowPolys(world, sun);
   rasterise(b, grid, (i, p, s) => {
     const bi = world.bld[i];
     if (bi < 0) bmask[i * S * S + s] = 1; // ground cells only
-  }, S);
-  rasterise(t, grid, (i, p, s) => {
-    if (world.bld[i] < 0 && tcount[i * S * S + s] < 3) tcount[i * S * S + s]++;
   }, S);
   // roofs shaded by taller neighbours
   for (let r = 0; r < world.buildings.length; r++) {
@@ -620,16 +742,63 @@ function sunlitField(world, sun) {
       if (B.h > R.h + 0.5) polys.push(boxShadow(B.x0, B.y0, B.x1, B.y1, B.h - R.h, sun));
     }
     if (!polys.length) continue;
+    // only the roof's own cells can be marked: visit just its cell window
+    const win = [Math.floor(R.x0 / cell), Math.floor(R.y0 / cell), Math.min(n - 1, Math.floor(R.x1 / cell)), Math.min(n - 1, Math.floor(R.y1 / cell))];
     rasterise(polys, grid, (i, p, s) => {
       if (world.bld[i] === r) bmask[i * S * S + s] = 1;
-    }, S);
+    }, S, win);
   }
+  return bmask;
+}
+
+/**
+ * Sunlit fraction per grid cell for one sun position (1 = full sun).
+ * Building shade is opaque; canopy shade transmits MODEL.canopyTransmission,
+ * or the tree's own `tr` (young street trees). `bmask` may be passed in from
+ * another world with the same buildings (Before / After states).
+ */
+function sunlitField(world, sun, bmask = null) {
+  const { n, cell } = world;
+  const N = n * n;
+  const out = new Float32Array(N);
+  if (sun.alt <= 0) return out;
+  out.fill(1);
+  const S = 2; // 2x2 samples per cell
+  const grid = { nx: n, ny: n, cell };
+  const bm = bmask ?? buildingMask(world, sun);
+  const t = world.trees.map((T) => canopyShadow(T.x, T.y, T.zc, T.r, sun));
   const tr = MODEL.canopyTransmission.value;
+  if (world.trees.some((T) => T.tr !== undefined)) {
+    // per-tree transmission: multiply per sample, at most three crowns deep
+    // as for the uniform case
+    const trans = new Float64Array(N * S * S).fill(1);
+    const deep = new Uint8Array(N * S * S);
+    rasterise(t, grid, (i, p, s) => {
+      const k = i * S * S + s;
+      if (world.bld[i] < 0 && deep[k] < 3) {
+        deep[k]++;
+        trans[k] *= world.trees[p].tr ?? tr;
+      }
+    }, S);
+    for (let i = 0; i < N; i++) {
+      let f = 0;
+      for (let s = 0; s < S * S; s++) {
+        const k = i * S * S + s;
+        if (!bm[k]) f += trans[k];
+      }
+      out[i] = f / (S * S);
+    }
+    return out;
+  }
+  const tcount = new Uint8Array(N * S * S);
+  rasterise(t, grid, (i, p, s) => {
+    if (world.bld[i] < 0 && tcount[i * S * S + s] < 3) tcount[i * S * S + s]++;
+  }, S);
   for (let i = 0; i < N; i++) {
     let f = 0;
     for (let s = 0; s < S * S; s++) {
       const k = i * S * S + s;
-      if (!bmask[k]) f += Math.pow(tr, tcount[k]);
+      if (!bm[k]) f += Math.pow(tr, tcount[k]);
     }
     out[i] = f / (S * S);
   }
@@ -652,18 +821,25 @@ function shadeClassField(world, sun, cell = 2) {
   return { n, cell, cls: out, night: false };
 }
 
-/** Precompute sun positions and sunlit fields for every 10-min slot. */
-function sunSlots(world) {
+/**
+ * Precompute sun positions and sunlit fields for every 10-min slot. With
+ * keepMasks the building masks are kept (slots.masks) so a second world with
+ * the same buildings can reuse them: sunSlots(worldB, { masksFrom: slotsA }).
+ */
+function sunSlots(world, opts = {}) {
   const site = world.scene.site;
   const suns = [];
   const fields = [];
+  const masks = opts.keepMasks ? [] : null;
   for (let k = 0; k < SLOTS; k++) {
     const h = (k * 24) / SLOTS;
     const s = solarPosition(site, h);
     suns.push(s);
-    fields.push(sunlitField(world, s));
+    const bm = s.alt <= 0 ? null : opts.masksFrom ? opts.masksFrom.masks[k] : opts.keepMasks ? buildingMask(world, s) : null;
+    if (masks) masks.push(bm);
+    fields.push(sunlitField(world, s, bm));
   }
-  return { suns, fields };
+  return masks ? { suns, fields, masks } : { suns, fields };
 }
 
 /** Effective material for a cell: roof material for building cells. */
@@ -694,15 +870,22 @@ function runModel(world, opts = {}) {
   const tauFac = (2 * Math.PI) / TAU;
   const sqrtTau = Math.sqrt(TAU);
 
+  // optional subset of cells (opts.cells): the model runs on a compact copy
+  // of their inputs and the result is scattered back (other cells stay 0;
+  // see retrofit.js). The arithmetic per cell is the same either way.
+  const idx = opts.cells ?? null;
+  const NF = N;
+  const NN = idx ? idx.length : N;
+  const fields = idx ? slots.fields.map((f) => Float32Array.from(idx, (i) => f[i])) : slots.fields;
   // per-cell parameters
-  const alpha = new Float32Array(N);
-  const eps = new Float32Array(N);
-  const cap = new Float32Array(N); // 2 sqrt(pi) / (mu sqrt(tau)), or 1 / C for thin layers
-  const restore = new Float32Array(N); // 2 pi / tau, or 0 for thin layers
-  const ef = new Float32Array(N);
-  const water = new Uint8Array(N);
-  for (let i = 0; i < N; i++) {
-    const id = cellMat(world, i);
+  const alpha = new Float32Array(NN);
+  const eps = new Float32Array(NN);
+  const cap = new Float32Array(NN); // 2 sqrt(pi) / (mu sqrt(tau)), or 1 / C for thin layers
+  const restore = new Float32Array(NN); // 2 pi / tau, or 0 for thin layers
+  const ef = new Float32Array(NN);
+  const water = new Uint8Array(NN);
+  for (let i = 0; i < NN; i++) {
+    const id = cellMat(world, idx ? idx[i] : i);
     const m = mats[id];
     water[i] = id === 'water' ? 1 : 0;
     if (water[i]) continue; // prescribed temperature
@@ -717,7 +900,7 @@ function runModel(world, opts = {}) {
       restore[i] = tauFac;
     } else throw new Error(`material ${id} has neither mu > 0 nor thinC`);
   }
-  const svf = world.svf;
+  const svf = idx ? Float32Array.from(idx, (i) => world.svf[i]) : world.svf;
 
   // per-minute forcing
   const M = 1440;
@@ -736,10 +919,10 @@ function runModel(world, opts = {}) {
   }
   const taMean = taSum / M;
 
-  const Ts = new Float32Array(N).fill(taMean + K0);
-  const Td = new Float32Array(N).fill(taMean + K0);
-  const sumDay = new Float64Array(N);
-  const store = new Float32Array(N * STORE);
+  const Ts = new Float32Array(NN).fill(taMean + K0);
+  const Td = new Float32Array(NN).fill(taMean + K0);
+  const sumDay = new Float64Array(NN);
+  let store = new Float32Array(NN * STORE);
   const stepsPerStore = M / STORE;
 
   let days = 0;
@@ -759,12 +942,12 @@ function runModel(world, opts = {}) {
       const lwall = SIGMA * tw4;
       const sf = (m / 10) | 0; // slot index
       const st = (m % 10) / 10;
-      const f0 = slots.fields[sf];
-      const f1 = slots.fields[(sf + 1) % SLOTS];
+      const f0 = fields[sf];
+      const f1 = fields[(sf + 1) % SLOTS];
       const bh = beamH[m];
       const df = dif[m];
       const waterT = taMean - 1 + Math.sin((2 * Math.PI * (h - 9)) / 24) + K0;
-      for (let i = 0; i < N; i++) {
+      for (let i = 0; i < NN; i++) {
         if (water[i]) {
           Ts[i] = waterT;
         } else {
@@ -782,19 +965,24 @@ function runModel(world, opts = {}) {
       }
       if (m % stepsPerStore === 0) {
         const k = m / stepsPerStore;
-        for (let i = 0; i < N; i++) store[i * STORE + k] = Ts[i] - K0;
+        for (let i = 0; i < NN; i++) store[i * STORE + k] = Ts[i] - K0;
       }
     }
     const steps = M / (dt / 60);
     maxDelta = 0;
-    for (let i = 0; i < N; i++) {
+    for (let i = 0; i < NN; i++) {
       const next = sumDay[i] / steps;
       if (!water[i]) maxDelta = Math.max(maxDelta, Math.abs(next - Td[i]));
       Td[i] = next;
     }
     days++;
   }
-  return new Thermal(world, store, slots, { rise, taMean, hc, site, ta, days, maxDelta, mats });
+  if (idx) {
+    const full = new Float32Array(NF * STORE);
+    idx.forEach((i, c) => full.set(store.subarray(c * STORE, (c + 1) * STORE), i * STORE));
+    store = full;
+  }
+  return new Thermal(world, store, slots, { rise, taMean, hc, site, ta, days, maxDelta, mats, cells: idx });
 }
 
 class Thermal {
@@ -843,6 +1031,32 @@ class Thermal {
     const k = Math.floor(x) % SLOTS;
     const f = x - Math.floor(x);
     return lerp(this.slots.fields[k][i], this.slots.fields[(k + 1) % SLOTS][i], f);
+  }
+
+  /**
+   * Water evaporated from cell i over the design day, mm (= kg m-2):
+   * sum of EF x max(Q*, 0) x dt / 2.45e6 J kg-1, evaluated on the stored
+   * 15-min surface temperatures with the same radiation terms as the model.
+   */
+  evaporation(i) {
+    const site = this.info.site;
+    const m = (this.info.mats ?? MATERIALS)[cellMat(this.world, i)];
+    if (!m || !m.ef || cellMat(this.world, i) === 'water') return 0;
+    const v = this.world.svf[i];
+    let sum = 0;
+    for (let k = 0; k < STORE; k++) {
+      const h = (k * 24) / STORE;
+      const s = this.sun(h);
+      const ir = irradiance(s.alt);
+      const K = this.sunlit(i, h) * ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + v * ir.diffuse;
+      const taK = this.air(h) + K0;
+      const tw = taK + 2 + (6 * K) / 900;
+      const L = v * skyEmissivity(site.vapourHpa, taK) * SIGMA * taK ** 4 + (1 - v) * SIGMA * tw ** 4;
+      const t = this.ts(i, h) + K0;
+      const q = (1 - m.alpha.value) * K + m.eps.value * L - m.eps.value * SIGMA * t ** 4;
+      if (q > 0) sum += m.ef.value * q * (86400 / STORE);
+    }
+    return sum / LATENT;
   }
 
   /** Mean leaf temperature of a canopy (simple: air + absorbed-sun term). */
@@ -928,7 +1142,7 @@ function paletteLut() {
 }
 
 
-return { SIGMA, SLOTS, STORE, daylight, airTemp, irradiance, skyEmissivity, svfAt, shadowPolys, sunlitField, shadeClassField, sunSlots, cellMat, runModel, Thermal, PALETTE_STOPS, heatRgb, paletteLut };
+return { SIGMA, SLOTS, STORE, LATENT, daylight, airTemp, irradiance, skyEmissivity, svfAt, shadowPolys, buildingMask, sunlitField, shadeClassField, sunSlots, cellMat, runModel, Thermal, PALETTE_STOPS, heatRgb, paletteLut };
 })();
 
 __m['world'] = (() => {
@@ -937,8 +1151,8 @@ __m['world'] = (() => {
 const { inPoly } = __m['core'];
 const { svfAt } = __m['thermal'];
 
-const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water'];
-const WALKABLE = { concrete: 1, stone: 1, grass: 1 };
+const GROUND_MATS = ['concrete', 'asphalt', 'stone', 'grass', 'water', 'pavers', 'porousAsphalt', 'coolPave', 'raingarden'];
+const WALKABLE = { concrete: 1, stone: 1, grass: 1, pavers: 1 };
 
 /** Shopfront segments [s0, s1] (metres along a face) for a shop building. */
 function shopSegments(B, face) {
@@ -1016,13 +1230,17 @@ function buildWorld(scene, opts = {}) {
 
   // sky view factor: horizon scan from roof level for roofs, ground otherwise;
   // canopies block most of the sky directly beneath them.
+  // opts.svfFrom: a world with the same buildings (Before / After states)
+  // whose open-sky horizon scan is reused.
   const svf = new Float32Array(N);
+  const svfOpen = opts.svfFrom ? opts.svfFrom.svfOpen : new Float32Array(N);
   if (opts.svf !== false) {
     for (let k = 0; k < N; k++) {
       const x = ((k % n) + 0.5) * cell;
       const y = (Math.floor(k / n) + 0.5) * cell;
       const z0 = height[k];
-      let v = svfAt(heightAt, x, y, z0 + 0.01, 16, 160, cell / 2);
+      let v = opts.svfFrom ? svfOpen[k] : svfAt(heightAt, x, y, z0 + 0.01, 16, 160, cell / 2);
+      svfOpen[k] = v;
       if (bld[k] < 0) v *= 1 - 0.75 * canopy[k];
       svf[k] = v;
     }
@@ -1055,6 +1273,7 @@ function buildWorld(scene, opts = {}) {
     height,
     canopy,
     svf,
+    svfOpen,
     buildings,
     trees,
     awnings,
@@ -1279,11 +1498,19 @@ const GROUND_RGB = {
   stone: hexRgb('#e3d7bb'),
   grass: hexRgb('#a9b97a'),
   water: hexRgb('#87adb2'),
+  pavers: hexRgb('#c9b9a0'),
+  porousAsphalt: hexRgb('#77726d'),
+  coolPaveAged: hexRgb('#aaa59c'),
+  coolPaveNew: hexRgb('#bdb8ae'),
+  raingarden: hexRgb('#8fa56a'),
 };
 const ROOF_RGB = {
   membrane: hexRgb('#5c5e66'),
   metal: hexRgb('#6c5f5a'),
   coolroof: hexRgb('#f3efe6'),
+  coolroofNew: hexRgb('#f3efe6'),
+  coolroofAged: hexRgb('#ddd8cc'),
+  greenroof: hexRgb('#93a865'),
 };
 const SOIL = hexRgb('#b49a77');
 const WIN = hexRgb('#5f7480');
@@ -1378,18 +1605,28 @@ function drawGround(pen, world) {
     pen.tag = 'g';
     const pts = [];
     for (let i = 0; i < g.poly.length; i += 2) pts.push([g.poly[i], g.poly[i + 1], 0]);
-    const fill = jitter(GROUND_RGB[g.mat], g.id.length * 13 + pts.length, 0.04);
+    const fill = jitter(GROUND_RGB[colourId(world, g.mat)], g.id.length * 13 + pts.length, 0.04);
     let opts = { stroke: null };
     if (g.street) {
       // ink the two curbs only
       opts = g.street === 'ew' ? { edges: [true, false, true, false], lw: 1.1 } : { edges: [false, true, false, true], lw: 1.1 };
-    } else if (g.id === 'park' || g.id === 'gardens' || g.id === 'carpark') opts = { lw: 1 };
+    } else if (g.id === 'park' || g.id === 'gardens' || g.id === 'carpark' || g.outline) opts = { lw: 1 };
+    else if (g.mat === 'raingarden') opts = { lw: 0.7, a: 0.7 };
     else if (g.mat === 'water') opts = { lw: 1.3 };
     else if (g.mat === 'stone') opts = { lw: 0.5, a: 0.45 };
     else if (g.id === 'yards') opts = { lw: 1.4 };
     pen.shape(pts, fill, { ...opts, t: 'g' });
   }
 
+  if (world.scene.decor) drawDecor(pen, world, world.scene.decor);
+  else asphaltParkDecor(pen, world);
+}
+
+/** Material id used for colours (aliases such as coolPave resolve per state). */
+const colourId = (world, id) => (world.colours && world.colours[id]) || id;
+
+/** Block 1 (asphalt-park) street character, lawn texture, pond and plaza. */
+function asphaltParkDecor(pen, world) {
   // street character: old Kiln Street gets patches and cracks
   patches(pen, 4, 151, 396, 169, 16, 11);
   cracks(pen, 2, 151, 398, 169, 38, 12);
@@ -1471,6 +1708,98 @@ function drawGround(pen, world) {
   groundEllipse(pen, 180, 372, 1.2, 1.2, GROUND_RGB.water, { lw: 0.5, n: 12, t: 'gm' });
 }
 
+/**
+ * Scene-driven ground marks (block 2 on): cracks, patches, centre dashes,
+ * crossings, pavement joints, car-park bays, manholes, lawn ticks and a pond
+ * rim, plus surface textures for the retrofit materials of the parcels.
+ */
+function drawDecor(pen, world, D) {
+  const S = world.scene;
+  for (const g of S.ground) {
+    const m = g.mat;
+    const [x0, y0, x1, y1] = bboxOf(g.poly);
+    if (m === 'asphalt' && g.street) cracks(pen, x0 + 1, y0 + 1, x1 - 1, y1 - 1, Math.round(((x1 - x0) * (y1 - y0)) / 220), g.id.length * 7 + 3);
+    else if (m === 'pavers') paverJoints(pen, x0, y0, x1, y1);
+    else if (m === 'porousAsphalt') speckle(pen, x0, y0, x1, y1, Math.round(((x1 - x0) * (y1 - y0)) / 9), 41, hexRgb('#4f4a45'));
+    else if (m === 'coolPave') speckle(pen, x0, y0, x1, y1, Math.round(((x1 - x0) * (y1 - y0)) / 16), 43, hexRgb('#e9e4d8'));
+    else if (m === 'raingarden') plants(pen, x0, y0, x1, y1, g.id.length * 5 + 1);
+  }
+  for (const c of D.cracks ?? []) cracks(pen, ...c);
+  for (const p of D.patches ?? []) patches(pen, ...p);
+  for (const d of D.dashes ?? []) centreDashes(pen, ...d);
+  for (const c of D.crossings ?? []) crossing(pen, ...c);
+  for (const [x0, y0, x1, y1, along] of D.joints ?? []) sidewalkJoints(pen, x0, y0, x1, y1, along);
+  pen.tag = 'gm';
+  for (const [x, y] of D.manholes ?? []) groundEllipse(pen, x, y, 0.8, 0.8, scaleRgb(GROUND_RGB.asphalt, 0.75), { lw: 0.6, n: 12, t: 'gm' });
+  for (const [xa, xb, ya, yb] of D.bays ?? []) {
+    for (let x = xa; x <= xb; x += 6) pen.line([[x, ya], [x, yb]], { lw: 0.8, stroke: hexRgb('#efe8d6'), a: 0.7 });
+  }
+  const r = makeRng(S.seed + 21);
+  const grassInk = hexRgb('#55683a');
+  pen.tag = 'gm';
+  for (const [x0, y0, x1, y1, count] of D.lawn ?? []) {
+    for (let i = 0; i < count; i++) {
+      const x = x0 + r() * (x1 - x0);
+      const y = y0 + r() * (y1 - y0);
+      const k = world.fine.mat[Math.floor(y / 2) * world.fine.n + Math.floor(x / 2)];
+      if (world.matIds[k] !== 'grass') continue;
+      pen.line([[x - 0.35, y + 0.2], [x, y - 0.15], [x + 0.3, y + 0.25]], { lw: 0.5, stroke: grassInk, a: 0.55, over: 0.1 });
+    }
+  }
+  if (D.pond) {
+    const [cx, cy, rx, ry] = D.pond;
+    groundEllipse(pen, cx, cy, rx + 0.8, ry + 0.8, null, { lw: 0.7, a: 0.6, t: 'gm' });
+    for (const [dx, dy, w] of [[-6, -3, 3], [4, 3, 4], [8, -4, 2.5]]) {
+      pen.line([[cx + dx - w / 2, cy + dy], [cx + dx, cy + dy - 0.25], [cx + dx + w / 2, cy + dy]], { lw: 0.6, stroke: hexRgb('#e9f0ec'), a: 0.8, over: 0.2 });
+    }
+  }
+}
+
+function bboxOf(p) {
+  let x0 = Infinity;
+  let y0 = Infinity;
+  let x1 = -Infinity;
+  let y1 = -Infinity;
+  for (let i = 0; i < p.length; i += 2) {
+    x0 = Math.min(x0, p[i]);
+    x1 = Math.max(x1, p[i]);
+    y0 = Math.min(y0, p[i + 1]);
+    y1 = Math.max(y1, p[i + 1]);
+  }
+  return [x0, y0, x1, y1];
+}
+
+/** Permeable pavers: a running-bond grid of joints (gravel-filled, drawn light). */
+function paverJoints(pen, x0, y0, x1, y1) {
+  pen.tag = 'gm';
+  const ink = hexRgb('#8f7f66');
+  for (let y = y0 + 2; y < y1; y += 2) pen.line([[x0, y], [x1, y]], { lw: 0.35, stroke: ink, a: 0.4, over: 0 });
+  for (let y = y0, row = 0; y < y1; y += 2, row++) {
+    for (let x = x0 + (row % 2 ? 2 : 4); x < x1; x += 4) pen.line([[x, y], [x, Math.min(y1, y + 2)]], { lw: 0.35, stroke: ink, a: 0.35, over: 0 });
+  }
+}
+
+function speckle(pen, x0, y0, x1, y1, count, seed, ink) {
+  const r = makeRng(seed);
+  pen.tag = 'gm';
+  for (let i = 0; i < count; i++) {
+    const x = x0 + r() * (x1 - x0);
+    const y = y0 + r() * (y1 - y0);
+    pen.line([[x, y], [x + 0.3 + r() * 0.3, y + (r() - 0.5) * 0.3]], { lw: 0.5, stroke: ink, a: 0.45, over: 0 });
+  }
+}
+
+/** Rain garden planting: tufts of grasses and a pebble edge. */
+function plants(pen, x0, y0, x1, y1, seed) {
+  const r = makeRng(seed);
+  pen.tag = 'gm';
+  const ink = hexRgb('#46602f');
+  for (let x = x0 + 0.8; x < x1; x += 1.6 + r() * 1.2) {
+    const y = y0 + 0.8 + r() * (y1 - y0 - 1.6);
+    for (let k = -1; k <= 1; k++) pen.line([[x, y, 0], [x + k * 0.35, y - 0.1, 0.9 + r() * 0.5]], { lw: 0.45, stroke: ink, a: 0.75, over: 0 });
+  }
+}
+
 // ---- boxes, buildings --------------------------------------------------------
 
 /** Generic box: top, south and east faces (the visible ones). */
@@ -1520,11 +1849,11 @@ function windowsOnFace(pen, B, face, k0) {
   }
 }
 
-function building(pen, B) {
+function building(pen, B, world = null) {
   pen.b = B.index;
   const { x0, y0, x1, y1, h } = B;
   const wall = jitter(hexRgb(B.wall), B.index * 3, 0.05);
-  const roof = jitter(ROOF_RGB[B.roof], B.index * 5, 0.06);
+  const roof = jitter(ROOF_RGB[world ? colourId(world, B.roof) : B.roof], B.index * 5, 0.06);
   pen.tag = 'w';
   pen.shape([[x0, y1, 0], [x1, y1, 0], [x1, y1, h], [x0, y1, h]], { k: 'wall', c: wall, n: [0, 1] }, { lw: 1.15, t: 'w' });
   pen.shape([[x1, y1, 0], [x1, y0, 0], [x1, y0, h], [x1, y1, h]], { k: 'wall', c: wall, n: [1, 0] }, { lw: 1.15, t: 'w' });
@@ -1576,13 +1905,22 @@ function building(pen, B) {
     const rng = makeRng(B.index * 101 + 7);
     if (B.roof === 'metal') {
       for (let x = x0 + 1.5; x < x1 - 1; x += 1.5) pen.line([[x, y0 + p, h], [x, y1 - p, h]], { lw: 0.4, a: 0.35, over: 0.1, t: 'rd' });
+    } else if (B.roof === 'greenroof') {
+      // sedum tufts in loose rows, and a gravel margin inside the parapet
+      const ink = hexRgb('#4f6a34');
+      for (let y = y0 + 2; y < y1 - 1.5; y += 2.2) {
+        for (let x = x0 + 1.5 + rng() * 1.5; x < x1 - 1.2; x += 2 + rng() * 1.6) {
+          pen.line([[x - 0.4, y + 0.2, h], [x, y - 0.2, h + 0.15], [x + 0.4, y + 0.2, h]], { lw: 0.4, stroke: ink, a: 0.6, over: 0, t: 'rd' });
+        }
+      }
+      pen.line([[x0 + 1.4, y0 + 1.4, h], [x1 - 1.4, y0 + 1.4, h], [x1 - 1.4, y1 - 1.4, h], [x0 + 1.4, y1 - 1.4, h], [x0 + 1.4, y0 + 1.4, h]], { lw: 0.35, a: 0.35, over: 0, t: 'rd' });
     } else {
       for (let y = y0 + 4; y < y1 - 1; y += 4) pen.line([[x0 + p, y, h], [x1 - p, y, h]], { lw: 0.35, a: 0.25, over: 0.1, t: 'rd' });
       const units = 1 + Math.floor(((x1 - x0) * (y1 - y0)) / 600);
       for (let u = 0; u < Math.min(units, 5); u++) {
         const ux = x0 + 2 + rng() * (x1 - x0 - 6);
         const uy = y0 + 2 + rng() * (y1 - y0 - 5);
-        box(pen, ux, uy, ux + 2.6, uy + 2, h, h + 1.3, B.roof === 'coolroof' ? hexRgb('#d9d4c8') : hexRgb('#a7a39c'), { t: 'rd', lw: 0.55 });
+        box(pen, ux, uy, ux + 2.6, uy + 2, h, h + 1.3, B.roof === 'coolroof' || B.roof === 'coolroofR' ? hexRgb('#d9d4c8') : hexRgb('#a7a39c'), { t: 'rd', lw: 0.55 });
       }
       if (B.h > 15) {
         const tx = x0 + (x1 - x0) * 0.7;
@@ -1606,6 +1944,13 @@ const LEAF = [hexRgb('#5f7d48'), hexRgb('#6f8c52'), hexRgb('#85a05f'), hexRgb('#
 
 function tree(pen, T, i) {
   const { x, y, r, zc } = T;
+  if (T.young) {
+    // tree guard: two stakes and a tie, then a small, airy crown
+    pen.tag = 'trunk';
+    pen.line([[x - 0.7, y + 0.2, 0], [x - 0.7, y + 0.2, 1.9]], { lw: 0.55, stroke: hexRgb('#8a6a4d'), over: 0.1, t: 'trunk' });
+    pen.line([[x + 0.7, y - 0.2, 0], [x + 0.7, y - 0.2, 1.9]], { lw: 0.55, stroke: hexRgb('#8a6a4d'), over: 0.1, t: 'trunk' });
+    pen.line([[x - 0.7, y + 0.2, 1.6], [x + 0.7, y - 0.2, 1.6]], { lw: 0.45, a: 0.8, over: 0, t: 'trunk' });
+  }
   pen.tag = 'trunk';
   const trunkTop = zc - r * 0.2;
   pen.shape([[x - 0.25, y + 0.25, 0], [x + 0.25, y - 0.25, 0], [x + 0.2, y - 0.2, trunkTop], [x - 0.2, y + 0.2, trunkTop]], hexRgb('#6b5443'), { lw: 0.7, t: 'trunk' });
@@ -1622,7 +1967,7 @@ function tree(pen, T, i) {
   blobs.forEach(([dx, dy, dz, rr], k) => {
     const lit = (dz / r + 0.6 - (dx + dy) / (3 * r)) * 1.4;
     const c = LEAF[Math.max(0, Math.min(3, Math.round(lit + 1)))];
-    pen.blob([x + dx, y + dy, zc + dz], rr, jitter(c, i * 31 + k, 0.08), { lw: 0.8, t: 'tree', lumpy: 0.05 });
+    pen.blob([x + dx, y + dy, zc + dz], rr, jitter(T.young ? mixRgb(c, LEAF[3], 0.45) : c, i * 31 + k, 0.08), { lw: T.young ? 0.6 : 0.8, t: 'tree', lumpy: 0.05, a: T.young ? 0.85 : undefined });
   });
   // a few leaf ticks
   pen.tag = 'gm';
@@ -1672,12 +2017,16 @@ function drawWorld(world, seed = 1) {
     objs.push({ kind: 'c', o: [x, y, ax, c], i, x0: x - hx, y0: y - hy, x1: x + hx, y1: y + hy });
   });
   world.scene.benches.forEach((b, i) => objs.push({ kind: 'n', o: b, i, x0: b.x - 0.9, y0: b.y - 0.9, x1: b.x + 0.9, y1: b.y + 0.9 }));
-  const lamps = [];
-  for (let x = 12; x < 400; x += 26) if (x < 118 || (x > 147 && x < 268) || x > 297) lamps.push([x, 145.8], [x + 13, 174.2]);
-  for (let x = 20; x < 400; x += 30) if (x < 118 || x > 297) lamps.push([x, 285.8]);
+  const D = world.scene.decor;
+  let lamps = D?.lamps;
+  if (!lamps) {
+    lamps = [];
+    for (let x = 12; x < 400; x += 26) if (x < 118 || (x > 147 && x < 268) || x > 297) lamps.push([x, 145.8], [x + 13, 174.2]);
+    for (let x = 20; x < 400; x += 30) if (x < 118 || x > 297) lamps.push([x, 285.8]);
+  }
   lamps.forEach(([x, y], i) => objs.push({ kind: 'l', o: [x, y], i, x0: x - 0.2, y0: y - 0.2, x1: x + 0.2, y1: y + 0.2 }));
   // small yard sheds (drawn as plain boxes; not part of the thermal model)
-  [[60, 70, 'x'], [205, 66, 'y'], [350, 70, 'x'], [60, 205, 'x'], [345, 210, 'y']].forEach(([x, y, ax], i) => {
+  (D?.sheds ?? [[60, 70, 'x'], [205, 66, 'y'], [350, 70, 'x'], [60, 205, 'x'], [345, 210, 'y']]).forEach(([x, y, ax], i) => {
     const [w, d] = ax === 'x' ? [6, 4] : [4, 6];
     objs.push({ kind: 's', o: [x, y, x + w, y + d], i, x0: x, y0: y, x1: x + w, y1: y + d });
   });
@@ -1685,7 +2034,7 @@ function drawWorld(world, seed = 1) {
   order.forEach((k, gi) => {
     const ob = objs[k];
     pen.group = gi + 1;
-    if (ob.kind === 'b') building(pen, ob.o);
+    if (ob.kind === 'b') building(pen, ob.o, world);
     else if (ob.kind === 't') tree(pen, ob.o, ob.i);
     else if (ob.kind === 'c') car(pen, ...ob.o, ob.i);
     else if (ob.kind === 'n') bench(pen, ob.o.x, ob.o.y, ob.o.a);
@@ -1696,7 +2045,7 @@ function drawWorld(world, seed = 1) {
 }
 
 
-return { GROUND_RGB, ROOF_RGB, drawGround, box, building, tree, car, bench, lamp, drawWorld };
+return { GROUND_RGB, ROOF_RGB, drawGround, drawDecor, box, building, tree, car, bench, lamp, drawWorld };
 })();
 
 __m['life'] = (() => {
@@ -2076,6 +2425,23 @@ class Renderer {
     this.pending = {};
     this.shown = {};
     this.pins = {}; // mode -> Set of `z|hour|dpr` the scrub preview needs
+    this.clip = null; // [x0, x1] device px: draw only this vertical band (split view)
+  }
+
+  /** New model results (days since rain changed): drop heat-dependent caches. */
+  setThermal(thermal) {
+    this.thermal = thermal;
+    this.hourCache.clear();
+    this.tmrtCache = null;
+    for (const k of [...this.tiles.keys()]) if (k.startsWith('thermal|')) this.tiles.delete(k);
+  }
+
+  /** New display list (aged / new materials redrawn): drop every cached bake. */
+  setDisplay(display) {
+    this.items = display.items;
+    this.groundCount = display.groundCount;
+    this.tiles.clear();
+    this.scaffold = null;
   }
 
   // ---- hour context ------------------------------------------------------
@@ -2455,7 +2821,13 @@ class Renderer {
     const ty0 = Math.floor(Math.max(minY, -oy) / TILE);
     const ty1 = Math.floor(Math.min(maxY, H - oy) / TILE);
     const out = [];
-    for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) out.push([tx, ty]);
+    const c = this.clip;
+    for (let ty = ty0; ty <= ty1; ty++) {
+      for (let tx = tx0; tx <= tx1; tx++) {
+        if (c && (ox + (tx + 1) * TILE <= c[0] || ox + tx * TILE >= c[1])) continue; // outside the split band
+        out.push([tx, ty]);
+      }
+    }
     // Tile cache cap: a 512 px tile is 1 MB, so this is about 9 hours of the
     // visible view, but never more than 160 MB (36 MB floor for tiny views).
     // On large HiDPI views 9 hours do not fit; the scrub preview then relies
@@ -2615,12 +2987,19 @@ class Renderer {
     // scrub preview: at most PREVIEW_BUDGET tile bakes per frame (a tile count,
     // not a clock; what a preview frame shows still depends on the cache)
     this.scrub = !!look.scrub;
-    this.budget = this.scrub ? PREVIEW_BUDGET : Infinity;
+    this.budget = this.scrub ? (look.budget ?? PREVIEW_BUDGET) : Infinity;
+    this.clip = look.clip ?? null;
     if (!this.scrub && (Object.keys(this.pins).length || Object.keys(this.pending).length)) this.endScrub();
     this.stats.preview = false;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
+    if (this.clip) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(this.clip[0], 0, this.clip[1] - this.clip[0], H);
+      ctx.clip();
+    }
     const pat = ctx.createPattern(this.tex.paper, 'repeat');
     pat.setTransform(new DOMMatrix([1, 0, 0, 1, ((ox % 256) + 256) % 256, ((oy % 256) + 256) % 256]));
     ctx.fillStyle = pat;
@@ -2649,6 +3028,8 @@ class Renderer {
       if (look.people !== false) this.drawPeople(ctx, f, cam, hq, W, H, lifeA, look.thermalMix ?? 0);
       if (look.notes) this.drawNotes(ctx, cam, W, H, look.notes, lifeA);
     }
+    if (this.clip) ctx.restore();
+    this.stats.lifeA = lifeA;
     this.stats.phase = intro && f < INTRO.pen ? 'pen' : intro && f < INTRO.wash ? 'wash' : intro && f < INTRO.life ? 'life' : 'steady';
     this.stats.frameMs = performance.now() - t0;
     return this.stats;
@@ -2810,6 +3191,7 @@ class Renderer {
       const X = ox + p[0] * Z;
       const Y = oy + p[1] * Z;
       if (X < -20 || Y < -20 || X > W + 20 || Y > H + 40) continue;
+      if (this.clip && (X < this.clip[0] - 30 || X > this.clip[1] + 30)) continue;
       if (this.hidden(a.x, a.y)) continue;
       count++;
       ctx.globalAlpha = alpha;
@@ -3029,8 +3411,69 @@ const GLOSSARY = {
     range: 'Albedo 0.15–0.30; 5–10 °C cooler than concrete while wet (not modelled in this block).',
     src: 'brief',
     why: 'Water evaporating from wet paving cools it, but only while there is water left to evaporate.',
+    scenes: ['asphalt-park'],
+  },
+  // ---- block 2 (sponge-retrofit) --------------------------------------------
+  permeablePaving: {
+    term: 'Permeable paving',
+    text: 'Pavers with open joints, or porous asphalt, that let rain soak through instead of running off.',
+    range: 'Wetted permeable pavement 15–35 °C cooler than dense asphalt in the early afternoon, 2–7 °C cooler about a day later; dry porous asphalt about 5 °C warmer.',
+    src: 'li2013',
+    why: 'It cools only while there is water in it to evaporate; dry, it can be as hot as the asphalt it replaced, or hotter.',
+    scenes: ['sponge-retrofit'],
+  },
+  greenRoof: {
+    term: 'Green roof',
+    text: 'A roof covered with a thin layer of soil-like substrate and hardy plants such as sedum (an “extensive” green roof).',
+    range: 'Albedo about 0.15–0.25; up to 18 °C cooler than a black roof in a New York case; Bowen ratio about 1–2.',
+    src: 'brief2, noaaGreen, heusinger',
+    why: 'Plants and damp substrate turn sunshine into evaporation instead of heat, and the roof also holds back rain.',
+    scenes: ['sponge-retrofit'],
+  },
+  rainGarden: {
+    term: 'Rain garden',
+    text: 'A shallow planted hollow that collects rain running off streets and roofs and lets it soak away.',
+    range: 'No measured cooling figure in our sources; this block uses engine assumptions (evaporative fraction 0.8 wet, 0.35 dry, 3-day drying).',
+    src: 'engine, mccoll',
+    why: 'It manages rain where it falls, and its damp soil stays cooler than paving for days after rain.',
+    scenes: ['sponge-retrofit'],
+  },
+  daysSinceRain: {
+    term: 'Days since rain (d)',
+    text: 'How many clear days have passed since the last soaking rain. d = 0 is the best case: a clear day after overnight rain.',
+    range: 'Wet surfaces dry with a time scale τ: pavers about 1 day, soils about 3 days, green-roof substrate about 4 days.',
+    src: 'brief2, mccoll',
+    why: 'Wet-surface cooling fades as the stored water evaporates, so a sponge-city street is coolest just after rain.',
+    scenes: ['sponge-retrofit'],
+  },
+  bowen: {
+    term: 'Bowen ratio and evaporative fraction',
+    text: 'Two ways to say how a surface splits its energy between heating the air (sensible heat) and evaporating water (latent heat). Bowen ratio = sensible ÷ latent; evaporative fraction = latent ÷ (sensible + latent) = 1 ÷ (1 + Bowen ratio).',
+    range: 'Green roofs: Bowen ratio below 1 to about 2 (evaporative fraction about 0.33–0.5 and more); dry paving: evaporative fraction near 0.',
+    src: 'heusinger',
+    why: 'The more energy goes into evaporation, the less is left to heat the surface.',
+    scenes: ['sponge-retrofit'],
+  },
+  spongeCity: {
+    term: 'Sponge city (海绵城市)',
+    text: 'China’s national programme (State Council guideline, 2015) to manage rain where it falls: let it soak in, slow it, store it, clean it, use it, and only then drain it (渗、滞、蓄、净、用、排).',
+    range: 'Target: absorb and use 70% of rainfall on site; 20% of built-up area by 2020, 80% by 2030.',
+    src: 'sponge2015',
+    why: 'Its goals are flooding and water supply; cooler streets are a side benefit, and no robust measured block-scale cooling figure exists.',
+    scenes: ['sponge-retrofit'],
+  },
+  albedoAgeing: {
+    term: 'Ageing (aged vs new)',
+    text: 'Reflective coatings get dirty and weathered, so they reflect less sun as they age.',
+    range: 'Cool pavement coating 0.26 → 0.18 within a year; cool roofs must reach 0.72 new or 0.50 after 3 years (Chicago code).',
+    src: 'ko2022, chicago',
+    why: 'A retrofit judged by its brand-new albedo overstates the cooling people will get over its life.',
+    scenes: ['sponge-retrofit'],
   },
 };
+
+/** Glossary keys shown for a scene (shared terms plus the scene's own). */
+const termsFor = (sceneId) => Object.keys(GLOSSARY).filter((k) => !GLOSSARY[k].scenes || GLOSSARY[k].scenes.includes(sceneId));
 
 const q = (a, p) => {
   const s = [...a].sort((x, y) => x - y);
@@ -3087,7 +3530,419 @@ function gl(key, label) {
   return `<span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="${key}">${label ?? GLOSSARY[key].term}</span>`;
 }
 
-return { GLOSSARY, glossaryStats, rangeLine, gl };
+return { GLOSSARY, termsFor, glossaryStats, rangeLine, gl };
+})();
+
+__m['retrofit'] = (() => {
+// retrofit: Before / After states of a scene, days-since-rain decay of the
+// wetted materials, and the shared model run.
+//
+// A retrofit scene lists each parcel once, with its Before material (`mat`,
+// `roof`) and, if the retrofit changes it, its After material (`after`).
+// Trees marked `after: true` are planted by the retrofit.
+//
+// Wetted materials fade from wet to dry with days since rain d:
+//   X(d) = X_dry + (X_wet - X_dry) exp(-d / tau)
+// for the evaporative fraction (efWet -> ef) and, for the green roof, the
+// substrate admittance (muWet -> mu). d = 0 is a clear day after overnight
+// rain. Irrigated lawn does not decay (it is watered).
+//
+// Two aliases pick the aged or new variant of a material: `coolroofR`
+// (coolroofAged / coolroofNew) and `coolPave` (coolPaveAged / coolPaveNew).
+const { MATERIALS } = __m['materials'];
+const { runModel, sunSlots, cellMat, STORE, Thermal } = __m['thermal'];
+
+const ALIASES = {
+  coolroofR: { aged: 'coolroofAged', new: 'coolroofNew' },
+  coolPave: { aged: 'coolPaveAged', new: 'coolPaveNew' },
+};
+const D_MAX = 7;
+const D_DEFAULT = 3;
+
+/** Wet-to-dry decay: dry + (wet - dry) exp(-d / tau). */
+const decay = (dry, wet, tau, d) => dry + (wet - dry) * Math.exp(-d / tau);
+
+/** Concrete material id behind an alias for the aged / new choice. */
+const resolveId = (id, aged = true) => (ALIASES[id] ? ALIASES[id][aged ? 'aged' : 'new'] : id);
+
+/**
+ * Material table for days since rain d and the aged / new choice. Decaying
+ * values are replaced by their value at d (the cited wet / dry values stay on
+ * the material as efWet / ef-dry for the cards).
+ */
+function stateMaterials(d = D_DEFAULT, aged = true, base = MATERIALS) {
+  const out = {};
+  for (const [id, m] of Object.entries(base)) {
+    if (!m.efWet && !m.muWet) {
+      out[id] = m;
+      continue;
+    }
+    const r = { ...m, dry: { ef: m.ef, mu: m.mu } };
+    if (m.efWet) r.ef = { ...m.ef, value: decay(m.ef.value, m.efWet.value, m.tau.value, d), atD: d };
+    if (m.muWet) r.mu = { ...m.mu, value: decay(m.mu.value, m.muWet.value, m.tau.value, d), atD: d };
+    out[id] = r;
+  }
+  for (const id of Object.keys(ALIASES)) out[id] = out[resolveId(id, aged)];
+  return out;
+}
+
+/** Plain (block-1 style) scene for one state: 'before' or 'after'. */
+function sceneState(scene, which) {
+  const after = which === 'after';
+  return {
+    ...scene,
+    state: which,
+    ground: scene.ground.map((g) => ({ ...g, mat: after && g.after ? g.after : g.mat })),
+    buildings: scene.buildings.map((b) => ({ ...b, roof: after && b.after ? b.after : b.roof })),
+    trees: scene.trees.filter((t) => after || !t.after),
+  };
+}
+
+/** True if the scene has Before / After states. */
+const isRetrofit = (scene) => !!scene.retrofit;
+
+/**
+ * Cells of world B whose model inputs differ from world A (material
+ * parameters, sky view factor, or sunlit share in any 10-min slot).
+ */
+function changedCells(wA, slotsA, matsA, wB, slotsB, matsB) {
+  const N = wA.n * wA.n;
+  const out = [];
+  const keys = ['alpha', 'eps', 'mu', 'thinC', 'ef'];
+  const val = (m, k) => (m[k] ? m[k].value : undefined);
+  for (let i = 0; i < N; i++) {
+    const ia = cellMat(wA, i);
+    const ib = cellMat(wB, i);
+    const a = matsA[ia];
+    const b = matsB[ib];
+    let diff = (ia === 'water') !== (ib === 'water') || keys.some((k) => val(a, k) !== val(b, k));
+    if (!diff && wA.svf[i] !== wB.svf[i]) diff = true;
+    for (let k = 0; !diff && k < slotsA.fields.length; k++) if (slotsA.fields[k][i] !== slotsB.fields[k][i]) diff = true;
+    if (diff) out.push(i);
+  }
+  return Int32Array.from(out);
+}
+
+/**
+ * Model for world B (After) that reuses a reference run on world A (Before)
+ * for every cell whose inputs are identical, and runs only the changed cells.
+ * Always derived from the same reference, so the result does not depend on
+ * which d or aged/new choices were visited before.
+ */
+function runShared(ref, wB, slotsB, matsB) {
+  const cells = changedCells(ref.world, ref.slots, ref.model.info.mats, wB, slotsB, matsB);
+  const sub = runModel(wB, { slots: slotsB, materials: matsB, cells });
+  const store = new Float32Array(ref.model.store);
+  for (const i of cells) store.set(sub.store.subarray(i * STORE, (i + 1) * STORE), i * STORE);
+  const info = { ...sub.info, days: ref.model.info.days, maxDelta: ref.model.info.maxDelta, subDays: sub.info.days, subMaxDelta: sub.info.maxDelta, changed: cells.length };
+  return new Thermal(wB, store, slotsB, info);
+}
+
+// ---- measures ------------------------------------------------------------------
+// Each retrofit measure is compared cell by cell, Before vs After, on the same
+// cells: those with the measure's After material that are in full sun (> 95%)
+// in both states at the hour (roofs: all sunlit roof cells; young trees:
+// ground cells the new crowns shade at that hour). Tmrt is for a person
+// standing on those cells (not on roofs).
+const MEASURES = [
+  {
+    id: 'coolRoof',
+    mat: 'coolroofR',
+    roof: true,
+    name: 'Cool roofs',
+    line: 'A white coating on the dark membrane roof reflects most of the sun, so the roof skin runs far cooler. Nobody stands on the roof, so the street-level Tmrt here does not change in this model.',
+    lit: 'Literature: white (0.80) vs grey (0.20) roof about −28 K at summer peak; −28 to −33 K in the EPA compendium. Aged roofs often sit below their rating.',
+    sources: ['lbnlRoof', 'chicago', 'santamouris'],
+  },
+  {
+    id: 'greenRoof',
+    mat: 'greenroof',
+    roof: true,
+    name: 'Green roofs',
+    line: 'Sedum and a thin damp substrate spend sunshine on evaporation instead of heating the roof; the effect is strongest soon after rain.',
+    lit: 'Literature: up to −18.4 K vs a black roof (Javits Center, NYC); EPA up to −31 K.',
+    sources: ['heusinger', 'noaaGreen', 'epa'],
+  },
+  {
+    id: 'pavers',
+    mat: 'pavers',
+    name: 'Permeable pavers',
+    line: 'Rain soaks into the joints and evaporates over the next day or so. Wet pavers are much cooler than asphalt; once dry, only their lighter colour helps.',
+    lit: 'Literature: wetted permeable pavement −15 to −35 K early afternoon; −2 to −7 K about 25 h later (Li et al. 2013).',
+    sources: ['li2013'],
+  },
+  {
+    id: 'porous',
+    mat: 'porousAsphalt',
+    name: 'Porous asphalt (car park)',
+    line: 'Drains rain like the pavers and is cooler while wet, but dry porous asphalt is darker and lighter-weight than dense asphalt, so it runs hotter.',
+    lit: 'Literature: dry porous asphalt about +5 K vs dense asphalt (Li et al. 2013).',
+    sources: ['li2013'],
+  },
+  {
+    id: 'coating',
+    mat: 'coolPave',
+    name: 'Cool pavement coating',
+    tradeoff: true,
+    line: 'A light coating on Canal Street: the road is a little cooler, but it reflects more sun onto people walking on it.',
+    lit: 'Literature (Los Angeles): road −4 to −6 K, pedestrian Tmrt +4 K at midday (Middel et al. 2020); coating albedo 0.26 -> 0.18 in a year (Ko et al. 2022).',
+    sources: ['middel2020', 'ko2022'],
+  },
+  {
+    id: 'rainGarden',
+    mat: 'raingarden',
+    name: 'Rain gardens',
+    line: 'Planted hollows along Willow Lane take the street runoff; their soil stays damp for days and cools by evaporation.',
+    lit: 'No measured cooling figure for rain gardens in the brief; the values here are engine assumptions.',
+    sources: ['engine', 'mccoll'],
+  },
+  {
+    id: 'trees',
+    young: true,
+    name: 'Young street trees',
+    line: 'New trees along Willow Lane, Market Road and Bridge Road. Their crowns are small and thin for now (about half the sun gets through), but walkers already use the patchy shade.',
+    lit: 'Literature: modelled −7 K Tmrt under trees in Phoenix; block cooling grows strongly above about 40% canopy cover.',
+    sources: ['middel2021', 'brief2'],
+  },
+];
+
+const SUN_FULL = 0.95;
+
+/** Cells compared for a measure at hour h (see MEASURES). */
+function measureCells(m, wB, tB, wA, tA, h) {
+  const out = [];
+  const N = wA.n * wA.n;
+  for (let i = 0; i < N; i++) {
+    if (m.young) {
+      if (wA.bld[i] < 0 && cellMat(wA, i) !== 'water' && tA.sunlit(i, h) < tB.sunlit(i, h) - 0.25) out.push(i);
+    } else if (cellMat(wA, i) === m.mat && (wA.bld[i] >= 0) === !!m.roof && tA.sunlit(i, h) > SUN_FULL && tB.sunlit(i, h) > SUN_FULL) out.push(i);
+  }
+  return out;
+}
+
+/**
+ * Before / After means for a measure at 12:00 and 15:00:
+ * {h12: {n, before, after, dTs, tmrtBefore, tmrtAfter, dTmrt}, h15: {...}}.
+ */
+function measureStats(m, wB, tB, wA, tA, hours = [12, 15]) {
+  const out = {};
+  for (const h of hours) {
+    const cells = measureCells(m, wB, tB, wA, tA, h);
+    const mean = (f) => cells.reduce((s, i) => s + f(i), 0) / Math.max(1, cells.length);
+    const r = { n: cells.length, before: mean((i) => tB.ts(i, h)), after: mean((i) => tA.ts(i, h)) };
+    r.dTs = r.after - r.before;
+    if (!m.roof) {
+      r.tmrtBefore = mean((i) => tB.tmrt(i, h));
+      r.tmrtAfter = mean((i) => tA.tmrt(i, h));
+      r.dTmrt = r.tmrtAfter - r.tmrtBefore;
+    }
+    out[`h${h}`] = r;
+  }
+  return out;
+}
+
+/**
+ * Water budget per wetted material: daily evaporated depth (mm) at each d,
+ * mean and max over its cells, against the storage it holds after rain.
+ * evap(d) is the After model at d. Returns
+ * {mat: {storage, days: [{d, mean, max}], total}} with total = sum over d.
+ */
+function waterBudget(wA, evapModels, mats = MATERIALS) {
+  const out = {};
+  for (const [id, m] of Object.entries(mats)) {
+    if (!m.storage) continue;
+    const cells = [];
+    for (let i = 0; i < wA.n * wA.n; i++) if (resolveId(cellMat(wA, i)) === id) cells.push(i);
+    if (!cells.length) continue;
+    const days = evapModels.map(({ d, model }) => {
+      const e = cells.map((i) => model.evaporation(i));
+      return { d, mean: e.reduce((a, b) => a + b, 0) / e.length, max: Math.max(...e) };
+    });
+    out[id] = { storage: m.storage.value, days, total: days.reduce((s, x) => s + x.max, 0) };
+  }
+  return out;
+}
+
+return { ALIASES, D_MAX, D_DEFAULT, decay, resolveId, stateMaterials, sceneState, isRetrofit, changedCells, runShared, MEASURES, measureCells, measureStats, waterBudget };
+})();
+
+__m['retroui'] = (() => {
+// retroui: the Before / After overlay of a retrofit block: margin-note text,
+// measure cards, the reflective-pavement trade-off card, the sponge-city card
+// and the split divider drawn on the canvas.
+const { rgbCss, noise1, INK } = __m['core'];
+const { SOURCES } = __m['materials'];
+const { gl } = __m['glossary'];
+const { MEASURES, measureStats } = __m['retrofit'];
+
+const fmt = (v) => (Math.round(v * 10) / 10).toFixed(1);
+const sgn = (v) => `${v < 0 ? '−' : '+'}${fmt(Math.abs(v))}`;
+const K = (v) => `${sgn(v)} K`;
+
+/** Margin notes (at most 5) for the retrofit block: text lines and glossary terms. */
+function retrofitNotes(scene, B, A, d, aged) {
+  const P = scene.probes;
+  const at = (V, k, h) => V.thermal.tsAt(P[k][0], P[k][1], h);
+  const cellOf = (k) => A.world.cellIndex(P[k][0], P[k][1]);
+  const roofA = A.thermal.info.mats.coolroofR;
+  const coat = measureStats(MEASURES.find((m) => m.id === 'coating'), B.world, B.thermal, A.world, A.thermal, [12]).h12;
+  const dLabel = d === 0 ? 'the morning after rain' : `${d} day${d === 1 ? '' : 's'} after rain`;
+  const text = {
+    roofs: [`Cool roof (${aged ? 'aged' : 'new'}, albedo ${roofA.alpha.value.toFixed(2)}): ${fmt(at(A, 'coolRoof', 15))} °C at 3 pm,`, `was ${fmt(at(B, 'coolRoof', 15))} °C as a dark membrane`],
+    coating: ['Coated Canal Street at noon: road', `${K(coat.dTs)}, but ${K(coat.dTmrt)} Tmrt for people on it`],
+    square: [`Permeable pavers, ${dLabel}:`, `${fmt(A.thermal.ts(cellOf('square'), 15))} °C at 3 pm (asphalt was ${fmt(B.thermal.ts(cellOf('square'), 15))} °C)`],
+    trees: ['Young street trees: thin crowns,', 'patchy shade for now'],
+    green: [`Green roof ${fmt(at(A, 'greenRoof', 15))} °C at 3 pm,`, `was ${fmt(at(B, 'greenRoof', 15))} °C`],
+  };
+  const terms = {
+    roofs: [['coolRoof', 'Cool roof'], ['albedoAgeing', aged ? 'aged' : 'new']],
+    coating: [['tmrt', 'Tmrt']],
+    square: [['permeablePaving', 'Permeable pavers'], ['daysSinceRain', dLabel]],
+    trees: [],
+    green: [['greenRoof', 'Green roof']],
+  };
+  return scene.notes.slice(0, 5).map((n) => ({ ...n, text: text[n.key], terms: terms[n.key] }));
+}
+
+const srcLine = (keys) => `<p class="src">Sources: ${keys.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: ${gl('forceRestore', 'force-restore')}, simulated; air temperature is the same in both states, so no air cooling is modelled.</p>`;
+
+/** Unverified inputs behind a measure (material parameter names). */
+function unverified(m, mats) {
+  const mat = m.young ? mats.youngCanopy : mats[m.mat];
+  const keys = ['alpha', 'eps', 'mu', 'muWet', 'ef', 'efWet', 'tau'].filter((k) => mat[k] && !mat[k].verified);
+  const names = { alpha: 'albedo', eps: 'emissivity', mu: 'admittance', muWet: 'wet admittance', ef: 'dry evaporative fraction', efWet: 'wet evaporative fraction', tau: 'drying time τ' };
+  const out = keys.map((k) => names[k]);
+  if (m.young) out.push('crown transmission 0.47 (LAI 1.5)');
+  return out;
+}
+
+/** Card HTML for one measure. st: measureStats(); mats: After material table. */
+function measureCard(m, st, mats, d, aged) {
+  const mat = m.young ? mats.youngCanopy : mats[m.mat];
+  const row = (h) => {
+    const r = st[`h${h}`];
+    if (!r.n) return `<tr><td>${h}:00</td><td colspan="2">no cells in full sun</td></tr>`;
+    const tm = m.roof ? '<td>— (roof)</td>' : `<td>${K(r.dTmrt)}</td>`;
+    return `<tr class="t"><td>${h}:00</td><td>${K(r.dTs)} <span class="sub">(${fmt(r.before)} → ${fmt(r.after)} °C)</span></td>${tm}</tr>`;
+  };
+  const wet = mat.efWet ? `<p class="sub">${gl('daysSinceRain', 'Days since rain')} d = ${d}: ${gl('ef', 'evaporative fraction')} ${mat.ef.value.toFixed(2)} (wet ${mat.efWet.value}, dry ${mat.dry.ef.value}, τ ${mat.tau.value} d).</p>` : '';
+  const age = m.mat === 'coolroofR' || m.mat === 'coolPave' ? `<p class="sub">Materials: ${aged ? 'aged' : 'new'}, ${gl('albedo', 'albedo')} ${mat.alpha.value.toFixed(2)} (${gl('albedoAgeing', 'aged vs new')}).</p>` : '';
+  const unv = unverified(m, mats);
+  return `
+    <button class="x" aria-label="close">×</button>
+    <h3>${m.name}</h3>
+    <div class="mat">After minus Before, same cells, simulated</div>
+    <table>
+      <tr><td></td><td>${gl('surfaceTemp', 'surface')} ΔTs</td><td>${gl('tmrt', 'person')} ΔTmrt</td></tr>
+      ${row(12)}
+      ${row(15)}
+    </table>
+    ${wet}${age}
+    <p class="note">${m.line}</p>
+    <p class="lit">${m.lit}</p>
+    ${unv.length ? `<p class="caveat">Unverified inputs: ${unv.join(', ')} <span class="unv">unverified</span></p>` : ''}
+    ${srcLine(m.sources)}`;
+}
+
+/** The reflective-pavement trade-off card. */
+function tradeoffCard(st, mats, aged) {
+  const r = st.h12;
+  const a = mats.coolPave.alpha.value;
+  return `
+    <button class="x" aria-label="close">×</button>
+    <h3>Reflective pavement: cools the road, not the person</h3>
+    <div class="mat">Canal Street coating (${aged ? 'aged' : 'new'}, ${gl('albedo', 'albedo')} ${a.toFixed(2)} vs 0.12), noon, simulated</div>
+    <table>
+      <tr class="t"><td>road surface</td><td>${K(r.dTs)}</td></tr>
+      <tr class="t"><td>${gl('tmrt', 'Tmrt')}, person on the road</td><td>${K(r.dTmrt)}</td></tr>
+    </table>
+    <p class="note">The light coating sends more sunshine back up, and part of it lands on people. The road gets cooler; a person standing on it gets more radiant heat at midday. Pair reflective paving with shade, such as trees or awnings.</p>
+    <p class="lit">Literature (Los Angeles): road −4 to −6 K, pedestrian Tmrt about +4 K at midday, with +118 W m⁻² more reflected sunshine (Middel et al. 2020). Neighbourhood scale: surface up to −5 K in the afternoon, air only −0.2 K (Ko et al. 2022).</p>
+    <p class="caveat">Known under-estimate: walls reflect no sunlight in this model, so light bounced onto the pavements from building faces is missing (Middel saw +20–30 W m⁻² on sidewalks in the evening).</p>
+    ${srcLine(['middel2020', 'ko2022'])}`;
+}
+
+/** Sponge-city guide card (text only; the block does not model rain or runoff). */
+function spongeCard() {
+  return `
+    <button class="x" aria-label="close">×</button>
+    <h3>${gl('spongeCity', 'Sponge city')}</h3>
+    <div class="mat">State Council General Office guideline, October 2015 (国办发〔2015〕75号)</div>
+    <p>Manage rain where it falls: let it soak in, slow it, store it, clean it, use it, and only then drain it — <span lang="zh">渗、滞、蓄、净、用、排</span>. The tools are the ones in this block: ${gl('greenRoof', 'green roofs')}, ${gl('permeablePaving', 'permeable paving')}, ${gl('rainGarden', 'rain gardens')}, and wetlands and parks at larger scale.</p>
+    <p>Target: absorb and use <b>70% of rainfall</b> on site, applied as a control rate for total annual runoff (年径流总量控制率); <b>20%</b> of built-up area by 2020 and <b>80%</b> by 2030.</p>
+    <p class="note">The goals are flooding and water supply first; cooling is a co-benefit. No robust measured block-scale cooling figure for sponge-city retrofits was found, so this page does not quote one. Rain and runoff are not modelled here, only the drying of wet surfaces.</p>
+    <p class="caveat">The primary Chinese text of the guideline was not located; the summary follows the English notice and a reprint <span class="unv">unverified</span></p>
+    ${srcLine(['sponge2015'])}`;
+}
+
+/**
+ * Split divider: an inked vertical line with a hand-drawn handle and the two
+ * state labels. Pure function of (x, height, sides). dpr scales sizes.
+ */
+function drawDivider(ctx, x, H, dpr, left, right) {
+  const ink = rgbCss(INK);
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  // paper gutter, then a double ink line with a slight wobble
+  ctx.fillStyle = 'rgba(243,236,221,0.85)';
+  ctx.fillRect(x - 2 * dpr, 0, 4 * dpr, H);
+  ctx.strokeStyle = ink;
+  ctx.lineCap = 'round';
+  for (const [off, lw, seed] of [[-1.6, 1.3, 3], [1.6, 0.8, 7]]) {
+    ctx.lineWidth = lw * dpr;
+    ctx.beginPath();
+    for (let y = 0; y <= H; y += 6 * dpr) {
+      const xx = x + off * dpr + 0.6 * dpr * noise1(y / (40 * dpr), seed);
+      if (y === 0) ctx.moveTo(xx, y);
+      else ctx.lineTo(xx, y);
+    }
+    ctx.stroke();
+  }
+  // handle
+  const hy = H * 0.5;
+  const r = 15 * dpr;
+  ctx.fillStyle = '#fbf7ee';
+  ctx.lineWidth = 1.5 * dpr;
+  ctx.beginPath();
+  for (let i = 0; i <= 24; i++) {
+    const a = (i / 24) * Math.PI * 2;
+    const rr = r * (1 + 0.04 * noise1(i * 0.8, 11));
+    const px = x + Math.cos(a) * rr;
+    const py = hy + Math.sin(a) * rr;
+    if (i) ctx.lineTo(px, py);
+    else ctx.moveTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.lineWidth = 1.4 * dpr;
+  ctx.beginPath();
+  for (const s of [-1, 1]) {
+    ctx.moveTo(x + s * 4 * dpr, hy - 5 * dpr);
+    ctx.lineTo(x + s * 9 * dpr, hy);
+    ctx.lineTo(x + s * 4 * dpr, hy + 5 * dpr);
+  }
+  ctx.stroke();
+  // labels
+  ctx.font = `${Math.round(17 * dpr)}px "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive`;
+  ctx.textBaseline = 'middle';
+  const ly = H * 0.5 - 36 * dpr;
+  for (const [label, side] of [[left, -1], [right, 1]]) {
+    const w = ctx.measureText(label).width;
+    const bx = side < 0 ? x - 12 * dpr - w : x + 12 * dpr;
+    ctx.fillStyle = 'rgba(251,247,238,0.92)';
+    ctx.fillRect(bx - 6 * dpr, ly - 12 * dpr, w + 12 * dpr, 24 * dpr);
+    ctx.lineWidth = 0.9 * dpr;
+    ctx.strokeStyle = 'rgba(43,38,33,0.6)';
+    ctx.strokeRect(bx - 6 * dpr, ly - 12 * dpr, w + 12 * dpr, 24 * dpr);
+    ctx.fillStyle = label === 'After' ? '#3f6e6a' : '#8a2f22';
+    ctx.fillText(label, bx, ly + 1 * dpr);
+  }
+  ctx.restore();
+}
+
+return { retrofitNotes, measureCard, tradeoffCard, spongeCard, drawDivider };
 })();
 
 __m['app'] = (() => {
@@ -3100,7 +3955,10 @@ const { runModel, shadeClassField, paletteLut, PALETTE_STOPS, heatRgb } = __m['t
 const { Life, shadeDensity, shadeAt } = __m['life'];
 const { Renderer, INTRO, quantHour } = __m['render'];
 const { MATERIALS, SOURCES, BASIS, paramKeys } = __m['materials'];
-const { GLOSSARY, gl, glossaryStats, rangeLine } = __m['glossary'];
+const { GLOSSARY, gl, glossaryStats, rangeLine, termsFor } = __m['glossary'];
+const { isRetrofit, sceneState, stateMaterials, runShared, resolveId, MEASURES, measureStats, waterBudget, ALIASES, D_MAX, D_DEFAULT } = __m['retrofit'];
+const { retrofitNotes, measureCard, tradeoffCard, spongeCard, drawDivider } = __m['retroui'];
+const { sunSlots } = __m['thermal'];
 
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
@@ -3121,25 +3979,82 @@ function hashCanvas(ctx, w, h) {
   return (x >>> 0).toString(16).padStart(8, '0');
 }
 
-function boot(scene, root = document) {
-  const t0 = performance.now();
-  const world = buildWorld(scene);
-  const t1 = performance.now();
-  const thermal = runModel(world);
-  const t2 = performance.now();
-  const display = drawWorld(world, scene.seed);
+/**
+ * A view: one drawn state of a scene (block 1 has one; a retrofit block has
+ * Before and After) with its world, model, display list, walkers and renderer.
+ */
+function makeView(id, sc, world, thermal, canvas) {
+  const display = drawWorld(world, sc.seed);
   const shadeCache = new Map();
   const shadeFor = (hq) => {
     if (!shadeCache.has(hq)) shadeCache.set(hq, shadeClassField(world, thermal.sun(hq)));
     return shadeCache.get(hq);
   };
-  const life = new Life(scene, shadeFor, (h) => thermal.air(h));
-  const canvas = root.getElementById('atlas');
+  const life = new Life(sc, shadeFor, (h) => thermal.air(h));
   const R = new Renderer(canvas, world, display, thermal, life);
+  return { id, scene: sc, world, thermal, display, shadeFor, life, R };
+}
+
+function boot(scene, root = document) {
+  const q = new URLSearchParams(location.search);
+  const canvas = root.getElementById('atlas');
+  const retro = isRetrofit(scene);
+  const t0 = performance.now();
+  let world;
+  let thermal;
+  let t1;
+  let t2;
+  let V; // views by id
+  let afterModel = null; // (d, aged) -> Thermal (retrofit only)
+  const retroQ = {
+    state: ['before', 'after', 'split'].includes(q.get('state')) ? q.get('state') : 'split',
+    split: q.has('split') ? clamp(parseFloat(q.get('split')) || 0.5, 0.05, 0.95) : 0.5,
+    d: q.has('d') ? Math.round(clamp(parseFloat(q.get('d')) || 0, 0, D_MAX)) : D_DEFAULT,
+    aged: q.get('materials') !== 'new',
+    swap: q.get('swap') === '1',
+  };
+  if (!retro) {
+    world = buildWorld(scene);
+    t1 = performance.now();
+    thermal = runModel(world);
+    t2 = performance.now();
+    V = { main: makeView('main', scene, world, thermal, canvas) };
+  } else {
+    // Before and After share buildings: the After world reuses the horizon
+    // scan and building shade masks, and its model reuses every Before cell
+    // whose inputs are unchanged (retrofit.js runShared)
+    const sB = sceneState(scene, 'before');
+    const sA = sceneState(scene, 'after');
+    const wB = buildWorld(sB);
+    const wA = buildWorld(sA, { svfFrom: wB });
+    t1 = performance.now();
+    const slB = sunSlots(wB, { keepMasks: true });
+    const slA = sunSlots(wA, { masksFrom: slB });
+    slB.masks = null;
+    const ref = { world: wB, slots: slB, model: runModel(wB, { slots: slB, materials: stateMaterials(D_DEFAULT, true) }) };
+    const cache = new Map();
+    afterModel = (d, aged) => {
+      const key = `${d}|${aged ? 1 : 0}`;
+      if (!cache.has(key)) {
+        if (cache.size >= 16) cache.delete(cache.keys().next().value);
+        cache.set(key, runShared(ref, wA, slA, stateMaterials(d, aged)));
+      }
+      return cache.get(key);
+    };
+    wA.colours = Object.fromEntries(Object.keys(ALIASES).map((k) => [k, resolveId(k, retroQ.aged)]));
+    const mA = afterModel(retroQ.d, retroQ.aged);
+    t2 = performance.now();
+    V = { before: makeView('before', sB, wB, ref.model, canvas), after: makeView('after', sA, wA, mA, canvas) };
+    world = wA;
+    thermal = mA;
+  }
+  // the view the single-state code paths (notes, glossary, block 1) use
+  const main = V.main ?? V.after;
+  const R = main.R;
+  const display = main.display;
   const t3 = performance.now();
 
   // ---- state -------------------------------------------------------------------------
-  const q = new URLSearchParams(location.search);
   const S = {
     frame: 0,
     paused: false,
@@ -3152,6 +4067,9 @@ function boot(scene, root = document) {
     intro: true,
     scrub: false, // hour slider being dragged, or refining after release
     released: true,
+    // retrofit only: which state is drawn, divider position (share of width),
+    // sides swapped (After on the left), days since rain, aged materials
+    ...(retro ? retroQ : {}),
   };
   if (q.get('ui') === '0') root.body.classList.add('noui');
   if (q.has('hour')) S.hour = Math.round(clamp(parseFloat(q.get('hour')) || 0, 0, 23.75) / 0.25) * 0.25;
@@ -3168,6 +4086,8 @@ function boot(scene, root = document) {
   // model values used in notes and cards
   const P = scene.probes;
   const at = (k, h) => thermal.tsAt(P[k][0], P[k][1], h);
+  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : block1Notes();
+  function block1Notes() {
   const notesText = {
     asphalt: ['Kiln Street, old asphalt (albedo 0.12):', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
     lawn: [`Park lawn: ${fmt(at('grass', 15))} °C at 3 pm;`, `${fmt(at('grass', 23))} °C at 11 pm, below the ${fmt(thermal.air(23))} °C air`],
@@ -3183,7 +4103,8 @@ function boot(scene, root = document) {
     roofs: [['coolRoof', 'White roof']],
     pond: [],
   };
-  const notes = scene.notes.slice(0, 5).map((n) => ({ ...n, text: notesText[n.key], terms: notesTerms[n.key] }));
+  return scene.notes.slice(0, 5).map((n) => ({ ...n, text: notesText[n.key], terms: notesTerms[n.key] }));
+  }
 
   const thermalMix = (f) => {
     const k = clamp((f - S.since) / FADE, 0, 1);
@@ -3194,7 +4115,7 @@ function boot(scene, root = document) {
   // ---- sizing ------------------------------------------------------------------------------
   const resize = () => {
     const dpr = Math.min(2, window.devicePixelRatio || 1);
-    R.dpr = dpr;
+    for (const v of Object.values(V)) v.R.dpr = dpr;
     canvas.width = Math.round(window.innerWidth * dpr);
     canvas.height = Math.round(window.innerHeight * dpr);
     canvas.style.width = `${window.innerWidth}px`;
@@ -3208,13 +4129,45 @@ function boot(scene, root = document) {
 
   let lastStats = null;
   let dirty = false;
+  /** Views on screen: [{v, clip}] left to right (retrofit), or the one view. */
+  const onScreen = () => {
+    if (!retro) return [{ v: main, clip: null }];
+    if (S.state !== 'split') return [{ v: V[S.state], clip: null }];
+    const sx = Math.round(S.split * canvas.width);
+    const [l, r] = S.swap ? [V.after, V.before] : [V.before, V.after];
+    return [{ v: l, clip: [0, sx] }, { v: r, clip: [sx, canvas.width] }];
+  };
+  let notesR = R; // renderer whose note hit boxes are live
   const draw = () => {
-    lastStats = R.frame(S.frame, S.cam, look(S.frame));
+    const tDraw = performance.now();
+    if (!retro) lastStats = R.frame(S.frame, S.cam, look(S.frame));
+    else {
+      const lk = look(S.frame);
+      const parts = onScreen();
+      const stats = parts.map(({ v, clip }) => ({ ...v.R.frame(S.frame, S.cam, { ...lk, notes: null, clip, budget: parts.length > 1 ? 1 : undefined }) }));
+      const st = stats[stats.length - 1];
+      lastStats = {
+        ...st,
+        people: stats.reduce((a, x) => a + x.people, 0),
+        sweating: stats.reduce((a, x) => a + x.sweating, 0),
+        sweatGlyphPx: Math.max(...stats.map((x) => x.sweatGlyphPx)),
+        tilesBaked: stats.reduce((a, x) => a + x.tilesBaked, 0),
+        frameMs: stats.reduce((a, x) => a + x.frameMs, 0),
+        preview: stats.some((x) => x.preview),
+        sides: parts.map(({ v }) => v.id),
+      };
+      const ctx = R.ctx;
+      if (parts.length > 1) drawDivider(ctx, parts[0].clip[1], canvas.height, R.dpr, S.swap ? 'After' : 'Before', S.swap ? 'Before' : 'After');
+      notesR = parts[parts.length - 1].v.R;
+      notesR.noteHits = [];
+      if (lk.notes && st.lifeA > 0) notesR.drawNotes(ctx, S.cam, canvas.width, canvas.height, lk.notes, st.lifeA);
+      lastStats.frameMs = performance.now() - tDraw;
+    }
     dirty = false;
     // a released scrub ends once the frame is exact again
     if (S.scrub && S.released && !lastStats.preview) {
       S.scrub = false;
-      R.endScrub(); // unpin now, even if the clock is paused and nothing else draws
+      for (const v of Object.values(V)) v.R.endScrub(); // unpin now, even if the clock is paused and nothing else draws
     }
     return lastStats;
   };
@@ -3244,7 +4197,7 @@ function boot(scene, root = document) {
   const setHour = (h, scrub = false) => {
     S.hour = ((Math.round(h / 0.25) * 0.25) % 24 + 24) % 24;
     syncUi();
-    if (card.dataset.open === '1') showCard(card._pick);
+    if (card.dataset.open === '1') reopenCard();
     if (scrub) {
       // slider drag: draw once in the next animation frame, as a preview
       S.scrub = true;
@@ -3265,6 +4218,111 @@ function boot(scene, root = document) {
   slider.addEventListener('pointercancel', release);
   slider.addEventListener('change', release);
   slider.addEventListener('input', () => setHour(parseFloat(slider.value), true));
+  // ---- retrofit controls: state, divider, days since rain, aged / new -------------------
+  const retroUi = retro ? buildRetroUi() : null;
+  function buildRetroUi() {
+    const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
+    root.body.insertAdjacentHTML(
+      'beforeend',
+      `<div id="retro" aria-label="Retrofit controls">
+        <div class="seg" role="group" aria-label="Show Before, After or both">${btn('data-state', 'before', 'Before')}${btn('data-state', 'split', 'Split')}${btn('data-state', 'after', 'After')}</div>
+        <div class="row"><label for="rain">${gl('daysSinceRain', 'days since rain')}</label><input id="rain" type="range" min="0" max="${D_MAX}" step="1" aria-label="days since rain"><span id="rainLabel" class="hand"></span></div>
+        <div class="seg" role="group" aria-label="Materials aged or new"><span>${gl('albedoAgeing', 'materials')}:</span>${btn('data-aged', '1', 'aged')}${btn('data-aged', '0', 'new')}</div>
+        <div class="measures"><div class="hand">Retrofit measures</div>${MEASURES.map((m) => btn('data-measure', m.id, m.name)).join('')}${btn('data-measure', 'tradeoff', 'Trade-off: reflective pavement', 'class="warn"')}${btn('data-measure', 'sponge', 'Sponge city (海绵城市)')}</div>
+      </div>`,
+    );
+    const el = root.getElementById('retro');
+    el.addEventListener('click', (e) => {
+      const b = e.target.closest ? e.target.closest('button') : null;
+      if (!b) return;
+      if (b.dataset.state) setState(b.dataset.state);
+      else if (b.dataset.aged) setAged(b.dataset.aged === '1');
+      else if (b.dataset.measure) showMeasure(b.dataset.measure, b);
+    });
+    const rain = root.getElementById('rain');
+    rain.addEventListener('input', () => setRain(parseInt(rain.value, 10)));
+    return { el, rain, label: root.getElementById('rainLabel') };
+  }
+  function syncRetro() {
+    if (!retroUi) return;
+    for (const b of retroUi.el.querySelectorAll('[data-state]')) b.setAttribute('aria-pressed', String(b.dataset.state === S.state));
+    for (const b of retroUi.el.querySelectorAll('[data-aged]')) b.setAttribute('aria-pressed', String((b.dataset.aged === '1') === S.aged));
+    retroUi.rain.value = String(S.d);
+    retroUi.label.textContent = S.d === 0 ? 'd = 0 · best case: clear day after overnight rain' : `d = ${S.d}`;
+    root.body.dataset.state = S.state;
+  }
+  const redraw = () => {
+    if (S.paused) draw();
+  };
+  function setState(st) {
+    S.state = st;
+    syncRetro();
+    redraw();
+  }
+  /** B key: in split view swap the sides; otherwise flip Before <-> After. */
+  function swapStates() {
+    if (S.state === 'split') S.swap = !S.swap;
+    else S.state = S.state === 'before' ? 'after' : 'before';
+    syncRetro();
+  }
+  function setSplit(f) {
+    S.split = clamp(f, 0.05, 0.95);
+    redraw();
+  }
+  /** New After model for the current days since rain and aged / new choice. */
+  function refreshAfter() {
+    thermal = afterModel(S.d, S.aged);
+    V.after.thermal = thermal;
+    V.after.R.setThermal(thermal);
+    notes = retrofitNotes(scene, V.before, V.after, S.d, S.aged);
+    syncRetro();
+    if (card.dataset.open === '1') reopenCard();
+    redraw();
+  }
+  function setRain(d) {
+    const v = Math.round(clamp(d, 0, D_MAX));
+    if (v === S.d) return;
+    S.d = v;
+    refreshAfter();
+  }
+  function setAged(aged) {
+    if (aged === S.aged) return;
+    S.aged = aged;
+    // redraw the After line work with the aged or new colours
+    V.after.world.colours = Object.fromEntries(Object.keys(ALIASES).map((k) => [k, resolveId(k, aged)]));
+    V.after.display = drawWorld(V.after.world, V.after.scene.seed);
+    V.after.R.setDisplay(V.after.display);
+    refreshAfter();
+  }
+  function measureStatsFor(id) {
+    const m = MEASURES.find((x) => x.id === id);
+    return measureStats(m, V.before.world, V.before.thermal, V.after.world, V.after.thermal);
+  }
+  function measureHtml(id) {
+    const mats = V.after.thermal.info.mats;
+    if (id === 'sponge') return spongeCard();
+    if (id === 'tradeoff') return tradeoffCard(measureStatsFor('coating'), mats, S.aged);
+    return measureCard(MEASURES.find((x) => x.id === id), measureStatsFor(id), mats, S.d, S.aged);
+  }
+  function showMeasure(id, anchor) {
+    card.innerHTML = measureHtml(id);
+    card.querySelector('.x').onclick = hideCard;
+    card._pick = null;
+    card._measure = id;
+    card.dataset.open = '1';
+    card.dataset.kind = id;
+    card.style.display = 'block';
+    const r = anchor ? anchor.getBoundingClientRect() : { right: 300, top: 120 };
+    card.style.left = `${Math.min(window.innerWidth - card.offsetWidth - 10, r.right + 12)}px`;
+    card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
+  }
+  function reopenCard() {
+    if (card._measure) {
+      card.innerHTML = measureHtml(card._measure);
+      card.querySelector('.x').onclick = hideCard;
+    } else if (card._pick) showCard(card._pick);
+  }
+
   const toggleThermal = () => {
     const m = thermalMix(S.frame);
     S.thermal = !S.thermal;
@@ -3276,6 +4334,7 @@ function boot(scene, root = document) {
     if (e.target && e.target.tagName === 'INPUT' && e.key !== 't' && e.key !== 'T') return;
     const k = e.key;
     if (k === 't' || k === 'T') toggleThermal();
+    else if (retro && (k === 'b' || k === 'B')) swapStates();
     else if (k === 'h') setHour(S.hour + 1);
     else if (k === 'H') setHour(S.hour - 1);
     else if (k === 'n' || k === 'N') S.notes = !S.notes;
@@ -3312,15 +4371,17 @@ function boot(scene, root = document) {
 
   // drag to pan, click to pick
   let drag = null;
+  /** True if a CSS-px x is on the split divider (handle or line). */
+  const onDivider = (x) => retro && S.state === 'split' && Math.abs(x * R.dpr - Math.round(S.split * canvas.width)) <= 12 * R.dpr;
   canvas.addEventListener('pointerdown', (e) => {
-    drag = { x: e.clientX, y: e.clientY, cam: { ...S.cam }, moved: false };
+    drag = { x: e.clientX, y: e.clientY, cam: { ...S.cam }, moved: false, divider: onDivider(e.clientX) };
     canvas.setPointerCapture(e.pointerId);
   });
-  const noteHit = (x, y) => (R.noteHits ?? []).find((h) => x >= h.x && x <= h.x + h.w && y >= h.y - h.h && y <= h.y + 3);
+  const noteHit = (x, y) => (notesR.noteHits ?? []).find((h) => x >= h.x && x <= h.x + h.w && y >= h.y - h.h && y <= h.y + 3);
   canvas.addEventListener('pointermove', (e) => {
     if (!drag) {
       const h = noteHit(e.clientX, e.clientY);
-      canvas.style.cursor = h ? 'help' : '';
+      canvas.style.cursor = h ? 'help' : onDivider(e.clientX) ? 'ew-resize' : '';
       if (h && fn.hidden) showFn(h.key, { left: h.x, right: h.x + h.w, top: h.y - h.h, bottom: h.y + 3 }, false);
       else if (!h && !fn.hidden && !fnPinned) hideFn();
       return;
@@ -3328,6 +4389,10 @@ function boot(scene, root = document) {
     const dx = e.clientX - drag.x;
     const dy = e.clientY - drag.y;
     if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
+    if (drag.divider) {
+      setSplit((e.clientX * R.dpr) / canvas.width);
+      return;
+    }
     if (!drag.moved) return;
     const a = -dx / drag.cam.z / ISO_C;
     const b = -dy / drag.cam.z / ISO_S;
@@ -3337,7 +4402,7 @@ function boot(scene, root = document) {
   canvas.addEventListener('pointerup', (e) => {
     const d = drag;
     drag = null;
-    if (d && !d.moved) {
+    if (d && !d.moved && !d.divider) {
       const h = noteHit(e.clientX, e.clientY);
       if (h) {
         showFn(h.key, { left: h.x, right: h.x + h.w, top: h.y - h.h, bottom: h.y + 3 }, true);
@@ -3350,13 +4415,21 @@ function boot(scene, root = document) {
     }
   });
 
+  /** The view drawn at a CSS-px x (split view: left or right of the divider). */
+  const viewAt = (cx) => {
+    const parts = onScreen();
+    const x = cx * R.dpr;
+    return (parts.find(({ clip }) => !clip || (x >= clip[0] && x < clip[1])) ?? parts[parts.length - 1]).v;
+  };
   /** Screen (CSS px) -> what is under it: building, tree or ground parcel. */
   function pick(cx, cy) {
     const dpr = R.dpr;
     const [ox, oy, Z] = R.origin(S.cam, canvas.width, canvas.height);
     const px = (cx * dpr - ox) / Z;
     const py = (cy * dpr - oy) / Z;
-    const objs = display.objects;
+    const view = viewAt(cx);
+    const world = view.world;
+    const objs = view.display.objects;
     for (let k = objs.length - 1; k >= 0; k--) {
       const o = objs[k];
       if (o.kind === 'b') {
@@ -3369,21 +4442,25 @@ function boot(scene, root = document) {
           const [xj, yj] = hex[j];
           if (yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) inside = !inside;
         }
-        if (inside) return { kind: 'building', B };
+        if (inside) return { kind: 'building', B, view };
       } else if (o.kind === 't') {
         const T = o.o;
         const c = iso(T.x, T.y, T.zc);
-        if (Math.hypot(px - c[0], py - c[1]) < T.r * 0.95) return { kind: 'tree', T };
+        if (Math.hypot(px - c[0], py - c[1]) < T.r * 0.95) return { kind: 'tree', T, view };
       }
     }
     const [x, y] = unIso(px, py, 0);
     if (x < 0 || y < 0 || x >= world.size || y >= world.size) return null;
-    return { kind: 'ground', x, y, g: scene.ground[world.parcelAt(x, y)] };
+    return { kind: 'ground', x, y, g: view.scene.ground[world.parcelAt(x, y)], view };
   }
 
   /** Data for a heat card (also used by checks). */
   function cardData(p) {
     const h = S.hour;
+    const view = p.view ?? main;
+    const world = view.world;
+    const thermal = view.thermal;
+    const mats = thermal.info.mats ?? MATERIALS;
     let title;
     let mat;
     let cells;
@@ -3394,8 +4471,8 @@ function boot(scene, root = document) {
       cells = [];
       for (let i = 0; i < world.bld.length; i++) if (world.bld[i] === p.B.index) cells.push(i);
     } else if (p.kind === 'tree') {
-      title = 'Tree';
-      mat = 'canopy';
+      title = p.T.young ? 'Young street tree' : 'Tree';
+      mat = p.T.young ? 'youngCanopy' : 'canopy';
       cells = [world.cellIndex(p.T.x, p.T.y)];
       tmrtCell = cells[0];
     } else {
@@ -3404,13 +4481,34 @@ function boot(scene, root = document) {
       cells = [world.cellIndex(p.x, p.y)];
       tmrtCell = cells[0];
     }
-    const m = MATERIALS[mat];
-    const mean = (hh) => cells.reduce((s, i) => s + thermal.ts(i, hh), 0) / cells.length;
+    const m = mats[mat];
+    const mean = (hh, T = thermal) => cells.reduce((s, i) => s + T.ts(i, hh), 0) / cells.length;
     const svf = cells.reduce((s, i) => s + world.svf[i], 0) / cells.length;
-    const ts = mat === 'canopy' ? (hh) => thermal.canopyTemp(hh) : mean;
+    const leaf = mat === 'canopy' || mat === 'youngCanopy';
+    const ts = leaf ? (hh) => thermal.canopyTemp(hh) : mean;
+    // retrofit: the same cells in the other state, if anything there differs
+    let compare = null;
+    if (retro && !leaf) {
+      const other = view === V.after ? V.before : V.after;
+      const oid = p.kind === 'building' ? other.world.buildings[p.B.index].roof : other.scene.ground[other.world.parcelAt(p.x, p.y)].mat;
+      const diff = oid !== mat || cells.some((i) => Math.abs(other.thermal.ts(i, 15) - thermal.ts(i, 15)) > 0.05);
+      if (diff) {
+        const [b, a] = view === V.after ? [other, view] : [view, other];
+        compare = {
+          before: mean(15, b.thermal),
+          after: mean(15, a.thermal),
+          beforeMat: (b.thermal.info.mats ?? MATERIALS)[p.kind === 'building' ? b.world.buildings[p.B.index].roof : b.scene.ground[b.world.parcelAt(p.x, p.y)].mat].name,
+          afterMat: (a.thermal.info.mats ?? MATERIALS)[p.kind === 'building' ? a.world.buildings[p.B.index].roof : a.scene.ground[a.world.parcelAt(p.x, p.y)].mat].name,
+          tmrtBefore: tmrtCell !== null ? b.thermal.tmrt(tmrtCell, 15) : null,
+          tmrtAfter: tmrtCell !== null ? a.thermal.tmrt(tmrtCell, 15) : null,
+        };
+      }
+    }
     return {
       title,
-      matId: mat,
+      state: view.id,
+      compare,
+      matId: resolveId(mat, S.aged),
       material: m.name,
       params: Object.fromEntries(paramKeys(m).map((k) => [k, m[k]])),
       caveat: m.caveat ?? null,
@@ -3419,12 +4517,14 @@ function boot(scene, root = document) {
       tsNow: ts(h),
       ts15: ts(15),
       ts23: ts(23),
-      groundNow: mat === 'canopy' ? mean(h) : null,
+      groundNow: leaf ? mean(h) : null,
       tmrtNow: tmrtCell !== null ? thermal.tmrt(tmrtCell, h) : null,
       tmrt15: tmrtCell !== null ? thermal.tmrt(tmrtCell, 15) : null,
       air: thermal.air(h),
       note: m.note,
       hour: h,
+      dryEf: m.dry ? m.dry.ef.value : null,
+      dryMu: m.dry ? m.dry.mu.value : null,
     };
   }
 
@@ -3441,21 +4541,36 @@ function boot(scene, root = document) {
         ? `<tr><td>${gl('admittance', 'admittance μ')}</td><td>${P.mu.value} J m⁻² s⁻½ K⁻¹${tag(P.mu)}</td></tr>`
         : '';
     const srcs = [...new Set(Object.values(d.params).map((v) => v.source))];
+    // wetted materials: value at the current days since rain, with the wet / dry ends and τ
+    const efCell = P.ef.atD !== undefined ? `${P.ef.value.toFixed(2)} at ${gl('daysSinceRain', `d = ${P.ef.atD}`)}${tag(P.ef)}` : `${P.ef.value}${tag(P.ef)}`;
+    const wet = [
+      P.efWet ? `<tr><td>evaporative fraction wet / dry</td><td>${P.efWet.value} / ${d.dryEf}${tag(P.efWet)}</td></tr>` : '',
+      P.muWet ? `<tr><td>admittance wet / dry</td><td>${P.muWet.value} / ${d.dryMu}${tag(P.muWet)}</td></tr>` : '',
+      P.tau ? `<tr><td>drying time τ</td><td>${P.tau.value} d${tag(P.tau)}</td></tr>` : '',
+      P.storage ? `<tr><td>water held after rain</td><td>${P.storage.value} mm${tag(P.storage)}</td></tr>` : '',
+    ].join('');
+    const cmp = d.compare
+      ? `<tr class="t"><td>15:00 Before → After</td><td>${fmt(d.compare.before)} → ${fmt(d.compare.after)} °C</td></tr>
+        ${d.compare.tmrtBefore !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} 15:00 Before → After</td><td>${fmt(d.compare.tmrtBefore)} → ${fmt(d.compare.tmrtAfter)} °C</td></tr>` : ''}
+        <tr><td colspan="2" class="sub">Before: ${d.compare.beforeMat}; After: ${d.compare.afterMat}</td></tr>`
+      : '';
     card.innerHTML = `
       <button class="x" aria-label="close">×</button>
       <h3>${d.title}</h3>
-      <div class="mat">${d.matId === 'coolroof' ? gl('coolRoof', d.material) : d.material}</div>
+      <div class="mat">${d.matId === 'coolroof' || d.matId === 'coolroofAged' || d.matId === 'coolroofNew' ? gl('coolRoof', d.material) : d.material}${retro ? ` · ${d.state === 'after' ? 'After' : 'Before'}` : ''}</div>
       <table>
         <tr><td>${gl('albedo', 'albedo α')}</td><td>${P.alpha.value}${tag(P.alpha)}</td></tr>
         <tr><td>${gl('emissivity', 'emissivity ε')}</td><td>${P.eps.value}${tag(P.eps)}</td></tr>
         ${heat}
-        <tr><td>${gl('ef', 'evaporative fraction')}</td><td>${P.ef.value}${tag(P.ef)}</td></tr>
+        <tr><td>${gl('ef', 'evaporative fraction')}</td><td>${efCell}</td></tr>
+        ${wet}
         <tr><td>${gl('svf', 'sky view factor')}</td><td>${d.svf.toFixed(2)}</td></tr>
         <tr class="t"><td>${gl('surfaceTemp', 'surface')} now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
         <tr class="t"><td>surface 15:00 / ${gl('nightLag', '23:00')}</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
         ${d.groundNow !== null ? `<tr><td>ground beneath now</td><td>${fmt(d.groundNow)} °C</td></tr>` : ''}
         ${d.tmrtNow !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} (person) now / 15:00</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
         <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
+        ${cmp}
       </table>
       <p class="note">${d.note}</p>
       ${d.caveat ? `<p class="caveat">${d.caveat}</p>` : ''}
@@ -3463,6 +4578,8 @@ function boot(scene, root = document) {
       <p class="src">Sources: ${srcs.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: ${gl('forceRestore', 'force-restore')} (Deardorff 1978), simulated. Basis tags and the model-vs-literature table: docs/sources.md.</p>`;
     card.querySelector('.x').onclick = hideCard;
     card._pick = p;
+    card._measure = null;
+    card.dataset.kind = 'heat';
     card.dataset.open = '1';
     card.style.display = 'block';
     if (x !== undefined) {
@@ -3485,12 +4602,13 @@ function boot(scene, root = document) {
   const fn = $('fn');
   const terms = $('terms');
   const termsBtn = $('termsBtn');
-  const gstats = glossaryStats(world, thermal);
+  // retrofit: footnote numbers come from the Before state (the old block)
+  const gstats = retro ? glossaryStats(V.before.world, V.before.thermal) : glossaryStats(world, thermal);
   let fnPinned = false;
   let fnByFocus = false;
   let fnTrigger = null;
   let fnTimer = null;
-  $('termsList').innerHTML = Object.keys(GLOSSARY).map((k) => `<li>${gl(k)}</li>`).join('');
+  $('termsList').innerHTML = termsFor(scene.id).map((k) => `<li>${gl(k)}</li>`).join('');
   function releaseTrigger() {
     if (fnTrigger) {
       fnTrigger.removeAttribute('aria-describedby');
@@ -3609,16 +4727,20 @@ function boot(scene, root = document) {
       const modes = m <= 0 ? ['day'] : m >= 1 ? ['thermal'] : ['day', 'thermal'];
       const W = canvas.width;
       const H = canvas.height;
-      const fit = Math.floor(R.maxTiles / Math.max(1, R.visibleTiles(S.cam, W, H).tiles.length)) - 2;
-      const hours = NEIGHBOURS.slice(0, Math.max(0, Math.floor(fit / modes.length) - 1)).map((dh) => quantHour(S.hour + dh));
-      for (const mode of modes) {
-        for (const h of hours) {
-          while (d.timeRemaining() > 12) {
-            if (!R.bakeSome(mode, S.cam, h, W, H, 1)) break;
-          }
-          if (d.timeRemaining() <= 12) {
-            this.kick();
-            return;
+      for (const { v, clip } of onScreen()) {
+        const Rv = v.R;
+        Rv.clip = clip; // bake only the band this view shows
+        const fit = Math.floor(Rv.maxTiles / Math.max(1, Rv.visibleTiles(S.cam, W, H).tiles.length)) - 2;
+        const hours = NEIGHBOURS.slice(0, Math.max(0, Math.floor(fit / modes.length) - 1)).map((dh) => quantHour(S.hour + dh));
+        for (const mode of modes) {
+          for (const h of hours) {
+            while (d.timeRemaining() > 12) {
+              if (!Rv.bakeSome(mode, S.cam, h, W, H, 1)) break;
+            }
+            if (d.timeRemaining() <= 12) {
+              this.kick();
+              return;
+            }
           }
         }
       }
@@ -3639,18 +4761,24 @@ function boot(scene, root = document) {
     requestAnimationFrame(loop);
   };
   syncUi();
+  syncRetro();
   draw();
   requestAnimationFrame(loop);
 
   // ---- API (used by checks; stable) --------------------------------------------------------
+  // checks may name a view: 'before' / 'after' (retrofit) or nothing (the main view)
+  const vw = (which) => (which ? V[which] : main);
   const api = {
     ready: true,
     info: {
       worldMs: t1 - t0,
       modelMs: t2 - t1,
       drawMs: t3 - t2,
+      totalMs: performance.now() - t0,
       items: display.items.length,
       intro: INTRO,
+      views: Object.keys(V),
+      changedCells: retro ? V.after.thermal.info.changed : 0,
     },
     /** Pure seek: render frame N with an optional camera {z,cx,cy}; pauses the clock. */
     seek(frame, cam) {
@@ -3686,7 +4814,8 @@ function boot(scene, root = document) {
       const p = iso(x, y, z);
       return [(ox + p[0] * Z) / R.dpr, (oy + p[1] * Z) / R.dpr];
     },
-    probes(h = S.hour) {
+    probes(h = S.hour, which) {
+      const { world, thermal } = vw(which);
       const out = {};
       for (const k of Object.keys(P)) {
         const [x, y] = P[k];
@@ -3697,13 +4826,15 @@ function boot(scene, root = document) {
       return out;
     },
     palette: () => paletteLut(),
-    agents(frame = S.frame, hour = S.hour) {
+    agents(frame = S.frame, hour = S.hour, which) {
+      const { life, shadeFor } = vw(which);
       const hq = quantHour(hour);
       const sh = shadeFor(hq);
       return life.at(frame / 60, hq).map((a) => ({ x: a.x, y: a.y, sit: a.sit, shade: shadeAt(sh, a.x, a.y) }));
     },
     /** Sweat cue per person: position, local Tmrt, sunlit share, strength, droplets showing. */
-    sweat(frame = S.frame, hour = S.hour) {
+    sweat(frame = S.frame, hour = S.hour, which) {
+      const { life, shadeFor, R } = vw(which);
       const hq = quantHour(hour);
       return life.at(frame / 60, hq).map((a) => {
         const h = R.heatAt(a.x, a.y, hq);
@@ -3711,11 +4842,16 @@ function boot(scene, root = document) {
         return { x: a.x, y: a.y, tmrt: h.tmrt, sunlit: h.sunlit, shade: shadeAt(shadeFor(hq), a.x, a.y), s: st.s, drops: st.drops.length, fall: st.drops.length ? st.drops[0].fall : null, fan: st.fan, hidden: R.hidden(a.x, a.y) };
       });
     },
-    shadeStats(frame = S.frame, hour = S.hour) {
+    shadeStats(frame = S.frame, hour = S.hour, which) {
+      const { world, life, shadeFor } = vw(which);
       const hq = quantHour(hour);
       return shadeDensity(world, life.at(frame / 60, hq), shadeFor(hq));
     },
-    card: (kind, a, b) => cardData(kind === 'building' ? { kind, B: world.buildings.find((B) => B.id === a) } : { kind: 'ground', x: a, y: b, g: scene.ground[world.parcelAt(a, b)] }),
+    card: (kind, a, b, which) => {
+      const view = vw(which);
+      const w = view.world;
+      return cardData(kind === 'building' ? { kind, B: w.buildings.find((B) => B.id === a), view } : { kind: 'ground', x: a, y: b, g: view.scene.ground[w.parcelAt(a, b)], view });
+    },
     stats: () => ({ ...lastStats }),
     /** False while a slider drag is showing (or refining) preview frames. */
     settled: () => !S.scrub,
@@ -3724,12 +4860,15 @@ function boot(scene, root = document) {
     /** Glossary keys, and the on-canvas note term hit boxes (CSS px). */
     glossaryKeys: () => Object.keys(GLOSSARY),
     glossaryStats: () => ({ ...gstats }),
-    noteTerms: () => (R.noteHits ?? []).map((h) => ({ ...h })),
+    noteTerms: () => (notesR.noteHits ?? []).map((h) => ({ ...h })),
+    /** Notes on the canvas (text lines), for checks. */
+    notes: () => (S.notes ? notes.map((n) => ({ key: n.key, text: n.text.slice() })) : []),
     /**
      * Opaque boxes in draw order (for occlusion masks in checks):
      * {kind, b (building index or -1), box: [x0, y0, x1, y1, z0, z1]}.
      */
-    boxes() {
+    boxes(which) {
+      const { display, world } = vw(which);
       const out = [];
       for (const o of display.objects) {
         if (o.kind === 'b') {
@@ -3768,6 +4907,30 @@ function boot(scene, root = document) {
       });
     },
     frameTimes,
+    /**
+     * Retrofit (block 2) only: state {state, split, swap, d, aged}; set() any
+     * of them (as the controls do); measures with Before / After numbers;
+     * card HTML; daily evaporated water per wetted material and d.
+     */
+    retro: retro
+      ? {
+        state: () => ({ state: S.state, split: S.split, swap: S.swap, d: S.d, aged: S.aged }),
+        set(o) {
+          if (o.aged !== undefined) setAged(!!o.aged);
+          if (o.d !== undefined) setRain(o.d);
+          if (o.state !== undefined) setState(o.state);
+          if (o.split !== undefined) setSplit(o.split);
+          if (o.swap !== undefined) S.swap = !!o.swap;
+          syncRetro();
+        },
+        measures: () => MEASURES.map((m) => ({ id: m.id, name: m.name, ...measureStatsFor(m.id) })),
+        measure: (id) => measureStatsFor(id),
+        html: (id) => measureHtml(id),
+        show: (id) => showMeasure(id, root.querySelector(`#retro [data-measure="${id}"]`)),
+        water: (ds = [0, 1, 2, 3, 4, 5, 6, 7]) => waterBudget(V.after.world, ds.map((d) => ({ d, model: afterModel(d, S.aged) }))),
+        divider: () => Math.round(S.split * canvas.width) / R.dpr,
+      }
+      : null,
   };
   window.atlas = api;
   return api;
