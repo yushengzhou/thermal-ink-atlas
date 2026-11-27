@@ -2074,6 +2074,8 @@ class Renderer {
     this.scrub = false; // set per frame from look.scrub
     this.budget = Infinity;
     this.pending = {};
+    this.shown = {};
+    this.pins = {}; // mode -> Set of hours whose tiles the scrub preview needs
   }
 
   // ---- hour context ------------------------------------------------------
@@ -2399,7 +2401,7 @@ class Renderer {
     g.globalCompositeOperation = 'source-over';
     this.tiles.set(key, c);
     this.stats.tilesBaked++;
-    while (this.tiles.size > this.maxTiles) this.tiles.delete(this.tiles.keys().next().value);
+    this.evict();
     return c;
   }
 
@@ -2454,8 +2456,33 @@ class Renderer {
     const ty1 = Math.floor(Math.min(maxY, H - oy) / TILE);
     const out = [];
     for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) out.push([tx, ty]);
-    this.maxTiles = clamp(out.length * 9, 72, 160);
+    // Tile cache cap: a 512 px tile is 1 MB, so this is about 9 hours of the
+    // visible view, but never more than 160 MB (36 MB floor for tiny views).
+    // On large HiDPI views 9 hours do not fit; the scrub preview then relies
+    // on pinning (see evict) rather than on the cap.
+    this.maxTiles = clamp(out.length * 9, 36, 160);
     return { ox, oy, tiles: out };
+  }
+
+  /** True if a tile key belongs to an hour the scrub preview has pinned. */
+  pinned(key) {
+    const [mode, , hq] = key.split('|');
+    const set = this.pins[mode];
+    return !!set && set.has(Number(hq));
+  }
+
+  /**
+   * Drop least recently used tiles down to the cap, skipping pinned ones: the
+   * scrub preview's pending and shown hours stay cached even when they alone
+   * exceed the cap, so a preview always finishes (bounded by 3 hours x modes
+   * of visible tiles).
+   */
+  evict() {
+    if (this.tiles.size <= this.maxTiles) return;
+    for (const k of this.tiles.keys()) {
+      if (this.tiles.size <= this.maxTiles) break;
+      if (!this.pinned(k)) this.tiles.delete(k);
+    }
   }
 
   tileKey(mode, z, hq, tx, ty) {
@@ -2499,6 +2526,7 @@ class Renderer {
       const shown = this.previewHours(mode, cam, hq, W, H, tiles);
       if (shown) {
         const [h0, h1, w] = shown;
+        this.stats.preview = true;
         this.blit(ctx, mode, cam.z, h0, tiles, ox, oy, alpha);
         if (w > 0) this.blit(ctx, mode, cam.z, h1, tiles, ox, oy, alpha * w);
         return;
@@ -2518,8 +2546,10 @@ class Renderer {
    * "pending" keyframe hour near the target, and show the nearest fully baked
    * hours around the target, cross-faded by distance. Returns null when the
    * target itself is baked (the frame is then exact) or nothing is baked.
-   * Preview frames depend on what is cached, so they exist only while
-   * scrubbing; seek() and ?f=N always take the exact path.
+   * Preview frames depend on what happens to be cached (earlier drags, idle
+   * pre-baking), so they are not deterministic; they exist only while
+   * scrubbing. seek(), ?f=N and the settled frame after release always take
+   * the exact path and are deterministic.
    */
   previewHours(mode, cam, hq, W, H, tiles) {
     const z = cam.z;
@@ -2533,10 +2563,11 @@ class Renderer {
       let p = this.pending[mode];
       if (p === undefined || dist(p, hq) > 1 || this.baked(mode, z, p, tiles)) p = hq;
       this.pending[mode] = p;
+      // keep what is on screen and what is being baked
+      this.pins[mode] = new Set([p, ...(this.shown[mode] ?? [])]);
       this.budget -= this.bakeSome(mode, cam, p, W, H, Math.max(0, this.budget));
     }
     if (this.baked(mode, z, hq, tiles)) return null;
-    this.stats.preview = true;
     // nearest baked hour before and after the target
     let lo = null;
     let hi = null;
@@ -2547,8 +2578,11 @@ class Renderer {
     if (lo === null) return null; // nothing baked: fall back to an exact bake
     const h0 = quantHour(hq - lo * HOUR_STEP);
     const h1 = quantHour(hq + hi * HOUR_STEP);
-    if (h0 === h1 || lo + hi > 4 / HOUR_STEP) return lo <= hi ? [h0, h0, 0] : [h1, h1, 0];
-    return [h0, h1, lo / (lo + hi)];
+    let out = [h0, h1, lo / (lo + hi)];
+    if (h0 === h1 || lo + hi > 4 / HOUR_STEP) out = lo <= hi ? [h0, h0, 0] : [h1, h1, 0];
+    this.shown[mode] = [out[0], out[1]];
+    this.pins[mode] = new Set([this.pending[mode], hq, out[0], out[1]].filter((h) => h !== undefined));
+    return out;
   }
 
   // ---- frame -----------------------------------------------------------------
@@ -2565,11 +2599,15 @@ class Renderer {
     const H = this.canvas.height;
     const hq = quantHour(look.hour);
     const [ox, oy] = this.origin(cam, W, H);
-    // scrub preview: at most PREVIEW_BUDGET tile bakes per frame (a count, not
-    // a clock, so a given input sequence always previews the same way)
+    // scrub preview: at most PREVIEW_BUDGET tile bakes per frame (a tile count,
+    // not a clock; what a preview frame shows still depends on the cache)
     this.scrub = !!look.scrub;
     this.budget = this.scrub ? PREVIEW_BUDGET : Infinity;
-    if (!this.scrub) this.pending = {};
+    if (!this.scrub) {
+      this.pending = {};
+      this.shown = {};
+      this.pins = {};
+    }
     this.stats.preview = false;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = 1;
