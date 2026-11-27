@@ -18,3 +18,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions: [Sem
 - Glossary footnotes and a `terms` panel (#2).
 - "Simulated" labels; unverified inputs flagged on cards and in `docs/sources.md` (#2).
 - Checks: unit tests, Playwright tests, size and offline budget, CI (#2).
+
+### Fixed
+- Dragging the hour slider no longer stutters: frames stay at 60 fps while new hours are baked a few tiles per frame and pre-baked in idle time; the exact frame is restored on release (#3).
