@@ -881,4 +881,105 @@ export const REFS = {
     venue: 'Buildings 15(13), 2166',
     doi: '10.3390/buildings15132166',
   },
+  // ---- block 11 (desert) ---- titles checked against Crossref where a DOI exists (2026-11-27); the rest are not recorded or from memory, as flagged
+  brief11: {
+    authors: 'This project', year: 2026, title: 'Research brief: desert courtyard block (Phoenix-like, 33.4°N) (block 11)',
+    venue: 'docs/research/desert-brief.md', link: 'docs/research/desert-brief.md',
+  },
+  ncei: {
+    authors: 'NOAA National Centers for Environmental Information', year: 2021, title: 'U.S. Climate Normals 1991–2020',
+    venue: 'Station USW00023183, Phoenix Sky Harbor (monthly and hourly normals; via the block-11 brief)',
+    flags: ['title from memory'],
+  },
+  azmet: {
+    authors: 'University of Arizona', year: null, title: 'Arizona Meteorological Network (AZMET)',
+    venue: 'Phoenix Encanto station, daily data 2023–25 (via the block-11 brief)',
+    flags: ['title from memory'],
+  },
+  climateGov2023: {
+    authors: 'NOAA Climate.gov; NWS Phoenix', year: 2023, title: null,
+    venue: 'Articles and climate summaries on Phoenix in July 2023 (via the block-11 brief)',
+  },
+  nwsPsr: {
+    authors: 'National Weather Service, Phoenix (PSR)', year: 2024, title: null,
+    venue: 'Climate summaries for summer 2024 (via the block-11 brief)',
+  },
+  middelKrayenhoff2019: {
+    authors: 'Middel, A. & Krayenhoff, E. S.', year: 2019,
+    title: 'Micrometeorological determinants of pedestrian thermal exposure during record-breaking heat in Tempe, Arizona: Introducing the MaRTy observational platform',
+    venue: 'Science of The Total Environment 687, 137–151',
+    doi: '10.1016/j.scitotenv.2019.06.085',
+  },
+  colter2019: {
+    authors: 'Colter, K. R., Middel, A. & Martin, C. A.', year: 2019,
+    title: 'Effects of natural and artificial shade on human thermal comfort in residential neighborhood parks of Phoenix, Arizona, USA',
+    venue: 'Urban Forestry & Urban Greening 44, 126429',
+    doi: '10.1016/j.ufug.2019.126429',
+  },
+  az1195: {
+    authors: 'University of Arizona Cooperative Extension', year: null, title: null,
+    venue: 'Publication AZ1195 (bermudagrass crop coefficients; via the block-11 brief)',
+  },
+  amwua: {
+    authors: 'Arizona Municipal Water Users Association', year: null, title: null,
+    venue: 'Landscape watering guidance for lawns and desert trees (via the block-11 brief)',
+  },
+  templeton2018: {
+    authors: 'Templeton, N. P., Vivoni, E. R., Wang, Z.-H. & Schreiner-McGraw, A. P.', year: 2018,
+    title: 'Quantifying Water and Energy Fluxes Over Different Urban Land Covers in Phoenix, Arizona',
+    venue: 'Journal of Geophysical Research: Atmospheres 123, 2111–2128',
+    doi: '10.1002/2017JD027845',
+    flags: ['matched by a title search to the brief\'s citation'],
+  },
+  gober2009: {
+    authors: 'Gober, P., Brazel, A., Quay, R., Myint, S. et al.', year: 2010,
+    title: 'Using Watered Landscapes to Manipulate Urban Heat Island Effects: How Much Water Will It Take to Cool Phoenix?',
+    venue: 'Journal of the American Planning Association 76(1), 109–121 (online 2009)',
+    doi: '10.1080/01944360903433113',
+  },
+  middel2014: {
+    authors: 'Middel, A., Häb, K., Brazel, A. J., Martin, C. A. et al.', year: 2014,
+    title: 'Impact of urban form and design on mid-afternoon microclimate in Phoenix Local Climate Zones',
+    venue: 'Landscape and Urban Planning 122, 16–28',
+    doi: '10.1016/j.landurbplan.2013.11.004',
+  },
+  middel2015: {
+    authors: 'Middel, A., Chhetri, N. & Quay, R.', year: 2015,
+    title: 'Urban forestry and cool roofs: Assessment of heat mitigation strategies in Phoenix residential neighborhoods',
+    venue: 'Urban Forestry & Urban Greening 14, 178–186',
+    doi: '10.1016/j.ufug.2014.09.010',
+  },
+  vanos2022: {
+    authors: 'Vanos, J. K., Wright, M. K., Kaiser, A. et al.', year: 2022,
+    title: 'Evaporative misters for urban cooling and comfort: effectiveness and motivations for use',
+    venue: 'International Journal of Biometeorology 66, 357–369',
+    doi: '10.1007/s00484-020-02056-y',
+  },
+  huang2025: {
+    authors: 'Huang, Bou-Zeid, Vanos, Middel et al.', year: 2025,
+    title: 'Urban heat mitigation through misting, and its role in broader blue infrastructure portfolios',
+    venue: 'Landscape and Urban Planning 256, 105290',
+    doi: '10.1016/j.landurbplan.2024.105290',
+  },
+  coolPave2024: {
+    authors: 'City of Phoenix and Arizona State University', year: 2024, title: 'Cool Pavement Pilot Program, Phase 2',
+    venue: 'Report, October 2024 (not read; via the block-11 brief)',
+    flags: ['title from memory'],
+  },
+  erell2014: {
+    authors: 'Erell, E., Pearlmutter, D., Boneh, D. & Kutiel, P. B.', year: 2014,
+    title: 'Effect of high-albedo materials on pedestrian heat stress in urban street canyons',
+    venue: 'Urban Climate 10, 367–386',
+    doi: '10.1016/j.uclim.2013.10.005',
+  },
+  mcdph2025: {
+    authors: 'Maricopa County Department of Public Health', year: 2026, title: null,
+    venue: 'Annual report on heat-related deaths in 2025, April 2026 (via the block-11 brief)',
+  },
+  stull2011: {
+    authors: 'Stull, R.', year: 2011,
+    title: 'Wet-Bulb Temperature from Relative Humidity and Air Temperature',
+    venue: 'Journal of Applied Meteorology and Climatology 50, 2267–2269',
+    doi: '10.1175/JAMC-D-11-0143.1',
+  },
 };
