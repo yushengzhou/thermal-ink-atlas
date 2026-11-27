@@ -543,4 +543,87 @@ export const REFS = {
     authors: 'Optris; Fluke', year: null, title: null,
     venue: 'Emissivity tables for infrared thermometers (web; via the block-6 brief)',
   },
+  // ---- block 7 ----
+  brief7: {
+    authors: 'This project', year: 2026, title: 'Research brief: older high-rise residential estate (block 7)',
+    venue: 'docs/research/estate-brief.md', link: 'docs/research/estate-brief.md',
+  },
+  gb50180: {
+    authors: 'Ministry of Housing and Urban-Rural Development of China', year: 2018,
+    title: '城市居住区规划设计标准 (Standard for urban residential area planning and design), GB 50180-2018',
+    venue: 'National standard, issued 2018-07-10, in force 2018-12-01; clause 4.0.9 / Table 4.0.9 (via codeofchina, via the block-7 brief)',
+    flags: ['title from memory'],
+  },
+  db33: {
+    authors: 'Zhejiang Province', year: null,
+    title: '城市建筑工程日照分析技术规程 (Technical specification for sunlight analysis of urban building projects), DB33/1050, draft revision',
+    venue: 'Zhejiang provincial standard (draft; via the block-7 brief)',
+    flags: ['title from memory'],
+  },
+  gb55038: {
+    authors: 'Ministry of Housing and Urban-Rural Development of China', year: 2025, title: null,
+    venue: 'GB 55038-2025, mandatory national code in force 2025-05-01 (via the block-7 brief)',
+  },
+  mu2025: {
+    authors: 'Mu et al.', year: 2025, title: null,
+    venue: 'Atmosphere 16(1), 100 (Changsha)',
+    doi: '10.3390/atmos16010100',
+  },
+  chow1999: {
+    authors: 'Chow, T. T. & Lin, Z.', year: 1999,
+    title: 'Prediction of on-coil temperature of condensers installed at tall building re-entrant',
+    venue: 'Applied Thermal Engineering 19(2), 117–132',
+    flags: ['title from memory'],
+  },
+  bojic2001: {
+    authors: 'Bojic, M., Lee, M. & Yik, F.', year: 2001,
+    title: 'Flow and temperature outside a high-rise residential building due to heat rejection by its air-conditioners',
+    venue: 'Energy and Buildings 33(7), 737–751',
+    flags: ['title from memory'],
+  },
+  bruelisauer2014: {
+    authors: 'Bruelisauer, M., Meggers, F., Saber, E., Li, C. & Leibundgut, H.', year: 2014,
+    title: 'Stuck in a stack: temperature measurements of the microclimate around split type condensing units in a high rise building in Singapore',
+    venue: 'Energy and Buildings 71, 28–37',
+    flags: ['title from memory'],
+  },
+  demunck2013: {
+    authors: 'de Munck, C. et al.', year: 2013,
+    title: 'How much can air conditioning increase air temperatures for a city like Paris, France?',
+    venue: 'International Journal of Climatology 33(1), 210–227',
+    flags: ['title from memory'],
+  },
+  berlin2020: {
+    authors: null, year: 2020, title: null,
+    venue: 'International Journal of Environmental Research and Public Health 17(13), 4645 (Berlin)',
+    doi: '10.3390/ijerph17134645',
+  },
+  lai2017: {
+    authors: 'Lai, A., Maing, M. & Ng, E.', year: 2017,
+    title: 'Observational studies of mean radiant temperature across different outdoor spaces under shaded conditions in densely built environment',
+    venue: 'Building and Environment 114, 397–409',
+    doi: '10.1016/j.buildenv.2016.12.034',
+  },
+  plea2016: {
+    authors: 'Lai, A., Maing, M. & Ng, E.', year: 2016,
+    title: 'Feasibility study on using sunlit view factor to model outdoor thermal comfort: a case study in Sha Tin, Hong Kong',
+    venue: 'PLEA 2016 Los Angeles: Cities, Buildings, People: Towards Regenerative Environments, 11–13 July 2016',
+  },
+  li2023: {
+    authors: 'Li et al.', year: 2023, title: null,
+    venue: 'Building and Environment (Hong Kong)',
+    doi: '10.1016/j.buildenv.2023.110225',
+  },
+  yang2010: {
+    authors: 'Yang, F., Lau, S. S. Y. & Qian, F.', year: 2010,
+    title: 'Summertime heat island intensities in three high-rise housing quarters in inner-city Shanghai China: building layout, density and greenery',
+    venue: 'Building and Environment 45(1), 115–134',
+    flags: ['title from memory'],
+  },
+  cai2017: {
+    authors: 'Cai, A. & Hu, D.', year: 2017,
+    title: 'Study on the correlations between surface temperature and near-surface air temperature on different underlying surfaces in city of Wuhan, China',
+    venue: 'International Journal of Environmental Science and Development 8(5), 378–384',
+    doi: '10.18178/ijesd.2017.8.5.981',
+  },
 };

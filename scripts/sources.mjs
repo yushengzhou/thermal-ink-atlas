@@ -18,6 +18,7 @@ import { hutongMarkdown } from './hutong-docs.mjs';
 import { htGlossaryStats } from './hutong.mjs';
 import { parkingMarkdown } from './parking-docs.mjs';
 import { pkGlossaryStats } from './parking.mjs';
+import { estateMarkdown } from './estate-docs.mjs';
 
 const UNITS = { mu: ' J m⁻² s⁻½ K⁻¹', muWet: ' J m⁻² s⁻½ K⁻¹', thinC: ' J m⁻² K⁻¹', tau: ' d', storage: ' mm' };
 const cell = (p, k = '') =>
@@ -327,7 +328,8 @@ ${retrofitMarkdown()}
 ${cbdMarkdown()}
 ${waterfrontMarkdown()}
 ${hutongMarkdown()}
-${parkingMarkdown()}`;
+${parkingMarkdown()}
+${estateMarkdown()}`;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
