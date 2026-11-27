@@ -118,7 +118,7 @@ export function shedCard(d) {
       <tr><td>${gl('groundFlux', 'G')} at 23:00</td><td>${W(d.shed.g23)}</td></tr>
     </table>
     <p class="note">The thin roof follows its sunshine within minutes. As the low evening sun leaves it, it drops faster than any other surface of the block, and by sunset it has already lost most of its heat: after that it only follows the slowly cooling sky and ends the night below the air.</p>
-    <p class="caveat">The shed's walls, its dark inside and the air in it are not modelled; the roof is one cell layer at 5–8 m. Emissivity of rusted steel varies widely (0.69–0.88 in emissivity tables, unverified); with a lower ε the roof cools less at night.</p>
+    <p class="caveat">In the first hour after sunset the asphalt, concrete and soil cool faster than the roof, so the spec's "steepest cooling after sunset" holds for the evening as a whole, not for that hour (outside its band; see docs/sources.md). Not tuned. The shed's walls, its dark inside and the air in it are not modelled; the roof is one cell layer at 5–8 m. Emissivity of rusted steel varies widely (0.69–0.88 in emissivity tables, unverified); with a lower ε the roof cools less at night.</p>
     ${srcLine(['optris', 'brief6'])}`;
 }
 

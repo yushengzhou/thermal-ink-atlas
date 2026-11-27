@@ -198,7 +198,7 @@ test('cards: storage, PV canopy, lot trees, shed, brownfield, hot car (quoted nu
   assert.ok(html.pv.includes('Golden') && html.pv.includes('63.5 / 28.5') && html.pv.includes('37.0 / 27.7') && html.pv.includes('outside the spec'));
   assert.ok(html.storage.includes('damping depth') && html.storage.includes('W m⁻²') && html.storage.includes('No measured night-time'));
   assert.ok(html.trees.includes('Scott') && html.trees.includes('7.26 K'));
-  assert.ok(html.shed.includes('K/h') && html.shed.includes('after sunset'));
+  assert.ok(html.shed.includes('K/h') && html.shed.includes('after sunset') && html.shed.includes('outside its band'));
   const d = await page.evaluate(() => [window.atlas.card('ground', 37.5, 72.5), window.atlas.card('ground', 37.5, 147.5), window.atlas.card('building', 'shedA')]);
   assert.ok(d[0].flux && d[0].flux.now < -60 && d[0].flux.cars === 0, `open asphalt: ${JSON.stringify(d[0].flux)}`);
   assert.ok(d[1].flux.cars > 0.2 && d[1].flux.pv, 'PV bay: cars and canopy');
