@@ -1,4 +1,4 @@
-// Blocks 1-8 are unchanged by later blocks: every page renders the same
+// Blocks 1-9 are unchanged by later blocks: every page renders the same
 // pixels, notes and probe values as its fixture page, kept gzipped in
 // tests/fixtures/base-pages: blocks 1-3 as built before block 4 (main at
 // 8e76f7a), block 4 as built before block 5 (189b7e1), block 5 as built
@@ -26,9 +26,10 @@ const CASES = {
   parking: ['hour=15&f=640', 'thermal&hour=15&f=640', 'thermal&hour=23&f=640&flux=1', 'thermal&hour=23&f=777&flux=1&notes=0&cam=4,140,170', 'hour=12&f=500&flux=1&cam=5,70,150', 'hour=9&f=400&cam=5.5,330,150'],
   campus: ['hour=15&f=640', 'thermal&hour=15&f=640', 'hour=14.25&f=640&irrigate=1&cam=3.5,160,130', 'thermal&hour=15&f=777&burn=1&cam=4,320,210', 'hour=10.25&f=400&notes=0&cam=5,330,210', 'thermal&hour=23&f=1500&irrigate=1&burn=1'],
   estate: ['hour=15&f=640', 'thermal&hour=15&f=640', 'hour=12&f=640&date=dajhan', 'thermal&hour=21&f=777&ac=1&cam=3.5,230,250', 'hour=9.25&f=400&date=dajhan&ac=1&notes=0&cam=4,70,200', 'thermal&hour=4&f=1500&acwall=0'],
+  busstop: ['hour=15&f=640', 'thermal&hour=15&f=640', 'hour=15&f=1650&spots=1&cam=5.5,265,195', 'thermal&hour=16.25&f=777&burn=1&cam=4,200,262', 'hour=12&f=400&spots=1&burn=1&notes=0&cam=1.75,200,180', 'thermal&hour=4&f=1500&spots=1&burn=1'],
 };
 // which page each fixture is (for messages)
-const BEFORE = { 'asphalt-park': 'block 4', 'sponge-retrofit': 'block 4', 'glass-cbd': 'block 4', waterfront: 'block 5', hutong: 'block 6', parking: 'the shared-core diet', estate: 'block 8', campus: 'block 9' };
+const BEFORE = { 'asphalt-park': 'block 4', 'sponge-retrofit': 'block 4', 'glass-cbd': 'block 4', waterfront: 'block 5', hutong: 'block 6', parking: 'the shared-core diet', estate: 'block 8', campus: 'block 9', busstop: 'block 10' };
 
 let browser;
 let dir;
