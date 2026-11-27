@@ -10,7 +10,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { base10, bands10, bandVerdicts, sheetRun, causes10, walkers10, VG_NOTES } from '../../scripts/village.mjs';
+import { base10, bands10, bandVerdicts, sheetRun, causes10, walkers10, ruledOut, VG_NOTES } from '../../scripts/village.mjs';
 import { bands10Markdown } from '../../scripts/village-docs.mjs';
 import { VG, laneSvf, centreSvf, laneSun, laneCells, checkThin, radiantIn, airShare, airIn, airShown, nFor, calibrate, laneGroups, isVillage, patchSlots, HOURS, cellsOf } from '../../engine/village.js';
 import { rooftopsAt, onRoofs, VG_BANDS } from '../../engine/vgui.js';
@@ -276,11 +276,6 @@ test('scene: at most five notes, equal-length route variants, rooftop rooms insi
     assert.ok(!w.vg && !w.vgFills, S.id);
   }
 });
-
-/** UI text the brief rules out ("slum" only in source titles): returns the words found. */
-export function ruledOut(text) {
-  return [...text.matchAll(/\b(slums?|squalid|chaotic|tangled)\b/gi)].map((m) => m[1].toLowerCase());
-}
 
 test('language: the block\'s UI text has none of the words the brief rules out ("slum" only in source titles); the check finds an injected word', () => {
   assert.deepEqual(ruledOut('Rooms in an urban village (城中村), residents'), []);

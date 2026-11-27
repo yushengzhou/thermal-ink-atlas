@@ -33,6 +33,11 @@ export const VG_NOTES = {
   paint: 'what the residents\' white-roof toggle (R) paints the marked bare iron and galvanised roofs with: white-painted tin, new paint (albedo 0.65)',
 };
 
+/** Words the brief rules out of the block's UI text ("slum" only in source titles): returns the words found. */
+export function ruledOut(text) {
+  return [...text.matchAll(/\b(slums?|squalid|chaotic|tangled)\b/gi)].map((m) => m[1].toLowerCase());
+}
+
 let cache = null;
 /** World, models, statistics (memoised; the white-roof model included). */
 export function base10() {
