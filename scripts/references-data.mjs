@@ -777,4 +777,108 @@ export const REFS = {
     authors: null, year: null, title: null,
     venue: 'Las Vegas surface temperature measurements (via the block-9 brief)',
   },
+
+  // ---- block 10 ----
+  brief10: {
+    authors: 'This project', year: 2026, title: 'Research brief: urban village and informal settlement — heat vulnerability (block 10)',
+    venue: 'docs/research/village-brief.md', link: 'docs/research/village-brief.md',
+  },
+  pingshan: {
+    authors: 'Guo, Zou, Li & Qiu', year: null, title: null,
+    venue: 'Mobile traverses in an urban village, Pingshan, Shenzhen, 2011–12 (journal not confirmed; via the block-10 brief)',
+  },
+  wu2015: {
+    authors: 'Wu et al.', year: '2015 / 2017', title: null,
+    venue: 'Journal of Harbin Institute of Technology (satellite surface heat island by housing type, Shenzhen; via the block-10 brief)',
+  },
+  yi2022: {
+    authors: 'Yi, Wang, Liu, Li et al.', year: 2022,
+    title: 'Thermal comfort differences between urban villages and formal settlements in Chinese developing cities: A case study in Shenzhen',
+    venue: 'Science of The Total Environment 853, 158283',
+    doi: '10.1016/j.scitotenv.2022.158283',
+  },
+  deng2023: {
+    authors: 'Deng, Nie, Li, Wu et al.', year: 2023,
+    title: 'Influence of built environment on outdoor thermal comfort: A comparative study of new and old urban blocks in Guangzhou',
+    venue: 'Building and Environment 234, 110133',
+    doi: '10.1016/j.buildenv.2023.110133',
+  },
+  scott2017: {
+    authors: 'Scott, Misiani, Okoth, Jordan et al.', year: 2017,
+    title: 'Temperature and heat in informal settlements in Nairobi',
+    venue: 'PLOS ONE 12(11), e0187300',
+    doi: '10.1371/journal.pone.0187300',
+  },
+  tasgaonkar2022: {
+    authors: 'Tasgaonkar, Zade, Ehsan, Gorti et al.', year: 2022,
+    title: 'Indoor heat measurement data from low-income households in rural and urban South Asia',
+    venue: 'Scientific Data 9, 285',
+    doi: '10.1038/s41597-022-01314-5',
+  },
+  wilby2021: {
+    authors: 'Wilby, Kasei, Gough, Amankwaa et al.', year: 2021,
+    title: 'Monitoring and moderating extreme indoor temperatures in low-income urban communities',
+    venue: 'Environmental Research Letters 16, 024033',
+    doi: '10.1088/1748-9326/abdbf2',
+  },
+  khlongToey: {
+    authors: 'Stockholm Environment Institute', year: null, title: null,
+    venue: 'Web page on heat in Khlong Toey, Bangkok (a snippet via the block-10 brief; the page was not read)',
+  },
+  vellingiri2020: {
+    authors: 'Vellingiri, Dutta, Singh, Sathish et al.', year: 2020,
+    title: 'Combating climate change-induced heat stress: assessing cool roofs and its impact on the indoor ambient temperature of the households in the urban slums of Ahmedabad',
+    venue: 'Indian Journal of Occupational and Environmental Medicine 24(1) (PMC7227734)',
+    doi: '10.4103/ijoem.IJOEM_120_19',
+  },
+  nutkiewicz2022: {
+    authors: 'Nutkiewicz, Mastrucci, Rao, Jain', year: 2022,
+    title: 'Cool roofs can mitigate cooling energy demand for informal settlement dwellers',
+    venue: 'Renewable and Sustainable Energy Reviews 159, 112183',
+    doi: '10.1016/j.rser.2022.112183',
+  },
+  bunker2024: {
+    authors: 'Bunker, Compoaré, Sewe, Laurent et al.', year: 2024,
+    title: 'The effects of cool roofs on health, environmental, and economic outcomes in rural Africa: study protocol for a community-based cluster randomized controlled trial',
+    venue: 'Trials 25, 59',
+    doi: '10.1186/s13063-023-07804-0',
+  },
+  emissTables: {
+    authors: 'The Engineering ToolBox; Optris', year: null, title: null,
+    venue: 'Emissivity tables for metals (via the block-10 brief)',
+  },
+  energyStarRoof: {
+    authors: 'US EPA ENERGY STAR', year: null, title: null,
+    venue: 'Roof products list: initial and 3-year solar reflectance (via the block-10 brief)',
+  },
+  ma2015: {
+    authors: 'Ma, Zeng, Zhou, Wang et al.', year: 2015,
+    title: 'The short-term effect of heat waves on mortality and its modifiers in China: An analysis from 66 communities',
+    venue: 'Environment International 75, 103–109',
+    doi: '10.1016/j.envint.2014.11.004',
+  },
+  natMed2024: {
+    authors: null, year: 2024, title: null,
+    venue: 'Nature Medicine: heat and older adults (details not recorded by the block-10 brief)',
+  },
+  hess2018: {
+    authors: 'Hess, Lm, Knowlton, Saha et al.', year: 2018,
+    title: 'Building resilience to climate change: pilot evaluation of the impact of India\'s first heat action plan on all-cause mortality',
+    venue: 'Journal of Environmental and Public Health 2018, 7973519 (PMC6236972)',
+    doi: '10.1155/2018/7973519',
+  },
+  carbonBriefAc: {
+    authors: 'Carbon Brief', year: null, title: null,
+    venue: 'Analysis of air-conditioner ownership in India (via the block-10 brief)',
+  },
+  dialogueEarth: {
+    authors: 'Dialogue Earth', year: null, title: null,
+    venue: 'Article on outdoor workers and heat in China (via the block-10 brief)',
+  },
+  ren2025: {
+    authors: 'Ren, Xu & Jiang', year: 2025,
+    title: 'Optimizing public space quality in high-density old districts of Asian megacities: thermal environment analysis of Shenzhen\'s urban fringe',
+    venue: 'Buildings 15(13), 2166',
+    doi: '10.3390/buildings15132166',
+  },
 };

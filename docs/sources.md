@@ -62,6 +62,13 @@ the sources listed below without checking them.
 | Opaque shelter panel (advertising panel or sheet) (`adPanel`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [brief9] *cited value*, unverified (opaque ad panel: no direct sun through it) |
 | Footbridge deck (steel) (`bridgeDeck`) | 0.15 [engine] *engine assumption (no source)*, unverified (not used for the screen: the deck surface is the shared thin metal layer (metal)) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [engine] *engine assumption (no source)*, unverified (the deck shades the road beneath it) |
 | Footbridge cover (opaque metal) (`bridgeRoof`) | 0.15 [engine] *engine assumption (no source)*, unverified (not used) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [brief9] *cited value*, unverified (opaque metal cover) |
+| Rusty corrugated iron roof (`rustTin`) | 0.25 [brief10] *cited range*, unverified (an assumption of the brief, 0.20-0.30 (no measured albedo of rusty iron was found); the middle value) | 0.825 [emissTables] *cited range*, unverified (brief 0.75-0.90 from emissivity tables (rusted iron 0.69-0.96); the middle value) | C 3000 J m⁻² K⁻¹ [brief10] *cited range*, unverified (one corrugated sheet, brief 2-4 kJ m-2 K-1; the middle value) | 0 [brief10] *cited value*, unverified (dry) | — |
+| Galvanised (zinc-coated) iron sheet roof (`galvTin`) | 0.6 [energyStarRoof] *cited range*, unverified (brief 0.55-0.65 (bare metal 0.78 new, 0.58 after 3 years on the ENERGY STAR list); the middle value) | 0.25 [emissTables] *cited range*, unverified (brief 0.25 for new galvanised steel (tables 0.23-0.28); old galvanised sheet about 0.88) | C 3000 J m⁻² K⁻¹ [brief10] *cited range*, unverified (one sheet, brief 2-4 kJ m-2 K-1; the middle value) | 0 [brief10] *cited value*, unverified (dry) | — |
+| Asbestos-cement sheet roof (aged) (`asbestosRoof`) | 0.3 [brief10] *cited range*, unverified (an assumption of the brief, 0.25-0.35 (no measured albedo found); the middle value) | 0.9 [brief10] *cited value*, unverified (an assumption of the brief) | C 8000 J m⁻² K⁻¹ [brief10] *cited value*, unverified (about 8 kJ m-2 K-1 for a corrugated cement sheet (an assumption of the brief)) | 0 [brief10] *cited value*, unverified (dry) | — |
+| Tarpaulin roof (`tarpRoof`) | 0.3 [brief10] *cited value*, unverified (an assumption of the brief (no measured value found)) | 0.9 [brief10] *cited value*, unverified (an assumption of the brief) | C 2000 J m⁻² K⁻¹ [brief10] *cited value*, unverified (the brief's floor: a real sheet holds about 0.4 kJ m-2 K-1, which makes the explicit 60 s step unstable (time constant about 20 s), so C is set to 2 kJ (time constant about 110 s); on the 15-min output the floor changes little) | 0 [brief10] *cited value*, unverified (dry) | — |
+| Corrugated iron, newly painted white (`whiteTin`) | 0.65 [brief10] *cited value*, unverified (white-painted tin 0.65 new (brief, from the earlier briefs)) | 0.88 [brief10] *cited value*, unverified (white paint) | C 3000 J m⁻² K⁻¹ [brief10] *cited range*, unverified (the same sheet as the bare roof, brief 2-4 kJ m-2 K-1) | 0 [brief10] *cited value*, unverified (dry) | — |
+| Corrugated iron painted white (weathered paint) (`whiteTinAged`) | 0.5 [brief10] *cited value*, unverified (white-painted tin 0.50 aged (brief, from the earlier briefs)) | 0.88 [brief10] *cited value*, unverified (white paint) | C 3000 J m⁻² K⁻¹ [brief10] *cited range*, unverified (the same sheet as the bare roof, brief 2-4 kJ m-2 K-1) | 0 [brief10] *cited value*, unverified (dry) | — |
+| Flat concrete roof slab (`slabRoof`) | 0.25 [oke] *cited value*, unverified (concrete roof slab 0.25 (via the block-10 brief)) | 0.9 [oke] *cited value*, unverified (via the block-10 brief) | μ 1785 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified (concrete, as the shared concrete paving) | 0 [brief10] *cited value*, unverified (dry) | — |
 
 Not used by the grid model:
 
@@ -280,6 +287,26 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[cpsc]** US Consumer Product Safety Commission, via the block-9 brief: sunlit steel decks can burn bare skin in seconds (unverified)
 - **[deckSteel]** Steel bridge deck surfacing, Materials 18(13) 3109, doi 10.3390/ma18133109 (via the block-9 brief): steel deck surfacing 60-70 C in summer sun (unverified)
 - **[lasVegas]** Las Vegas surface measurements, via the block-9 brief: sunlit metal up to 62 C (unverified)
+- **[brief10]** Research brief docs/research/village-brief.md (block 10; values compiled from the sources below, items marked unverified there are flagged here; the roof albedos for rusty iron, asbestos cement and tarpaulin are assumptions of the brief, no measured value was found; the indoor proxies and their coefficients are assumptions of the brief)
+- **[pingshan]** Guo, Zou, Li & Qiu, mobile traverses in an urban village in Pingshan, Shenzhen, 2011-12 (journal not confirmed; via the block-10 brief): heat island largest 20:00-24:00, mean 1.71 K over 18-24 h, peak 3.95 K; thermal-humidity index worse than a green reference, especially at night (unverified)
+- **[wu2015]** Wu et al. (2015 / 2017) Journal of Harbin Institute of Technology, satellite surface heat island in Shenzhen by housing type (via the block-10 brief): high-density urban village 3.53 K, multi-storey 2.62 K, high-rise 1.60 K (unverified)
+- **[yi2022]** Yi et al. (2022) Science of the Total Environment 853, 158283, doi 10.1016/j.scitotenv.2022.158283, Thermal comfort differences between urban villages and formal settlements in Chinese developing cities: a case study in Shenzhen (via the block-10 brief): urban villages the worst summer thermal-humidity index; density worsens it, vegetation (NDVI) mitigates (unverified)
+- **[deng2023]** Deng et al. (2023) Building and Environment 234, 110133, doi 10.1016/j.buildenv.2023.110133, new and old urban blocks in Guangzhou (via the block-10 brief): pedestrian Tmrt peak 43.7 C with air 41.3 C at 14:00; sky view factor and building coverage the main predictors (unverified)
+- **[scott2017]** Scott et al. (2017) PLoS ONE 12, e0187300, doi 10.1371/journal.pone.0187300, Temperature and heat in informal settlements in Nairobi (via the block-10 brief): +3.1 K daily maximum and +1.83 K daily minimum against the weather station; Mukuru +4.8 K maximum; sites with vegetation 0.7 K cooler (unverified)
+- **[tasgaonkar2022]** Tasgaonkar et al. (2022) Scientific Data 9, 285, doi 10.1038/s41597-022-01314-5, indoor heat data from 206 loggers in low-income homes in South Asia (via the block-10 brief): Delhi in April, tin-roof rooms 33.4 C indoors vs 32.8 C outdoors; Yavatmal tin-roof rooms 3-4 K above outdoors in May-June; indoors above outdoors at night (unverified)
+- **[wilby2021]** Wilby et al. (2021) Environmental Research Letters 16, 024033, doi 10.1088/1748-9326/abdbf2, 47 rooms in low-income communities in Ghana (via the block-10 brief): metal-roofed concrete rooms 4.5 K warmer by day than mud or thatch, 1.5 K cooler at night (unverified)
+- **[khlongToey]** Bangkok, Khlong Toey, roof and room surfaces at 37 C air (a snippet from a Stockholm Environment Institute page, via the block-10 brief): roof 68.1, ceiling 49.2, wall 45.7, floor 41.1 C (unverified; the page was not read)
+- **[vellingiri2020]** Vellingiri et al. (2020) Indian Journal of Occupational and Environmental Medicine 24(1), doi 10.4103/ijoem.IJOEM_120_19, cool roofs and indoor temperature in 16 homes in Ahmedabad, October 2017 (MHT and IIPH; via the block-10 brief): indoor tin 34.6-35.8, asbestos 32.5-36.8, concrete 31.6-33.8 C; white paint on tin -1.1 K, Modroof -2.0 K, thermocol under asbestos -2.4 K (from the reported means); "4.5 K at peak" in the discussion only; a "5-6 C" press figure unverified
+- **[nutkiewicz2022]** Nutkiewicz et al. (2022) Renewable and Sustainable Energy Reviews 159, 112183, doi 10.1016/j.rser.2022.112183, Cool roofs can mitigate cooling energy demand for informal settlement dwellers (via the block-10 brief): up to 91% less annual heat-stress exposure, simulated for 17 cities (unverified)
+- **[bunker2024]** Bunker et al. (2024) Trials 25, 59, doi 10.1186/s13063-023-07804-0, study protocol of a cluster randomised trial of cool roofs in rural Burkina Faso (via the block-10 brief): results reported by the press only (unverified)
+- **[emissTables]** Emissivity tables (Engineering Toolbox, Optris), via the block-10 brief: galvanised steel 0.23-0.28 new, about 0.88 old; oxidised galvanised iron 0.85; rusted iron 0.69-0.96 (unverified)
+- **[energyStarRoof]** ENERGY STAR roof product list, via the block-10 brief: bare metal solar reflectance 0.78 new, 0.58 after 3 years (unverified)
+- **[ma2015]** Ma et al. (2015) Environment International 75, 103-109, doi 10.1016/j.envint.2014.11.004, heat waves and mortality in 66 communities in China (via the block-10 brief): +5.0% deaths (2.9-7.2%) on heat-wave days, larger for older people, women, deaths out of hospital and dense communities (unverified)
+- **[natMed2024]** A 2024 study in Nature Medicine on heat and older adults (via the block-10 brief): people aged 65 and over at hazard ratio 1.78-1.98; decline in daily functioning predicts risk (details and title not recorded by the brief; unverified)
+- **[hess2018]** Hess et al. (2018) Journal of Environmental and Public Health, 7973519, doi 10.1155/2018/7973519, pilot evaluation of Ahmedabad's Heat Action Plan (via the block-10 brief): the May 2010 heat wave about 1,344 excess deaths (+43.1%); about 1,190 deaths avoided per year after the plan (unverified)
+- **[carbonBriefAc]** Carbon Brief on air conditioning in India (via the block-10 brief): 4.9% of households owned an air conditioner in 2020-21, about 8% in 2024 (unverified)
+- **[dialogueEarth]** Dialogue Earth on outdoor workers and heat in China (via the block-10 brief): about 100 million outdoor workers (unverified)
+- **[ren2025]** Ren, Xu & Jiang (2025) Buildings 15(13), 2166, doi 10.3390/buildings15132166, thermal environment of public space in high-density old districts on Shenzhen's urban fringe (the brief cites it as a Baishizhou CFD study of wind shadows in the lanes; not checked)
 - **[noaa]** NOAA Global Monitoring Laboratory, General Solar Position Calculations (solareqns.PDF)
 - **[brutsaert]** Brutsaert (1975) Water Resources Research 11(5) 742-744, clear-sky emissivity
 - **[meinel]** Meinel & Meinel (1976) Applied Solar Energy, clear-sky beam irradiance
@@ -365,6 +392,10 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Headway** (busstop only): Typical: Here 10 min (an assumption of the brief, 5–15 min), with gaps spread by a coefficient of variation of 0.4 (0.3–0.5, unverified); riders who arrive at random then wait (h / 2)(1 + cv²) on average. [brief9, fan2002]
 - **Heat dose of a wait** (busstop only): Typical: No standard dose exists for a few minutes of waiting; the brief defines it on UTCI, which this engine does not compute, so the apparent temperature stands in. [brief9, bom]
 - **Contact-burn threshold (benches, rails, decks)** (busstop only): Typical: 1 min of contact: metal 51 °C, stone, concrete and glass 56 °C, plastics and wood 60 °C; 10 min: 48 °C; bare metal burns in about 1 s at 65–70 °C (unverified). [iso13732, brief9]
+- **Urban village (城中村)** (village only): Typical: In Shenzhen, satellite surface heat islands of about 3.5 K over high-density urban villages, against 2.6 K for multi-storey and 1.6 K for high-rise housing; urban villages had the worst summer thermal-humidity index in one Shenzhen study. [wu2015, yi2022, brief10]
+- **Handshake building (握手楼)** (village only): Typical: Lanes about 1–3 m wide between walls 18–25 m high: a sky view of about 0.04–0.16 at the lane floor (canyon formula). [brief10]
+- **Indoor radiant temperature (proxy)** (village only): Typical: Measured rooms under tin roofs: 0.6–4 K above the outdoor air (Delhi, Yavatmal, Ahmedabad); white paint on tin cooled the room by about 1 K, other cool roofs 2.0–2.4 K. [tasgaonkar2022, vellingiri2020, brief10]
+- **Heat vulnerability** (village only): Typical: China, 66 communities: +5.0% deaths on heat-wave days (2.9–7.2%), more among older people, women and in dense communities; in India about 5–8% of households had an air conditioner (2020–24). [ma2015, carbonBriefAc, brief10]
 - **Permeable paving** (sponge-retrofit only): Typical: Wetted permeable pavement 15–35 °C cooler than dense asphalt in the early afternoon, 2–7 °C cooler about a day later; dry porous asphalt about 5 °C warmer. [li2013]
 - **Green roof** (sponge-retrofit only): Typical: Albedo about 0.15–0.25; up to 18 °C cooler than a black roof in a New York case; Bowen ratio about 1–2. [brief2, noaaGreen, heusinger]
 - **Rain garden** (sponge-retrofit only): Typical: No measured cooling figure in our sources; this block uses engine assumptions (evaporative fraction 0.8 wet, 0.35 dry, 3-day drying). [engine, mccoll]
@@ -2306,3 +2337,300 @@ form) against the brief's NOAA table: the gap is the engine approximation (about
   table the shadow shifts at 14–17 h differ by at most 0.01 m.
 - **Invented street:** layout, the stops' places (stop A moved after model runs, see Stops), the rider rate, the bus clock and the bigger roof of the comparison are
   assumptions.
+
+## Block 10: urban village and informal edge
+
+The tenth block (`cities/village`) is an invented 400 m block in the manner of a South China urban village (城中村) at
+22.5° N on 20 July (air 27–35 °C, vapour pressure 28 hPa, wind 1 m/s; an assumed heat-wave day). West of Village Road
+stand 272 village houses of 6–8 storeys (18–24 m) built plot to plot, the "handshake buildings" (握手楼), with lanes
+1.5–3 m wide between them and a 6 m market lane; flat concrete roofs, 57 of them with a rooftop room under metal
+sheeting. East of the road: the older village centre (an ancestral hall, its open square, a pond, three banyans). South of
+Bus Road: a low-rise edge of single-storey rooms in 193 runs, roofed with rusty corrugated iron, galvanised sheet,
+asbestos-cement sheet or tarpaulin, some painted white by the residents, between 2 m alleys. The residents' white roofs
+are `R`, the panel button or `?coolroof=1` (default off: they repaint the 65 bare roofs marked in the scene); the
+room under each sheet roof is `O`, the panel button or `?under=1`. On this page `R` paints the roofs; it does not
+restart the intro as it does elsewhere. Its research brief is [`docs/research/village-brief.md`](research/village-brief.md).
+
+### Block 10 parameters
+
+The block's materials (`rustTin`, `galvTin`, `asbestosRoof`, `tarpRoof`, `whiteTin`, `whiteTinAged`, `slabRoof`) are in
+the parameter table above; they are cut from the other pages at build time (`@page village` in `engine/materials.js`).
+Lanes and paths are the shared `concrete`, the roads `asphalt`, the yard `drySoil`, the pond `water`, the ancestral
+hall `greyTile` (block 5). The block's own values live in `engine/village.js` (`VG`):
+
+| Parameter | Value |
+|---|---|
+| `storey` | 3 [engine] *engine assumption (no source)*, unverified (storey height of a village house, m; engine assumption (the houses are 6-8 storeys, 18-24 m)) |
+| `storeys` | 6-8 [brief10] *cited range*, unverified (storeys of the village houses: 6, 7 or 8 (30 / 40 / 30% by plot, layout); the brief's 6-8 storeys and walls 18-25 m) |
+| `laneW` | 2 [brief10] *cited range*, unverified (lane width, m: the brief's 1-3 m, most lanes the middle value 2 m; the layout also has lanes of 1.5 and 3 m (and Market Lane 6 m, outside the bands' set)) |
+| `roomRise` | 2.6 [engine] *engine assumption (no source)*, unverified (height of a rooftop room above its house's roof, m; engine assumption) |
+| `thinFloor` | 2000 [brief10] *cited value*, unverified (the smallest heat capacity of a thin layer, J m-2 K-1: the brief's floor for the explicit 60 s step (C >= 2 kJ); checked for every thin layer of the scene at load (checkThin)) |
+| `warm` | 6 [engine] *engine assumption (no source)*, unverified (coarse 10-min spin-up days for the heavy cells (block 3's opts.warm, with its stability guard); the thin roofs run from a cold start (they converge within the first day)) |
+| `noon` | 12 [engine] *engine assumption (no source)*, unverified (the bands' "noon": 12:00 local clock time (set before the first model run; solar noon at 114.1° E is about 12:30, reported as a supplementary row)) |
+| `night` | 22 [brief10] *cited value*, unverified (the hour of the lane-against-open band, 22:00 (the brief)) |
+| `fr` | 0.4 [brief10] *cited range*, unverified (F_r, the ceiling's share of a person's view in a room under a sheet roof; an assumption of the brief, 0.3-0.5; the middle value) |
+| `wallUp` | 2 [brief10] *cited range*, unverified (the room's walls in the radiant proxy are at the outdoor air + this, K; the brief's 1-3 K, the middle value) |
+| `hci` | 1.25 [brief10] *cited range*, unverified (h_ci, convective coefficient of the ceiling in the air proxy, W m-2 K-1; the brief's 1-1.5, the middle value) |
+| `roomH` | 2.5 [engine] *engine assumption (no source)*, unverified (room height h (volume over roof area) in the air proxy, m; engine assumption) |
+| `rhoCp` | 1206 [engine] *engine assumption (no source)*, unverified (rho c_p of air, J m-3 K-1 (1.2 kg m-3 x 1005 J kg-1 K-1)) |
+| `airTarget` | 3 [brief10] *cited range*, unverified (the air proxy is calibrated (as the brief says: "calibrate n to +2-4 K peak under bare tin") so the bare rusty-iron rooms peak at this many K above the outdoor air, the middle of 2-4 K; the band on it therefore holds by construction and is not counted) |
+| `airCap` | 5 [brief10] *cited value*, unverified (the air proxy is never shown beyond +-5 K (the brief)) |
+| `paint` | whiteTin [brief10] *cited value*, unverified (what the residents' white-roof toggle (R) paints the marked bare iron and galvanised roofs with: white-painted tin, new paint (albedo 0.65)) |
+
+### The lanes (sub-grid)
+
+A lane 1.5–3 m wide cannot be drawn on a 5 m grid: on the raster it is a 5 m gap, which sees about four times the sky
+(below). Each lane is centred on a row (or column) of cell centres, so it keeps one cell; its houses cover the cells on
+either side. The 1848 lane cells take their sky view and direct sun from an endless canyon of the lane's own width W and
+its two walls H1, H2 (the houses on either side; a rooftop room stands back from the lane, so its house's height):
+
+- sky view of the floor (its mean over the width, crossed strings): F = (√(W² + H1²) + √(W² + H2²) − H1 − H2) / (2W);
+  for equal walls √(1 + (H/W)²) − H/W, which for deep lanes is the brief's centre-line form cos(atan(2H/W)) to within 0.001
+  (both are about W / 2H);
+- sunlit share of the floor: s = clamp(1 − H_s·|d| / (W·tan β), 0, 1), H_s the wall on the sun's side and d the across-lane part of
+  the unit vector toward the sun;
+- a crossing of two lanes (with houses on all four corners) is taken as the east–west lane with the mean heights of its corner
+  houses: the cross lane's extra sky and sun are not counted;
+- the cell's own sky view also sets its share of the walls (1 − F) for the wall terms, as everywhere.
+
+Lane cells: number, width W (m), wall height H (m), sky view canyon / 5 m raster (not used) / centre-line form, floor in
+sun at 12:00 / 15:00, Tmrt at 12:00 / 15:00 / 22:00 (°C), floor at 15:00 / 22:00 (°C):
+
+| Lanes | n | W | H | SVF | raster | centre line | sun | Tmrt | floor |
+|---|---|---|---|---|---|---|---|---|---|
+| village lanes 1.5 m | 66 | 1.5 | 20.6 | 0.037 | 0.204 | 0.037 | 32% / 10% | 53.2 / 51.2 / 33.9 | 46.8 / 35.0 |
+| village lanes 2 m | 792 | 2.0 | 21.0 | 0.048 | 0.199 | 0.048 | 36% / 20% | 54.2 / 54.1 / 33.9 | 47.9 / 35.2 |
+| village lanes 3 m | 132 | 3.0 | 21.0 | 0.072 | 0.199 | 0.072 | 48% / 29% | 57.1 / 56.6 / 33.9 | 49.1 / 35.4 |
+| all village lanes 1.5–3 m (the bands' set) | 990 | 2.1 | 21.0 | 0.050 | 0.199 | 0.050 | 37% / 21% | 54.5 / 54.2 / 33.9 | 48.0 / 35.2 |
+| Market Lane 6 m | 32 | 6.0 | 20.8 | 0.143 | 0.202 | 0.143 | 91% / 81% | 70.3 / 73.6 / 34.3 | 61.0 / 37.3 |
+| crossings (as the east–west lane) | 240 | 2.3 | 21.0 | 0.056 | 0.283 | 0.056 | 75% / 46% | 66.2 / 64.4 / 34.5 | 57.3 / 36.6 |
+| alleys of the low-rise edge, 2 m | 526 | 2.0 | 2.7 | 0.327 | 0.843 | 0.344 | 95% / 82% | 70.0 / 72.0 / 33.1 | 60.2 / 37.0 |
+| the open square (413 cells, SVF ≥ 0.85; by day its sunlit cells) | 413 | — | — | 0.973 | — | — | — | 68.0 / 72.6 / 28.5 | 59.9 / 35.5 |
+
+Air 33.0 / 35.0 / 31.4 °C. The sun is 82.9° high at 12:00 (azimuth 101.7°) and 55.2° at 15:00, so a
+straight-walled lane floor gets the sun at midday; the walls are the shared warm wall (air + 2 K + 6 K × K/900: 42.1 °C at 12:00,
+whatever their own shade). The lanes keep the people in them out of the night sky: at 22:00 the village lanes are
++5.4 K warmer in Tmrt than the open square, in line with the Pingshan traverses (heat island largest 20:00–24:00) [pingshan].
+
+### Thin sheets and the 60 s step
+
+A sheet roof is a thin layer, dTs/dt = G / C (no restore term). The explicit 60 s step is stable only while
+Δt (4εσT³ + h_c) / C stays well below 2 (smooth below 1); with T = 340 K and h_c = 9.5 W m⁻² K⁻¹ a real
+tarpaulin (about 0.4 kJ m⁻² K⁻¹, the brief) is past it and the run diverges. Every thin layer on this page holds C ≥ 2 kJ
+(the brief's floor; `checkThin` refuses a scene that breaks it). Each sheet alone, in the open, on the design day:
+
+| Sheet | stability factor | finite | daily range | largest 15-min change |
+|---|---|---|---|---|
+| tarpaulin, C 2 kJ m⁻² K⁻¹ (shipped, the floor) | 0.53 | yes | 23.8–75.2 °C | 2.92 K |
+| tarpaulin, C 0.4 kJ m⁻² K⁻¹ (a real sheet, the brief) | 2.63 | **no** (NaN) | — | — |
+| Rusty corrugated iron roof, C 3 kJ m⁻² K⁻¹ | 0.34 | yes | 24.0–79.9 °C | 3.20 K |
+| Galvanised (zinc-coated) iron sheet roof, C 3 kJ m⁻² K⁻¹ | 0.23 | yes | 25.8–69.7 °C | 2.41 K |
+| Asbestos-cement sheet roof (aged), C 8 kJ m⁻² K⁻¹ | 0.13 | yes | 23.8–75.1 °C | 2.92 K |
+| Corrugated iron, newly painted white, C 3 kJ m⁻² K⁻¹ | 0.35 | yes | 23.8–54.0 °C | 1.62 K |
+| Corrugated iron painted white (weathered paint), C 3 kJ m⁻² K⁻¹ | 0.35 | yes | 23.8–63.5 °C | 2.19 K |
+
+At the floor the tarpaulin's time constant is about C / (4εσT³ + h_c) ≈ 110 s instead of about 20 s: on the stored 15-min
+values the difference is small, but the floor slightly slows its rise and fall.
+
+### Roofs
+
+Ground-level rooms of the low-rise edge, by roof: number, surface at 15:00, the day's peak, at 03:00 (°C), the radiant proxy under
+the roof at 15:00 / 03:00 (°C) and the illustrative room air's day's peak (K above the outdoor air):
+
+| Roof | n | 15:00 | peak | 03:00 | radiant | air peak |
+|---|---|---|---|---|---|---|
+| rusty corrugated iron | 64 | 71.2 | 79.9 | 24.7 | 52.0 / 27.8 | +3.0 |
+| galvanised sheet | 39 | 63.2 | 69.7 | 26.5 | 48.3 / 28.5 | +2.3 |
+| asbestos-cement sheet | 39 | 67.8 | 75.2 | 24.6 | 50.4 / 27.7 | +2.7 |
+| tarpaulin | 23 | 67.2 | 75.3 | 24.6 | 50.1 / 27.7 | +2.7 |
+| iron painted white years ago (weathered) | 28 | 57.9 | 63.6 | 24.6 | 45.9 / 27.7 | +1.9 |
+
+Rooftop rooms on the village houses:
+
+| Roof | n | 15:00 | peak | 03:00 | radiant | air peak |
+|---|---|---|---|---|---|---|
+| rusty corrugated iron | 23 | 71.1 | 79.9 | 24.7 | 52.0 / 27.7 | +3.0 |
+| galvanised sheet | 12 | 63.2 | 69.7 | 26.5 | 48.3 / 28.5 | +2.3 |
+| asbestos-cement sheet | 9 | 67.8 | 75.2 | 24.5 | 50.4 / 27.7 | +2.7 |
+| tarpaulin | 2 | 67.2 | 75.2 | 24.5 | 50.1 / 27.7 | +2.7 |
+| iron painted white years ago (weathered) | 11 | 57.8 | 63.5 | 24.5 | 45.8 / 27.7 | +1.9 |
+
+The flat concrete roofs of the village houses (1031 cells): 62.1 °C at 15:00, 36.1 °C at 22:00, 33.0 °C at 03:00; the room under a slab
+is not computed. Measured rooms (quoted, not simulated): Delhi in April, tin roofs 33.4 °C indoors against 32.8 °C outdoors;
+Yavatmal 3–4 K above outdoors in May–June [tasgaonkar2022]; Ahmedabad homes 34.6–35.8 °C under tin, 32.5–36.8 °C under
+asbestos, 31.6–33.8 °C under concrete [vellingiri2020]; Ghana, metal-roofed rooms 4.5 K warmer by day than mud or thatch,
+1.5 K cooler at night [wilby2021]; Bangkok at 37 °C air, roof 68.1 °C and ceiling 49.2 °C [khlongToey].
+
+### Under the roof (proxies)
+
+Not a simulation of the room (the brief's option: a radiant proxy and an information overlay):
+
+- radiant: T_mrt,in⁴ = F_r·T_roof⁴ + (1 − F_r)·T_w⁴, T_w = Ta + 2 K, F_r = 0.4; the ceiling is the roof sheet, taken
+  as black at the roof's temperature (likely an overstatement under a bright galvanised underside, ε 0.25);
+- air (illustrative only): ΔT = h_ci·(T_roof − Ta) / (h_ci + ρc_p·n·h/3600) with h_ci 1.25, h 2.5 m and
+  n = 21.50 air changes per hour, **calibrated** as the brief says, so the mean of the 64 bare rusty-iron rooms' daily peaks is
+  +3 K (the middle of the brief's +2 to +4 K): the share of (T_roof − Ta) that reaches the air is 0.065. Its band
+  (7, bare tin) therefore holds by construction and is not counted; the white-paint change is a prediction. A card never
+  shows it beyond ±5 K; the largest raw value in this model is 3.01 K, so the cap does not bind here.
+
+### The residents' white roofs
+
+`R` repaints the 65 marked bare roofs (iron and galvanised) with new white paint (albedo 0.65) and runs those roof cells
+again (the other cells are unchanged: there is no lateral coupling). Surface at 15:00 bare → white (°C), its change (K), the radiant
+proxy at 15:00 (°C) and the illustrative air's day's peak (K above the outdoor air):
+
+| Painted roofs | n | bare 15:00 | white 15:00 | change | radiant | air peak |
+|---|---|---|---|---|---|---|
+| rusty-iron rooms (the bands' set) | 26 | 71.2 | 50.3 | −20.9 | 52.0 → 42.5 (−9.5) | +3.00 → +1.32 (−1.68) |
+| every painted rusty-iron roof | 37 | 71.1 | 50.3 | −20.9 | 52.0 → 42.5 (−9.5) | +3.00 → +1.32 (−1.68) |
+| every painted galvanised roof | 28 | 63.2 | 50.2 | −13.0 | 48.3 → 42.5 (−5.8) | +2.33 → +1.31 (−1.02) |
+| all painted roofs | 65 | 67.7 | 50.2 | −17.5 | 50.4 → 42.5 (−7.9) | +2.71 → +1.32 (−1.40) |
+
+Roofs the residents painted white years ago (weathered, albedo 0.5) are 13.3 K cooler than bare rusty iron at 15:00.
+Measured: white paint on tin −1.1 K indoors, a cool-roof sheet −2.0 K, insulation under asbestos −2.4 K [vellingiri2020];
+simulated, up to 91% fewer heat-stress hours [nutkiewicz2022]; a randomised trial's protocol [bunker2024].
+
+### Walkers and residents
+
+Walkers choose the shadier of two equal routes (a 2 m lane against the 6 m market lane, two lanes, two village lanes north–south,
+the bus-road kerb against the tree-lined path, across the square, two alleys of the edge). At 15:00 their density in shade is
+4.89 times that in sun. 14 people dwell at doorways in the lanes, under the banyans, on the square and in the yard;
+at 15:00 100% of them sit in shade. From 20:00 to 01:00, 20 residents sit on 10 roofs (`engine/vgui.js`,
+a pure function of the hour; their heat is their roof cell's).
+
+### Sensitivity
+
+One change at a time, inside the brief's ranges (docs only). Rusty-iron rooms (shipped 71.2 °C at 15:00, peak 79.9 °C):
+
+| Case | 15:00 °C | peak °C |
+|---|---|---|
+| rusty iron α 0.2 | 73.6 | 82.9 |
+| rusty iron α 0.3 | 68.7 | 76.9 |
+| rusty iron ε 0.75 | 72.7 | 81.9 |
+| rusty iron ε 0.9 | 69.7 | 78.2 |
+| rusty iron C 2 kJ m⁻² K⁻¹ | 71.0 | 79.9 |
+| rusty iron C 4 kJ m⁻² K⁻¹ | 71.3 | 79.9 |
+
+Asbestos-cement rooms (shipped 67.8 °C at 15:00):
+
+| Case | 15:00 °C | peak °C |
+|---|---|---|
+| asbestos cement α 0.25 | 70.2 | 78.1 |
+| asbestos cement α 0.35 | 65.4 | 72.3 |
+| asbestos cement C 6 kJ m⁻² K⁻¹ | 67.6 | 75.2 |
+| asbestos cement C 10 kJ m⁻² K⁻¹ | 68.0 | 75.2 |
+
+No value inside the brief's ranges brings asbestos cement into 50–62 °C (band 3). Weathered white paint (α 0.50) instead of new
+on the painted rusty-iron rooms: −12.5 K at 15:00 against bare (band 2's 15–25 K: outside).
+
+Radiant proxy under bare rusty iron at 15:00 (shipped 52.0 °C):
+
+| Case | °C |
+|---|---|
+| F_r 0.3, walls air + 2 K | 48.4 |
+| F_r 0.5, walls air + 2 K | 55.4 |
+| F_r 0.4, walls air + 1 K | 51.4 |
+| F_r 0.4, walls air + 3 K | 52.5 |
+
+h_ci 1 or 1.5: n is recalibrated (17.2 per hour and 25.8 per hour), the share reaching the air stays 0.065 and the
+white-paint change −1.68 K.
+
+Lane width at the village's mean wall height (the canyon floor's mean and the brief's centre-line form):
+
+| Lane | SVF | centre line |
+|---|---|---|
+| lane 1 m, walls 21.0 m | 0.024 | 0.024 |
+| lane 1.5 m, walls 21.0 m | 0.036 | 0.036 |
+| lane 2 m, walls 21.0 m | 0.048 | 0.048 |
+| lane 3 m, walls 21.0 m | 0.071 | 0.071 |
+
+A 1 m lane (the brief's lower end) would sit at 0.024, below band 4's 0.03; the scene's narrowest lanes are 1.5 m.
+
+### Causes of the misses (docs-only runs)
+
+Nothing shipped changes. Band 5 (village lanes at 12:00, Tmrt − air, shipped +21.5 K against ≤ +8 K): the lane cells run again
+alone with (a) their walls at air + 2 K all day (lane walls are mostly in shade; the shared term's sun part adds 7.0 K at 12:00),
+(b) no direct sun on the lane floor or the person (as balconies, overhangs and washing would give), (c) both. Tmrt − air at
+12:00 and lanes − square at 22:00 (K):
+
+| Run | 12:00 | 22:00 |
+|---|---|---|
+| shipped (shared warm walls, canyon sun) | +21.5 | +5.4 |
+| (a) walls at air + 2 K all day | +17.6 | +5.3 |
+| (b) no direct sun in the lanes | +10.2 | +4.7 |
+| (c) both | +5.9 | +4.5 |
+
+Each cause alone leaves the lanes outside; together they bring them inside (+5.9 K). Band 6 stays inside in every run.
+
+Bands 1 and 3: the sheets with a heat loss through their underside to a room at the outdoor air, h_u = h_ci + 4εσT³ at
+340 K, added to h_c (a docs run with opts.wind; the room is taken at the air temperature, slightly overstating the loss):
+
+| Sheet | h_u W m⁻² K⁻¹ | shipped 15:00 °C | with h_u 15:00 °C | with h_u peak °C |
+|---|---|---|---|---|
+| Rusty corrugated iron roof | 8.6 | 71.2 | 58.8 | 64.6 |
+| Asbestos-cement sheet roof (aged) | 9.3 | 67.8 | 56.2 | 61.0 |
+
+With the underside loss asbestos cement comes inside band 3 and rusty iron falls just below band 1's 60 °C: the engine's
+thin layer, which loses heat from its top only, is the likely common cause (band 1 is met as shipped).
+
+### Acceptance bands
+
+At an air of 35 °C at 15:00 (the brief's bands for Ta 35, clear), "noon" 12:00 local time, night 22:00.
+
+| Check (spec #16) | Model | Band | Source | |
+|---|---|---|---|---|
+| 1. Rusty corrugated iron roofs of the rooms (n 64) at 15:00, °C | 71.15 °C | 60 to 75 | brief10 | inside |
+| 1. Supplementary: rusty iron rooftop rooms (n 23) at 15:00, °C | 71.13 °C | 60 to 75 | brief10 | inside (supplementary, not counted) |
+| 2. The painted rusty-iron rooms (n 26): bare − newly white roof at 15:00, K | 20.88 K | 15 to 25 | brief10 | inside |
+| 2. Supplementary: every painted roof (n 65, iron and galvanised): bare − newly white at 15:00, K | 17.48 K | 15 to 25 | brief10 | inside (supplementary, not counted) |
+| 2. Supplementary: rusty iron rooms − rooms the residents painted white years ago (weathered, n 28) at 15:00, K | 13.27 K | 15 to 25 | brief10 | outside (supplementary, not counted) |
+| 3. Asbestos-cement roofs of the rooms (n 39) at 15:00, °C | 67.85 °C | 50 to 62 | brief10 | **outside** |
+| 4. Sky view of the village lanes 1.5–3 m (n 990 lane cells): mean | 0.050 | 0.03 to 0.16 | brief10 | inside |
+| 4. The same: lowest lane cell | 0.031 | 0.03 to 0.16 | brief10 | inside |
+| 4. The same: highest lane cell | 0.083 | 0.03 to 0.16 | brief10 | inside |
+| 4. Supplementary: the same cells on the 5 m grid (the raster, not used): mean | 0.199 | 0.03 to 0.16 | brief10 | outside (supplementary, not counted) |
+| 4. Supplementary: the brief's centre-line form cos(atan(2H/W)) on the same cells: mean | 0.050 | 0.03 to 0.16 | brief10 | inside (supplementary, not counted) |
+| 4. Supplementary: Market Lane (6 m) | 0.143 | 0.03 to 0.16 | brief10 | inside (supplementary, not counted) |
+| 5. Village lanes at 12:00: Tmrt − air, K | 21.48 K | ≤ 8 | brief10 | **outside** |
+| 5. The open square at 12:00 (n 405 sunlit cells): Tmrt − air, K | 34.95 K | ≥ 25 | brief10 | inside |
+| 5. Supplementary: village lanes at solar noon (12:30): Tmrt − air, K | 31.51 K | ≤ 8 | brief10 | outside (supplementary, not counted) |
+| 5. Supplementary: village lanes at 15:00: Tmrt − air, K | 19.23 K | ≤ 8 | brief10 | outside (supplementary, not counted) |
+| 5. Supplementary: the open square at 15:00: Tmrt − air, K | 37.63 K | ≥ 25 | brief10 | inside (supplementary, not counted) |
+| 6. Village lanes − the open square, Tmrt at 22:00, K | 5.44 K | 2 to 6 | brief10 | inside |
+| 6. Supplementary: the edge's alleys − the open square, Tmrt at 22:00, K | 4.65 K | 2 to 6 | brief10 | inside (supplementary, not counted) |
+| 7. Supplementary (by construction: n calibrated to it): illustrative room air under bare rusty iron, day's peak, K above the outdoor air (n 21.5 per hour) | 3.00 K | 2 to 4 | brief10 | inside (supplementary, not counted) |
+| 7. White paint on the painted rusty-iron rooms (n 26): change of the illustrative room air's day's peak, K | -1.68 K | -2.5 to -1 | vellingiri2020 | inside |
+| 8. Illustrative room-air values shown beyond ±5 K (250 sheet roofs × 96 times × 2 roof states) | 0.000 | 0 | brief10 | inside |
+| 8. Supplementary: the largest raw value before the cap, K | 3.01 K | — (reported) | brief10 | reported (supplementary, not counted) |
+| Walkers at 15:00: density in shade over density in sun | 4.890 | ≥ 2 | melnikov | inside |
+| People dwelling at 15:00 (n 14) whose place is in shade | 1.000 | ≥ 0.5 | melnikov | inside |
+
+2 of 13 counted checks fall outside their band; 12 supplementary rows are not counted. By the brief's bands: 6 of 8 met (1, 2, 4, 6, 7, 8); missed: 3, 5. They are reported, not tuned away: every parameter value is the brief's central value (or the shared value the brief names), and the layout and every value were committed before the first model run of these bands; nothing in the scene changed after it.
+
+Misses:
+- **Band 3** (asbestos cement 67.8 °C at 15:00 against 50–62 °C): the thin layer here has no loss through its underside to the room
+  (tested above, docs only: 56.2 °C with it); no parameter in the brief's ranges brings it inside (Sensitivity). Stated on the metal-roofs card.
+- **Band 5** (village lanes at 12:00, +21.5 K against ≤ +8 K): two causes, tested above (docs only): the direct sun on a
+  straight-walled lane floor at midday (the sun 82.9° high; no balconies or overhangs) and the shared warm-wall term
+  (engine), which sets every wall at air + 9.0 K at 12:00 whether in sun or shade. Stated on the lanes card.
+
+### Disclosures
+
+- **Invented place:** no real village, addresses or people; the layout (plots, storeys, lane widths, roofs, which roofs are painted)
+  is a design choice inside the brief's ranges, and it was committed before the first model run of the bands; nothing in the
+  scene changed after it.
+- **Air fixed:** no warm air held in the lanes at night, no wind in the lanes (Ren et al. 2025, cited by the brief for the lanes'
+  wind shadows, is not used), no heat from people, cooking or appliances.
+- **Lanes:** an endless straight-walled canyon per lane cell (no balconies, air-conditioner boxes, overhangs or washing); a crossing
+  is taken as the east–west lane; the edges of the village keep the grid's values. The raster's sky view of the same cells
+  (0.199) is reported, not used.
+- **Walls:** the shared warm-wall term (air + 2 K + 6 K × K/900, all orientations, in sun or shade) is an engine assumption; in a lane
+  that sees almost only walls it dominates Tmrt (band 5).
+- **Sheets:** thin layers that exchange heat at their top only (no loss into the room, bands 1 and 3); the tarpaulin held at the 2 kJ
+  floor; no measured albedo for rusty iron, asbestos cement or tarpaulin (the brief's assumptions).
+- **Indoor values are proxies:** the radiant proxy treats the ceiling as black at the roof's temperature; the air figure is
+  illustrative, calibrated to the brief's band (so that band is by construction) and capped at ±5 K; the room under a concrete slab is not computed.
+- **Engine sun** (`sun.js`, issue #24): against suncalc at this site, the altitude differs by +0.12° at 12:00 and −0.06° at 15:00 (azimuth −0.83°, +0.25°); the village lanes' sunlit floor is 36.9% against 35.7% and 20.9% against 22.5% with the reference sun: too small to move band 5.
+- **Language:** "urban village (城中村)", "informal settlement", "residents"; vulnerability is described as exposure plus a lack of
+  resources, with cited and hedged figures only; asbestos cement is named a health hazard in one line, without advice. The block's
+  text is checked for the words the brief rules out (`tests/unit/village.test.mjs`).
