@@ -5,9 +5,21 @@
 // Computed once at load with 1-min steps, repeating the design day until the
 // deep temperature Td converges (max change < 0.05 K, at least 3 days), and
 // stored at 15-min resolution for the last day; seek() only looks values up.
-import { MATERIALS, MODEL } from './materials.js';
-import { solarPosition, boxShadow, canopyShadow, rasterise } from './sun.js';
+//
+// Shortwave on a cell: K = sunlit I sin(beta) + SVF D + K_wr + r I sin(beta).
+//   K_wr = a_w (1 - SVF_open) c K_wall is sunlight reflected diffusely by the
+//   opaque walls the cell sees (all blocks; a_w = MODEL.wallAlbedo, c the
+//   crown cover factor, glass walls excluded), with
+//   K_wall = f_lit I cos(beta) / pi + 0.5 D + 0.5 a_g G (a_g the cell's albedo,
+//   G = I sin(beta) + D unshaded);
+//   r is the specular reflection off sunlit glass (block 3, reflect.js).
+// Longwave from the walls: opaque walls at T_wall (engine assumption below),
+// glass walls at T_g (reflect.js glassTemp) with emissivity eps_g, reflecting
+// the air temperature for the rest.
+import { MATERIALS, MODEL, GLASS } from './materials.js';
+import { solarPosition, boxShadow, canopyShadow, rasterise, sunVector } from './sun.js';
 import { lerp, hexRgb, DEG } from './core.js';
+import { glassTemp, FACE_N, FACES } from './reflect.js';
 
 export const SIGMA = 5.670374e-8;
 const TAU = 86400;
@@ -57,22 +69,29 @@ export const skyEmissivity = (eaHpa, taK) => 1.24 * Math.pow(eaHpa / taK, 1 / 7)
 /**
  * Sky view factor at (x, y, z0) by horizon scan: SVF = mean over azimuths of
  * cos^2(horizon elevation). heightAt(x, y) returns obstacle height (m).
+ * onDir(dx, dy, tanHorizon, dist) is called per direction with the sample
+ * that sets the horizon (dist 0 if the horizon is open).
  */
-export function svfAt(heightAt, x, y, z0, nDirs = 16, maxDist = 160, step = 2.5) {
+export function svfAt(heightAt, x, y, z0, nDirs = 16, maxDist = 160, step = 2.5, onDir = null) {
   let sum = 0;
   for (let k = 0; k < nDirs; k++) {
     const a = ((k + 0.5) / nDirs) * 2 * Math.PI;
     const dx = Math.cos(a);
     const dy = Math.sin(a);
     let best = 0; // tan of horizon angle
+    let bestD = 0;
     for (let d = step; d <= maxDist; d += step) {
       const h = heightAt(x + dx * d, y + dy * d) - z0;
       if (h > 0) {
         const t = h / d;
-        if (t > best) best = t;
+        if (t > best) {
+          best = t;
+          bestD = d;
+        }
       }
     }
     sum += 1 / (1 + best * best); // cos^2(atan(best))
+    if (onDir) onDir(dx, dy, best, bestD);
   }
   return sum / nDirs;
 }
@@ -240,6 +259,9 @@ export function runModel(world, opts = {}) {
   const hc = 5.7 + 3.8 * site.wind;
   const tauFac = (2 * Math.PI) / TAU;
   const sqrtTau = Math.sqrt(TAU);
+  // block 3: specular reflection fields per slot (reflect.js reflectFor) and the glass type
+  const reflFull = opts.refl ?? null;
+  const glass = opts.glass ?? null;
 
   // optional subset of cells (opts.cells): the model runs on a compact copy
   // of their inputs and the result is scattered back (other cells stay 0;
@@ -248,6 +270,7 @@ export function runModel(world, opts = {}) {
   const NF = N;
   const NN = idx ? idx.length : N;
   const fields = idx ? slots.fields.map((f) => Float32Array.from(idx, (i) => f[i])) : slots.fields;
+  const refl = reflFull ? (idx ? reflFull.map((f) => (f ? Float32Array.from(idx, (i) => f[i]) : null)) : reflFull) : null;
   // per-cell parameters
   const alpha = new Float32Array(NN);
   const eps = new Float32Array(NN);
@@ -272,12 +295,35 @@ export function runModel(world, opts = {}) {
     } else throw new Error(`material ${id} has neither mu > 0 nor thinC`);
   }
   const svf = idx ? Float32Array.from(idx, (i) => world.svf[i]) : world.svf;
+  // wall reflection coefficients: K_wr = cw kw0 + cwa kwG (see the header)
+  const cw = new Float32Array(NN);
+  const cwa = new Float32Array(NN);
+  // glass share of the wall view per orientation (block 3): g0..g3 (S, N, E, W), gOpaque = 1 - sum
+  const gv = world.gview ? [0, 1, 2, 3].map(() => new Float64Array(NN)) : null;
+  const gOpaque = gv ? new Float64Array(NN) : null;
+  for (let i = 0; i < NN; i++) {
+    const c = idx ? idx[i] : i;
+    let g = 0;
+    if (gv) {
+      for (let o = 0; o < 4; o++) {
+        gv[o][i] = world.gview[c * 4 + o];
+        g += gv[o][i];
+      }
+      gOpaque[i] = 1 - g;
+    }
+    cw[i] = wallReflectCoef(world, c) * (1 - g);
+    cwa[i] = cw[i] * alpha[i];
+  }
+  const [g0, g1, g2, g3] = gv ?? [];
 
   // per-minute forcing
   const M = 1440;
   const ta = new Float32Array(M);
   const beamH = new Float32Array(M); // beam on horizontal
   const dif = new Float32Array(M);
+  const kw0 = new Float32Array(M); // K_wall without the ground-reflected part
+  const kwG = new Float32Array(M); // 0.5 G (times the cell albedo)
+  const lglass = gv ? new Float32Array(M * 4) : null; // L from glass walls per orientation
   let taSum = 0;
   for (let m = 0; m < M; m++) {
     const h = m / 60;
@@ -287,6 +333,10 @@ export function runModel(world, opts = {}) {
     const ir = irradiance(s.alt);
     beamH[m] = ir.beam * Math.max(0, Math.sin(s.alt * DEG));
     dif[m] = ir.diffuse;
+    const w = wallShortwave(ir, s);
+    kw0[m] = w.k0;
+    kwG[m] = w.kG;
+    if (lglass) for (let o = 0; o < 4; o++) lglass[m * 4 + o] = glassLongwave(glass, ta[m], ir, s, FACES[o]);
   }
   const taMean = taSum / M;
 
@@ -296,18 +346,22 @@ export function runModel(world, opts = {}) {
   let store = new Float32Array(NN * STORE);
   const stepsPerStore = M / STORE;
 
+  // per-cell inputs and state for the step functions (one minute, all cells)
+  const C = { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, dt, gOpaque, g0, g1, g2, g3 };
   let days = 0;
   let maxDelta = Infinity;
-  while (days < maxDays && (days < minDays || maxDelta >= tol)) {
+  /** One design day with steps of stepMin minutes; returns max |change of Td| over cells. */
+  const runDay = (stepMin, keep) => {
     sumDay.fill(0);
-    for (let m = 0; m < M; m += dt / 60) {
+    C.dt = stepMin * 60;
+    for (let m = 0; m < M; m += stepMin) {
       const h = m / 60;
       const taK = ta[m] + K0;
       const ta4 = taK * taK * taK * taK;
       // walls seen from the ground: air + 2 K plus a sun term by day that
       // peaks at midday (engine assumption; ignores wall orientation; the peak
       // value is computed in docs/sources.md)
-      const tw = taK + 2 + (6 * (beamH[m] + dif[m])) / 900;
+      const tw = wallTemp(taK, beamH[m] + dif[m]);
       const tw4 = tw * tw * tw * tw;
       const lsky = skyEmissivity(site.vapourHpa, taK) * SIGMA * ta4;
       const lwall = SIGMA * tw4;
@@ -315,37 +369,35 @@ export function runModel(world, opts = {}) {
       const st = (m % 10) / 10;
       const f0 = fields[sf];
       const f1 = fields[(sf + 1) % SLOTS];
+      const r0 = refl ? refl[sf] : null;
+      const r1 = refl ? refl[(sf + 1) % SLOTS] : null;
       const bh = beamH[m];
       const df = dif[m];
+      const k0 = kw0[m];
+      const kg = kwG[m];
       const waterT = taMean - 1 + Math.sin((2 * Math.PI * (h - 9)) / 24) + K0;
-      for (let i = 0; i < NN; i++) {
-        if (water[i]) {
-          Ts[i] = waterT;
-        } else {
-          const sl = f0[i] + (f1[i] - f0[i]) * st;
-          const v = svf[i];
-          const K = sl * bh + v * df;
-          const L = v * lsky + (1 - v) * lwall;
-          const t = Ts[i];
-          const t4 = t * t * t * t;
-          const qstar = (1 - alpha[i]) * K + eps[i] * L - eps[i] * SIGMA * t4;
-          const G = qstar - hc * (t - taK) - (qstar > 0 ? ef[i] * qstar : 0);
-          Ts[i] = t + dt * (cap[i] * G - restore[i] * (t - Td[i]));
-        }
-        sumDay[i] += Ts[i];
-      }
-      if (m % stepsPerStore === 0) {
+      if (gv) stepGlass(C, f0, f1, st, r0, r1, bh, df, k0, kg, lsky, lwall, lglass[m * 4], lglass[m * 4 + 1], lglass[m * 4 + 2], lglass[m * 4 + 3], taK, waterT);
+      else stepPlain(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT);
+      if (keep && m % stepsPerStore === 0) {
         const k = m / stepsPerStore;
         for (let i = 0; i < NN; i++) store[i * STORE + k] = Ts[i] - K0;
       }
     }
-    const steps = M / (dt / 60);
-    maxDelta = 0;
+    const steps = M / stepMin;
+    let md = 0;
     for (let i = 0; i < NN; i++) {
       const next = sumDay[i] / steps;
-      if (!water[i]) maxDelta = Math.max(maxDelta, Math.abs(next - Td[i]));
+      if (!water[i]) md = Math.max(md, Math.abs(next - Td[i]));
       Td[i] = next;
     }
+    return md;
+  };
+  // opts.warm (block 3): this many coarse days (10-min steps) first, to bring
+  // the deep temperature close before the 1-min days; the convergence test
+  // below is unchanged and counts only 1-min days (still at least minDays).
+  for (let k = 0; k < (opts.warm ?? 0); k++) runDay(10, false);
+  while (days < maxDays && (days < minDays || maxDelta >= tol)) {
+    maxDelta = runDay(dt / 60, true);
     days++;
   }
   if (idx) {
@@ -353,7 +405,91 @@ export function runModel(world, opts = {}) {
     idx.forEach((i, c) => full.set(store.subarray(c * STORE, (c + 1) * STORE), i * STORE));
     store = full;
   }
-  return new Thermal(world, store, slots, { rise, taMean, hc, site, ta, days, maxDelta, mats, cells: idx });
+  return new Thermal(world, store, slots, { rise, taMean, hc, site, ta, days, maxDelta, mats, cells: idx, refl: reflFull, glass, warm: opts.warm ?? 0 });
+}
+
+/** One model minute for every cell (blocks without glass). */
+function stepPlain(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT) {
+  const { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, dt } = C;
+  for (let i = 0; i < NN; i++) {
+    if (water[i]) {
+      Ts[i] = waterT;
+    } else {
+      const sl = f0[i] + (f1[i] - f0[i]) * st;
+      const v = svf[i];
+      const K = sl * bh + v * df + cw[i] * k0 + cwa[i] * kg;
+      const L = v * lsky + (1 - v) * lwall;
+      const t = Ts[i];
+      const t4 = t * t * t * t;
+      const qstar = (1 - alpha[i]) * K + eps[i] * L - eps[i] * SIGMA * t4;
+      const G = qstar - hc * (t - taK) - (qstar > 0 ? ef[i] * qstar : 0);
+      Ts[i] = t + dt * (cap[i] * G - restore[i] * (t - Td[i]));
+    }
+    sumDay[i] += Ts[i];
+  }
+}
+
+/** One model minute for every cell of a glass block: adds the specular term and glass walls. */
+function stepGlass(C, f0, f1, st, r0, r1, bh, df, k0, kg, lsky, lwall, L0, L1, L2, L3, taK, waterT) {
+  const { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, dt, gOpaque, g0, g1, g2, g3 } = C;
+  const a0 = r0 ? (1 - st) * bh : 0;
+  const a1 = r1 ? st * bh : 0;
+  for (let i = 0; i < NN; i++) {
+    if (water[i]) {
+      Ts[i] = waterT;
+    } else {
+      const sl = f0[i] + (f1[i] - f0[i]) * st;
+      const v = svf[i];
+      let K = sl * bh + v * df + cw[i] * k0 + cwa[i] * kg;
+      if (r0) K += r0[i] * a0;
+      if (r1) K += r1[i] * a1;
+      const lw = gOpaque[i] * lwall + g0[i] * L0 + g1[i] * L1 + g2[i] * L2 + g3[i] * L3;
+      const L = v * lsky + (1 - v) * lw;
+      const t = Ts[i];
+      const t4 = t * t * t * t;
+      const qstar = (1 - alpha[i]) * K + eps[i] * L - eps[i] * SIGMA * t4;
+      const G = qstar - hc * (t - taK) - (qstar > 0 ? ef[i] * qstar : 0);
+      Ts[i] = t + dt * (cap[i] * G - restore[i] * (t - Td[i]));
+    }
+    sumDay[i] += Ts[i];
+  }
+}
+
+/** Opaque wall temperature seen from the ground (engine assumption): Ta + 2 K + 6 K x (K/900). taK in K. */
+export const wallTemp = (taK, kGlobal) => taK + 2 + (6 * kGlobal) / 900;
+
+/**
+ * Wall-reflection coefficient of cell i: a_w (1 - SVF_open), times the crown
+ * factor (1 - 0.75 cover) under trees as for the sky. Glass walls are taken
+ * out by the caller (they reflect specularly, see reflect.js).
+ */
+export function wallReflectCoef(world, i) {
+  const open = world.svfOpen ? world.svfOpen[i] : world.svf[i];
+  const crown = world.bld[i] < 0 ? 1 - 0.75 * world.canopy[i] : 1;
+  return MODEL.wallAlbedo.value * Math.max(0, 1 - open) * crown;
+}
+
+/** Shortwave on a wall (azimuth mean): k0 = f_lit I cos(beta) / pi + 0.5 D; kG = 0.5 G (times ground albedo). */
+export function wallShortwave(ir, sun) {
+  if (sun.alt <= 0) return { k0: 0, kG: 0 };
+  const sinb = Math.sin(sun.alt * DEG);
+  const cosb = Math.cos(sun.alt * DEG);
+  return { k0: (MODEL.wallLit.value * ir.beam * cosb) / Math.PI + 0.5 * ir.diffuse, kG: 0.5 * (ir.beam * sinb + ir.diffuse) };
+}
+
+/** Longwave from a glass wall of one orientation: eps_g sigma Tg^4 + (1 - eps_g) sigma Ta^4 (W m-2). */
+export function glassLongwave(glass, ta, ir, sun, face) {
+  const g = GLASS[glass ?? 'lowe'];
+  let cosT = 0;
+  if (sun.alt > 0) {
+    const sv = sunVector(sun.alt, sun.az);
+    const nn = FACE_N[face];
+    cosT = sv[0] * nn[0] + sv[1] * nn[1];
+  }
+  const tg = glassTemp(ta, ir.beam, ir.diffuse, cosT, g.absorb.value) + K0;
+  const e = g.eps.value;
+  const taK = ta + K0;
+  return e * SIGMA * tg ** 4 + (1 - e) * SIGMA * taK ** 4;
 }
 
 export class Thermal {
@@ -404,11 +540,74 @@ export class Thermal {
     return lerp(this.slots.fields[k][i], this.slots.fields[(k + 1) % SLOTS][i], f);
   }
 
+  /** Specular reflected beam fraction r at cell i, hour h (block 3; 0 elsewhere). */
+  refl(i, h) {
+    const R = this.info.refl;
+    if (!R) return 0;
+    const x = ((((h % 24) + 24) % 24) * SLOTS) / 24;
+    const k = Math.floor(x) % SLOTS;
+    const f = x - Math.floor(x);
+    const a = R[k] ? R[k][i] : 0;
+    const b = R[(k + 1) % SLOTS] ? R[(k + 1) % SLOTS][i] : 0;
+    return a + (b - a) * f;
+  }
+
+  /** Glass share of the walls cell i sees (all orientations). */
+  glassShare(i) {
+    const g = this.world.gview;
+    return g ? g[i * 4] + g[i * 4 + 1] + g[i * 4 + 2] + g[i * 4 + 3] : 0;
+  }
+
+  /**
+   * Shortwave parts on cell i at hour h, W m-2: direct (sunlit beam), sky
+   * (diffuse), walls (diffuse wall reflection K_wr), glass (specular
+   * reflection), and their sum K, as in runModel.
+   */
+  shortwave(i, h) {
+    const s = this.sun(h);
+    const ir = irradiance(s.alt);
+    const bh = ir.beam * Math.max(0, Math.sin(s.alt * DEG));
+    const w = wallShortwave(ir, s);
+    const mat = (this.info.mats ?? MATERIALS)[cellMat(this.world, i)];
+    const c = wallReflectCoef(this.world, i) * (1 - this.glassShare(i));
+    const direct = this.sunlit(i, h) * bh;
+    const sky = this.world.svf[i] * ir.diffuse;
+    const walls = c * (w.k0 + mat.alpha.value * w.kG);
+    const r = this.refl(i, h);
+    const glass = r * bh;
+    return { direct, sky, walls, glass, r, K: direct + sky + walls + glass, beam: ir.beam, diffuse: ir.diffuse, sun: s };
+  }
+
+  /** Longwave from the walls cell i sees (W m-2), as in runModel. */
+  lwall(i, h) {
+    const taK = this.air(h) + K0;
+    const s = this.sun(h);
+    const ir = irradiance(s.alt);
+    const opaque = SIGMA * wallTemp(taK, ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + ir.diffuse) ** 4;
+    const g = this.world.gview;
+    if (!g) return opaque;
+    let out = (1 - this.glassShare(i)) * opaque;
+    for (let o = 0; o < 4; o++) if (g[i * 4 + o] > 0) out += g[i * 4 + o] * glassLongwave(this.info.glass, this.air(h), ir, s, FACES[o]);
+    return out;
+  }
+
+  /** Glass outer-surface temperature (deg C) of a façade orientation at hour h. */
+  glassTemp(face, h) {
+    const s = this.sun(h);
+    const ir = irradiance(s.alt);
+    let cosT = 0;
+    if (s.alt > 0) {
+      const sv = sunVector(s.alt, s.az);
+      cosT = sv[0] * FACE_N[face][0] + sv[1] * FACE_N[face][1];
+    }
+    return glassTemp(this.air(h), ir.beam, ir.diffuse, cosT, GLASS[this.info.glass ?? 'lowe'].absorb.value);
+  }
+
   /**
    * Water evaporated from cell i over the design day, mm (= kg m-2):
    * sum of EF x max(Q*, 0) x dt / 2.45e6 J kg-1, evaluated on the stored
    * 15-min surface temperatures (a 15-min sum, not the model's 1-min one)
-   * with the model's radiation terms, including its wall term (driven by the
+   * with the model's radiation terms, including its wall terms (driven by the
    * unshaded sun, as in runModel).
    */
   evaporation(i) {
@@ -419,12 +618,9 @@ export class Thermal {
     let sum = 0;
     for (let k = 0; k < STORE; k++) {
       const h = (k * 24) / STORE;
-      const s = this.sun(h);
-      const ir = irradiance(s.alt);
-      const K = this.sunlit(i, h) * ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + v * ir.diffuse;
+      const K = this.shortwave(i, h).K;
       const taK = this.air(h) + K0;
-      const tw = taK + 2 + (6 * (ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + ir.diffuse)) / 900;
-      const L = v * skyEmissivity(site.vapourHpa, taK) * SIGMA * taK ** 4 + (1 - v) * SIGMA * tw ** 4;
+      const L = v * skyEmissivity(site.vapourHpa, taK) * SIGMA * taK ** 4 + (1 - v) * this.lwall(i, h);
       const t = this.ts(i, h) + K0;
       const q = (1 - m.alpha.value) * K + m.eps.value * L - m.eps.value * SIGMA * t ** 4;
       if (q > 0) sum += m.ef.value * q * (86400 / STORE);
@@ -443,29 +639,32 @@ export class Thermal {
   /**
    * Mean radiant temperature (deg C) for a standing person on a ground cell,
    * SOLWEIG-style six-direction sum (Lindberg et al. 2008), simplified:
-   * walls are treated as air + 2 K plus the same sun term as above, and reflect no shortwave.
+   * opaque walls are treated as air + 2 K plus the same sun term as above and
+   * reflect sunlight diffusely (K_wr: onto the ground, and half of it onto the
+   * person's sides); glass walls reflect the beam specularly (an extra beam
+   * r I from the mirrored direction, same altitude, so the same f_p) and emit
+   * at the glass temperature.
    */
   tmrt(i, h) {
     const site = this.info.site;
-    const s = this.sun(h);
-    const ir = irradiance(s.alt);
+    const sw = this.shortwave(i, h);
+    const s = sw.sun;
     const sl = this.sunlit(i, h);
     const v = this.world.svf[i];
     const taK = this.air(h) + K0;
     const mat = (this.info.mats ?? MATERIALS)[cellMat(this.world, i)];
     const tg = this.ts(i, h) + K0;
-    const Kh = sl * ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + v * ir.diffuse;
+    const Kh = sw.K; // everything that reaches the ground
     const b = Math.max(0, s.alt);
     const fp = 0.308 * Math.cos(b * (1 - (b * b) / 48402) * DEG);
     const ak = 0.7;
     const ap = 0.97;
-    const Ksky = v * ir.diffuse; // onto the upward-facing side (direct beam via fp)
+    const Ksky = v * sw.diffuse; // onto the upward-facing side (direct beam via fp)
     const Kground = mat.alpha.value * Kh; // reflected up from the ground
-    const Klat = 0.5 * Ksky + 0.5 * Kground;
-    const S = ak * (0.06 * Ksky + 0.06 * Kground + 0.88 * Klat + fp * ir.beam * sl);
+    const Klat = 0.5 * Ksky + 0.5 * Kground + 0.5 * sw.walls;
+    const S = ak * (0.06 * Ksky + 0.06 * Kground + 0.88 * Klat + fp * sw.beam * (sl + sw.r));
     const lsky = skyEmissivity(site.vapourHpa, taK) * SIGMA * taK ** 4;
-    const tw = taK + 2 + (6 * (ir.beam * Math.max(0, Math.sin(s.alt * DEG)) + ir.diffuse)) / 900;
-    const Ldown = v * lsky + (1 - v) * SIGMA * tw ** 4;
+    const Ldown = v * lsky + (1 - v) * this.lwall(i, h);
     const Lg = mat.eps.value * SIGMA * tg ** 4 + (1 - mat.eps.value) * Ldown; // emitted + reflected
     const Llat = 0.5 * Ldown + 0.5 * Lg;
     const L = ap * (0.06 * Ldown + 0.06 * Lg + 0.88 * Llat);
