@@ -376,9 +376,10 @@ function filmPage(W, H) {
     legend() {
       const bar = this.doc.getElementById('legendBar');
       const stops = [...(bar ? bar.style.background : '').matchAll(/rgb\((\d+), (\d+), (\d+)\)(?: (\d+(?:\.\d+)?)%)?/g)].map((m) => [m[4] === undefined ? null : Number(m[4]) / 100, `rgb(${m[1]},${m[2]},${m[3]})`]);
-      const lo = this.doc.getElementById('legendLo')?.textContent ?? '';
-      const hi = this.doc.getElementById('legendHi')?.textContent ?? '';
-      return { stops, lo, hi };
+      // the heat view's scale (#36): surface minus the air, ticks and the air at the hour from the page's own legend
+      const ticks = [...this.doc.querySelectorAll('#legendTicks span')].map((e) => [parseFloat(e.style.left) / 100, e.textContent]);
+      const air = this.A.probes().air;
+      return { stops, ticks, air };
     },
     /** Draw film frame `s` (see frameSpec) into base and out. */
     render(s) {
@@ -496,7 +497,7 @@ function filmPage(W, H) {
       const w = 400;
       const x = W - 56 - w;
       const hasLeg = mix > 0;
-      const h = (hasLeg ? 160 : 86) + (o.state ? 34 : 0);
+      const h = (hasLeg ? 206 : 86) + (o.state ? 34 : 0);
       this.card(g, x, 52, w, h);
       g.fillStyle = INK;
       g.font = `600 30px ${SERIF}`;
@@ -527,13 +528,21 @@ function filmPage(W, H) {
         g.lineWidth = 1.2;
         g.strokeRect(bx, by, bw, 14);
         g.fillStyle = INK;
-        g.font = `16px ${SERIF}`;
-        g.fillText(L.lo, bx, by + 34);
+        g.font = `15px ${SERIF}`;
+        const [first, zero, last] = [L.ticks[0], L.ticks.find((t) => t[1] === '0'), L.ticks.at(-1)];
+        g.fillText(first[1], bx, by + 32);
         g.textAlign = 'right';
-        g.fillText(L.hi, bx + bw, by + 34);
+        g.fillText(last[1], bx + bw, by + 32);
         g.textAlign = 'center';
+        g.fillText(`0 = air ${Math.round(L.air)} °C · 气温`, bx + zero[0] * bw + 62, by + 32);
+        g.textAlign = 'left';
+        g.fillText('← cooler than the air', bx, by + 56);
         g.font = `15px ${ZH}`;
-        g.fillText('surface temperature · 地表温度', bx + bw / 2, by + 34);
+        g.fillText('← 比气温凉', bx, by + 78);
+        g.textAlign = 'right';
+        g.fillText('比气温热 →', bx + bw, by + 78);
+        g.font = `15px ${SERIF}`;
+        g.fillText('hotter than the air →', bx + bw, by + 56);
       }
       g.restore();
     },
