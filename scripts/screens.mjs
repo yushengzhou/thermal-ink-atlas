@@ -13,6 +13,15 @@ mkdirSync(`${root}thumbs`, { recursive: true });
 const AP = 'asphalt-park';
 const SR = 'sponge-retrofit';
 const GC = 'glass-cbd';
+const WF = 'waterfront';
+const HT = 'hutong';
+const PK = 'parking';
+const ES = 'estate';
+const CPS = 'campus';
+const BSS = 'busstop';
+const UV = 'village';
+const DC = 'desert';
+const NMK = 'nightmarket';
 const shots = [
   [AP, 'docs/media/day-1500.jpg', 'hour=15&f=400', { width: 1280, height: 800 }],
   [AP, 'docs/media/thermal-1500.jpg', 'thermal&hour=15&f=400', { width: 1280, height: 800 }],
@@ -64,6 +73,151 @@ const shots = [
     },
   ],
   [GC, 'thumbs/glass-cbd.jpg', 'hour=15&f=400&notes=0&ui=0&cam=2.5,215,205', { width: 640, height: 400 }],
+  // block 4: wind lines by day, thermal at 15:00, the warm pond at 04:00, the air overlay, the sheltered-street card
+  [WF, 'docs/media/wf-day-1500-wind.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
+  [WF, 'docs/media/wf-thermal-1500.jpg', 'thermal&hour=15&f=640', { width: 1280, height: 800 }],
+  [WF, 'docs/media/wf-thermal-0400-pond.jpg', 'thermal&hour=4&f=640&cam=3.5,205,212', { width: 1280, height: 800 }],
+  [WF, 'docs/media/wf-air-overlay-1500.jpg', 'hour=15&f=640&air=1&notes=0&cam=3.5,200,95', { width: 1280, height: 800 }],
+  [
+    WF,
+    'docs/media/wf-shelter-card.jpg',
+    'hour=15&f=640',
+    { width: 1280, height: 800 },
+    async (page) => {
+      await page.click('#wind [data-card="shelter"]');
+    },
+  ],
+  [WF, 'thumbs/waterfront.jpg', 'hour=15&f=400&notes=0&ui=0&cam=2.5,170,150', { width: 640, height: 400 }],
+  // block 5: lanes and courtyards by day, thermal at 15:00, thermal 21:00 with and without the splash, the tianpeng card
+  [HT, 'docs/media/ht-day-1500.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
+  [HT, 'docs/media/ht-day-1500-lanes.jpg', 'hour=15&f=640&notes=0&cam=5,125,245', { width: 1280, height: 800 }],
+  [HT, 'docs/media/ht-thermal-1500.jpg', 'thermal&hour=15&f=640', { width: 1280, height: 800 }],
+  [HT, 'docs/media/ht-thermal-2100-splash.jpg', 'thermal&hour=21&f=640&notes=0&cam=3.5,120,240&splash=1', { width: 1280, height: 800 }],
+  [HT, 'docs/media/ht-thermal-2100-nosplash.jpg', 'thermal&hour=21&f=640&notes=0&cam=3.5,120,240&splash=0', { width: 1280, height: 800 }],
+  [
+    HT,
+    'docs/media/ht-tianpeng-card.jpg',
+    'hour=15&f=640&cam=5,125,245&notes=0',
+    { width: 1280, height: 800 },
+    async (page) => {
+      await page.click('#hutong [data-card="tianpeng"]');
+    },
+  ],
+  [HT, 'thumbs/hutong.jpg', 'hour=15&f=400&notes=0&ui=0&cam=3.5,125,245', { width: 640, height: 400 }],
+  // block 6: the car park by day, thermal at 15:00 and at 23:00 with the night-release strokes, the PV canopy close up, the storage card
+  [PK, 'docs/media/pk-day-1500.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
+  [PK, 'docs/media/pk-thermal-1500.jpg', 'thermal&hour=15&f=640', { width: 1280, height: 800 }],
+  [PK, 'docs/media/pk-thermal-2300-release.jpg', 'thermal&hour=23&f=640&flux=1', { width: 1280, height: 800 }],
+  [PK, 'docs/media/pk-thermal-2300-close.jpg', 'thermal&hour=23&f=640&flux=1&notes=0&cam=4,140,170', { width: 1280, height: 800 }],
+  [PK, 'docs/media/pk-day-1500-pv.jpg', 'hour=15&f=640&notes=0&cam=5,70,150', { width: 1280, height: 800 }],
+  [
+    PK,
+    'docs/media/pk-storage-card.jpg',
+    'thermal&hour=23&f=640&flux=1&notes=0',
+    { width: 1280, height: 800 },
+    async (page) => {
+      await page.click('#parking [data-card="storage"]');
+    },
+  ],
+  [PK, 'thumbs/parking.jpg', 'hour=15&f=400&notes=0&ui=0&cam=3,110,140', { width: 640, height: 400 }],
+  // block 7: day and thermal at 15:00, the 大寒 view with the sill tallies, the condenser plumes at 21:00, the spacing card
+  [ES, 'docs/media/es-day-1500.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
+  [ES, 'docs/media/es-thermal-1500.jpg', 'thermal&hour=15&f=640', { width: 1280, height: 800 }],
+  [ES, 'docs/media/es-dajhan-1200.jpg', 'hour=12&f=640&date=dajhan&notes=0', { width: 1280, height: 800 }],
+  [ES, 'docs/media/es-dajhan-tallies.jpg', 'hour=12&f=640&date=dajhan&notes=0&cam=5.5,190,250', { width: 1280, height: 800 }],
+  [ES, 'docs/media/es-ac-2100.jpg', 'hour=21&f=640&ac=1&notes=0&cam=3.5,230,250', { width: 1280, height: 800 }],
+  [
+    ES,
+    'docs/media/es-rule-card.jpg',
+    'hour=12&f=640&notes=0',
+    { width: 1280, height: 800 },
+    async (page) => {
+      await page.click('#estate [data-card="rule"]');
+    },
+  ],
+  [ES, 'thumbs/estate.jpg', 'hour=15&f=400&notes=0&ui=0&cam=2.5,215,215', { width: 640, height: 400 }],
+  // block 8: day and thermal at 15:00, the burn hatching, the watered pitch at 14:15, children at play under the sails, the watering card
+  [CPS, 'docs/media/cp-day-1500.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
+  [CPS, 'docs/media/cp-thermal-1500.jpg', 'thermal&hour=15&f=640', { width: 1280, height: 800 }],
+  [CPS, 'docs/media/cp-burn-1500.jpg', 'hour=15&f=640&burn=1&notes=0', { width: 1280, height: 800 }],
+  [CPS, 'docs/media/cp-water-1415.jpg', 'thermal&hour=14.25&f=640&irrigate=1&notes=0&cam=3,160,130', { width: 1280, height: 800 }],
+  [CPS, 'docs/media/cp-kids-1500.jpg', 'hour=15&f=640&notes=0&cam=5.5,325,205', { width: 1280, height: 800 }],
+  [
+    CPS,
+    'docs/media/cp-water-card.jpg',
+    'thermal&hour=14.25&f=640&irrigate=1&notes=0',
+    { width: 1280, height: 800 },
+    async (page) => {
+      await page.click('#campus [data-card="water"]');
+    },
+  ],
+  [CPS, 'thumbs/campus.jpg', 'hour=15&f=400&notes=0&ui=0&cam=2.5,250,170', { width: 640, height: 400 }],
+  // block 9: day and thermal at 15:00, stop C with the waiting places at 17:00 and the screen card, stop A with its bus, the burn flags on the open footbridge
+  [BSS, 'docs/media/bs-day-1500.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
+  [BSS, 'docs/media/bs-thermal-1500.jpg', 'thermal&hour=15&f=640', { width: 1280, height: 800 }],
+  [BSS, 'docs/media/bs-spots-1700.jpg', 'hour=17&f=640&spots=1&notes=0&cam=7.5,265,190', { width: 1280, height: 800 }],
+  [BSS, 'docs/media/bs-stop-a-1500.jpg', 'hour=15&f=1650&spots=1&notes=0&cam=7.5,305,209', { width: 1280, height: 800 }],
+  [BSS, 'docs/media/bs-burn-1500.jpg', 'hour=15&f=900&burn=1&notes=0&cam=4,200,262', { width: 1280, height: 800 }],
+  [
+    BSS,
+    'docs/media/bs-screen-card.jpg',
+    'hour=17&f=640&spots=1&notes=0&cam=5.5,262,190',
+    { width: 1280, height: 800 },
+    async (page) => {
+      await page.click('#busstop [data-card="screen"]');
+    },
+  ],
+  [BSS, 'thumbs/busstop.jpg', 'hour=15&f=1650&notes=0&ui=0&cam=3,250,200', { width: 640, height: 400 }],
+  // block 10: day and thermal at 15:00, the lanes at 22:00 (thermal), the residents' white roofs and the room under the roof, the lanes card
+  [UV, 'docs/media/uv-day-1500.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
+  [UV, 'docs/media/uv-thermal-1500.jpg', 'thermal&hour=15&f=640', { width: 1280, height: 800 }],
+  [UV, 'docs/media/uv-thermal-2200.jpg', 'thermal&hour=22&f=640&notes=0&cam=4,150,200', { width: 1280, height: 800 }],
+  [UV, 'docs/media/uv-under-1500.jpg', 'hour=15&f=640&under=1&notes=0&cam=4,130,340', { width: 1280, height: 800 }],
+  [UV, 'docs/media/uv-white-1500.jpg', 'thermal&hour=15&f=640&coolroof=1&notes=0&cam=4,130,340', { width: 1280, height: 800 }],
+  [
+    UV,
+    'docs/media/uv-lanes-card.jpg',
+    'hour=15&f=640&notes=0&cam=4,150,200',
+    { width: 1280, height: 800 },
+    async (page) => {
+      await page.click('#village [data-card="lanes"]');
+    },
+  ],
+  [UV, 'thumbs/village.jpg', 'hour=15&f=640&notes=0&ui=0&cam=2.5,200,260', { width: 640, height: 400 }],
+  // block 11: day and thermal at 15:00, the plaza after sunset (thermal), the street coating off, the water used, the intro hint, the sails card
+  [DC, 'docs/media/dc-day-1500.jpg', 'hour=15&f=640', { width: 1280, height: 800 }],
+  [DC, 'docs/media/dc-thermal-1500.jpg', 'thermal&hour=15&f=640', { width: 1280, height: 800 }],
+  [DC, 'docs/media/dc-thermal-2100.jpg', 'thermal&hour=21&f=640&notes=0&cam=4,290,60', { width: 1280, height: 800 }],
+  [DC, 'docs/media/dc-bare-thermal-1500.jpg', 'thermal&hour=15&f=640&coat=0&notes=0&cam=3.5,240,190', { width: 1280, height: 800 }],
+  [DC, 'docs/media/dc-water-1500.jpg', 'hour=15&f=640&water=1&notes=0', { width: 1280, height: 800 }],
+  [DC, 'docs/media/dc-intro-hint.jpg', 'hour=15&f=60', { width: 1280, height: 800 }],
+  [
+    DC,
+    'docs/media/dc-sails-card.jpg',
+    'hour=15&f=640&notes=0&cam=5,280,60',
+    { width: 1280, height: 800 },
+    async (page) => {
+      await page.click('#desert [data-card="sails"]');
+    },
+  ],
+  [DC, 'thumbs/desert.jpg', 'hour=15&f=640&notes=0&ui=0&cam=2.2,215,110', { width: 640, height: 400 }],
+  // block 12: the market at 21:00 (day view and heat view), the heat given off, a close look at a grill in the heat view, the street at 17:00, the intro hint, the grill card
+  [NMK, 'docs/media/nm-night-2100.jpg', 'f=640', { width: 1280, height: 800 }],
+  [NMK, 'docs/media/nm-thermal-2100.jpg', 'thermal&f=640', { width: 1280, height: 800 }],
+  [NMK, 'docs/media/nm-heat-2100.jpg', 'f=640&heat=1&notes=0&people=0&cam=3.5,190,180', { width: 1280, height: 800 }],
+  [NMK, 'docs/media/nm-grill-2100.jpg', 'thermal&f=640&notes=0&cam=7.5,245,195', { width: 1280, height: 800 }],
+  [NMK, 'docs/media/nm-day-1700.jpg', 'hour=17&f=640&notes=0&cam=4,200,170', { width: 1280, height: 800 }],
+  [NMK, 'docs/media/nm-intro-hint.jpg', 'f=60', { width: 1280, height: 800 }],
+  [
+    NMK,
+    'docs/media/nm-grill-card.jpg',
+    'f=640&notes=0&cam=6,245,190',
+    { width: 1280, height: 800 },
+    async (page) => {
+      await page.click('#market [data-card="grill"]');
+    },
+  ],
+  [NMK, 'thumbs/nightmarket.jpg', 'f=640&notes=0&ui=0&cam=4.5,215,180', { width: 640, height: 400 }],
 ];
 const browser = await chromium.launch();
 for (const [city, out, q, viewport, act] of shots) {

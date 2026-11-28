@@ -196,7 +196,14 @@ export function canyonStats(world, T, seg, ref) {
   }
   const shaded = cells.filter((i) => T.sunlit(i, 15) < SHADE);
   const m = (a, h) => mean(a.map((i) => T.ts(i, h)));
+  // since when each cell shaded at 15:00 has been out of the sun (quarter hours back from 15:00); the median
+  const since = shaded.map((i) => {
+    let h = 15;
+    while (h > 5 && T.sunlit(i, h - 0.25) < SHADE) h -= 0.25;
+    return h;
+  }).sort((a, b) => a - b);
   return {
+    shadeSince: since.length ? since[Math.floor(since.length / 2)] : null,
     n: cells.length,
     hw: seg.h / seg.w,
     svf: mean(cells.map((i) => world.svf[i])),

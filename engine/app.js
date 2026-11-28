@@ -13,11 +13,31 @@ import { retrofitNotes, measureCard, tradeoffCard, spongeCard, drawDivider } fro
 import { sunSlots } from './thermal.js';
 import { GLASS, GLASS_IDS, GLASS_DEFAULT } from './materials.js';
 import { isGlass, glassSetup, glassShade, spotStats, spotClasses, openReference, canyonStats } from './cbd.js';
-import { cbdNotes, canyonCard, glassCard, spotCard, acCard, extremeCard, CBD_CARDS } from './cbdui.js';
+import { cbdNotes, canyonCard, glassCard, spotCard, acCard, extremeCard, CBD_CARDS, cbdOverlay } from './cbdui.js';
 import { classDensity } from './life.js';
 import { glassRho, FACE_N } from './reflect.js';
 import { sunVector } from './sun.js';
 import { isGlassFace } from './kit.js';
+import { isWaterfront, waterfrontSetup, comfortShade, windStats, hcStats, asphaltContrast, waterStats, overlayStats, lineStats, promenadeShade, shelterProfile, overlayReach, walkerWind } from './waterfront.js';
+import { wfNotes, riverCard, pondCard, corridorCard, shelterCard, shadeCard, WF_CARDS, wfOverlay } from './wfui.js';
+import { penLines, SPEEDS, apparentTemp } from './wind.js';
+import { Pen } from './pen.js';
+import { isHutong, hutongSetup } from './hutong.js';
+import { htApp } from './hutui.js';
+import { isParking, parkingSetup } from './parking.js';
+import { pkApp } from './pkui.js';
+import { isEstate, estateSetup } from './estate.js';
+import { esApp } from './esui.js';
+import { isCampus, campusSetup } from './campus.js';
+import { cpApp } from './cpui.js';
+import { isBus, busSetup } from './busstop.js';
+import { bsApp } from './bsui.js';
+import { isVillage, villageSetup } from './village.js';
+import { vgApp } from './vgui.js';
+import { isDesert, desertSetup } from './desert.js';
+import { dsApp } from './dsui.js';
+import { isMarket, marketSetup } from './market.js';
+import { nmApp } from './nmui.js';
 
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
@@ -42,15 +62,19 @@ function hashCanvas(ctx, w, h) {
  * A view: one drawn state of a scene (block 1 has one; a retrofit block has
  * Before and After) with its world, model, display list, walkers and renderer.
  */
-function makeView(id, sc, world, thermal, canvas, glass = null) {
+function makeView(id, sc, world, thermal, canvas, glass = null, wf = null) {
   const display = drawWorld(world, sc.seed);
   const shadeCache = new Map();
   const view = { id, scene: sc, world, thermal, display };
   // glass block: reflection spots (2 m grid) join the shade classes (cbd.js glassShade)
   const gs = glass ? glassShade(world, () => view.thermal, glass.type) : null;
+  // waterfront block: per-pixel route weights from shade and the local wind (waterfront.js comfortShade)
+  const cs = wf ? comfortShade(world, () => view.thermal) : null;
   const shadeFor = gs
     ? gs.shadeFor
-    : (hq) => {
+    : cs
+      ? cs.shadeFor
+      : (hq) => {
       if (!shadeCache.has(hq)) shadeCache.set(hq, shadeClassField(world, view.thermal.sun(hq)));
       return shadeCache.get(hq);
     };
@@ -59,10 +83,21 @@ function makeView(id, sc, world, thermal, canvas, glass = null) {
   if (gs) {
     R.spotFor = gs.spotFor;
     R.glass = glass.type();
+    R.overlay = cbdOverlay;
   }
   /** Glass type changed: drop spot, shade and walker caches. */
   view.resetGlass = () => {
     if (gs) gs.reset();
+    life.plans.clear();
+  };
+  if (wf) {
+    // wind lines through the pen recorder (own pen, so the block's display list is unchanged)
+    R.wind = { lines: wf.lines, items: penLines(new Pen(sc.seed + 97), wf.lines) };
+    R.overlay = wfOverlay;
+  }
+  /** Wind preset changed: drop comfort-shade and walker caches. */
+  view.resetWind = () => {
+    if (cs) cs.reset();
     life.plans.clear();
   };
   return Object.assign(view, { shadeFor, spotFor: gs ? gs.spotFor : null, life, R });
@@ -91,6 +126,32 @@ export function boot(scene, root = document) {
   let glassSet = null;
   const glassQ = { type: GLASS_IDS.includes(q.get('glass')) ? q.get('glass') : GLASS_DEFAULT, ac: q.get('ac') === '1' };
   const glassNow = { type: glassQ.type }; // read by the view's spot field
+  // waterfront block (block 4): wind lines (?wind=0 hides them), speed preset ?u=, air overlay ?air=1
+  const wfMode = isWaterfront(scene);
+  let wfSet = null;
+  const wfQ = wfMode
+    ? { wind: q.get('wind') !== '0', air: q.get('air') === '1', u: SPEEDS.includes(Number(q.get('u'))) ? Number(q.get('u')) : scene.wind.default }
+    : null;
+  // hutong block (block 5): the evening splash, ?splash=0|1 (default on); its page parts are a block plugin (hutui.js htApp)
+  const htMode = isHutong(scene);
+  let htSet = null;
+  const htSplash0 = q.get('splash') !== '0';
+  // car park block (block 6): its page parts live in its own module (pkui.js pkApp: a block plugin, see blk below)
+  const pkMode = isParking(scene);
+  let pkSet = null;
+  // estate block (block 7): a block plugin too (esui.js esApp)
+  const esMode = isEstate(scene);
+  let esSet = null;
+  const cpMode = isCampus(scene); // block 8 plugin (cpui.js cpApp)
+  let cpSet = null;
+  const bsMode = isBus(scene); // block 9 plugin (bsui.js bsApp)
+  let bsSet = null;
+  const vgMode = isVillage(scene); // block 10 plugin (vgui.js vgApp)
+  let vgSet = null;
+  const dsMode = isDesert(scene); // block 11 plugin (dsui.js dsApp)
+  let dsSet = null;
+  const nmMode = isMarket(scene); // block 12 plugin (nmui.js nmApp)
+  let nmSet = null;
   if (!retro) {
     world = buildWorld(scene);
     t1 = performance.now();
@@ -102,9 +163,46 @@ export function boot(scene, root = document) {
       const tc = performance.now();
       thermal = glassSet.model(glassQ.type);
       glassSet.timing = { slotsMs: tb - ta, reflMs: tc - tb, runMs: performance.now() - tc };
+    } else if (wfMode) {
+      const ta = performance.now();
+      wfSet = waterfrontSetup(world, sunSlots(world));
+      const tb = performance.now();
+      thermal = wfSet.model(wfQ.u);
+      const tc = performance.now();
+      wfSet.lines();
+      wfSet.timing = { slotsMs: tb - ta, runMs: tc - tb, linesMs: performance.now() - tc };
+    } else if (htMode) {
+      const ta = performance.now();
+      htSet = hutongSetup(world, sunSlots(world));
+      const tb = performance.now();
+      htSet.base();
+      const tc = performance.now();
+      thermal = htSet.model(htSplash0);
+      htSet.timing = { slotsMs: tb - ta, runMs: tc - tb, splashMs: performance.now() - tc };
+    } else if (pkMode) {
+      pkSet = parkingSetup(world);
+      thermal = pkSet.model;
+    } else if (esMode) {
+      esSet = estateSetup(world);
+      thermal = esSet.model;
+    } else if (cpMode) {
+      cpSet = campusSetup(world);
+      thermal = cpSet.base;
+    } else if (bsMode) {
+      bsSet = busSetup(world);
+      thermal = bsSet.base;
+    } else if (vgMode) {
+      vgSet = villageSetup(world);
+      thermal = vgSet.base;
+    } else if (dsMode) {
+      dsSet = desertSetup(world);
+      thermal = dsSet.base;
+    } else if (nmMode) {
+      nmSet = marketSetup(world);
+      thermal = nmSet.base;
     } else thermal = runModel(world);
     t2 = performance.now();
-    V = { main: makeView('main', scene, world, thermal, canvas, glassMode ? { type: () => glassNow.type } : null) };
+    V = { main: makeView('main', scene, world, thermal, canvas, glassMode ? { type: () => glassNow.type } : null, wfMode ? { lines: wfSet.lines() } : null) };
   } else {
     // Before and After share buildings: the After world reuses the horizon
     // scan and building shade masks, and its model reuses every Before cell
@@ -149,7 +247,7 @@ export function boot(scene, root = document) {
     frame: 0,
     paused: false,
     cam: { ...scene.startCam },
-    hour: 15,
+    hour: scene.startHour ?? 15, // block 12 opens in the evening
     thermal: false,
     since: -1e9,
     notes: q.get('notes') !== '0',
@@ -162,6 +260,8 @@ export function boot(scene, root = document) {
     ...(retro ? retroQ : {}),
     // glass block only: glass type, AC overlay
     ...(glassMode ? { glass: glassQ.type, ac: glassQ.ac } : {}),
+    // waterfront only: wind lines, air overlay, wind speed preset
+    ...(wfMode ? wfQ : {}),
   };
   if (q.get('ui') === '0') root.body.classList.add('noui');
   if (q.has('hour')) S.hour = Math.round(clamp(parseFloat(q.get('hour')) || 0, 0, 23.75) / 0.25) * 0.25;
@@ -217,20 +317,55 @@ export function boot(scene, root = document) {
       plaza15: at('plaza', 15),
     };
   }
-  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : block1Notes();
+  // waterfront block: numbers for notes, cards and glossary (cached per wind preset)
+  const wfCache = new Map();
+  const wf = () => {
+    const key = S.u;
+    if (!wfCache.has(key)) {
+      const st = windStats(world);
+      wfCache.set(key, {
+        st,
+        hc: hcStats(world, thermal),
+        ac: asphaltContrast(world, thermal, 15),
+        water: waterStats(world, thermal),
+        overlay: overlayStats(world, wfSet.lines()),
+        shade: promenadeShade(world, thermal, 15),
+        profile: shelterProfile(world, P.sheltered[0], 145),
+      });
+    }
+    return wfCache.get(key);
+  };
+  function wfNoteData() {
+    const w = wf();
+    const ci = (k) => world.cellIndex(P[k][0], P[k][1]);
+    return {
+      river15: thermal.ts(ci('river'), 15),
+      air15: thermal.air(15),
+      air04: thermal.air(4),
+      pond04: thermal.ts(ci('pond'), 4),
+      reach: overlayReach(),
+      corridorFw: w.st.corridorMean,
+      corridorTs: thermal.ts(ci('corridor'), 15),
+      shelterFw: world.fw[ci('sheltered')],
+      shelterTs: thermal.ts(ci('sheltered'), 15),
+      shadeTmrt: w.shade.shadeTmrt,
+      sunTmrt: w.shade.sunTmrt,
+    };
+  }
+  let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode || pkMode || esMode || cpMode || bsMode || vgMode || dsMode || nmMode ? null : block1Notes();
   function block1Notes() {
   const notesText = {
-    asphalt: ['Kiln Street, old asphalt (albedo 0.12):', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
+    asphalt: ['Kiln Street, old dark asphalt:', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
     lawn: [`Park lawn: ${fmt(at('grass', 15))} °C at 3 pm;`, `${fmt(at('grass', 23))} °C at 11 pm, below the ${fmt(thermal.air(23))} °C air`],
-    shade: ['In the hot hours walkers keep', 'to the shady pavement'],
+    shade: ['3 pm · walkers take', 'the shady side'],
     roofs: [`White roof ${fmt(at('coolRoof', 15))} °C,`, `dark roof ${fmt(at('darkRoof', 15))} °C at 3 pm`],
     pond: [`The pond stays near ${fmt(at('water', 15))} °C`],
   };
   // glossary terms inside the canvas notes: [key, exact substring of a line]
   const notesTerms = {
-    asphalt: [['albedo', 'albedo 0.12'], ['nightLag', `still ${fmt(at('asphalt', 23))} °C at 11 pm`]],
+    asphalt: [['albedo', 'old dark asphalt'], ['nightLag', `still ${fmt(at('asphalt', 23))} °C at 11 pm`]],
     lawn: [['surfaceTemp', `${fmt(at('grass', 15))} °C at 3 pm`], ['nightLag', `${fmt(at('grass', 23))} °C at 11 pm`]],
-    shade: [['tmrt', 'shady pavement']],
+    shade: [['tmrt', 'the shady side']],
     roofs: [['coolRoof', 'White roof']],
     pond: [],
   };
@@ -242,8 +377,9 @@ export function boot(scene, root = document) {
     return S.thermal ? k : 1 - k;
   };
   // glass block: its tall façades make a day tile slower to bake (about 7 ms),
-  // so a slider drag bakes one tile per frame instead of two
-  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people, scrub: S.scrub, ac: !!S.ac, budget: glassMode ? 1 : undefined });
+  // so a slider drag bakes one tile per frame instead of two; the hutong block
+  // likewise (hundreds of small tiled roofs and crowns per tile)
+  const look = (f) => ({ hour: S.hour, thermalMix: thermalMix(f), notes: S.notes ? notes : null, intro: S.intro, people: S.people, scrub: S.scrub, ac: !!S.ac, budget: glassMode || htMode ? 1 : undefined, ...(wfMode ? { wind: S.wind, air: S.air, u: S.u } : {}), ...(blk ? blk.look() : {}) });
 
   // ---- sizing ------------------------------------------------------------------------------
   const resize = () => {
@@ -271,8 +407,30 @@ export function boot(scene, root = document) {
     return [{ v: l, clip: [0, sx] }, { v: r, clip: [sx, canvas.width] }];
   };
   let notesR = R; // renderer whose note hit boxes are live
+  // the page panels a bottom overlay label moves beside (render.js labelX), in canvas pixels
+  const avoidRects = (sel = '.blockpanel, #cartouche, #legend') => {
+    const c = canvas.getBoundingClientRect();
+    const k = canvas.width / (c.width || 1);
+    const out = [];
+    for (const el of root.querySelectorAll(sel)) {
+      const r = el.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) out.push([(r.left - c.left) * k, (r.top - c.top) * k, (r.right - c.left) * k, (r.bottom - c.top) * k]);
+    }
+    return out;
+  };
+  // a panel folded or opened moves the labels: draw again
+  root.addEventListener('toggle', () => {
+    dirty = true;
+  }, true);
   const draw = () => {
     const tDraw = performance.now();
+    const avoid = avoidRects();
+    // margin notes also keep out from under the bottom bar (outside evaluation of #33)
+    const avoidNotes = avoidRects('.blockpanel, #cartouche, #legend, #bar');
+    for (const v of Object.values(V)) {
+      v.R.avoid = avoid;
+      v.R.avoidNotes = avoidNotes;
+    }
     if (!retro) lastStats = R.frame(S.frame, S.cam, look(S.frame));
     else {
       const lk = look(S.frame);
@@ -305,6 +463,9 @@ export function boot(scene, root = document) {
       lastStats.frameMs = performance.now() - tDraw;
     }
     dirty = false;
+    // the loading hint (#29 item 3) while the pen draws and the washes come in: a DOM element, never the canvas
+    const ink = S.intro && S.frame < INTRO.wash;
+    if (inkHint.hidden === ink) inkHint.hidden = !ink;
     // a released scrub ends once the frame is exact again
     if (S.scrub && S.released && !lastStats.preview) {
       S.scrub = false;
@@ -319,11 +480,46 @@ export function boot(scene, root = document) {
   const hourLabel = $('hourLabel');
   const legend = $('legend');
   const card = $('card');
+  const heatBtn = $('heatBtn');
+  // opening a card's expert part makes it taller: keep the whole card on screen
+  card.addEventListener('toggle', () => {
+    const top = parseFloat(card.style.top) || 0;
+    card.style.top = `${Math.max(10, Math.min(top, window.innerHeight - card.offsetHeight - 10))}px`;
+  }, true);
+  // a tap opens the card on pointerup; the click the browser sends next lands on the new card
+  // (on a phone, often on its "For experts" fold): swallow that one click, at the tap's own spot, so the fold stays closed
+  card.addEventListener('click', (e) => {
+    const g = card._shownAt;
+    if (g && performance.now() - g.t < 400 && Math.abs(e.clientX - g.x) < 12 && Math.abs(e.clientY - g.y) < 12) {
+      card._shownAt = null;
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, true);
+  const inkHint = $('inkHint');
+  // the bar's buttons (#29: every key has a visible button): T, H and h, as the keys
+  $('bar').addEventListener('click', (e) => {
+    const b = e.target.closest ? e.target.closest('button[data-k]') : null;
+    if (b) window.dispatchEvent(new KeyboardEvent('keydown', { key: b.dataset.k }));
+  });
+  // block panels fold (#29); on a narrow screen they start folded
+  const foldPanels = () => {
+    for (const p of root.querySelectorAll('.blockpanel')) {
+      if (p.querySelector(':scope > details:not(.cards)')) continue;
+      const d = root.createElement('details');
+      d.open = window.innerWidth > 700;
+      d.innerHTML = `<summary class="hand">${p.getAttribute('aria-label') ?? 'Controls'}</summary>`;
+      while (p.firstChild) d.appendChild(p.firstChild);
+      p.appendChild(d);
+    }
+    if (window.innerWidth <= 700) for (const d of root.querySelectorAll('.blockpanel > details')) d.open = false;
+  };
   const syncUi = () => {
     slider.value = String(S.hour);
     hourLabel.textContent = `${hhmm(S.hour)}  ·  air ${fmt(thermal.air(S.hour))} °C`;
     legend.style.opacity = S.thermal ? '1' : '0';
     root.body.classList.toggle('thermal', S.thermal);
+    heatBtn.setAttribute('aria-pressed', String(!!S.thermal));
   };
   // legend gradient from the palette
   const lo = PALETTE_STOPS[0][0];
@@ -333,7 +529,7 @@ export function boot(scene, root = document) {
     return `rgb(${c.map(Math.round).join(',')}) ${(((t - lo) / (hi - lo)) * 100).toFixed(1)}%`;
   }).join(', ')})`;
   $('legendLo').textContent = `${lo} °C`;
-  $('legendHi').textContent = `${hi} °C`;
+  $('legendHi').textContent = `≥ ${hi} °C`;
 
   const setHour = (h, scrub = false) => {
     S.hour = ((Math.round(h / 0.25) * 0.25) % 24 + 24) % 24;
@@ -365,11 +561,11 @@ export function boot(scene, root = document) {
     const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
     root.body.insertAdjacentHTML(
       'beforeend',
-      `<div id="retro" aria-label="Retrofit controls">
-        <div class="seg" role="group" aria-label="Show Before, After or both">${btn('data-state', 'before', 'Before')}${btn('data-state', 'split', 'Split')}${btn('data-state', 'after', 'After')}</div>
+      `<div id="retro" class="blockpanel" aria-label="Retrofit controls">
+        <div class="seg" role="group" aria-label="Show Before, After or both">${btn('data-state', 'before', 'Before')}${btn('data-state', 'split', 'Split')}${btn('data-state', 'after', 'After')}${btn('data-swap', '1', 'swap (B)')}</div>
         <div class="row"><label for="rain">${gl('daysSinceRain', 'days since rain')}</label><input id="rain" type="range" min="0" max="${D_MAX}" step="1" aria-label="days since rain"><span id="rainLabel" class="hand"></span></div>
         <div class="seg" role="group" aria-label="Materials aged or new"><span>${gl('albedoAgeing', 'materials')}:</span>${btn('data-aged', '1', 'aged')}${btn('data-aged', '0', 'new')}</div>
-        <div class="measures"><div class="hand">Retrofit measures</div>${MEASURES.map((m) => btn('data-measure', m.id, m.name)).join('')}${btn('data-measure', 'tradeoff', 'Trade-off: reflective pavement', 'class="warn"')}${btn('data-measure', 'sponge', 'Sponge city (海绵城市)')}</div>
+        <details class="cards"><summary class="hand">What each measure does (${MEASURES.length + 2} cards)</summary><div class="measures">${MEASURES.map((m) => btn('data-measure', m.id, m.name)).join('')}${btn('data-measure', 'tradeoff', 'Trade-off: reflective pavement', 'class="warn"')}${btn('data-measure', 'sponge', 'Sponge city (海绵城市, China\'s rain plan)')}</div></details>
       </div>`,
     );
     const el = root.getElementById('retro');
@@ -377,7 +573,10 @@ export function boot(scene, root = document) {
       const b = e.target.closest ? e.target.closest('button') : null;
       if (!b) return;
       if (b.dataset.state) setState(b.dataset.state);
-      else if (b.dataset.aged) setAged(b.dataset.aged === '1');
+      else if (b.dataset.swap) {
+        swapStates();
+        redraw();
+      } else if (b.dataset.aged) setAged(b.dataset.aged === '1');
       else if (b.dataset.measure) showMeasure(b.dataset.measure, b);
     });
     const rain = root.getElementById('rain');
@@ -389,7 +588,7 @@ export function boot(scene, root = document) {
     for (const b of retroUi.el.querySelectorAll('[data-state]')) b.setAttribute('aria-pressed', String(b.dataset.state === S.state));
     for (const b of retroUi.el.querySelectorAll('[data-aged]')) b.setAttribute('aria-pressed', String((b.dataset.aged === '1') === S.aged));
     retroUi.rain.value = String(S.d);
-    retroUi.label.textContent = S.d === 0 ? 'd = 0 · best case: clear day after overnight rain' : `d = ${S.d}`;
+    retroUi.label.textContent = S.d === 0 ? 'the day after overnight rain (best case)' : `${S.d} day${S.d === 1 ? '' : 's'} after rain`;
     root.body.dataset.state = S.state;
   }
   const redraw = () => {
@@ -465,7 +664,13 @@ export function boot(scene, root = document) {
     card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
   }
   function reopenCard() {
-    if (card._measure && card._measure.startsWith('cbd:')) {
+    if (card._measure && card._measure.startsWith('blk:')) {
+      card.innerHTML = blk.html(card._measure.slice(4));
+      card.querySelector('.x').onclick = hideCard;
+    } else if (card._measure && card._measure.startsWith('wf:')) {
+      card.innerHTML = wfCardHtml(card._measure.slice(3));
+      card.querySelector('.x').onclick = hideCard;
+    } else if (card._measure && card._measure.startsWith('cbd:')) {
       card.innerHTML = cbdCardHtml(card._measure.slice(4));
       card.querySelector('.x').onclick = hideCard;
     } else if (card._measure) {
@@ -480,8 +685,8 @@ export function boot(scene, root = document) {
     const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
     root.body.insertAdjacentHTML(
       'beforeend',
-      `<div id="glass" aria-label="Glass controls">
-        <div class="seg" role="group" aria-label="Glass type"><span>${gl('curtainWall', 'glass')}:</span>${GLASS_IDS.map((id) => btn('data-glass', id, { clear: 'clear', lowe: 'low-e', mirror: 'mirror' }[id])).join('')}</div>
+      `<div id="glass" class="blockpanel" aria-label="Glass controls">
+        <div class="seg" role="group" aria-label="Glass type"><span>${gl('curtainWall', 'glass')}:</span>${GLASS_IDS.map((id) => btn('data-glass', id, { clear: 'clear', lowe: 'coated', mirror: 'mirror' }[id])).join('')}</div>
         <div class="seg">${btn('data-ac', '1', 'AC heat overlay', 'aria-pressed="false"')}</div>
         <div class="measures"><div class="hand">Cards</div>${CBD_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'extreme' || id === 'spot' ? 'class="warn"' : '')).join('')}</div>
       </div>`,
@@ -545,6 +750,98 @@ export function boot(scene, root = document) {
     card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
   }
 
+  // ---- wind controls (block 4): wind lines, speed preset, air overlay, cards ------------
+  const wfUi = wfMode ? buildWfUi() : null;
+  function buildWfUi() {
+    const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
+    root.body.insertAdjacentHTML(
+      'beforeend',
+      `<div id="wind" class="blockpanel" aria-label="Wind controls">
+        <div class="seg" role="group" aria-label="Wind speed"><span>${gl('windFactor', 'wind')}:</span>${btn('data-u', '1', 'calm 1 m/s')}${btn('data-u', '3', 'breezy 3 m/s')}</div>
+        <div class="seg">${btn('data-lines', '1', 'wind lines', 'title="keyboard shortcut: W"')}${btn('data-air', '1', 'air overlay', 'title="keyboard shortcut: A"')}</div>
+        <div class="measures"><div class="hand">Cards</div>${WF_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'shelter' ? 'class="warn"' : '')).join('')}</div>
+      </div>`,
+    );
+    const el = root.getElementById('wind');
+    el.addEventListener('click', (e) => {
+      const b = e.target.closest ? e.target.closest('button') : null;
+      if (!b) return;
+      if (b.dataset.u) setU(Number(b.dataset.u));
+      else if (b.dataset.lines) setWindLines(!S.wind);
+      else if (b.dataset.air) setAir(!S.air);
+      else if (b.dataset.card) showWfCard(b.dataset.card, b);
+    });
+    return { el };
+  }
+  function syncWf() {
+    if (!wfUi) return;
+    for (const b of wfUi.el.querySelectorAll('[data-u]')) b.setAttribute('aria-pressed', String(Number(b.dataset.u) === S.u));
+    wfUi.el.querySelector('[data-lines]').setAttribute('aria-pressed', String(!!S.wind));
+    wfUi.el.querySelector('[data-air]').setAttribute('aria-pressed', String(!!S.air));
+    root.body.dataset.u = String(S.u);
+  }
+  function setU(u) {
+    if (!SPEEDS.includes(u) || u === S.u) return;
+    S.u = u;
+    thermal = wfSet.model(u);
+    main.thermal = thermal;
+    main.resetWind();
+    R.setThermal(thermal);
+    notes = wfNotes(scene, wfNoteData());
+    syncWf();
+    if (card.dataset.open === '1') reopenCard();
+    if (S.paused) draw();
+  }
+  function setWindLines(on) {
+    S.wind = !!on;
+    syncWf();
+    if (S.paused) draw();
+  }
+  function setAir(on) {
+    S.air = !!on;
+    syncWf();
+    if (S.paused) draw();
+  }
+  function wfCardHtml(id) {
+    const w = wf();
+    if (id === 'river') return riverCard({ water: w.water, overlay: w.overlay, u: S.u });
+    if (id === 'pond') return pondCard({ water: w.water, lawn04: thermal.ts(world.cellIndex(P.lawn[0], P.lawn[1]), 4) });
+    if (id === 'corridor') return corridorCard({ st: w.st, ac: w.ac, hc: w.hc, u: S.u });
+    if (id === 'shelter') return shelterCard({ st: w.st, ac: w.ac, u: S.u, profile: w.profile });
+    return shadeCard({ ...w.shade, waterAir: w.overlay.at0 });
+  }
+  function showWfCard(id, anchor) {
+    card.innerHTML = wfCardHtml(id);
+    card.querySelector('.x').onclick = hideCard;
+    card._pick = null;
+    card._measure = `wf:${id}`;
+    card.dataset.open = '1';
+    card.dataset.kind = id;
+    card.style.display = 'block';
+    const r = anchor ? anchor.getBoundingClientRect() : { top: 120 };
+    const panel = wfUi.el.getBoundingClientRect();
+    card.style.left = `${Math.min(window.innerWidth - card.offsetWidth - 10, panel.right + 12)}px`;
+    card.style.top = `${Math.max(10, Math.min(window.innerHeight - card.offsetHeight - 10, r.top - 20))}px`;
+  }
+
+  // ---- a block plugin (blocks 5 and 6): its controls, cards, notes, heat-card rows, glossary numbers
+  // and API live in its own module; app.js only calls these hooks
+  const env = {
+    scene, world, thermal, root, card, R, S, main, query: q, setup: htSet ?? pkSet ?? esSet ?? cpSet ?? bsSet ?? vgSet ?? dsSet ?? nmSet,
+    hideCard: () => hideCard(),
+    reopen: () => card.dataset.open === '1' && reopenCard(),
+    redraw: () => S.paused && draw(),
+    /** A new model for the main view (block 5 splash on / off). */
+    setModel(T) {
+      thermal = T;
+      main.thermal = T;
+      R.setThermal(T);
+    },
+    setNotes: (n) => (notes = n),
+  };
+  const blk = pkMode ? pkApp(env) : htMode ? htApp(env, htSplash0) : esMode ? esApp(env) : cpMode ? cpApp(env) : bsMode ? bsApp(env) : vgMode ? vgApp(env) : dsMode ? dsApp(env) : nmMode ? nmApp(env) : null;
+  if (blk) notes = blk.notes();
+
   const toggleThermal = () => {
     const m = thermalMix(S.frame);
     S.thermal = !S.thermal;
@@ -558,6 +855,11 @@ export function boot(scene, root = document) {
     if (k === 't' || k === 'T') toggleThermal();
     else if (retro && (k === 'b' || k === 'B')) swapStates();
     else if (glassMode && (k === 'g' || k === 'G')) setGlass(GLASS_IDS[(GLASS_IDS.indexOf(S.glass) + (k === 'g' ? 1 : GLASS_IDS.length - 1)) % GLASS_IDS.length]);
+    else if (wfMode && (k === 'w' || k === 'W')) setWindLines(!S.wind);
+    else if (wfMode && (k === 'a' || k === 'A')) setAir(!S.air);
+    else if (blk && blk.key(k)) {
+      // handled by the block plugin
+    }
     else if (k === 'h') setHour(S.hour + 1);
     else if (k === 'H') setHour(S.hour - 1);
     else if (k === 'n' || k === 'N') S.notes = !S.notes;
@@ -594,17 +896,19 @@ export function boot(scene, root = document) {
 
   // drag to pan, click to pick
   let drag = null;
-  /** True if a CSS-px x is on the split divider (handle or line). */
-  const onDivider = (x) => retro && S.state === 'split' && Math.abs(x * R.dpr - Math.round(S.split * canvas.width)) <= 12 * R.dpr;
+  /** True if a CSS-px point is on the split divider's round handle (#29 item 8: anywhere else a drag pans the map). */
+  const onDivider = (x, y) => retro && S.state === 'split' && Math.hypot(x * R.dpr - Math.round(S.split * canvas.width), y * R.dpr - canvas.height * 0.5) <= 20 * R.dpr;
   canvas.addEventListener('pointerdown', (e) => {
-    drag = { x: e.clientX, y: e.clientY, cam: { ...S.cam }, moved: false, divider: onDivider(e.clientX) };
+    // any press on the map closes an open footnote (hover or pinned), unless it lands on a margin note
+    if (!fn.hidden && !noteHit(e.clientX, e.clientY)) hideFn();
+    drag = { x: e.clientX, y: e.clientY, cam: { ...S.cam }, moved: false, divider: onDivider(e.clientX, e.clientY) };
     canvas.setPointerCapture(e.pointerId);
   });
   const noteHit = (x, y) => (notesR.noteHits ?? []).find((h) => x >= h.x && x <= h.x + h.w && y >= h.y - h.h && y <= h.y + 3);
   canvas.addEventListener('pointermove', (e) => {
     if (!drag) {
       const h = noteHit(e.clientX, e.clientY);
-      canvas.style.cursor = h ? 'help' : onDivider(e.clientX) ? 'ew-resize' : '';
+      canvas.style.cursor = h ? 'help' : onDivider(e.clientX, e.clientY) ? 'ew-resize' : '';
       if (h && fn.hidden) showFn(h.key, { left: h.x, right: h.x + h.w, top: h.y - h.h, bottom: h.y + 3 }, false);
       else if (!h && !fn.hidden && !fnPinned) hideFn();
       return;
@@ -633,8 +937,10 @@ export function boot(scene, root = document) {
       }
       if (!fn.hidden) hideFn();
       const p = pick(e.clientX, e.clientY);
-      if (p) showCard(p, e.clientX, e.clientY);
-      else hideCard();
+      if (p) {
+        showCard(p, e.clientX, e.clientY);
+        card._shownAt = { t: performance.now(), x: e.clientX, y: e.clientY };
+      } else hideCard();
     }
   });
 
@@ -694,8 +1000,9 @@ export function boot(scene, root = document) {
       cells = [];
       for (let i = 0; i < world.bld.length; i++) if (world.bld[i] === p.B.index) cells.push(i);
     } else if (p.kind === 'tree') {
-      title = p.T.young ? 'Young street tree' : 'Tree';
-      mat = p.T.young ? 'youngCanopy' : 'canopy';
+      // block 5 trees carry a species (their own material)
+      title = p.T.species ? mats[p.T.species].name : p.T.young ? 'Young street tree' : 'Tree';
+      mat = p.T.species ?? (p.T.young ? 'youngCanopy' : 'canopy');
       cells = [world.cellIndex(p.T.x, p.T.y)];
       tmrtCell = cells[0];
     } else {
@@ -707,7 +1014,7 @@ export function boot(scene, root = document) {
     const m = mats[mat];
     const mean = (hh, T = thermal) => cells.reduce((s, i) => s + T.ts(i, hh), 0) / cells.length;
     const svf = cells.reduce((s, i) => s + world.svf[i], 0) / cells.length;
-    const leaf = mat === 'canopy' || mat === 'youngCanopy';
+    const leaf = mat === 'canopy' || mat === 'youngCanopy' || !!m.tree;
     const ts = leaf ? (hh) => thermal.canopyTemp(hh) : mean;
     // retrofit: the same cells in the other state, if anything there differs
     let compare = null;
@@ -738,14 +1045,29 @@ export function boot(scene, root = document) {
       });
       glassInfo = { id: S.glass, name: g.name, rho0: g.rho0, absorb: g.absorb, eps: g.eps, faces };
     }
+    // waterfront: wind factor, local wind and h_c of the cell (roofs: f_w = 1)
+    const windInfo = wfMode && cells.length
+      ? (() => {
+        const c = tmrtCell ?? cells[0];
+        const fw = world.fw[c];
+        const at = tmrtCell !== null ? apparentTemp(thermal.air(h), scene.site.vapourHpa, thermal.info.wind * fw, thermal.tmrt(tmrtCell, h)) : null;
+        return { fw, u: thermal.info.wind * fw, hc: thermal.hcAt(c), site: thermal.info.wind, at };
+      })()
+      : null;
+    // a block plugin's own heat-card numbers (block 5: water on a splashed cell; block 6: G and the car share)
+    const blkInfo = blk && cells.length ? blk.cardInfo(cells, tmrtCell, h, leaf, thermal) : null;
     return {
       title,
       state: view.id,
       compare,
+      wind: windInfo,
+      water: null,
+      flux: null,
+      ...(blk ? { [blk.cardKey]: blkInfo } : {}),
       glass: glassInfo,
       wallsNow: sw ? sw.walls : null,
       glassNow: sw ? sw.glass : null,
-      matId: resolveId(mat, S.aged),
+      matId: retro ? resolveId(mat, S.aged) : mat,
       material: m.name,
       params: Object.fromEntries(paramKeys(m).map((k) => [k, m[k]])),
       caveat: m.caveat ?? null,
@@ -756,15 +1078,22 @@ export function boot(scene, root = document) {
       ts23: ts(23),
       groundNow: leaf ? mean(h) : null,
       tmrtNow: tmrtCell !== null ? thermal.tmrt(tmrtCell, h) : null,
+      // the share of the 5 m square in the sun now (a person's radiant heat takes the square's mean)
+      sunNow: tmrtCell !== null ? thermal.sunlit(tmrtCell, h) : null,
+      // the same square with no direct sun on the person: the "fully in the shade" figure of a partly sunlit tree square
+      tmrtShadeNow: tmrtCell !== null ? thermal.tmrt(tmrtCell, h, 0) : null,
       tmrt15: tmrtCell !== null ? thermal.tmrt(tmrtCell, 15) : null,
       air: thermal.air(h),
       note: m.note,
+      leaf,
       hour: h,
       dryEf: m.dry ? m.dry.ef.value : null,
       dryMu: m.dry ? m.dry.mu.value : null,
     };
   }
 
+  /** A source key with its text, the key linking to this block's group on the references page (#29 item 5). */
+  const refLink = (k) => `<a class="ref" href="../../references.html">[${k}]</a> ${SOURCES[k]}`;
   function showCard(p, x, y) {
     if (!p) return;
     const d = cardData(p);
@@ -785,16 +1114,44 @@ export function boot(scene, root = document) {
       P.muWet ? `<tr><td>admittance wet / dry</td><td>${P.muWet.value} / ${d.dryMu}${tag(P.muWet)}</td></tr>` : '',
       P.tau ? `<tr><td>drying time τ</td><td>${P.tau.value} d${tag(P.tau)}</td></tr>` : '',
       P.storage ? `<tr><td>water held after rain</td><td>${P.storage.value} mm${tag(P.storage)}</td></tr>` : '',
+      P.tr ? `<tr><td>sun let through the crown</td><td>${P.tr.value}${tag(P.tr)}</td></tr>` : '',
     ].join('');
     const cmp = d.compare
       ? `<tr class="t"><td>15:00 Before → After</td><td>${fmt(d.compare.before)} → ${fmt(d.compare.after)} °C</td></tr>
         ${d.compare.tmrtBefore !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} 15:00 Before → After</td><td>${fmt(d.compare.tmrtBefore)} → ${fmt(d.compare.tmrtAfter)} °C</td></tr>` : ''}
         <tr><td colspan="2" class="sub">Before: ${d.compare.beforeMat}; After: ${d.compare.afterMat}</td></tr>`
       : '';
+    const feel = d.tmrtNow !== null ? `; the ${gl('tmrt', 'radiant heat')} on someone standing here is ${fmt(d.tmrtNow)} °C` : '';
+    // a square only partly in shade: say so, since the number mixes sun and shade (outside evaluation of #33)
+    const partial = d.tmrtNow !== null && d.sunNow > 0.1 && d.sunNow < 0.9 ? `<p class="sub">This 5 m square is about ${Math.round(d.sunNow * 10) * 10}% in the sun now, so the radiant heat here mixes sun and shade: standing fully in the shade here, it is about ${fmt(d.tmrtShadeNow)} °C.</p>` : '';
+    // a tree square partly or fully in the sun now: the shade sentence agrees with the sunlit share (urbanist re-check of #33)
+    const SHADE_CLAUSE = '; the ground beneath sits in their shade.';
+    const treeSun = d.leaf && d.sunNow !== null && d.sunNow > 0.1 && d.note && d.note.endsWith(SHADE_CLAUSE);
+    const note = !treeSun
+      ? d.note
+      : d.note.slice(0, -SHADE_CLAUSE.length) +
+        (d.sunNow < 0.9
+          ? '; only part of this square is in their shade now (see the sunlit share above).'
+          : '; at this hour the sun gets in under the crown, so this square is not in their shade now.');
+    const groundRow = treeSun ? 'ground in this square now (sun and shade)' : 'ground beneath now';
     card.innerHTML = `
       <button class="x" aria-label="close">×</button>
       <h3>${d.title}</h3>
+      <p class="lead">At ${hhmm(d.hour)} the ${d.groundNow !== null ? 'top' : 'surface'} here is ${fmt(d.tsNow)} °C${feel}, with the air at ${fmt(d.air)} °C.</p>
+      ${partial}
       <div class="mat">${d.matId === 'coolroof' || d.matId === 'coolroofAged' || d.matId === 'coolroofNew' ? gl('coolRoof', d.material) : d.material}${retro ? ` · ${d.state === 'after' ? 'After' : 'Before'}` : ''}</div>
+      <table>
+        <tr class="t"><td>${gl('surfaceTemp', 'surface')} now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
+        <tr class="t"><td>surface at 3 pm / ${gl('nightLag', '11 pm')}</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
+        ${d.groundNow !== null ? `<tr><td>${groundRow}</td><td>${fmt(d.groundNow)} °C</td></tr>` : ''}
+        ${d.tmrtNow !== null ? `<tr><td>${gl('tmrt', 'radiant heat')} on you standing here, now / 3 pm</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
+        <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
+        ${blk && d[blk.cardKey] ? blk.cardRows(d[blk.cardKey]) : ''}
+        ${d.wind && d.wind.at !== null ? `<tr><td>${gl('apparentTemp', 'feels like, with the wind')} now</td><td>${fmt(d.wind.at)} °C</td></tr>` : ''}
+        ${cmp}
+      </table>
+      <p class="note">${note}</p>
+      <details class="expert"><summary>For experts</summary>
       <table>
         <tr><td>${gl('albedo', 'albedo α')}</td><td>${P.alpha.value}${tag(P.alpha)}</td></tr>
         <tr><td>${gl('emissivity', 'emissivity ε')}</td><td>${P.eps.value}${tag(P.eps)}</td></tr>
@@ -802,14 +1159,11 @@ export function boot(scene, root = document) {
         <tr><td>${gl('ef', 'evaporative fraction')}</td><td>${efCell}</td></tr>
         ${wet}
         <tr><td>${gl('svf', 'sky view factor')}</td><td>${d.svf.toFixed(2)}</td></tr>
-        <tr class="t"><td>${gl('surfaceTemp', 'surface')} now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
-        <tr class="t"><td>surface 15:00 / ${gl('nightLag', '23:00')}</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
-        ${d.groundNow !== null ? `<tr><td>ground beneath now</td><td>${fmt(d.groundNow)} °C</td></tr>` : ''}
-        ${d.tmrtNow !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} (person) now / 15:00</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
+        ${d.tmrtNow !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} now / 15:00</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
         ${d.wallsNow !== null ? `<tr><td>sun off the ${gl('wallReflection', 'walls')} now</td><td>${Math.round(d.wallsNow)} W m⁻²</td></tr>` : ''}
         ${d.glassNow !== null && glassMode ? `<tr><td>sun off the ${gl('specular', 'glass')} now</td><td>${Math.round(d.glassNow)} W m⁻²</td></tr>` : ''}
-        <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
-        ${cmp}
+        ${d.wind ? `<tr><td>${gl('windFactor', 'wind factor f_w')}</td><td>${d.wind.fw.toFixed(2)} · ${fmt(d.wind.u)} of ${d.wind.site} m/s</td></tr>
+        <tr><td>convection h_c</td><td>${fmt(d.wind.hc)} W m⁻² K⁻¹</td></tr>` : ''}
       </table>
       ${d.glass ? `<table>
         <tr><td colspan="2" class="sub">${gl('curtainWall', 'Curtain wall')}: ${d.glass.name}</td></tr>
@@ -817,10 +1171,10 @@ export function boot(scene, root = document) {
         ${d.glass.faces.map((f) => `<tr><td>${f.face} face now</td><td>${f.rho !== null ? `${gl('fresnel', `ρ ${f.rho.toFixed(2)}`)} at θ ${Math.round(f.theta)}°` : 'not in sun'} · glass ${fmt(f.tg)} °C</td></tr>`).join('')}
         <tr><td>glass ${gl('emissivity', 'ε')} / absorptance</td><td>${d.glass.eps.value}${tag(d.glass.eps)} / ${d.glass.absorb.value}${tag(d.glass.absorb)}</td></tr>
       </table>` : ''}
-      <p class="note">${d.note}</p>
       ${d.caveat ? `<p class="caveat">${d.caveat}</p>` : ''}
       ${d.prescribed ? `<p class="caveat">${d.prescribed}</p>` : ''}
-      <p class="src">Sources: ${srcs.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: ${gl('forceRestore', 'force-restore')} (Deardorff 1978), simulated. Basis tags and the model-vs-literature table: docs/sources.md.</p>`;
+      <p class="src">Sources: ${srcs.map(refLink).join('; ')}. Made-up block, calculated temperatures: a ${gl('forceRestore', 'force-restore')} surface model (Deardorff 1978) on a 5 m grid; the air temperature is fixed.</p></details>`;
+    for (const a of card.querySelectorAll('a.ref')) a.setAttribute('href', `${a.getAttribute('href')}#${scene.id}`); // this block's group on the references page
     card.querySelector('.x').onclick = hideCard;
     card._pick = p;
     card._measure = null;
@@ -848,7 +1202,15 @@ export function boot(scene, root = document) {
   const terms = $('terms');
   const termsBtn = $('termsBtn');
   // retrofit: footnote numbers come from the Before state (the old block)
-  const gstats = retro ? glossaryStats(V.before.world, V.before.thermal) : glassMode ? glossaryStats(world, thermal, { canyon: canyonStats(world, thermal, CANYONS.lane, openRef('stone')), spot: spotTmrt(15) }) : glossaryStats(world, thermal);
+  const gstats = retro
+    ? glossaryStats(V.before.world, V.before.thermal)
+    : glassMode
+      ? glossaryStats(world, thermal, { canyon: canyonStats(world, thermal, CANYONS.lane, openRef('stone')), spot: spotTmrt(15) })
+      : wfMode
+        ? glossaryStats(world, thermal, { wind: { river: wf().st.river.mean, corridor: wf().st.corridorMean, shelter: wf().st.shelterMean, lee: wf().st.lee01.mean } })
+        : blk
+            ? glossaryStats(world, thermal, blk.glossary())
+            : glossaryStats(world, thermal);
   let fnPinned = false;
   let fnByFocus = false;
   let fnTrigger = null;
@@ -1008,6 +1370,9 @@ export function boot(scene, root = document) {
   syncUi();
   syncRetro();
   syncGlass();
+  syncWf();
+  if (blk) blk.sync();
+  foldPanels();
   draw();
   requestAnimationFrame(loop);
 
@@ -1016,6 +1381,8 @@ export function boot(scene, root = document) {
   const vw = (which) => (which ? V[which] : main);
   const api = {
     ready: true,
+    /** True while the loading hint is shown (#29 item 3). */
+    hint: () => !inkHint.hidden,
     info: {
       worldMs: t1 - t0,
       modelMs: t2 - t1,
@@ -1026,6 +1393,15 @@ export function boot(scene, root = document) {
       views: Object.keys(V),
       changedCells: retro ? V.after.thermal.info.changed : 0,
       ...(glassSet ? glassSet.timing : {}),
+      ...(wfSet ? wfSet.timing : {}),
+      ...(htSet ? htSet.timing : {}),
+      ...(pkSet ? pkSet.timing : {}),
+      ...(esSet ? esSet.timing : {}),
+      ...(cpSet ? cpSet.timing : {}),
+      ...(bsSet ? bsSet.timing : {}),
+      ...(vgSet ? vgSet.timing : {}),
+      ...(dsSet ? dsSet.timing : {}),
+      ...(nmSet ? nmSet.timing : {}),
     },
     /** Pure seek: render frame N with an optional camera {z,cx,cy}; pauses the clock. */
     seek(frame, cam) {
@@ -1084,9 +1460,9 @@ export function boot(scene, root = document) {
       const { life, shadeFor, R } = vw(which);
       const hq = quantHour(hour);
       return life.at(frame / 60, hq).map((a) => {
-        const h = R.heatAt(a.x, a.y, hq);
+        const h = a.heat ?? R.heatAt(a.x, a.y, hq);
         const st = R.sweatAt(a, frame / 60, hq);
-        return { x: a.x, y: a.y, tmrt: h.tmrt, sunlit: h.sunlit, shade: shadeAt(shadeFor(hq), a.x, a.y), s: st.s, drops: st.drops.length, fall: st.drops.length ? st.drops[0].fall : null, fan: st.fan, hidden: R.hidden(a.x, a.y) };
+        return { x: a.x, y: a.y, tmrt: h.tmrt, sunlit: h.sunlit, shade: a.heat ? +(h.sunlit < 0.5) : shadeAt(shadeFor(hq), a.x, a.y), s: st.s, drops: st.drops.length, fall: st.drops.length ? st.drops[0].fall : null, fan: st.fan, hidden: R.hidden(a.x, a.y) };
       });
     },
     shadeStats(frame = S.frame, hour = S.hour, which) {
@@ -1097,6 +1473,7 @@ export function boot(scene, root = document) {
     card: (kind, a, b, which) => {
       const view = vw(which);
       const w = view.world;
+      if (kind === 'tree') return cardData({ kind, T: w.trees[a], view }); // a: tree index
       return cardData(kind === 'building' ? { kind, B: w.buildings.find((B) => B.id === a), view } : { kind: 'ground', x: a, y: b, g: view.scene.ground[w.parcelAt(a, b)], view });
     },
     stats: () => ({ ...lastStats }),
@@ -1126,7 +1503,8 @@ export function boot(scene, root = document) {
             out.push({ kind: 'chimney', b: -1, box: [cx - 1.6, cy - 1.6, cx + 1.6, cy + 1.6, B.h, ch] });
           }
           for (const A of world.awnings) if (A.b === B.index) out.push({ kind: 'a', b: -1, box: [A.x0, A.y0, A.x1, A.y1, A.z0 - 0.3, A.z1] });
-        } else if (o.kind === 'c') out.push({ kind: 'c', b: -1, box: [o.x0, o.y0, o.x1, o.y1, 0, 1.6] });
+        } else if (o.kind === 'p') out.push({ kind: 'p', b: -1, box: [o.o.x0, o.o.y0, o.o.x1, o.o.y1, o.o.z - 0.1, o.o.z] });
+        else if (o.kind === 'c') out.push({ kind: 'c', b: -1, box: [o.x0, o.y0, o.x1, o.y1, 0, 1.6] });
         else if (o.kind === 's') out.push({ kind: 's', b: -1, box: [o.x0, o.y0, o.x1, o.y1, 0, 2.6] });
         else if (o.kind === 'n') out.push({ kind: 'n', b: -1, box: [o.x0, o.y0, o.x1, o.y1, 0, 1] });
       }
@@ -1190,6 +1568,49 @@ export function boot(scene, root = document) {
         reflAt: (x, y, h = S.hour) => thermal.refl(world.cellIndex(x, y), h),
       }
       : null,
+    /**
+     * Waterfront block (block 4) only: state {wind, air, u}; set() them; wind
+     * lines (hash, summary, vertices), wind factor at a point, model numbers,
+     * card HTML, walkers' wind.
+     */
+    wind: wfMode
+      ? {
+        state: () => ({ wind: !!S.wind, air: !!S.air, u: S.u }),
+        set(o) {
+          if (o.u !== undefined) setU(Number(o.u));
+          if (o.wind !== undefined) setWindLines(o.wind);
+          if (o.air !== undefined) setAir(o.air);
+        },
+        lines: () => lineStats(world, wfSet.lines()),
+        vertices: () => wfSet.lines().map((L) => Array.from(L.p)),
+        fw: (x, y) => world.fw[world.cellIndex(x, y)],
+        stats: () => {
+          const w = wf();
+          const ac = { ...w.ac, sheltered: { ...w.ac.sheltered, cells: undefined }, exposed: { ...w.ac.exposed, cells: undefined } };
+          return { st: w.st, hc: w.hc, ac, water: w.water, overlay: w.overlay, shade: w.shade };
+        },
+        html: (id) => wfCardHtml(id),
+        show: (id) => showWfCard(id, root.querySelector(`#wind [data-card="${id}"]`)),
+        walkers: (frame = S.frame, hour = S.hour) => {
+          const hq = quantHour(hour);
+          const sh = main.shadeFor(hq);
+          const P = main.life.plan(hq);
+          return { ...walkerWind(world, main.life.at(frame / 60, hq), sh), choice: P.choice.slice(), costs: P.costs.map((c) => c.slice()), routes: scene.routes.map((r) => r.id), atGap: sh.atGap ?? null };
+        },
+        models: () => wfSet.cached(),
+      }
+      : null,
+    /** Hutong block (block 5) only: its plugin's API (hutui.js htApp). */
+    hutong: htMode ? blk.api : null,
+    /** Car park block (block 6) only: its plugin's API (pkui.js pkApp). */
+    parking: pkMode ? blk.api : null,
+    /** Estate block (block 7) only: its plugin's API (esui.js esApp). */
+    estate: esMode ? blk.api : null,
+    campus: cpMode ? blk.api : null,
+    busstop: bsMode ? blk.api : null,
+    village: vgMode ? blk.api : null,
+    desert: dsMode ? blk.api : null,
+    market: nmMode ? blk.api : null,
     retro: retro
       ? {
         state: () => ({ state: S.state, split: S.split, swap: S.swap, d: S.d, aged: S.aged }),

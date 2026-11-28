@@ -10,14 +10,26 @@ import { irradiance } from '../engine/thermal.js';
 import { SCENE } from '../cities/asphalt-park/scene.js';
 import { base, targetRows, sensitivity, TIERS } from './regions.mjs';
 import { GLOSSARY, glossaryStats, rangeLine } from '../engine/glossary.js';
-import { base2, bandRows, water, sensitivity2, diagnostics } from './retrofit.mjs';
+import { base2, bandRows, water, sensitivity2, diagnostics, greenRoofCheck } from './retrofit.mjs';
 import { MEASURES, D_DEFAULT, D_MAX, decay } from '../engine/retrofit.js';
 import { cbdMarkdown, cbdGlossaryStats } from './cbd-docs.mjs';
+import { waterfrontMarkdown, wfGlossaryStats } from './waterfront-docs.mjs';
+import { hutongMarkdown } from './hutong-docs.mjs';
+import { htGlossaryStats } from './hutong.mjs';
+import { parkingMarkdown } from './parking-docs.mjs';
+import { pkGlossaryStats } from './parking.mjs';
+import { estateMarkdown } from './estate-docs.mjs';
+import { campusMarkdown } from './campus-docs.mjs';
+import { busstopMarkdown } from './busstop-docs.mjs';
+import { villageMarkdown } from './village-docs.mjs';
+import { desertMarkdown } from './desert-docs.mjs';
+import { nightmarketMarkdown } from './nightmarket-docs.mjs';
 
 const UNITS = { mu: ' J m⁻² s⁻½ K⁻¹', muWet: ' J m⁻² s⁻½ K⁻¹', thinC: ' J m⁻² K⁻¹', tau: ' d', storage: ' mm' };
 const cell = (p, k = '') =>
   `${p.value}${UNITS[k] ?? ''} [${p.source}] *${BASIS[p.basis]}*${p.verified ? '' : ', unverified'}${p.note ? ` (${p.note})` : ''}`;
 const f1 = (x) => (Math.round(x * 10) / 10).toFixed(1);
+const f2 = (x) => x.toFixed(2);
 const signed = (x, d = 1) => `${x < 0 ? '−' : '+'}${Math.abs(x).toFixed(d)}`;
 
 /** Largest value of the daytime wall term 6 K x K/900 on the design day. */
@@ -59,8 +71,15 @@ export function glossaryMarkdown(world, model) {
   const st = glossaryStats(world, model);
   // block-3-only terms computed from the model are quoted with block 3's numbers (as on that page)
   const st3 = cbdGlossaryStats();
+  // block-4-only terms likewise with block 4's numbers
+  const st4 = wfGlossaryStats();
+  // block-5-only terms likewise with block 5's numbers
+  const st5 = { ...st, ...htGlossaryStats() };
+  // block-6-only terms likewise with block 6's numbers
+  const st6 = { ...st, ...pkGlossaryStats() };
+  const statsFor = (g) => (g.model && g.scenes && g.scenes.includes('glass-cbd') ? st3 : g.model && g.scenes && g.scenes.includes('waterfront') ? st4 : g.model && g.scenes && g.scenes.includes('hutong') ? st5 : g.model && g.scenes && g.scenes.includes('parking') ? st6 : st);
   return Object.entries(GLOSSARY)
-    .map(([k, g]) => `- **${g.term}**${g.scenes ? ` (${g.scenes.join(', ')} only)` : ''}: ${rangeLine(k, g.model && g.scenes && g.scenes.includes('glass-cbd') ? st3 : st)} ${g.model ? '[this model]' : `[${g.src}]`}`)
+    .map(([k, g]) => `- **${g.term}**${g.scenes ? ` (${g.scenes.join(', ')} only)` : ''}: ${rangeLine(k, statsFor(g))} ${g.model ? '[this model]' : `[${g.src}]`}`)
     .join('\n');
 }
 
@@ -163,9 +182,29 @@ Tmrt is 65 °C or more — the sweat-cue threshold — is ${(D.walk.before.share
 ${(D.walk.afterNoTrees.share * 100).toFixed(1)}% for After **without the young street trees** (mean Tmrt ${f1(D.walk.before.mean)}, ${f1(D.walk.after.mean)} and ${f1(D.walk.afterNoTrees.mean)} °C).
 **The drop in sweating walkers After comes entirely from the young trees.** The roofs do not touch pedestrians, nobody
 walks on the coated road, and the sponge measures and reflective paving alone leave walkers as hot or slightly hotter
-(the lighter pavers add ${signed(D.paversNoonTmrt)} K Tmrt at noon). Shade is what cools people; the young-trees card says so.
+(the lighter pavers add ${signed(D.paversNoonTmrt)} K Tmrt at noon). Here, only the trees lower what walkers feel; the young-trees card says so.
 The trees' crown size (radius 2.6 m, centre 4.4 m) is an engine (scene) assumption, their transmission 0.47 the
 brief's mid value, and their kerb-side placement a design choice of this invented block.
+
+### The green roof against a white roof (outside evaluation #29, item 6)
+
+${(() => {
+  const G = greenRoofCheck();
+  const rows = G.cases.map((c) => `| ${c.label} | ${c.ts.map(f1).join(' | ')} |`).join('\n');
+  return `The evaluators saw the green roof hotter than the aged white roof at every wetness. That is what the cited inputs give, not a
+bug: the green roof (albedo ${MATERIALS.greenroof.alpha.value}) absorbs ${f2(1 - MATERIALS.greenroof.alpha.value)} of the sun against ${f2(1 - MATERIALS.coolroofAged.alpha.value)} for the aged white roof (${MATERIALS.coolroofAged.alpha.value}), and the
+${MATERIALS.greenroof.ef.value}–${MATERIALS.greenroof.efWet.value} of positive net radiation it spends on evaporation does not make up the gap. Roof surface at 15:00 (After, cells in full sun), °C;
+the aged white roof is ${f1(G.white)} °C and the dark membrane it replaces ${f1(G.dark)} °C:
+
+| Case (docs only; nothing shipped changes) | ${G.D.map((d) => `d = ${d}`).join(' | ')} |
+|---|${G.D.map(() => '---').join('|')}|
+${rows}
+
+Disclosures: the roof is **a single surface** (no plant canopy, no leaf temperature, no irrigation); the dry evaporative
+fraction ${MATERIALS.greenroof.ef.value} (Bowen ratio ${f1((1 - MATERIALS.greenroof.ef.value) / MATERIALS.greenroof.ef.value)}) sits at the dry edge of the Bowen ratios Heusinger & Weber measured (about < 1 to 2)
+[heusinger]. The card says it in plain words: cooler than the dark roof it replaces, warmer than a white roof by
+mid-afternoon, close to it only right after rain or if watered. No value was changed.`;
+})()}
 
 ### Water budget
 
@@ -205,8 +244,8 @@ unverified on the card. Rain, runoff and flooding are not modelled.
 - **Porous asphalt is hotter when dry.** It is darker (α 0.08) and lighter-weight than dense asphalt, so it only
   cools in the first day or two after rain (Li et al. 2013: dry porous asphalt about +5 K).
 - **Pavers are lighter, so they also reflect more sun onto people** at midday once dry; the pavers card shows ΔTmrt.
-- **Ageing:** a coating that starts at 0.26 is about 0.18 after a year (Ko et al. 2022); in-service cool roofs often sit
-  below their aged rating (LBNL-6714E). The page defaults to aged values.
+- **Ageing:** a coating that starts at 0.26 is about 0.18 after a year (Ko et al. 2022); in-service cool roofs generally sit
+  below their listed aged values (70 Chicago-area roofs, Rupar & Graham 2015, abstract only [rupar2015]). The page defaults to aged values.
 `;
 }
 
@@ -215,7 +254,7 @@ export function sourcesMarkdown() {
   const rows = Object.entries(MATERIALS).map(([id, m]) => {
     const ks = paramKeys(m);
     const heat = m.thinC ? `C ${cell(m.thinC, 'thinC')}` : m.mu ? `μ ${cell(m.mu, 'mu')}` : '—';
-    const wet = ['efWet', 'muWet', 'tau', 'storage'].filter((k) => m[k]).map((k) => `${{ efWet: 'EF wet', muWet: 'μ wet', tau: 'τ', storage: 'storage' }[k]} ${cell(m[k], k)}`);
+    const wet = ['efWet', 'muWet', 'tau', 'storage', 'tr'].filter((k) => m[k]).map((k) => `${{ efWet: 'EF wet', muWet: 'μ wet', tau: 'τ', storage: 'storage', tr: 'sun let through, tr' }[k]} ${cell(m[k], k)}`);
     return `| ${m.name} (\`${id}\`) | ${cell(m.alpha)} | ${cell(m.eps)} | ${heat} | ${ks.includes('ef') ? `${m.efWet ? 'dry ' : ''}${cell(m.ef)}` : '—'} | ${wet.length ? wet.join('; ') : '—'} |`;
   });
   const prescribed = Object.entries(MATERIALS).filter(([, m]) => m.prescribed).map(([id, m]) => `- \`${id}\`: ${m.prescribed}`);
@@ -236,7 +275,7 @@ the sources listed below without checking them.
 
 ## Surface parameters
 
-| Material | albedo α | emissivity ε | heat storage (μ, or thin-layer C) | evaporative fraction | wet after rain, drying time, water held (block 2) |
+| Material | albedo α | emissivity ε | heat storage (μ, or thin-layer C) | evaporative fraction | wet after rain, drying time, water held (block 2); crown or screen transmission (blocks 5, 6, 8, 9) |
 |---|---|---|---|---|---|
 ${rows.join('\n')}
 
@@ -275,7 +314,10 @@ ${Object.entries(SOURCES).map(([k, v]) => `- **[${k}]** ${v}`).join('\n')}
 - Shortwave: K↓ = sunlit·I_b·sinβ + SVF·D + K_wr (+ r·I_b·sinβ off glass, block 3), I_b = 1361·0.7^(AM^0.678) [meinel], D = 0.12·I_b·sinβ [brief]; tree shade transmits exp(−0.5·LAI) ≈ 0.17 (LAI 3.5 is an *engine assumption*).
 - Longwave: L↓ = SVF·ε_sky·σTa⁴ + (1−SVF)·L_wall, L_wall = σT_wall⁴ for opaque walls (glass walls: block 3), ε_sky = 1.24·(e_a/Ta)^(1/7) [brutsaert], T_wall = Ta + 2 K + 6 K·(K↓/900) (*engine assumption*, peaks at ${f1(wmax)} K + 2 K, ignores wall orientation).
 - Convection: h_c = 5.7 + 3.8·u [oke], the same for roofs and ground.
-- Water: Ts = daily mean Ta − 1 K + 1 K·sin(2π(t − 9 h)/24) [brief].
+- Water: Ts = daily mean Ta − 1 K + 1 K·sin(2π(t − 9 h)/24) [brief] (blocks 1–3; block 4's river and pond: see Block 4).
+- Convection, block 4: h_c = 5.7 + 3.8·u_site·f_w per cell, f_w the wind factor (see Block 4); blocks 1–3 have f_w = 1.
+- Ground heat flux, block 6: G (the flux into the surface above, thin layers C·dTs/dt) is stored every 15 min when a block asks for it (\`opts.flux\`, see Block 6) [deardorff]; parked cars shade the cells beneath them as a sub-grid share (see Block 6).
+- Surface water store, block 5: G also loses LE = L·β(W)·(h_c/c_p)·max(0, q_sat(Ts) − q_a) on cells holding splashed water W (see Block 5); empty, and never computed, in blocks 1–4.
 - Tree leaves: air + 2.5 K·(K↓/900) by day, air − 0.5 K at night (*engine assumption*; brief: air +0–3 K).
 - Air temperature [brief]: sinusoid with Ta,min at sunrise and Ta,max at 15:00, implemented as two half-cosines (rise and fall).
 - Sky view factor: horizon scan, SVF = mean over 16 azimuths of cos²(horizon elevation); canyon check against cos(arctan(2H/W)).
@@ -309,7 +351,16 @@ Moving any one of them toward the middle of its cited range breaks it. Region me
 ${sensitivityMarkdown(sensitivity())}
 
 ${retrofitMarkdown()}
-${cbdMarkdown()}`;
+${cbdMarkdown()}
+${waterfrontMarkdown()}
+${hutongMarkdown()}
+${parkingMarkdown()}
+${estateMarkdown()}
+${campusMarkdown()}
+${busstopMarkdown()}
+${villageMarkdown()}
+${desertMarkdown()}
+${nightmarketMarkdown()}`;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

@@ -16,6 +16,12 @@ export const GROUND_RGB = {
   coolPaveAged: hexRgb('#aaa59c'),
   coolPaveNew: hexRgb('#bdb8ae'),
   raingarden: hexRgb('#8fa56a'),
+  river: hexRgb('#7ea3ab'),
+  pond: hexRgb('#87adb2'),
+  greyBrick: hexRgb('#b9b3a6'),
+  ballast: hexRgb('#a29a8d'),
+  drySoil: hexRgb('#cbb38c'),
+  scrub: hexRgb('#b2ad7c'),
 };
 export const ROOF_RGB = {
   membrane: hexRgb('#5c5e66'),
@@ -24,12 +30,14 @@ export const ROOF_RGB = {
   coolroofNew: hexRgb('#f3efe6'),
   coolroofAged: hexRgb('#ddd8cc'),
   greenroof: hexRgb('#93a865'),
+  greyTile: hexRgb('#6e7072'),
+  rustShed: hexRgb('#97603f'),
 };
 const SOIL = hexRgb('#b49a77');
-const WIN = hexRgb('#5f7480');
+export const WIN = hexRgb('#5f7480');
 const AWNINGS = ['#b5533c', '#3f6e6a', '#c9973f', '#5b6b8c', '#8e4b5e'].map(hexRgb);
 
-const jitter = (c, k, amt = 0.06) => scaleRgb(c, 1 + (hash3(k, 77) - 0.5) * amt);
+export const jitter = (c, k, amt = 0.06) => scaleRgb(c, 1 + (hash3(k, 77) - 0.5) * amt);
 
 // ---- ground -----------------------------------------------------------------
 
@@ -92,7 +100,7 @@ function crossing(pen, x0, y0, x1, y1, along) {
   }
 }
 
-function groundEllipse(pen, cx, cy, rx, ry, fill, opts = {}) {
+export function groundEllipse(pen, cx, cy, rx, ry, fill, opts = {}) {
   const pts = [];
   const n = opts.n ?? 24;
   for (let i = 0; i < n; i++) {
@@ -125,7 +133,8 @@ export function drawGround(pen, world) {
       opts = g.street === 'ew' ? { edges: [true, false, true, false], lw: 1.1 } : { edges: [false, true, false, true], lw: 1.1 };
     } else if (g.id === 'park' || g.id === 'gardens' || g.id === 'carpark' || g.outline) opts = { lw: 1 };
     else if (g.mat === 'raingarden') opts = { lw: 0.7, a: 0.7 };
-    else if (g.mat === 'water') opts = { lw: 1.3 };
+    else if (g.mat === 'water' || g.mat === 'pond') opts = { lw: 1.3 };
+    else if (g.mat === 'river') opts = { stroke: null };
     else if (g.mat === 'stone') opts = { lw: 0.5, a: 0.45 };
     else if (g.id === 'yards') opts = { lw: 1.4 };
     pen.shape(pts, fill, { ...opts, t: 'g' });
@@ -260,6 +269,9 @@ export function drawDecor(pen, world, D) {
       pen.line([[x - 0.35, y + 0.2], [x, y - 0.15], [x + 0.3, y + 0.25]], { lw: 0.5, stroke: grassInk, a: 0.55, over: 0.1 });
     }
   }
+  if (D.river) riverMarks(pen, world.size, D.river[0], D.river[1], S.seed);
+  // blocks 5 and 6: their own ground marks (world.draw.decor: htkit.js, pkkit.js)
+  if (world.draw && world.draw.decor) world.draw.decor(pen, world, D);
   if (D.pond) {
     const [cx, cy, rx, ry] = D.pond;
     groundEllipse(pen, cx, cy, rx + 0.8, ry + 0.8, null, { lw: 0.7, a: 0.6, t: 'gm' });
@@ -267,6 +279,25 @@ export function drawDecor(pen, world, D) {
       pen.line([[cx + dx - w / 2, cy + dy], [cx + dx, cy + dy - 0.25], [cx + dx + w / 2, cy + dy]], { lw: 0.6, stroke: hexRgb('#e9f0ec'), a: 0.8, over: 0.2 });
     }
   }
+}
+
+/** River (block 4): current ripples in rows, and the quay wall along the bank (y1). */
+function riverMarks(pen, size, y0, y1, seed) {
+  const r = makeRng(seed + 7);
+  pen.tag = 'gm';
+  const light = hexRgb('#e9f0ec');
+  const deep = hexRgb('#4f7480');
+  for (let y = y0 + 4; y < y1 - 3; y += 4.5) {
+    for (let x = 2 + r() * 10; x < size - 6; x += 9 + r() * 14) {
+      const w = 2.5 + r() * 4;
+      const yy = y + (r() - 0.5) * 1.5;
+      pen.line([[x, yy], [x + w / 2, yy - 0.3], [x + w, yy]], { lw: 0.55, stroke: r() < 0.6 ? light : deep, a: 0.7, over: 0.2 });
+    }
+  }
+  // quay wall: a double ink line with coping joints
+  pen.line([[0, y1 - 0.6], [size, y1 - 0.6]], { lw: 1.4, over: 0.2 });
+  pen.line([[0, y1 + 0.7], [size, y1 + 0.7]], { lw: 0.6, a: 0.6, over: 0.2 });
+  for (let x = 2; x < size; x += 2.5) pen.line([[x, y1 - 0.6], [x, y1 + 0.7]], { lw: 0.35, a: 0.4, over: 0 });
 }
 
 function bboxOf(p) {
@@ -303,7 +334,7 @@ function paverJoints(pen, x0, y0, x1, y1) {
   }
 }
 
-function speckle(pen, x0, y0, x1, y1, count, seed, ink) {
+export function speckle(pen, x0, y0, x1, y1, count, seed, ink) {
   const r = makeRng(seed);
   pen.tag = 'gm';
   for (let i = 0; i < count; i++) {
@@ -462,7 +493,7 @@ export function building(pen, B, world = null) {
     pen.shape([[x0 + p, y0 + p, h - 0.1], [x1 - p, y0 + p, h - 0.1], [x1 - p, y1 - p, h - 0.1], [x0 + p, y1 - p, h - 0.1]], roof, { lw: 0.5, a: 0.7, t: 'r' });
     pen.tag = 'rd';
     const rng = makeRng(B.index * 101 + 7);
-    if (B.roof === 'metal') {
+    if (B.roof === 'metal' || B.roof === 'rustShed') {
       for (let x = x0 + 1.5; x < x1 - 1; x += 1.5) pen.line([[x, y0 + p, h], [x, y1 - p, h]], { lw: 0.4, a: 0.35, over: 0.1, t: 'rd' });
     } else if (B.roof === 'greenroof') {
       // sedum tufts in loose rows, and a gravel margin inside the parapet
@@ -497,9 +528,7 @@ export function building(pen, B, world = null) {
   pen.b = -1;
 }
 
-// ---- trees, cars, furniture -----------------------------------------------------
-
-const LEAF = [hexRgb('#5f7d48'), hexRgb('#6f8c52'), hexRgb('#85a05f'), hexRgb('#9bb46c')];
+export const LEAF = [hexRgb('#5f7d48'), hexRgb('#6f8c52'), hexRgb('#85a05f'), hexRgb('#9bb46c')];
 
 export function tree(pen, T, i) {
   const { x, y, r, zc } = T;
@@ -589,10 +618,20 @@ export function drawWorld(world, seed = 1) {
     const [w, d] = ax === 'x' ? [6, 4] : [4, 6];
     objs.push({ kind: 's', o: [x, y, x + w, y + d], i, x0: x, y0: y, x1: x + w, y1: y + d });
   });
+  // block 5: pergolas and awnings; an awning sits above the eaves, so it sorts in front of its own yard's houses
+  if (world.screens) {
+    world.screens.forEach((P, i) => {
+      const e = P.kind === 'awning' ? 6 : 0;
+      objs.push({ kind: 'p', o: P, i, x0: P.x0, y0: P.y0, x1: P.x1 + e, y1: P.y1 + e, ...(P.kind === 'pvCanopy' ? { front: true } : {}) });
+    });
+    for (const [x, y] of D?.bowls ?? []) objs.push({ kind: 'f', o: [x, y], i: 0, x0: x - 0.6, y0: y - 0.6, x1: x + 0.6, y1: y + 0.6 });
+  }
   const order = depthOrder(objs);
   order.forEach((k, gi) => {
     const ob = objs[k];
     pen.group = gi + 1;
+    // blocks 5 and 6 draw their own objects (world.draw.objects: htkit.js, pkkit.js); true if it did
+    if (world.draw && world.draw.objects && world.draw.objects(pen, ob, world)) return;
     if (ob.kind === 'b') building(pen, ob.o, world);
     else if (ob.kind === 't') tree(pen, ob.o, ob.i);
     else if (ob.kind === 'c') car(pen, ...ob.o, ob.i);

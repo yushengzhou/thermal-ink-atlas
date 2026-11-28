@@ -7,10 +7,9 @@ import { gl } from './glossary.js';
 import { MEASURES, measureStats } from './retrofit.js';
 
 const fmt = (v) => (Math.round(v * 10) / 10).toFixed(1);
-const sgn = (v) => `${v < 0 ? '−' : '+'}${fmt(Math.abs(v))}`;
-const K = (v) => `${sgn(v)} K`;
 
 /** Margin notes (at most 5) for the retrofit block: text lines and glossary terms. */
+const degs = (v) => `${Math.max(1, Math.round(Math.abs(v)))} degree${Math.round(Math.abs(v)) > 1 ? 's' : ''}`;
 export function retrofitNotes(scene, B, A, d, aged) {
   const P = scene.probes;
   const at = (V, k, h) => V.thermal.tsAt(P[k][0], P[k][1], h);
@@ -19,15 +18,15 @@ export function retrofitNotes(scene, B, A, d, aged) {
   const coat = measureStats(MEASURES.find((m) => m.id === 'coating'), B.world, B.thermal, A.world, A.thermal, [12]).h12;
   const dLabel = d === 0 ? 'a clear day after overnight rain' : `${d} day${d === 1 ? '' : 's'} after rain`;
   const text = {
-    roofs: [`Cool roof (${aged ? 'aged' : 'new'}, albedo ${roofA.alpha.value.toFixed(2)}): ${fmt(at(A, 'coolRoof', 15))} °C at 3 pm,`, `was ${fmt(at(B, 'coolRoof', 15))} °C as a dark membrane`],
-    coating: ['Coated Canal Street at noon: road', `${K(coat.dTs)}, but ${K(coat.dTmrt)} Tmrt for people on it`],
+    roofs: [`Cool roof (${aged ? 'aged' : 'new'} white paint): ${fmt(at(A, 'coolRoof', 15))} °C at 3 pm,`, `was ${fmt(at(B, 'coolRoof', 15))} °C as a dark membrane`],
+    coating: [`Coated Canal Street at noon: the road is ${degs(coat.dTs)} cooler,`, `but people on it get ${degs(coat.dTmrt)} more radiant heat`],
     square: [`Permeable pavers, ${dLabel}:`, `${fmt(A.thermal.ts(cellOf('square'), 15))} °C at 3 pm (asphalt was ${fmt(B.thermal.ts(cellOf('square'), 15))} °C)`],
     trees: ['Young street trees: thin shade, but they', 'are what cools the walkers here'],
     green: [`Green roof ${fmt(at(A, 'greenRoof', 15))} °C at 3 pm,`, `was ${fmt(at(B, 'greenRoof', 15))} °C`],
   };
   const terms = {
     roofs: [['coolRoof', 'Cool roof'], ['albedoAgeing', aged ? 'aged' : 'new']],
-    coating: [['tmrt', 'Tmrt']],
+    coating: [['tmrt', 'radiant heat']],
     square: [['permeablePaving', 'Permeable pavers'], ['daysSinceRain', dLabel]],
     trees: [],
     green: [['greenRoof', 'Green roof']],
@@ -35,7 +34,12 @@ export function retrofitNotes(scene, B, A, d, aged) {
   return scene.notes.slice(0, 5).map((n) => ({ ...n, text: text[n.key], terms: terms[n.key] }));
 }
 
-const srcLine = (keys) => `<p class="src">Sources: ${keys.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: ${gl('forceRestore', 'force-restore')}, simulated; air temperature is the same in both states, so no air cooling is modelled.</p>`;
+const ref = (k) => `<a href="../../references.html#sponge-retrofit">[${k}]</a> ${SOURCES[k]}`;
+/** The closed part at the bottom of a card (#29): the model's terms, flags and sources, with links to the references page. */
+const experts = (body, keys) => `<details class="expert"><summary>For experts</summary>${body}<p class="src">Sources: ${keys.map(ref).join('; ')}. Made-up block, calculated temperatures: a ${gl('forceRestore', 'force-restore')} surface model on a 5 m grid; the air temperature is the same in both states, so no air cooling is modelled.</p></details>`;
+/** A change in plain degrees: −2.0°. */
+const dg = (v) => `${v < 0 ? '−' : '+'}${fmt(Math.abs(v))}°`;
+const feelWords = (v) => (Math.abs(v) < 0.5 ? 'about the same' : `${degs(v)} ${v < 0 ? 'cooler' : 'warmer'}`);
 
 /** Unverified inputs behind a measure (material parameter names). */
 function unverified(m, mats) {
@@ -53,27 +57,31 @@ export function measureCard(m, st, mats, d, aged) {
   const row = (h) => {
     const r = st[`h${h}`];
     if (!r.n) return `<tr><td>${h}:00</td><td colspan="2">no cells in full sun</td></tr>`;
-    const tm = m.roof ? '<td class="sub">roof</td>' : `<td>${K(r.dTmrt)}</td>`;
-    return `<tr class="t"><td>${h}:00</td><td>${K(r.dTs)}</td>${tm}</tr><tr><td></td><td class="sub" colspan="2">surface ${fmt(r.before)} → ${fmt(r.after)} °C${m.roof ? '' : `; Tmrt ${fmt(r.tmrtBefore)} → ${fmt(r.tmrtAfter)} °C`}</td></tr>`;
+    const tm = m.roof ? '<td class="sub">roof</td>' : `<td>${dg(r.dTmrt)}</td>`;
+    return `<tr class="t"><td>${h}:00</td><td>${dg(r.dTs)}</td>${tm}</tr><tr><td></td><td class="sub" colspan="2">surface ${fmt(r.before)} → ${fmt(r.after)} °C${m.roof ? '' : `; radiant heat on you ${fmt(r.tmrtBefore)} → ${fmt(r.tmrtAfter)} °C`}</td></tr>`;
   };
   const wet = mat.efWet ? `<p class="sub">${gl('daysSinceRain', 'Days since rain')} d = ${d}: ${gl('ef', 'evaporative fraction')} ${mat.ef.value.toFixed(2)} (wet ${mat.efWet.value}, dry ${mat.dry.ef.value}, τ ${mat.tau.value} d).</p>` : '';
   const age = m.mat === 'coolroofR' || m.mat === 'coolPave' ? `<p class="sub">Materials: ${aged ? 'aged' : 'new'}, ${gl('albedo', 'albedo')} ${mat.alpha.value.toFixed(2)} (${gl('albedoAgeing', 'aged vs new')}).</p>` : '';
   const unv = unverified(m, mats);
+  const r15 = st.h15;
+  const lead = !r15.n
+    ? m.line
+    : m.roof
+      ? `By 3 pm the roof is ${feelWords(r15.dTs)} than before (${fmt(r15.before)} → ${fmt(r15.after)} °C)${m.leadMore ? `; ${m.leadMore}` : ''}.`
+      : `By 3 pm the ground here is ${feelWords(r15.dTs)} than before, and the radiant heat on someone standing on it is ${Math.abs(r15.dTmrt) < 0.5 ? 'about the same' : `${degs(r15.dTmrt)} ${r15.dTmrt < 0 ? 'lower' : 'higher'}`}.`;
   return `
     <button class="x" aria-label="close">×</button>
     <h3>${m.name}</h3>
-    <div class="mat">After minus Before, same cells, simulated</div>
+    <p class="lead">${lead}</p>
     <table class="cmp">
-      <tr><td></td><td>${gl('surfaceTemp', 'surface')} ΔTs</td><td>${gl('tmrt', 'person')} ΔTmrt</td></tr>
+      <tr><td>After minus Before</td><td>${gl('surfaceTemp', 'surface')}</td><td>${gl('tmrt', 'radiant heat on you')}</td></tr>
       ${row(12)}
       ${row(15)}
     </table>
-    ${wet}${age}
     <p class="note">${m.line}</p>
     ${m.lesson ? `<p class="caveat"><b>${m.lesson}</b></p>` : ''}
-    <p class="lit">${m.lit}</p>
-    ${unv.length ? `<p class="caveat">Unverified inputs: ${unv.join(', ')} <span class="unv">unverified</span></p>` : ''}
-    ${srcLine(m.sources)}`;
+    ${experts(`${wet}${age}<p class="lit">${m.lit}</p>${m.expert ? `<p class="caveat">${m.expert}</p>` : ''}
+    ${unv.length ? `<p class="caveat">Unverified inputs: ${unv.join(', ')} <span class="unv">unverified</span></p>` : ''}`, m.sources)}`;
 }
 
 /**
@@ -81,33 +89,31 @@ export function measureCard(m, st, mats, d, aged) {
  * coating measure; matsNew / matsAged: material tables for the two coatings.
  */
 export function tradeoffCard(st, matsNew, matsAged) {
-  const row = (label, r) => `<tr class="t"><td>${label}</td><td>${K(r.dTs)}</td><td>${K(r.dTmrt)}</td></tr>`;
+  const row = (label, r) => `<tr class="t"><td>${label}</td><td>${dg(r.dTs)}</td><td>${dg(r.dTmrt)}</td></tr>`;
   return `
     <button class="x" aria-label="close">×</button>
     <h3>Reflective pavement: cools the road, not the person</h3>
-    <div class="mat">Canal Street coating vs the old asphalt (${gl('albedo', 'albedo')} 0.12), noon, simulated</div>
+    <p class="lead">At noon the coated road is ${degs(st.new.dTs)} cooler, but people on it get ${degs(st.new.dTmrt)} more radiant heat, because light paving bounces sunshine onto them.</p>
     <table class="cmp">
-      <tr><td>coating</td><td>road ΔTs</td><td>person ΔTmrt</td></tr>
-      ${row(`new, α ${matsNew.coolPave.alpha.value}`, st.new)}
-      ${row(`1 year, α ${matsAged.coolPave.alpha.value}`, st.aged)}
+      <tr><td>Canal Street coating, noon</td><td>road</td><td>radiant heat on you</td></tr>
+      ${row('new', st.new)}
+      ${row('after 1 year', st.aged)}
     </table>
     <p class="note">The light coating sends more sunshine back up, and part of it lands on people. The road gets cooler; a person standing on it gets more radiant heat at midday. Pair reflective paving with shade, such as trees or awnings.</p>
-    <p class="lit">Literature (Los Angeles): road −4 to −6 K, pedestrian Tmrt about +4 K at midday, with +118 W m⁻² more reflected sunshine (Middel et al. 2020). Neighbourhood scale: surface up to −5 K in the afternoon, air only −0.2 K (Ko et al. 2022).</p>
-    <p class="caveat">Walls bounce sunlight onto the pavements here only in a simple, street-averaged way (${gl('wallReflection', 'diffuse wall reflection')}, wall albedo 0.3, an unverified mid-range value), so the effect next to bright walls can be larger (Middel saw +20–30 W m⁻² on sidewalks in the evening). Coating albedos are <span class="unv">unverified</span></p>
-    ${srcLine(['middel2020', 'ko2022'])}`;
+    ${experts(`<p class="lit">Coating ${gl('albedo', 'albedo')} new ${matsNew.coolPave.alpha.value}, after a year ${matsAged.coolPave.alpha.value}, against the old asphalt's 0.12; road ΔTs and person ΔTmrt as in the table.</p><p class="lit">Literature (Los Angeles): road −4 to −6 K, pedestrian Tmrt about +4 K at midday, with +118 W m⁻² more reflected sunshine (Middel et al. 2020). Neighbourhood scale: surface up to −5 K in the afternoon, air only −0.2 K (Ko et al. 2022).</p>
+    <p class="caveat">Walls bounce sunlight onto the pavements here only in a simple, street-averaged way (${gl('wallReflection', 'diffuse wall reflection')}, wall albedo 0.3, an unverified mid-range value), so the effect next to bright walls can be larger (Middel saw +20–30 W m⁻² on sidewalks in the evening). Coating albedos are <span class="unv">unverified</span></p>`, ['middel2020', 'ko2022'])}`;
 }
 
 /** Sponge-city guide card (text only; the block does not model rain or runoff). */
 export function spongeCard() {
   return `
     <button class="x" aria-label="close">×</button>
-    <h3>${gl('spongeCity', 'Sponge city')}</h3>
-    <div class="mat">State Council General Office guideline, October 2015 (国办发〔2015〕75号)</div>
+    <h3>${gl('spongeCity', 'Sponge city')} (海绵城市)</h3>
+    <p class="lead">China's "sponge city" plan asks towns to hold their rain like a sponge: soak it up where it falls instead of piping it away.</p>
     <p>Manage rain where it falls: let it soak in, slow it, store it, clean it, use it, and only then drain it — <span lang="zh">渗、滞、蓄、净、用、排</span>. The tools are the ones in this block: ${gl('greenRoof', 'green roofs')}, ${gl('permeablePaving', 'permeable paving')}, ${gl('rainGarden', 'rain gardens')}, and wetlands and parks at larger scale.</p>
     <p>Target: absorb and use <b>70% of rainfall</b> on site, applied as a control rate for total annual runoff (年径流总量控制率); <b>20%</b> of built-up area by 2020 and <b>80%</b> by 2030.</p>
     <p class="note">The goals are flooding and water supply first; cooling is a co-benefit. No robust measured block-scale cooling figure for sponge-city retrofits was found, so this page does not quote one. Rain and runoff are not modelled here, only the drying of wet surfaces.</p>
-    <p class="caveat">The primary Chinese text of the guideline was not located; the summary follows the English notice and a reprint <span class="unv">unverified</span></p>
-    ${srcLine(['sponge2015'])}`;
+    ${experts(`<p class="lit">State Council General Office guideline, October 2015 (国办发〔2015〕75号).</p><p class="caveat">The primary Chinese text of the guideline was not located; the summary follows the English notice and a reprint <span class="unv">unverified</span></p>`, ['sponge2015'])}`;
 }
 
 /**

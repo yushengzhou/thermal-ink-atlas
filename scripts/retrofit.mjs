@@ -157,3 +157,29 @@ export function diagnostics() {
     paversNoonTmrt: stats('pavers', after(3, true)).h12.dTmrt,
   };
 }
+
+/**
+ * The green roof against an aged white roof (outside evaluation #29 item 6;
+ * docs only, nothing shipped changes): roof surface at 15:00 (mean of the
+ * cells in full sun, After) at d = 0 / 3 / 7 for the shipped values and two
+ * one-at-a-time cases, a wetter evaporative fraction (dry 0.33 / wet 0.67,
+ * Bowen ratio about 2 / 0.5) and a watered roof (EF 0.6 wet and dry,
+ * albedo 0.25), against the aged white roof and the dark membrane.
+ */
+export function greenRoofCheck() {
+  const { after } = base2();
+  const g = MATERIALS.greenroof;
+  const with_ = (patch, d, key) => {
+    const mats = { ...MATERIALS, greenroof: { ...g, ...Object.fromEntries(Object.entries(patch).map(([k, v]) => [k, { ...g[k], value: v }])) } };
+    return after(d, true, stateMaterials(d, true, mats), `green.${key}@${d}`);
+  };
+  const ts = (model) => stats('greenRoof', model, [15]).h15.after;
+  const D = [0, 3, 7];
+  const cases = [
+    { label: `shipped (EF dry ${g.ef.value} / wet ${g.efWet.value}, α ${g.alpha.value})`, ts: D.map((d) => ts(after(d, true))) },
+    { label: 'EF dry 0.33 / wet 0.67 (Bowen ratio about 2 / 0.5)', ts: D.map((d) => ts(with_({ ef: 0.33, efWet: 0.67 }, d, 'wetter'))) },
+    { label: 'a watered roof: EF 0.6 wet and dry, α 0.25', ts: D.map((d) => ts(with_({ ef: 0.6, efWet: 0.6, alpha: 0.25 }, d, 'watered'))) },
+  ];
+  const white = stats('coolRoof', after(3, true), [15]).h15;
+  return { D, cases, white: white.after, dark: stats('greenRoof', after(3, true), [15]).h15.before };
+}

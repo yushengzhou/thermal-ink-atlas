@@ -41,6 +41,20 @@ export function polyLength(p) {
   return L;
 }
 
+/**
+ * Route weight at a world point: the class weight, or, where the raster
+ * carries a per-pixel weight field (block 4: shade weights shifted by the
+ * local wind, see waterfront.js comfortShade), that field (by day only).
+ */
+export function weightAt(shade, weight, x, y) {
+  if (shade.wf && !shade.night) {
+    const i = Math.floor(x / shade.cell);
+    const j = Math.floor(y / shade.cell);
+    if (i >= 0 && j >= 0 && i < shade.n && j < shade.n) return shade.wf[j * shade.n + i];
+  }
+  return weight[shadeAt(shade, x, y)];
+}
+
 /** Perceived cost of walking polyline p under a shade raster. */
 export function routeCost(p, shade, step = 1, weight = WEIGHT) {
   let cost = 0;
@@ -51,7 +65,7 @@ export function routeCost(p, shade, step = 1, weight = WEIGHT) {
       const t = (k + 0.5) / n;
       const x = p[i] + (p[i + 2] - p[i]) * t;
       const y = p[i + 1] + (p[i + 3] - p[i + 1]) * t;
-      cost += (L / n) * weight[shadeAt(shade, x, y)];
+      cost += (L / n) * (shade.wf ? weightAt(shade, weight, x, y) : weight[shadeAt(shade, x, y)]);
     }
   }
   return cost;
@@ -129,7 +143,7 @@ export class Life {
     const hot = air > 28 && !shade.night;
     const spots = this.scene.spots.map((s) => {
       const cls = shadeAt(shade, s.x, s.y);
-      return hot ? weight[cls] : cls === 0 ? 0.95 : 1;
+      return hot ? (shade.wf ? weightAt(shade, weight, s.x, s.y) : weight[cls]) : cls === 0 ? 0.95 : 1;
     });
     const used = new Array(spots.length).fill(0);
     const dwell = [];
@@ -157,7 +171,7 @@ export class Life {
     let best = pref;
     let bc = Infinity;
     for (const o of [pref, -2.1, -1.2, -0.3, 0.6, 1.5, 2.1]) {
-      const c = weight[shadeAt(shade, x - dy * o, y + dx * o)] + 0.02 * Math.abs(o - pref);
+      const c = (shade.wf ? weightAt(shade, weight, x - dy * o, y + dx * o) : weight[shadeAt(shade, x - dy * o, y + dx * o)]) + 0.02 * Math.abs(o - pref);
       if (c < bc) {
         bc = c;
         best = o;

@@ -19,10 +19,33 @@ const THERMAL_WALL = hexRgb('#e7dfcd');
 const NIGHT_RGB = hexRgb('#27355a');
 const LIT = hexRgb('#f4cf7a');
 const SWEAT_CSS = 'rgba(143,182,207,0.95)';
-// glass pane colours by type (day view), and the reflection-spot glint
+// glass pane colours by type (day view), the reflection-spot glint and its outline ink
 export const GLASS_RGB = { clear: hexRgb('#7d9ea6'), lowe: hexRgb('#8ea4b8'), mirror: hexRgb('#b9c3c6') };
 const GLINT = [255, 246, 214];
-const AC_INK = hexRgb('#8a2f22');
+const SPOT_INK = [176, 98, 40];
+export const HAND_FONT = '"Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive';
+
+/**
+ * Left edge of a bottom overlay label w px wide whose text baseline is at by
+ * (box: 5 px either side, 18 px above to 4 px below): centred, kept 8 px inside
+ * the canvas, and moved beside any page panel it would sit behind (R.avoid:
+ * the panels' boxes in canvas pixels, set by the app before each frame) when
+ * there is room; otherwise as far from the panel as the canvas allows.
+ */
+export function labelX(R, w, W, by) {
+  const d = R.dpr;
+  let bx = clamp(W / 2 - w / 2, 8 * d, W - w - 8 * d);
+  for (const r of R.avoid ?? []) {
+    if (r[3] <= by - 18 * d || r[1] >= by + 4 * d || r[2] <= bx - 5 * d || r[0] >= bx + w + 5 * d) continue;
+    const right = r[2] + 13 * d;
+    const left = r[0] - 13 * d - w;
+    if (right <= W - w - 8 * d) bx = right;
+    else if (left >= 8 * d) bx = left;
+    // no room beside it: as far from the panel as the canvas allows, so the least of the label is hidden
+    else bx = r[0] + r[2] < W ? W - w - 8 * d : 8 * d;
+  }
+  return bx;
+}
 
 function makeCanvas(w, h) {
   if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(w, h);
@@ -105,6 +128,13 @@ export class Renderer {
     this.clip = null; // [x0, x1] device px: draw only this vertical band (split view)
     this.glass = 'lowe'; // glass type (block 3): pane colours
     this.spotFor = null; // (hq) -> reflection spot field on the 2 m grid, or null (block 3)
+    this.wind = null; // block 4: {lines, items} wind lines (wind.js windLines + pen.stream items)
+    this.flux = null; // block 6: (hq) -> [{x, y, z, g}] ground heat flux samples (parking.js fluxSamples)
+    this.overlay = null; // a block's overlay (R, ctx, f, cam, W, H, alpha, look, hq), drawn under the people
+    this.pool = world.scene.pooling !== false; // edge pooling on washes (off in block 5)
+    // block 5: skip shadow polygons off the tile. Not used elsewhere: Skia may anti-alias a smaller
+    // path differently, so blocks 1-4 keep their exact pixels
+    this.cullShadows = !!world.scene.cullShadows;
     const hs = Math.max(0, ...world.buildings.map((b) => b.h + (b.chimney ? b.chimney[2] - b.h : 0)));
     this.topMargin = Math.max(40, hs + 8); // m above ground that tiles must cover
   }
@@ -149,11 +179,20 @@ export class Renderer {
     const polys = shadowPolys(this.world, sun);
     const shadows = up ? polys.b.concat(polys.t).filter(Boolean).map((p) => {
       const out = new Float32Array(p.length);
+      let x0 = Infinity;
+      let y0 = Infinity;
+      let x1 = -Infinity;
+      let y1 = -Infinity;
       for (let i = 0; i < p.length; i += 2) {
         const q = iso(p[i], p[i + 1], 0);
         out[i] = q[0];
         out[i + 1] = q[1];
+        if (q[0] < x0) x0 = q[0];
+        if (q[0] > x1) x1 = q[0];
+        if (q[1] < y0) y0 = q[1];
+        if (q[1] > y1) y1 = q[1];
       }
+      out.bb = [x0, y0, x1, y1]; // projected bounds, to skip polygons off a tile
       return out;
     }) : [];
     // building roof temperatures and ground heat image for the thermal view
@@ -305,14 +344,26 @@ export class Renderer {
           if (py > q1) q1 = py;
         }
       }
-      const a = clamp(r[i] / 0.4, 0, 1);
+      const a = clamp(r[i] / 0.6, 0, 1);
       d.data[i * 4] = GLINT[0];
       d.data[i * 4 + 1] = GLINT[1];
       d.data[i * 4 + 2] = GLINT[2];
       d.data[i * 4 + 3] = Math.round(255 * (a > 0 ? 0.25 + 0.75 * a : 0));
     }
     g.putImageData(d, 0, 0);
-    hc.spotImg = { img, R: hc.spot.cell, bb: [p0 - 2, q0 - 2, p1 + 2, q1 + 2] };
+    // the patch's outline (#29 item 7): cell edges between a lit and an unlit cell, on the ground plane
+    const edge = [];
+    const on = (x, y) => x >= 0 && y >= 0 && x < n && y < n && r[y * n + x] > 0;
+    for (let y = 0; y < n; y++) {
+      for (let x = 0; x < n; x++) {
+        if (!on(x, y)) continue;
+        if (!on(x, y - 1)) edge.push([x, y, x + 1, y]);
+        if (!on(x, y + 1)) edge.push([x, y + 1, x + 1, y + 1]);
+        if (!on(x - 1, y)) edge.push([x, y, x, y + 1]);
+        if (!on(x + 1, y)) edge.push([x + 1, y, x + 1, y + 1]);
+      }
+    }
+    hc.spotImg = { img, R: hc.spot.cell, bb: [p0 - 2, q0 - 2, p1 + 2, q1 + 2], edge: edge.map(([a, b, c, e]) => [...iso(a * cell, b * cell, 0), ...iso(c * cell, e * cell, 0)]) };
     return hc.spotImg;
   }
 
@@ -361,6 +412,19 @@ export class Renderer {
     hz.globalCompositeOperation = 'source-over';
     g.globalAlpha = 0.4 * k;
     g.drawImage(this.hatchScratch, 0, 0);
+    // a dashed ink outline, so the patch reads as a shape that moves with the hour
+    g.setTransform(Z, 0, 0, Z, ox, oy);
+    g.globalAlpha = 0.75 * k;
+    g.strokeStyle = rgbCss(SPOT_INK);
+    g.lineWidth = (1.3 * this.dpr) / Z;
+    g.setLineDash([4 / Z, 3 / Z]);
+    g.beginPath();
+    for (const e of si.edge) {
+      g.moveTo(e[0], e[1]);
+      g.lineTo(e[2], e[3]);
+    }
+    g.stroke();
+    g.setLineDash([]);
     g.globalAlpha = 1;
   }
 
@@ -376,8 +440,11 @@ export class Renderer {
       if (it.t === 'slab') return scaleRgb(THERMAL_WALL, 0.85);
       if (it.t === 'r' || it.t === 'rd') return it.b >= 0 ? heatRgb(hc.roof[it.b]) : null;
       if (it.t === 'tree') return null;
+      if (it.t === 'car') return null; // block 6: parked cars are outlines over the wash (not modelled)
       if (it.t === 'win') return null;
       const n = f.n ?? [0, 1];
+      // block 3 (#29 item 7): a glass face takes the colour of its own surface temperature
+      if (f.k === 'glass' && this.thermal.glassTemp) return scaleRgb(heatRgb(this.thermal.glassTemp(n[0] ? 'E' : 'S', hc.hq)), n[0] ? 0.92 : 1);
       return scaleRgb(THERMAL_WALL, n[0] ? 0.9 : 1);
     }
     if (Array.isArray(f)) return f;
@@ -409,6 +476,7 @@ export class Renderer {
         if (t === 'g' || t === 'gm' || t === 'treeTick') strokeA *= 0.28;
         else if (t === 'win') strokeA *= 0.22;
         else if (t === 'tree') strokeA *= 0.55;
+        else if (t === 'car') strokeA *= 0.4;
         else strokeA *= 0.7;
       }
       if (mode === 'scaffold' && (t === 'gm' || t === 'treeTick')) strokeA *= 0.8;
@@ -417,13 +485,20 @@ export class Renderer {
         const p = it.fp;
         ctx.beginPath();
         ctx.moveTo(p[0], p[1]);
-        for (let i = 2; i < p.length; i += 2) ctx.lineTo(p[i], p[i + 1]);
+        for (let i = 2; i < p.length; i += 2) {
+          // pen-up break between shapes of a multi-shape item (Pen.shapes, block 5)
+          if (p[i] !== p[i]) {
+            ctx.closePath();
+            i += 2;
+            ctx.moveTo(p[i], p[i + 1]);
+          } else ctx.lineTo(p[i], p[i + 1]);
+        }
         ctx.closePath();
         ctx.globalAlpha = mode === 'scaffold' ? 1 : alpha;
         ctx.fillStyle = rgbCss(fill);
         ctx.fill();
-        // pigment pooling at the edge of washes
-        if (mode !== 'scaffold' && (t === 'w' || t === 'r' || t === 'tree' || t === 'g')) {
+        // pigment pooling at the edge of washes (scene.pooling === false skips it: block 5, hundreds of small washes per tile)
+        if (mode !== 'scaffold' && this.pool && (t === 'w' || t === 'r' || t === 'tree' || t === 'g')) {
           ctx.globalAlpha = 0.28 * alpha;
           ctx.strokeStyle = rgbCss(scaleRgb(fill, 0.8));
           ctx.lineWidth = (lwBase * 1.6) / Z;
@@ -455,22 +530,112 @@ export class Renderer {
     ctx.globalAlpha = 1;
   }
 
-  /** Lit windows after dark (drawn above the night tint). */
+  /**
+   * Lit windows after dark (drawn above the night tint). A lit window that a
+   * later face of another building or a tree may hide (their boxes overlap)
+   * goes through a layer from which those later faces are cut out, so a tall
+   * tower's windows no longer shine through the nearer, lower roofs in front
+   * of it (#29 item 7); every other window is drawn straight onto the tile.
+   */
   litWindows(ctx, list, hc, Z, ox, oy, bb) {
+    // which windows a later face may hide depends only on the display list and the tile (a face's day
+    // fill is never null by the hour), so it is worked out once per list and tile, not for every hour a
+    // drag bakes; the object list is a fresh slice of this.items on every bake, so the memo hangs on those
+    const memo = this.winMemo ?? (this.winMemo = new WeakMap());
+    const own = list.length === this.items.length - this.groundCount && list[0] === this.items[this.groundCount] ? this.items : list;
+    let perList = memo.get(own);
+    if (!perList) memo.set(own, (perList = new Map()));
+    const key = `${list.length},${Z},${ox},${oy},${bb ? bb.join(',') : ''}`;
+    let hit = perList.get(key);
+    if (!hit) {
+      const inTile = (b) => !bb || !(b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3]);
+      const its = list.filter((it) => inTile(it.bb));
+      const over = (a, b) => !(a[2] <= b[0] || a[0] >= b[2] || a[3] <= b[1] || a[1] >= b[3]);
+      const lit0 = (it) => it.t === 'win' && it.f && it.f.k === 'win' && !(it.f.h > (it.f.shop ? 0.75 : 0.45));
+      const face0 = (it) => it.t !== 'win' && it.fp && this.fillOf(it, 'day', hc);
+      const hid = new Set();
+      for (let k = 0; k < its.length; k++) {
+        const w = its[k];
+        if (!lit0(w)) continue;
+        for (let j = k + 1; j < its.length; j++) {
+          const o = its[j];
+          if (o.b !== w.b && face0(o) && over(o.bb, w.bb)) {
+            hid.add(k);
+            break;
+          }
+        }
+      }
+      if (perList.size > 256) perList.clear(); // pans and zooms make new tiles; keep the memo small
+      // the layer only holds the hidden windows, so only a later face over one of them can cut anything:
+      // those faces (boxes grown by 2 px for the anti-aliased edge) and the box around the hidden windows
+      const m = 2 / Z;
+      const grow = (b) => [b[0] - m, b[1] - m, b[2] + m, b[3] + m];
+      const hb = [...hid].map((k) => grow(its[k].bb));
+      const first = hid.size ? Math.min(...hid) : its.length;
+      const cut = its.map((it, j) => j > first && !hid.has(j) && !!face0(it) && hb.some((b) => over(grow(it.bb), b)));
+      const box = hb.length ? hb.reduce((a, b) => [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[2], b[2]), Math.max(a[3], b[3])]) : null;
+      hit = { items: its, hidden: hid, lit: its.map(lit0), cut, box };
+      perList.set(key, hit);
+    }
+    const { items, hidden } = hit;
+    const lit = (it, k) => hit.lit[k];
+    const path = (g, p) => {
+      g.beginPath();
+      g.moveTo(p[0], p[1]);
+      for (let i = 2; i < p.length; i += 2) {
+        if (p[i] !== p[i]) {
+          g.closePath();
+          i += 2;
+          g.moveTo(p[i], p[i + 1]);
+        } else g.lineTo(p[i], p[i + 1]);
+      }
+      g.closePath();
+    };
     ctx.setTransform(Z, 0, 0, Z, ox, oy);
-    for (const it of list) {
-      if (it.t !== 'win' || !it.f || it.f.k !== 'win') continue;
-      const b = it.bb;
-      if (bb && (b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3])) continue;
-      if (it.f.h > (it.f.shop ? 0.75 : 0.45)) continue;
-      const p = it.fp;
-      ctx.beginPath();
-      ctx.moveTo(p[0], p[1]);
-      for (let i = 2; i < p.length; i += 2) ctx.lineTo(p[i], p[i + 1]);
-      ctx.closePath();
+    ctx.fillStyle = rgbCss(LIT);
+    items.forEach((it, k) => {
+      if (!lit(it, k) || hidden.has(k)) return;
+      path(ctx, it.fp);
       ctx.globalAlpha = 0.85 * hc.night;
-      ctx.fillStyle = rgbCss(LIT);
       ctx.fill();
+    });
+    if (hidden.size) {
+      // the layer depends only on the tile and the windows' alpha, so after dark (night = 1, alpha 0.85)
+      // every hour of a tile shares one: a few layers are kept (1 MB each), keyed like the memo
+      const alpha = 0.85 * hc.night;
+      const lk = `${key}|${alpha}`;
+      const layers = this.winLayers ?? (this.winLayers = new Map());
+      let L = layers.get(lk)?.get(own);
+      if (!L) {
+        L = makeCanvas(TILE, TILE);
+        const g = L.getContext('2d');
+        g.setTransform(Z, 0, 0, Z, ox, oy);
+        g.fillStyle = rgbCss(LIT);
+        items.forEach((it, k) => {
+          if (hidden.has(k)) {
+            g.globalCompositeOperation = 'source-over';
+            g.globalAlpha = alpha;
+            path(g, it.fp);
+            g.fill();
+          } else if (hit.cut[k]) {
+            g.globalCompositeOperation = 'destination-out';
+            g.globalAlpha = it.a ?? 1;
+            path(g, it.fp);
+            g.fill();
+          }
+        });
+        g.globalCompositeOperation = 'source-over';
+        if (layers.size >= 8) layers.delete(layers.keys().next().value);
+        layers.set(lk, new WeakMap([[own, L]]));
+      }
+      // the pixel box around the hidden windows: outside it the layer is empty
+      const px0 = clamp(Math.floor(ox + hit.box[0] * Z) - 2, 0, TILE);
+      const py0 = clamp(Math.floor(oy + hit.box[1] * Z) - 2, 0, TILE);
+      const px1 = clamp(Math.ceil(ox + hit.box[2] * Z) + 2, 0, TILE);
+      const py1 = clamp(Math.ceil(oy + hit.box[3] * Z) + 2, 0, TILE);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = 1;
+      if (px1 > px0 && py1 > py0) ctx.drawImage(L, px0, py0, px1 - px0, py1 - py0, px0, py0, px1 - px0, py1 - py0);
     }
     ctx.globalAlpha = 1;
   }
@@ -522,7 +687,7 @@ export class Renderer {
       this.replay(g, objects, 'thermal', hc, Z, ox, oy, bb, lw);
     } else {
       this.replay(g, ground, 'day', hc, Z, ox, oy, bb, lw);
-      if (hc.shadows.length) this.drawShadows(g, hc, Z, ox, oy);
+      if (hc.shadows.length) this.drawShadows(g, hc, Z, ox, oy, this.cullShadows ? bb : null);
       if (hc.spot) this.drawSpots(g, hc, Z, ox, oy, bb);
       this.replay(g, objects, 'day', hc, Z, ox, oy, bb, lw);
       if (hc.night > 0) {
@@ -548,8 +713,9 @@ export class Renderer {
     return c;
   }
 
-  drawShadows(g, hc, Z, ox, oy) {
-    // union first (solid), then one translucent multiply so overlaps don't stack
+  drawShadows(g, hc, Z, ox, oy, bb = null) {
+    // union first (solid), then one translucent multiply so overlaps don't stack;
+    // bb (block 5): polygons wholly off the tile (drawing-plane bounds with a margin) are skipped
     if (!this.shadowScratch) this.shadowScratch = makeCanvas(TILE, TILE);
     const s = this.shadowScratch.getContext('2d');
     s.setTransform(1, 0, 0, 1, 0, 0);
@@ -558,11 +724,24 @@ export class Renderer {
     s.fillStyle = '#000';
     s.beginPath();
     for (const p of hc.shadows) {
+      const b = p.bb;
+      if (bb && b && (b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3])) continue;
       s.moveTo(p[0], p[1]);
       for (let i = 2; i < p.length; i += 2) s.lineTo(p[i], p[i + 1]);
       s.closePath();
     }
     s.fill('nonzero');
+    // keep the shadows on the board: a long low-sun shadow must not fall on the paper around it (outside evaluation of #33)
+    const W0 = this.world.size;
+    s.globalCompositeOperation = 'destination-in';
+    s.beginPath();
+    for (const [x, y] of [[0, 0], [W0, 0], [W0, W0], [0, W0]]) {
+      const q = iso(x, y, 0);
+      if (x === 0 && y === 0) s.moveTo(q[0], q[1]);
+      else s.lineTo(q[0], q[1]);
+    }
+    s.closePath();
+    s.fill();
     s.setTransform(1, 0, 0, 1, 0, 0);
     s.globalCompositeOperation = 'source-in';
     const strength = clamp(hc.sun.alt / 8, 0, 1);
@@ -802,8 +981,13 @@ export class Renderer {
     this.stats.sweating = 0;
     this.stats.sweatGlyphPx = 0;
     this.noteHits = [];
+    this.stats.windDashes = 0;
+    this.stats.airSegs = 0;
+    this.stats.fluxUp = 0;
+    this.stats.fluxDown = 0;
     if (lifeA > 0) {
-      if (look.ac) this.drawAc(ctx, f, cam, W, H, lifeA);
+      // block overlays (block 3 AC plumes, block 4 wind lines and air, block 6 night release), set by the block's own module
+      if (this.overlay) this.overlay(this, ctx, f, cam, W, H, lifeA, look, hq);
       if (look.people !== false) this.drawPeople(ctx, f, cam, hq, W, H, lifeA, look.thermalMix ?? 0);
       if (look.notes) this.drawNotes(ctx, cam, W, H, look.notes, lifeA);
     }
@@ -865,14 +1049,22 @@ export class Renderer {
     ctx.drawImage(c, 0, 0);
   }
 
-  /** True if the person's hip at (x, y) is hidden behind a building. */
-  hidden(x, y) {
+  /** True if the person's hip at (x, y) is hidden behind a building (block 5: or under a pergola or awning; block 8: not children, seen through the sail mesh; block 9: z, standing on a deck). */
+  hidden(x, y, mesh = false, z = 0) {
     for (const B of this.world.buildings) {
       const dIn = Math.max(B.x0 - x, B.y0 - y, 0);
       const dOut = Math.min(B.x1 - x, B.y1 - y);
       if (dOut <= dIn) continue;
       const top = B.h + (B.gable ? 2 : 0);
-      if (top > 0.9 + dIn / ISO_Z) return true;
+      if (top > 0.9 + z + dIn / ISO_Z) return true;
+    }
+    if (this.world.screens && !mesh) {
+      // a flat top at z hides the hip if the line of sight passes through it inside its footprint
+      for (const P of this.world.screens) {
+        const dIn = Math.max(P.x0 - x, P.y0 - y, 0);
+        const dOut = Math.min(P.x1 - x, P.y1 - y);
+        if (dOut > dIn && 0.9 + z + dIn / ISO_Z <= P.z && 0.9 + z + dOut / ISO_Z >= P.z - 0.1) return true;
+      }
     }
     return false;
   }
@@ -894,72 +1086,13 @@ export class Renderer {
    * there too (class 3: spot in shade, class 4: spot in sun).
    */
   sweatAt(a, t, hq) {
+    // block 9: people waiting at a stop or on a deck carry their own heat (point model)
+    if (a.heat) return sweatState(a.k, t, a.heat.tmrt, a.heat.sunlit);
     const h = this.heatAt(a.x, a.y, hq);
     const sh = this.life.plan(hq).shade;
     const c = sh.night ? -1 : shadeAt(sh, a.x, a.y);
     const lit = c === 0 || c === 4 ? h.sunlit : c === 3 ? 1 : 0;
     return sweatState(a.k, t, h.tmrt, lit);
-  }
-
-  /**
-   * AC overlay (block 3, information only): rooftop plant on each tall
-   * building with a rising heat plume, and one label saying the model does not
-   * feel this heat. Pure function of (frame, camera).
-   */
-  drawAc(ctx, f, cam, W, H, alpha) {
-    const [ox, oy, Z] = this.origin(cam, W, H);
-    const d = this.dpr;
-    ctx.save();
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.lineCap = 'round';
-    let label = null;
-    for (const B of this.world.buildings) {
-      if (B.h < 25) continue;
-      const units = 1 + Math.floor(((B.x1 - B.x0) * (B.y1 - B.y0)) / 2500);
-      for (let u = 0; u < Math.min(3, units); u++) {
-        const x = B.x0 + (B.x1 - B.x0) * (0.25 + 0.5 * hash3(B.index, u, 61));
-        const y = B.y0 + (B.y1 - B.y0) * (0.25 + 0.5 * hash3(B.index, u, 62));
-        const p = iso(x, y, B.h + 1.5);
-        const X = ox + p[0] * Z;
-        const Y = oy + p[1] * Z;
-        if (X < -40 || X > W + 40 || Y < -80 || Y > H + 40) continue;
-        if (this.clip && (X < this.clip[0] || X > this.clip[1])) continue;
-        ctx.globalAlpha = alpha * 0.8;
-        ctx.strokeStyle = rgbCss(AC_INK);
-        ctx.lineWidth = 1.1 * d;
-        for (let k = 0; k < 3; k++) {
-          ctx.beginPath();
-          const x0 = X + (k - 1) * 4 * d;
-          for (let i = 0; i <= 10; i++) {
-            const v = i / 10;
-            const yy = Y - v * 26 * d;
-            const xx = x0 + Math.sin(v * 7 + f * 0.08 + k * 1.7 + u) * 2.2 * d * (0.4 + v);
-            if (i) ctx.lineTo(xx, yy);
-            else ctx.moveTo(xx, yy);
-          }
-          ctx.stroke();
-        }
-        if (!label || Y < label[1]) label = [X, Y - 30 * d];
-      }
-    }
-    if (label) {
-      ctx.globalAlpha = alpha;
-      ctx.font = `${Math.round(14 * d)}px "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive`;
-      ctx.textBaseline = 'bottom';
-      const text = 'AC rejected heat — not felt in this model';
-      const w = ctx.measureText(text).width;
-      const bx = clamp(label[0] - w / 2, 8 * d, W - w - 8 * d);
-      const by = Math.max(24 * d, label[1]);
-      ctx.fillStyle = 'rgba(248,243,231,0.94)';
-      ctx.fillRect(bx - 5 * d, by - 19 * d, w + 10 * d, 23 * d);
-      ctx.strokeStyle = 'rgba(138,47,34,0.7)';
-      ctx.lineWidth = 0.9 * d;
-      ctx.strokeRect(bx - 5 * d, by - 19 * d, w + 10 * d, 23 * d);
-      ctx.fillStyle = rgbCss(AC_INK);
-      ctx.fillText(text, bx, by);
-    }
-    ctx.restore();
-    this.stats.ac = !!label;
   }
 
   /**
@@ -1026,23 +1159,25 @@ export class Renderer {
     const shLen = hc.up ? Math.min(4, 1.7 / Math.tan(Math.max(8, hc.sun.alt) * DEG)) : 0;
     // people drawn a little larger than life, with a floor so they (and the
     // sweat cue) stay legible at the default overview zoom
-    const s = Math.max(Z * 1.25, 5.5 * this.dpr);
+    const s0 = Math.max(Z * 1.25, 5.5 * this.dpr);
     const lw = Math.max(0.8, this.lineBase(cam.z) * 0.8);
     const ink = rgbCss(INK);
     let count = 0;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.lineCap = 'round';
     for (const a of agents) {
-      const p = iso(a.x, a.y, 0);
+      const z = a.z || 0;
+      const p = iso(a.x, a.y, z);
       const X = ox + p[0] * Z;
       const Y = oy + p[1] * Z;
       if (X < -20 || Y < -20 || X > W + 20 || Y > H + 40) continue;
       if (this.clip && (X < this.clip[0] - 30 || X > this.clip[1] + 30)) continue;
-      if (this.hidden(a.x, a.y)) continue;
+      if (this.hidden(a.x, a.y, a.child, z)) continue;
       count++;
+      const s = a.child ? s0 * 0.7 : s0; // block 8: children
       ctx.globalAlpha = alpha;
       if (sh) {
-        const q = iso(a.x + sh[0] * shLen * 0.5, a.y + sh[1] * shLen * 0.5, 0);
+        const q = iso(a.x + sh[0] * shLen * 0.5, a.y + sh[1] * shLen * 0.5, z);
         ctx.fillStyle = 'rgba(60,70,95,0.22)';
         ctx.beginPath();
         ctx.ellipse(ox + q[0] * Z, oy + q[1] * Z, Math.max(1.2, shLen * 0.45 * s * 0.6), Math.max(0.8, 0.22 * s), 0, 0, Math.PI * 2);
@@ -1104,16 +1239,59 @@ export class Renderer {
     const [ox, oy, Z] = this.origin(cam, W, H);
     const d = this.dpr;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.font = `${Math.round(15 * d)}px "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive`;
+    const fs = W / d < 700 ? 12 : 15; // smaller hand on a phone (#29 item 4)
+    ctx.font = `${Math.round(fs * d)}px "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive`;
     ctx.textBaseline = 'top';
+    const lh = (fs + 3) * d;
+    const top = (W / d < 700 ? 96 : 8) * d; // on a phone the cartouche spans the top
+    // first pass: where each note goes
+    const placed = [];
     notes.forEach((n, i) => {
       const p = iso(n.at[0], n.at[1], n.at[2] ?? 0);
       const ax = ox + p[0] * Z;
       const ay = oy + p[1] * Z;
-      const tx = ax + n.dx * d;
-      const ty = ay + n.dy * d;
+      let tx = ax + n.dx * d;
+      let ty = ay + n.dy * d;
       if (tx < -200 * d || tx > W + 50 || ty < -60 || ty > H + 20) return;
-      ctx.globalAlpha = alpha;
+      const lines = n.text;
+      const w = Math.max(...lines.map((l) => ctx.measureText(l).width));
+      let bx = tx - (n.dx < 0 ? w + 6 * d : -6 * d);
+      let by = ty - (n.dy < 0 ? lines.length * lh : 0);
+      // keep the whole note on the canvas (#29 items 4 and 7): shift the box and the leader's end with it
+      const sx = Math.min(0, W - 8 * d - (bx + w + 5 * d)) || Math.max(0, 8 * d - (bx - 5 * d));
+      const sy = Math.min(0, H - 8 * d - (by + lines.length * lh + 3 * d)) || Math.max(0, top - (by - 3 * d));
+      bx += sx;
+      by += sy;
+      tx += sx;
+      ty += sy;
+      // and out from under the page's panels and the bottom bar (R.avoidNotes, canvas px; outside evaluation of #33):
+      // up above a panel in the lower half of the canvas, down below one in the upper half, if it still fits
+      const bh = lines.length * lh + 6 * d;
+      for (const r of this.avoidNotes ?? []) {
+        if (r[2] <= bx - 5 * d || r[0] >= bx + w + 5 * d || r[3] <= by - 3 * d || r[1] >= by - 3 * d + bh) continue;
+        const dy = (r[1] + r[3]) / 2 > H / 2 ? r[1] - 4 * d - (by - 3 * d + bh) : r[3] + 4 * d - (by - 3 * d);
+        if (by + dy - 3 * d >= top && by + dy - 3 * d + bh <= H - 8 * d) {
+          by += dy;
+          ty += dy;
+        }
+      }
+      // and off the notes placed before it: below the other box, or above it if that does not fit
+      for (const o of placed) {
+        const oh = o.lines.length * lh + 6 * d;
+        if (o.bx + o.w + 5 * d <= bx - 5 * d || o.bx - 5 * d >= bx + w + 5 * d || o.by - 3 * d + oh <= by - 3 * d || o.by - 3 * d >= by - 3 * d + bh) continue;
+        const down = o.by - 3 * d + oh + 3 * d - (by - 3 * d);
+        const up = o.by - 3 * d - 3 * d - (by - 3 * d + bh);
+        const dy = by - 3 * d + bh + down <= H - 8 * d ? down : up;
+        if (by + dy - 3 * d >= top && by + dy - 3 * d + bh <= H - 8 * d) {
+          by += dy;
+          ty += dy;
+        }
+      }
+      placed.push({ n, i, ax, ay, tx, ty, bx, by, w, lines });
+    });
+    ctx.globalAlpha = alpha;
+    // second pass: every leader first, so no leader is drawn across another note's text
+    for (const { ax, ay, tx, ty } of placed) {
       // leader: a gently bowed ink line with a dot at the anchor
       ctx.strokeStyle = rgbCss(INK);
       ctx.lineWidth = 1.1 * d;
@@ -1127,11 +1305,9 @@ export class Renderer {
       ctx.beginPath();
       ctx.arc(ax, ay, 2.2 * d, 0, Math.PI * 2);
       ctx.fill();
-      const lines = n.text;
-      const lh = 18 * d;
-      const w = Math.max(...lines.map((l) => ctx.measureText(l).width));
-      const bx = tx - (n.dx < 0 ? w + 6 * d : -6 * d);
-      const by = ty - (n.dy < 0 ? lines.length * lh : 0);
+    }
+    // third pass: the boxes and their text
+    for (const { n, i, bx, by, w, lines } of placed) {
       ctx.fillStyle = 'rgba(248,243,231,0.94)';
       ctx.fillRect(bx - 5 * d, by - 3 * d, w + 10 * d, lines.length * lh + 6 * d);
       ctx.strokeStyle = 'rgba(43,38,33,0.55)';
@@ -1144,20 +1320,20 @@ export class Renderer {
         const k = lines.findIndex((l) => l.includes(sub));
         if (k < 0) continue;
         const x0 = bx + ctx.measureText(lines[k].slice(0, lines[k].indexOf(sub))).width;
-        const w = ctx.measureText(sub).width;
-        const y = by + k * lh + 16 * d;
+        const tw = ctx.measureText(sub).width;
+        const y = by + k * lh + (fs + 1) * d;
         ctx.save();
         ctx.setLineDash([1.5 * d, 2 * d]);
         ctx.lineWidth = 1 * d;
         ctx.strokeStyle = ctx.fillStyle;
         ctx.beginPath();
         ctx.moveTo(x0, y);
-        ctx.lineTo(x0 + w, y);
+        ctx.lineTo(x0 + tw, y);
         ctx.stroke();
         ctx.restore();
-        this.noteHits.push({ key, x: x0 / d, y: y / d, w: w / d, h: lh / d });
+        this.noteHits.push({ key, x: x0 / d, y: y / d, w: tw / d, h: lh / d });
       }
-    });
+    }
     ctx.globalAlpha = 1;
   }
 }

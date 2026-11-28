@@ -1,12 +1,101 @@
 // Build: inline engine modules + a city scene into one offline HTML file.
 // Usage: node scripts/build.mjs [city-id]   (default: every city in cities/)
 // Fails if the output is over 500 KB or references anything external.
+// Each page carries the core engine plus only its own block's modules; the
+// other blocks' modules are replaced by stubs whose predicates say "not this
+// block" (STUBS), so app.js and world.js never enter their code paths.
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { posix } from 'node:path';
+import { SOURCES, MATERIALS, GLASS } from '../engine/materials.js';
+import { GLOSSARY } from '../engine/glossary.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const MODULES = ['core', 'sun', 'materials', 'reflect', 'thermal', 'world', 'pen', 'kit', 'life', 'render', 'glossary', 'retrofit', 'retroui', 'cbd', 'cbdui', 'app'];
+const MODULES = ['core', 'sun', 'materials', 'reflect', 'thermal', 'wind', 'world', 'pen', 'kit', 'life', 'render', 'glossary', 'retrofit', 'retroui', 'cbd', 'cbdui', 'waterfront', 'wfui', 'htkit', 'hutong', 'hutui', 'pkkit', 'parking', 'pkui', 'eskit', 'estate', 'esui', 'cpkit', 'campus', 'cpui', 'bskit', 'busstop', 'bsui', 'vgkit', 'village', 'vgui', 'dskit', 'desert', 'dsui', 'nmkit', 'market', 'nmui', 'app'];
+/** Block-specific modules, by the scene flag that selects them. */
+export const BLOCKS = [
+  { flag: /retrofit: true/, modules: ['retrofit', 'retroui'] },
+  { flag: /glassBlock: true/, modules: ['reflect', 'cbd', 'cbdui'] },
+  { flag: /windBlock: true/, modules: ['wind', 'waterfront', 'wfui'] },
+  { flag: /hutongBlock: true/, modules: ['htkit', 'hutong', 'hutui'] },
+  { flag: /parkingBlock: true/, modules: ['pkkit', 'parking', 'pkui'] },
+  { flag: /estateBlock: true/, modules: ['eskit', 'estate', 'esui'] },
+  { flag: /campusBlock: true/, modules: ['cpkit', 'campus', 'cpui'] },
+  { flag: /busBlock: true/, modules: ['bskit', 'busstop', 'bsui'] },
+  { flag: /villageBlock: true/, modules: ['vgkit', 'village', 'vgui'] },
+  { flag: /desertBlock: true/, modules: ['dskit', 'desert', 'dsui'] },
+  { flag: /marketBlock: true/, modules: ['nmkit', 'market', 'nmui'] },
+];
+/** What a left-out module exposes: only the predicates the core calls (always false there). */
+export const STUBS = {
+  retrofit: '{ isRetrofit: () => false }',
+  cbd: '{ isGlass: () => false }',
+  wind: '{ isWindBlock: () => false }',
+  waterfront: '{ isWaterfront: () => false }',
+  hutong: '{ isHutong: () => false }',
+  parking: '{ isParking: () => false }',
+  estate: '{ isEstate: () => false }',
+  campus: '{ isCampus: () => false }',
+  busstop: '{ isBus: () => false }',
+  village: '{ isVillage: () => false }',
+  desert: '{ isDesert: () => false }',
+  market: '{ isMarket: () => false }',
+};
+/** Modules a page needs, given its scene source. */
+export function modulesFor(scene) {
+  const own = BLOCKS.filter((b) => b.flag.test(scene)).flatMap((b) => b.modules);
+  const other = new Set(BLOCKS.flatMap((b) => b.modules).filter((m) => !own.includes(m)));
+  return MODULES.map((m) => ({ m, stub: other.has(m) }));
+}
 const LIMIT = 500 * 1024;
+
+/**
+ * Links (href) a page may carry, as an allow-list: a fragment (#id), or a
+ * relative path made only of [A-Za-z0-9._/-] (no whitespace, backslash,
+ * entity "&", colon or "//"), optionally with a #fragment, that stays inside
+ * the repository once resolved against the page's own directory. page is the
+ * page's path from the repo root (cities/<id>/index.html, references.html).
+ * Returns the offending href values (empty if all are allowed).
+ */
+export function hrefProblems(html, page) {
+  const out = [];
+  const allowed = (v) => {
+    if (/^#[A-Za-z0-9._-]*$/.test(v)) return true;
+    if (/^[A-Za-z0-9._/-]+(?:#[A-Za-z0-9._-]*)?$/.test(v) && !v.startsWith('/') && !v.includes('//')) {
+      const target = posix.normalize(posix.join(posix.dirname(page), v.split('#')[0]));
+      if (target !== '..' && !target.startsWith('../') && !posix.isAbsolute(target)) return true;
+    }
+    return false;
+  };
+  const value = (m) => m[1] ?? m[2] ?? m[3];
+  for (const m of html.matchAll(/\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/gi)) {
+    const v = value(m);
+    if (!allowed(v)) out.push(`href="${v}"`);
+  }
+  // the same allow-list for a form's action (and a button's formaction) and for every URL of a srcset
+  for (const m of html.matchAll(/\b(?:form)?action\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/gi)) {
+    const v = value(m);
+    if (!allowed(v)) out.push(`action="${v}"`);
+  }
+  for (const m of html.matchAll(/\bsrcset\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/gi)) {
+    const urls = value(m).split(',').map((c) => c.trim().split(/\s+/)[0]);
+    for (const u of urls) if (!allowed(u)) out.push(`srcset="${u}"`);
+  }
+  return out;
+}
+
+/**
+ * What a page may not reference: any URL with a host (//host/...), a src=
+ * other than data: or #, @import, url() other than data: or #, and any href
+ * outside the allow-list of hrefProblems (so no scheme, host, root path,
+ * whitespace or entity tricks, and no relative path that climbs out of the
+ * repository); form actions and srcset URLs go through the same allow-list.
+ * Allowed links open offline and fetch nothing on load.
+ */
+export function externalRefs(html, page) {
+  const hits = html.match(/(?:https?:)?\/\/[a-z0-9.-]+\.[a-z]{2,}\/|\bsrc\s*=\s*["'](?!#|data:)|@import|url\((?!\s*["']?(?:data:|#))/gi) ?? [];
+  return [...new Set([...hits, ...hrefProblems(html, page)])];
+}
 
 // Each ES module becomes a function scope; imports become destructuring.
 function wrap(name, src) {
@@ -20,34 +109,162 @@ function wrap(name, src) {
 
 const read = (p) => readFileSync(`${root}${p}`, 'utf8');
 
-function build(city) {
+// ---- per-page trimming of the shared data modules ------------------------------
+// Every page carries the whole engine core, but not every page needs all of its
+// data. Three things are cut per page at build time (the engine files and the
+// docs keep everything):
+//   - SOURCES (materials.js): only the keys the page can show: the sources of
+//     the materials its scene and its own modules name (plus the shared tree
+//     canopies), of the glass types if its modules use GLASS, and the keys its
+//     scene, its own modules and the core quote literally (card source lines);
+//   - the note of each parameter, v(value, source, basis, verified, note): read
+//     only by docs/sources.md, never by a page;
+//   - GLOSSARY (glossary.js): the terms of other blocks (scenes: [...] without
+//     this page) unless the page's code names them (gl('key') or 'key').
+const quoted = (text) => new Set([...text.matchAll(/'(\w+)'/g)].map((m) => m[1]));
+const paramSources = (o) => Object.values(o).filter((p) => p && typeof p === 'object' && 'source' in p).map((p) => p.source);
+
+/** Source keys a page needs (see above). text: its scene, own modules and core modules (materials.js and glossary.js excluded). */
+export function pageSourceKeys(sceneText, ownText, coreText) {
+  const q = quoted(`${sceneText}\n${ownText}`);
+  const keys = new Set();
+  for (const id of [...q, 'canopy', 'youngCanopy']) if (MATERIALS[id]) paramSources(MATERIALS[id]).forEach((k) => keys.add(k));
+  if (/\bGLASS\b/.test(ownText)) Object.values(GLASS).forEach((g) => paramSources(g).forEach((k) => keys.add(k)));
+  for (const k of [...q, ...quoted(coreText)]) if (k in SOURCES) keys.add(k);
+  return keys;
+}
+
+/**
+ * Block-only material groups in materials.js: an Object.assign(MATERIALS, {...})
+ * block whose heading comment names its page ("@page <city>"). Returns
+ * [{city, text}] (text: the comment line through the closing "});" and its newline).
+ * Throws if a group holds code (`function` or `=>` outside strings): groups are data only.
+ */
+export function pageMaterialGroups(src) {
+  const groups = [...src.matchAll(/^\/\/ [^\n]*@page ([\w-]+)[^\n]*\n(?:\/\/[^\n]*\n)*Object\.assign\(MATERIALS, \{\n[\s\S]*?\n\}\);\n\n?/gm)].map((m) => ({ city: m[1], text: m[0] }));
+  // data only: code in a group would leave the shared-core count on its page
+  for (const g of groups) if (/\bfunction\b|=>/.test(g.text.replace(/'(?:[^'\\\n]|\\.)*'/g, "''"))) throw new Error(`materials.js: the @page ${g.city} group holds code (function or =>); material groups are data only`);
+  return groups;
+}
+
+/** materials.js for one page: other pages' material groups cut, SOURCES cut to keys, parameter notes dropped. */
+export function trimMaterials(src, keys, city = null) {
+  for (const g of pageMaterialGroups(src)) if (g.city !== city) src = src.replace(g.text, '');
+  const a = src.indexOf('export const SOURCES = {');
+  const b = src.indexOf('\n};\n', a);
+  if (a < 0 || b < 0) throw new Error('materials.js: SOURCES block not found');
+  const lines = src.slice(a, b).split('\n');
+  const kept = lines.filter((l, i) => i === 0 || !/^  \w+: /.test(l) || keys.has(/^  (\w+): /.exec(l)[1]));
+  if (lines.some((l, i) => i > 0 && !/^  \w+: '.*',$/.test(l))) throw new Error('materials.js: every SOURCES entry must be one line');
+  const out = src.slice(0, a) + kept.join('\n') + src.slice(b);
+  return dropNotes(out);
+}
+
+/** v(value, 'source', 'basis', verified, 'note') -> v(value, 'source', 'basis', verified). */
+export const dropNotes = (text) => text.replace(/(\bv\((?:[^()'\n]|'(?:[^'\\\n]|\\.)*')*?,\s*(?:true|false)),\s*'(?:[^'\\\n]|\\.)*'\)/g, '$1)');
+
+/** glossary.js for one page: other blocks' terms dropped unless named in the page's code. */
+export function trimGlossary(src, city, text) {
+  const q = quoted(text);
+  const named = new Set([...text.matchAll(/data-gl="(\w+)"/g)].map((m) => m[1]));
+  const drop = Object.entries(GLOSSARY).filter(([k, g]) => g.scenes && !g.scenes.includes(city) && !q.has(k) && !named.has(k)).map(([k]) => k);
+  let out = src;
+  for (const k of drop) {
+    const re = new RegExp(`\\n  ${k}: \\{\\n[\\s\\S]*?\\n  \\},(?=\\n)`);
+    if (!re.test(out)) throw new Error(`glossary.js: term ${k} not found as a block`);
+    out = out.replace(re, '');
+  }
+  return out;
+}
+
+/** The page's parts: {html, bundle, own (bytes of its own block modules), scene (bytes), core (the rest)}. */
+export function pageParts(city) {
   const scene = read(`cities/${city}/scene.js`);
+  const mods = modulesFor(scene);
+  const own = new Set(BLOCKS.flatMap((b) => b.modules));
+  const ownText = mods.filter(({ m, stub }) => !stub && own.has(m)).map(({ m }) => read(`engine/${m}.js`)).join('\n');
+  const coreText = mods.filter(({ m, stub }) => !stub && !own.has(m) && m !== 'materials' && m !== 'glossary').map(({ m }) => read(`engine/${m}.js`)).join('\n');
+  const keys = pageSourceKeys(scene, ownText, coreText);
+  const shell = read('engine/shell.html');
+  const source = (m) => (m === 'materials' ? trimMaterials(read('engine/materials.js'), keys, city) : m === 'glossary' ? trimGlossary(read('engine/glossary.js'), city, `${scene}\n${ownText}\n${coreText}\n${shell}`) : read(`engine/${m}.js`));
+  const parts = mods.map(({ m, stub }) => ({ m, own: own.has(m) && !stub, text: stub ? `__m['${m}'] = ${STUBS[m] ?? '{}'};\n` : wrap(m, source(m)) }));
   const bundle = [
     "'use strict';",
     '(() => {',
     'const __m = {};',
-    ...MODULES.map((m) => wrap(m, read(`engine/${m}.js`))),
+    ...parts.map((p) => p.text),
     wrap('scene', scene),
     "__m['app'].boot(__m['scene'].SCENE);",
     '})();',
   ].join('\n');
+  // the page's own material group (kept only on this page), as it stands in the bundle
+  const own8 = pageMaterialGroups(read('engine/materials.js')).filter((g) => g.city === city).map((g) => dropNotes(g.text));
+  return { scene, keys, bundle, ownBytes: parts.filter((p) => p.own).reduce((a, p) => a + Buffer.byteLength(p.text), 0), sceneBytes: Buffer.byteLength(wrap('scene', scene)), matBytes: own8.reduce((a, t) => a + Buffer.byteLength(t), 0) };
+}
+
+function build(city) {
+  const { scene, keys: srcKeys, bundle, ownBytes, sceneBytes, matBytes } = pageParts(city);
 
   const meta = /title: '([^']+)'/.exec(scene)[1];
   const sub = /note: '([^']+)'/.exec(scene)[1];
-  const keys = /retrofit: true/.test(scene) ? '<kbd>B</kbd> before/after · ' : /glassBlock: true/.test(scene) ? '<kbd>G</kbd> glass · ' : '';
+  // the plain one-line day for the title box; the full site note (latitude, wind, vapour, fixed air) folds under For experts
+  const plain = /plain: '([^']+)'/.exec(scene)[1];
   const html = read('engine/shell.html')
     .replace(/__TITLE__/g, meta)
     .replace('__SUBTITLE__', sub)
-    .replace('__KEYS__', keys)
+    .replace('__PLAIN__', plain)
     .replace('__BUNDLE__', () => bundle.replace(/<\/script/gi, '<\\/script'));
 
-  const external = html.match(/(?:https?:)?\/\/[a-z0-9.-]+\.[a-z]{2,}\/|\b(?:src|href)\s*=\s*["'](?!#|data:)|@import|url\((?!\s*["']?(?:data:|#))/gi);
-  if (external) throw new Error(`${city}: external reference(s): ${[...new Set(external)].join(', ')}`);
+  const external = externalRefs(html, `cities/${city}/index.html`);
+  if (external.length) throw new Error(`${city}: external reference(s): ${external.join(', ')}`);
   const size = Buffer.byteLength(html);
   if (size > LIMIT) throw new Error(`${city}: built file is ${size} bytes, over the ${LIMIT} byte budget`);
   writeFileSync(`${root}cities/${city}/index.html`, html);
-  console.log(`cities/${city}/index.html  ${(size / 1024).toFixed(1)} KB`);
+  const ownSrc = ownSources(city, srcKeys).bytes + matBytes;
+  console.log(`cities/${city}/index.html  ${(size / 1024).toFixed(1)} KB (own modules ${(ownBytes / 1024).toFixed(1)} KB, scene ${(sceneBytes / 1024).toFixed(1)} KB, own sources and materials ${(ownSrc / 1024).toFixed(1)} KB, shared core ${((size - ownBytes - sceneBytes - ownSrc) / 1024).toFixed(1)} KB)`);
 }
 
-const cities = process.argv[2] ? [process.argv[2]] : readdirSync(`${root}cities`).filter((c) => existsSync(`${root}cities/${c}/scene.js`)).sort();
-for (const c of cities) build(c);
+const allCities = () => readdirSync(`${root}cities`).filter((c) => existsSync(`${root}cities/${c}/scene.js`)).sort();
+
+/**
+ * The page's own SOURCES keys: keys it carries that no other page carries
+ * (the sources only its block cites), and their bytes in its materials.js
+ * (one line each). keys: the page's key set (pageParts).
+ */
+export function ownSources(city, keys = pageParts(city).keys) {
+  const others = new Set(allCities().filter((c) => c !== city).flatMap((c) => [...pageParts(c).keys]));
+  const own = [...keys].filter((k) => !others.has(k));
+  const lines = new Map(read('engine/materials.js').split('\n').filter((l) => /^  \w+: '.*',$/.test(l)).map((l) => [/^  (\w+): /.exec(l)[1], l]));
+  return { keys: own, bytes: own.reduce((a, k) => a + Buffer.byteLength(`${lines.get(k)}\n`), 0) };
+}
+
+/**
+ * Bytes of a built page that are not its own: not its block modules, not its
+ * scene, not its own SOURCES keys (ownSources) and not its own material group
+ * (pageMaterialGroups). The shared core as this
+ * page carries it: what every page pays for.
+ */
+/**
+ * The shared core's budget, bytes per page (tests/unit/build.test.mjs). Set at
+ * 290,000 B while blocks 7-12 were still to come; raised to 300,000 B in the
+ * outside-evaluation pass (#29), whose shared page parts (the bar's heat and
+ * hour buttons, the loading hint, the phone layout, the foldable panels, the
+ * plain-words heat card with its closed expert part, notes kept on the
+ * canvas, lit windows behind nearer roofs, the glass block's patch outline
+ * and façade colours in the renderer) belong in the core on purpose: the core
+ * went from 282,913-286,762 B to 291,550-295,319 B. All twelve blocks are
+ * built and the largest page is 392 KB of the 500 KB limit.
+ */
+export const CORE_BUDGET = 310000; // 300,000 since the #29 pass; 310,000 since the outside evaluation of #33 (shared UI fixes: note placement, card tap, plain title box, ~4 KB)
+
+export function coreBytes(city) {
+  const size = Buffer.byteLength(read(`cities/${city}/index.html`));
+  const p = pageParts(city);
+  return size - p.ownBytes - p.sceneBytes - ownSources(city, p.keys).bytes - p.matBytes;
+}
+
+// run as a script (tests import modulesFor without building)
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const cities = process.argv[2] ? [process.argv[2]] : allCities();
+  for (const c of cities) build(c);
+}

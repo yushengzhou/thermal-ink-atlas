@@ -66,7 +66,7 @@ test('glass query modes, buttons and the G key', async () => {
     const st = await page.evaluate(() => ({ ...window.atlas.glass.state(), pressed: document.querySelector('#glass [aria-pressed="true"][data-glass]').dataset.glass, notes: window.atlas.notes().map((n) => n.text.join(' ')).join(' | ') }));
     assert.equal(st.glass, want, q);
     assert.equal(st.pressed, want);
-    assert.ok(st.notes.includes(GLASS[want].name.toLowerCase()), `${q}: note names the glass`);
+    assert.ok(st.notes.includes({ clear: 'clear glass', lowe: 'coated glass', mirror: 'mirror glass' }[want]), `${q}: note names the glass in plain words`);
     assert.deepEqual(errors, []);
     await context.close();
   }
@@ -242,12 +242,12 @@ test('cards: canyon, each glass, reflection spot, AC heat, extreme case; heat ca
   for (const s of ['Street canyon', 'sky view factor', 'night lag', 'Oke (1981)', 'air + 2 K', 'unverified']) assert.ok(t.includes(s), `canyon: ${s}`);
   for (const g of ['clear', 'lowe', 'mirror']) {
     t = await card(`glass-${g}`);
-    for (const s of [GLASS[g].name, 'reflectance ρ₀', 'ΔTmrt', '12:00', '15:00', 'Sources:']) assert.ok(t.includes(s), `${g}: ${s}`);
-    assert.match(t, /[−+]\d+\.\d K/);
+    for (const s of [GLASS[g].name, 'reflectance ρ₀', 'hotter, on average', '12:00', '15:00', 'Sources:']) assert.ok(t.includes(s), `${g}: ${s}`);
+    assert.match(t, /[−+]\d+\.\d°/);
     if (g !== 'clear') assert.match(t, /unverified/);
   }
   t = await card('spot');
-  for (const s of ['out of the sun, still hot', 'plain building shade', 'Chengdu', '+4 to +13', 'Single bounce only', 'reflection off']) assert.ok(t.includes(s), `spot: ${s}`);
+  for (const s of ['out of the sun, still hot', 'plain building shade', 'Chengdu', '+4 to +13', 'Single bounce only', 'without it']) assert.ok(t.includes(s), `spot: ${s}`);
   t = await card('ac');
   for (const s of ['1 + 1/COP', '20–70', '400', 'Not felt in this model']) assert.ok(t.includes(s), `ac: ${s}`);
   assert.equal((await page.evaluate(() => window.atlas.glass.state())).ac, true, 'the AC card turns the overlay on');

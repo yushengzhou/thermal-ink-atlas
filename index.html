@@ -20,23 +20,24 @@
   a.card h2 { margin: 0; font-size: 20px; }
   a.card p { margin: 4px 0 0; font-size: 14px; opacity: .8; }
   a.card p.sim { font-size: 12px; opacity: .65; letter-spacing: .02em; }
-  footer { margin-top: 48px; font-size: 13px; opacity: .7; }
+  p.refs { margin: 40px 0 0; font-size: 15px; }
+  p.refs a { color: #8a2f22; }
+  footer { margin-top: 12px; font-size: 13px; opacity: .7; }
 </style>
 </head>
 <body>
 <main>
   <h1>Thermal-Ink Atlas</h1>
-  <p class="lede">Hand-inked city blocks that show urban heat through a heat-wave day. Each block is invented, not a
-    real place, and its surface temperatures are simulated with a simple, cited energy-balance model. Each block is one
-    offline HTML file.</p>
+  <p class="lede">Hand-inked city blocks that show urban heat through a heat-wave day. Each block is made up, not a
+    real place, and its temperatures are calculated from published measurements. Open one and slide through the day.</p>
   <div class="cards">
     <a class="card" href="cities/asphalt-park/index.html">
       <img src="thumbs/asphalt-park.jpg" alt="Isometric ink drawing of an asphalt street and a shady pocket park">
       <div>
         <h2>Asphalt street vs pocket park</h2>
         <p class="hand">An old sunbaked street, one block from a shady lawn and pond.</p>
-        <p class="sim">Simulated block · invented geometry · modelled temperatures</p>
-        <p>Press T for heat, H for the hour.</p>
+        <p class="sim">Made-up block · calculated temperatures</p>
+        <p>Slide through the day and watch the street heat up while the park stays cooler.</p>
       </div>
     </a>
     <a class="card" href="cities/sponge-retrofit/index.html">
@@ -44,8 +45,8 @@
       <div>
         <h2>Sponge-city and cool-roof retrofit</h2>
         <p class="hand">The same block before and after: cool and green roofs, permeable paving, rain gardens, young trees.</p>
-        <p class="sim">Simulated block · invented geometry · modelled temperatures</p>
-        <p>Drag the divider or press B; slide the days since rain.</p>
+        <p class="sim">Made-up block · calculated temperatures</p>
+        <p>Pull the divider between before and after, and see how fast the wet ground dries after rain.</p>
       </div>
     </a>
     <a class="card" href="cities/glass-cbd/index.html">
@@ -53,12 +54,94 @@
       <div>
         <h2>Glass towers and street canyons</h2>
         <p class="hand">Deep streets shade by day and cool slowly at night; glass façades throw hot spots of reflected sun onto the street.</p>
-        <p class="sim">Simulated block · invented geometry · modelled temperatures</p>
-        <p>Switch the glass (clear, low-e, mirror) or press G.</p>
+        <p class="sim">Made-up block · calculated temperatures</p>
+        <p>Switch the glass and watch the patch of reflected sun move across the street.</p>
+      </div>
+    </a>
+    <a class="card" href="cities/waterfront/index.html">
+      <img src="thumbs/waterfront.jpg" alt="Isometric ink drawing of a river bank with a tree-lined promenade, wide streets running inland from the river with dashed wind lines along them, and a garden with a small pond">
+      <div>
+        <h2>Waterfront and wind corridors</h2>
+        <p class="hand">Streets that point along the river wind stay breezier and cooler; the river cools only a short way, and the still pond is warm at night.</p>
+        <p class="sim">Made-up block · calculated temperatures</p>
+        <p>Turn on the wind and see which streets the river breeze reaches.</p>
+      </div>
+    </a>
+    <a class="card" href="cities/hutong/index.html">
+      <img src="thumbs/hutong.jpg" alt="Isometric ink drawing of single-storey courtyard houses with grey tile roofs between narrow lanes, courtyard trees, vine pergolas and a reed-mat awning over one courtyard">
+      <div>
+        <h2>Hutong lanes and courtyards</h2>
+        <p class="hand">Low lanes stay in the sun at noon; trees, vines and the summer mat awning (天棚) give the shade, and an evening splash cools the paving for a few hours.</p>
+        <p class="sim">Made-up block · calculated temperatures</p>
+        <p>Splash the lanes in the evening, and step under the summer mat awning (天棚).</p>
+      </div>
+    </a>
+    <a class="card" href="cities/parking/index.html">
+      <img src="thumbs/parking.jpg" alt="Isometric ink drawing of a large car park with rows of parked cars, trees along the footpaths between the bays and blue solar canopies over some rows, next to a concrete yard, a lawn and rail sidings">
+      <div>
+        <h2>Car park and old rail yard</h2>
+        <p class="hand">Thick asphalt and concrete store the day's heat and keep giving a little back all night, staying a couple of degrees above the air; the rusty sheds and the dry soil of the old rail yard cool to the air much sooner.</p>
+        <p class="sim">Made-up block · calculated temperatures</p>
+        <p>Stay until 11 pm and watch the car park give back the day's heat.</p>
+      </div>
+    </a>
+    <a class="card" href="cities/estate/index.html">
+      <img src="thumbs/estate.jpg" alt="Isometric ink drawing of an older high-rise housing estate: long rows of 18-floor slab blocks with worn lawns, trees and parked cars in the courtyards between them">
+      <div>
+        <h2>Older high-rise estate</h2>
+        <p class="hand">Rows spaced for two hours of winter sun leave the summer courtyards open to the midday sun; the AC condensers pour out heat the air here cannot feel.</p>
+        <p class="sim">Made-up block · calculated temperatures</p>
+        <p>Compare July with the winter shadows the rows were spaced for, and show where the air conditioners' heat goes.</p>
+      </div>
+    </a>
+    <a class="card" href="cities/campus/index.html">
+      <img src="thumbs/campus.jpg" alt="Isometric ink drawing of a school campus: a green artificial-turf pitch inside a red running track, blue basketball courts, a grass field with trees and a playground with two shade sails">
+      <div>
+        <h2>School campus playground</h2>
+        <p class="hand">Artificial turf and play rubber get 20–40 degrees hotter than grass; shade sails and trees cool them, watering the pitch only for minutes.</p>
+        <p class="sim">Made-up block · calculated temperatures</p>
+        <p>See which play surfaces would burn bare skin at 3 pm, and what watering the pitch does.</p>
+      </div>
+    </a>
+    <a class="card" href="cities/busstop/index.html">
+      <img src="thumbs/busstop.jpg" alt="Isometric ink drawing of a wide avenue crossed by a street: small bus shelters on the sidewalks with people waiting, a red bus at a stop, steel footbridges over the avenue, shops and flats">
+      <div>
+        <h2>Bus stops and footbridges</h2>
+        <p class="hand">Standing under an opaque shelter roof takes much of the sun's radiant heat off you; on the open end of the bench the low afternoon sun gets in anyway, and a west screen helps more than a bigger roof.</p>
+        <p class="sim">Made-up block · calculated temperatures</p>
+        <p>Wait for the bus at 5 pm and find the one seat the low sun cannot reach.</p>
+      </div>
+    </a>
+    <a class="card" href="cities/village/index.html">
+      <img src="thumbs/village.jpg" alt="Isometric ink drawing of a dense urban village: rows of grey six- to eight-storey houses with narrow lanes between them and small rooms on some roofs, a road, and low rows of rooms under rusty, grey, blue and white sheet roofs">
+      <div>
+        <h2>Urban village and informal edge</h2>
+        <p class="hand">Lanes two metres wide keep much of the sun out by day but keep people from cooling off at night; bare iron roofs reach about 71 °C, and the residents' white paint, weathered over the years, keeps them about 13 degrees cooler.</p>
+        <p class="sim">Made-up block · calculated temperatures</p>
+        <p>Paint the bare iron roofs white, and look at the warmth inside the rooms under them.</p>
+      </div>
+    </a>
+    <a class="card" href="cities/desert/index.html">
+      <img src="thumbs/desert.jpg" alt="Isometric ink drawing of a desert neighbourhood: pale one- and two-storey houses built around small courtyards, gravel yards with small desert trees, a plaza with pale shade sails and a wooden ramada, a long row of shops with an arcade, a pale grey main street and a green watered lawn">
+      <div>
+        <h2>Desert courtyard neighbourhood</h2>
+        <p class="hand">A shade sail takes most of the afternoon sun's radiant heat off you (measured in Tempe: 14–20 degrees of it; this page's sails, at about 23, are likely too good); the watered lawn stays near the air but drinks about 6.5 litres per square metre a day; the light street coating cools the road and warms the people on it.</p>
+        <p class="sim">Made-up block · calculated temperatures</p>
+        <p>Slide through the day and see where the shade is; then compare the sails, the trees and the arcade, or what the lawn costs in water.</p>
+      </div>
+    </a>
+    <a class="card" href="cities/nightmarket/index.html">
+      <img src="thumbs/nightmarket.jpg" alt="Isometric ink drawing of a night market at dusk: a long paved street lined with shophouses and striped awnings, a row of small food stalls with coloured canopies, strings of lights, a crowd, and a square with more stalls in front of a red temple hall">
+      <div>
+        <h2>Night market street</h2>
+        <p class="hand">At 9 pm the granite street still gives back about 100 watts per square metre of the day's heat (the midday sun gives about 1,000), and the crowd adds more than that; but only right next to a charcoal grill does a person feel it.</p>
+        <p class="sim">Made-up block · calculated temperatures</p>
+        <p>Walk into the evening market; show the heat given off by the stone, the crowd and the stalls, then stand next to the grill.</p>
       </div>
     </a>
   </div>
-  <footer>MIT licence · thermal-ink-atlas contributors · model inputs marked unverified on the cards</footer>
+  <p class="refs"><a href="references.html">Sources</a>: every reference behind the twelve blocks, by block.</p>
+  <footer>MIT licence · thermal-ink-atlas contributors · inputs not yet checked are flagged in each card's expert part</footer>
 </main>
 </body>
 </html>

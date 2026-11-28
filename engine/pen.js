@@ -107,6 +107,25 @@ export class Pen {
     return this._push(it, sp.length ? sp.concat(Array.from(fp)) : Array.from(fp));
   }
 
+  /**
+   * Several closed shapes with one fill as one item (block 5: the window
+   * panes of a façade): polys is [[[x,y,z],...], ...]; the fill path and the
+   * ink keep pen-up breaks (NaN) between the shapes.
+   */
+  shapes(polys, fill, opts = {}) {
+    const k = this._k();
+    const fp = [];
+    const sp = [];
+    polys.forEach((wpts, n) => {
+      const p = wpts.map((q) => iso(q[0], q[1], q[2] ?? 0));
+      if (fp.length) fp.push(NaN, NaN);
+      for (const q of p) fp.push(q[0], q[1]);
+      if (opts.stroke !== null) for (let i = 0; i < p.length; i++) this._edge(sp, p[i][0], p[i][1], p[(i + 1) % p.length][0], p[(i + 1) % p.length][1], k + n * 131 + i * 31, opts.over ?? 1);
+    });
+    const it = { f: fill, s: opts.stroke === null ? null : opts.stroke ?? 1, lw: opts.lw ?? 1, fp: new Float32Array(fp), sp: new Float32Array(sp), t: opts.t, a: opts.a };
+    return this._push(it, sp.concat(fp));
+  }
+
   /** Open polyline from world points (ink only). */
   line(wpts, opts = {}) {
     const p = wpts.map((q) => iso(q[0], q[1], q[2] ?? 0));
@@ -126,6 +145,55 @@ export class Pen {
     }
     const it = { f: null, s: opts.stroke ?? 1, lw: opts.lw ?? 1, fp: null, sp: new Float32Array(sp), t: opts.t, a: opts.a, dash: opts.dash };
     return this._push(it, sp);
+  }
+
+  /**
+   * Many short strokes as one item (block 5: tile rows, brick courses,
+   * hatching): segs is [[a, b], ...] of world points; each segment gets its
+   * own wobble and overshoot, separated by pen-up breaks.
+   */
+  lines(segs, opts = {}) {
+    const k = this._k();
+    const sp = [];
+    segs.forEach(([a, b], n) => {
+      const p = iso(a[0], a[1], a[2] ?? 0);
+      const q = iso(b[0], b[1], b[2] ?? 0);
+      this._edge(sp, p[0], p[1], q[0], q[1], k + n * 31, opts.over ?? 1);
+    });
+    const it = { f: null, s: opts.stroke ?? 1, lw: opts.lw ?? 1, fp: null, sp: new Float32Array(sp), t: opts.t, a: opts.a };
+    return this._push(it, sp);
+  }
+
+  /**
+   * One continuous hand-drawn stream line (block 4 wind lines) from a flat
+   * world array [x0, y0, x1, y1, ...] at height opts.z: projected, with a
+   * slow seeded wobble across the line (no overshoot, no breaks), so it can
+   * be dashed vertex by vertex. Returns the item; sp keeps one projected
+   * point per input vertex.
+   */
+  stream(w, opts = {}) {
+    const k = opts.k ?? this._k();
+    const z = opts.z ?? 0;
+    const amp = opts.amp ?? this.amp;
+    const m = w.length / 2;
+    const sp = new Float32Array(m * 2);
+    let s = 0;
+    for (let v = 0; v < m; v++) {
+      const a = Math.max(0, v - 1);
+      const b = Math.min(m - 1, v + 1);
+      const p = iso(w[v * 2], w[v * 2 + 1], z);
+      const pa = iso(w[a * 2], w[a * 2 + 1], z);
+      const pb = iso(w[b * 2], w[b * 2 + 1], z);
+      const dx = pb[0] - pa[0];
+      const dy = pb[1] - pa[1];
+      const L = Math.hypot(dx, dy) || 1;
+      if (v) s += Math.hypot(p[0] - sp[v * 2 - 2], p[1] - sp[v * 2 - 1]);
+      const off = amp * noise1(s / 9 + (k % 89) * 1.7, k * 13 + 5);
+      sp[v * 2] = p[0] - (dy / L) * off;
+      sp[v * 2 + 1] = p[1] + (dx / L) * off;
+    }
+    const it = { f: null, s: opts.stroke ?? 1, lw: opts.lw ?? 1, fp: null, sp, t: opts.t ?? 'wind', a: opts.a };
+    return this._push(it, Array.from(sp));
   }
 
   /** Screen-plane blob (circle with wobbly outline) at a world point. */

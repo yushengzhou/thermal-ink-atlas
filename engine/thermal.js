@@ -2,6 +2,14 @@
 // dTs/dt = (2 sqrt(pi) / (mu sqrt(tau))) G - (2 pi / tau) (Ts - Td)   (Deardorff 1978)
 // G = (1-a) K + e L_down - e s Ts^4 - hc (Ts - Ta) - EF max(Q*, 0)
 // Thin layers (sheet metal) use dTs/dt = G / C instead (no restore term).
+// Block 5 adds a surface water store W (mm) on chosen cells (splashing):
+//   G = ... - EF max(Q*, 0) - LE,  LE = L beta(W) (h_c / c_p) max(0, q_sat(Ts) - q_a),
+//   beta(W) = beta_wet min(1, W / W_c),  dW/dt = -LE / L,  W := W0 at the splash hour.
+// Blocks without wet cells never enter that step (stepSplash below).
+// Block 8: efOnly with a pulse, EF = res + (ef0 - res) exp(-(t - hour) / tau).
+// Block 6 keeps G itself (opts.flux): on the stored 15-min steps the model
+// minute runs through stepFlux, the same arithmetic as stepPlain that also
+// writes G per cell; the other minutes and every other block are unchanged.
 // Computed once at load with 1-min steps, repeating the design day until the
 // deep temperature Td converges (max change < 0.05 K, at least 3 days), and
 // stored at 15-min resolution for the last day; seek() only looks values up.
@@ -17,7 +25,7 @@
 // glass walls at T_g (reflect.js glassTemp) with emissivity eps_g, reflecting
 // the air temperature for the rest.
 import { MATERIALS, MODEL, GLASS } from './materials.js';
-import { solarPosition, boxShadow, canopyShadow, rasterise, sunVector } from './sun.js';
+import { solarPosition, boxShadow, canopyShadow, rasterise as rasterOne, rasteriseScan, sunVector } from './sun.js';
 import { lerp, hexRgb, DEG } from './core.js';
 import { glassTemp, FACE_N, FACES } from './reflect.js';
 
@@ -27,6 +35,23 @@ const K0 = 273.15;
 export const SLOTS = 144; // sun / shade samples per day (10 min)
 export const STORE = 96; // stored temperature samples per day (15 min)
 export const LATENT = 2.45e6; // latent heat of vaporisation, J kg-1
+
+/** Prescribed water kinds: 1 pond of blocks 1-3 ('water'), 2 river, 3 still pond (block 4). */
+export const WATER_KIND = { water: 1, river: 2, pond: 3 };
+export const isWater = (id) => !!WATER_KIND[id];
+
+/**
+ * Prescribed water surface temperature (deg C) of a water kind at clock hour
+ * h, for the daily mean air temperature taMean:
+ *   water (blocks 1-3): taMean - 1 + sin(2 pi (h - 9) / 24)
+ *   river (block 4):    taMean - 2 + 0.5 sin(2 pi (h - 9) / 24)
+ *   pond (block 4):     taMean - 0.5 + 2 sin(2 pi (h - 10) / 24)
+ */
+export function waterTemp(kind, taMean, h) {
+  if (kind === 2) return taMean - 2 + 0.5 * Math.sin((2 * Math.PI * (h - 9)) / 24);
+  if (kind === 3) return taMean - 0.5 + 2 * Math.sin((2 * Math.PI * (h - 10)) / 24);
+  return taMean - 1 + Math.sin((2 * Math.PI * (h - 9)) / 24);
+}
 
 /** Sunrise and sunset clock hours for the site (scan at 1-min steps). */
 export function daylight(site) {
@@ -44,14 +69,15 @@ export function daylight(site) {
 
 /**
  * Air temperature (deg C): cosine rise from taMin at sunrise to taMax at
- * 15:00, cosine fall to the next sunrise.
+ * site.tmaxHour (default 15:00), cosine fall to the next sunrise.
  */
 export function airTemp(site, hour, rise) {
   const { taMin, taMax } = site;
+  const x = site.tmaxHour ?? 15;
   const h = ((hour % 24) + 24) % 24;
-  if (h >= rise && h <= 15) return taMin + ((taMax - taMin) * (1 - Math.cos((Math.PI * (h - rise)) / (15 - rise)))) / 2;
+  if (h >= rise && h <= x) return taMin + ((taMax - taMin) * (1 - Math.cos((Math.PI * (h - rise)) / (x - rise)))) / 2;
   const hh = h < rise ? h + 24 : h;
-  return taMax - ((taMax - taMin) * (1 - Math.cos((Math.PI * (hh - 15)) / (rise + 24 - 15)))) / 2;
+  return taMax - ((taMax - taMin) * (1 - Math.cos((Math.PI * (hh - x)) / (rise + 24 - x)))) / 2;
 }
 
 /** Clear-sky beam (normal) and diffuse (horizontal) irradiance, W m-2. */
@@ -96,6 +122,49 @@ export function svfAt(heightAt, x, y, z0, nDirs = 16, maxDist = 160, step = 2.5,
   return sum / nDirs;
 }
 
+/**
+ * Sky view factor by an exact horizon scan over the cell grid (block 5,
+ * narrow lanes): along each azimuth the ray steps from cell boundary to cell
+ * boundary (Amanatides-Woo traversal), and each cell it enters sets the
+ * horizon at its height over the distance to its near edge, so walls on
+ * cell edges are seen at their true distance. grid: {n, cell, height}.
+ */
+export function svfGridAt(grid, x, y, z0, nDirs = 16, maxDist = 160) {
+  const { n, cell, height } = grid;
+  let sum = 0;
+  for (let k = 0; k < nDirs; k++) {
+    const a = ((k + 0.5) / nDirs) * 2 * Math.PI;
+    const dx = Math.cos(a);
+    const dy = Math.sin(a);
+    let i = Math.floor(x / cell);
+    let j = Math.floor(y / cell);
+    const si = dx > 0 ? 1 : -1;
+    const sj = dy > 0 ? 1 : -1;
+    const ddx = Math.abs(dx) < 1e-12 ? Infinity : cell / Math.abs(dx);
+    const ddy = Math.abs(dy) < 1e-12 ? Infinity : cell / Math.abs(dy);
+    let tx = Math.abs(dx) < 1e-12 ? Infinity : ((dx > 0 ? (i + 1) * cell : i * cell) - x) / dx;
+    let ty = Math.abs(dy) < 1e-12 ? Infinity : ((dy > 0 ? (j + 1) * cell : j * cell) - y) / dy;
+    let best = 0;
+    for (;;) {
+      let t;
+      if (tx < ty) {
+        t = tx;
+        i += si;
+        tx += ddx;
+      } else {
+        t = ty;
+        j += sj;
+        ty += ddy;
+      }
+      if (t > maxDist || i < 0 || j < 0 || i >= n || j >= n) break;
+      const h = height[j * n + i] - z0;
+      if (h > 0 && h / t > best) best = h / t;
+    }
+    sum += 1 / (1 + best * best);
+  }
+  return sum / nDirs;
+}
+
 /** Shadow polygons for all buildings and trees at a sun position. */
 export function shadowPolys(world, sun, zFloor = 0) {
   const b = [];
@@ -106,21 +175,37 @@ export function shadowPolys(world, sun, zFloor = 0) {
   if (zFloor === 0) for (const A of world.awnings ?? []) b.push(boxShadow(A.x0, A.y0, A.x1, A.y1, A.z1, sun, A.z0));
   const t = [];
   for (const T of world.trees) t.push(canopyShadow(T.x, T.y, T.zc, T.r, sun));
+  // block 5: flat screens (vine pergolas, mat awnings) shade like canopies
+  if (world.screens) for (const P of world.screens) t.push(screenShadow(P, sun));
   return { b, t };
 }
+
+/** Ground shadow of a flat screen {x0, y0, x1, y1, z} (a thin box 0.1 m deep). */
+export const screenShadow = (P, sun) => boxShadow(P.x0, P.y0, P.x1, P.y1, P.z, sun, P.z - 0.1);
+
+/** Shade samples per cell side (2, i.e. 2.5 m apart on the 5 m grid; block 5: world.shadeS). */
+const samplesOf = (world) => world.shadeS ?? 2;
+/** Rasteriser for a world: the scanline version for fine shade samples (block 5; same samples, same inside rule). */
+const rasterFor = (world) => (world.shadeS ? rasteriseScan : rasterOne);
 
 /**
  * Building shade mask for one sun position: 2x2 samples per cell, 1 where a
  * building (or awning) shades the ground or a taller building shades a roof.
  */
 export function buildingMask(world, sun) {
+  if (world.shadeS && !(world.awnings && world.awnings.length)) return buildingMaskRay(world, sun);
+  return buildingMaskPoly(world, sun);
+}
+
+/** The cast-shadow polygon version of buildingMask (blocks 1-4; block 5's ray mask is checked against it). */
+export function buildingMaskPoly(world, sun) {
   const { n, cell } = world;
   const N = n * n;
-  const S = 2;
+  const S = samplesOf(world);
   const grid = { nx: n, ny: n, cell };
   const bmask = new Uint8Array(N * S * S);
   const { b } = shadowPolys(world, sun);
-  rasterise(b, grid, (i, p, s) => {
+  rasterFor(world)(b, grid, (i, p, s) => {
     const bi = world.bld[i];
     if (bi < 0) bmask[i * S * S + s] = 1; // ground cells only
   }, S);
@@ -134,9 +219,68 @@ export function buildingMask(world, sun) {
     if (!polys.length) continue;
     // only the roof's own cells can be marked: visit just its cell window
     const win = [Math.floor(R.x0 / cell), Math.floor(R.y0 / cell), Math.min(n - 1, Math.floor(R.x1 / cell)), Math.min(n - 1, Math.floor(R.y1 / cell))];
-    rasterise(polys, grid, (i, p, s) => {
+    rasterFor(world)(polys, grid, (i, p, s) => {
       if (world.bld[i] === r) bmask[i * S * S + s] = 1;
     }, S, win);
+  }
+  return bmask;
+}
+
+/**
+ * Building shade mask by ray marching (block 5: fine samples, many low
+ * boxes): a sample at (x, y, z0) (ground 0, roof its height) is shaded if the
+ * ray toward the sun enters a cell taller than the ray there. The ray is
+ * lowest where it enters a cell, so for boxes on the grid this is the same
+ * test as the cast-shadow polygons, without visiting the footprints.
+ */
+export function buildingMaskRay(world, sun) {
+  const { n, cell, height } = world;
+  const N = n * n;
+  const S = samplesOf(world);
+  const bmask = new Uint8Array(N * S * S);
+  // as the cast-shadow polygons (sun.js shadowOffset): no building shadows below 0.5 deg
+  if (sun.alt <= 0.5) return bmask;
+  const tanA = Math.tan(sun.alt * DEG);
+  const b = sun.az * DEG;
+  const dx = Math.sin(b); // toward the sun: x east, y south
+  const dy = -Math.cos(b);
+  let hMax = 0;
+  for (let i = 0; i < N; i++) hMax = Math.max(hMax, height[i]);
+  const si = dx > 0 ? 1 : -1;
+  const sj = dy > 0 ? 1 : -1;
+  const ddx = Math.abs(dx) < 1e-12 ? Infinity : cell / Math.abs(dx);
+  const ddy = Math.abs(dy) < 1e-12 ? Infinity : cell / Math.abs(dy);
+  for (let c = 0; c < N; c++) {
+    const z0 = height[c];
+    const reach = (hMax - z0) / tanA;
+    if (reach <= 0) continue;
+    const ci = c % n;
+    const cj = (c - ci) / n;
+    for (let s = 0; s < S * S; s++) {
+      const x = (ci + ((s % S) + 0.5) / S) * cell;
+      const y = (cj + (Math.floor(s / S) + 0.5) / S) * cell;
+      let i = ci;
+      let j = cj;
+      let tx = Math.abs(dx) < 1e-12 ? Infinity : ((dx > 0 ? (i + 1) * cell : i * cell) - x) / dx;
+      let ty = Math.abs(dy) < 1e-12 ? Infinity : ((dy > 0 ? (j + 1) * cell : j * cell) - y) / dy;
+      for (;;) {
+        let t;
+        if (tx < ty) {
+          t = tx;
+          i += si;
+          tx += ddx;
+        } else {
+          t = ty;
+          j += sj;
+          ty += ddy;
+        }
+        if (t > reach || i < 0 || j < 0 || i >= n || j >= n) break;
+        if (height[j * n + i] > z0 + t * tanA) {
+          bmask[c * S * S + s] = 1;
+          break;
+        }
+      }
+    }
   }
   return bmask;
 }
@@ -153,17 +297,18 @@ export function sunlitField(world, sun, bmask = null) {
   const out = new Float32Array(N);
   if (sun.alt <= 0) return out;
   out.fill(1);
-  const S = 2; // 2x2 samples per cell
+  const S = samplesOf(world); // S x S samples per cell (2 x 2 in blocks 1-4)
   const grid = { nx: n, ny: n, cell };
   const bm = bmask ?? buildingMask(world, sun);
   const t = world.trees.map((T) => canopyShadow(T.x, T.y, T.zc, T.r, sun));
   const tr = MODEL.canopyTransmission.value;
+  if (world.screens) return screenedField(world, sun, bm, t, S, out);
   if (world.trees.some((T) => T.tr !== undefined)) {
     // per-tree transmission: multiply per sample, at most three crowns deep
     // as for the uniform case
     const trans = new Float64Array(N * S * S).fill(1);
     const deep = new Uint8Array(N * S * S);
-    rasterise(t, grid, (i, p, s) => {
+    rasterOne(t, grid, (i, p, s) => {
       const k = i * S * S + s;
       if (world.bld[i] < 0 && deep[k] < 3) {
         deep[k]++;
@@ -181,7 +326,7 @@ export function sunlitField(world, sun, bmask = null) {
     return out;
   }
   const tcount = new Uint8Array(N * S * S);
-  rasterise(t, grid, (i, p, s) => {
+  rasterOne(t, grid, (i, p, s) => {
     if (world.bld[i] < 0 && tcount[i * S * S + s] < 3) tcount[i * S * S + s]++;
   }, S);
   for (let i = 0; i < N; i++) {
@@ -195,6 +340,40 @@ export function sunlitField(world, sun, bmask = null) {
   return out;
 }
 
+/**
+ * Sunlit fraction with per-tree crowns (each its own transmission, at most
+ * three crowns deep as above) and flat screens (block 5: pergolas and mat
+ * awnings, each multiplying in its own transmission), on S x S samples.
+ */
+function screenedField(world, sun, bm, t, S, out) {
+  const { n, cell } = world;
+  const N = n * n;
+  const grid = { nx: n, ny: n, cell };
+  const tr = MODEL.canopyTransmission.value;
+  const trans = new Float64Array(N * S * S).fill(1);
+  const deep = new Uint8Array(N * S * S);
+  rasterFor(world)(t, grid, (i, p, s) => {
+    const k = i * S * S + s;
+    if (world.bld[i] < 0 && deep[k] < 3) {
+      deep[k]++;
+      trans[k] *= world.trees[p].tr ?? tr;
+    }
+  }, S);
+  const sc = world.screens.map((P) => screenShadow(P, sun));
+  rasterFor(world)(sc, grid, (i, p, s) => {
+    if (world.bld[i] < 0) trans[i * S * S + s] *= world.screens[p].tr;
+  }, S);
+  for (let i = 0; i < N; i++) {
+    let f = 0;
+    for (let s = 0; s < S * S; s++) {
+      const k = i * S * S + s;
+      if (!bm[k]) f += trans[k];
+    }
+    out[i] = f / (S * S);
+  }
+  return out;
+}
+
 /** Fine shade-class raster (0 sun, 1 building shade, 2 tree shade). */
 export function shadeClassField(world, sun, cell = 2) {
   const n = Math.round(world.size / cell);
@@ -202,10 +381,10 @@ export function shadeClassField(world, sun, cell = 2) {
   if (sun.alt <= 0) return { n, cell, cls: out, night: true };
   const { b, t } = shadowPolys(world, sun);
   const grid = { nx: n, ny: n, cell };
-  rasterise(t, grid, (i) => {
+  rasterFor(world)(t, grid, (i) => {
     out[i] = 2;
   });
-  rasterise(b, grid, (i) => {
+  rasterFor(world)(b, grid, (i) => {
     out[i] = 1;
   });
   return { n, cell, cls: out, night: false };
@@ -256,7 +435,12 @@ export function runModel(world, opts = {}) {
   const N = n * n;
   const { rise } = daylight(site);
   const slots = opts.slots ?? sunSlots(world);
-  const hc = 5.7 + 3.8 * site.wind;
+  // opts.wind (block 4 presets) overrides the site wind speed u_site
+  const uSite = opts.wind ?? site.wind;
+  const hc = 5.7 + 3.8 * uSite;
+  // block 4: per-cell wind factor f_w (wind.js) -> h_c = 5.7 + 3.8 u_site f_w.
+  // Blocks without a wind direction have no f_w and keep the scalar h_c.
+  const fwFull = opts.fw ?? world.fw ?? null;
   const tauFac = (2 * Math.PI) / TAU;
   const sqrtTau = Math.sqrt(TAU);
   // block 3: specular reflection fields per slot (reflect.js reflectFor) and the glass type
@@ -281,7 +465,7 @@ export function runModel(world, opts = {}) {
   for (let i = 0; i < NN; i++) {
     const id = cellMat(world, idx ? idx[i] : i);
     const m = mats[id];
-    water[i] = id === 'water' ? 1 : 0;
+    water[i] = WATER_KIND[id] ?? 0;
     if (water[i]) continue; // prescribed temperature
     alpha[i] = m.alpha.value;
     eps[i] = m.eps.value;
@@ -315,6 +499,42 @@ export function runModel(world, opts = {}) {
     cwa[i] = cw[i] * alpha[i];
   }
   const [g0, g1, g2, g3] = gv ?? [];
+  // per-cell h_c (block 4) and whether any river / still-pond cell exists
+  let hcA = null;
+  if (fwFull) {
+    if (gv) throw new Error('per-cell wind is not supported together with glass walls');
+    hcA = new Float64Array(NN);
+    for (let i = 0; i < NN; i++) hcA[i] = 5.7 + 3.8 * uSite * fwFull[idx ? idx[i] : i];
+  }
+  const kinds = water.some((k) => k > 1);
+  // block 5: surface water store on the wet-able cells (opts.splash), see the header
+  const sp = opts.splash ?? null;
+  let WS = null;
+  if (sp) {
+    const set = new Set(sp.cells);
+    const wet = new Uint8Array(NN);
+    for (let i = 0; i < NN; i++) wet[i] = !water[i] && set.has(idx ? idx[i] : i) ? 1 : 0;
+    WS = {
+      wet,
+      W: new Float64Array(NN), // mm = kg m-2
+      evap: new Float64Array(NN), // mm evaporated over the current day
+      start: new Float64Array(NN), // W at the start of the day, just before the splash, at the end (mass balance)
+      before: new Float64Array(NN),
+      end: new Float64Array(NN),
+      store: new Float32Array(NN * STORE),
+      qa: specificHumidity(site.vapourHpa),
+      beta: sp.beta,
+      wc: sp.wc,
+      w0: sp.w0,
+      at: Math.round(sp.hour * 60),
+      efOnly: !!sp.efOnly, // the old path alone: EF := efWet from the splash hour to midnight, no store
+      efWet: sp.efWet ?? 1,
+      pulse: sp.pulse ?? null, // block 8 (tau in minutes)
+      efOn: false,
+      margin: Infinity, // smallest Ts - wet-bulb of the air over wet cells holding water, every model minute (last day)
+      marginAt: null,
+    };
+  }
 
   // per-minute forcing
   const M = 1440;
@@ -339,29 +559,50 @@ export function runModel(world, opts = {}) {
     if (lglass) for (let o = 0; o < 4; o++) lglass[m * 4 + o] = glassLongwave(glass, ta[m], ir, s, FACES[o]);
   }
   const taMean = taSum / M;
+  // block 5: the air's wet-bulb temperature per minute (K), for the wet-surface check
+  const twK = WS ? Float64Array.from(ta, (t) => wetBulb(t, site.vapourHpa) + K0) : null;
 
   const Ts = new Float32Array(NN).fill(taMean + K0);
   const Td = new Float32Array(NN).fill(taMean + K0);
   const sumDay = new Float64Array(NN);
   let store = new Float32Array(NN * STORE);
   const stepsPerStore = M / STORE;
+  // block 6: ground heat flux G (W m-2, into the surface) on the stored steps
+  const flux = opts.flux ? new Float32Array(NN * STORE) : null;
+  if (flux && (gv || WS || hcA || kinds)) throw new Error('opts.flux needs the plain step (no glass, wind factor, water kinds or water store)');
+  const Gnow = flux ? new Float64Array(NN) : null;
 
   // per-cell inputs and state for the step functions (one minute, all cells)
-  const C = { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, dt, gOpaque, g0, g1, g2, g3 };
+  const C = { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, hcA, dt, gOpaque, g0, g1, g2, g3, wt: new Float64Array(4), WS };
   let days = 0;
   let maxDelta = Infinity;
   /** One design day with steps of stepMin minutes; returns max |change of Td| over cells. */
   const runDay = (stepMin, keep) => {
     sumDay.fill(0);
     C.dt = stepMin * 60;
+    if (WS) {
+      WS.evap.fill(0);
+      WS.start.set(WS.W);
+      WS.efOn = false;
+      WS.margin = Infinity;
+      WS.marginAt = null;
+    }
     for (let m = 0; m < M; m += stepMin) {
+      if (WS && m === WS.at) {
+        // the evening splash: every wet-able cell gets W0 (the old path alone: EF switched on)
+        WS.before.set(WS.W);
+        if (WS.efOnly) WS.efOn = true;
+        else for (let i = 0; i < NN; i++) if (WS.wet[i]) WS.W[i] = WS.w0;
+      }
+      if (WS && WS.pulse && WS.efOn) WS.efWet = WS.pulse.res + (WS.pulse.ef0 - WS.pulse.res) * Math.exp(-(m - WS.at) / WS.pulse.tau);
       const h = m / 60;
       const taK = ta[m] + K0;
       const ta4 = taK * taK * taK * taK;
       // walls seen from the ground: air + 2 K plus a sun term by day that
       // peaks at midday (engine assumption; ignores wall orientation; the peak
       // value is computed in docs/sources.md)
-      const tw = wallTemp(taK, beamH[m] + dif[m]);
+      // opts.wallTemp (docs sensitivity runs only, never a page): another wall temperature, K
+      const tw = opts.wallTemp ? opts.wallTemp(taK, beamH[m] + dif[m]) : wallTemp(taK, beamH[m] + dif[m]);
       const tw4 = tw * tw * tw * tw;
       const lsky = skyEmissivity(site.vapourHpa, taK) * SIGMA * ta4;
       const lwall = SIGMA * tw4;
@@ -377,12 +618,30 @@ export function runModel(world, opts = {}) {
       const kg = kwG[m];
       const waterT = taMean - 1 + Math.sin((2 * Math.PI * (h - 9)) / 24) + K0;
       if (gv) stepGlass(C, f0, f1, st, r0, r1, bh, df, k0, kg, lsky, lwall, lglass[m * 4], lglass[m * 4 + 1], lglass[m * 4 + 2], lglass[m * 4 + 3], taK, waterT);
+      else if (WS) {
+        for (let k = 1; k <= 3; k++) C.wt[k] = waterTemp(k, taMean, h) + K0;
+        stepSplash(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK);
+      } else if (hcA || kinds) {
+        for (let k = 1; k <= 3; k++) C.wt[k] = waterTemp(k, taMean, h) + K0;
+        stepWind(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK);
+      } else if (flux && keep && m % stepsPerStore === 0) stepFlux(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT, Gnow);
       else stepPlain(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT);
+      if (WS && keep) {
+        for (let i = 0; i < NN; i++) {
+          if (WS.wet[i] && WS.W[i] > 0 && Ts[i] - twK[m] < WS.margin) {
+            WS.margin = Ts[i] - twK[m];
+            WS.marginAt = { i: idx ? idx[i] : i, h };
+          }
+        }
+      }
       if (keep && m % stepsPerStore === 0) {
         const k = m / stepsPerStore;
         for (let i = 0; i < NN; i++) store[i * STORE + k] = Ts[i] - K0;
+        if (flux) for (let i = 0; i < NN; i++) flux[i * STORE + k] = Gnow[i];
+        if (WS) for (let i = 0; i < NN; i++) WS.store[i * STORE + k] = WS.W[i];
       }
     }
+    if (WS) WS.end.set(WS.W);
     const steps = M / stepMin;
     let md = 0;
     for (let i = 0; i < NN; i++) {
@@ -399,28 +658,149 @@ export function runModel(world, opts = {}) {
   // comfortably stable: max over cells of 600 s x (cap (4 eps sigma T^3 + hc)
   // + restore) < 0.5 with T = 340 K (membrane roofs 0.31; thin metal roofs
   // about 0.96, so a block with them falls back to the plain start).
-  const warmFactor = opts.warm ? coarseStability(C, 600) : 0;
+  const warmFactor = opts.warm ? coarseStability(C, 600, WS ? latentCoupling(WS, C) : null) : 0;
   const warmUsed = !!opts.warm && warmFactor < 0.5;
   if (warmUsed) for (let k = 0; k < opts.warm; k++) runDay(10, false);
   while (days < maxDays && (days < minDays || maxDelta >= tol)) {
     maxDelta = runDay(dt / 60, true);
     days++;
   }
+  let wetInfo = null;
+  if (WS) {
+    // water left (mm, at the stored 15-min steps) and evaporated over the last day, per cell
+    let wst = WS.store;
+    const full = (a) => {
+      if (!idx) return a;
+      const out = new Float64Array(NF);
+      idx.forEach((i, c) => (out[i] = a[c]));
+      return out;
+    };
+    if (idx) {
+      wst = new Float32Array(NF * STORE);
+      idx.forEach((i, c) => wst.set(WS.store.subarray(c * STORE, (c + 1) * STORE), i * STORE));
+    }
+    // per cell, last day: evaporated, and the store at the start, just before the splash and at the end
+    // (mass balance: evap = start - before + w0 - end on wet cells)
+    wetInfo = { margin: WS.margin, marginAt: WS.marginAt, store: wst, evap: full(WS.evap), start: full(WS.start), before: full(WS.before), end: full(WS.end), wet: full(WS.wet), w0: WS.w0, beta: WS.beta, wc: WS.wc, hour: sp.hour, efOnly: WS.efOnly, qa: WS.qa };
+  }
+  let fluxFull = flux;
   if (idx) {
     const full = new Float32Array(NF * STORE);
     idx.forEach((i, c) => full.set(store.subarray(c * STORE, (c + 1) * STORE), i * STORE));
     store = full;
+    if (flux) {
+      fluxFull = new Float32Array(NF * STORE);
+      idx.forEach((i, c) => fluxFull.set(flux.subarray(c * STORE, (c + 1) * STORE), i * STORE));
+    }
   }
-  return new Thermal(world, store, slots, { rise, taMean, hc, site, ta, days, maxDelta, mats, cells: idx, refl: reflFull, glass, warm: warmUsed ? opts.warm : 0, warmFactor });
+  return new Thermal(world, store, slots, { ...(fluxFull ? { flux: fluxFull } : {}), rise, taMean, hc, fw: fwFull, wind: uSite, site, ta, days, maxDelta, mats, cells: idx, refl: reflFull, glass, warm: warmUsed ? opts.warm : 0, warmFactor, ...(wetInfo ? { wet: wetInfo } : {}) });
+}
+
+// ---- block 5: moist air and the surface water store --------------------------
+export const CP_AIR = 1005; // specific heat of air, J kg-1 K-1
+export const P_AIR = 1013.25; // air pressure, hPa (sea level)
+
+/** Saturation vapour pressure over water, hPa, at t deg C (Bolton 1980). */
+export const satVapour = (t) => 6.112 * Math.exp((17.67 * t) / (t + 243.5));
+
+/** Specific humidity (kg kg-1) of air with vapour pressure e hPa: 0.622 e / (p - 0.378 e). */
+export const specificHumidity = (e, p = P_AIR) => (0.622 * e) / (p - 0.378 * e);
+
+/** Saturation specific humidity at t deg C. */
+export const qSat = (t) => specificHumidity(satVapour(t));
+
+// q_sat table for the model step (Math.exp per cell and minute is the slow
+// part): 230-370 K every 0.02 K; linear interpolation is within 2e-7 kg kg-1
+// of the formula (checked in tests/unit/hutong.test.mjs).
+export const QSAT_T0 = 230;
+export const QSAT_DT = 0.02;
+const QSAT = Float64Array.from({ length: Math.round((370 - QSAT_T0) / QSAT_DT) + 2 }, (_, k) => qSat(QSAT_T0 + k * QSAT_DT - K0));
+/** q_sat at T kelvin from the table, as the model step reads it. */
+export function qSatTable(T) {
+  const u = (T - QSAT_T0) / QSAT_DT;
+  const k = u | 0;
+  return QSAT[k] + (QSAT[k + 1] - QSAT[k]) * (u - k);
+}
+
+/**
+ * Wet-bulb temperature (deg C) of air at ta deg C with vapour pressure e hPa:
+ * the t where c_p (ta - t) = L (q_sat(t) - q_a) (psychrometric balance), by bisection.
+ */
+export function wetBulb(ta, e) {
+  const qa = specificHumidity(e);
+  let lo = ta - 40;
+  let hi = ta;
+  for (let k = 0; k < 60; k++) {
+    const t = (lo + hi) / 2;
+    if (CP_AIR * (ta - t) > LATENT * (qSat(t) - qa)) lo = t;
+    else hi = t;
+  }
+  return (lo + hi) / 2;
+}
+
+/**
+ * Upper bound of the latent term's coupling dLE/dTs (W m-2 K-1) on wet cells
+ * for the coarse-step guard: L beta (h_c / c_p) dq_sat/dT at 340 K, the same
+ * bound coarseStability uses for the other terms (so it holds for any splash
+ * hour, not only the evening one).
+ */
+function latentCoupling(WS, C) {
+  const t = 340 - K0;
+  const dq = (qSat(t + 0.01) - qSat(t - 0.01)) / 0.02;
+  const out = new Float64Array(C.NN);
+  for (let i = 0; i < C.NN; i++) if (WS.wet[i]) out[i] = LATENT * WS.beta * ((C.hcA ? C.hcA[i] : C.hc) / CP_AIR) * dq;
+  return out;
+}
+
+/**
+ * One model minute with the surface water store (block 5): the same
+ * arithmetic as stepWind, minus LE on wet cells while they hold water.
+ * Evaporation is explicit and capped so W never goes below 0.
+ */
+export function stepSplash(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK) {
+  const { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, hcA, dt, wt, WS } = C;
+  const { wet, W, evap, qa, beta, wc, efOn, efWet } = WS;
+  for (let i = 0; i < NN; i++) {
+    if (water[i]) {
+      Ts[i] = wt[water[i]];
+    } else {
+      const sl = f0[i] + (f1[i] - f0[i]) * st;
+      const v = svf[i];
+      const K = sl * bh + v * df + cw[i] * k0 + cwa[i] * kg;
+      const L = v * lsky + (1 - v) * lwall;
+      const t = Ts[i];
+      const t4 = t * t * t * t;
+      const qstar = (1 - alpha[i]) * K + eps[i] * L - eps[i] * SIGMA * t4;
+      const h = hcA ? hcA[i] : hc;
+      let le = 0.0;
+      if (wet[i] === 1 && W[i] > 0) {
+        // q_sat(Ts) from the table (QSAT_T0, QSAT_DT), linear between entries
+        const u = (t - QSAT_T0) / QSAT_DT;
+        const k = u | 0;
+        const dq = QSAT[k] + (QSAT[k + 1] - QSAT[k]) * (u - k) - qa;
+        if (dq > 0) {
+          let E = beta * Math.min(1, W[i] / wc) * (h / CP_AIR) * dq; // kg m-2 s-1
+          if (E * dt > W[i]) E = W[i] / dt;
+          W[i] -= E * dt;
+          evap[i] += E * dt;
+          le = LATENT * E;
+        }
+      }
+      const e = efOn && wet[i] ? efWet : ef[i];
+      const G = qstar - h * (t - taK) - (qstar > 0 ? e * qstar : 0) - le;
+      Ts[i] = t + dt * (cap[i] * G - restore[i] * (t - Td[i]));
+    }
+    sumDay[i] += Ts[i];
+  }
 }
 
 /** Largest explicit-step stability factor over the cells for a step of dtS seconds (T = 340 K). */
-export function coarseStability(C, dtS) {
+export function coarseStability(C, dtS, latent = null) {
   const T3 = 340 ** 3;
   let max = 0;
   for (let i = 0; i < C.NN; i++) {
     if (C.water[i]) continue;
-    max = Math.max(max, dtS * (C.cap[i] * (4 * C.eps[i] * SIGMA * T3 + C.hc) + C.restore[i]));
+    max = Math.max(max, dtS * (C.cap[i] * (4 * C.eps[i] * SIGMA * T3 + (C.hcA ? C.hcA[i] : C.hc) + (latent ? latent[i] : 0)) + C.restore[i]));
   }
   return max;
 }
@@ -440,6 +820,60 @@ function stepPlain(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT) {
       const t4 = t * t * t * t;
       const qstar = (1 - alpha[i]) * K + eps[i] * L - eps[i] * SIGMA * t4;
       const G = qstar - hc * (t - taK) - (qstar > 0 ? ef[i] * qstar : 0);
+      Ts[i] = t + dt * (cap[i] * G - restore[i] * (t - Td[i]));
+    }
+    sumDay[i] += Ts[i];
+  }
+}
+
+/**
+ * One model minute for every cell, as stepPlain, that also writes the ground
+ * heat flux G (W m-2, positive into the surface) of each cell before its step
+ * to Gout (block 6, opts.flux; water cells 0). The arithmetic of Ts is the
+ * same statement as in stepPlain, so a flux run matches a plain run bit for bit.
+ */
+export function stepFlux(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK, waterT, Gout) {
+  const { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, dt } = C;
+  for (let i = 0; i < NN; i++) {
+    if (water[i]) {
+      Ts[i] = waterT;
+      Gout[i] = 0;
+    } else {
+      const sl = f0[i] + (f1[i] - f0[i]) * st;
+      const v = svf[i];
+      const K = sl * bh + v * df + cw[i] * k0 + cwa[i] * kg;
+      const L = v * lsky + (1 - v) * lwall;
+      const t = Ts[i];
+      const t4 = t * t * t * t;
+      const qstar = (1 - alpha[i]) * K + eps[i] * L - eps[i] * SIGMA * t4;
+      const G = qstar - hc * (t - taK) - (qstar > 0 ? ef[i] * qstar : 0);
+      Gout[i] = G;
+      Ts[i] = t + dt * (cap[i] * G - restore[i] * (t - Td[i]));
+    }
+    sumDay[i] += Ts[i];
+  }
+}
+
+/**
+ * One model minute for every cell with a per-cell h_c and / or several water
+ * kinds (block 4). The same arithmetic as stepPlain, with hcA[i] for hc (or
+ * the scalar hc when there is no wind factor) and C.wt[kind] for the water.
+ */
+function stepWind(C, f0, f1, st, bh, df, k0, kg, lsky, lwall, taK) {
+  const { NN, water, svf, alpha, eps, cap, restore, ef, cw, cwa, Ts, Td, sumDay, hc, hcA, dt, wt } = C;
+  for (let i = 0; i < NN; i++) {
+    if (water[i]) {
+      Ts[i] = wt[water[i]];
+    } else {
+      const sl = f0[i] + (f1[i] - f0[i]) * st;
+      const v = svf[i];
+      const K = sl * bh + v * df + cw[i] * k0 + cwa[i] * kg;
+      const L = v * lsky + (1 - v) * lwall;
+      const t = Ts[i];
+      const t4 = t * t * t * t;
+      const qstar = (1 - alpha[i]) * K + eps[i] * L - eps[i] * SIGMA * t4;
+      const h = hcA ? hcA[i] : hc;
+      const G = qstar - h * (t - taK) - (qstar > 0 ? ef[i] * qstar : 0);
       Ts[i] = t + dt * (cap[i] * G - restore[i] * (t - Td[i]));
     }
     sumDay[i] += Ts[i];
@@ -477,13 +911,14 @@ export const wallTemp = (taK, kGlobal) => taK + 2 + (6 * kGlobal) / 900;
 
 /**
  * Wall-reflection coefficient of cell i: a_w (1 - SVF_open), times the crown
- * factor (1 - 0.75 cover) under trees as for the sky. Glass walls are taken
+ * factor (1 - 0.75 cover) under trees as for the sky (a_w: world.wallAlbedo
+ * if set, block 11). Glass walls are taken
  * out by the caller (they reflect specularly, see reflect.js).
  */
 export function wallReflectCoef(world, i) {
   const open = world.svfOpen ? world.svfOpen[i] : world.svf[i];
   const crown = world.bld[i] < 0 ? 1 - 0.75 * world.canopy[i] : 1;
-  return MODEL.wallAlbedo.value * Math.max(0, 1 - open) * crown;
+  return (world.wallAlbedo ?? MODEL.wallAlbedo.value) * Math.max(0, 1 - open) * crown;
 }
 
 /** Shortwave on a wall (azimuth mean): k0 = f_lit I cos(beta) / pi + 0.5 D; kG = 0.5 G (times ground albedo). */
@@ -515,6 +950,45 @@ export class Thermal {
     this.store = store;
     this.slots = slots;
     this.info = info;
+  }
+
+  /** Water held on cell i at hour h, mm (block 5 splash runs; 0 elsewhere). */
+  water(i, h) {
+    const w = this.info.wet;
+    if (!w) return 0;
+    const x = ((((h % 24) + 24) % 24) * STORE) / 24;
+    const k = Math.floor(x);
+    const f = x - k;
+    const a = w.store[i * STORE + (k % STORE)];
+    const b = w.store[i * STORE + ((k + 1) % STORE)];
+    return a + (b - a) * f;
+  }
+
+  /** Water evaporated from cell i's store over the design day, mm (the model's own 1-min sum; block 5). */
+  evaporated(i) {
+    return this.info.wet ? this.info.wet.evap[i] : 0;
+  }
+
+  /** Ground heat flux G into cell i at hour h, W m-2 (block 6 flux runs; null elsewhere). Negative: the surface gives stored heat back. */
+  flux(i, h) {
+    const F = this.info.flux;
+    if (!F) return null;
+    const x = ((((h % 24) + 24) % 24) * STORE) / 24;
+    const k = Math.floor(x);
+    const f = x - k;
+    const a = F[i * STORE + (k % STORE)];
+    const b = F[i * STORE + ((k + 1) % STORE)];
+    return a + (b - a) * f;
+  }
+
+  /** Wind factor f_w of cell i (1 for blocks without a wind direction). */
+  fw(i) {
+    return this.info.fw ? this.info.fw[i] : 1;
+  }
+
+  /** Convective coefficient h_c of cell i, W m-2 K-1 (as in runModel). */
+  hcAt(i) {
+    return this.info.fw ? 5.7 + 3.8 * this.info.wind * this.info.fw[i] : this.info.hc;
   }
 
   /** Air temperature at clock hour h. */
@@ -654,7 +1128,7 @@ export class Thermal {
   evaporation(i) {
     const site = this.info.site;
     const m = (this.info.mats ?? MATERIALS)[cellMat(this.world, i)];
-    if (!m || !m.ef || cellMat(this.world, i) === 'water') return 0;
+    if (!m || !m.ef || isWater(cellMat(this.world, i))) return 0;
     const v = this.world.svf[i];
     let sum = 0;
     for (let k = 0; k < STORE; k++) {
@@ -686,10 +1160,11 @@ export class Thermal {
    * r I from the mirrored direction, same altitude, so the same f_p) and emit
    * at the glass temperature.
    */
-  tmrt(i, h) {
+  tmrt(i, h, slIn) {
+    // slIn (block 4 walkers): sunlit share of a 2 m pixel instead of the cell's
     const sw = this.shortwave(i, h);
     const s = sw.sun;
-    const sl = this.sunlit(i, h);
+    const sl = slIn ?? this.sunlit(i, h);
     const v = this.world.svf[i];
     const mat = (this.info.mats ?? MATERIALS)[cellMat(this.world, i)];
     const tg = this.ts(i, h) + K0;

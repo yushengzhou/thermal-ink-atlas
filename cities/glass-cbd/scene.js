@@ -40,6 +40,7 @@ export const SCENE = {
     taMax: 35,
     wind: 1.5,
     vapourHpa: 20,
+    plain: 'A hot summer day: the air goes from 25 °C at dawn to 35 °C in the afternoon.',
     note: 'Assumed heat-wave day: 35° N, 20 July, air 25–35 °C, light wind 1.5 m/s. Air temperature is fixed: no canyon air heating or AC waste heat is modelled.',
   },
   // Ground parcels, painted in order (later wins). Base is concrete pavement.
@@ -155,7 +156,7 @@ export const SCENE = {
   notes: [
     { at: [147.5, 217.5, 0], dx: -40, dy: 95, key: 'spot' },
     { at: [210, 170, 70], dx: 110, dy: -70, key: 'glass' },
-    { at: [135, 306, 0], dx: 60, dy: 90, key: 'lane' },
+    { at: [135, 306, 0], dx: 100, dy: 150, key: 'lane' },
     { at: [262.5, 252.5, 0], dx: 90, dy: 30, key: 'plaza' },
   ],
   startCam: { z: 2, cx: 235, cy: 225 },

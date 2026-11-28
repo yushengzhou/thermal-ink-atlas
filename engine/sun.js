@@ -133,3 +133,66 @@ export function rasterise(polys, grid, visit, s = 1, win = null) {
     }
   }
 }
+
+/**
+ * Scanline version of rasterise (block 5, many small shadows on a fine
+ * sample grid): the same samples and the same inside rule as inPoly
+ * (crossing count, x strictly left of the crossing), found per sample row
+ * from the polygon's edge crossings instead of one test per sample.
+ */
+export function rasteriseScan(polys, grid, visit, s = 1, win = null) {
+  const { nx, ny, cell } = grid;
+  const wi0 = win ? win[0] : 0;
+  const wj0 = win ? win[1] : 0;
+  const wi1 = win ? win[2] : nx - 1;
+  const wj1 = win ? win[3] : ny - 1;
+  const xs = [];
+  for (let p = 0; p < polys.length; p++) {
+    const poly = polys[p];
+    if (!poly) continue;
+    let x0 = Infinity;
+    let y0 = Infinity;
+    let x1 = -Infinity;
+    let y1 = -Infinity;
+    for (let i = 0; i < poly.length; i += 2) {
+      x0 = Math.min(x0, poly[i]);
+      x1 = Math.max(x1, poly[i]);
+      y0 = Math.min(y0, poly[i + 1]);
+      y1 = Math.max(y1, poly[i + 1]);
+    }
+    const i0 = Math.max(wi0, Math.floor(x0 / cell));
+    const i1 = Math.min(wi1, Math.floor(x1 / cell));
+    const j0 = Math.max(wj0, Math.floor(y0 / cell));
+    const j1 = Math.min(wj1, Math.floor(y1 / cell));
+    if (i0 > i1) continue;
+    const n = poly.length;
+    for (let j = j0; j <= j1; j++) {
+      for (let sj = 0; sj < s; sj++) {
+        const y = (j + (sj + 0.5) / s) * cell;
+        xs.length = 0;
+        for (let i = 0, k = n - 2; i < n; k = i, i += 2) {
+          const xi = poly[i];
+          const yi = poly[i + 1];
+          const xj = poly[k];
+          const yj = poly[k + 1];
+          if (yi > y !== yj > y) xs.push(((xj - xi) * (y - yi)) / (yj - yi) + xi);
+        }
+        if (xs.length < 2) continue;
+        xs.sort((a, b) => a - b);
+        // inside: an odd number of crossings strictly right of x, i.e. xs[2q] <= x < xs[2q + 1]
+        for (let q = 0; q + 1 < xs.length; q += 2) {
+          const a = xs[q];
+          const b = xs[q + 1];
+          const g0 = Math.max(i0 * s, Math.floor((a / cell) * s - 0.5) - 1);
+          const g1 = Math.min(i1 * s + s - 1, Math.ceil((b / cell) * s - 0.5) + 1);
+          for (let g = g0; g <= g1; g++) {
+            const i = Math.floor(g / s);
+            const si = g - i * s;
+            const x = (i + (si + 0.5) / s) * cell;
+            if (x >= a && x < b) visit(j * nx + i, p, si + sj * s);
+          }
+        }
+      }
+    }
+  }
+}

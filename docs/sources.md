@@ -9,6 +9,7 @@ Each value carries a source key and a basis tag:
 - *edge of cited range*
 - *interpretation of the source*
 - *engine assumption (no source)*
+- *calibrated to a measured value (by construction)*
 
 Values marked *unverified* have not been checked against the primary source yet; the heat cards
 label them the same way. "Cited" ranges are the research brief's figures, which it compiled from
@@ -16,9 +17,9 @@ the sources listed below without checking them.
 
 ## Surface parameters
 
-| Material | albedo α | emissivity ε | heat storage (μ, or thin-layer C) | evaporative fraction | wet after rain, drying time, water held (block 2) |
+| Material | albedo α | emissivity ε | heat storage (μ, or thin-layer C) | evaporative fraction | wet after rain, drying time, water held (block 2); crown or screen transmission (blocks 5, 6, 8, 9) |
 |---|---|---|---|---|---|
-| Aged asphalt (`asphalt`) | 0.12 [lbnl] *cited value* (LBNL aged asphalt 0.12-0.15) | 0.95 [oke] *cited value*, unverified | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 0 [brief] *cited value*, unverified (dry impervious) | — |
+| Aged asphalt (`asphalt`) | 0.12 [lbnl] *cited value* (LBNL-43442: about 0.12 +- 0.03 after about 5 years) | 0.95 [oke] *cited value*, unverified | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Concrete paving (`concrete`) | 0.3 [oke] *cited range*, unverified (cited 0.10-0.35) | 0.9 [oke] *edge of cited range*, unverified (cited 0.71-0.90) | μ 1785 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Stone paving / gravel path (`stone`) | 0.3 [oke] *cited range*, unverified (cited 0.20-0.40) | 0.92 [oke] *cited range*, unverified (cited 0.85-0.95) | μ 1500 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (between brick 1065 and stone 2220) | 0.05 [engine] *engine assumption (no source)*, unverified | — |
 | Irrigated lawn (`grass`) | 0.25 [oke] *edge of cited range*, unverified (cited 0.16-0.26) | 0.95 [oke] *edge of cited range*, unverified (cited 0.90-0.95) | μ 1400 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (soil 600-2200) | 0.8 [brief] *edge of cited range*, unverified (cited 0.6-0.8) | — |
@@ -27,26 +28,90 @@ the sources listed below without checking them.
 | Dark metal roof (`metal`) | 0.15 [oke] *cited range*, unverified (cited 0.10-0.25) | 0.9 [brief] *cited value*, unverified (~0.9 painted) | C 12000 J m⁻² K⁻¹ [brief] *cited range*, unverified (thin layers 5-20 kJ m-2 K-1) | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Cool (white) roof (`coolroof`) | 0.8 [epa] *edge of cited range*, unverified (cited >=0.65 new, 0.5-0.6 aged; 0.80 is a new, clean white roof) | 0.88 [epa] *cited range*, unverified (cited 0.85-0.90) | μ 450 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (same build-up as the dark membrane) | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Tree canopy (`canopy`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.7 [brief] *cited range*, unverified (cited 0.6-0.8) | — |
+| River (open water) (`river`) | 0.06 [oke] *cited range*, unverified (cited 0.03-0.10) | 0.96 [oke] *cited range*, unverified (cited 0.92-0.97) | μ 1545 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 1 [engine] *engine assumption (no source)*, unverified | — |
+| Still pond (shallow) (`pond`) | 0.06 [oke] *cited range*, unverified (cited 0.03-0.10) | 0.96 [oke] *cited range*, unverified (cited 0.92-0.97) | μ 1545 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified | 1 [engine] *engine assumption (no source)*, unverified | — |
 | Cool roof, aged (`coolroofAged`) | 0.6 [brief2] *cited range*, unverified (brief: aged cool roofs 0.50-0.70, of which 0.60-0.70 unverified; Chicago code floor: 3-year aged >= 0.50 [chicago]) | 0.88 [lbnlRoof] *cited value*, unverified | μ 450 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (same build-up as the dark membrane) | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Cool roof, new (`coolroofNew`) | 0.8 [lbnlRoof] *cited value*, unverified (new white roof about 0.80; read second-hand via the compendium, so unverified as in block 1) | 0.88 [lbnlRoof] *cited value*, unverified | μ 450 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (same build-up as the dark membrane) | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Extensive green roof (`greenroof`) | 0.2 [brief2] *cited range*, unverified (cited 0.15-0.25) | 0.95 [brief2] *cited value*, unverified | μ 600 J m⁻² s⁻½ K⁻¹ [brief2] *cited value*, unverified (dry substrate; wet 1200, decays with tau) | dry 0.25 [brief2] *interpretation of the source*, unverified (dry; the brief's value. Heusinger & Weber report Bowen ratio <1-2) | EF wet 0.5 [heusinger] *interpretation of the source*, unverified (wet; Bowen ratio about 1 (Heusinger & Weber: <1-2)); μ wet 1200 J m⁻² s⁻½ K⁻¹ [brief2] *cited value*, unverified (wet substrate); τ 4 d [brief2] *cited value*, unverified (substrate drying time, days); storage 30 mm [brief2] *cited range*, unverified (100 mm substrate holds 20-40 mm) |
-| Permeable pavers (`pavers`) | 0.26 [li2013] *cited value* | 0.92 [brief2] *cited value*, unverified | μ 870 J m⁻² s⁻½ K⁻¹ [engine] *engine assumption (no source)*, unverified (dry, assumed) | dry 0.02 [brief2] *interpretation of the source*, unverified (dry; brief value) | EF wet 0.5 [brief2] *interpretation of the source*, unverified (wet; brief value); τ 1 d [brief2] *interpretation of the source*, unverified (days; the brief calls it calibrated to Li 2013, but in this model it does not reproduce Li at d = 1 (see docs/sources.md)); storage 5 mm [brief2] *interpretation of the source*, unverified (brief: "a few mm", read as 5 mm; the daily water check needs >= 4.1 mm) |
+| Permeable pavers (`pavers`) | 0.26 [li2013] *cited value* | 0.92 [brief2] *cited value*, unverified | μ 870 J m⁻² s⁻½ K⁻¹ [engine] *engine assumption (no source)*, unverified (dry, assumed) | dry 0.02 [brief2] *interpretation of the source*, unverified (dry; brief value) | EF wet 0.5 [brief2] *interpretation of the source*, unverified (wet; brief value); τ 1 d [brief2] *interpretation of the source*, unverified (days; the brief calls it calibrated to Li 2013, but in this model it does not reproduce Li at d = 1); storage 5 mm [brief2] *interpretation of the source*, unverified (brief: "a few mm", read as 5 mm; the daily water check needs >= 4.1 mm) |
 | Porous asphalt (`porousAsphalt`) | 0.08 [li2013] *cited value* | 0.95 [brief2] *cited value*, unverified | μ 800 J m⁻² s⁻½ K⁻¹ [engine] *engine assumption (no source)*, unverified (dry, assumed) | dry 0.02 [brief2] *interpretation of the source*, unverified (dry; as pavers) | EF wet 0.5 [brief2] *interpretation of the source*, unverified (wet; as pavers); τ 1 d [brief2] *interpretation of the source*, unverified (days; as pavers); storage 5 mm [brief2] *interpretation of the source*, unverified (brief: "a few mm", read as 5 mm; the daily water check needs >= 4.1 mm) |
 | Cool pavement coating, 1 year old (`coolPaveAged`) | 0.18 [ko2022] *cited value*, unverified (0.26 -> 0.18 after one year) | 0.92 [brief2] *cited value*, unverified | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified (the asphalt underneath) | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Cool pavement coating, new (`coolPaveNew`) | 0.25 [middel2020] *cited value*, unverified | 0.92 [brief2] *cited value*, unverified | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified (the asphalt underneath) | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Rain garden (`raingarden`) | 0.2 [engine] *engine assumption (no source)*, unverified | 0.95 [engine] *engine assumption (no source)*, unverified | μ 1400 J m⁻² s⁻½ K⁻¹ [engine] *engine assumption (no source)*, unverified | dry 0.35 [engine] *engine assumption (no source)*, unverified (dry) | EF wet 0.8 [engine] *engine assumption (no source)*, unverified (wet); τ 3 d [mccoll] *interpretation of the source*, unverified (soil drydown, days; median not checked); storage 40 mm [engine] *engine assumption (no source)*, unverified (ponding and soil, assumed) |
 | Young street tree (`youngCanopy`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.7 [brief] *cited range*, unverified (cited 0.6-0.8) | — |
+| Grey brick paving (青砖) (`greyBrick`) | 0.2 [brief5] *cited range*, unverified (brief 0.20 (0.15-0.30); brick absorptance 0.45 light grey to 0.90 slate grey [midlandBrick]) | 0.92 [brief5] *cited value*, unverified | μ 1100 J m⁻² s⁻½ K⁻¹ [brief5] *cited value*, unverified | 0.02 [brief5] *cited value*, unverified (dry, porous brick) | — |
+| Grey tile roof on a mud and lime back (`greyTile`) | 0.18 [brief5] *cited range*, unverified (brief 0.18 (0.12-0.25); light terracotta clay tile 0.40-0.50 [carb], grey reduced-fired tile darker (unverified)) | 0.9 [brief5] *cited value*, unverified (clay tile 0.80-0.90 [carb]) | μ 1000 J m⁻² s⁻½ K⁻¹ [brief5] *cited value*, unverified (tiles bedded on a mud and lime back, not ventilated [sohuRoof]; the ventilated-tile result [miller2007] does not apply) | 0 [brief5] *cited value*, unverified (dry) | — |
+| Jujube tree (枣树) (`jujube`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.6 [brief5] *cited value*, unverified (brief value) | sun let through, tr 0.37 [brief5] *interpretation of the source*, unverified (exp(-0.5 x 2.0); brief LAI 1.5-2.5 (no measured LAI for jujube), i.e. 0.29-0.47) |
+| Pomegranate (石榴) (`pomegranate`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.6 [brief5] *cited value*, unverified (brief value) | sun let through, tr 0.29 [brief5] *interpretation of the source*, unverified (exp(-0.5 x 2.5); brief LAI 2-3, i.e. 0.22-0.37) |
+| Pagoda tree (国槐) (`pagodaTree`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.7 [brief5] *cited value*, unverified (brief value) | sun let through, tr 0.17 [brief5] *interpretation of the source*, unverified (exp(-0.5 x 3.5); brief LAI 3-4 (no measured LAI), i.e. 0.14-0.22) |
+| Vine pergola (葡萄架) (`pergola`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.6 [brief5] *cited value*, unverified (brief value) | sun let through, tr 0.29 [jjshs] *interpretation of the source*, unverified (exp(-0.5 x 2.5); vines LAI 2-3 [jjshs] (a yield study; an interpretation), overhead arbours > 90% cover [ucdavis]) |
+| Summer mat awning (天棚) (`awning`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used: only the transmission of the mat matters here) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0.2 [brief5] *cited range*, unverified (brief 0.1-0.3 for reed mats (unverified)) |
+| Track gravel (rail ballast) (`ballast`) | 0.2 [brief6] *engine assumption (no source)*, unverified (brief assumption 0.20 (0.10-0.30)) | 0.92 [brief6] *engine assumption (no source)*, unverified (brief assumption) | μ 700 J m⁻² s⁻½ K⁻¹ [brief6] *engine assumption (no source)*, unverified (effective admittance of a loose, airy layer; brief assumption 700 (600-900)) | 0 [brief6] *engine assumption (no source)*, unverified (dry, drains at once) | — |
+| Bare compacted soil (`drySoil`) | 0.25 [brief6] *engine assumption (no source)*, unverified (brief assumption 0.25 (0.20-0.35)) | 0.93 [brief6] *engine assumption (no source)*, unverified (brief assumption) | μ 800 J m⁻² s⁻½ K⁻¹ [brief6] *interpretation of the source*, unverified (dry soil about 600 [oke], read up to 800 for compacted ground (brief assumption)) | 0.05 [brief6] *engine assumption (no source)*, unverified (dry, a little moisture left deep down (brief assumption)) | — |
+| Scrubby dry vegetation (`scrub`) | 0.22 [brief6] *engine assumption (no source)*, unverified (brief assumption) | 0.95 [brief6] *engine assumption (no source)*, unverified (brief assumption) | μ 800 J m⁻² s⁻½ K⁻¹ [brief6] *engine assumption (no source)*, unverified (the dry soil beneath (brief assumption)) | 0.2 [brief6] *engine assumption (no source)*, unverified (sparse, drought-stressed plants: little water to spend (brief assumption)) | — |
+| Rusty corrugated steel shed roof (`rustShed`) | 0.2 [brief6] *engine assumption (no source)*, unverified (brief assumption for rusted steel) | 0.75 [optris] *cited range*, unverified (oxidised steel 0.69-0.88 [optris]) | C 3000 J m⁻² K⁻¹ [brief6] *interpretation of the source*, unverified (one corrugated sheet about 0.7 mm of steel, rho c about 3.6 MJ m-3 K-1 (calculation in the brief); range 2-5 kJ m-2 K-1) | 0 [brief6] *cited value*, unverified (dry) | — |
+| Solar (PV) canopy over the bays (`pvCanopy`) | 0.1 [engine] *engine assumption (no source)*, unverified (not used: the panels are a screen here) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [golden2007] *interpretation of the source*, unverified (opaque panels: no direct sun through them) |
+| Artificial turf (crumb-rubber infill) (`turf`) | 0.08 [brief8] *cited range*, unverified (brief 0.08 (0.05-0.15); Jim measured 0.073 [jim2016]; 0.10-0.12 (Loveday) and 0.069 (Wardenaar) via the brief) | 0.93 [brief8] *engine assumption (no source)*, unverified (an assumption of the brief) | μ 350 J m⁻² s⁻½ K⁻¹ [brief8] *engine assumption (no source)*, unverified (an assumption of the brief, 350 (250-500): plastic fibres over loose black SBR crumb and a shock pad; damping depth about 6 cm in the infill) | 0 [brief8] *cited value*, unverified (dry plastic: no water to spend (watering: the irrigation pulse in block 8)) | — |
+| Running track (PU / EPDM on asphalt) (`track`) | 0.12 [brief8] *cited range*, unverified (brief 0.12 (0.10-0.20), unverified) | 0.92 [brief8] *engine assumption (no source)*, unverified (an assumption of the brief) | μ 950 J m⁻² s⁻½ K⁻¹ [brief8] *interpretation of the source*, unverified (brief: a blend of about 900-1000 for a thin rubber coat over asphalt, read as 950) | 0 [brief8] *cited value*, unverified (dry) | — |
+| Acrylic court coating on asphalt (`acrylic`) | 0.2 [brief8] *cited range*, unverified (brief 0.20 (0.15-0.30); an asphalt court measured 0.24 [vanos2017]) | 0.92 [brief8] *engine assumption (no source)*, unverified (an assumption of the brief) | μ 1200 J m⁻² s⁻½ K⁻¹ [brief8] *interpretation of the source*, unverified (brief: the asphalt underneath (a coat a few millimetres thick)) | 0 [brief8] *cited value*, unverified (dry) | — |
+| Poured rubber play surface (`rubber`) | 0.12 [brief8] *interpretation of the source*, unverified (the brief has no row for play-surface rubber; its PU / EPDM track value 0.12 (0.10-0.20) is used) | 0.92 [brief8] *engine assumption (no source)*, unverified (as the track (an assumption of the brief)) | μ 950 J m⁻² s⁻½ K⁻¹ [brief8] *interpretation of the source*, unverified (as the track: EPDM granules over an SBR base on a hard bed) | 0 [brief8] *cited value*, unverified (dry) | — |
+| Shade sail (knitted HDPE) (`shadeSail`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used: only the transmission of the fabric matters here) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0.2 [brief8] *cited range*, unverified (brief 0.10-0.30 for knitted HDPE shade cloth (unverified); the middle value) |
+| Opaque metal shelter roof (`roofMetal`) | 0.15 [engine] *engine assumption (no source)*, unverified (not used: the roof is a screen; its underside is the warm-wall term) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [brief9] *cited value*, unverified (opaque metal, PV or ad panel: no direct sun through it) |
+| Clear polycarbonate shelter roof (`polyClear`) | 0.1 [engine] *engine assumption (no source)*, unverified (not used) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0.8 [brettMartin] *cited value*, unverified (10 mm twinwall, clear: solar transmission 0.80 (datasheet via the brief)) |
+| Opal polycarbonate shelter roof (`polyOpal`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0.47 [brettMartin] *cited value*, unverified (10 mm twinwall, opal: solar transmission 0.47 (bronze 0.43, not used) (datasheet via the brief)) |
+| Clear glass shelter (roof and walls) (`glassBox`) | 0.08 [engine] *engine assumption (no source)*, unverified (not used) | 0.84 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0.82 [brief3] *interpretation of the source*, unverified (1 - rho0 - a_g of clear float glass at normal incidence (block 3: 0.08 and 0.10); the brief gives no glass value; less at a glancing angle (not modelled)) |
+| Opaque shelter panel (advertising panel or sheet) (`adPanel`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [brief9] *cited value*, unverified (opaque ad panel: no direct sun through it) |
+| Footbridge deck (steel) (`bridgeDeck`) | 0.15 [engine] *engine assumption (no source)*, unverified (not used for the screen: the deck surface is the shared thin metal layer (metal)) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [engine] *engine assumption (no source)*, unverified (the deck shades the road beneath it) |
+| Footbridge cover (opaque metal) (`bridgeRoof`) | 0.15 [engine] *engine assumption (no source)*, unverified (not used) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [brief9] *cited value*, unverified (opaque metal cover) |
+| Rusty corrugated iron roof (`rustTin`) | 0.25 [brief10] *cited range*, unverified (an assumption of the brief, 0.20-0.30 (no measured albedo of rusty iron was found); the middle value) | 0.825 [emissTables] *cited range*, unverified (brief 0.75-0.90 from emissivity tables (rusted iron 0.69-0.96); the middle value) | C 3000 J m⁻² K⁻¹ [brief10] *cited range*, unverified (one corrugated sheet, brief 2-4 kJ m-2 K-1; the middle value) | 0 [brief10] *cited value*, unverified (dry) | — |
+| Galvanised (zinc-coated) iron sheet roof (`galvTin`) | 0.6 [energyStarRoof] *cited range*, unverified (brief 0.55-0.65 (bare metal 0.78 new, 0.58 after 3 years on the ENERGY STAR list, retired in 2022); the middle value) | 0.25 [emissTables] *cited range*, unverified (brief 0.25 for new galvanised steel (tables 0.23-0.28); old galvanised sheet about 0.88) | C 3000 J m⁻² K⁻¹ [brief10] *cited range*, unverified (one sheet, brief 2-4 kJ m-2 K-1; the middle value) | 0 [brief10] *cited value*, unverified (dry) | — |
+| Asbestos-cement sheet roof (aged) (`asbestosRoof`) | 0.3 [brief10] *cited range*, unverified (an assumption of the brief, 0.25-0.35 (no measured albedo found); the middle value) | 0.9 [brief10] *cited value*, unverified (an assumption of the brief) | C 8000 J m⁻² K⁻¹ [brief10] *cited value*, unverified (about 8 kJ m-2 K-1 for a corrugated cement sheet (an assumption of the brief)) | 0 [brief10] *cited value*, unverified (dry) | — |
+| Tarpaulin roof (`tarpRoof`) | 0.3 [brief10] *cited value*, unverified (an assumption of the brief (no measured value found)) | 0.9 [brief10] *cited value*, unverified (an assumption of the brief) | C 2000 J m⁻² K⁻¹ [brief10] *cited value*, unverified (the brief's floor: a real sheet holds about 0.4 kJ m-2 K-1, which makes the explicit 60 s step unstable (time constant about 20 s), so C is set to 2 kJ (time constant about 110 s); on the 15-min output the floor changes little) | 0 [brief10] *cited value*, unverified (dry) | — |
+| Corrugated iron, newly painted white (`whiteTin`) | 0.65 [brief10] *cited value*, unverified (white-painted tin 0.65 new (brief, from the earlier briefs)) | 0.88 [brief10] *cited value*, unverified (white paint) | C 3000 J m⁻² K⁻¹ [brief10] *cited range*, unverified (the same sheet as the bare roof, brief 2-4 kJ m-2 K-1) | 0 [brief10] *cited value*, unverified (dry) | — |
+| Corrugated iron painted white (weathered paint) (`whiteTinAged`) | 0.5 [brief10] *cited value*, unverified (white-painted tin 0.50 aged (brief, from the earlier briefs)) | 0.88 [brief10] *cited value*, unverified (white paint) | C 3000 J m⁻² K⁻¹ [brief10] *cited range*, unverified (the same sheet as the bare roof, brief 2-4 kJ m-2 K-1) | 0 [brief10] *cited value*, unverified (dry) | — |
+| Flat concrete roof slab (`slabRoof`) | 0.25 [oke] *cited value*, unverified (concrete roof slab 0.25 (via the block-10 brief)) | 0.9 [oke] *cited value*, unverified (via the block-10 brief) | μ 1785 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified (concrete, as the shared concrete paving) | 0 [brief10] *cited value*, unverified (dry) | — |
+| Decomposed granite and gravel (xeriscape) (`gravel`) | 0.275 [brief11] *cited range*, unverified (brief 0.16-0.39 for gravel and decomposed granite (unverified); the middle value) | 0.92 [oke] *cited range*, unverified (as the shared stone and gravel path, cited 0.85-0.95) | μ 800 J m⁻² s⁻½ K⁻¹ [brief6] *interpretation of the source*, unverified (a loose gravel layer on dry ground: the shared bare dry soil (block 6: dry soil about 600, read up to 800)) | 0 [brief11] *interpretation of the source*, unverified (dry: a xeriscape yard is not watered) | — |
+| Irrigated lawn (bermudagrass) (`desertLawn`) | 0.25 [oke] *edge of cited range*, unverified (as the shared lawn, cited 0.16-0.26) | 0.95 [oke] *edge of cited range*, unverified (as the shared lawn, cited 0.90-0.95) | μ 1400 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (as the shared lawn, soil 600-2200) | 0.9 [brief11] *cited range*, unverified (an engine assumption of the brief, 0.85-0.95; the middle value (the spec's 0.9). A fixed share of net radiation: it does not react to the dry air) | — |
+| Street with a light reflective coating (`coolCoat`) | 0.345 [coolPave2024] *cited range*, unverified (coated reflectance 0.30-0.39 [coolPave2024]; the middle value. Uncoated, the street is the shared aged asphalt (0.12), lighter than the 0.036 measured there) | 0.95 [oke] *cited value*, unverified (as asphalt) | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified (the asphalt beneath) | 0 [brief] *cited value*, unverified (dry impervious) | — |
+| Shade sail (knitted HDPE) (`desertSail`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used: only the transmission of the cloth matters here) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0.15 [brief11] *cited range*, unverified (the spec's 0.15, inside the brief's suggested 0.10-0.25 (no measured value checked; unverified)) |
+| Ramada (shade roof on posts) (`ramada`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [brief11] *cited value*, unverified (an opaque roof: no direct sun through it (the spec)) |
+| Arcade (covered walkway along the shops) (`arcadeRoof`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [brief11] *cited value*, unverified (an opaque roof (the brief's arcades, tunnels and overhangs)) |
+| Mesquite tree (Prosopis) (`mesquite`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.7 [brief] *cited range*, unverified (not used: leaf temperature is the shared canopy formula) | sun let through, tr 0.3 [middel2021] *calibrated to a measured value (by construction)*, unverified (the share of sun through the crown, calibrated (scripts/desert.mjs calibrateMesquite: bisection, 0.302, rounded) so that the mesquites' mean Tmrt at 15:00 is 16.7 K below open sun, as measured under Prosopis [middel2021]; no measured leaf area was found (brief). As exp(-0.5 LAI): LAI about 2.4) |
+| Palo verde tree (Parkinsonia) (`paloVerde`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.7 [brief] *cited range*, unverified (not used: leaf temperature is the shared canopy formula) | sun let through, tr 0.3 [brief11] *engine assumption (no source)*, unverified (taken as the mesquite's calibrated crown (0.3): no measured value was found; the brief groups the two native trees) |
+| Shop awning (canvas) (`marketAwning`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used: only the transmission of the canvas matters here) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0 [engine] *engine assumption (no source)*, unverified (taken as opaque (no value in the brief): no direct sun through it) |
 
 Not used by the grid model:
 
 - `water`: Not used by the grid model: the pond is held at daily mean air - 1 K, +-1 K (research brief).
 - `canopy`: Not used by the grid model: leaf temperature = air + 2.5 K x (K/900 W m-2) by day, air - 0.5 K at night (engine assumption; brief: air +0-3 K).
+- `river`: Not used by the grid model: the river is held at daily mean air - 2 K, +-0.5 K (peak at 15:00), so it stays below the air all afternoon (research brief, block 4; offset and amplitude are assumptions).
+- `pond`: Not used by the grid model: the pond is held at daily mean air - 0.5 K, +-2 K (peak at 16:00): cooler than the afternoon air, warmer than the air before dawn (research brief, block 4; numbers are assumptions, the warm night is cited).
 - `youngCanopy`: Not used by the grid model: leaf temperature as for mature trees. Its thin crown lets through exp(-0.5 x 1.5) = 0.47 of the sun (see youngTreeTransmission).
+- `jujube`: Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.
+- `pomegranate`: Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.
+- `pagodaTree`: Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.
+- `pergola`: Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.
+- `awning`: Not used by the grid model as a surface: a flat screen above the eaves that lets through tr of the sun; the cells under it count as fully covered for the sky view (crown factor).
+- `pvCanopy`: Not used by the grid model as a surface: a flat opaque screen 4.2 m up; the ground beneath sees the sky with SVF 0.11 [golden2007] and the panel undersides as warm walls (engine assumption).
+- `shadeSail`: Not used by the grid model as a surface: a flat screen 3.5 m up that lets through tr of the sun; the cells under it count as fully covered for the sky view (crown factor), so their walls term stands in for the warm fabric overhead.
+- `roofMetal`: Not used by the grid model as a surface: a flat opaque screen 2.65 m up; at the waiting points (point model) its underside is seen as the warm-wall term (air + 2 K, more by day).
+- `polyClear`: Not used by the grid model as a surface: a flat screen that lets through tr of the direct sun; its diffuse light is not counted (the sky view counts it as cover).
+- `polyOpal`: As the clear sheet: a flat screen that lets through tr of the direct sun.
+- `glassBox`: A flat glass roof (screen) and glass walls that let through tr of the direct sun; the air trapped inside is not modelled.
+- `adPanel`: A vertical panel: it blocks the direct sun on the 5 m grid (as a thin opaque box) and at the waiting points; it reflects no sunlight and its own temperature is not computed.
+- `bridgeDeck`: Over the road a flat opaque screen 6 m up; its walking surface is computed at points as the shared dark metal thin layer (metal).
+- `bridgeRoof`: A flat opaque screen 2.65 m above the deck.
+- `desertSail`: Not used by the grid model as a surface: a flat screen 4 m up that lets through tr of the sun; the cells under it count as fully covered for the sky view (crown factor), so the warm-wall term stands in for the cloth overhead.
+- `ramada`: Not used by the grid model as a surface: a flat opaque screen 3.2 m up; the cells under it count as fully covered for the sky view (crown factor).
+- `arcadeRoof`: Not used by the grid model as a surface: a flat opaque screen 3.5 m up along the shopfronts; with the building beside it, the walkway sees little sky.
+- `mesquite`: Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.
+- `paloVerde`: Not used by the grid model as a surface: leaf temperature as for the other trees; its crown shades the ground with its own transmission tr.
+- `marketAwning`: Not used by the grid model as a surface: a flat opaque screen 3.2 m up in front of each shophouse; the cells under it count as fully covered for the sky view (crown factor), so the warm-wall term stands in for the canvas overhead.
 
 Shown on the heat cards as a caveat:
 
-- `grass`: Its 3 pm place below shaded paving holds only with evaporative fraction and albedo at the top of their cited ranges (see Sensitivity in docs/sources.md).
-- `coolroof`: Its 3 pm place below shaded paving holds only with albedo at the top of its cited range (see Sensitivity in docs/sources.md).
+- `grass`: Its 3 pm place below shaded paving holds only with evaporative fraction and albedo at the top of their cited ranges (tested in the model notes).
+- `coolroof`: Its 3 pm place below shaded paving holds only with albedo at the top of its cited range (tested in the model notes).
 
 ## Model constants
 
@@ -69,20 +134,52 @@ Shown on the heat cards as a caveat:
 | `glassHo` | 20 [brief3] *cited range*, unverified (outside film coefficient h_o, brief 15-25 W m-2 K-1) |
 | `glassHi` | 7.7 [iso6946] *interpretation of the source*, unverified (inside film coefficient h_i,eff, W m-2 K-1, read as 1 / 0.13) |
 | `sweatCue` | Tmrt 65 -> 70 C [engine] *engine assumption (no source)*, unverified (visual cue only: droplets on people in sun, strength rising from Tmrt 65 C to full at 70 C (separates sunlit pavement from sunlit lawn in this model); no physiological model) |
+| `windFmin` | 0.3 [brief4] *engine assumption (no source)*, unverified (f_min: wind factor right behind an obstacle (leeward face); also the lower clamp of f_w) |
+| `shelterReach` | 5 H [brief4] *engine assumption (no source)*, unverified (shelter recovers linearly to 1 at 5 building heights downwind ("5H recovery" is an assumption in the brief; wake recirculation 1.6-2.6 x building width is cited [wake])) |
+| `channelC` | 0.2 [brief4] *engine assumption (no source)*, unverified (c_ch: channelling gain in streets aligned with the wind, C = 1 + c_ch max(0, cos 3 delta)) |
+| `windFmax` | 1.2 [brief4] *engine assumption (no source)*, unverified (f_max: upper clamp of f_w) |
+| `alignCut` | 30 deg [corridor] *cited value*, unverified (channelling only in streets whose axis is within 30 deg of the wind) |
+| `channelHw` | 0.4 [oke1988] *interpretation of the source*, unverified (channelling only where the street H/W > 0.4 (read from the Oke 1988 regime thresholds, about 0.3-0.4, unverified)) |
+| `windHc` | h_c = 5.7 + 3.8 u_site f_w [brief4] *interpretation of the source*, unverified (the same h_c formula [oke] with the local wind u_i = u_site f_w per cell (roofs and blocks without a wind direction: f_w = 1). The formula is a near-surface flat-plate fit fed here with the 10 m wind x f_w, which overstates street-level h_c and its wind sensitivity) |
+| `riverCurve` | Ta_mean - 2 K + 0.5 K sin(2 pi (h - 9) / 24) [brief4] *engine assumption (no source)*, unverified (prescribed river surface; range 1 K (large rivers: smallest daily range [webb2008]); the -2 K offset and 0.5 K amplitude are assumptions) |
+| `pondCurve` | Ta_mean - 0.5 K + 2 K sin(2 pi (h - 10) / 24) [brief4] *engine assumption (no source)*, unverified (prescribed shallow pond surface; range 4 K; warmer than the air at night is cited [solcerova2019], the numbers are assumptions) |
+| `airDay` | 1 [brief4] *cited range*, unverified (overlay only: dTa at the bank by day, -1.0 K (cited range 0.2-1.5 K [hathway2012, cheonggyecheon, jacobs2020])) |
+| `airL` | 30 [brief4] *cited range*, unverified (overlay only: decay length L, m (cited 30-80 m [hathway2012, cheonggyecheon], unverified)) |
+| `airLaligned` | 60 [brief4] *interpretation of the source*, unverified (overlay only: decay length in streets aligned with the wind, m, chosen so the effect is below 0.2 K by 150 m (the brief reads the Ota River 150-500 m [ota] as at most 150 m here)) |
+| `airNight` | 0.3 [brief4] *engine assumption (no source)*, unverified (overlay only: dTa at the bank at night, +0.3 K (range 0-1 K assumed; the sign is cited [steeneveld2014, solcerova2019])) |
+| `airPond` | 0.2 [jacobs2020] *cited value*, unverified (overlay only: dTa next to the small pond by day, -0.2 K (Jacobs et al. typical afternoon value)) |
+| `apparentTemp` | AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25 [bom] *cited value* (Steadman (1994) [steadman1994], coefficients checked against the BoM page; comfort for the walkers in block 4 (a stand-in for UTCI, which is not implemented); ws = u_10 f_w clamped to 0.5-17 m/s as the brief gives for UTCI) |
+| `atRadiation` | Q = 6.1 W m-2 K-1 x (Tmrt - Ta) [bom] *interpretation of the source*, unverified (extra radiation absorbed by a person, linearised: 4 eps sigma T^3 with eps 0.97 and T 303 K over the whole body surface. At a sunlit Tmrt near 68 C (341 K) 4 eps sigma T^3 is about 8.7, so Q is understated by about 30% there; a standing person radiates over only about 0.7 of the body surface (ASHRAE effective radiating area), which errs the other way. Route weights divide by the sun-shade AT gap, so this largely cancels for the walkers; absolute AT on the cards carries it) |
+| `windLines` | seeds every 20 m upwind, RK2 2.5 m steps, slide along buildings [brief4] *engine assumption (no source)*, unverified (drawing only: assumed direction x shelter factor, not computed flow; dash spacing and speed proportional to u_i (speed drawn 4x)) |
+| `waterStore` | LE = L beta(W) (h_c / c_p) max(0, q_sat(Ts) - q_a), dW/dt = -LE / L [brief5] *cited value*, unverified (bulk evaporation from the splashed paving; beta(W) = beta_wet min(1, W / W_c); c_p 1005 J kg-1 K-1, p 1013.25 hPa, q = 0.622 e / (p - 0.378 e); adds to the EF term, which is zero after sunset) |
+| `satVapour` | e_s = 6.112 exp(17.67 T / (T + 243.5)) hPa [bolton1980] *cited value*, unverified (saturation vapour pressure over water) |
+| `splashW0` | 1 [brief5] *edge of cited range*, unverified (W0, mm of evaporable water left on the paving by one splash; brief 0.5-1.0 mm of the 1-2 L m-2 thrown (about 1 L m-2 per cycle in Paris [hendel2015])) |
+| `splashBeta` | 0.5 [brief5] *cited range*, unverified (beta_wet, the wetness factor of splashed brick; brief 0.3-1 (unverified); Kobe asphalt 0.15 [takebayashi2023]) |
+| `splashWc` | 0.2 [brief5] *cited value*, unverified (W_c, mm: below it the wet patch dries up and beta falls in proportion) |
+| `splashHour` | 19 [brief5] *cited value*, unverified (the evening splash, every evening of the repeated design day (evening watering recommended [takebayashi2023]; the uchimizu custom [nippon])) |
+| `shadeSamples` | 4 x 4 per 5 m cell [engine] *engine assumption (no source)*, unverified (block 5 only: shade sampled every 1.25 m, so the 1.2 m wall shadow of a 5 m lane at noon registers (blocks 1-4: 2 x 2)) |
+| `screenCover` | SVF x (1 - 0.75) [engine] *engine assumption (no source)*, unverified (cells under a pergola or awning take the crown factor of a full tree crown for the sky view and wall reflection, as cells under trees do) |
+| `groundFlux` | G = (1 - a) K + eps L - eps sigma Ts^4 - h_c (Ts - Ta) - EF max(Q*, 0) [deardorff] *cited value*, unverified (the force-restore surface flux into the ground (thin layers: C dTs/dt), stored every 15 min; negative = the ground gives stored heat back) |
+| `dampingDepth` | d = sqrt(kappa tau / pi) [brief6] *cited value*, unverified (kappa = k / (rho c); HMA 0.126 m, PCC 0.133 m from the Stempihar inputs [stempihar2012]; force-restore holds for slabs thicker than about 1.5 d (about 0.2 m)) |
+| `pvSvf` | 0.11 [golden2007] *cited value*, unverified (sky view factor of the ground under the PV canopy, as measured by Golden et al.; set on the cells whose centre is under a panel row) |
+| `carShade` | sunlit x (1 - car share) [engine] *engine assumption (no source)*, unverified (parked cars as a sub-grid shade: each cell loses the share of its area under car footprints from its direct sun, all day (the lot is taken as full; shadows are not offset with the sun angle)) |
+| `carSky` | SVF x (1 - car share) [engine] *engine assumption (no source)*, unverified (all day: the ground under a car sees the car underside, taken as the warm-wall term (air + 2 K, more by day), instead of the sky, so it also loses diffuse sky light by day) |
+| `thinPaving` | 600 [brief6] *interpretation of the source*, unverified (effective admittance of thin (< 0.2 m) asphalt over a loose base, for the thin-layer check only (not in the scene); brief: thin paving needs a lower effective mu) |
 
 The wall term's daytime part peaks at 6.8 K on the design day (total wall excess up to 8.8 K above air).
 
 ## Source keys
 
-- **[lbnl]** Pomerantz et al. (2000) LBNL-49283, cool pavements: asphalt albedo 0.05 fresh, 0.12-0.15 aged
-- **[oke]** Oke (1987/2017) Boundary Layer Climates / Urban Climates, surface property tables (cited from memory in the research brief)
-- **[epa]** US EPA (2008) Reducing Urban Heat Islands: Cool Pavements / Cool Roofs compendium
+- **[lbnl]** Pomerantz, Pon, Akbari & Chang (2000) LBNL-43442, The effect of pavements' temperatures on air temperatures in large cities (Fig. 1): asphalt albedo about 0.05 fresh, about 0.12 +- 0.03 after about 5 years; secondary: Pomerantz et al. (2003) LBNL-49283, doi 10.2172/816205, which quotes the same values
+- **[oke]** Oke (1987) Boundary Layer Climates, 2nd ed. (Methuen) / Oke, Mills, Christen & Voogt (2017) Urban Climates (Cambridge University Press), surface property tables (cited from memory in the research brief)
+- **[epa]** US EPA Reducing Urban Heat Islands: Compendium of Strategies (October 2008; the Cool Pavements chapter updated 2012, cited as 2012; the 2012 text was not read)
 - **[brief]** Research brief docs/research/thermal-model-brief.md (ranges compiled from the sources above; not yet checked)
 - **[deardorff]** Deardorff (1978) J. Geophys. Res. 83(C4) 1889-1903, force-restore method (NASA NTRS 19780019748)
-- **[melnikov]** Melnikov et al. (2022) Scientific Reports 12, 2617, doi 10.1038/s41598-022-06383-5
+- **[melnikov]** Melnikov et al. (2022) Scientific Reports 12, 2441, doi 10.1038/s41598-022-06383-5
 - **[engine]** Engine assumption: no literature source
 - **[brief2]** Research brief docs/research/retrofit-brief.md (block 2; values compiled from the sources below, items marked unverified there are flagged here)
-- **[lbnlRoof]** US EPA Cool Roofs compendium with ENERGY STAR / LBNL roof data: new white roof albedo about 0.80; LBNL-6714E: in-service roofs often below their CRRC aged rating
+- **[lbnlRoof]** US EPA Cool Roofs compendium with ENERGY STAR / LBNL roof data: new white roof albedo about 0.80
+- **[rupar2015]** Rupar & Graham (2015) ASTM STP1590, 153-205, doi 10.1520/STP159020150019 (abstract only): 70 Chicago-area roofs 2008-2012, in-service reflectance generally below the listed aged values
 - **[chicago]** Chicago energy code via the block-2 brief: low-slope roofs need initial albedo >= 0.72 or 3-year aged >= 0.50
 - **[santamouris]** Santamouris (2014) Solar Energy 103, 682-703, doi 10.1016/j.solener.2012.07.003, cool roofs and pavements review
 - **[noaaGreen]** NOAA Institutional Repository noaa_57843: Javits Center green roof, NYC, up to 18.4 K cooler than a black roof
@@ -102,16 +199,167 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[oke1981]** Oke (1981) J. Climatol. 1, 237-254, doi 10.1002/joc.3370010304: max nocturnal UHI = 7.45 + 3.97 ln(H/W) (coefficients via a secondary source, redalyc 283230157011)
 - **[theeuwes2014]** Theeuwes et al. (2014) Q. J. R. Meteorol. Soc., doi 10.1002/qj.2289: the Oke relation breaks down at high H/W
 - **[johansson2006]** Johansson (2006) Building and Environment, doi 10.1016/j.buildenv.2005.05.022: Fez deep canyon (H/W about 10) about 6 K, up to 10 K, cooler by day
-- **[zhu2018]** Zhu, Jahn & Rein (2018) J. Building Performance Simulation, doi 10.1080/19401493.2018.1538389: 20 Fenchurch St simulated peak 3,384 W m-2 (worst 4,176)
+- **[zhu2018]** Zhu, Jahn & Rein (2019, online 2018) J. Building Performance Simulation 12(4), 378-387, doi 10.1080/19401493.2018.1538389: 20 Fenchurch St simulated peak 3,384 W m-2 (worst 4,176)
 - **[vdara]** Vdara hotel, Las Vegas, 2010 pool-deck hot zone (NBC News; Architectural Record): anecdotal
 - **[speroni2022]** Speroni et al. (2022) Sustainability 14, 5781, doi 10.3390/su14105781 (abstract only): scale models, diffuse façades <= +30%, flat mirror > +100%, concave > +300% at pedestrian level
 - **[du2025]** Du et al. (2025) J. Harbin Inst. Tech. 57(9), doi 10.11918/202406062: Chengdu Chunxi Road, Aug 2023, reflection zones Tmrt +4 to +13 C, air +1-2 C, UTCI +2-5 C, peak Tmrt 73.9 C
 - **[chen2024]** Chen et al. (2024) Energy and Buildings, doi 10.1016/j.enbuild.2024.114926: reflective façades lower cooling energy but raise canyon UTCI
 - **[sanagar2025]** Sanagar Darbani et al. (2025) Developments in the Built Environment, doi 10.1016/j.dibe.2025.100758: low-emissivity glass cuts Tmrt by up to 5 K (simulation)
-- **[wallenberg2026]** Wallenberg et al. (2026) Geosci. Model Dev. 19, 1321, doi 10.5194/gmd-19-1321-2026: SOLWEIG wall albedo 0.5 with reflected shortwave; highest Tmrt in front of sunlit façades
+- **[wallenberg2026]** Wallenberg et al. (2026) Geosci. Model Dev. 19, 1321-1336, doi 10.5194/gmd-19-1321-2026: SOLWEIG wall albedo 0.5 with reflected shortwave (abstract, sections 2.6 and 3); the authors note, as background, that Tmrt is highest in front of sunlit façades
 - **[xie2016]** Xie et al. (2016) Atmos. Chem. Phys. 16, 6071, doi 10.5194/acp-16-6071-2016: dense urban anthropogenic heat 20-70 W m-2 of ground area, occasionally > 100
 - **[sailor2011]** Sailor (2011) Int. J. Climatol., doi 10.1002/joc.2106, anthropogenic heat review; Sailor et al. (2015) citing Ichinose (1999): central Tokyo > 400 W m-2 by day
 - **[sponge2015]** State Council General Office (2015) Guiding Opinions on Promoting Sponge City Construction, Guo Ban Fa [2015] No. 75 (English notice, gov.cn, 2015-10-16; reprint waizi.org.cn/law/6860.html; MOHURD interpretation via cs.com.cn; the primary Chinese text was not located)
+- **[brief4]** Research brief docs/research/waterfront-brief.md (block 4; values compiled from the sources below, items marked unverified there are flagged here)
+- **[volker2013]** Völker et al. (2013) Erdkunde 67(4), review of 27 studies: urban blue space about 2.5 K (95% CI 1.9-3.2) cooler May-October, inflated by remote-sensing surface temperatures
+- **[hathway2012]** Hathway & Sharples (2012) Building and Environment, River Don, Sheffield: river about 1 K cooler than the city reference, vegetated banks about 2 K cooler than paved, reach about 30 m with open banks (via secondary sources, unverified)
+- **[steeneveld2014]** Steeneveld et al. (2014) Landscape and Urban Planning, doi 10.1016/j.landurbplan.2013.09.001: in Rotterdam, water bodies raise the 95th percentile of the daily maximum UHI (warm after sunset)
+- **[theeuwes2013]** Theeuwes et al. (2013) J. Geophys. Res. Atmos., doi 10.1002/jgrd.50704 (WRF): water warmer than the air at night worsens night-time comfort
+- **[jacobs2020]** Jacobs et al. (2020) Are urban water bodies really cooling? Urban Climate (ENVI-met, small Dutch water bodies): afternoon air -0.2 K typical, -0.6 K at most; PET -0.6 typical, -1.9 at most; shade gives PET -1 to -7 K
+- **[cheonggyecheon]** Cheonggyecheon, Seoul (TMU repository; AMS abstract): more than 1 K cooler to 70-80 m (north side), about 0.5 K to 30-50 m (south side); before / after -0.1 to -0.9 K
+- **[ota]** Murakawa et al. (1990) J. Archit. Plann. Environ. Eng. (Trans. AIJ) 415, 9-19, doi 10.3130/aijax.415.0_9, Ota River, Hiroshima: river cooling detectable 150-500 m inland along streets perpendicular to the river, more with wind, wider streets and lower density (unverified: via the block-4 brief; the abstract mentions an effect up to about 20 m height and the 150-500 m figure was not found in it)
+- **[corridor]** Ventilation-corridor planning criteria: corridors within 30 deg of the prevailing wind (Chinese planning criteria and Givoni 20-30 deg, via Ren et al. 2018 (CUHK) and MDPI Buildings 14(2):348)
+- **[oke1988]** Oke (1988) Energy and Buildings 11, street-canyon flow regimes, thresholds about 0.3-0.4 and 0.65-0.7 H/W (unverified)
+- **[wake]** Chen, Mo & Hang (2024) Building Simulation 17(4), 509-524, doi 10.1007/s12273-024-1103-z: building wake recirculation length about 1.6-2.6 x building width
+- **[solcerova2019]** Solcerova et al. (2019) Frontiers in Earth Science 7, 156, doi 10.3389/feart.2019.00156: a Delft pond is warmer than the air at night and releases about 2.7 MJ m-2 per night (43% longwave, 39% latent, 11% sensible)
+- **[webb2008]** Webb et al. (2008) Hydrological Processes, river water temperature review: large deep rivers have the smallest daily range ("< 1 K" unverified)
+- **[steadman1994]** Steadman (1994) Australian Meteorological Magazine 43, apparent temperature with radiation (the paper itself was not read; formula via [bom])
+- **[bom]** Australian Bureau of Meteorology, Thermal stress: About the formula for the apparent temperature (bom.gov.au/info/thermal_stress/): AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25, ws the 10 m wind, Q the net radiation absorbed per unit area of body surface (W m-2); coefficients checked against this page
+- **[brief5]** Research brief docs/research/hutong-brief.md (block 5; values compiled from the sources below, items marked unverified there are flagged here)
+- **[hendel2015]** Hendel, Colombert, Diab & Royon (2015) J. Sustain. Dev. Energy Water Environ. Syst. 3(1) 1-11, doi 10.13044/j.sdewes.2015.03.0001: watering the Rue du Louvre, Paris, about 1 L m-2 per cycle; surface -7.5 K at 19:30 and -6 K at 20:30, lasting several hours (the abstract: several degrees for several hours; the -7.5 / -6 K figures not checked)
+- **[hendel2016]** Hendel, Gutierrez, Colombert, Diab & Royon (2016) Urban Climate 16, 43-58, doi 10.1016/j.uclim.2016.02.003: pavement watering in Paris, air -0.79 K at most, Tmrt -1.76 K (no open abstract; not checked)
+- **[takebayashi2023]** Takebayashi, Mori & Tozawa (2023) Atmosphere 14(6), 1014, doi 10.3390/atmos14061014: road watering in Kobe, 0.025 mm per pass, about -6 K on average and about -10 K at most (the abstract), -2 to -4 K at once (via the brief, not in the abstract), gone within 30 min in sun, evening watering recommended; lE = l beta alpha_w (X_s - X_a) with beta 0.15 on asphalt
+- **[kato2008]** Kato et al. (2008), via the block-5 brief: a watered road 50 -> 40 C in about 60 min (the paper not identified for certain; a possible match is Kato, Tebakari, Tsuchiya & Yamada (2008) Proc. Hydraulic Engineering 52, 277-282, doi 10.2208/prohe.52.277; unverified)
+- **[nippon]** nippon.com feature on uchimizu (via the block-5 brief): sprinkling water in the evening and in shade, a custom since the Edo period
+- **[lin2019]** Lin, Jin & Jin (2019) Int. J. Environ. Res. Public Health 16(16), 2986, doi 10.3390/ijerph16162986: traditional block in Harbin, SVF lanes 0.09-0.27, courtyards 0.22-0.37; courtyards with a lower SVF had cooler air, by 0.4 K on average in the abstract (the brief: 0.3 K, at most 0.6 K, and 0.4 K globe, at most 1.0 K; the full text not checked)
+- **[spainCourtyard]** Cordoba and Seville courtyard studies, MDPI Proceedings 2(22) 1390 and 1381, 38(1) 17 (abstracts only, unverified): courtyards 3-6 K below the outdoor air on hot days, up to 11-15 K at 40-45 C
+- **[yang2024]** Yang & Wang (杨文敏, 王美仙) (2024) J. Beijing Forestry Univ., doi 10.12171/j.1000-1522.20240012 (abstract only; checked against it): Beijing street-tree shade -1.0 to -2.1 K air and -481 to -789 W m-2; pagoda tree second for comfort
+- **[carb]** California Air Resources Board cool-roof data, via the block-5 brief: clay tile solar reflectance 0.40-0.50, emissivity 0.80-0.90 (light terracotta; grey reduced-fired tile is darker, unverified)
+- **[midlandBrick]** Midland Brick product data, via the block-5 brief: brick solar absorptance 0.45 (light grey) to 0.90 (slate grey)
+- **[sohuRoof]** Web article (sohu), via the block-5 brief: northern roofs of paired tiles on a mud or lime back, not ventilated (secondary, unverified)
+- **[miller2007]** Miller (2007), Oak Ridge National Laboratory, via the block-5 brief: ventilated tile roofs run cooler; does not apply to mud-backed, unventilated roofs
+- **[ucdavis]** UC Davis guidance, via the block-5 brief: overhead vine arbours give more than 90% cover
+- **[jjshs]** Takahashi (1985) J. Japan. Soc. Hort. Sci. 54(3) 293-300, doi 10.2503/jjshs.54.293, optimum leaf area index of Delaware grape vines, via the block-5 brief: LAI 2 or more, ideally 3; the paper is about the LAI best for grape yield and quality, not for shade (the LAI figure not checked)
+- **[deng]** Deng Yunxiang, Tianpeng zheyin (The Paper, newsDetail_forward_18319465), via the block-5 brief: summer mat awnings over Beijing courtyards; the old Beijing saying "tianpeng, fish bowl, pomegranate tree", which the cartoonist Li Binsheng drew
+- **[visitBeijing]** Visit Beijing (official tourism site), via the block-5 brief: jujube and pagoda trees in courtyards; the pomegranate stands for many children
+- **[bolton1980]** Bolton (1980) Monthly Weather Review 108, 1046-1053: saturation vapour pressure e_s = 6.112 exp(17.67 T / (T + 243.5)) hPa (formula from memory, not checked)
+- **[brief6]** Research brief docs/research/parking-brief.md (block 6; values compiled from the sources below, items marked unverified there are flagged here; brownfield values are mostly its assumptions)
+- **[golden2007]** Golden, Carlson, Kaloush & Phelan (2007) Solar Energy 81(7), 872-883, doi 10.1016/j.solener.2006.11.007 (checked against the paper): Phoenix, 17 June 2004 (air max 41.0 C, wind 0.86 m/s): exposed asphalt (SVF 0.90) mean maximum 63.5 / mean minimum 28.5 / mean average 43.6 C, under a PV canopy (SVF 0.11) 37.0 / 27.7 / 32.1 C; the paper has internal inconsistencies
+- **[stempihar2012]** Stempihar, Pourshams-Manzouri, Kaloush & Rodezno (2012) Transportation Research Record 2293, 123-130, doi 10.3141/2293-15: modelled Phoenix pavements (the model run confirmed by the abstract; the ranges and properties not checked), max 53-69 C, min 29-35 C; HMA k 1.2, rho 2238, c 921; PCC k 1.5, rho 2350, c 1000; eps 0.91; surface temperatures asymptotic above about 203 mm thickness
+- **[takebayashi2009]** Takebayashi & Moriyama (2009) Solar Energy 83(8), 1211-1223, doi 10.1016/j.solener.2009.01.019 (checked against the accepted manuscript): grass parking vs asphalt, sensible heat about 100-150 W m-2 lower by day and about 50 W m-2 lower at night
+- **[asaeda1996]** Asaeda, Ca & Wake (1996) Atmospheric Environment 30(3), 413-427, doi 10.1016/1352-2310(94)00140-5, Heat storage of pavement and its effect on the lower atmosphere; via the block-6 brief: asphalt emits about 150 W m-2 more infrared than bare soil at its maximum (extra sensible heat 50 vs 200 W m-2 across abstracts, unverified)
+- **[zhu2022]** Zhu et al. (2022) Frontiers in Environmental Science, doi 10.3389/fenvs.2021.795474, ECOSTRESS Phoenix: roads the only class warming at night; a 100% road pixel about 4.5 K warmer than grass at night (interpretation; the abstract covers daytime only, so the night claim is unverified)
+- **[hoehne2020]** Hoehne et al. (2020/2022) Sustainable and Resilient Infrastructure, doi 10.1080/23789689.2020.1773013: Phoenix pavement and vehicle sensible heat, 67% roads, 29% parking, 3.9% vehicles (checked against the abstract)
+- **[matias2025]** Matias, Mills, Silva, Girotti & Lopes (2025) City and Environment Interactions 28, 100232, doi 10.1016/j.cacint.2025.100232, parked cars in Lisbon (abstract and press): air up to 3.8 K warmer next to a black car (about 2 K on average, per the press); the 71 C black-roof figure is from [matias2026] (a later paper)
+- **[matias2026]** Matias, Silva, Mills & Lopes (2026) Discover Environment 4, 93, doi 10.1007/s44274-026-00593-8, vehicles as thermally active surfaces, via the round-2 reference check: black car roofs a median of about 71 C, about 20 K above white ones (the paper not read; unverified)
+- **[levinson2011]** Levinson et al. (2011) Applied Energy 88(12) 4343-4357, doi 10.1016/j.apenergy.2011.05.006 (checked against the abstract): black vs silver car roof up to 25 K hotter; cabin soak air 5-6 K
+- **[vanos2018]** Vanos, Middel, Poletti & Selover (2018) Temperature 5(3) 276-292, doi 10.1080/23328940.2018.1468205: Tempe, steady-state mean cabin air 47.6 C in sun vs 39.5 C in shade (the abstract); after 1 h cabin 46 vs 38 C and dashboard 69 vs 48 C are the ASU press release's figures
+- **[mclaren2005]** McLaren, Null & Quinn (2005) Pediatrics 116(1) e109-e112, doi 10.1542/peds.2004-2368 (PMID 15995010; checked against the abstract): parked-car cabin +1.8 K per 5 min, 80% of the rise in the first 30 min, 47 C at 22 C ambient; cracking the windows did not help
+- **[nsc]** US National Safety Council, child hot-car deaths (via the block-6 brief): 1,010 US children 1998-2024, 39 in 2024
+- **[scott1999]** Scott, Simpson & McPherson (1999) Journal of Arboriculture 25(3) 129-142, doi 10.48044/jauf.1999.019 (checked against the paper): parking-lot tree shade, asphalt -20 K, air at 0.5 m -1.3 K, car cabins -26 K
+- **[onishi2010]** Onishi, Cao, Ito, Shi & Imura (2010) Urban Forestry & Urban Greening 9(4) 323-332, doi 10.1016/j.ufug.2010.06.002: greening parking lots in Nagoya, the largest modelled summer surface temperature drop -7.26 K for one lot; across the whole area the effect was slight
+- **[optris]** Optris and Fluke emissivity tables, via the block-6 brief: rusty or oxidised steel about 0.69-0.88 (unverified)
+- **[brief7]** Research brief docs/research/estate-brief.md (block 7; geometry calculated there, other values compiled from the sources below, items marked unverified there are flagged here; the estate counts, the AC profile and the condenser plume term are assumptions of the brief or of this block)
+- **[gb50180]** GB 50180-2018 Standard for urban residential area planning and design (issued 2018-07-10, in force 2018-12-01), replaces GB 50180-93; clause 4.0.9 / Table 4.0.9 sunlight standards, via the block-7 brief (codeofchina): zones I, II, III and VII, cities of 500,000 or more, at least 2 h on the Great Cold day (大寒); the usual reading, table values not checked against the primary text (unverified)
+- **[db33]** Zhejiang DB33/1050 sunlight analysis rules: the brief read the draft (DB33/1050-20xx) that revised DB33/1050-2008; the standard in force is DB33/1050-2016 (from 2016-06-01). In the draft (sections 2.0.10, 3.5.3-3.5.7): 大寒 08:00-16:00 and 冬至 09:00-15:00 true solar time, cumulative, only stretches of 10 min or more, steps of at most 5 min, test point 0.9 m above the floor (not checked in the 2016 text; unverified)
+- **[gb55038]** GB 55038-2025 Project code for residential buildings, mandatory from 2025-05-01 (replaces GB 50368-2005), via the block-7 brief: each dwelling needs at least one bedroom or living room that meets the sunlight standard (news reports); the clause was not checked (unverified)
+- **[mu2025]** Mu et al. (2025) Atmosphere 16(1) 100, doi 10.3390/atmos16010100, Changsha: AC condenser exhaust 5.2 K above the air by day and 6.5 K at night, relative humidity -14.2% (residential split units; checked against the abstract)
+- **[chow1999]** Chow & Lin (1999) Applied Thermal Engineering 19(2) 117-132, doi 10.1016/S1359-4311(98)00042-8, via the block-7 brief: condensers in a Hong Kong building re-entrant, air at the top floors more than 7 K above ambient (unverified)
+- **[bojic2001]** Bojic, Lee & Yik (2001) Energy and Buildings 33(7) 737-751, doi 10.1016/S0378-7788(01)00061-5, window-type air-conditioners in recessed spaces of Hong Kong public housing, via the block-7 brief: air at the condensers 4-9 K above ambient at the 30th storey (not checked; unverified)
+- **[bruelisauer2014]** Bruelisauer et al. (2014) Energy and Buildings 71, 28-37, doi 10.1016/j.enbuild.2013.11.056, split condensing units in the void of a 24-storey Singapore building: the air rose 10-13 K along the height of the void (louvres added about 9 K more), inlets about 50 C from floor 10 up, efficiency -32% (checked against the abstract)
+- **[demunck2013]** de Munck et al. (2013) International Journal of Climatology 33(1) 210-227, doi 10.1002/joc.3415, simulated AC waste heat in Paris: street air +0.5 K with today's AC, +1 K if all of it were released as sensible heat, +2 K under a future doubling of AC (checked against the abstract)
+- **[berlin2020]** Jin, Schubert, Hefny Salim & Schneider (2020) Int. J. Environ. Res. Public Health 17(13) 4645, doi 10.3390/ijerph17134645, AC in Berlin, simulated (wall-mounted units, 22 C target, summer 2018): street air up to 0.6 K warmer (the abstract; the brief's +0.5 K is not in it)
+- **[lai2017]** Lai, Maing & Ng (2017) Building and Environment 114, 397-409, doi 10.1016/j.buildenv.2016.12.034, Hong Kong outdoor spaces under shade: Tmrt +1.6 K per +10 W m-2 of longwave, the longwave 0.1 less sky view brings (abstract checked against the paper)
+- **[plea2016]** Lai, Maing & Ng (2016) PLEA 2016 Los Angeles, Wo Che Estate, Sha Tin, Hong Kong: sky view factor 0.327 next to the sitting areas (checked against the paper; the brief gives 0.32-0.35 for the podium)
+- **[li2023]** Li et al. (2023) Building and Environment, doi 10.1016/j.buildenv.2023.110225, Hong Kong residential public spaces in heat waves: a sky view factor threshold near 0.4 (checked against the abstract)
+- **[yang2010]** Yang, Lau & Qian (2010) Building and Environment 45(1) 115-134, doi 10.1016/j.buildenv.2009.05.010, Shanghai high-rise housing quarters: vegetation matters more at night; the night heat island not explained by the site, so anthropogenic heat (via the block-7 brief, unverified)
+- **[cai2017]** Cai & Hu (2017) Int. J. Environ. Sci. Dev. 8(5) 378-384, doi 10.18178/ijesd.2017.8.5.981, Wuhan, August 2015: under direct sun hard paving 9.87 K and open space 3.67 K hotter than grass (checked against the paper)
+- **[brief8]** Research brief docs/research/campus-brief.md (block 8; values compiled from the sources below, items marked unverified there are flagged here; the emissivities and admittances of the turf, track and court build-ups and the sail transmission are assumptions of the brief)
+- **[jim2016]** Jim (2016) Applied Energy 173, 520-534, doi 10.1016/j.apenergy.2016.04.072, natural and artificial turf in Hong Kong (checked against the abstract): artificial turf surface 70.2 C (substrate 69.3 C) against under 40 C for natural grass; albedo 0.073 for the turf and 0.23 for grass. Via the block-8 brief and [singh2024], not in the abstract (unverified): air at 15 cm over the turf 54.2 C vs 36.0 C at 150 cm; daily minimum of the turf 23.1-23.4 C, about the grass 23.1 C; the brief's 74.6 vs 36.9 C is in neither abstract
+- **[jim2017]** Jim (2017) Landscape and Urban Planning 157, 561-576, doi 10.1016/j.landurbplan.2016.09.012, Intense summer heat fluxes in artificial turf harm people and environment (checked against the abstract): artificial turf 72.4 C vs grass 36.6 C on a sunny day; the turf cools quickly after late afternoon (the brief's 73.8 vs 37.3 C at air 34.4 C is not in the abstract)
+- **[singh2024]** Singh, Peterson, Jay & Stevens (2024) International Journal of Biometeorology 68(7) 1235-1252, doi 10.1007/s00484-024-02679-5, systematic review of 23 studies (checked against the abstract): artificial turf 9.4-33.7 K hotter than natural grass at the surface and 0.5-1.2 K in the air; Tmrt and WBGT findings inconsistent. Via the block-8 brief (the individual maxima not checked): 86.6 C (Twomey 2016), 80.1 vs 53.2 C (Petrass 2014), 71.5 C at air 30.6 C (McNitt 2008), 65.3 vs 40.4 C at air 34.8 C (Liu & Jim 2021); SBR infill 53.5 vs TPE 45.6 C in the lab
+- **[nydoh]** New York State Department of Health, Information About Crumb-Rubber Infilled Synthetic Turf Athletic Fields (fact sheet, revised October 2018; checked against the fact sheet): Brigham Young University (2002) turf average 47 C vs grass 26 C and asphalt 43 C, maximum 93 C; watering cut the turf from 79 to 29 C, back to 49 C after 5 min and 73 C after 20 min; Penn State plots 49/54/63 C at air 26-29 C, turf 20-30 K hotter than grass
+- **[mcnitt2008]** McNitt, Petrunak & Serensits (2008) Acta Horticulturae 783, 573-582, doi 10.17660/ActaHortic.2008.783.59, via the block-8 brief (consistent with the abstract and with NYSDOH's summary of the Penn State work): irrigating synthetic turf at Penn State, 54-71 C down to 24 C, back to 32-49 C within 30 min, then about stable for 3 h (unverified)
+- **[pfautsch2020]** Pfautsch et al. (2020) School Microclimates, Western Sydney University, doi 10.26183/np86-t866 (checked against the report): sunlit artificial turf 51.7 / 56.1 / 59.2 C (max 67.5) on normal / hot / extreme days, asphalt 44.8 / 51.1 / 54.4 C (max 61.6); shaded turf 35 C vs 61 C sunlit; shade cooled black asphalt by about 25 K and the black-globe temperature by more than 10 K
+- **[vanos2016]** Vanos et al. (2016) Landscape and Urban Planning 146, 29, doi 10.1016/j.landurbplan.2015.10.007, playgrounds in Gilbert, Arizona, at noon, air 41.6 C: rubber surface 87.2 C in sun, 42.2 C under a tree, 46.7 C under a shade sail; a slide 71.7 C in sun, 43.9 C in shade (the figures match the 2015 press release; not checked against the paper, unverified)
+- **[vanos2017]** Vanos, Herdt & Lochbaum (2017) Building and Environment 126, 119-131, doi 10.1016/j.buildenv.2017.09.026, playgrounds in Lubbock, Texas, via the block-8 brief: a shade sail cut the radiation a child absorbs by 168 W m-2; concrete in sun / shade 40.0 / 29.2, 43.8 / 32.7 and 44.4 / 34.1 C; grass albedo 0.22-0.26, an asphalt court 0.24; a child's body is nearer the hot ground (unverified)
+- **[vanos2015]** Vanos (2015) Environment International 76, 1-15, doi 10.1016/j.envint.2014.11.016, review of children's health and vulnerability in outdoor microclimates (no numbers quoted)
+- **[paolini]** Paolini, Parchami, Nazarian & Hart (2025), MaRTy for kids: adapting biomet equipment to capture the heat exposure of children, ICUC12 abstract ICUC12-249 (checked against the abstract): in weak wind the air at 0.3 m was up to 1 K warmer than at 1.5 or 1.8 m
+- **[kinmen]** National Kinmen Senior High School, Observation of surface temperature at Kinmen Senior High School, GLOBE student research report (checked against the report): on sunny days a red PU running track more than 15 K above the air at noon (weekly readings over 17 weeks; a weak source, a student report)
+- **[aoki2009]** Aoki (2009) Nature and its Environment (自然と環境) 11, 40-48, measured at 11:00 on 11 August 2004 (via the round-2 reference check; the paper not read): artificial turf 67.0 C, artificial running track 63.9 C, natural turf 42.2 C, clay track 45.1 C, tennis court 59.3 C
+- **[courtVendor]** Acrylic court coating makers (CoolTop; Laykold), via the block-8 brief: a standard acrylic court about 52 C at air about 30 C (vendor claims, unverified)
+- **[iso13732]** ISO 13732-1:2006, hot surfaces, via CENELEC Guide 29 (2007) Table A.1 (checked against the guide): burn thresholds for 1 min / 10 min / 8 h of contact, metal 51 / 48 / 43 C, ceramics, glass and stone 56 / 48 / 43 C, plastics and wood 60 / 48 / 43 C (the table has no concrete or asphalt row); for contact of 1 min or longer the guide says Table A.1 applies to children too; its lower end for children is for contacts of 1-10 s only
+- **[vanosPress]** Press coverage of Vanos's playground studies, via the block-8 brief: 60 C burns skin in 1 min, 74 C in 5 s, 77 C in 3 s (the standard behind it not named; unverified)
+- **[brief9]** Research brief docs/research/busstop-brief.md (block 9; values compiled from the sources below, items marked unverified there are flagged here; the shelter, footbridge and headway dimensions are assumptions of the brief; the 1 s contact-burn value for bare metal, about 65-70 C, is unverified)
+- **[dzyuban2022]** Dzyuban, Hondula, Coseo & Redman (2022) International Journal of Biometeorology 66(2), 345-356, doi 10.1007/s00484-021-02074-4, Phoenix bus stops, June-July 2018 (via the block-9 brief): air 41.8 / 41.2 C, globe 52.0 / 44.3 C, PET 68.2 / 49.5 C in sun / shade; shade 19 C PET cooler on average (maximum PET 81.6 C); metal roof 20.6, ad panel 20.3, polycarbonate 18.2 C PET cooler, a vegetated awning not significant in the afternoon (the abstract: every design helped in the morning); stops without side panels worse; concrete 57.4 / 41.3 C, metal bench 47.7 / 40.4 C; most riders arrive less than 5 min before the bus (unverified)
+- **[lanza2025]** Lanza, Ernst, Watkins & Chen (2025) Transportation Research Part D 140, 104653, doi 10.1016/j.trd.2025.104653, 17 bus stops in Houston, 13 days in 2023 (checked against the abstract): tree shade 3.2 C WBGT cooler; enclosed shelters without overhead shade more than 3 C hotter than open sun
+- **[chenWalk2024]** Chen, Mak, Hang & Dai (2024) Sustainable Cities and Society 100, 105048, doi 10.1016/j.scs.2023.105048, an elevated walkway in hot-humid Hong Kong, measured and CFD-modelled (checked against the abstract): PET on the walkway level 2-17 K lower than in the open, and the walkway raised the ground-level PET by up to 2.7 K. Via the block-9 brief, not checked (the full text embargoed): Tmrt 53.5-68.0 C on the open sidewalk vs 19.9-39.6 C under the walkway (gap 19.8-34.8 K); PET 32.6-37.3 and 45.8-51.1 C; air -0.4 to 1.5 K (unverified)
+- **[hyd047]** Highways Department, Hong Kong, Guidance Notes on Design of Covers for Walkways and Passenger Shelters, BS/GN/047 (November 2018; checked against sections 3.1-3.5): bus shelters opaque, translucent materials avoided; walkway covers translucent on at most 1/3 of the width at the sides; low headroom or wider covers and fascias; flat covers better than upward-sloped ones; check with a sun-shadow analysis
+- **[brettMartin]** Brett Martin polycarbonate datasheet, 10 mm twinwall sheet (via the block-9 brief): solar transmission clear 0.80, opal 0.47, bronze 0.43; the solar heat gain coefficient is not the transmittance (unverified)
+- **[asuFilm]** Arizona State University radiative-cooling film on a bus shelter roof (via the block-9 brief): Tmrt 1-2 K lower, roof 10-20 F cooler (not peer reviewed, unverified)
+- **[sgWalkway]** Singapore covered walkways (secondary, via the block-9 brief): strong heat stress more than 77% of the time (unverified)
+- **[ucla]** UCLA study of Los Angeles Metro bus stops (via the block-9 brief): 26% of 10,526 stops sheltered (unverified)
+- **[fan2002]** Salek & Machemehl (1999) Characterizing Bus Transit Passenger Wait Times, SWUTC/99/167211-1, Center for Transportation Research, University of Texas at Austin (rosap.ntl.bts.gov/view/dot/40714). The block-9 brief cited this as Fan & Machemehl (2002), with a City University review; no such SWUTC report was found, so the verifiable report with that title is cited instead (the 2002 paper, reportedly a conference paper, not checked). The claim, as the citing papers describe it: passengers arrive at random for headways up to about 10-12 min, the mean wait is about half the headway (unverified)
+- **[fraser2017]** Fraser & Chester (2017) Journal of Transport & Health 4, 216-225, doi 10.1016/j.jth.2016.07.005 (via the block-9 brief): heat exposure and vulnerability of transit riders (a general claim)
+- **[liu2025]** Liu, Li, Pereira & Yan (2025) Journal of Transport Geography 128, 104383, doi 10.1016/j.jtrangeo.2025.104383, Miami (checked against the abstract): walking to the stop, not waiting at it, is the main source of heat exposure
+- **[cpsc]** US Consumer Product Safety Commission, via the block-9 brief: sunlit steel decks can burn bare skin in seconds (unverified)
+- **[deckSteel]** Mao, Gu, Jiang, Zhang & Lei (2025) Materials 18(13) 3109, doi 10.3390/ma18133109, thermal field of epoxy steel bridge-deck paving (checked against the abstract): a finite-element model of extreme conditions with laboratory tests at 70 C; airflow under the girders cuts the peaks by up to 20 K. The brief's "60-70 C in summer sun" is not shown in it (unverified)
+- **[lasVegas]** Las Vegas surface measurements, via the block-9 brief: sunlit metal up to 62 C (unverified)
+- **[brief10]** Research brief docs/research/village-brief.md (block 10; values compiled from the sources below, items marked unverified there are flagged here; the roof albedos for rusty iron, asbestos cement and tarpaulin are assumptions of the brief, no measured value was found; the indoor proxies and their coefficients are assumptions of the brief)
+- **[pingshan]** Guo, Zou, Li & Qiu, Analysis on the thermal environment of urban village in Shenzhen (journal and year not found; fieldwork November 2011 to October 2012, Pingshan; checked against the abstract): heat island largest 20:00-24:00, a summer mean of 1.71 K over 18-24 h; the peak 3.95 K at 20:00 in February; thermal-humidity index worse than a green reference, especially at night
+- **[wu2015]** Wu, Xia, Lin, Wang, Gong & Zhang (2015) Journal of Harbin Institute of Technology 47(6) 59-62, doi 10.11918/j.issn.0367-6234.2015.06.011, thermal environments of typical residential districts in Shenzhen (Landsat 5 TM; checked against the abstract): surface heat island of high-density urban villages 3.53 K, multi-storey 2.62 K, high-rise 1.60 K
+- **[yi2022]** Yi et al. (2022) Science of the Total Environment 853, 158283, doi 10.1016/j.scitotenv.2022.158283, Thermal comfort differences between urban villages and formal settlements in Chinese developing cities: a case study in Shenzhen (via the block-10 brief): urban villages the worst summer thermal-humidity index; density worsens it, vegetation (NDVI) mitigates (unverified)
+- **[deng2023]** Deng et al. (2023) Building and Environment 234, 110133, doi 10.1016/j.buildenv.2023.110133, new and old urban blocks in Guangzhou (via the block-10 brief): pedestrian Tmrt peak 43.7 C with air 41.3 C at 14:00; sky view factor and building coverage the main predictors (unverified)
+- **[scott2017]** Scott et al. (2017) PLoS ONE 12, e0187300, doi 10.1371/journal.pone.0187300, Temperature and heat in informal settlements in Nairobi (via the block-10 brief): +3.1 K daily maximum and +1.83 K daily minimum against the weather station; Mukuru +4.8 K maximum; sites with vegetation 0.7 K cooler (unverified)
+- **[tasgaonkar2022]** Tasgaonkar et al. (2022) Scientific Data 9, 285, doi 10.1038/s41597-022-01314-5, indoor heat data from 206 loggers in low-income homes in South Asia (via the block-10 brief): Delhi in April, tin-roof rooms 33.4 C indoors vs 32.8 C outdoors; Yavatmal tin-roof rooms 3-4 K above outdoors in May-June; indoors above outdoors at night (unverified)
+- **[wilby2021]** Wilby et al. (2021) Environmental Research Letters 16, 024033, doi 10.1088/1748-9326/abdbf2, 47 rooms in low-income communities in Ghana (via the block-10 brief): metal-roofed concrete rooms 4.5 K warmer by day than mud or thatch, 1.5 K cooler at night (unverified)
+- **[khlongToey]** Stockholm Environment Institute (2024), perspective on heat in low-income communities in Klongtoey, Bangkok (via the block-10 brief and the round-2 check): one unshaded house at midday in April, roof 68.1, ceiling 49.2, wall 45.7, floor 41.1 C; a shaded house had a 45.5 C roof (the 37 C air not checked; the page returns 403 to automated readers; unverified)
+- **[vellingiri2020]** Vellingiri et al. (2020) Indian Journal of Occupational and Environmental Medicine 24(1), doi 10.4103/ijoem.IJOEM_120_19, cool roofs and indoor temperature in 16 homes in Ahmedabad, October 2017 (MHT and IIPH; via the block-10 brief): indoor tin 34.6-35.8, asbestos 32.5-36.8, concrete 31.6-33.8 C; white paint on tin -1.1 K, Modroof -2.0 K, thermocol under asbestos -2.4 K (from the reported means); "4.5 K at peak" in the discussion only; a "5-6 C" press figure unverified
+- **[nutkiewicz2022]** Nutkiewicz et al. (2022) Renewable and Sustainable Energy Reviews 159, 112183, doi 10.1016/j.rser.2022.112183, Cool roofs can mitigate cooling energy demand for informal settlement dwellers (via the block-10 brief): up to 91% less annual heat-stress exposure, simulated for 17 cities (unverified)
+- **[bunker2024]** Bunker et al. (2024) Trials 25, 59, doi 10.1186/s13063-023-07804-0, study protocol of a cluster randomised trial of cool roofs in rural Burkina Faso (via the block-10 brief): results reported by the press only (unverified)
+- **[emissTables]** Emissivity tables (Engineering Toolbox, Optris), via the block-10 brief: galvanised steel 0.23-0.28 new, about 0.88 old; oxidised galvanised iron 0.85; rusted iron 0.69-0.96 (unverified)
+- **[energyStarRoof]** ENERGY STAR roof product list, via the block-10 brief: bare metal solar reflectance 0.78 new, 0.58 after 3 years (not checked; unverified). EPA retired the ENERGY STAR roof specification on 1 June 2022, so the list is no longer kept up to date; the Cool Roof Rating Council (CRRC) Rated Products Directory now takes its place
+- **[ma2015]** Ma et al. (2015) Environment International 75, 103-109, doi 10.1016/j.envint.2014.11.004, heat waves and mortality in 66 communities in China (via the block-10 brief): +5.0% deaths (2.9-7.2%) on heat-wave days, larger for older people, women, deaths out of hospital and dense communities (unverified)
+- **[natMed2024]** Xi, Liu, Zhang, Huang, Burkart, Ebi, Zeng & Ji (2024) Nature Medicine 30(5) 1489-1498, doi 10.1038/s41591-024-02880-4, heatwave mortality in Chinese adults over 65 (CLHLS cohort, 2008-2018; checked against the abstract): the hazard of death on heatwave days against other days HR 1.78-1.98; limits on mobility (HR 2.32-3.20) and dependence in daily activities (HR 2.22-3.27) raise it; once function is accounted for, age itself does not predict the risk
+- **[hess2018]** Hess et al. (2018) Journal of Environmental and Public Health, 7973519, doi 10.1155/2018/7973519, pilot evaluation of Ahmedabad's Heat Action Plan (via the block-10 brief): the May 2010 heat wave about 1,344 excess deaths (+43.1%); about 1,190 deaths avoided per year after the plan (unverified)
+- **[carbonBriefAc]** Carbon Brief on air conditioning in India (via the block-10 brief): 4.9% of households owned an air conditioner in 2020-21, about 8% in 2024 (unverified)
+- **[dialogueEarth]** Dialogue Earth on outdoor workers and heat in China (via the block-10 brief): about 100 million outdoor workers (unverified)
+- **[brief11]** Research brief docs/research/desert-brief.md (block 11; values compiled from the sources below, items marked unverified there are flagged here; the sail transmittance, the stucco and gravel albedos, the mesquite crown and the lawn evaporative fraction are assumptions or ranges of the brief, no measured value was checked)
+- **[ncei]** NOAA NCEI U.S. Climate Normals 1991-2020, Phoenix Sky Harbor (USW00023183), via the block-11 brief: July mean maximum 41.4 C and minimum 29.2 C (matches NWS Phoenix's statement of the normals); hourly normals with the minimum near 06 MST, the maximum at 16-17 MST and a dew point of 11-14 C (hourly normals not checked; unverified)
+- **[azmet]** Arizona Meteorological Network (AZMet), Phoenix Encanto station (az15), hot days of 2023-25, via the block-11 brief: minimum 28.7 C, dew point 11-13 C, reference evapotranspiration 7.8-8.9 mm a day (July mean 7.1-7.8), wind 1.5-2.2 m/s, lowest relative humidity 12-14% (values not checked; unverified). The station sits on an irrigated urban golf course, so its dew point and minimum may run moist or cool for a desert courtyard
+- **[climateGov2023]** NOAA Climate.gov, U.S. climate summary for July 2023, and NWS Phoenix, July 2023 summary (checked against both): mean high 45.9 C (114.7 F), mean low 32.7 C (90.8 F), 31 consecutive days at or above 110 F (43.3 C), a record warm low of 97 F (36.1 C) on 19 July
+- **[nwsPsr]** NWS Phoenix (PSR), 2024 Year in Review and July 2024 Climate Summary (checked via the round-2 reference check): 70 days at or above 110 F (43.3 C) in the whole of 2024, a record; 118 F (47.8 C) on 5 and 8 July
+- **[middelKrayenhoff2019]** Middel & Krayenhoff (2019) Science of the Total Environment 687, 137-151, doi 10.1016/j.scitotenv.2019.06.085, pedestrian thermal exposure in Tempe during record heat (MaRTy cart); the block-11 brief quotes it together with Middel et al. 2021: peak sunlit Tmrt 76.2 C, 76.4 C in a bright east-west canyon at an air of 48.5 C, pedestrian wind under 1 m/s on average (unverified)
+- **[colter2019]** Colter, Middel & Martin (2019) Urban Forestry & Urban Greening 44, 126429, doi 10.1016/j.ufug.2019.126429, natural and artificial shade (trees and ramadas) in Phoenix neighbourhood parks (the brief gives no numbers from it; unverified)
+- **[az1195]** Brown & Kopec (rev. 2014) Converting Reference Evapotranspiration into Turf Water Use, University of Arizona Cooperative Extension AZ1195 (checked via the round-2 reference check): bermudagrass Kc 0.78 in July for turf watered daily, 0.1 lower for watering every 3 days (Table 2 note), so 0.68 here
+- **[amwua]** Arizona Municipal Water Users Association (AMWUA), Landscaping with Style: Watering Schedules, via the block-11 brief: a lawn watered every 3 days, about 6.4 mm a day applied; a desert tree with a 6.1 m canopy about 890 L every 7-21 days, i.e. about 1.4-4.3 L per m2 of canopy a day (the schedule is an image; the figures not checked; unverified)
+- **[templeton2018]** Templeton, Vivoni, Wang & Schreiner-McGraw (2018) J. Geophys. Res. Atmospheres 123(4), 2111-2128, doi 10.1002/2017JD027845, water and energy fluxes over urban land covers in Phoenix (checked against the abstract): irrigated turf grass has the highest evaporative fraction
+- **[gober2009]** Gober, Brazel, Quay, Myint et al. (2010, online 2009) J. American Planning Association 76(1), 109-121, doi 10.1080/01944360903433113, watered landscapes and the Phoenix heat island (via the block-11 brief): 32.8% more outdoor water for 0.41-0.82 K per hour faster evening cooling (unverified)
+- **[middel2014]** Middel et al. (2014) Landscape and Urban Planning 122, 16-28, doi 10.1016/j.landurbplan.2013.11.004, urban form and landscaping in Phoenix local climate zones (via the block-11 brief): xeric yards warmest, then oasis, then mesic; by day the form matters more than the landscaping (unverified)
+- **[middel2015]** Middel, Chhetri & Quay (2015) Urban Forestry & Urban Greening 14, 178-186, doi 10.1016/j.ufug.2014.09.010, trees and cool roofs in Phoenix neighbourhoods (via the block-11 brief): about -0.14 K of air per 1% more tree canopy (unverified)
+- **[vanos2022]** Vanos, Wright, Kaiser et al. (2022) International Journal of Biometeorology 66, 357-369, doi 10.1007/s00484-020-02056-y, evaporative misters for cooling and comfort (via the block-11 brief): Tmrt -7.6 K, PET -6.5 K, UTCI -4.4 K (unverified)
+- **[huang2025]** Huang, Bou-Zeid, Vanos, Middel et al. (2025) Landscape and Urban Planning 256, 105290, doi 10.1016/j.landurbplan.2024.105290, misting as blue infrastructure (via the block-11 brief): up to -17.5 K of air in a model, 4.87 L per hour per nozzle, 0.3-0.7 nozzles per m2, i.e. 1.5-3.4 L per m2 an hour (unverified)
+- **[coolPave2024]** Middel, Vanos, Kaloush, Medina, Sailor, Campbell et al. (ASU) (2024), City of Phoenix Cool Pavement Pilot Program, Phase II - 2022, report and executive summary, October 2024 (checked against both): coated road surface -6.7 K at noon and -5.8 K in the afternoon; pedestrian Tmrt +3.2 K at noon and +2.5 K in the afternoon; air -0.07 K on average, the most cooling at 8 pm (-0.6 F) and a little warmer at 9 pm (+0.3 F); solar reflectance 0.30-0.39 coated against 0.036
+- **[erell2014]** Erell, Pearlmutter, Boneh & Kutiel (2014) Urban Climate 10, 367-386, doi 10.1016/j.uclim.2013.10.005, high-albedo materials can worsen pedestrian heat stress in street canyons (via the block-11 brief)
+- **[mcdph2025]** Maricopa County Department of Public Health, 2025 Heat-Related Deaths Report (2026), via the block-11 brief: heat-related deaths 339 (2021), 425 (2022), 645 (2023), 608 (2024), 430 (2025, preliminary 427) (these counts consistent with county and press reports); the 2025 split of 313 outdoors and 111 indoors, and for 2024 49% homeless and substances involved in 57%, as the brief quotes them, not checked; a preliminary 585 for 2026 is unverified
+- **[stull2011]** Stull (2011) J. Applied Meteorology and Climatology 50, 2267-2269, doi 10.1175/JAMC-D-11-0143.1, wet-bulb temperature from relative humidity and air temperature (via the block-11 brief: about 22 C at 43 C and 12 hPa)
+- **[brief12]** Research brief docs/research/nightmarket-brief.md (block 12; values compiled from the sources below; the stone night release, the crowd and stall heat, the grill radiation and the night Tmrt are the brief's own arithmetic; items marked unverified there are flagged here)
+- **[cwaTaipei]** Taiwan Central Weather Administration climate normals 1991-2020, Taipei station, July: mean daily maximum about 34 C, minimum about 27 C (not in the brief; from memory, unverified)
+- **[yang2016]** Yang & Zhao (2016, online December 2015) Buildings 6(1), 2, doi 10.3390/buildings6010002, diurnal thermal behaviour of pavements, vegetation and a water pond in a hot-humid city (Guangzhou, via the block-12 brief: granite and concrete warmed the air all day; full text not read, night numbers unverified)
+- **[doulos2004]** Doulos, Santamouris & Livada (2004) Solar Energy 77(2), 231-249, doi 10.1016/j.solener.2004.04.005, passive cooling of outdoor urban spaces: the role of materials (via the block-12 brief, which suggests checking it; not read)
+- **[coolPaveNight]** City of Phoenix and Arizona State University cool pavement pilot, night results (phoenix.gov, via the block-12 brief): treated surface 2.4 F cooler at sunrise, air at 1.8 m 0.5 F cooler at night (unverified)
+- **[ashrae55]** ASHRAE Standard 55 and ISO 8996 metabolic rates, via the block-12 brief: 1 met = 58.2 W m-2, a body of 1.8 m2 about 105 W; standing about 1.2 met (about 125 W), walking at 0.9 m/s about 2.0 met (about 210 W) (from memory in the brief, unverified)
+- **[ashraeRetail]** ASHRAE heat gain from people, retail, via the block-12 brief: 73 W sensible and 59 W latent at 25.6 C (secondary copies disagree; unverified)
+- **[sailorAms]** Sailor, anthropogenic heat (an AMS abstract, via the block-12 brief): metabolism about 2-3% of urban anthropogenic heat (unverified)
+- **[crowdLimits]** Crowd density guidance (G. Keith Still, crowd safety notes; NSW event factsheet), via the block-12 brief: critical density 2-3 people per m2, event limits about 2 (unverified)
+- **[wokVendor]** Vendor specifications of jet wok burners, via the block-12 brief: 28-37 kW per burner (unverified)
+- **[charcoalVendor]** A vendor listing of a charcoal roaster (archiexpo), via the block-12 brief: about 1.2 kg of charcoal an hour, 6 kW output; with about 29 MJ per kg, 1 kg an hour is about 8 kW of fuel (unverified)
+- **[taiwanNewsPm]** Taiwan News on night markets and air quality, via the block-12 brief: night markets raise fine particles (PM) nearby (unverified; no stall heat or air temperature measured)
+- **[nccuXimen]** A National Chengchi University thesis on thermal comfort in Ximending, Taipei, via the block-12 brief: uncomfortable before 16:00 (title not recorded; unverified)
+- **[ntuEnvimet]** A National Taiwan University ENVI-met study of a Taipei street, via the block-12 brief: evening PET depends on how wet the pavement is (title not recorded; unverified)
+- **[ftvFans]** Formosa TV news on night-market vendors and heat, via the block-12 brief: stalls use floor fans (unverified)
+- **[travelTaipei]** Taipei Travel (the city's tourism site), Shilin Night Market, via the block-12 brief: open about 16:00 to 00:00 (unverified)
+- **[shilinWiki]** Wikipedia, Shilin Night Market, and travel guides, via the block-12 brief: busiest 20:00-23:00 (guides: 19:00-22:00) (unverified)
+- **[ren2025]** Ren, Xu & Jiang (2025) Buildings 15(13), 2166, doi 10.3390/buildings15132166, thermal environment of public space in high-density old districts on Shenzhen's urban fringe (the brief cites it as a Baishizhou CFD study of wind shadows in the lanes; not checked)
 - **[noaa]** NOAA Global Monitoring Laboratory, General Solar Position Calculations (solareqns.PDF)
 - **[brutsaert]** Brutsaert (1975) Water Resources Research 11(5) 742-744, clear-sky emissivity
 - **[meinel]** Meinel & Meinel (1976) Applied Solar Energy, clear-sky beam irradiance
@@ -128,7 +376,10 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - Shortwave: K↓ = sunlit·I_b·sinβ + SVF·D + K_wr (+ r·I_b·sinβ off glass, block 3), I_b = 1361·0.7^(AM^0.678) [meinel], D = 0.12·I_b·sinβ [brief]; tree shade transmits exp(−0.5·LAI) ≈ 0.17 (LAI 3.5 is an *engine assumption*).
 - Longwave: L↓ = SVF·ε_sky·σTa⁴ + (1−SVF)·L_wall, L_wall = σT_wall⁴ for opaque walls (glass walls: block 3), ε_sky = 1.24·(e_a/Ta)^(1/7) [brutsaert], T_wall = Ta + 2 K + 6 K·(K↓/900) (*engine assumption*, peaks at 6.8 K + 2 K, ignores wall orientation).
 - Convection: h_c = 5.7 + 3.8·u [oke], the same for roofs and ground.
-- Water: Ts = daily mean Ta − 1 K + 1 K·sin(2π(t − 9 h)/24) [brief].
+- Water: Ts = daily mean Ta − 1 K + 1 K·sin(2π(t − 9 h)/24) [brief] (blocks 1–3; block 4's river and pond: see Block 4).
+- Convection, block 4: h_c = 5.7 + 3.8·u_site·f_w per cell, f_w the wind factor (see Block 4); blocks 1–3 have f_w = 1.
+- Ground heat flux, block 6: G (the flux into the surface above, thin layers C·dTs/dt) is stored every 15 min when a block asks for it (`opts.flux`, see Block 6) [deardorff]; parked cars shade the cells beneath them as a sub-grid share (see Block 6).
+- Surface water store, block 5: G also loses LE = L·β(W)·(h_c/c_p)·max(0, q_sat(Ts) − q_a) on cells holding splashed water W (see Block 5); empty, and never computed, in blocks 1–4.
 - Tree leaves: air + 2.5 K·(K↓/900) by day, air − 0.5 K at night (*engine assumption*; brief: air +0–3 K).
 - Air temperature [brief]: sinusoid with Ta,min at sunrise and Ta,max at 15:00, implemented as two half-cosines (rise and fall).
 - Sky view factor: horizon scan, SVF = mean over 16 azimuths of cos²(horizon elevation); canyon check against cos(arctan(2H/W)).
@@ -147,15 +398,15 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature ranges carry a source key;
 "In this model" lines are computed from the model at load, the same way as here.
 
-- **Albedo (α)**: Typical: Fresh asphalt 0.05, aged asphalt 0.12–0.15, grass 0.16–0.26, new white roof 0.65 or more. [lbnl, brief]
+- **Albedo (α)**: Typical: Fresh asphalt about 0.05, aged asphalt about 0.12 ± 0.03 (after about 5 years), grass 0.16–0.26, new white roof 0.65 or more. [lbnl, brief]
 - **Emissivity (ε)**: Typical: Concrete 0.71–0.90, asphalt about 0.95, grass 0.90–0.95, tree leaves 0.97–0.99. [brief]
 - **Thermal admittance (μ)**: Typical: Soils 600–2200, asphalt ~1200, concrete ~1785, stone ~2220 J m⁻² s⁻½ K⁻¹. [brief]
 - **Thin-layer heat capacity (C)**: Typical: About 5–20 kJ m⁻² K⁻¹ for metal sheet and thin roof layers. [brief]
 - **Evaporative fraction**: Typical: Dry paving 0; watered lawns and tree leaves 0.6–0.8. [brief]
 - **Sky view factor (SVF)**: In this model: Open lawn about 0.98; paved ground near buildings 0.54–0.87. [this model]
 - **Surface temperature**: Typical: On a hot afternoon (air 25–35 °C): lawn 30–40 °C, shaded paving 34–40 °C, aged asphalt 55–62 °C, fresh asphalt 60–68 °C. [brief]
-- **Mean radiant temperature (Tmrt)**: In this model: At 3 pm: 39–46 °C in building shade, 62–72 °C on sunlit ground (5th–95th percentile). [this model]
-- **Force-restore model (simulation)**: In this model: 5 m grid, 1-minute steps, the design day repeated 7 times until it settles. [this model]
+- **Radiant heat on you (mean radiant temperature, Tmrt)**: In this model: At 3 pm: 39–46 °C in building shade, 62–72 °C on sunlit ground (5th–95th percentile). [this model]
+- **How the temperatures are calculated**: In this model: In 5 m squares, minute by minute, over the same hot day run 7 times until it settles (a "force-restore" surface model, Deardorff 1978). [this model]
 - **Thermal inertia / night lag**: In this model: At 11 pm asphalt is 3.6 °C and concrete 4.4 °C warmer than the open lawn. [this model]
 - **Cool roof**: Typical: Albedo 0.65 or more when new, about 0.5–0.6 after weathering. [brief]
 - **Permeable paving** (asphalt-park only): Typical: Albedo 0.15–0.30; 5–10 °C cooler than concrete while wet (not modelled in this block). [brief]
@@ -164,16 +415,55 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Specular reflection** (glass-cbd only): Typical: Scale models: flat mirror façades more than double the sunshine at pedestrian level; diffuse façades add at most about 30%; concave façades more than 300%. [speroni2022]
 - **Fresnel reflection** (glass-cbd only): Typical: Clear float glass (n = 1.52, two surfaces): 0.082 at 0°, 0.10 at 45°, 0.17 at 60°, 0.30 at 70°, 0.41 at 75°, 0.56 at 80°. [fresnel]
 - **Reflection spot** (glass-cbd only): In this model: At 3 pm with solar-control low-e glass: Tmrt 49 °C in shaded spots vs 40 °C in plain shade and 71 °C in sun. [this model]
-- **Street canyon (H/W)** (glass-cbd only): Typical: Sky view factor at the centre of a long canyon: 1/√(1 + (2H/W)²), i.e. 0.45 at H/W 1, 0.24 at 2, 0.16 at 3, 0.10 at 5. Oke (1981): calm-night urban–rural air difference about 7.45 + 3.97 ln(H/W) K (secondary source). [brief3, oke1981]
-- **Low-e glass** (glass-cbd only): Typical: Solar reflectance about 0.15–0.35 head-on; Singapore caps glass daylight reflectance at 20%. [brief3, bca]
+- **Street canyon (H/W)** (glass-cbd, hutong only): Typical: Sky view factor at the centre of a long canyon: 1/√(1 + (2H/W)²), i.e. 0.45 at H/W 1, 0.24 at 2, 0.16 at 3, 0.10 at 5. Oke (1981): calm-night urban–rural air difference about 7.45 + 3.97 ln(H/W) K (secondary source). [brief3, oke1981]
+- **Coated (low-e) glass** (glass-cbd only): Typical: Solar reflectance about 0.15–0.35 head-on; Singapore caps glass daylight reflectance at 20%. [brief3, bca]
 - **AC waste heat** (glass-cbd only): Typical: Dense urban areas 20–70 W m⁻² of ground area, sometimes over 100; central Tokyo over 400 W m⁻² by day. [xie2016, sailor2011]
+- **Wind factor (f_w)** (waterfront only): In this model: Over the river 1.00; along Quay Street 1.20; Rope Walk, behind the warehouses, 0.46 (mean), 0.37 within one building height of the wall. [this model]
+- **Ventilation corridor** (waterfront only): Typical: Planning guides ask for corridors within about 30° of the prevailing wind; along the Ota River (Hiroshima) river cooling was detected 150–500 m inland along streets perpendicular to the river (not yet checked). [corridor, ota]
+- **Fetch** (waterfront only): Typical: River Don, Sheffield: about 30 m with open banks; Cheonggyecheon, Seoul: 30–80 m; small water bodies: −0.2 K typical in the afternoon. [hathway2012, cheonggyecheon, jacobs2020]
+- **Sheltering (lee)** (waterfront only): Typical: Recirculation behind a building about 1.6–2.6 times its width; recovery to the open wind after about 5 building heights is an assumption of this model. [wake, brief4]
+- **Apparent temperature** (waterfront only): Typical: AT = Ta + 0.348 e − 0.70 ws + 0.70 Q/(ws + 10) − 4.25 (e in hPa, ws the 10 m wind in m/s, Q in W m⁻²; as given by the Australian Bureau of Meteorology). [bom, steadman1994]
+- **Siheyuan (四合院)** (hutong only): In this model: Courtyard sky view 0.21–0.87 (10th–90th percentile), under a mat awning 0.18; Harbin's traditional courtyards measured 0.22–0.37. [this model]
+- **Tianpeng (天棚), the summer mat awning** (hutong only): Typical: Reed mats let through about 10–30% of the sun (not yet checked); this model uses 20%. [deng, brief5]
+- **Surface water store (W)** (hutong only): In this model: Each splash leaves 1 mm at 19:00; on the splashed lanes 0.49 mm is left at 21:00 and 0.20 mm at 23:00, and it is gone by morning. [this model]
+- **Wet-bulb temperature** (hutong, desert only): In this model: At 21:00 the air is 31.0 °C and its wet-bulb 23.9 °C; the coolest wet paving stays 2.7 K above the wet-bulb. [this model]
+- **Heat storage** (parking only): In this model: At 11 pm open asphalt is 1.9 °C above the air and still gives back 105 W m⁻²; bare soil 68 W m⁻², the rusty shed roof 1 W m⁻². [this model]
+- **Damping depth (d)** (parking only): In this model: With the Stempihar inputs: asphalt 0.127 m, concrete 0.132 m (admittance 1573 and 1877; the model uses 1200 and 1785). [this model]
+- **Ground heat flux (G)** (parking only): In this model: Open asphalt takes in up to 276 W m⁻² (at 11:00) and gives back 121 W m⁻² at 8 pm, 113 W m⁻² at 4 am. [this model]
+- **Thermal inertia** (parking only): In this model: At 11 pm: asphalt 30.9 °C, concrete 31.9 °C, ballast 28.8 °C, soil 28.8 °C, shed roof 25.5 °C (air 28.9 °C). [this model]
+- **Midwinter sunlight rule (大寒日)** (estate only): Typical: GB 50180-2018: at least 2 h on 大寒 in zones I, II, III and VII for cities of 500,000 or more (3 h in smaller ones); flats for the elderly 2 h on the winter solstice (冬至); new homes in old-area renovation 1 h on 大寒 (table values not checked against the standard, not yet checked). The draft of the Zhejiang rules (DB33/1050, now the 2016 edition): only stretches of 10 min or more count, steps of at most 5 min, the point 0.9 m above the floor. [gb50180, db33]
+- **Effective height (H_eff)** (estate only): Typical: 18 floors of 2.9 m with the ground floor at grade: 52.2 − 0.9 = 51.3 m. [brief7, db33]
+- **Spacing coefficient (G / H_eff)** (estate only): Typical: At 35° N for long slabs: 1.45 for 1 h, 1.47 for 2 h and 1.52 for 3 h of 大寒 sun; 1.64–1.74 on the winter solstice (a worked estimate). The coefficient method is "no longer appropriate" for high-rises in the draft of the Zhejiang rules (DB33/1050). [brief7, db33]
+- **Condenser heat rejection** (estate only): Typical: A 3.5 kW split unit with EER 3.3 rejects about 4.6 kW; at 0.5–0.7 m³/s of fan air that is 5.5–7.5 K above the air (a worked estimate). Measured in Changsha: exhaust 5.2 K above the air by day, 6.5 K at night (Mu et al. 2025). [brief7, mu2025]
+- **EER (energy efficiency ratio)** (estate only): Typical: Split air conditioners about 3–4; this block uses 3.3. [brief7]
+- **Artificial turf** (campus only): Typical: In summer sun 65–80 °C, at times over 85 °C: 9.4–34 K hotter than natural grass at the surface, but only 0.5–1.2 K warmer in the air above (review of 23 studies); at night it cools to about the grass temperature. [singh2024, jim2016]
+- **Crumb-rubber infill** (campus only): Typical: Lab tests: SBR 53.5 °C against TPE 45.6 °C under the same lamp; a shock pad adds about 1.8 K, the blade colour 1–2 K. [singh2024]
+- **Contact-burn threshold** (campus only): Typical: 1 min of contact: metal 51 °C, ceramics, glass and stone 56 °C, plastics and wood 60 °C; 10 min: 48 °C for all of them; 8 h: 43 °C. From 1 min on these apply to children too (CENELEC Guide 29). [iso13732]
+- **Shade sail** (campus, desert only): Typical: Lets through about 10–30% of the sun (not yet checked); Gilbert, Arizona at noon: rubber 46.7 °C under a sail against 87.2 °C in sun; Lubbock: 168 W m⁻² less radiation absorbed by a child. [brief8, vanos2016, vanos2017]
+- **Solar transmittance (τ)** (busstop only): Typical: 10 mm twinwall polycarbonate: clear 0.80, opal 0.47, bronze 0.43 (a datasheet, not yet checked); opaque metal, PV and ad panels 0; the solar heat gain coefficient of a window is a different number. [brettMartin, brief9]
+- **Profile angle (φ)** (busstop only): Typical: At 35° N on 20 July the sun stands 61° high at 14:00 and 25° at 17:00, from the west-south-west to the west; a roof 1.45 m above a seated head must reach (that height) / tan φ past the head to shade it. [brief9]
+- **Headway** (busstop only): Typical: Here 10 min (an assumption, 5–15 min), with gaps spread by a coefficient of variation of 0.4 (0.3–0.5, not yet checked); riders who arrive at random then wait (h / 2)(1 + cv²) on average. [brief9, fan2002]
+- **Heat dose of a wait** (busstop only): Typical: No standard dose exists for a few minutes of waiting; its definition uses UTCI, which this engine does not compute, so the apparent temperature stands in. [brief9, bom]
+- **Contact-burn threshold (benches, rails, decks)** (busstop only): Typical: 1 min of contact: metal 51 °C, ceramics, glass and stone 56 °C (concrete read with them), plastics and wood 60 °C; 10 min: 48 °C; bare metal burns in about 1 s at 65–70 °C (not yet checked). [iso13732, brief9]
+- **Urban village (城中村)** (village only): Typical: In Shenzhen, satellite surface heat islands of about 3.5 K over high-density urban villages, against 2.6 K for multi-storey and 1.6 K for high-rise housing; urban villages had the worst summer thermal-humidity index in one Shenzhen study. [wu2015, yi2022, brief10]
+- **Handshake building (握手楼)** (village only): Typical: Lanes about 1–3 m wide between walls 18–25 m high: a sky view of about 0.04–0.16 at the lane floor (canyon formula). [brief10]
+- **Indoor radiant temperature (proxy)** (village only): Typical: Measured rooms under tin roofs: 0.6–4 K above the outdoor air (Delhi, Yavatmal, Ahmedabad); white paint on tin cooled the room by about 1 K, other cool roofs 2.0–2.4 K. [tasgaonkar2022, vellingiri2020, brief10]
+- **Heat vulnerability** (village only): Typical: China, 66 communities: +5.0% deaths on heat-wave days (2.9–7.2%), more among older people, women and in dense communities; in India about 5–8% of households had an air conditioner (2020–24). [ma2015, carbonBriefAc, brief10]
 - **Permeable paving** (sponge-retrofit only): Typical: Wetted permeable pavement 15–35 °C cooler than dense asphalt in the early afternoon, 2–7 °C cooler about a day later; dry porous asphalt about 5 °C warmer. [li2013]
 - **Green roof** (sponge-retrofit only): Typical: Albedo about 0.15–0.25; up to 18 °C cooler than a black roof in a New York case; Bowen ratio about 1–2. [brief2, noaaGreen, heusinger]
 - **Rain garden** (sponge-retrofit only): Typical: No measured cooling figure in our sources; this block uses engine assumptions (evaporative fraction 0.8 wet, 0.35 dry, 3-day drying). [engine, mccoll]
 - **Days since rain (d)** (sponge-retrofit only): Typical: Wet surfaces dry with a time scale τ: pavers about 1 day, soils about 3 days, green-roof substrate about 4 days. [brief2, mccoll]
-- **Bowen ratio and evaporative fraction** (sponge-retrofit only): Typical: Green roofs: Bowen ratio below 1 to about 2 in field data; this block uses EF 0.5 for a wet and 0.25 for a dry green roof (the brief’s values); dry paving EF near 0. [heusinger, brief2]
+- **Bowen ratio and evaporative fraction** (sponge-retrofit only): Typical: Green roofs: Bowen ratio below 1 to about 2 in field data; this block uses EF 0.5 for a wet and 0.25 for a dry green roof (values chosen for this block); dry paving EF near 0. [heusinger, brief2]
 - **Sponge city (海绵城市)** (sponge-retrofit only): Typical: Target: absorb and use 70% of rainfall on site; 20% of built-up area by 2020, 80% by 2030. [sponge2015]
 - **Ageing (aged vs new)** (sponge-retrofit only): Typical: Cool pavement coating 0.26 → 0.18 within a year; cool roofs must reach 0.72 new or 0.50 after 3 years (Chicago code). [ko2022, chicago]
+- **Xeriscape** (desert only): Typical: In Phoenix neighbourhoods, xeric yards were the warmest by day, then "oasis" yards, then fully watered (mesic) ones; by day the form of a neighbourhood mattered more than its landscaping. [middel2014, brief11]
+- **Ramada** (desert only): Typical: Sails, umbrellas and similar light shade lowered the radiant heat on a person by about 17 K in Tempe; arcades and overhangs by about 23–31 K. [middel2021, colter2019, brief11]
+- **Reference evapotranspiration (ET₀)** (desert only): Typical: Phoenix in July about 7–9 mm a day (up to 10); bermudagrass watered every day uses about 0.78 of it, watered every 3 days about 0.68, so about 5–6 L per m² a day. [azmet, az1195, brief11]
+- **Vapour pressure (e_a)** (desert only): Typical: Desert summer air about 8–15 hPa (dew point 3–13 °C); a humid summer city 25–30 hPa. [ncei, azmet, brief11]
+- **Net longwave (infrared) loss** (nightmarket only): In this model: undefined [this model]
+- **Metabolic rate (met)** (nightmarket only): Typical: Standing about 1.2 met (about 125 W), walking slowly about 2 met (about 210 W). [ashrae55]
+- **Anthropogenic heat** (nightmarket only): Typical: Whole cities usually 20–70 W m⁻², more in dense centres; a night market's stalls about 60 W m⁻² over the street, several kW over a stall. [sailor2011, brief12]
+- **Sensible and latent heat** (nightmarket only): Typical: People at about 26 °C: about 73 W sensible and 59 W latent each in a shop; at 30 °C only about 40% of a body's heat is sensible. [ashraeRetail, brief12]
 
 ## Model vs literature targets
 
@@ -302,9 +592,27 @@ Tmrt is 65 °C or more — the sweat-cue threshold — is 69.9% Before, 66.3% Af
 69.9% for After **without the young street trees** (mean Tmrt 65.0, 64.5 and 65.2 °C).
 **The drop in sweating walkers After comes entirely from the young trees.** The roofs do not touch pedestrians, nobody
 walks on the coated road, and the sponge measures and reflective paving alone leave walkers as hot or slightly hotter
-(the lighter pavers add +3.7 K Tmrt at noon). Shade is what cools people; the young-trees card says so.
+(the lighter pavers add +3.7 K Tmrt at noon). Here, only the trees lower what walkers feel; the young-trees card says so.
 The trees' crown size (radius 2.6 m, centre 4.4 m) is an engine (scene) assumption, their transmission 0.47 the
 brief's mid value, and their kerb-side placement a design choice of this invented block.
+
+### The green roof against a white roof (outside evaluation #29, item 6)
+
+The evaluators saw the green roof hotter than the aged white roof at every wetness. That is what the cited inputs give, not a
+bug: the green roof (albedo 0.2) absorbs 0.80 of the sun against 0.40 for the aged white roof (0.6), and the
+0.25–0.5 of positive net radiation it spends on evaporation does not make up the gap. Roof surface at 15:00 (After, cells in full sun), °C;
+the aged white roof is 47.5 °C and the dark membrane it replaces 67.2 °C:
+
+| Case (docs only; nothing shipped changes) | d = 0 | d = 3 | d = 7 |
+|---|---|---|---|
+| shipped (EF dry 0.25 / wet 0.5, α 0.2) | 49.1 | 53.8 | 56.3 |
+| EF dry 0.33 / wet 0.67 (Bowen ratio about 2 / 0.5) | 44.0 | 50.6 | 54.0 |
+| a watered roof: EF 0.6 wet and dry, α 0.25 | 45.2 | 46.3 | 47.0 |
+
+Disclosures: the roof is **a single surface** (no plant canopy, no leaf temperature, no irrigation); the dry evaporative
+fraction 0.25 (Bowen ratio 3.0) sits at the dry edge of the Bowen ratios Heusinger & Weber measured (about < 1 to 2)
+[heusinger]. The card says it in plain words: cooler than the dark roof it replaces, warmer than a white roof by
+mid-afternoon, close to it only right after rain or if watered. No value was changed.
 
 ### Water budget
 
@@ -358,8 +666,8 @@ unverified on the card. Rain, runoff and flooding are not modelled.
 - **Porous asphalt is hotter when dry.** It is darker (α 0.08) and lighter-weight than dense asphalt, so it only
   cools in the first day or two after rain (Li et al. 2013: dry porous asphalt about +5 K).
 - **Pavers are lighter, so they also reflect more sun onto people** at midday once dry; the pavers card shows ΔTmrt.
-- **Ageing:** a coating that starts at 0.26 is about 0.18 after a year (Ko et al. 2022); in-service cool roofs often sit
-  below their aged rating (LBNL-6714E). The page defaults to aged values.
+- **Ageing:** a coating that starts at 0.26 is about 0.18 after a year (Ko et al. 2022); in-service cool roofs generally sit
+  below their listed aged values (70 Chicago-area roofs, Rupar & Graham 2015, abstract only [rupar2015]). The page defaults to aged values.
 
 ## Block 3: glass CBD
 
@@ -490,7 +798,7 @@ compares the same glass with the specular bounce switched off (same glass temper
 | Reflective (mirror) glass | 15:00 | 769 | 0.40 | +11.7 K | +25.6 K | 52.7 °C (258) | 40.1 °C | 70.9 °C | 81.9 °C |
 
 Field comparison: Chengdu, Chunxi Road (August 2023), reflection zones Tmrt +4 to +13 °C, air +1–2 °C, UTCI +2–5 °C,
-peak Tmrt 73.9 °C [du2025]. SOLWEIG with reflective walls also puts the highest Tmrt in front of sunlit façades [wallenberg2026].
+peak Tmrt 73.9 °C [du2025]. Wallenberg et al., who give SOLWEIG walls an albedo of 0.5, note that Tmrt is highest in front of sunlit façades [wallenberg2026].
 Reflective façades lower cooling energy but raise canyon UTCI [chen2024]; low-emissivity glass can cut Tmrt by up to 5 K
 in simulation [sanagar2025] (not modelled: glass emissivity is 0.84 for every type here).
 
@@ -608,3 +916,2390 @@ Notes on the rows outside:
   diffuse part is ignored) and opaque walls only diffusely.
 - Low-e and mirror reflectances, all absorptances, glass emissivity and the glass temperature balance are unverified
   (no datasheet or measurement was found).
+
+## Block 4: waterfront and wind corridors
+
+The fourth block (`cities/waterfront`) is an invented 400 m block on the south bank of a river: a stone promenade
+with a row of riverside trees, two wide streets running south from the river along the prevailing wind (Quay Street
+and Willow Street, the ventilation corridors), two narrower streets across it (Rope Walk and Tannery Lane, in the lee
+of the building rows upwind of them) and a garden with a small still pond. The wind blows from the river (north) at a
+calm (1 m/s) or breezy (3 m/s, default) preset; buttons, `?u=1|3`. Its research brief is
+[`docs/research/waterfront-brief.md`](research/waterfront-brief.md).
+
+### Wind factor
+
+Each 5 m ground cell gets a wind factor f_w = clamp(S·C, 0.3, 1.2) (`engine/wind.js`):
+
+- **Shelter S** = min over upwind buildings b within 5·H_b of f_min + (1 − f_min)·d_b/(5·H_b), 1 if none;
+  d_b is the distance from the cell centre, straight upwind, to b's footprint (an exact ray–box distance).
+- **Channelling C** = 1 + c_ch·max(0, cos 3δ) in a street within 30° of the wind (δ the angle between its axis
+  and the wind) whose H/W > 0.4; else 1. A street here is its carriageway and pavements out to the facing walls;
+  H is the mean height of the walls facing it within 15 m of the kerb and W the mean wall-to-wall width, both
+  sampled every 5 m where walls face it on both sides.
+- **Roofs** keep f_w = 1 (*engine assumption*: above the street-level shelter). Trees are not obstacles (porous; not
+  modelled).
+- The local wind u_i = u_site·f_w sets the convective coefficient of the cell, h_c = 5.7 + 3.8·u_i [oke], in the
+  force-restore model, and the wind a walker feels. **Blocks 1–3 declare no wind direction, have no f_w and keep the
+  scalar h_c = 5.7 + 3.8·u_site**: their model runs, drawings and pixels are unchanged (checked against the pages
+  built before this block, `tests/e2e/regression.test.mjs`).
+- Block 4 runs one model per preset, each with 6 coarse (10-min) spin-up days before the 1-min days (as block 3,
+  with the same stability guard); this run converges after 3 1-min days at 3 m/s
+  (max |ΔTd| 0.010 K) and 3 at 1 m/s.
+
+| Street | Axis | δ | H m | W m | H/W | C |
+|---|---|---|---|---|---|---|
+| Quay Street (`quay`) | N–S | 0° | 17.4 | 30.0 | 0.58 | 1.20 |
+| Willow Street (`willow`) | N–S | 0° | 16.6 | 30.0 | 0.55 | 1.20 |
+| Rope Walk (`rope`) | E–W | 90° | 19.0 | 22.0 | 0.86 | 1.00 |
+| Rope Walk (`rope2`) | E–W | 90° | – | – | no facing walls | 1.00 |
+| Rope Walk (`rope3`) | E–W | 90° | 22.0 | 22.0 | 1.00 | 1.00 |
+| Tannery Lane (`tannery`) | E–W | 90° | 18.5 | 20.0 | 0.93 | 1.00 |
+| Tannery Lane (`tannery2`) | E–W | 90° | – | – | no facing walls | 1.00 |
+| Tannery Lane (`tannery3`) | E–W | 90° | 21.0 | 20.0 | 1.05 | 1.00 |
+
+Isolated-building check (H 20 m, wind from the north, centre line): upwind f_w 1.00; at the leeward wall
+0.30; mean over 0–1 H 0.37, 0.44 at 1 H; 1.00 at 5–6 H. In the block: over the
+river f_w = 1.00–1.00; Quay and Willow Streets 1.20 (mean); the streets across the wind
+0.53; Rope Walk 0.46; 0–1 H behind the Wharf Warehouses 0.37 (mean), 0.41 (largest).
+
+### Block 4 parameters
+
+| Constant | Value |
+|---|---|
+| `windFmin` | 0.3 [brief4] *engine assumption (no source)*, unverified (f_min: wind factor right behind an obstacle (leeward face); also the lower clamp of f_w) |
+| `shelterReach` | 5 H [brief4] *engine assumption (no source)*, unverified (shelter recovers linearly to 1 at 5 building heights downwind ("5H recovery" is an assumption in the brief; wake recirculation 1.6-2.6 x building width is cited [wake])) |
+| `channelC` | 0.2 [brief4] *engine assumption (no source)*, unverified (c_ch: channelling gain in streets aligned with the wind, C = 1 + c_ch max(0, cos 3 delta)) |
+| `windFmax` | 1.2 [brief4] *engine assumption (no source)*, unverified (f_max: upper clamp of f_w) |
+| `alignCut` | 30 deg [corridor] *cited value*, unverified (channelling only in streets whose axis is within 30 deg of the wind) |
+| `channelHw` | 0.4 [oke1988] *interpretation of the source*, unverified (channelling only where the street H/W > 0.4 (read from the Oke 1988 regime thresholds, about 0.3-0.4, unverified)) |
+| `windHc` | h_c = 5.7 + 3.8 u_site f_w [brief4] *interpretation of the source*, unverified (the same h_c formula [oke] with the local wind u_i = u_site f_w per cell (roofs and blocks without a wind direction: f_w = 1). The formula is a near-surface flat-plate fit fed here with the 10 m wind x f_w, which overstates street-level h_c and its wind sensitivity) |
+| `riverCurve` | Ta_mean - 2 K + 0.5 K sin(2 pi (h - 9) / 24) [brief4] *engine assumption (no source)*, unverified (prescribed river surface; range 1 K (large rivers: smallest daily range [webb2008]); the -2 K offset and 0.5 K amplitude are assumptions) |
+| `pondCurve` | Ta_mean - 0.5 K + 2 K sin(2 pi (h - 10) / 24) [brief4] *engine assumption (no source)*, unverified (prescribed shallow pond surface; range 4 K; warmer than the air at night is cited [solcerova2019], the numbers are assumptions) |
+| `airDay` | 1 [brief4] *cited range*, unverified (overlay only: dTa at the bank by day, -1.0 K (cited range 0.2-1.5 K [hathway2012, cheonggyecheon, jacobs2020])) |
+| `airL` | 30 [brief4] *cited range*, unverified (overlay only: decay length L, m (cited 30-80 m [hathway2012, cheonggyecheon], unverified)) |
+| `airLaligned` | 60 [brief4] *interpretation of the source*, unverified (overlay only: decay length in streets aligned with the wind, m, chosen so the effect is below 0.2 K by 150 m (the brief reads the Ota River 150-500 m [ota] as at most 150 m here)) |
+| `airNight` | 0.3 [brief4] *engine assumption (no source)*, unverified (overlay only: dTa at the bank at night, +0.3 K (range 0-1 K assumed; the sign is cited [steeneveld2014, solcerova2019])) |
+| `airPond` | 0.2 [jacobs2020] *cited value*, unverified (overlay only: dTa next to the small pond by day, -0.2 K (Jacobs et al. typical afternoon value)) |
+| `apparentTemp` | AT = Ta + 0.348 e - 0.70 ws + 0.70 Q / (ws + 10) - 4.25 [bom] *cited value* (Steadman (1994) [steadman1994], coefficients checked against the BoM page; comfort for the walkers in block 4 (a stand-in for UTCI, which is not implemented); ws = u_10 f_w clamped to 0.5-17 m/s as the brief gives for UTCI) |
+| `atRadiation` | Q = 6.1 W m-2 K-1 x (Tmrt - Ta) [bom] *interpretation of the source*, unverified (extra radiation absorbed by a person, linearised: 4 eps sigma T^3 with eps 0.97 and T 303 K over the whole body surface. At a sunlit Tmrt near 68 C (341 K) 4 eps sigma T^3 is about 8.7, so Q is understated by about 30% there; a standing person radiates over only about 0.7 of the body surface (ASHRAE effective radiating area), which errs the other way. Route weights divide by the sun-shade AT gap, so this largely cancels for the walkers; absolute AT on the cards carries it) |
+| `windLines` | seeds every 20 m upwind, RK2 2.5 m steps, slide along buildings [brief4] *engine assumption (no source)*, unverified (drawing only: assumed direction x shelter factor, not computed flow; dash spacing and speed proportional to u_i (speed drawn 4x)) |
+
+### Water
+
+River and pond are prescribed (`engine/thermal.js` waterTemp), not computed; the pond of blocks 1–3 keeps its curve.
+
+- River: Ts = daily mean Ta − 2 K + 0.5 K·sin(2π(t − 9 h)/24): 27.5–28.5 °C (range 1.0 K),
+  28.5 °C at 15:00 against 35.0 °C air. Large deep rivers have the smallest daily range [webb2008].
+- Pond: Ts = daily mean Ta − 0.5 K + 2 K·sin(2π(t − 10 h)/24): 27.5–31.5 °C (range 4.0 K),
+  31.4 °C at 15:00 (air 35.0 °C) and 27.5 °C at 04:00 (air 25.1 °C). A pond warmer than the
+  air at night is cited [solcerova2019, steeneveld2014]; the offsets and amplitudes are assumptions.
+
+### Air overlay (information only)
+
+The air temperature stays a fixed forcing. The water's effect on the air is drawn as an overlay along the wind lines
+(`A`, `?air=1`), labelled "illustrative, from literature, not simulated", and never enters a temperature, Tmrt or
+comfort value. Along a line, λ = ∫ds/L(s) from where it leaves the water, L = 30 m (60 m in streets along the
+wind); by day ΔTa = −1 K·exp(−λ), at night +0.3 K·exp(−λ) (day weight from the sun altitude, full above
+10°). The pond uses the river's numbers ×0.20 (−0.2 K by day [jacobs2020]; at night the same ratio,
+an *engine assumption*). By day: −0.92 K at the bank, −0.39 K at 30 m, −0.13 K at 80 m.
+
+### Wind lines (drawing only)
+
+Seeds every 20 m across the wind on the upwind edge (seeded jitter ±3 m); RK2 steps of 2.5 m along the wind, or,
+where a step would enter a building (grown by 1.5 m), along the wall: the side the wind leans toward, head-on the
+side of the wall's centre the line is on. A line ends at the block edge or where it meets an earlier line (on a
+1.5 m grid), so no path is drawn twice. Lines are recorded once through the pen recorder (a slow seeded wobble) and
+dashed every frame: dash period 4 m per m/s of local wind (∝ u_i), moving at 4·u_i (drawn faster than life);
+the phase is a pure function of the frame. Label on the page: "assumed direction × shelter factor, not computed flow".
+This run: 20 lines, 1723 vertices, 0 inside a building, hash `65d58117`. Toggle `W`, `?wind=0|1`.
+
+### Comfort and walkers
+
+Walkers use the block 1 route rule (Melnikov shade weights, scaled by heat) with a wind term
+(`engine/waterfront.js` comfortShade): per 2 m pixel, w = w_class + (1 − w_b)·(AT(u·f_w) − AT(u))/(AT_sun − AT_shade),
+with AT the apparent temperature with radiation [steadman1994, bom] from the pixel's Tmrt (sun, building shade or tree shade
+of its 5 m cell) and the local wind (u_10·f_w clamped to 0.5–17 m/s as the brief gives for UTCI), and AT_sun − AT_shade
+the mean gap between sunlit and building-shaded walkable ground at f_w = 1 (8.2 K at 15:00, 3 m/s). At f_w = 1 the
+weights are exactly those of blocks 1–3; a breezier pixel weighs less, a sheltered one more. UTCI is not implemented;
+apparent temperature is a simpler stand-in (coefficients checked against the Bureau of Meteorology page; Steadman's paper
+itself not read). The extra radiation Q = 6.1·(Tmrt − Ta) is a linearisation (4εσT³ at 303 K over the whole body
+surface): at a sunlit Tmrt near 68 °C it understates Q by about 30 %, while counting the whole body surface (rather than
+the ≈ 0.7 that radiates, ASHRAE) overstates it; the walkers' weights divide by the sun–shade AT gap, so this largely
+cancels in routing, but the absolute apparent temperatures on the cards carry it. The sweat cue is unchanged (Tmrt only).
+
+At 15:00 (3 m/s) all 14 walkers on the stroll route take the tree-shaded, breezy riverside (cost 373.8) over sunny,
+sheltered Rope Walk (423.1). Across all routes the wind term moves walkers only a little: mean f_w where people walk
+1.00 vs 0.99 with the wind ignored (walkable ground 0.87). Shade dominates: under the riverside trees
+Tmrt is 42.4 °C vs 68.4 °C in the sun beside them (apparent temperature 38.0 vs 46.6 °C), against
+the overlay's −1 K at the bank.
+
+### Acceptance bands (block 4)
+
+| Check (spec #9) | Model | Band | Source | |
+|---|---|---|---|---|
+| Isolated building, open ground upwind: f_w | 1 | 0.99 to 1.01 | brief4 | inside |
+| Isolated building (H 20 m), 0–1 H leeward on the centre line: mean f_w | 0.370 | ≤ 0.4 | brief4 | inside |
+| Isolated building, 0–1 H leeward: largest f_w (at 1 H: f_min + (1 − f_min)/5) | 0.438 | ≤ 0.4 | brief4 | **outside** |
+| Isolated building, 5–6 H leeward: smallest f_w | 1 | ≥ 0.95 | brief4 | inside |
+| Over the river: smallest f_w (n 720) | 1 | 0.99 to 1.01 | brief4 | inside |
+| Over the river: largest f_w | 1 | 0.99 to 1.01 | brief4 | inside |
+| Wharf Warehouses (H 16 m), ground 0–1 H leeward: mean f_w (n 63) | 0.366 | ≤ 0.4 | brief4 | inside |
+| Wharf Warehouses, ground 0–1 H leeward: largest f_w (cell centres 2.5–13.5 m behind the wall) | 0.409 | ≤ 0.4 | brief4 | **outside** |
+| Customs Terrace (H 20 m), ground 5–6.5 H straight downwind: smallest f_w (n 132) | 1 | ≥ 0.95 | brief4 | inside |
+| Streets along the wind (quay, willow): mean f_w | 1.200 | ≥ 1 | brief4 | inside |
+| Along minus across the wind (rope, rope2, rope3, tannery, tannery2, tannery3, mean 0.533) | 0.667 | ≥ 0.3 | brief4 | inside |
+| h_c at 3 m/s, ground: smallest (bound 5.7 + 3.8 u f_min = 9.12) | 9.151 W m⁻² K⁻¹ | ≥ 9.12 | brief4 | inside |
+| h_c at 3 m/s, ground: largest (bound 5.7 + 3.8 u f_max = 19.38) | 19.380 W m⁻² K⁻¹ | ≤ 19.38 | brief4 | inside |
+| h_c at 3 m/s, roofs minus 5.7 + 3.8 u = 17.10 (f_w = 1) | 0 W m⁻² K⁻¹ | 0 to 0 | brief4 | inside |
+| h_c at 1 m/s, ground: smallest (bound 5.7 + 3.8 u f_min = 6.84) | 6.850 W m⁻² K⁻¹ | ≥ 6.84 | brief4 | inside |
+| h_c at 1 m/s, ground: largest (bound 5.7 + 3.8 u f_max = 10.26) | 10.260 W m⁻² K⁻¹ | ≤ 10.26 | brief4 | inside |
+| h_c at 1 m/s, roofs minus 5.7 + 3.8 u = 9.50 (f_w = 1) | 0 W m⁻² K⁻¹ | 0 to 0 | brief4 | inside |
+| Sunlit asphalt at 15:00, 3 m/s: sheltered (f_w ≤ 0.45, n 212, SVF 0.58) minus exposed (f_w ≥ 0.95, n 394, SVF 0.76) | +11.13 K | 2 to 8 | engine | **outside** |
+| The same at 1 m/s (calm), read against the same band | +7.13 K | 2 to 8 | engine | inside |
+| Open asphalt (SVF 1, no walls) at f_w 0.37 minus f_w 1.16, 15:00, 3 m/s: the wind alone | +9.57 K | 2 to 8 | engine | **outside** |
+| Tmrt at 15:00, 1 m/s minus 3 m/s: largest change over ground cells | +4.50 K | ≤ 2 | brief4 | **outside** |
+| Tmrt at 15:00, 1 m/s minus 3 m/s: mean over sunlit ground | +2.17 K | ≤ 2 | brief4 | **outside** |
+| River: daily range | 1 K | ≤ 1.5 | brief4 | inside |
+| Pond: daily range | 4 K | 3 to 5 | brief4 | inside |
+| River minus air at 15:00 | −6.50 K | ≤ 0 | brief4 | inside |
+| Pond minus air at 15:00 | −3.57 K | ≤ 0 | brief4 | inside |
+| Pond minus air at 04:00 | +2.35 K | ≥ 0 | solcerova2019 | inside |
+| Air overlay by day: size of ΔTa at the bank, first drawn vertex over land (20 lines) | +0.92 K | 0.5 to 1.5 | brief4 | inside |
+| Air overlay by day: largest size of ΔTa more than 80 m from the water, outside streets along the wind | +0.09 K | ≤ 0.2 | brief4 | inside |
+| Air overlay by day: largest size of ΔTa more than 150 m from the water, in streets along the wind | +0.06 K | ≤ 0.2 | brief4 | inside |
+| Air overlay at night: smallest ΔTa | 0 K | ≥ 0 | brief4 | inside |
+| Wind lines (20 lines, 1723 vertices): vertices inside a building | 0 | ≤ 0 | brief4 | inside |
+| Walkers at 15:00: share of the stroll route (n 14) on the tree-shaded, breezy riverside rather than sunny, sheltered Rope Walk | 1 | ≥ 0.5 | melnikov | inside |
+| Walkers at 15:00: mean f_w where people walk minus the same walkers with wind ignored | 0.002 | ≥ 0 | melnikov | inside |
+
+6 of 34 checks fall outside their band. They are reported, not tuned away: no input was moved to pass a band.
+
+Notes on the rows outside:
+
+- **0–1 H leeward, largest f_w.** S rises linearly from f_min = 0.3 at the wall, so at exactly 1 H it is
+  0.3 + 0.70/5 = 0.44 > 0.4: the band holds for the mean over 0–1 H (0.37 isolated, 0.37 in the block) but
+  not for the far end of the zone. f_min and the 5 H recovery are assumptions with no cited range; they were not changed.
+- **Sheltered minus exposed asphalt at 15:00, 3 m/s: +11.1 K, above the 2–8 K band.** The brief marks this band as an
+  engine plausibility band to be calibrated from a run. This is that run: sheltered sunlit asphalt (mean f_w 0.37, h_c
+  9.9 W m⁻² K⁻¹, 67.6 °C) against exposed sunlit asphalt (f_w 1.16, h_c 18.9, 56.5 °C). Doubling h_c removes
+  that much heat; part of the gap is the narrower streets (SVF 0.58 vs 0.76), but an open cell with no walls still
+  gives +9.6 K. At 1 m/s the gap is +7.1 K (inside). The band was **not** widened to fit, and no
+  parameter was moved; the result is reported as an engine finding: with h_c = 5.7 + 3.8 u and a 3 m/s site wind, the
+  wind factor's 0.3–1.2 range makes a larger surface contrast than the brief expected. No measurement of this contrast
+  was found.
+- **Tmrt change with u: 4.5 K at most, 2.2 K on average in sun (band ≤ 2 K).** Wind does not enter Tmrt directly;
+  at 1 m/s the ground runs hotter and its longwave raises Tmrt. The largest change is on sunlit asphalt.
+- **What drives both misses: h_c = 5.7 + 3.8 u is a flat-plate fit fed with the 10 m wind × f_w.** The Jürges / McAdams
+  form [oke] is a fit for the wind just above a surface; here it is fed with the site's 10 m reference wind times f_w,
+  although street-level wind is usually well below the 10 m value even before any shelter. That overstates street-level
+  h_c and, above all, its sensitivity to wind (3.8 W m⁻² K⁻¹ per m/s across the 0.3–1.2 range of f_w), which is what makes
+  the +11.1 K asphalt contrast and the 4.5 K Tmrt change. A reference-height correction (a factor below 1 on u
+  before h_c) would shrink both. Blocks 1–3 use the same convention with one site wind, so their numbers carry the same
+  bias but no contrast. **Decision:** these misses are accepted as disclosed engine findings and the bands are kept as
+  written (project lead, under the maintainer's standing instruction); a wind-height correction is left to a follow-up
+  issue and is not made here.
+
+### Disclosures (block 4)
+
+- **Air fixed:** the air temperature is the same design-day curve as in blocks 1–3; the water's air effect is an overlay
+  only. Measured urban water cools the air only a little and over a short distance (about 0.2–1.5 K by day, mostly
+  within 30–80 m [hathway2012, cheonggyecheon, jacobs2020]; reviews that report about 2.5 K are inflated by remote-sensing
+  surface temperatures [volker2013]) and can warm the night [steeneveld2014, theeuwes2013, solcerova2019].
+- **One wind direction and speed; a geometric heuristic, not CFD:** no vortices, downdraughts, corner jets, river or sea
+  breezes, gusts or humidity. h_c uses the 10 m wind × f_w in a near-surface flat-plate fit, which overstates street-level
+  convection and its wind sensitivity (see the notes above). Wakes are straight shadows of the footprint along the wind; oblique winds would also
+  shelter the corridors' edges. Trees do not slow the wind. Roofs keep f_w = 1.
+- **Prescribed water curves** for the river and pond (not a water energy balance).
+- **Shade is the biggest comfort lever near water** [jacobs2020: PET −1 to −7 K for shade vs −0.6 K typical next to small
+  water bodies]; the riverside-shade card says so.
+- **Comfort** uses apparent temperature [steadman1994, bom], not UTCI; Q is linearised (see Comfort and walkers).
+- Unverified: the Hathway & Sharples numbers (secondary sources), the Ota River reach, the Oke (1988) thresholds, the decay
+  length 30–80 m, the "< 1 K" river range, the Q linearisation; f_min, c_ch, f_max, the 5 H recovery, the water curves and the night overlay
+  are assumptions.
+
+## Block 5: hutong lanes and courtyards
+
+The fifth block (`cities/hutong`) is an invented 400 m block in the manner of old Beijing: six bands of single-storey
+courtyard houses (siheyuan), two rows to a band, back to back, between east–west lanes (hutong) 5 m wide, a 10 m main
+lane with pagoda trees (Pagoda Tree Hutong, asphalt) and one north–south lane (Bell Lane). Every house is a 4 m
+grey-brick box with a grey tile roof on a mud and lime back; each courtyard has a jujube, a pair of pomegranates or a
+pagoda tree, 33 have a vine pergola, and 15 the summer mat awning (tianpeng, 天棚) over
+the whole yard. 67 of the 167 courtyards (about two households in five, an assumption) and two
+lanes (Jujube Lane and Lantern Lane) are splashed with water at 19:00. The design day is 21 June (the solstice) at
+39.9° N, air 25–35 °C, vapour pressure 25 hPa, wind 1 m/s: the brief's band conditions. Its research brief is
+[`docs/research/hutong-brief.md`](research/hutong-brief.md).
+
+The splash is shown with `P`, the panel button or `?splash=0|1` (default on).
+
+### Materials and screens
+
+- `greyBrick`: Grey brick paving (青砖). Lanes and courtyards are paved with fired grey brick: darker than stone, a little porous, and it holds the day's heat into the evening.
+- `greyTile`: Grey tile roof on a mud and lime back. Paired grey tiles laid on a thick mud and lime bed: dark and heavy, the roof bakes in the afternoon and gives the heat back slowly.
+- `jujube`: Jujube tree (枣树). A small courtyard tree with an open, airy crown: patchy shade.
+- `pomegranate`: Pomegranate (石榴). A low, dense courtyard tree; its fruit stands for many children.
+- `pagodaTree`: Pagoda tree (国槐). The big shade tree of the Beijing lanes: a wide, dense crown high above the roofs.
+- `pergola`: Vine pergola (葡萄架). A grape vine trained over a trellis at head height: dappled shade over the courtyard path.
+- `awning`: Summer mat awning (天棚). A shed of reed mats on poles, built over the whole courtyard each summer, higher than the eaves; its side mats roll up to let the air through.
+
+Their values and basis tags are in the Surface parameters table above. The brief's paving and roof values sit
+inside wider product ranges: brick solar absorptance 0.45 (light grey) to 0.90 (slate grey) [midlandBrick]; clay
+tile reflectance 0.40–0.50 for light terracotta, grey reduced-fired tile darker [carb]; northern roofs bed the tiles
+on a mud and lime back, not ventilated [sohuRoof], so the cooler ventilated-tile result [miller2007] does not apply.
+Tree species shade with their own crown
+transmission tr = exp(−0.5 LAI) (LAI from the brief, unverified; no measured LAI for jujube or the pagoda tree was found).
+Pergolas and awnings are flat screens: their cast shadow (a thin box at z 2.4 m or
+6.5 m) multiplies in their transmission; the cells under them count as fully covered for the sky view and
+the wall reflection, with the crown factor 1 − 0.75 used for trees in every block. Trees enter the sky view the same
+way, so the sky view here does **not** ignore trees (it is a crude crown factor, not a ray trace through leaves).
+
+### Lanes
+
+Lane geometry, from the model's grid (interior cells: walls on both sides, nothing overhead). n is small (5–14 cells
+per east–west lane) because a cell counts only if the cells just outside both lane edges, and their neighbours along
+the lane, are all walls: gates every 25–35 m and the side lanes break the walls. The cells are picked by geometry
+alone, before any result, and are near-identical. Sky view: the model,
+the endless canyon at the same cell centres (0.5/√(1 + (H/d₁)²) + 0.5/√(1 + (H/d₂)²)) and on the centre line
+(cos(atan(2H/W))). Noon: the model's sunlit share at solar noon (12:16, sun 73.5° high) vs 1 − (H/tan β)/W.
+
+| Lane | Paving | W m | H m | H/W | n | SVF model | SVF canyon at cells | SVF centre line | noon sunlit model / formula | splashed |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Jujube Lane (`jujube`) | greyBrick | 5 | 4.0 | 0.80 | 5 | 0.54 | 0.53 | 0.53 | 0.75 / 0.76 | yes |
+| Pagoda Tree Hutong (`main`) | asphalt | 10 | 4.0 | 0.40 | 14 | 0.71 | 0.71 | 0.78 | 0.86 / 0.88 | no |
+| Lantern Lane (`lantern`) | greyBrick | 5 | 4.0 | 0.80 | 5 | 0.54 | 0.53 | 0.53 | 0.75 / 0.76 | yes |
+| Well Lane (`well`) | greyBrick | 5 | 4.0 | 0.80 | 11 | 0.54 | 0.53 | 0.53 | 0.75 / 0.76 | no |
+| Brick Lane (`brick`) | greyBrick | 5 | 4.0 | 0.80 | 5 | 0.54 | 0.53 | 0.53 | 0.75 / 0.76 | no |
+| Bell Lane (`bell`) | greyBrick | 5 | 4.0 | 0.80 | 55 | 0.53 | 0.53 | 0.53 | — | no |
+
+Two grid changes make 5 m lanes come out right; both are used only by this block (`scene.shadeSamples`, `scene.svfExact`):
+
+- **Shade sampled every 1.25 m** (4 × 4 per 5 m cell instead of 2 × 2): at noon a 4 m wall casts 1.18 m of shadow, which
+  the 2.5 m samples of blocks 1–4 miss entirely. The building shade is found by marching each sample's ray toward the
+  sun over the height grid (`buildingMaskRay`), which gives the same samples as the cast-shadow polygons (checked on
+  every ground and roof sample of the block for every daylight 10-min sun slot of the design day, and on a test block
+  with houses of 4, 7 and 12 m, where roofs are shaded too; `tests/unit/hutong.test.mjs`) without visiting the footprints; the crown and screen shadows
+  use a scanline version of the polygon rasteriser with the same inside rule (`rasteriseScan`).
+- **Exact horizon scan** (`svfGridAt`): the 2.5 m horizon-scan step of blocks 1–4, started from the cell centre, lands
+  exactly on a 5 m lane's wall line and sees the wall at 5 m on one side instead of 2.5 m (sky view 0.71 for the 5 m
+  lanes instead of the canyon's 0.53). Here each ray steps from cell edge to cell edge and sees each wall at its true
+  distance; 32 azimuths.
+- The 10 m lane has no cell on its centre line: its cells sit 2.5 m from one wall, so the model's sky view (0.71) is
+  that of those points, not of the centre line (0.78). The acceptance row against the centre-line formula is outside (below) for this reason.
+- Lanes narrower than the 5 m grid cannot be shown. Houses are boxes at eave height: the pitched roofs are drawn but
+  are not in the shade or sky-view calculation (the brief: roof tilt negligible for pedestrian metrics).
+
+### Evening splash: the surface water store
+
+The model's evaporation term EF·max(Q*, 0) needs positive net radiation, which is gone after sunset: switched on
+at 19:00 (EF := 1 on the splashed lanes, no store) it changes the lane paving by at most 0.04 K. So block 5
+adds a per-cell water store W, engine-wide but empty unless a block asks for it (blocks 1–4 never enter the step;
+their pages render the same pixels as before, `tests/e2e/regression.test.mjs`):
+
+- LE = L·β(W)·(h_c/c_p)·max(0, q_sat(Ts) − q_a), β(W) = β_wet·min(1, W/W_c), dW/dt = −LE/L, W := W0 at 19:00 every day;
+  G = (1 − α)K + εL↓ − εσTs⁴ − h_c(Ts − Ta) − EF·max(Q*, 0) − LE (thermal.js `stepSplash`).
+- q = 0.622·e/(p − 0.378·e) with p = 1013.25 hPa; e_s = 6.112·exp(17.67·T/(T + 243.5)) hPa [bolton1980]; in the
+  1-min step q_sat comes from a 0.02 K table of the same formula (linear between entries, within 2e-7 kg kg⁻¹; Math.exp per
+  cell and minute was the slow part). The wet-bulb check uses the formula itself.
+- Evaporation is explicit and capped so W never goes below 0. The splash model runs the wet-able cells (n 1138) again
+  with the store; the coarse-step guard includes the latent coupling at the same 340 K bound as the other terms, which
+  turns the 6 coarse spin-up days off for wet runs (this run: 0 coarse days, 6 1-min days, max |ΔTd|
+  0.034 K). The other cells are those of the dry model (no lateral coupling in this model). The dry model and
+  the wet runs each stop when the deep temperature changes by less than 0.05 K a day, so differences between them carry
+  a few hundredths of a kelvin of convergence noise (it is all of the old EF path's 0.04 K).
+- The design day repeats with a splash **every evening**, so the paving's daily mean is lower and the splashed lanes
+  are 0.54 K cooler even at 18:45, before the splash, and 0.52 K the next afternoon.
+
+| Constant | Value |
+|---|---|
+| `waterStore` | LE = L beta(W) (h_c / c_p) max(0, q_sat(Ts) - q_a), dW/dt = -LE / L [brief5] *cited value*, unverified (bulk evaporation from the splashed paving; beta(W) = beta_wet min(1, W / W_c); c_p 1005 J kg-1 K-1, p 1013.25 hPa, q = 0.622 e / (p - 0.378 e); adds to the EF term, which is zero after sunset) |
+| `satVapour` | e_s = 6.112 exp(17.67 T / (T + 243.5)) hPa [bolton1980] *cited value*, unverified (saturation vapour pressure over water) |
+| `splashW0` | 1 [brief5] *edge of cited range*, unverified (W0, mm of evaporable water left on the paving by one splash; brief 0.5-1.0 mm of the 1-2 L m-2 thrown (about 1 L m-2 per cycle in Paris [hendel2015])) |
+| `splashBeta` | 0.5 [brief5] *cited range*, unverified (beta_wet, the wetness factor of splashed brick; brief 0.3-1 (unverified); Kobe asphalt 0.15 [takebayashi2023]) |
+| `splashWc` | 0.2 [brief5] *cited value*, unverified (W_c, mm: below it the wet patch dries up and beta falls in proportion) |
+| `splashHour` | 19 [brief5] *cited value*, unverified (the evening splash, every evening of the repeated design day (evening watering recommended [takebayashi2023]; the uchimizu custom [nippon])) |
+| `shadeSamples` | 4 x 4 per 5 m cell [engine] *engine assumption (no source)*, unverified (block 5 only: shade sampled every 1.25 m, so the 1.2 m wall shadow of a 5 m lane at noon registers (blocks 1-4: 2 x 2)) |
+| `screenCover` | SVF x (1 - 0.75) [engine] *engine assumption (no source)*, unverified (cells under a pergola or awning take the crown factor of a full tree crown for the sky view and wall reflection, as cells under trees do) |
+
+The splashed lanes (n 10, sky view 0.54), dry vs splash, °C:
+
+| Time | dry | splash | ΔTs | W mm | air | wet-bulb |
+|---|---|---|---|---|---|---|
+| 19:00 | 40.7 | 40.0 | −0.78 | 0.99 | 33.1 | 24.4 |
+| 19:30 | 38.6 | 33.7 | −4.89 | 0.79 | 32.6 | 24.3 |
+| 20:00 | 37.0 | 31.0 | −6.03 | 0.67 | 32.1 | 24.2 |
+| 20:30 | 35.9 | 29.7 | −6.20 | 0.57 | 31.6 | 24.1 |
+| 21:00 | 35.0 | 29.0 | −6.04 | 0.49 | 31.0 | 23.9 |
+| 21:30 | 34.3 | 28.5 | −5.80 | 0.41 | 30.5 | 23.8 |
+| 22:00 | 33.8 | 28.2 | −5.54 | 0.34 | 29.9 | 23.6 |
+| 22:30 | 33.3 | 28.0 | −5.30 | 0.27 | 29.3 | 23.5 |
+| 23:00 | 32.8 | 27.7 | −5.08 | 0.20 | 28.8 | 23.3 |
+| 23:30 | 32.4 | 27.7 | −4.70 | 0.15 | 28.3 | 23.1 |
+| 00:00 | 32.0 | 27.8 | −4.15 | 0.11 | 27.7 | 23.0 |
+
+- Largest ΔTs within 1 h: −6.03 K at 20:00; −5.08 K at 23:00; ΔTmrt −2.87 K at 20:00 and −2.86 K at 21:00.
+- Water: one splash evaporates at most 1.00 of its 1 mm before the next (what is left at 19:00 is topped up, not
+  added); the day's evaporation balances the store to 2.2e-15 mm; the store's day-to-day drift is
+  1.9e-3 mm (the model day is not exactly periodic). W is never negative.
+- The wet paving stays at least 2.71 K above the air's wet-bulb temperature while water is left (checked
+  inside the model at every 1-min step of the last model day, over all 1138 wet-able cells).
+- Literature: Paris, about 1 L m⁻² per cycle, surface −7.5 K at 19:30 and −6 K at 20:30, lasting several hours
+  [hendel2015]; air −0.79 K at most and Tmrt −1.76 K [hendel2016]; Kobe, 0.025 mm per pass, −2 to −4 K at once, gone
+  within 30 min in sun, evening recommended [takebayashi2023]; a road 50 → 40 °C in about 60 min [kato2008].
+
+**β_wet sensitivity** (the brief's range 0.3–1; shipped 0.5), splashed lanes:
+
+| β_wet | largest ΔTs within 1 h | ΔTs 23:00 | ΔTmrt 20:00 |
+|---|---|---|---|
+| 0.5 (shipped) | −6.03 K | −5.08 K | −2.87 K |
+| 0.3 | −4.32 K | −3.88 K | −2.06 K |
+| 1 | −8.84 K | −4.09 K | −4.18 K |
+
+At β_wet 1 the largest ΔTs (−8.84 K) and ΔTmrt (−4.18 K) fall outside the spec's bands;
+0.5 (near the middle of the brief's range; the geometric mean of 0.3 and 1 is 0.55) was set in the code
+before the first model run and was not changed after the bands were checked; 0.3 also passes, 1 does not.
+
+### Roofs, shaded lanes, courtyards
+
+- Grey tile roofs at 15:00: 66.9 °C (all 3064 roof cells alike: same material, all open to the sky),
+  **outside** the brief's 50–62 °C. Across the cited albedo range the roof is 69.4 °C at 0.12 and 63.8 °C at 0.25, outside
+  at every value; the light 1 m/s wind (h_c 9.5 W m⁻² K⁻¹) and the brief's admittance 1000 for the tile and mud back keep the
+  roof hot. Not tuned.
+- Lane floor in shade at 15:00 (sunlit share ≤ 0.3, n 10): 49.2 °C, Ta +14.2 K,
+  **outside** the brief's Ta to Ta + 8 K; floor shaded at 13:00, 14:00 and 15:00 (n 2): Ta +10.2 K, also
+  outside. In these low lanes the floor is in sun most of the day (the point of this block), a 5 m cell is one lane
+  width (its shaded share mixes with sun), and the brick (μ 1100) keeps the midday heat; the wall term (Ta + 2 K +
+  6 K·K/900) adds longwave. Not tuned.
+- Courtyards at 15:00 (Tmrt): under a mat awning 49.2 °C, under a pergola 46.2 °C, under crowns 60.1 °C,
+  open and sunlit 72.2 °C; paving 44.2, 42.8, 52.8 and 64.5 °C. Courtyard sky view
+  0.21–0.87 (10th–90th percentile; Harbin's traditional courtyards 0.22–0.37, lanes 0.09–0.27 [lin2019]).
+- Courtyard air ("cool pond") is **quoted, not simulated**: Córdoba and Seville 3–6 K below the outdoor air, up to
+  11–15 K at 40–45 °C [spainCourtyard] (abstracts only, unverified); Harbin about 0.4 K on average (the abstract; the brief's 0.3 K, at most 0.6 K, not checked) [lin2019]; the Fez medina
+  about 10 K cooler in the early afternoon, 2–4 K warmer before dawn [johansson2006]. The air temperature is fixed.
+
+Trees by species at 15:00 (ground cell at the trunk; at 3 pm the shade falls east of it):
+
+| Species | trees | tr | sunlit share | Tmrt °C |
+|---|---|---|---|---|
+| Pagoda tree (国槐) (`pagodaTree`) | 54 | 0.17 | 0.71 | 63.5 |
+| Pomegranate (石榴) (`pomegranate`) | 108 | 0.29 | 0.71 | 64.0 |
+| Jujube tree (枣树) (`jujube`) | 98 | 0.37 | 0.52 | 57.8 |
+
+Beijing street-tree shade: air −1.0 to −2.1 K, −481 to −789 W m⁻², the pagoda tree second for comfort [yang2024]
+(abstract only).
+
+### Walkers
+
+Walkers use the lanes with the shade weights of blocks 1–3 [melnikov]; pergolas and awnings count as crown shade
+(weight 0.92 at full heat). Of the 16 people resting in courtyards and Well Square at 15:00, 16 sit in shade
+(16 under crowns or screens); walkers' density in shade is 5.5 times that in sun. The sweat cue is as before.
+
+### Acceptance bands (block 5)
+
+| Check (spec #10) | Model | Band | Source | |
+|---|---|---|---|---|
+| Splashed lanes (n 10, SVF 0.54), W0 1 mm: largest ΔTs within 1 h of the splash (at 20.00 h) | −6.03 K | -8 to -3 | brief5 | inside |
+| Splashed lanes: ΔTs at 23:00 | −5.08 K | -6 to -1 | brief5 | inside |
+| Splashed lanes: |ΔTs| the next afternoon (15:00 of the repeated day) | +0.52 K | ≤ 1.5 | brief5 | inside |
+| Water evaporated from one splash before the next, largest over the wet-able cells (n 1138), minus W0 | 0 mm | ≤ 0 | brief5 | inside |
+| Water store: mass balance error, |evaporated − (start − before the splash + W0 − end)|, largest cell | 0 mm | ≤ 0 | engine | inside |
+| Water store: smallest W over the day (never negative) | 0 mm | ≥ 0 | engine | inside |
+| Wet paving minus the wet-bulb temperature of the air, smallest at any model minute (last model day) while water is left | +2.71 K | ≥ 0 | brief5 | inside |
+| The old evaporation term alone (EF := 1 from 19:00, no water store): largest |ΔTs| on the splashed lanes, 19:00–24:00 | +0.04 K | ≤ 0.5 | brief5 | inside |
+| Splashed lanes: ΔTmrt at 20:00 | −2.87 K | -3.5 to -0.5 | brief5 | inside |
+| Splashed lanes: ΔTmrt at 21:00 | −2.86 K | -3.5 to -0.5 | brief5 | inside |
+| Jujube Lane (W 5 m, H 4 m, n 5): noon sunlit share minus 1 − (H/tan β)/W = 0.764 | -0.014 | -0.05 to 0.05 | brief5 | inside |
+| Pagoda Tree Hutong (W 10 m, H 4 m, n 14): noon sunlit share minus 1 − (H/tan β)/W = 0.882 | -0.025 | -0.05 to 0.05 | brief5 | inside |
+| Lantern Lane (W 5 m, H 4 m, n 5): noon sunlit share minus 1 − (H/tan β)/W = 0.764 | -0.014 | -0.05 to 0.05 | brief5 | inside |
+| Well Lane (W 5 m, H 4 m, n 11): noon sunlit share minus 1 − (H/tan β)/W = 0.764 | -0.014 | -0.05 to 0.05 | brief5 | inside |
+| Brick Lane (W 5 m, H 4 m, n 5): noon sunlit share minus 1 − (H/tan β)/W = 0.764 | -0.014 | -0.05 to 0.05 | brief5 | inside |
+| Jujube Lane: sky view (model 0.537) minus the endless canyon at the same cell centres | 0.007 | -0.05 to 0.05 | brief5 | inside |
+| Pagoda Tree Hutong: sky view (model 0.711) minus the endless canyon at the same cell centres | 0.005 | -0.05 to 0.05 | brief5 | inside |
+| Lantern Lane: sky view (model 0.537) minus the endless canyon at the same cell centres | 0.007 | -0.05 to 0.05 | brief5 | inside |
+| Well Lane: sky view (model 0.536) minus the endless canyon at the same cell centres | 0.006 | -0.05 to 0.05 | brief5 | inside |
+| Brick Lane: sky view (model 0.537) minus the endless canyon at the same cell centres | 0.007 | -0.05 to 0.05 | brief5 | inside |
+| Bell Lane: sky view (model 0.533) minus the endless canyon at the same cell centres | 0.003 | -0.05 to 0.05 | brief5 | inside |
+| Pagoda Tree Hutong: sky view (model, cells 2.5 m off the centre line) minus cos(atan(2H/W)) = 0.781 on the centre line | -0.069 | -0.05 to 0.05 | brief5 | **outside** |
+| Grey tile roofs at 15:00 (n 3064) | 66.862 °C | 50 to 62 | brief5 | **outside** |
+| Lane floor in shade at 15:00 (sunlit share ≤ 0.3, n 10) minus the air | +14.16 K | 0 to 8 | brief5 | **outside** |
+| Lane floor in shade at 13:00, 14:00 and 15:00 (n 2) minus the air at 15:00 | +10.25 K | 0 to 8 | brief5 | **outside** |
+| Dwellers at 15:00 resting in shade (walls, crowns, pergolas, awnings), n 16 | 1 | ≥ 0.5 | melnikov | inside |
+
+4 of 26 checks fall outside their band. They are reported, not tuned away: no input was moved to pass a band.
+
+### Disclosures (block 5)
+
+- **Air fixed:** the splash cools the paving and the radiation people feel, not the air (Paris: −0.79 K at most);
+  courtyard air cooling is quoted, not simulated.
+- **Grid:** 5 m cells; lanes narrower than 5 m cannot be shown; the 10 m lane's cells sit off its centre line.
+- **Houses are boxes at eave height** (4 m); the pitched roofs are drawing only.
+- **Sky view includes trees and screens** through the crown factor (every block does the same for trees); it is not
+  a ray trace through leaves.
+- **Daily splash:** the repeated design day is splashed every evening (see above); the custom itself in Beijing has
+  no citable source in the brief (unverified); the Japanese uchimizu parallel is [nippon].
+- **Dimensions and materials unverified:** plot widths, 4 m eaves, lane widths, grey brick and tile values, LAI of the
+  trees and the awning's transmission are the brief's, unverified; the Spanish courtyard numbers are abstracts only.
+- **Misses:** the grey roof, the shaded lane floor and the 10 m lane's centre-line sky view fall outside their bands
+  (table above); β_wet 1 would push the splash outside its band.
+- **The 4 × 4 shade samples, ray-marched building shade and exact horizon scan are used only by this block;** blocks
+  1–4 keep 2 × 2 samples, the polygon masks and the 2.5 m horizon scan, and render the same pixels as before.
+- **Drawing only, for bake time:** this block skips the pigment pooling at the edge of washes and draws only the
+  shadow polygons that reach a tile (tried for every block, but culling changes how the shadow union is
+  anti-aliased, so blocks 1–4 keep drawing all of them); during a slider drag it bakes one tile per frame, as block 3.
+
+## Block 6: car park and brownfield
+
+The sixth block (`cities/parking`) is an invented 400 m block on the edge of an industrial town: a big open-air car
+park of thick asphalt (848 parked cars in rows; an open section, a section with trees planted on the footpaths
+between the bays, and a section under solar (PV) canopies), a concrete loading yard and apron, four rusty corrugated
+steel sheds, two rail sidings on ballast, a small irrigated office lawn, and a brownfield of bare compacted soil and
+scrubby dry vegetation around an old floor slab. The design day is block 1's (35° N, 20 July, air 25–35 °C, wind
+1.5 m/s, vapour pressure 20 hPa): the brief's bands assume air 25–35 °C. Its research brief is
+[`docs/research/parking-brief.md`](research/parking-brief.md).
+
+The night-release overlay is shown with `G`, the panel button or `?flux=1` (default off).
+
+### Materials
+
+- `asphalt`: Aged asphalt. Dark, dense and dry: it soaks up most of the sun and gives the heat back long after dark.
+- `concrete`: Concrete paving. Lighter than asphalt so it peaks lower, but its mass keeps it warm into the night.
+- `ballast`: Track gravel (rail ballast). Loose crushed stone under the rails: full of air, so it heats fast in the sun and lets go of the heat soon after dark.
+- `drySoil`: Bare compacted soil. Dry, compacted ground of the old works: lighter than asphalt and with less heat store, so it cools sooner after dark.
+- `scrub`: Scrubby dry vegetation. Weeds and dry grass that took over the disused land: a little evaporation, not much shade.
+- `grass`: Irrigated lawn. Watered grass spends much of its sunshine evaporating water, and at night it cools below the air.
+- `rustShed`: Rusty corrugated steel shed roof. A single sheet of rusty steel over an open shed: almost no heat store, so it follows the sun up and drops below the air within minutes of sunset.
+- `pvCanopy`: Solar (PV) canopy over the bays. Rows of solar panels on steel posts over the parking bays: shade for the cars by day and a lid on the night sky.
+
+Their values and basis tags are in the Surface parameters table above. The thick asphalt and the concrete slab are the
+shared `asphalt` and `concrete` (α 0.12 and 0.30, μ 1200 and 1785), inside the brief's ranges; the brownfield
+values (ballast, soil, scrub, the shed's albedo) are the brief's **assumptions**, not measurements.
+
+### Cars, the PV canopy and heat storage in the model
+
+- **Parked cars** are not modelled as objects with a temperature. Each 5 m cell gets the share of its area under car
+  footprints (exact rectangle overlap with the drawn 4.4 × 1.8 m cars); its direct sun is multiplied by
+  (1 − share) in every 10-min sun slot (`carShade`), and its sky view by (1 − share) all day (`carSky`: the car underside
+  is taken as the warm-wall term, air + 2 K and more by day, so the ground under a car also loses diffuse sky light by day). The lot is taken as full all day and the car shadow is not offset with the
+  sun angle. 848 cars cover 24% of the lot (the brief's rule of thumb is 30–35%, unverified); the
+  bay rows 40%.
+- **The PV canopy** is a flat opaque screen 4.2 m up (`pvCanopy`, tr 0); its cast shadow is computed like the block-5
+  screens. Cells whose centre is under a panel row take the sky view Golden et al. measured, 0.11 (`pvSvf`, then × (1 − car share)),
+  and see the panel undersides as the warm-wall term. In the drawing the canopy is drawn after the cars it covers
+  (an opt-in `front` flag in the depth sort that no object of blocks 1–5 carries).
+- **Ground heat flux G.** The force-restore step already computes G, the flux into the surface:
+  G = (1 − α)K↓ + εL↓ − εσTs⁴ − h_c(Ts − Ta) − EF·max(Q*, 0) [deardorff]. With `opts.flux` the model stores it every 15 min:
+  on those minutes it runs `stepFlux`, the same statement as `stepPlain` that also writes G, so a flux run matches a
+  plain run bit for bit (checked in `tests/unit/parking.test.mjs`); thin layers (the shed roofs) have G = C dTs/dt.
+  Blocks 1–5 never ask for it.
+- **Damping depth** d = √(κτ/π), κ = k/(ρc): with the Stempihar et al. inputs [stempihar2012] asphalt (k 1.2, ρ 2238, c 921)
+  0.127 m and concrete (k 1.5, ρ 2350, c 1000) 0.132 m; their admittances √(kρc) are 1573 and 1877,
+  against 1200 and 1785 used here (the Oke values; see Sensitivity). Force-restore is exact for a sinusoidal
+  forcing of a uniform semi-infinite slab, and fits slabs thicker than about 1.5 d (0.2 m): the lot and the yard. In a pure sine
+  wave G leads Ts by 3 h; here the open asphalt's G peaks at 11:00 (276 W m⁻²) and its Ts at
+  13:15, 2.3 h later (the day is not a sine wave: no sun at night).
+
+| Constant | Value |
+|---|---|
+| `groundFlux` | G = (1 - a) K + eps L - eps sigma Ts^4 - h_c (Ts - Ta) - EF max(Q*, 0) [deardorff] *cited value*, unverified (the force-restore surface flux into the ground (thin layers: C dTs/dt), stored every 15 min; negative = the ground gives stored heat back) |
+| `dampingDepth` | d = sqrt(kappa tau / pi) [brief6] *cited value*, unverified (kappa = k / (rho c); HMA 0.126 m, PCC 0.133 m from the Stempihar inputs [stempihar2012]; force-restore holds for slabs thicker than about 1.5 d (about 0.2 m)) |
+| `pvSvf` | 0.11 [golden2007] *cited value*, unverified (sky view factor of the ground under the PV canopy, as measured by Golden et al.; set on the cells whose centre is under a panel row) |
+| `carShade` | sunlit x (1 - car share) [engine] *engine assumption (no source)*, unverified (parked cars as a sub-grid shade: each cell loses the share of its area under car footprints from its direct sun, all day (the lot is taken as full; shadows are not offset with the sun angle)) |
+| `carSky` | SVF x (1 - car share) [engine] *engine assumption (no source)*, unverified (all day: the ground under a car sees the car underside, taken as the warm-wall term (air + 2 K, more by day), instead of the sky, so it also loses diffuse sky light by day) |
+| `thinPaving` | 600 [brief6] *interpretation of the source*, unverified (effective admittance of thin (< 0.2 m) asphalt over a loose base, for the thin-layer check only (not in the scene); brief: thin paving needs a lower effective mu) |
+
+### The 23:00 picture: heat storage and the night release
+
+Class means (cells picked by geometry before any result: see `cellClasses` in `engine/parking.js`); air
+35.0 °C at 15:00, 28.9 °C at 23:00; G in W m⁻², negative = the ground gives heat back.
+
+| Surface | n | SVF | car share | 15:00 °C | 23:00 °C | 23:00 − air | G 20:00 | G 23:00 | G 04:00 |
+|---|---|---|---|---|---|---|---|---|---|
+| open asphalt (no car, crown or canopy) (`openAsphalt`) | 568 | 1.00 | 0.00 | 63.0 | 30.9 | +1.9 | −121 | −105 | −113 |
+| open bay rows (with cars) (`openBays`) | 192 | 0.60 | 0.40 | 52.6 | 31.0 | +2.1 | −79 | −74 | −83 |
+| bay rows under the trees (`treeBays`) | 96 | 0.35 | 0.38 | 41.9 | 30.5 | +1.6 | −36 | −45 | −55 |
+| bay rows under the PV canopy (`pvBays`) | 144 | 0.06 | 0.42 | 35.5 | 30.8 | +1.9 | −11 | −26 | −37 |
+| concrete yard and apron (`yard`) | 1095 | 0.98 | 0.00 | 55.4 | 31.9 | +3.0 | −135 | −117 | −128 |
+| rail ballast (`ballast`) | 480 | 1.00 | 0.00 | 62.7 | 28.8 | −0.2 | −70 | −66 | −71 |
+| bare compacted soil (`soil`) | 1414 | 1.00 | 0.00 | 59.4 | 28.8 | −0.1 | −73 | −68 | −74 |
+| scrubby dry vegetation (`scrub`) | 976 | 1.00 | 0.00 | 57.3 | 28.6 | −0.4 | −69 | −65 | −71 |
+| irrigated lawn (`lawn`) | 234 | 1.00 | 0.00 | 38.4 | 27.8 | −1.2 | −50 | −51 | −62 |
+| rusty shed roofs (`shed`) | 280 | 1.00 | 0.00 | 66.7 | 25.5 | −3.5 | −1 | −1 | −0 |
+
+The day, Ts °C / G W m⁻² (class means):
+
+| Time | air | open asphalt | concrete yard | bare soil | ballast | lawn | shed roof |
+|---|---|---|---|---|---|---|---|
+| 09:00 | 28.4 | 46.0 / +236 | 40.5 / +226 | 45.0 / +159 | 48.0 / +160 | 30.6 / +66 | 58.8 / +8 |
+| 12:00 | 32.9 | 63.9 / +249 | 54.0 / +273 | 61.2 / +153 | 65.6 / +147 | 36.4 / +95 | 76.6 / +1 |
+| 15:00 | 35.0 | 63.0 / +50 | 55.4 / +88 | 59.4 / +25 | 62.7 / +18 | 38.4 / +54 | 66.7 / −6 |
+| 18:00 | 33.9 | 44.9 / −173 | 43.7 / −160 | 41.6 / −119 | 42.2 / −121 | 35.3 / −16 | 36.8 / −8 |
+| 20:00 | 32.2 | 34.8 / −121 | 35.9 / −135 | 32.2 / −73 | 32.0 / −70 | 30.7 / −50 | 28.6 / −1 |
+| 23:00 | 28.9 | 30.9 / −105 | 31.9 / −117 | 28.8 / −68 | 28.8 / −66 | 27.8 / −51 | 25.5 / −1 |
+| 02:00 | 26.1 | 28.7 / −113 | 29.9 / −127 | 26.6 / −75 | 26.5 / −72 | 25.8 / −62 | 22.8 / −1 |
+| 05:00 | 25.0 | 27.6 / −111 | 28.7 / −125 | 25.4 / −72 | 25.3 / −70 | 24.6 / −60 | 21.7 / −0 |
+
+- Open asphalt takes in up to 276 W m⁻² (at 11:00), the concrete yard 273 at noon; at 23:00 they give back 105 and
+  117 W m⁻²; the soil, scrub and ballast 65–68; the lawn 51; the shed roofs 1 (nothing to give).
+- Sensible heat to the air at night (h_c(Ts − Ta), h_c 11.4 W m⁻² K⁻¹), asphalt minus lawn:
+  20:00 46, 22:00 36, 23:00 35, 00:00 34, 02:00 34, 04:00 34 W m⁻²; grass parking vs asphalt measured about 50 W m⁻² at night and
+  100–150 by day [takebayashi2009]. **No measured night-time W m⁻² for a car park was found** (the brief): the night
+  fluxes are the model's alone.
+- Literature for scale: modelled Phoenix pavements, max 53–69 °C, min 29–35 °C (asphalt 34.0, concrete 33.5) [stempihar2012]
+  (a hotter day than this one); asphalt about 150 W m⁻² more infrared than bare soil at its maximum [asaeda1996] (abstracts,
+  unverified); roads the only class warming the night in Phoenix [zhu2022] (interpretation, unverified); pavements and
+  vehicles' sensible heat in Phoenix 67% roads, 29% parking, 3.9% vehicles [hoehne2020] (snippet only, unverified).
+
+### The PV canopy
+
+Compared as Golden et al. did [golden2007] (bare asphalt under the panels vs exposed asphalt): the canopy's bay cells
+(n 144) run again in the same scene without cars (an empty bay, SVF 0.11), next to the open asphalt of the
+block's model. And, as shipped, the bay rows with their cars:
+
+| | 15:00 °C | max °C | min °C | daily range K | range vs open asphalt |
+|---|---|---|---|---|---|
+| open asphalt (no car) | 63.0 | 66.2 | 27.5 | 38.7 | — |
+| empty bay under the canopy | 35.4 | 35.4 | 27.2 | 8.2 | −79% |
+| canopy bay rows, with cars | 35.5 | 35.5 | 27.3 | 8.2 | −79% |
+| open bay rows, with cars | 52.6 | 54.1 | 27.6 | 26.4 | −32% |
+
+Golden et al., Phoenix, 17 June 2004 (air max 41.0 °C, wind 0.86 m/s): exposed asphalt 63.5 / 28.5 °C (max / min), under
+the canopy 37.0 / 27.7 °C: the brief quotes the range as −70% (−73% from these max / min; the paper has internal
+inconsistencies). Here the empty bay's range shrinks by 79%, **outside** the spec's −60 to −75% band. Both ranges
+differ from Phoenix: the open asphalt swings 38.7 K here vs 35.0 K there, the bay under the canopy 8.2 K vs 9.3 K
+(a different day: air 25–35 °C here, up to 41 °C there). The panel undersides are the shared warm-wall term (air + 2 K +
+6 K·K↓/900). **Sensitivity (not shipped, not tuned):** with undersides at air + 2 K + 25 K·K↓/900 by day (a module about
+25 K above the air in full sun, a typical rating figure, not from the brief) and air − 2 K at night (panels facing a
+clear sky), the empty bay runs 41.1 / 27.0 °C (max / min), 40.9 °C at 15:00, a range of 14.1 K: −64% against
+open asphalt, inside the band. So the shared wall term is a likely cause of the miss. It stays as shipped:
+the wall term is shared by every block, and the underside temperatures above are an assumption, not a source. The
+panels' own temperature, their electricity and the air beneath are not modelled.
+
+### Lot trees, cars and the hot-car card
+
+Bay rows at 15:00: open 52.6 °C, under the trees 41.9 °C (−10.7 K); at 23:00
+31.0 and 30.5 °C. Sacramento lots: tree shade −20 K on the asphalt, −1.3 K air at 0.5 m, −26 K in
+car cabins [scott1999]; greening up to −7.26 K surface for one modelled lot, slight over the whole area [onishi2010]. The 5 m cells mix crown shade and sun, so the cell
+means differ by less than a spot right under a crown.
+
+The hot-car card is **information only**: cabins, car bodies and the air next to them are not simulated. It quotes
+[vanos2018] (Tempe: steady-state mean cabin air 47.6 °C in sun vs 39.5 °C in shade, the paper's abstract; dashboard 69 vs 48 °C after 1 h, the press release), [mclaren2005] (+1.8 K per
+5 min, 80% of the rise in 30 min, 47 °C at 22 °C ambient, cracked windows ineffective), [scott1999] (cabins −26 K under
+trees), [levinson2011] (black vs silver roof up to 25 K, cabin 5–6 K), [matias2025] (air up to 3.8 K warmer next to a black car), [matias2026] (black car roofs about 71 °C, unverified)
+and [nsc] (1,010 US child hot-car deaths 1998–2024, 39 in 2024; via the brief).
+
+### The rusty shed: evening cooling
+
+Fastest evening cooling of each class mean (largest 15-min rate from 16:00 to 1 h after sunset, 19:09) and the
+cooling over the first hour after sunset:
+
+| Surface | fastest K/h, at | first hour after sunset K |
+|---|---|---|
+| open asphalt (no car, crown or canopy) | 7.08 at 17:38 | 3.26 |
+| open bay rows (with cars) | 4.63 at 17:53 | 2.37 |
+| bay rows under the trees | 2.43 at 16:38 | 1.42 |
+| bay rows under the PV canopy | 1.15 at 18:53 | 0.95 |
+| concrete yard and apron | 4.99 at 18:08 | 2.84 |
+| rail ballast | 7.89 at 17:38 | 2.81 |
+| bare compacted soil | 6.96 at 17:53 | 2.78 |
+| scrubby dry vegetation | 6.57 at 18:08 | 2.71 |
+| irrigated lawn | 2.91 at 18:38 | 1.82 |
+| rusty shed roofs | 10.86 at 17:08 | 0.98 |
+
+The shed roof (C 3 kJ m⁻² K⁻¹, time constant C/(4εσT³ + h_c) about 3.1 min) cools fastest of all
+as the low evening sun leaves it, and is already near its night balance with the sky at sunset; after sunset it cools
+**more slowly** than the slabs, which still have heat to lose. So the brief's "steepest cooling after sunset" is **not**
+met: band 4 counts as missed. The evening-window row in the table below (16:00 to sunset + 1 h, peaking two hours before
+sunset) is supplementary and does not count. At 23:00 the roof is −3.5 K from the air.
+
+### Thin layers and sensitivity
+
+Thin paving (a lower effective admittance, `thinPaving` 600; not in the scene) on 71 open-asphalt cells: daily
+max 66.3 → 71.0 °C, min 27.5 → 24.8 °C (hotter by day, cooler at night). With the Stempihar admittance
+(1573): max 63.8 °C, min 28.8 °C.
+
+One value at a time at the ends of its range, the class run again on every sixth of its cells (°C; differences against
+the shipped model's other classes; bands: asphalt − soil at 23:00 +2 to +6 K, asphalt − lawn +3 to +8 K, concrete − asphalt
+at 15:00 −5 to −12 K and at 23:00 ±2 K, soil − asphalt at 23:00 ≤ −2 K):
+
+| Case | 15:00 | 23:00 | asphalt − soil 23:00 | asphalt − lawn 23:00 | − asphalt 15:00 | − asphalt 23:00 |
+|---|---|---|---|---|---|---|
+| asphalt μ 1570 (Stempihar inputs) | 61.5 | 32.1 | +3.28 | +4.34 | — | — |
+| asphalt α 0.09 (LBNL 0.12 − 0.03) | 63.9 | 31.0 | +2.18 | +3.25 | — | — |
+| asphalt α 0.15 (LBNL 0.12 + 0.03) | 61.7 | 30.7 | +1.87 | +2.93 | — | — |
+| concrete μ 1880 (Stempihar inputs) | 55.1 | 32.1 | — | — | −7.91 | +1.28 |
+| concrete α 0.15 (brief range 0.15–0.35) | 60.9 | 33.1 | — | — | −2.09 | +2.20 |
+| concrete α 0.35 | 53.5 | 31.5 | — | — | −9.45 | +0.68 |
+| soil μ 600 (Oke dry soil) | 60.0 | 28.0 | +2.84 | — | −3.01 | −2.84 |
+| soil α 0.20 (brief 0.20–0.35) | 61.3 | 29.0 | +1.83 | — | −1.72 | −1.83 |
+| soil α 0.35 | 55.6 | 28.4 | +2.42 | — | −7.43 | −2.42 |
+| ballast μ 600 (brief 600–900) | 62.9 | 28.3 | — | — | — | −2.56 |
+| ballast μ 900 | 62.0 | 29.6 | — | — | — | −1.28 |
+
+| Shed case | 15:00 | 23:00 | 23:00 − air |
+|---|---|---|---|
+| shed ε 0.69 (tables 0.69–0.88) | 67.8 | 25.7 | −3.27 |
+| shed ε 0.88 | 64.5 | 25.0 | −3.89 |
+| shed C 2 kJ m⁻² K⁻¹ (brief 2–5) | 66.6 | 25.4 | −3.49 |
+| shed C 5 kJ m⁻² K⁻¹ | 66.9 | 25.5 | −3.44 |
+
+Bands 1 (asphalt − soil) and 5 (soil − asphalt at 23:00) pass by 0.02 K only: a darker soil (α 0.20, asphalt − soil
++1.83 K) or a lighter aged asphalt (α 0.15, +1.87 K), both inside their ranges, puts them outside; the
+Stempihar asphalt admittance (1570: +3.28 K) or Oke's dry soil (600: +2.84 K) widens the gap. A light
+concrete (α 0.35) or a dark one (0.15) moves the 15:00 gap to −9.5 or −2.1 K (band −12 to −5 K). The shed stays
+3.3–3.9 K below the air at 23:00 across its ranges. All shipped values were set from the brief before
+the first model run and not changed after the bands were checked.
+
+### Walkers
+
+Walkers use the shade weights of blocks 1–5 [melnikov]; the PV canopy counts as crown shade (weight 0.92 at full heat),
+as the block-5 screens. At 15:00 the walkers crossing the lot take the footpath under the trees or the canopy
+(acrossTrees 100%, acrossPv 100%, acrossPv2 100%); 10 of 12 people resting sit in shade, and walkers' density in shade is 11.4
+times that in sun on the walkable ground (footpaths, yard, lawn). The sweat cue is as before.
+
+### Acceptance bands (block 6)
+
+| Check (spec #11) | Model | Band | Source | |
+|---|---|---|---|---|
+| 1. Open asphalt (n 568) minus bare compacted soil (n 1414) at 23:00 | +2.02 K | 2 to 6 | brief6 | inside |
+| 1. Open asphalt minus scrubby dry vegetation (n 976) at 23:00 | +2.30 K | 2 to 6 | brief6 | inside |
+| 1. Open asphalt minus the irrigated lawn (n 234) at 23:00 | +3.09 K | 3 to 8 | brief6 | inside |
+| 2. Open asphalt: ground heat flux G at 20:00 | −121.4 W m⁻² | -160 to -60 | brief6 | inside |
+| 2. Open asphalt: ground heat flux G at 04:00 | −112.9 W m⁻² | ≤ -30 | brief6 | inside |
+| 2. Asphalt minus lawn sensible heat h_c (Ts − Ta), h_c 11.4 W m⁻² K⁻¹: smallest of 20:00, 22:00, 23:00, 00:00, 02:00, 04:00 | +33.8 W m⁻² | 30 to 80 | brief6 | inside |
+| 2. Asphalt minus lawn sensible heat: largest of the same hours | +46.3 W m⁻² | 30 to 80 | brief6 | inside |
+| 3. Concrete yard (n 1095) minus open asphalt at 15:00 | −7.60 K | -12 to -5 | brief6 | inside |
+| 3. Concrete yard minus open asphalt at 23:00 | +1.06 K | -2 to 2 | brief6 | inside |
+| 4. Rusty shed roof (n 280) at 23:00 minus the air | −3.47 K | ≤ 0.5 | brief6 | inside |
+| 4. Supplementary (not the brief's wording, mostly before sunset): shed roof's fastest evening cooling (largest 15-min rate, 16:00 to sunset + 1 h) minus the fastest other surface class (shed 10.86 K/h at 17.13 h) | +2.98 K/h | ≥ 0 | brief6 | inside (supplementary, not counted) |
+| 4. Shed roof: cooling in the first hour after sunset (19.15 h) minus the fastest other surface class (shed 0.98 K) | −2.29 K | ≥ 0 | brief6 | **outside** |
+| 5. Bare soil minus open asphalt at 15:00 | −3.60 K | -8 to 8 | brief6 | inside |
+| 5. Bare soil minus open asphalt at 23:00 | −2.02 K | ≤ -2 | brief6 | inside |
+| 6. Empty bay under the PV canopy (n 144, SVF 0.11) minus open asphalt at 15:00 | −27.57 K | -30 to -20 | golden2007 | inside |
+| 6. Empty bay under the PV canopy minus open asphalt at dawn (sunrise 5.08 h) | −0.34 K | -1.5 to 1.5 | golden2007 | inside |
+| 6. Daily range under the PV canopy (8.2 K) vs open asphalt (38.7 K): relative change | -0.787 | -0.75 to -0.6 | golden2007 | **outside** |
+| 7. Hot-car card (information only): cabin air in sun minus in shade, steady-state means, as quoted (Vanos et al. 2018) | +8.10 K | ≥ 8 | vanos2018 | inside |
+| 7. Hot-car card: cabins under lot trees, as quoted (Scott et al. 1999) | 26 K | ≤ 26 | scott1999 | inside |
+| 8. Thin paving (μ 600 vs 1200, n 71): change of the daily maximum | +4.71 K | ≥ 0 | brief6 | inside |
+| 8. Thin paving: change of the daily minimum | −2.69 K | ≤ 0 | brief6 | inside |
+| Dwellers at 15:00 resting in shade (crowns, PV canopy, buildings), n 12 | 0.833 | ≥ 0.5 | melnikov | inside |
+| Walkers at 15:00: density in shade over density in sun, walkable ground (footpaths, yard, lawn) | 11.442 | ≥ 1 | melnikov | inside |
+
+2 of 22 checks fall outside their band (1 supplementary row not counted). By the brief's bands: 6 of 8 met (1, 2, 3, 5, 7, 8); missed: 4, 6. They are reported, not tuned away: no input was moved to pass a band.
+
+### Disclosures (block 6)
+
+- **Air fixed:** the heat the lot gives the air at night, and the warm air next to cars, are quoted, not simulated.
+- **No measured night W m⁻² for a car park** was found; the night release is the model's alone.
+- **Brownfield values are assumptions:** ballast, soil and scrub (albedo, admittance, evaporation) and the shed's albedo are
+  the brief's assumptions; the shed's emissivity is from emissivity tables (0.69–0.88, unverified); the lot's car share is
+  from the drawn cars (the brief's 30–35% rule of thumb is unverified).
+- **Cars are a sub-grid shade**, the lot full all day; their shadows are not offset with the sun; cabins are not modelled
+  (the hot-car card is information only).
+- **Golden et al. 2007** has internal inconsistencies; several other figures are from abstracts or press only
+  (Asaeda, Zhu, Hoehne, Matias) and flagged unverified.
+- **Misses:** bands 4 (the shed's steepest cooling after sunset) and 6 (the PV canopy's range reduction) are missed (above);
+  bands 1 and 5 pass by 0.02 K and are sensitive to albedos inside their ranges (Sensitivity). Not tuned.
+- **Footpaths narrower than the grid:** the 2 m concrete footpaths between the bays are drawn and walkable (2 m grid);
+  the 5 m model sees the asphalt around them.
+- **Drawing:** in the thermal view parked cars are drawn as outlines over the heat wash of the ground beneath (cell
+  means); the PV canopy is drawn like the block-5 screens (the wash shows through).
+
+## Block 7: older high-rise estate
+
+The seventh block (`cities/estate`) is an invented 400 m residential estate at 35° N of the kind built in older city
+districts: four rows of east-west slabs (18 floors of 2.9 m, 52.2 m; three 100 m slabs per row, 15 m deep), two
+30-floor point towers (87.0 m) at the north edge with lobbies and shops on their ground floors, a strip of two-storey shops on
+the estate road, worn lawns, surface parking (378 parked cars), plane trees along the lanes and in the tree
+belts, pagoda trees (国槐) on the lawns, and air-conditioning condensers stacked on the façades. The rows stand
+80 m apart. The design day is block 1's (35° N, 20 July, air 25–35 °C, wind 1.5 m/s, vapour pressure 20 hPa); the
+大寒 view (`S`, the panel button or `?date=dajhan`, default `jul`) is geometry only. The condenser overlay is `C`, the
+panel button or `?ac=1` (default off); `?acwall=0` switches the plume wall term off (checks). Its research brief is
+[`docs/research/estate-brief.md`](research/estate-brief.md).
+
+### Block 7 parameters
+
+The materials are shared: the paving `concrete`, the lanes and parking `asphalt`, the lawns `grass` (block 1's
+irrigated lawn), the worn patches `drySoil` (block 6), the roofs `membrane`, the lane and belt trees `canopy`, the
+lawn trees `pagodaTree` (block 5). The block's own values live in `engine/estate.js` (`ES`):
+
+| Parameter | Value |
+|---|---|
+| `floorHeight` | 2.9 [brief7] *cited value*, unverified (storey height of the older slabs; 18 floors make 52.2 m, 30 floors 87.0 m (the brief: 18F about 54 m, 30F about 87 m)) |
+| `groundFloor` | 0 [engine] *engine assumption (no source)*, unverified (ground-floor level above the courtyard; older slabs often sit 0.3-0.45 m up (see Sensitivity)) |
+| `sillHeight` | 0.9 [db33] *cited value*, unverified (the test point of the rule, 0.9 m above the floor (the pre-2016 draft of Zhejiang DB33/1050); H_eff = roof - (ground floor + 0.9 m)) |
+| `ruleHours` | 2 [gb50180] *cited value*, unverified (大寒 >= 2 h, climate zone II (35° N cities such as Zhengzhou, Xi'an, Xuzhou), cities of 500,000 or more; table values as the brief read them, not checked against the standard) |
+| `ruleWindow` | 08:00-16:00 [db33] *cited value*, unverified (true solar time on 大寒 (20 January), as the draft Zhejiang rules; GB 50180 window not checked) |
+| `ruleStep` | 5 [db33] *cited value*, unverified (minutes per step (at most 5 min in the draft Zhejiang rules); samples at mid-step) |
+| `ruleSegment` | 10 [db33] *cited value*, unverified (only stretches of sun of at least this many minutes count (draft Zhejiang rules)) |
+| `spacingK` | 1.47 [brief7] *interpretation of the source*, unverified (G / H_eff for 2 h of 大寒 sun between long parallel slabs at 35° N, calculated in the brief (1.45 for 1 h, 1.52 for 3 h); the estate uses G = 80 m, G / H_eff = 1.56, the 5 m grid step above 1.47 x 51.3 = 75.4 m) |
+| `qCool` | 3.5 [brief7] *cited value*, unverified (cooling capacity of one split unit, kW (the brief's calculation)) |
+| `eer` | 3.3 [brief7] *cited value*, unverified (energy efficiency ratio of the split unit (the brief's calculation)) |
+| `fanFlow` | 0.6 [brief7] *cited range*, unverified (condenser fan air flow, m3/s; brief 0.5-0.7 (unverified)) |
+| `perFlat` | 3.3 [brief7] *engine assumption (no source)*, unverified (heat rejected per flat at full use, kW; the brief's estate estimate (2,400 flats x 3.3 kW on 16 ha, about 50 W m-2); an assumption) |
+| `condensers` | 2 south + 1 north per flat [brief7] *cited range*, unverified (brief: 2-3 per flat, stacked per floor 2.8-3.0 m apart (unverified); here 2 on the south face and 1 on the north face) |
+| `plumeWidth` | 1.5 [engine] *engine assumption (no source)*, unverified (width of the warm wall strip above a stack of condensers, m; an assumption of this block) |
+| `wallDT` | 2 [brief7] *engine assumption (no source)*, unverified (wall warming in the plume zones at full use; an assumption of the brief (at most 2 K), not a cited range; the upper end is used, so the Tmrt it adds is an upper estimate) |
+| `acProfile` | peak 20:00-21:00 [engine] *engine assumption (no source)*, unverified (share of flats running AC by hour (AC_SHARE in engine/estate.js): 0.2 at 08:00, 0.45 in the afternoon, 1.0 at 20:00-21:00, 0.55 at 05:00; an assumption of this block) |
+
+### Sun and shadow geometry
+
+NOAA equations [noaa] at 35° N, 120° E, UTC+8 (the clock is within 12 min of true solar time on both days). The engine
+(`engine/sun.js`, every block) takes the declination from NOAA's **fractional-year approximation**, which is about 0.2° off
+the full NOAA algorithm (the solar-calculator spreadsheet) on these dates; the engine is not changed here, since every block's
+pixels depend on it:
+
+- Solar noon altitude, engine: 20 July 75.88°, 大寒 (20 January 2026) 34.63°. With the full NOAA declination:
+  75.66° and 34.87°. The brief's 75.6° and 34.8° (β = 90° − φ + δ) agree with the full algorithm; the engine's
+  sun is 0.22° too high in July and 0.24° too low on 大寒 (band 1 allows ±0.3°).
+- On 20 July the sun is due east at 08:12 and due west at 15:48 solar time (the brief: 08:10 and 15:50); before and
+  after, it shines on the slabs' north faces and the slabs shade a strip south of them.
+- A wall's north shadow at noon: 0.252 H in July and 1.448 H on 大寒 (brief 0.257 H and 1.44 H; with the full declination 0.256 H and 1.435 H: the engine's sun explains the difference), i.e. 13.1 m and
+  75.6 m for an 18-floor slab. The engine's building mask (2 × 2 samples per 5 m cell) north of slab 2A at solar
+  noon: 12.5 m and 75.0 m (the run of shaded samples, 2.5 m each).
+
+### The 大寒 sunlight rule
+
+GB 50180-2018 Table 4.0.9 [gb50180]: in zone II (35° N cities such as Zhengzhou, Xi'an, Xuzhou), cities of 500,000 or more,
+every home gets at least 2 h of sun on 大寒 (the brief's reading; table values not checked against the standard, unverified). Counted
+here as the draft Zhejiang rules describe [db33] (the pre-2016 draft that revised DB33/1050-2008; the standard in force is DB33/1050-2016, in which these parameters were not checked): 08:00–16:00 true solar time on 20 January, at a point 0.9 m above the
+ground-floor level (the floor at grade, `groundFloor` 0), 5-min steps (sampled at mid-step), cumulative, only stretches
+of at least 10 min. A step counts when the sun is up, south of the façade (its rays reach the south face) and no
+building box is in the way (rays cast against every box; trees do not count). Sills every 2.5 m along each slab's south
+face (480 in all, 5 cm out from the wall); a flat takes the lowest of its sills.
+
+H_eff = roof − (ground floor + 0.9 m) = 51.3 m. The brief's spacing coefficient for 2 h is 1.47 (G ≥ 75.4 m);
+the rows stand 80 m apart (G / H_eff 1.56), the 5 m grid step above it.
+
+| Slab | H_eff m | G to the row south | G / H_eff | lowest sill h |
+|---|---|---|---|---|
+| slab1a | 51.3 | 80 m | 1.56 | 3.75 |
+| slab1b | 51.3 | 80 m | 1.56 | 3.50 |
+| slab1c | 51.3 | 80 m | 1.56 | 3.75 |
+| slab2a | 51.3 | 80 m | 1.56 | 3.75 |
+| slab2b | 51.3 | 80 m | 1.56 | 3.50 |
+| slab2c | 51.3 | 80 m | 1.56 | 3.75 |
+| slab3a | 51.3 | 80 m | 1.56 | 3.75 |
+| slab3b | 51.3 | 80 m | 1.56 | 3.50 |
+| slab3c | 51.3 | 80 m | 1.56 | 3.75 |
+| slab4a | 51.3 | — (back road) | — | 8.00 |
+| slab4b | 51.3 | — (back road) | — | 8.00 |
+| slab4c | 51.3 | — (back road) | — | 8.00 |
+
+Every ground-floor sill gets at least 3.50 h (the rows facing the back road 8.00 h). More than the 2 h of
+the coefficient because the slabs are 100 m long with 30 m gaps (the low morning and afternoon sun comes through the gaps)
+and G / H_eff is 1.56, not 1.47.
+
+The checker on two long continuous slabs (a 400 m test scene, not the estate) at G = 1.47 H_eff (75.4 m) gives the middle
+sill **1.50 h with the engine's approximate declination and 2.00 h with the full NOAA declination** (the brief: 2 h).
+So the brief's coefficient is right; the shortfall is the engine's sun, 0.24° low on 大寒, and near the threshold the
+hours change fast (1.45: 0.33 / 1.33 h, 1.52: 2.75 / 3.00 h, engine / full). 2 h needs G / H_eff ≈ 1.485 with the engine's
+sun and 1.47 with the full declination. The estate's 1.56 clears both, so the rule test above holds either way.
+
+### The July courtyard
+
+Courtyard north of slab 2A (between rows 1 and 2, x 20–120 m), shade cast by slab 2A alone (its ground shadow polygon,
+2.5 m samples, within the slab's x-range), by true solar time on 20 July:
+
+| Solar time | deepest shade, m from slab 2A | shaded share of the courtyard depth (middle) |
+|---|---|---|
+| 10:00 | 8.8 | 0.13 |
+| 11:00 | 11.3 | 0.16 |
+| 12:00 | 11.3 | 0.16 |
+| 13:00 | 11.3 | 0.16 |
+| 14:00 | 8.8 | 0.13 |
+| 15:00 | 3.8 | 0.06 |
+| 16:00 | 0.0 | 0.00 |
+
+Between 10:00 and 16:00 the slab's shadow never reaches beyond 11.3 m (0.22 H; the brief: no shade beyond 0.37 H, its
+worst case); at noon it covers 16% of the 80 m depth (the brief: 0.26 H / G = 0.17). With every
+building (the engine's mask) at 16:00 solar time, 23 samples of that courtyard beyond 0.37 H are shaded too: the sun is
+north of west after 15:48 and the next row's south face throws a thin strip south (supplementary row).
+
+Cell classes (ground cells with no crown, in the three courtyards within the slab columns, picked by parcel and
+distance before any result; `cellClasses` in `engine/estate.js`); sun share = the cell's sunlit share at 12:00:
+
+| Class | n | SVF | sun 12:00 | Ts 12:00 | Ts 15:00 | Ts 23:00 | Tmrt 12:00 | Tmrt 15:00 |
+|---|---|---|---|---|---|---|---|---|
+| paving at the sills (0–10 m south of a slab) (`sillStrip`) | 360 | 0.50 | 1.00 | 55.7 | 57.5 | 33.6 | 70.5 | 73.4 |
+| lawn (`lawn`) | 851 | 0.64 | 0.98 | 36.9 | 38.9 | 29.2 | 60.0 | 63.0 |
+| worn patches (bare soil) (`worn`) | 89 | 0.67 | 1.00 | 62.6 | 60.7 | 30.3 | 70.6 | 71.7 |
+| surface parking (asphalt) (`parking`) | 540 | 0.67 | 1.00 | 65.3 | 64.5 | 32.3 | 66.5 | 69.9 |
+| paving along the next slab's north face (0–15 m) (`northPath`) | 540 | 0.53 | 0.17 | 40.2 | 43.6 | 31.7 | 45.3 | 57.1 |
+| all courtyard ground (no crown) (`court`) | 2848 | 0.62 | 0.84 | 49.1 | 50.5 | 31.5 | 61.6 | 65.9 |
+
+At midday the only shade in the courtyards is the strip along the north faces (sun share 0.17, Tmrt 45.3 °C
+against 66.5 °C over the parking). Sunlit paving at the sills minus the lawn at 15:00: +18.6 K (Wuhan,
+August 2015, measured 9.87 K [cai2017]; soft band 7): the lawn here is block 1's irrigated lawn (EF 0.8), wetter than a worn
+estate lawn in summer. Sky view in the courtyards 0.62 on average (Wo Che Estate podium 0.327 [plea2016]).
+
+Tmrt and sky view in shade [lai2017]: over the 433 building-shaded paved cells at 15:00 (SVF 0.33–0.85) the model's Tmrt
+rises 0.17 K per 0.1 less sky view, against +1.6 K measured in Hong Kong: soft band 5 is **missed**. After dark
+(21:00, longwave only, 3682 paved cells) it is 0.86 K. By day the model's shaded Tmrt is set mostly by the diffuse
+and wall-reflected sun and the warm ground, and its walls are only air + 2 K (+ the daytime term): a wall-dominated
+view adds less longwave than the Hong Kong measurements found (10 W m⁻² per 0.1 SVF). Not tuned.
+
+### Condensers
+
+One split unit: Q_rej = Q_cool (1 + 1/EER) = 3.5 × (1 + 1/3.3) = 4.56 kW; exhaust rise ΔT = Q_rej / (ρ c_p V̇)
+with ρ from the air temperature (ideal gas, sea level), c_p 1005 J kg⁻¹ K⁻¹, V̇ 0.6 m³/s: 6.60 K at 15:00
+(35 °C), 6.47 K at 23:00. Measured in Changsha: +5.2 K by day, +6.5 K at night [mu2025].
+
+2076 flats (1728 in the slabs: 8 per floor × 18 floors × 12; 348 in the towers: 6 per floor × 29 residential floors × 2),
+each rejecting up to 3.3 kW (`perFlat`, the brief's estate estimate), times the share running by hour (`acProfile`):
+
+| Hour | share running | kW | W m⁻² of site |
+|---|---|---|---|
+| 00:00 | 0.80 | 5481 | 34.3 |
+| 03:00 | 0.65 | 4453 | 27.8 |
+| 06:00 | 0.40 | 2740 | 17.1 |
+| 09:00 | 0.25 | 1713 | 10.7 |
+| 12:00 | 0.40 | 2740 | 17.1 |
+| 15:00 | 0.45 | 3083 | 19.3 |
+| 18:00 | 0.75 | 5138 | 32.1 |
+| 20:00 | 1.00 | 6851 | 42.8 |
+| 21:00 | 1.00 | 6851 | 42.8 |
+| 23:00 | 0.90 | 6166 | 38.5 |
+
+Peak 42.8 W m⁻² at 20:00 (the brief's estimate: about 50 W m⁻² for 2,400 flats on 16 ha). For scale, AC
+waste heat raised Paris street air +0.5 K today, +1 K if all of it were sensible and +2 K under a future doubling, in simulations [demunck2013], Berlin up to 0.6 K [berlin2020]; in stacks and
+recesses the upper condensers breathe air more than 7 K [chow1999] or 4–9 K [bojic2001] above ambient, and a 24-storey void warmed 10–13 K
+from bottom to top [bruelisauer2014]. **None of this is simulated:** the air is fixed. The overlay draws plumes on the visible condenser stacks (more
+strokes when more flats run their AC) and the heat of each south face.
+
+**Plume wall term** (on by default in this block only): the walls in the condensers' plume zones are taken
+2 K × the share running warmer (`wallDT`, the brief's upper bound). A face's plume share is its condenser stacks × 1.5 m
+over its length: slabs 0.24 (south, 2 stacks per flat) and 0.12 (north), gables 0; towers 0.27 on every face. Each ground cell
+takes the plume share of the walls it sees (a 16-direction horizon scan, each direction's wall view sin²(elevation) taking
+the share of the face its ray entered; courtyard mean 0.17, largest 0.27). Its longwave from the walls gains
+share × σ((T_w + ΔT)⁴ − T_w⁴) (up to 2.8 W m⁻² at the cell where it is largest). Only Thermal.lwall changes, so only Tmrt
+(and the cards' evaporation sum) feel it: the largest Tmrt it adds is 0.18 K (0.08 K over the courtyards at 21:00);
+the brief estimated about 1.2 W m⁻² and 0.2 K at the ground. The stored surface temperatures come from the run without it,
+so ground Ts is unchanged; fed into the surface balance (a docs run, upper bound: every wall + 2 K × 0.27 all day, 782
+cells) it would change ground Ts by at most 0.14 K.
+
+### Sensitivity
+
+| Sill rule case | lowest sill h |
+|---|---|
+| sill at 0.9 m (shipped) | 3.50 |
+| ground floor 0.45 m up: sill at 1.35 m | 3.67 |
+| counted at the ground (0 m), not the sill | 3.17 |
+| 1-min steps (every 4th sill) | 3.62 |
+
+| G / H_eff (long slabs) | G m | middle sill h, engine's sun | middle sill h, full NOAA declination |
+|---|---|---|---|
+| 1.45 | 74.4 | 0.33 | 1.33 |
+| 1.47 | 75.4 | 1.50 | 2.00 |
+| 1.52 | 78.0 | 2.75 | 3.00 |
+
+| Condenser case | Q_rej kW | exhaust ΔT at 35 °C, K |
+|---|---|---|
+| shipped: 3.5 kW, EER 3.3, 0.6 m³/s | 4.56 | 6.60 |
+| fan 0.5 m³/s | 4.56 | 7.92 |
+| fan 0.7 m³/s | 4.56 | 5.66 |
+| EER 3.0 | 4.67 | 6.76 |
+| EER 3.6 | 4.47 | 6.47 |
+
+Plume wall term at 1 K instead of 2 K: 1.4 W m⁻² and about 0.09 K of Tmrt at the cell where it is largest
+(0.18 K as shipped). The rule margin holds for a raised ground floor, a ground-level count and 1-min steps; the
+exhaust rise stays within 5–8 K for the fan and EER ranges. All shipped values were set from the brief before the first
+model run and not changed after the bands were checked.
+
+### Walkers
+
+Walkers use the shade weights of blocks 1–6 [melnikov]. The courtyard routes pair the path along a slab's north face (in its
+shadow at midday) with the path through the middle of the courtyard: at 12:00 court1 100%, court2 100%, court3 100% take the
+north-face path. At 15:00 10 of 12 people resting sit in shade, and walkers' density in shade is 9.2 times that in
+sun. The north-face paths are hidden behind the next row in this view. The sweat cue is as before.
+
+### Acceptance bands (block 7)
+
+| Check (spec #13) | Model | Band | Source | |
+|---|---|---|---|---|
+| 1. Sun altitude at solar noon, 20 July (NOAA equations) | 75.88 ° | 75.3 to 75.9 | brief7 | inside |
+| 1. Sun altitude at solar noon, 大寒 (20 January) | 34.63 ° | 34.5 to 35.1 | brief7 | inside |
+| 1. Sun due east, 20 July (true solar time, minutes; 08:10 = 490) | 492.3 min | 485 to 495 | brief7 | inside |
+| 1. Sun due west, 20 July (true solar time, minutes; 15:50 = 950) | 948.2 min | 945 to 955 | brief7 | inside |
+| 2. July noon shadow north of a slab (engine mask), m; brief 0.257 H = 13.4 m ± 5 m | 12.50 m | 8.415 to 18.415 | brief7 | inside |
+| 2. 大寒 noon shadow north of a slab (engine mask), m; brief 1.44 H = 75.2 m ± 5 m | 75 m | 70.168 to 80.168 | brief7 | inside |
+| 3. Lowest 大寒 sun at a ground-floor sill behind another row (rows 1–3, n 360 sills), h | 3.50 h | ≥ 2 | gb50180 | inside |
+| 3. Lowest 大寒 sun at any ground-floor sill (n 480), h | 3.50 h | ≥ 2 | gb50180 | inside |
+| 3. Row spacing G / H_eff, lowest of rows 1–3 | 1.559 | ≥ 1.47 | brief7 | inside |
+| 3. Supplementary: the checker on two long continuous slabs at G = 1.47 H_eff (75.4 m; a test scene, not the estate), with the engine's approximate declination: sun at the middle sill, h (the brief: 2 h) | 1.50 h | 1.75 to 2.25 | brief7 | outside (supplementary, not counted) |
+| 3. Supplementary: the same long slabs with the full NOAA declination (the brief's sun): sun at the middle sill, h | 2 h | 1.75 to 2.25 | brief7 | inside (supplementary, not counted) |
+| 3. Supplementary: G / H_eff that gives 2 h at the middle sill of the long slabs, engine's approximate declination (the brief: 1.47) | 1.485 | 1.45 to 1.52 | brief7 | inside (supplementary, not counted) |
+| 3. Supplementary: the same with the full NOAA declination | 1.470 | 1.45 to 1.52 | brief7 | inside (supplementary, not counted) |
+| 4. July, 10:00–16:00 solar time: deepest shade slab 2A casts into the courtyard north of it, m (no shade beyond 0.37 H = 19.3 m) | 11.25 m | ≤ 19.314 | brief7 | inside |
+| 4. July solar noon: shaded share of that courtyard's depth (middle column); brief 0.257 H / G = 0.168 ± 1 cell | 0.156 | 0.105 to 0.23 | brief7 | inside |
+| 4. Supplementary: 16:00 solar time, all buildings (engine mask): shaded samples of that courtyard beyond 0.37 H (the next row's south face, sun north of west after 15:50) | 23 | ≥ 0 | brief7 | inside (supplementary, not counted) |
+| 5. Supplementary (night, longwave only): 21:00 (after dark), all open paving (n 3682): Tmrt change per 0.1 less sky view, K | 0.86 K | 0.8 to 3.2 | lai2017 | inside (supplementary, not counted) |
+| 5. Soft: 15:00, building-shaded paving (n 433, SVF 0.33–0.85): Tmrt change per 0.1 less sky view, K (Lai et al.: +1.6 K, within × 2) | 0.17 K | 0.8 to 3.2 | lai2017 | **outside** (soft: reported, not asserted) |
+| 6. Heat rejected per condenser, Q_cool (1 + 1/EER), kW | 4.56 kW | 3 to 6 | brief7 | inside |
+| 6. Exhaust temperature rise at 15:00, Q_rej / (ρ c_p V̇), K | 6.60 K | 5 to 8 | brief7 | inside |
+| 6. Exhaust temperature rise at 23:00, K | 6.47 K | 5 to 8 | brief7 | inside |
+| 6. Site heat rejection at its peak (20:00, 2076 flats), W m⁻² | 42.8 W m⁻² | 20 to 70 | brief7 | inside |
+| 6. Ground surface temperature change with the plume wall term on (as shipped, every ground cell, 15:00 and 21:00), K | 0 K | ≤ 0 | brief7 | inside |
+| 6. Supplementary (reported, no band): the same term fed into the surface balance, upper bound (every wall + 2 K × 0.27 all day; n 782 cells, every 15 min): largest ground Ts change, K | 0.14 K | — (reported) | brief7 | reported (supplementary, not counted) |
+| 6. Largest Tmrt change the plume wall term adds (ground cells seeing condenser walls, 03:00, 12:00, 15:00, 21:00), K | 0.18 K | ≤ 1 | brief7 | inside |
+| 7. Soft: 15:00, sunlit paving at the sills (n 360) minus the lawn (n 851), K (Wuhan: 9.87 K, within × 2) | 18.55 K | 5 to 20 | cai2017 | inside (soft: reported, not asserted) |
+| Dwellers at 15:00 resting in shade, n 12 | 0.833 | ≥ 0.5 | melnikov | inside |
+| Walkers at 15:00: density in shade over density in sun | 9.224 | ≥ 2 | melnikov | inside |
+| Walkers at 12:00 on the courtyard routes: lowest share on the north-face path (in the slab's shadow) | 1 | ≥ 0.5 | melnikov | inside |
+
+0 of 20 asserted checks fall outside their band; 1 of 2 soft checks (bands 5 and 7, reported, not asserted) fall outside; 7 supplementary rows are not counted. By the brief's bands: 6 of 7 met (1, 2, 3, 4, 6, 7); missed: 5 (soft). They are reported, not tuned away: no input was moved to pass a band.
+
+### Disclosures (block 7)
+
+- **Air fixed:** the condensers' heat, the stack effect (warmer intake air higher up) and the night heat island they feed
+  are shown and quoted, not simulated; ground Ts does not feel the condensers.
+- **One wind**, the design day's 1.5 m/s everywhere; no flow between the slabs.
+- **National rule only:** GB 50180-2018 as the brief read it (table values not checked against the standard, unverified); GB 55038-2025 and local
+  rules (such as the Beijing coefficient 1.7, unverified) are not checked; older estates were approved under GB 50180-93.
+- **Rule counted at the sill, not the ground:** the rule's point is 0.9 m above the ground-floor level (the floor taken at
+  grade); trees do not count; the towers' ground floors are lobbies and shops (not tested).
+- **The engine's sun is approximate:** `sun.js` uses NOAA's fractional-year declination, about 0.2° off the full algorithm
+  (大寒 noon 34.63° vs 34.87°; July 75.88° vs 75.66°); the brief agrees with the full algorithm. Two long slabs at
+  1.47 H_eff give the middle sill 1.50 h with the engine's sun and 2.00 h with the full declination. The estate stands at
+  1.56 and every sill gets at least 3.50 h with the engine's sun. Not changed in this block (it would move every block's pixels).
+- **Invented estate:** layout, flat counts, condensers per flat, the AC profile, the plume width and the plume wall term
+  are assumptions; the shops' condensers are left out.
+- **Lawn:** the lawns use block 1's irrigated lawn (EF 0.8), so they run cooler than a dry worn lawn; worn patches are bare soil.
+- **Misses:** soft band 5 (Tmrt per sky view in shade, 0.17 K per 0.1 against 1.6 K) is outside; reported, not tuned.
+- **Drawing:** in this view the 49 m of each courtyard next to the row south of it (the parking and the north-face path)
+  are hidden behind that row (18 floors); the 大寒 shadows are cut where a building stands in front, and the sill tallies
+  are drawn on each slab's roof edge, one per flat.
+
+## Block 8: school campus playground
+
+The eighth block (`cities/campus`) is an invented 400 m school campus at 35° N on a summer day-camp day: a 400 m running
+track (PU / EPDM on asphalt; 36.5 m radius, 84.39 m straights, 8 lanes) around an artificial-turf football pitch, three
+acrylic basketball courts, a natural grass field, a playground on poured rubber with a slide, climbing frames, swings, two
+shade sails (2, 3.5 m up) and shade trees, the teaching block and a gym on the north road, a staff car park (46
+cars) and trees along the edges. The design day is block 1's (35° N, 20 July, air 25–35 °C, wind 1.5 m/s, vapour pressure
+20 hPa); 20 July falls in the school holidays, so the children are at a day camp. Watering the pitch at 14:00 is `I`, the panel
+button or `?irrigate=1` (default off); the contact-burn hatching is `U`, the panel button or `?burn=1` (default off).
+Its research brief is [`docs/research/campus-brief.md`](research/campus-brief.md).
+
+### Block 8 parameters
+
+The block's materials (`turf`, `track`, `acrylic`, `rubber`, `shadeSail`) are in the parameter table above; they
+are cut from the other pages at build time (`@page campus` in `engine/materials.js`). The grass field is the shared
+irrigated lawn (`grass`, α 0.25; the brief lists 0.23 and calls it the existing value), the paving `concrete`, the roads
+and the car park `asphalt`, the roofs `membrane` and `metal` (the gym), the trees `canopy`. The poured rubber of the
+playground has no row in the brief: its PU / EPDM track row is used (an *interpretation*). The block's own values live in
+`engine/campus.js` (`CP`):
+
+| Parameter | Value |
+|---|---|
+| `irrigateHour` | 14 [engine] *engine assumption (no source)*, unverified (the pitch is watered at 14:00 (the spec); the design day repeats, so it is watered every day at that hour) |
+| `efPeak` | 0.8 [brief8] *cited value*, unverified (evaporative fraction of the watered turf at the start of the pulse (the brief: 0.8 decaying)) |
+| `efRes` | 0.05 [brief8] *cited range*, unverified (evaporative fraction the pulse decays to, until midnight; brief 0-0.1, the middle value) |
+| `irrigateTau` | 15 [brief8] *cited range*, unverified (decay time of the pulse, minutes; brief 10-20 min, the middle value; the model steps every minute and stores every 15 min) |
+| `sailHeight` | 3.5 [engine] *engine assumption (no source)*, unverified (height of the shade sails, m; an assumption of this block) |
+| `burnMetal` | 51 [iso13732] *cited value*, unverified (1-min contact-burn threshold for bare metal (ISO 13732-1 via CENELEC Guide 29, via the brief)) |
+| `burnStone` | 56 [iso13732] *cited value*, unverified (1-min contact-burn threshold for ceramics, glass and stone (as above); concrete is read with them) |
+| `burnPlastic` | 60 [iso13732] *cited value*, unverified (1-min contact-burn threshold for plastics and wood (as above); used for the turf, the rubber, the track and the courts) |
+| `burn10min` | 48 [iso13732] *cited value*, unverified (the 10-min threshold, 48 C for every material group (as above); quoted on the burn card for long contact) |
+| `asphaltClass` | ceramics, glass and stone [iso13732] *interpretation of the source*, unverified (ISO 13732-1 has no concrete or asphalt group; concrete and asphalt (stone aggregate in bitumen) are read with ceramics, glass and stone) |
+| `playTimes` | 10:00-10:30, 12:00-13:00, 15:00-15:30 [engine] *engine assumption (no source)*, unverified (when the children come out (a summer day camp): engine assumption) |
+| `kidSize` | 0.7 [engine] *engine assumption (no source)*, unverified (children are drawn at 0.7 of an adult figure; drawing only) |
+
+### Surfaces
+
+Cell classes (ground cells picked by material and geometry before any result; `cellClasses` in `engine/campus.js`), mean
+surface temperature (°C) and Tmrt of a standing adult (°C):
+
+| Class | n | SVF | Ts 05:00 | Ts 12:00 | Ts 14:00 | Ts 15:00 | Ts 23:00 | Tmrt 12:00 | Tmrt 15:00 |
+|---|---|---|---|---|---|---|---|---|---|
+| artificial turf (the pitch) (`turf`) | 404 | 0.99 | 23.7 | 74.7 | 73.2 | 68.0 | 27.3 | 67.3 | 68.5 |
+| natural grass (the field, no crown) (`grass`) | 836 | 1.00 | 24.6 | 36.4 | 38.3 | 38.4 | 27.8 | 58.0 | 61.4 |
+| running track (no crown) (`track`) | 172 | 0.99 | 26.8 | 66.8 | 68.1 | 65.0 | 30.2 | 65.0 | 68.1 |
+| acrylic courts (no crown) (`courts`) | 300 | 0.99 | 27.4 | 61.3 | 63.3 | 61.0 | 30.8 | 65.9 | 68.8 |
+| playground rubber (all) (`rubber`) | 396 | 0.85 | 26.7 | 60.8 | 62.0 | 59.4 | 30.1 | 60.0 | 62.4 |
+| rubber with its centre under a sail (`sail`) | 65 | 0.25 | 27.3 | 41.2 | 43.2 | 43.5 | 30.8 | 43.8 | 47.2 |
+| rubber, no crown, not under a sail (`openRubber`) | 309 | 1.00 | 26.6 | 65.9 | 66.8 | 63.4 | 29.9 | 64.3 | 66.1 |
+
+The turf peaks at 75.6 °C at 12:45 (Hong Kong: 70.2 °C [jim2016], 72.4 °C [jim2017]); at 15:00 it is +29.6 K on the grass
+(review: 9.4–33.7 K [singh2024]; Penn State 20–30 K [nydoh]), and at 05:00 −0.9 K (Jim: both near 23 °C). Low admittance
+(μ 350) and a dark, dry surface make it fast both ways. The track and the courts are a thin coat on asphalt: at 15:00 the
+track is +30.0 K above the air and the courts +26.0 K (bands 5 and 6; weak sources [kinmen], [aoki2009],
+vendor claims [courtVendor]). Aoki's artificial track was 63.9 °C against 67.0 °C on the artificial turf (11:00, August 2004),
+below the turf as here (band 5: −3.1 K); his 42.2 °C is the natural turf [aoki2009].
+
+Rubber of the playground by what shades the cell's centre (shadow polygons of the sails and the crowns; the cell's sunlit
+share from the model), 12:00 / 15:00 (`shadeSplit`):
+
+| Rubber | n | Ts °C | Tmrt °C |
+|---|---|---|---|
+| in full sun (sunlit > 0.95) | 294 / 279 | 66.4 / 64.6 | 64.8 / 68.0 |
+| in a sail's shadow only (sunlit < 0.35) | 65 / 55 | 41.2 / 42.0 | 43.8 / 45.3 |
+| in a crown's shadow only (sunlit < 0.35) | 12 / 18 | 41.1 / 45.6 | 42.7 / 43.1 |
+
+Gilbert, Arizona at noon (air 41.6 °C): rubber 87.2 °C in sun, 46.7 °C under a sail, 42.2 °C under a tree [vanos2016]. Here the sail
+cuts 25.2 K at noon and 22.6 K at 15:00 (band 7 asks 25 K or more at the air's peak: **missed** at 15:00); the sail cells sit
++7.0 K above the air (inside 0–8 K). The tree-shaded cells at 15:00 are the cells east of the crowns, in their shade only since
+early afternoon and still warm from the morning sun: +10.6 K above the air (18 cells; +8.2 K at noon), outside the
+brief's 0–5 K (band 8 **missed**). The crowns pass 0.17 of the sun (the shared canopy) and the sail 0.20.
+
+### Watering the pitch
+
+The brief's pulse [brief8]: EF(t) = EF_res + (0.8 − EF_res)·exp(−t/τ), EF_res 0.05, τ 15 min, from 14:00, on the turf cells only.
+It runs through the per-minute path of the block-5 water store (`opts.splash` with `efOnly` and a `pulse`; no water store,
+EF·max(Q*, 0) as everywhere else); the watered turf cells are a second run of just those cells (404), merged into the dry model
+(no lateral coupling). Turf means:
+
+| Time | EF | air °C | dry °C | watered °C | difference |
+|---|---|---|---|---|---|
+| 14:00 | 0.80 | 34.8 | 73.2 | 72.4 | −0.8 |
+| 14:15 | 0.33 | 34.9 | 72.2 | 66.3 | −5.9 |
+| 14:30 | 0.15 | 34.9 | 71.0 | 65.7 | −5.3 |
+| 14:45 | 0.09 | 35.0 | 69.6 | 65.8 | −3.8 |
+| 15:00 | 0.06 | 35.0 | 68.0 | 65.4 | −2.6 |
+| 15:15 | 0.06 | 35.0 | 66.3 | 64.5 | −1.8 |
+| 15:30 | 0.05 | 35.0 | 64.5 | 63.1 | −1.4 |
+| 15:45 | 0.05 | 34.9 | 62.5 | 61.4 | −1.1 |
+| 16:00 | 0.05 | 34.9 | 60.4 | 59.5 | −0.9 |
+| 16:15 | 0.05 | 34.8 | 58.2 | 57.4 | −0.8 |
+| 16:30 | 0.05 | 34.7 | 55.8 | 55.2 | −0.6 |
+| 16:45 | 0.05 | 34.6 | 53.4 | 52.9 | −0.6 |
+| 17:00 | 0.05 | 34.5 | 51.0 | 50.5 | −0.5 |
+
+The largest cooling, 5.9 K at 14:15, leaves the turf 31.4 K above the air: the measured drops to near the air
+(Brigham Young University 79 → 29 °C [nydoh]; Penn State 54–71 → 24 °C [mcnitt2008]) are **not reproduced** (band 9 missed), likely because EF caps the
+evaporation at 0.8 of the net radiation (a few hundred W m⁻² in the early afternoon), while real sprinkler water cools the infill with its own heat
+capacity and evaporates from a 70 °C surface far faster than the net radiation alone allows. The recovery is inside the band
+(36% of the cooling gone 30 min later; 0.47 K left after 3 h), but of a small drop. Not tuned.
+
+For comparison only (supplementary, not shipped): the block-5 water store on the turf (bulk evaporation from W0 1 mm with
+β 0.5 and W_c 0.2 mm, the hutong splash values, which were not set for turf) cools the turf 28.2 K by 14:30, to
+7.8 K above the air, and 36% of that is gone 30 min later: the shape of the measurements, but with
+parameters nobody measured for turf.
+
+### Contact burns
+
+ISO 13732-1 via CENELEC Guide 29 [iso13732], 1 min of contact: metal 51 °C, ceramics, glass and stone 56 °C, plastics and wood
+60 °C (10 min: 48 °C; 8 h: 43 °C). Material classes: `turf` plastic, `track` plastic, `acrylic` plastic, `rubber` plastic, `concrete` stone, `stone` stone, `greyBrick` stone, `asphalt` stone, `metal` metal, `rustShed` metal; grass, water and leaves
+have none. The table has no concrete or asphalt row: concrete and asphalt are read with ceramics, glass and stone (an *interpretation*).
+For contact of 1 min or longer CENELEC Guide 29 says Table A.1 applies to children too (its low end for children is for 1–10 s contacts only). The overlay hatches every ground cell above its
+limit at the hour shown (`burnCells`). Cells over the limit at 12:00: Aged asphalt 551, Acrylic court coating on asphalt 300, Running track (PU / EPDM on asphalt) 172, Artificial turf (crumb-rubber infill) 404, Poured rubber play surface 299; at 15:00: Aged asphalt 551, Concrete paving 156, Acrylic court coating on asphalt 300, Running track (PU / EPDM on asphalt) 172, Artificial turf (crumb-rubber infill) 404, Poured rubber play surface 282. The slide
+is drawn, not modelled (no metal ground is hatched); Vanos et al. measured a slide at 71.7 °C in sun [vanos2016].
+
+### Children and walkers
+
+Children come out at the play times (10:00-10:30, 12:00-13:00, 15:00-15:30, an engine assumption) and take the cheapest play spot with room left,
+the cost being the shade weight of the spot (sun 1, building shade 0.84, tree or sail shade 0.92 at full heat [melnikov]). At
+15:00 55% of the 26 children play in shade (14 of the 52 play places are shaded then; at 12:00 40%). They are drawn at
+0.7 of an adult. The grown-ups (walkers and people waiting) use the weights of blocks 1–7: at 15:00 8 of 8
+waiting sit in shade, and walkers' density in shade is 6.1 times that in sun. The sweat cue is as before.
+
+No measured child-height against adult-height Tmrt was found [brief8], and the model cannot resolve one: the ground share a
+person sees within R from height z is R²/(R² + z²), so 90% lies within 3 m at 1.0 m and 4.5 m at 1.5 m, both less than one 5 m
+cell. The children card is qualitative: children are nearer the hot ground [vanos2017], [vanos2015], and the air at 0.3 m can be
+up to 1 K warmer than at 1.5 m [paolini].
+
+### Sensitivity
+
+One value at a time, within the brief's ranges, on the cells it touches:
+
+| Case | turf peak 14–15 h °C | turf − grass 15:00 K | turf − grass 05:00 K |
+|---|---|---|---|
+| shipped (α 0.08, μ 350) | 73.2 | +29.6 | −0.9 |
+| turf albedo 0.05 | 74.5 | +30.8 | −0.9 |
+| turf albedo 0.15 | 70.1 | +26.9 | −1.1 |
+| turf μ 250 | 73.7 | +29.7 | −1.6 |
+| turf μ 500 | 72.3 | +29.3 | −0.0 |
+
+| Case | above the air at 15:00, K |
+|---|---|
+| courts, shipped α 0.2 | +26.0 |
+| court albedo 0.15 | +27.9 |
+| court albedo 0.3 | +22.2 |
+| track, shipped α 0.12 | +30.0 |
+| track albedo 0.1 | +30.7 |
+| track albedo 0.2 | +26.9 |
+
+| Case | under the sail above the air, 15:00 | sun − sail, 15:00 | Tmrt sun − sail, 12:00 |
+|---|---|---|---|
+| shipped, transmission 0.2 | +7.0 K | +22.6 K | +20.9 K |
+| sail transmission 0.1 | +3.8 K | +25.8 K | +24.2 K |
+| sail transmission 0.3 | +10.2 K | +19.4 K | +17.7 K |
+
+| Irrigation pulse | at the largest cooling, above the air | largest cooling | gone 30 min later | left after 3 h |
+|---|---|---|---|---|
+| shipped: τ 15 min, EF_res 0.05 | +31.4 K | −5.9 K | 36% | 0.47 K |
+| τ 10 min, EF_res 0.05 | +32.5 K | −4.8 K | 46% | 0.46 K |
+| τ 20 min, EF_res 0.05 | +30.7 K | −6.6 K | 25% | 0.49 K |
+| τ 15 min, EF_res 0 | +31.7 K | −5.6 K | 47% | 0.03 K |
+| τ 15 min, EF_res 0.1 | +31.2 K | −6.1 K | 25% | 0.93 K |
+
+The courts' miss (band 6) closes at the light end of the court albedo range (0.30) and the sail's 25 K (band 7) at the
+dense end of the sail range (0.10); the shipped values are the brief's middle values and were not moved. No pulse in the
+brief's ranges brings the watered turf within 5 K of the air.
+
+### Acceptance bands (block 8)
+
+Evaluated at 15:00, the air's peak (the brief's bands are for Ta peak 35 °C), unless the band names its hour: the turf peak
+at 14–15 h, the night at 05:00, the irrigation from 14:00, Tmrt at noon.
+
+| Check (spec #12) | Model | Band | Source | |
+|---|---|---|---|---|
+| 1. Artificial turf, highest 15-min mean 14:00–15:00 (n 404), °C | 73.20 °C | 65 to 80 | jim2016 | inside |
+| 1. Supplementary: turf daily peak (12:45), °C | 75.59 °C | 65 to 80 | jim2016 | inside (supplementary, not counted) |
+| 2. Turf − grass at 15:00 (grass field n 836), K | 29.63 K | 20 to 40 | singh2024 | inside |
+| 2. Supplementary: turf − grass at 14:00, K | 34.85 K | 20 to 40 | singh2024 | inside (supplementary, not counted) |
+| 3. Natural grass at 15:00, °C | 38.39 °C | 33 to 42 | jim2016 | inside |
+| 4. Turf − grass at 05:00, K | -0.93 K | -2 to 2 | jim2016 | inside |
+| 5. Running track at 15:00 above the air (n 172), K | 29.95 K | 15 to 30 | kinmen | inside |
+| 5. Running track − turf at 15:00, K (below the turf) | -3.07 K | < 0 | aoki2009 | inside |
+| 5. Supplementary: running track at 14:00 above the air, K | 33.30 K | 15 to 30 | kinmen | outside (supplementary, not counted) |
+| 6. Acrylic courts at 15:00 above the air (n 300), K | 25.98 K | 15 to 25 | courtVendor | **outside** |
+| 7. Rubber under a sail at 15:00 above the air (n 55), K | 7.05 K | 0 to 8 | vanos2016 | inside |
+| 7. Rubber in sun (n 279) − under a sail at 15:00, K | 22.57 K | ≥ 25 | pfautsch2020 | **outside** |
+| 7. Supplementary: the same at 12:00 (Vanos et al. measured at noon), K | 25.19 K | ≥ 25 | vanos2016 | inside (supplementary, not counted) |
+| 8. Rubber under a tree at 15:00 above the air (n 18), K | 10.59 K | 0 to 5 | vanos2016 | **outside** |
+| 8. Supplementary: the same at 12:00 (n 12), K | 8.22 K | 0 to 5 | vanos2016 | outside (supplementary, not counted) |
+| 9. Watered pitch at its largest cooling (14:15) above the air, K (within 5 K) | 31.43 K | ≤ 5 | nydoh | **outside** |
+| 9. Share of that cooling gone 30 min later (14:45), 1 − ΔT(+30 min) / ΔT | 0.357 | 0.3 to 0.9 | mcnitt2008 | inside |
+| 9. Cooling left 3 h after watering (17:00), K | 0.47 K | ≤ 10 | mcnitt2008 | inside |
+| 9. Supplementary (not shipped): the block-5 water store instead of the pulse (W0 1 mm, β 0.5, W_c 0.2 mm, as the hutong splash), largest cooling (14:30) above the air, K | 7.82 K | ≤ 5 | nydoh | outside (supplementary, not counted) |
+| 9. Supplementary (not shipped): the same, share of the cooling gone 30 min later | 0.364 | 0.3 to 0.9 | mcnitt2008 | inside (supplementary, not counted) |
+| 10. Tmrt at noon, rubber in sun − under a sail (n 294 / 65), K | 20.91 K | 15 to 30 | vanos2017 | inside |
+| 10. Tmrt at noon, rubber in sun − under a tree (n 12), K | 22.01 K | 15 to 30 | vanos2017 | inside |
+| Children at 15:00 (n 26) playing in shade (sails, trees, buildings) | 0.548 | ≥ 0.5 | melnikov | inside |
+| Grown-ups resting at 15:00 in shade (n 8) | 1.000 | ≥ 0.5 | melnikov | inside |
+| Walkers at 15:00: density in shade over density in sun | 6.118 | ≥ 2 | melnikov | inside |
+
+4 of 18 counted checks fall outside their band; 7 supplementary rows are not counted. By the brief's bands: 6 of 10 met (1, 2, 3, 4, 5, 10); missed: 6, 7, 8, 9. They are reported, not tuned away: every input is the brief's central value (or the shared value the brief names), set before the first model run.
+
+### Disclosures (block 8)
+
+- **Air fixed:** no near-ground air layer (54 °C at 15 cm over a 70 °C pitch in Hong Kong [jim2016], via the brief, is not modelled), no
+  cooling of the air by the grass or the sprinklers; a child's exposure on the turf is understated.
+- **No height-resolved Tmrt:** every Tmrt is for a standing adult; the children card is qualitative, and no child-height
+  number is quoted.
+- **Burn limits depend on the material and the contact time:** the overlay uses the 1-min limits per material class
+  (concrete and asphalt read with ceramics, glass and stone); the limits apply to children from 1 min of contact on, and children's longer contact makes the 10-min 48 °C the safer reading; the slide
+  is not modelled.
+- **Irrigation lasts minutes, and here it is weak:** the brief's EF pulse cools the turf 5.9 K at most, far short of the measured
+  drops to near the air (band 9 missed); not tuned. The bulk water store of block 5 would come closer but has no turf values.
+- **Shade structures hold heat after sunset:** the cells under the sails see the cloth as a warm wall (air + 2 K, more by
+  day) instead of the sky, so they stay a little warmer at night [middel2021]; the cloth's own temperature is not computed.
+- **Weak evidence:** the track (one school report, one study) and the courts (vendor claims) bands are unverified; the
+  play-surface rubber borrows the track's values.
+- **Misses:** band 6 (courts +26.0 K above the air, against 15–25 K), band 7 (sun − sail 22.6 K at 15:00, against ≥ 25 K),
+  band 8 (tree-shaded rubber +10.6 K, against 0–5 K; 18 cells) and band 9 (watered turf 31.4 K above the air, against
+  ≤ 5 K) are outside; each card that states the number says so. Reported, not tuned.
+- **Invented campus:** layout, the sail height, the play times and the play spots are assumptions; 20 July is a holiday,
+  so the children are at a day camp.
+
+## Block 9: bus stops and footbridges
+
+The ninth block (`cities/busstop`) is an invented 400 m stretch of a north–south arterial (Station Avenue: 40 m of asphalt
+between 12 m concrete sidewalks) crossed by an east–west street (Market Street), with five bus stops of different designs
+and two steel footbridges 6 m up, on block 1's design day (35° N, 20 July, air 25–35 °C, wind 1.5 m/s, vapour pressure
+20 hPa). The stops: **A** an opaque metal roof on Market Street (back panel to the south), **B** a clear polycarbonate roof
+on the avenue's west kerb (back panel to the west), **C** an opal polycarbonate roof with a west end screen on Market
+Street, **D** no shelter, a bench under three street trees on the west kerb, **E** an enclosed glass box with a glass roof
+on Market Street. One footbridge is covered by an opaque roof, the other is open. Buses come to every stop on a headway
+schedule and riders wait for them; others cross the footbridges. The waiting places are `K`, the panel button or
+`?spots=1` (default off); the contact-burn flags are `U`, the panel button or `?burn=1` (default off). Its research
+brief is [`docs/research/busstop-brief.md`](research/busstop-brief.md).
+
+### Block 9 parameters
+
+The block's materials (`roofMetal`, `polyClear`, `polyOpal`, `glassBox`, `adPanel`, `bridgeDeck`, `bridgeRoof`)
+are in the parameter table above; they are cut from the other pages at build time (`@page busstop` in
+`engine/materials.js`). Only their transmission of direct sun (τ) is used. The sidewalks are the shared `concrete`, the
+roads `asphalt`, the park `grass`; the footbridge decks, the handrails and the metal bench seats are the shared dark
+metal thin layer `metal` (C 12 kJ m⁻² K⁻¹, inside the brief's 5–20 kJ), stop D's bench `concrete`. The glass of stop E
+has no value in the brief: 1 − ρ₀ − a_g of the block-3 clear float glass (0.82) is used, an *interpretation*. The block's
+own values live in `engine/busstop.js` (`BS`):
+
+| Parameter | Value |
+|---|---|
+| `shelterH` | 2.65 [brief9] *engine assumption (no source)*, unverified (roof height of the shelters, m; an assumption of the brief, 2.5-2.8 m, the middle value (the brief's worked example uses 2.7 m)) |
+| `shelterDepth` | 2 [brief9] *engine assumption (no source)*, unverified (shelter depth, m; an assumption of the brief, 1.5-2.5 m, the middle value) |
+| `shelterLength` | 7 [brief9] *engine assumption (no source)*, unverified (shelter length, m; an assumption of the brief, 4-10 m, the middle value) |
+| `deckH` | 6 [brief9] *cited range*, unverified (footbridge deck height, m; brief 5.5-6.5 m (unverified), the middle value; the cover is a shelter height above the deck) |
+| `headStand` | 1.7 [brief9] *cited value*, unverified (head height of a standing adult, m (the brief's geometry)) |
+| `headSeat` | 1.2 [brief9] *cited value*, unverified (head height of a seated adult, m (the brief's geometry)) |
+| `bodySamples` | 0.35, 0.65 and 1.0 of the head height [engine] *engine assumption (no source)*, unverified (the direct sun on the body for Tmrt is the mean of the sun shares at these heights (the head alone gives the shade check)) |
+| `skyAt` | 0.65 of the head height [engine] *engine assumption (no source)*, unverified (the sky view of a person under a roof is taken at this height (the roof's view factor from an upward-facing point)) |
+| `westScreen` | 2.2 [brief9] *cited value*, unverified (top of stop C's west end screen, m (the brief's worked example: a screen to 2.2 m)) |
+| `biggerRoof` | 1 [engine] *engine assumption (no source)*, unverified (the bigger roof of the headline comparison: 1 m more on every side of stop C's roof) |
+| `headway` | 10 [brief9] *engine assumption (no source)*, unverified (mean time between buses, min; an assumption of the brief, 5-15 min, the middle value) |
+| `cv` | 0.4 [brief9] *cited range*, unverified (coefficient of variation of the gaps between buses; brief 0.3-0.5 (unverified), the middle value; gaps h (1 + a (2u - 1)), a = cv sqrt(3)) |
+| `riders` | 0.4 [engine] *engine assumption (no source)*, unverified (riders arriving at each stop per minute (Poisson); engine assumption) |
+| `service` | 06:00-23:00 [engine] *engine assumption (no source)*, unverified (buses run from 06:00 to 23:00; engine assumption) |
+| `clock` | 12 [engine] *engine assumption (no source)*, unverified (the bus clock runs this many times faster than the animation, over the 15 min after the hour shown (drawing only; the statistics use the real clock)) |
+| `doseBase` | 32 [brief9] *interpretation of the source*, unverified (heat dose D = sum max(0, AT - 32) dt: the brief defines it on UTCI (engine definition); this engine has no UTCI, so the apparent temperature with radiation (block 4, [bom]) stands in, an interpretation) |
+| `burnMetal` | 51 [iso13732] *cited value*, unverified (1-min contact-burn threshold for bare metal (ISO 13732-1 via CENELEC Guide 29, via the briefs)) |
+| `burnStone` | 56 [iso13732] *cited value*, unverified (1-min threshold for stone, concrete, glass and ceramics (as above); the concrete bench of stop D) |
+| `burnPlastic` | 60 [iso13732] *cited value*, unverified (1-min threshold for plastics and wood (as above); quoted on the card, no plastic surface is modelled) |
+| `burn1s` | 65 [brief9] *edge of cited range*, unverified (about 1 s of contact for bare metal at 65-70 C (unverified, via the brief); the low end, as the brief's band 7 names it, so the flag errs early) |
+| `benchZ` | 0.45 [engine] *engine assumption (no source)*, unverified (bench seat height, m; engine assumption) |
+| `railZ` | 1.1 [engine] *engine assumption (no source)*, unverified (handrail height above the deck, m; engine assumption) |
+
+### The waiting-point model
+
+Shelters are 2 m deep on a 5 m grid, so a grid cell cannot tell a seat under the roof from the kerb in front of it [brief9].
+The grid model runs as everywhere else (the roofs and decks are flat screens with their τ, the opaque panels thin opaque
+boxes for the ground shade), and every waiting place, each stop's centre and a reference point in the open, the bench
+seats, 7 points along each deck and a handrail point per bridge (83 points) are computed again at points (`engine/busstop.js`):
+
+- **Direct sun at a point** (x, y, z): the ray toward the sun is tested against the buildings (boxes), the tree crowns (the
+  grid's crown shadow ellipse, seen from z; transmission 0.17, at most three crowns), every flat roof above the point (it
+  passes τ where the ray crosses the roof plane inside the roof) and every vertical panel (τ where it crosses the panel).
+  For a person, the share of the sun on the body is the mean at 0.35, 0.65 and 1.0 of the head height; the head alone gives the
+  shade check (heads 1.7 m standing, 1.2 m seated).
+- **Sky view at a point**: the buildings' horizon (`svfAt` from the point's height) × (1 − 0.75 crown cover) × (1 − F),
+  F the view factor of the roofs above from an upward-facing point (rectangle corner formula). A roof counts as full cover
+  whatever its τ, as the sails and PV canopies of blocks 6 and 8: its underside is the engine's warm wall (air + 2 K, more
+  by day).
+- **Ground and Tmrt**: the points run the same force-restore model as a grid cell (a one-row "world" of points, each with
+  its own sun share and sky view, `runModel` with `opts.cells`); Tmrt is the engine's six-direction sum (`Thermal.tmrt`)
+  with the body's sun share and the sky view at 0.65 of the head height.
+
+### Stops
+
+Tmrt of an adult (°C; standing at the centre and in the open, seated on the bench) at 12:00 / 15:00 / 17:00, the concrete
+under the centre and in the open and the bench seat at 15:00 (°C), and the sky view (centre / open):
+
+| Stop | centre | bench | open | concrete 15:00 | bench 15:00 | SVF |
+|---|---|---|---|---|---|---|
+| A | 36.0 / 36.3 / 47.0 | 40.8 / 66.8 / 61.1 | 67.5 / 70.2 / 61.8 | 33.6 / 56.0 | 37.3 (metal) | 0.65 / 0.82 |
+| B | 62.8 / 45.4 / 35.1 | 62.1 / 38.0 / 39.5 | 67.1 / 66.6 / 46.6 | 42.9 / 54.0 | 36.0 (metal) | 0.66 / 0.85 |
+| C | 52.8 / 54.6 / 50.2 | 51.8 / 44.7 / 33.8 | 67.8 / 70.5 / 62.1 | 44.5 / 56.2 | 51.9 (metal) | 0.60 / 0.78 |
+| D | — | 48.8 / 43.6 / 38.4 | 66.6 / 69.1 / 39.4 | — / 55.1 | 40.8 (concrete) | — / 0.98 |
+| E | 63.4 / 66.1 / 59.1 | 62.8 / 65.3 / 58.1 | 67.4 / 70.1 / 61.7 | 52.3 / 55.9 | 62.6 (metal) | 0.62 / 0.80 |
+
+Riders arriving 15:00–16:00 and 12:00–13:00 (mean wait in min, mean Tmrt while waiting in °C, mean heat dose in K·min, share
+of the waits with the head in direct sun):
+
+| Stop | n 15–16 h | wait | Tmrt | dose | head in sun | n 12–13 h | Tmrt | dose |
+|---|---|---|---|---|---|---|---|---|
+| A | 25 | 4.9 | 41.8 | 30.5 | 12% | 28 | 38.6 | 27.1 |
+| B | 22 | 5.8 | 38.9 | 32.9 | 14% | 23 | 62.1 | 69.9 |
+| C | 30 | 4.9 | 50.9 | 47.0 | 10% | 23 | 55.3 | 57.9 |
+| D | 24 | 5.4 | 37.4 | 29.2 | 0% | 24 | 56.1 | 89.4 |
+| E | 24 | 6.0 | 64.6 | 92.6 | 100% | 18 | 63.8 | 97.7 |
+
+At 15:00 the opaque roof of stop A takes 33.9 K of Tmrt off a person standing under it (Tempe: building shade −28.8 K,
+tree −28.1 K [middel2021]; Phoenix: shade −19 °C PET [dzyuban2022]), but its seat at the open west end gets the low sun from
+the side. The trees of stop D cut 25.5 K on the bench. The glass box (stop E) cuts only 4.0 K: its glass passes
+0.82 of the sun from above and the sides (Houston: enclosed shelters without overhead shade more than 3 °C WBGT hotter than
+the open sun [lanza2025], mostly from the trapped air, which is not modelled).
+
+**Stop A's placement.** The opaque stop was first placed on the avenue's east kerb (open front to the west, the brief's
+"east-kerb stop"). Model runs during development showed that there the low afternoon sun reaches most of a standing body
+under the roof at 15:00, so band 1 would have measured the kerb rather than the roof; the stop was then moved to Market
+Street (east–west, back panel to the south). This happened after model runs, while the scene was being built; no parameter
+value changed. Band 1 is therefore a property of an opaque roof **and** of where it stands: on the avenue the kerb decides
+(see Which kerb: the same opaque shelter cuts 23.5 K at 15:00 on the west kerb, inside band 1, and 0.0 K on the east kerb, far
+outside it; both are supplementary rows of the band table).
+
+### West screen against a bigger roof
+
+Stop C's four bench places (seated heads), Tmrt (°C) and, in brackets, the share of heads with more than half the sun on
+them (point model):
+
+| Stop C | 14:00 | 15:00 | 16:00 | 17:00 |
+|---|---|---|---|---|
+| as built: opal roof and the west screen | 53.8 (0%) | 51.9 (25%) | 48.4 (0%) | 42.8 (25%) |
+| the same roof, no screen | 57.0 (0%) | 58.1 (25%) | 58.2 (25%) | 54.7 (50%) |
+| a roof 1 m bigger on every side, no screen | 55.8 (0%) | 56.8 (0%) | 56.6 (0%) | 53.3 (25%) |
+
+The screen to 2.2 m is cooler than the bigger roof at 14:00, 15:00, 16:00, 17:00; at 17:00 by 10.6 K. The brief:
+between 14 and 17 h the low western sun gets under any roof, so the west side needs a vertical screen [brief9]; Hong Kong's
+guidance asks for fascias and a sun-shadow check [hyd047]. A band of sun still passes between the top of the screen and the
+roof.
+
+### Which kerb
+
+Stop B's shelter with an opaque roof, as built on the west kerb and mirrored onto the east kerb (open front to the west),
+Tmrt seated / standing under the roof (°C); the reference in the open stands 6 m north of the shelter (Tmrt at 15:00:
+69.4 °C west, 68.8 °C east), so the cut at 15:00 for a standing person is 23.5 K on the west kerb and 0.0 K on the
+east kerb:
+
+| Shelter | 12:00 | 14:00 | 15:00 | 16:00 | 17:00 |
+|---|---|---|---|---|---|
+| west kerb | 37.1 / 47.2 | 36.7 / 46.0 | 35.9 / 45.9 | 34.5 / 43.6 | 38.6 / 45.9 |
+| east kerb | 36.3 / 43.8 | 36.5 / 64.5 | 60.3 / 68.8 | 65.2 / 66.9 | 60.8 / 61.7 |
+
+On a north–south street the west-kerb stop's back panel blocks the afternoon sun and the east-kerb stop's open front takes
+it [brief9].
+
+### Roofs: transmittance
+
+Stop A's shelter with each roof (the same panel, the same place), Tmrt at its centre at 15:00 (standing), the cut against
+the open reference (70.2 °C), the share of the opaque roof's cut, and the concrete under the centre:
+
+| Roof | Tmrt °C | cut K | share | concrete °C |
+|---|---|---|---|---|
+| opaque metal (τ 0) | 36.3 | 33.9 | 1.00 | 33.6 |
+| clear polycarbonate (τ 0.80) | 65.4 | 4.8 | 0.14 | 52.1 |
+| opal polycarbonate (τ 0.47) | 54.2 | 16.0 | 0.47 | 44.6 |
+| bronze polycarbonate (τ 0.43, not in the scene) | 52.8 | 17.4 | 0.51 | 43.6 |
+
+The datasheet transmissions [brettMartin] are used as a share of the **direct** beam; the sheet's diffuse light is not
+counted (the roof counts as cover for the sky view). An opal sheet scatters what it lets through, so less of it reaches a
+standing body's sides than the model's beam gives: likely why opal comes out at 0.47 of the opaque cut, just under the
+brief's 0.50–0.65 (band 2 **missed**); bronze (τ 0.43) is inside.
+
+### Buses, riders and the heat dose
+
+Buses come every 10 min with gaps h (1 + a (2u − 1)), u uniform, a = cv √3 (cv 0.4), from 06:00 to 23:00; riders
+arrive at random (exponential gaps, 0.4 a minute at each stop) and board the next bus (`daySchedule`, a pure function of the
+seed and the stop). For random arrivals E[W] = (h / 2)(1 + cv²) = 5.80 min [brief9], [fan2002] (Salek & Machemehl 1999, cited by the brief as Fan & Machemehl 2002); simulated: 5.74 min over
+2082 riders (A 5.85, B 5.51, C 5.20, D 6.19, E 5.95). When it is hot (air above 28 °C, by day) a rider takes the free waiting place with
+the lowest Tmrt at that moment, else the first free one (the bench first). On the page the bus clock runs 12 times faster than the
+animation over the 15 min after the hour shown, looping.
+
+The heat dose of a wait is the engine's definition [brief9]: D = Σ max(0, AT − 32) Δt, in 1-min steps (K·min). The brief writes it
+on UTCI, which this engine does not compute; the apparent temperature with radiation of block 4 stands in for it
+(AT = Ta + 0.348 e − 0.70 ws + 0.70 Q / (ws + 10) − 4.25, Q = 6.1 (Tmrt − Ta) [bom], ws the site wind 1.5 m/s), an *interpretation*.
+No standard heat dose exists for a few minutes of waiting [brief9]; it compares stops, it is not a measure of risk.
+
+### Footbridges
+
+| | 12:00 | 15:00 | 17:00 | daily peak |
+|---|---|---|---|---|
+| Tmrt, open deck (mean of 7 points), °C | 70.0 | 69.6 | 58.3 | |
+| Tmrt, covered deck, °C | 37.5 | 37.9 | 37.1 | |
+| steel deck, open, °C | 75.7 | 67.1 | 48.5 | 76.2 |
+| steel deck, covered, °C | 34.9 | 36.3 | 36.6 | 40.9 |
+| handrail, open bridge, °C | 75.7 | 67.1 | 48.5 | 76.2 |
+| handrail, covered bridge (south edge), °C | 76.4 | 68.2 | 34.2 | 77.0 |
+
+At 15:00 the cover takes 31.7 K of Tmrt off a person on the deck (Hong Kong elevated walkway: 19.8–34.8 K via the brief, not in the abstract, which gives PET 2–17 K lower on the walkway [chenWalk2024]). The open
+steel deck peaks at 76.2 °C, above the brief's 60–70 °C for steel deck surfacing (supplementary, not counted; the source [deckSteel] models extreme conditions and tests at 70 °C, it does not show 60–70 °C in summer sun): likely
+because the plate is heated from above and loses no heat from below in this thin-layer model, so deck and rail temperatures
+are upper bounds. The covered bridge's south handrail still gets the sun under the eaves.
+
+### Contact burns
+
+ISO 13732-1 via CENELEC Guide 29 [iso13732], 1 min of contact: metal 51 °C, ceramics, glass and stone 56 °C (concrete read with them), plastics and wood
+60 °C; bare metal in about 1 s at 65–70 °C (unverified [brief9]; the flag at 65 °C, the low end). Display only. At 15:00:
+
+| Surface | °C | 1-min limit | above it | 1-s flag |
+|---|---|---|---|---|
+| bench seat, stop A (metal) | 37.3 | 51 | no | no |
+| bench seat, stop B (metal) | 36.0 | 51 | no | no |
+| bench seat, stop C (metal) | 51.9 | 51 | yes | no |
+| bench seat, stop D (concrete) | 40.8 | 56 | no | no |
+| bench seat, stop E (metal) | 62.6 | 51 | yes | no |
+| deck, mid-span, covered footbridge (metal) | 36.2 | 51 | no | no |
+| handrail, covered footbridge (metal) | 68.2 | 51 | yes | yes |
+| deck, mid-span, open footbridge (metal) | 67.1 | 51 | yes | yes |
+| handrail, open footbridge (metal) | 67.1 | 51 | yes | yes |
+
+11 of 21 bench, rail and deck points carry the 1-min flag at 15:00, 9 the 1-s flag. Sunlit steel decks can burn in seconds
+[cpsc]; sunlit metal reached 62 °C in Las Vegas [lasVegas]; for 1–10 s contacts CENELEC Guide 29 advises the low end of its range for children (from 1 min on Table A.1
+applies to children as is), and the brief advises reading at least 4 s of contact for older people and children.
+
+### Walkers and riders
+
+Walkers use the shade weights of blocks 1–8 on two sidewalk variants per route [melnikov]; at 15:00 their density in shade is
+1.16 times that in sun, short of the 2 the other blocks reach: likely because both sidewalks of each street have the same rows
+of street trees and little building shade in the afternoon, so the choice between them changes little. Riders choose their
+waiting place by Tmrt: 74% of the 125 riders arriving 15:00–16:00 wait with the head in shade. Riders crossing the
+footbridges carry the deck's point-model heat. The sweat cue is as before (Tmrt 65–70 °C in sun).
+
+### Sensitivity
+
+One value at a time, within the brief's ranges:
+
+| Stop A's shelter | Tmrt cut at 15:00 | under the roof − air | concrete under it − air |
+|---|---|---|---|
+| shipped (H 2.65 m, depth 2 m) | +33.9 K | +1.3 K | −1.4 K |
+| roof height 2.5 m | +33.7 K | +1.5 K | −1.4 K |
+| roof height 2.8 m | +34.1 K | +1.1 K | −1.4 K |
+| depth 1.5 m | +34.3 K | +0.6 K | −1.7 K |
+| depth 2.5 m | +33.9 K | +1.7 K | −1.2 K |
+
+| Buses | simulated mean wait | formula | ratio |
+|---|---|---|---|
+| shipped (h 10 min, cv 0.4) | 5.74 min | 5.80 min | 0.99 |
+| headway 5 | 2.88 min | 2.90 min | 0.99 |
+| headway 15 | 8.56 min | 8.70 min | 0.98 |
+| cv 0.3 | 5.36 min | 5.45 min | 0.98 |
+| cv 0.5 | 6.12 min | 6.25 min | 0.98 |
+
+| Steel (open bridge) | deck 15:00 | deck daily peak | handrail peak |
+|---|---|---|---|
+| shipped, C 12 kJ m⁻² K⁻¹ | 67.1 °C | 76.2 °C | 76.2 °C |
+| thin metal C 5 kJ m⁻² K⁻¹ | 66.4 °C | 76.2 °C | 76.2 °C |
+| thin metal C 20 kJ m⁻² K⁻¹ | 67.8 °C | 76.1 °C | 76.1 °C |
+
+| Deck height | Tmrt open − covered at 15:00 |
+|---|---|
+| shipped, 6 m | +31.7 K |
+| deck 5.5 m | +31.6 K |
+| deck 6.5 m | +31.7 K |
+
+Band 2 (opal) closes with the bronze sheet (τ 0.43, its own datasheet value, not in the scene); no shelter height or depth in
+the brief's ranges brings the shaded concrete (band 3) up to the air.
+
+**Band 3, roof underside (docs only, not shipped, not tuned).** The point under stop A's roof sees the roof (0.30 of its view)
+as the shared warm-wall term, 42.0 °C at 15:00 (air + 2 K + 6 K·K/900). A sunlit dark metal roof is far hotter underneath: this
+model's own dark metal roofs (the grid's `metal` roof cells, a thin layer, so the underside is about the top) reach 67.1 °C at 15:00.
+With the roof's share of the view at that temperature, minute by minute (the building walls keep the shared term), the
+concrete under the roof comes out +1.3 K from the air at 15:00 (−1.4 K in the same run with the shared term), inside
+the brief's 0–8 K. So the shared wall term is a likely cause of the miss; the missing lateral conduction from the sunlit slab
+around the 2 m strip is another, not tested. It stays as shipped: the wall term is shared by every block, as for block 6's
+PV undersides. The deck's peak barely moves with C: a thin layer in
+full sun sits near its radiative balance whatever its heat capacity.
+
+**Shade ranking: what a person under a roof sees (docs only, not shipped, not tuned).** The outside evaluation of #33 found
+the ranking upside down: stop A's thin metal roof (36.3 °C at 15:00, +1.3 K from the air) beats the trees of stop D
+(43.6 °C on the bench), while Tempe measured building shade first, trees second and lightweight structures last [middel2021].
+Two simplifications of `Thermal.tmrt` favour a small roof: a person sees **only the ground at their own point** (the shaded
+concrete under the roof, 33.6 °C), not the sunlit paving a metre or two away, and the roof's underside counts as the shared
+warm wall, not as hot metal. A test at 15:00 (`surround9` in `scripts/busstop.mjs`): each sideways direction sees the ground
+straight out at 0.25, 0.75, 1.5, 3 and 6 m, weighted by the share of a vertical sensor's downward view each band takes from
+mid-body height (c / √(c² + d²) beyond distance d), from the point model's own force-restore run at those samples; a sight line
+through an opaque panel takes the wall term. The roof is a thin metal point on the roof (67.2 °C), its share of the view
+(open × F at mid-body) seen from above only (the brief's W_up 0.06) or also in the upper half of the sideways directions:
+
+| Point, 15:00 | shipped | sees the ground around | + roof underside, up | + roof underside, up and sides |
+|---|---|---|---|---|
+| stop A, centre under the roof (standing) | 36.3 °C | 44.0 °C | 44.8 °C | 50.8 °C |
+| stop A, open reference (standing) | 70.2 °C | 67.6 °C | — | — |
+| stop D, bench under the trees (seated) | 43.6 °C | 44.1 °C | — | — |
+| stop D, open reference (standing) | 69.1 °C | 67.6 °C | — | — |
+
+The ground around a person decides it: +7.7 K under stop A's roof, +0.5 K on stop D's shaded bench (its ground is
+shaded all round), −2.5 K in the open; the roof's underside adds +0.8 K seen from above only (as the brief
+expects, "≈1 K"), +6.8 K seen from the sides too. With both, stop A's cut is 16.9 to 22.8 K (shipped
+33.9 K; band 1: 20–35 K) and the shelter is no better than the trees (44.1 °C), the measured order. So the
+shipped shelter values are **likely too optimistic**; the page says so on stop A's card and in the expert part of every
+roofed stop. Not shipped: every block's Tmrt sees only its own cell's ground (grid blocks: a 5 m cell, so the gap is largest
+for the sub-cell shelters here), and fixing it in one block would make shade values incomparable across blocks; it belongs
+to the engine change of [issue #28](https://github.com/yushengzhou/thermal-ink-atlas/issues/28). Block 1's park trees are not thin (crown transmission
+0.17, the engine's LAI 3.5): fully shaded lawn cells come out about 20 K below the open lawn at 15:00; a 5 m cell only partly in
+a crown's shadow mixes sun and shade, and its heat card now says so.
+
+### Acceptance bands (block 9)
+
+Evaluated at 15:00, the air's peak (the brief's bands are for Ta peak 35 °C), unless the band names its hours: the shadow
+shift at 14–17 h, the wait over the whole service day. Band 4 checks the engine's sun (`sun.js`, NOAA's fractional-year
+form) against the brief's NOAA table: the gap is the engine approximation (about 0.2° at noon, issue #24), well inside
+0.25 m here.
+
+| Check (spec #14) | Model | Band | Source | |
+|---|---|---|---|---|
+| 1. Opaque shelter (stop A) at 15:00, standing: Tmrt at the kerb − under the roof (centre), K | 33.91 K | 20 to 35 | middel2021 | inside |
+| 1. The same: Tmrt under the roof − air, K | 1.25 K | 0 to 15 | brief9 | inside |
+| 1. Supplementary: an opaque roof on the avenue's west kerb (stop B's shelter) at 15:00, standing: Tmrt at the kerb − under the roof, K | 23.52 K | 20 to 35 | middel2021 | inside (supplementary, not counted) |
+| 1. Supplementary: an opaque roof on the avenue's east kerb (stop B's shelter, mirrored: open front to the west) at 15:00, standing: Tmrt at the kerb − under the roof, K | 0.02 K | 20 to 35 | middel2021 | outside (supplementary, not counted) |
+| 1. Supplementary: stop B (clear roof, centre) at 15:00, Tmrt at the kerb − under the roof, K | 21.16 K | 20 to 35 | middel2021 | inside (supplementary, not counted) |
+| 1. Supplementary: stop D (trees, on the bench) at 15:00, Tmrt at the kerb − on the bench, K | 25.47 K | 20 to 35 | middel2021 | inside (supplementary, not counted) |
+| 1. Supplementary: stop E (glass box, centre) at 15:00, Tmrt at the kerb − under the roof, K | 4.00 K | 20 to 35 | middel2021 | outside (supplementary, not counted) |
+| 2. Stop A's shelter with a clear polycarbonate roof (τ 0.80): share of the opaque roof's Tmrt cut at 15:00 | 0.140 | ≤ 0.3 | brief9 | inside |
+| 2. The same with an opal roof (τ 0.47): share | 0.471 | 0.5 to 0.65 | brief9 | **outside** |
+| 2. Supplementary: the same with a bronze roof (τ 0.43, not in the scene): share | 0.513 | 0.5 to 0.65 | brief9 | inside (supplementary, not counted) |
+| 3. Concrete at 15:00: at the kerb − under stop A's roof, K | 22.46 K | ≥ 10 | dzyuban2022 | inside |
+| 3. Concrete under stop A's roof − air at 15:00, K | -1.42 K | 0 to 8 | dzyuban2022 | **outside** |
+| 4. Roof shadow shift at 14:00 (H 2.65 m, sun.js), m (H·cot β 1.458 m from the brief's NOAA table) | 1.45 m | 1.208 to 1.708 | noaa | inside |
+| 4. Roof shadow shift at 15:00 (H 2.65 m, sun.js), m (H·cot β 2.279 m from the brief's NOAA table) | 2.27 m | 2.029 to 2.529 | noaa | inside |
+| 4. Roof shadow shift at 16:00 (H 2.65 m, sun.js), m (H·cot β 3.498 m from the brief's NOAA table) | 3.49 m | 3.248 to 3.748 | noaa | inside |
+| 4. Roof shadow shift at 17:00 (H 2.65 m, sun.js), m (H·cot β 5.697 m from the brief's NOAA table) | 5.69 m | 5.447 to 5.947 | noaa | inside |
+| 4. Supplementary: shadow shift per m at 14:00, east (brief 0.51), m | 0.51 m | 0.49 to 0.53 | noaa | inside (supplementary, not counted) |
+| 4. Supplementary: shadow shift per m at 14:00, north (brief 0.21), m | 0.20 m | 0.19 to 0.23 | noaa | inside (supplementary, not counted) |
+| 4. Supplementary: shadow shift per m at 17:00, east (brief 2.12), m | 2.12 m | 2.1 to 2.14 | noaa | inside (supplementary, not counted) |
+| 4. Supplementary: shadow shift per m at 17:00, north (brief -0.33), m | -0.33 m | -0.35 to -0.31 | noaa | inside (supplementary, not counted) |
+| 5. Simulated mean wait (2082 riders, all stops, the whole day) over (h / 2)(1 + cv²) = 5.80 min | 0.990 | 0.9 to 1.1 | fan2002 | inside |
+| 5. Supplementary: stop A (428 riders) | 1.009 | 0.9 to 1.1 | fan2002 | inside (supplementary, not counted) |
+| 5. Supplementary: stop B (428 riders) | 0.950 | 0.9 to 1.1 | fan2002 | inside (supplementary, not counted) |
+| 5. Supplementary: stop C (415 riders) | 0.897 | 0.9 to 1.1 | fan2002 | outside (supplementary, not counted) |
+| 5. Supplementary: stop D (430 riders) | 1.067 | 0.9 to 1.1 | fan2002 | inside (supplementary, not counted) |
+| 5. Supplementary: stop E (381 riders) | 1.025 | 0.9 to 1.1 | fan2002 | inside (supplementary, not counted) |
+| 6. Footbridge decks at 15:00: Tmrt on the open − the covered deck (mean of 7 points each), K | 31.65 K | 20 to 35 | chenWalk2024 | inside |
+| 6. Supplementary: the same at mid-span, K | 31.75 K | 20 to 35 | chenWalk2024 | inside (supplementary, not counted) |
+| 7. Surfaces at 15:00 (21 bench, rail and deck points) whose 1-min flag disagrees with its ISO 13732-1 limit | 0.000 | 0 | iso13732 | inside |
+| 7. Metal surfaces at 15:00 whose 1-s flag disagrees with ≈65 °C | 0.000 | 0 | brief9 | inside |
+| 7. Supplementary: open steel deck, daily peak (mean of the deck points; the brief's 60–70 °C), °C | 76.21 °C | 60 to 70 | deckSteel | outside (supplementary, not counted) |
+| Riders arriving 15:00–16:00 (n 125) waiting with their head in shade | 0.736 | ≥ 0.5 | melnikov | inside |
+| Walkers at 15:00: density in shade over density in sun | 1.162 | ≥ 2 | melnikov | **outside** |
+
+3 of 16 counted checks fall outside their band; 17 supplementary rows are not counted. By the brief's bands: 5 of 7 met (1, 4, 5, 6, 7); missed: 2, 3. They are reported, not tuned away: every parameter value is the brief's central value (or the shared value the brief names), set before the first model run. The layout is a design choice, and one placement was made after model runs (stop A, see Stops).
+
+### Disclosures (block 9)
+
+- **Air fixed:** no warm air trapped in the glass box (Lanza et al. found enclosed shelters without overhead shade more than
+  3 °C WBGT hotter than the open sun [lanza2025]), no bus exhaust, no misting, no wind shelter; inside stop E is understated.
+- **Panels and glass:** walls and panels reflect no sunlight; their own temperature is not computed; no greenhouse effect;
+  the glass passes 0.82 of the beam at every angle (less at a glancing angle). Translucent roofs pass their τ as direct beam
+  and their diffuse light is not counted (the roof counts as cover for the sky view).
+- **Sub-cell shade check:** the waiting places, decks, rails and benches are points; the 5 m grid around them sees only the
+  roofs, the decks and the opaque panels (not the glass walls). The ground under a point has no lateral heat exchange with
+  the sunlit slab around it.
+- **Conditions while waiting:** Tmrt is a steady-state value for an adult (head 1.7 m standing, 1.2 m seated); the model does
+  not follow a body heating up over a wait. The heat dose is the engine's own measure, on the apparent temperature (UTCI is
+  not implemented), not a health threshold; the stairs' extra effort is not modelled.
+- **Thin plates:** decks, handrails and bench seats are horizontal thin layers heated from above only (no cooling from below
+  or round a tube), so their temperatures are upper bounds; the open deck's peak (76.2 °C) is above the brief's 60–70 °C.
+- **Burn limits depend on the material and the contact time:** the 1-min ISO limits apply to adults and, from 1 min on, to children; the 1-s value
+  for bare metal is unverified; flags are display only.
+- **Misses:** band 2 (opal 0.47 of the opaque cut, against 0.50–0.65), band 3 (concrete under stop A's roof −1.4 K from the air at
+  15:00, against 0–8 K above it; likely the roof underside taken at the shared warm-wall temperature, which the sensitivity run
+  above supports, and the missing lateral conduction from the sunlit slab around a 2 m strip, not tested) and the
+  walkers' shade ratio (1.16, against 2) are outside; each card that states the number says so. Reported, not tuned.
+- **Engine sun:** `sun.js` uses NOAA's fractional-year approximation (about 0.2° off at noon, issue #24); against the brief's
+  table the shadow shifts at 14–17 h differ by at most 0.01 m.
+- **Invented street:** layout, the stops' places (stop A moved after model runs, see Stops), the rider rate, the bus clock and the bigger roof of the comparison are
+  assumptions.
+
+## Block 10: urban village and informal edge
+
+The tenth block (`cities/village`) is an invented 400 m block in the manner of a South China urban village (城中村) at
+22.5° N on 20 July (air 27–35 °C, vapour pressure 28 hPa, wind 1 m/s; an assumed heat-wave day). West of Village Road
+stand 272 village houses of 6–8 storeys (18–24 m) built plot to plot, the "handshake buildings" (握手楼), with lanes
+1.5–3 m wide between them and a 6 m market lane; flat concrete roofs, 57 of them with a rooftop room under metal
+sheeting. East of the road: the older village centre (an ancestral hall, its open square, a pond, three banyans). South of
+Bus Road: a low-rise edge of single-storey rooms in 193 runs, roofed with rusty corrugated iron, galvanised sheet,
+asbestos-cement sheet or tarpaulin, some painted white by the residents, between 2 m alleys. The residents' white roofs
+are `W`, the panel button or `?coolroof=1` (default off: they repaint the 65 bare roofs marked in the scene); the
+room under each sheet roof is `O`, the panel button or `?under=1`. Its research brief is [`docs/research/village-brief.md`](research/village-brief.md).
+
+### Block 10 parameters
+
+The block's materials (`rustTin`, `galvTin`, `asbestosRoof`, `tarpRoof`, `whiteTin`, `whiteTinAged`, `slabRoof`) are in
+the parameter table above; they are cut from the other pages at build time (`@page village` in `engine/materials.js`).
+Lanes and paths are the shared `concrete`, the roads `asphalt`, the yard `drySoil`, the pond `water`, the ancestral
+hall `greyTile` (block 5). The block's own values live in `engine/village.js` (`VG`):
+
+| Parameter | Value |
+|---|---|
+| `storey` | 3 [engine] *engine assumption (no source)*, unverified (storey height of a village house, m; engine assumption (the houses are 6-8 storeys, 18-24 m)) |
+| `storeys` | 6-8 [brief10] *cited range*, unverified (storeys of the village houses: 6, 7 or 8 (30 / 40 / 30% by plot, layout); the brief's 6-8 storeys and walls 18-25 m) |
+| `laneW` | 2 [brief10] *cited range*, unverified (lane width, m: the brief's 1-3 m, most lanes the middle value 2 m; the layout also has lanes of 1.5 and 3 m (and Market Lane 6 m, outside the bands' set)) |
+| `roomRise` | 2.6 [engine] *engine assumption (no source)*, unverified (height of a rooftop room above its house's roof, m; engine assumption) |
+| `thinFloor` | 2000 [brief10] *cited value*, unverified (the smallest heat capacity of a thin layer, J m-2 K-1: the brief's floor for the explicit 60 s step (C >= 2 kJ); checked for every thin layer of the scene at load (checkThin)) |
+| `warm` | 6 [engine] *engine assumption (no source)*, unverified (coarse 10-min spin-up days for the heavy cells (block 3's opts.warm, with its stability guard); the thin roofs run from a cold start (they converge within the first day)) |
+| `noon` | 12 [engine] *engine assumption (no source)*, unverified (the bands' "noon": 12:00 local clock time (set before the first model run; solar noon at 114.1° E is about 12:30, reported as a supplementary row)) |
+| `night` | 22 [brief10] *cited value*, unverified (the hour of the lane-against-open band, 22:00 (the brief)) |
+| `fr` | 0.4 [brief10] *cited range*, unverified (F_r, the ceiling's share of a person's view in a room under a sheet roof; an assumption of the brief, 0.3-0.5; the middle value) |
+| `wallUp` | 2 [brief10] *cited range*, unverified (the room's walls in the radiant proxy are at the outdoor air + this, K; the brief's 1-3 K, the middle value) |
+| `hci` | 1.25 [brief10] *cited range*, unverified (h_ci, convective coefficient of the ceiling in the air proxy, W m-2 K-1; the brief's 1-1.5, the middle value) |
+| `roomH` | 2.5 [engine] *engine assumption (no source)*, unverified (room height h (volume over roof area) in the air proxy, m; engine assumption) |
+| `rhoCp` | 1206 [engine] *engine assumption (no source)*, unverified (rho c_p of air, J m-3 K-1 (1.2 kg m-3 x 1005 J kg-1 K-1)) |
+| `airTarget` | 3 [brief10] *cited range*, unverified (the air proxy is calibrated (as the brief says: "calibrate n to +2-4 K peak under bare tin") so the bare rusty-iron rooms peak at this many K above the outdoor air, the middle of 2-4 K; the band on it therefore holds by construction and is not counted) |
+| `airCap` | 5 [brief10] *cited value*, unverified (the air proxy is never shown beyond +-5 K (the brief)) |
+| `paint` | whiteTin [brief10] *cited value*, unverified (what the residents' white-roof toggle (W) paints the marked bare iron and galvanised roofs with: white-painted tin, new paint (albedo 0.65)) |
+
+### The lanes (sub-grid)
+
+A lane 1.5–3 m wide cannot be drawn on a 5 m grid: on the raster it is a 5 m gap, which sees about four times the sky
+(below). Each lane is centred on a row (or column) of cell centres, so it keeps one cell; its houses cover the cells on
+either side. The 1848 lane cells take their sky view and direct sun from an endless canyon of the lane's own width W and
+its two walls H1, H2 (the houses on either side; a rooftop room stands back from the lane, so its house's height):
+
+- sky view of the floor (its mean over the width, crossed strings): F = (√(W² + H1²) + √(W² + H2²) − H1 − H2) / (2W);
+  for equal walls √(1 + (H/W)²) − H/W, which for deep lanes is the brief's centre-line form cos(atan(2H/W)) to within 0.001
+  (both are about W / 2H);
+- sunlit share of the floor: s = clamp(1 − H_s·|d| / (W·tan β), 0, 1), H_s the wall on the sun's side and d the across-lane part of
+  the unit vector toward the sun;
+- a crossing of two lanes (with houses on all four corners) is taken as the east–west lane with the mean heights of its corner
+  houses: the cross lane's extra sky and sun are not counted;
+- the cell's own sky view also sets its share of the walls (1 − F) for the wall terms, as everywhere.
+
+Lane cells: number, width W (m), wall height H (m), sky view canyon / 5 m raster (not used) / centre-line form, floor in
+sun at 12:00 / 15:00, Tmrt at 12:00 / 15:00 / 22:00 (°C), floor at 15:00 / 22:00 (°C):
+
+| Lanes | n | W | H | SVF | raster | centre line | sun | Tmrt | floor |
+|---|---|---|---|---|---|---|---|---|---|
+| village lanes 1.5 m | 66 | 1.5 | 20.6 | 0.037 | 0.204 | 0.037 | 32% / 10% | 53.2 / 51.2 / 33.9 | 46.8 / 35.0 |
+| village lanes 2 m | 792 | 2.0 | 21.0 | 0.048 | 0.199 | 0.048 | 36% / 20% | 54.2 / 54.1 / 33.9 | 47.9 / 35.2 |
+| village lanes 3 m | 132 | 3.0 | 21.0 | 0.072 | 0.199 | 0.072 | 48% / 29% | 57.1 / 56.6 / 33.9 | 49.1 / 35.4 |
+| all village lanes 1.5–3 m (the bands' set) | 990 | 2.1 | 21.0 | 0.050 | 0.199 | 0.050 | 37% / 21% | 54.5 / 54.2 / 33.9 | 48.0 / 35.2 |
+| Market Lane 6 m | 32 | 6.0 | 20.8 | 0.143 | 0.202 | 0.143 | 91% / 81% | 70.3 / 73.6 / 34.3 | 61.0 / 37.3 |
+| crossings (as the east–west lane) | 240 | 2.3 | 21.0 | 0.056 | 0.283 | 0.056 | 75% / 46% | 66.2 / 64.4 / 34.5 | 57.3 / 36.6 |
+| alleys of the low-rise edge, 2 m | 526 | 2.0 | 2.7 | 0.327 | 0.843 | 0.344 | 95% / 82% | 70.0 / 72.0 / 33.1 | 60.2 / 37.0 |
+| the open square (413 cells, SVF ≥ 0.85; by day its sunlit cells) | 413 | — | — | 0.973 | — | — | — | 68.0 / 72.6 / 28.5 | 59.9 / 35.5 |
+
+Air 33.0 / 35.0 / 31.4 °C. The sun is 82.9° high at 12:00 (azimuth 101.7°) and 55.2° at 15:00, so a
+straight-walled lane floor gets the sun at midday; the walls are the shared warm wall (air + 2 K + 6 K × K/900: 42.1 °C at 12:00,
+whatever their own shade). The lanes keep the people in them out of the night sky: at 22:00 the village lanes are
++5.4 K warmer in Tmrt than the open square, in line with the Pingshan traverses (heat island largest 20:00–24:00) [pingshan].
+
+### Thin sheets and the 60 s step
+
+A sheet roof is a thin layer, dTs/dt = G / C (no restore term). The explicit 60 s step is stable only while
+Δt (4εσT³ + h_c) / C stays well below 2 (smooth below 1); with T = 340 K and h_c = 9.5 W m⁻² K⁻¹ a real
+tarpaulin (about 0.4 kJ m⁻² K⁻¹, the brief) is past it and the run diverges. Every thin layer on this page holds C ≥ 2 kJ
+(the brief's floor; `checkThin` refuses a scene that breaks it). Each sheet alone, in the open, on the design day:
+
+| Sheet | stability factor | finite | daily range | largest 15-min change |
+|---|---|---|---|---|
+| tarpaulin, C 2 kJ m⁻² K⁻¹ (shipped, the floor) | 0.53 | yes | 23.8–75.2 °C | 2.92 K |
+| tarpaulin, C 0.4 kJ m⁻² K⁻¹ (a real sheet, the brief) | 2.63 | **no** (NaN) | — | — |
+| Rusty corrugated iron roof, C 3 kJ m⁻² K⁻¹ | 0.34 | yes | 24.0–79.9 °C | 3.20 K |
+| Galvanised (zinc-coated) iron sheet roof, C 3 kJ m⁻² K⁻¹ | 0.23 | yes | 25.8–69.7 °C | 2.41 K |
+| Asbestos-cement sheet roof (aged), C 8 kJ m⁻² K⁻¹ | 0.13 | yes | 23.8–75.1 °C | 2.92 K |
+| Corrugated iron, newly painted white, C 3 kJ m⁻² K⁻¹ | 0.35 | yes | 23.8–54.0 °C | 1.62 K |
+| Corrugated iron painted white (weathered paint), C 3 kJ m⁻² K⁻¹ | 0.35 | yes | 23.8–63.5 °C | 2.19 K |
+
+At the floor the tarpaulin's time constant is about C / (4εσT³ + h_c) ≈ 110 s instead of about 20 s: on the stored 15-min
+values the difference is small, but the floor slightly slows its rise and fall.
+
+### Roofs
+
+Ground-level rooms of the low-rise edge, by roof: number, surface at 15:00, the day's peak, at 03:00 (°C), the radiant proxy under
+the roof at 15:00 / 03:00 (°C) and the illustrative room air's day's peak (K above the outdoor air):
+
+| Roof | n | 15:00 | peak | 03:00 | radiant | air peak |
+|---|---|---|---|---|---|---|
+| rusty corrugated iron | 64 | 71.2 | 79.9 | 24.7 | 52.0 / 27.8 | +3.0 |
+| galvanised sheet | 39 | 63.2 | 69.7 | 26.5 | 48.3 / 28.5 | +2.3 |
+| asbestos-cement sheet | 39 | 67.8 | 75.2 | 24.6 | 50.4 / 27.7 | +2.7 |
+| tarpaulin | 23 | 67.2 | 75.3 | 24.6 | 50.1 / 27.7 | +2.7 |
+| iron painted white years ago (weathered) | 28 | 57.9 | 63.6 | 24.6 | 45.9 / 27.7 | +1.9 |
+
+Rooftop rooms on the village houses:
+
+| Roof | n | 15:00 | peak | 03:00 | radiant | air peak |
+|---|---|---|---|---|---|---|
+| rusty corrugated iron | 23 | 71.1 | 79.9 | 24.7 | 52.0 / 27.7 | +3.0 |
+| galvanised sheet | 12 | 63.2 | 69.7 | 26.5 | 48.3 / 28.5 | +2.3 |
+| asbestos-cement sheet | 9 | 67.8 | 75.2 | 24.5 | 50.4 / 27.7 | +2.7 |
+| tarpaulin | 2 | 67.2 | 75.2 | 24.5 | 50.1 / 27.7 | +2.7 |
+| iron painted white years ago (weathered) | 11 | 57.8 | 63.5 | 24.5 | 45.8 / 27.7 | +1.9 |
+
+The flat concrete roofs of the village houses (1031 cells): 62.1 °C at 15:00, 36.1 °C at 22:00, 33.0 °C at 03:00; the room under a slab
+is not computed. Measured rooms (quoted, not simulated): Delhi in April, tin roofs 33.4 °C indoors against 32.8 °C outdoors;
+Yavatmal 3–4 K above outdoors in May–June [tasgaonkar2022]; Ahmedabad homes 34.6–35.8 °C under tin, 32.5–36.8 °C under
+asbestos, 31.6–33.8 °C under concrete [vellingiri2020]; Ghana, metal-roofed rooms 4.5 K warmer by day than mud or thatch,
+1.5 K cooler at night [wilby2021]; Bangkok, one unshaded house at midday in April, roof 68.1 °C and ceiling 49.2 °C (a shaded house's roof 45.5 °C) [khlongToey].
+
+### Under the roof (proxies)
+
+Not a simulation of the room (the brief's option: a radiant proxy and an information overlay):
+
+- radiant: T_mrt,in⁴ = F_r·T_roof⁴ + (1 − F_r)·T_w⁴, T_w = Ta + 2 K, F_r = 0.4; the ceiling is the roof sheet, taken
+  as black at the roof's temperature (likely an overstatement under a bright galvanised underside, ε 0.25);
+- air (illustrative only): ΔT = h_ci·(T_roof − Ta) / (h_ci + ρc_p·n·h/3600) with h_ci 1.25, h 2.5 m and
+  n = 21.50 air changes per hour, **calibrated** as the brief says, so the mean of the 64 bare rusty-iron rooms' daily peaks is
+  +3 K (the middle of the brief's +2 to +4 K): the share of (T_roof − Ta) that reaches the air is 0.065. Its band
+  (7, bare tin) therefore holds by construction and is not counted. The white-paint change (band 7) is **semi-constructed**: the proxy is
+  linear in T_roof − Ta, so the change is the target times the roofs' relative cooling (−0.561 per K of target); it tests the
+  model's roof-temperature ratio, not an independent indoor prediction (−1.12 K at +2 K, −1.68 K at +3 K, −2.24 K at +4 K). A card never
+  shows it beyond ±5 K; the largest raw value in this model is 3.01 K, so the cap does not bind here.
+
+### The residents' white roofs
+
+`W` repaints the 65 marked bare roofs (iron and galvanised) with new white paint (albedo 0.65) and runs those roof cells
+again (the other cells are unchanged: there is no lateral coupling). Surface at 15:00 bare → white (°C), its change (K), the radiant
+proxy at 15:00 (°C) and the illustrative air's day's peak (K above the outdoor air):
+
+| Painted roofs | n | bare 15:00 | white 15:00 | change | radiant | air peak |
+|---|---|---|---|---|---|---|
+| rusty-iron rooms (the bands' set) | 26 | 71.2 | 50.3 | −20.9 | 52.0 → 42.5 (−9.5) | +3.00 → +1.32 (−1.68) |
+| every painted rusty-iron roof | 37 | 71.1 | 50.3 | −20.9 | 52.0 → 42.5 (−9.5) | +3.00 → +1.32 (−1.68) |
+| every painted galvanised roof | 28 | 63.2 | 50.2 | −13.0 | 48.3 → 42.5 (−5.8) | +2.33 → +1.31 (−1.02) |
+| all painted roofs | 65 | 67.7 | 50.2 | −17.5 | 50.4 → 42.5 (−7.9) | +2.71 → +1.32 (−1.40) |
+
+Roofs the residents painted white years ago (weathered, albedo 0.5) are 13.3 K cooler than bare rusty iron at 15:00.
+Measured: white paint on tin −1.1 K indoors, a cool-roof sheet −2.0 K, insulation under asbestos −2.4 K [vellingiri2020];
+simulated, up to 91% fewer heat-stress hours [nutkiewicz2022]; a randomised trial's protocol [bunker2024].
+
+### Walkers and residents
+
+Walkers choose the shadier of two equal routes (a 2 m lane against the 6 m market lane, two lanes, two village lanes north–south,
+the bus-road kerb against the tree-lined path, across the square, two alleys of the edge). At 15:00 their density in shade is
+4.89 times that in sun. 14 people dwell at doorways in the lanes, under the banyans, on the square and in the yard;
+at 15:00 100% of them sit in shade. From 20:00 to 01:00, 20 residents sit on 10 roofs (`engine/vgui.js`,
+a pure function of the hour; their heat is their roof cell's).
+
+### Sensitivity
+
+One change at a time, inside the brief's ranges (docs only). Rusty-iron rooms (shipped 71.2 °C at 15:00, peak 79.9 °C):
+
+| Case | 15:00 °C | peak °C |
+|---|---|---|
+| rusty iron α 0.2 | 73.6 | 82.9 |
+| rusty iron α 0.3 | 68.7 | 76.9 |
+| rusty iron ε 0.75 | 72.7 | 81.9 |
+| rusty iron ε 0.9 | 69.7 | 78.2 |
+| rusty iron C 2 kJ m⁻² K⁻¹ | 71.0 | 79.9 |
+| rusty iron C 4 kJ m⁻² K⁻¹ | 71.3 | 79.9 |
+
+Asbestos-cement rooms (shipped 67.8 °C at 15:00):
+
+| Case | 15:00 °C | peak °C |
+|---|---|---|
+| asbestos cement α 0.25 | 70.2 | 78.1 |
+| asbestos cement α 0.35 | 65.4 | 72.3 |
+| asbestos cement C 6 kJ m⁻² K⁻¹ | 67.6 | 75.2 |
+| asbestos cement C 10 kJ m⁻² K⁻¹ | 68.0 | 75.2 |
+
+No value inside the brief's ranges brings asbestos cement into 50–62 °C (band 3). Weathered white paint (α 0.50) instead of new
+on the painted rusty-iron rooms: −12.5 K at 15:00 against bare (band 2's 15–25 K: outside).
+
+Radiant proxy under bare rusty iron at 15:00 (shipped 52.0 °C):
+
+| Case | °C |
+|---|---|
+| F_r 0.3, walls air + 2 K | 48.4 |
+| F_r 0.5, walls air + 2 K | 55.4 |
+| F_r 0.4, walls air + 1 K | 51.4 |
+| F_r 0.4, walls air + 3 K | 52.5 |
+
+h_ci 1 or 1.5: n is recalibrated (17.2 per hour and 25.8 per hour), the share reaching the air stays 0.065 and the
+white-paint change −1.68 K.
+
+Band 7 over the brief's calibration targets (bare tin peaking at +2 to +4 K): the white-paint change scales one for one with the target.
+
+| Target | white-paint change of the air peak |
+|---|---|
+| +2 K | −1.12 K |
+| +3 K (shipped) | −1.68 K |
+| +4 K | −2.24 K |
+
+Every target in the brief's range lands inside −1 to −2.5 K, so band 7 confirms only the model's roof-temperature ratio (semi-constructed).
+
+Lane width at the village's mean wall height (the canyon floor's mean and the brief's centre-line form):
+
+| Lane | SVF | centre line |
+|---|---|---|
+| lane 1 m, walls 21.0 m | 0.024 | 0.024 |
+| lane 1.5 m, walls 21.0 m | 0.036 | 0.036 |
+| lane 2 m, walls 21.0 m | 0.048 | 0.048 |
+| lane 3 m, walls 21.0 m | 0.071 | 0.071 |
+
+A 1 m lane (the brief's lower end) would sit at 0.024, below band 4's 0.03; the scene's narrowest lanes are 1.5 m.
+
+### Causes of the misses (docs-only runs)
+
+Nothing shipped changes. Band 5 (village lanes at 12:00, Tmrt − air, shipped +21.5 K against ≤ +8 K): the lane cells run again
+alone with (a) their walls at air + 2 K all day (lane walls are mostly in shade; the shared term's sun part adds 7.0 K at 12:00),
+(b) no direct sun on the lane floor or the person (as balconies, overhangs and washing would give), (c) both. Tmrt − air at
+12:00 and lanes − square at 22:00 (K):
+
+| Run | 12:00 | 22:00 |
+|---|---|---|
+| shipped (shared warm walls, canyon sun) | +21.5 | +5.4 |
+| (a) walls at air + 2 K all day | +17.6 | +5.3 |
+| (b) no direct sun in the lanes | +10.2 | +4.7 |
+| (c) both | +5.9 | +4.5 |
+
+Each cause alone leaves the lanes outside; together they bring them inside (+5.9 K). Band 6 stays inside in every run.
+
+Bands 1 and 3: the sheets with a heat loss through their underside to a room at the outdoor air, h_u = h_ci + 4εσT³ at
+340 K, added to h_c (a docs run with opts.wind; the room is taken at the air temperature, slightly overstating the loss):
+
+| Sheet | h_u W m⁻² K⁻¹ | shipped 15:00 °C | with h_u 15:00 °C | with h_u peak °C |
+|---|---|---|---|---|
+| Rusty corrugated iron roof | 8.6 | 71.2 | 58.8 | 64.6 |
+| Asbestos-cement sheet roof (aged) | 9.3 | 67.8 | 56.2 | 61.0 |
+
+With the underside loss asbestos cement comes inside band 3 and rusty iron falls just below band 1's 60 °C: the engine's
+thin layer, which loses heat from its top only, is the likely common cause (band 1 is met as shipped).
+
+### Acceptance bands
+
+At an air of 35 °C at 15:00 (the brief's bands for Ta 35, clear), "noon" 12:00 local time, night 22:00.
+
+| Check (spec #16) | Model | Band | Source | |
+|---|---|---|---|---|
+| 1. Rusty corrugated iron roofs of the rooms (n 64) at 15:00, °C | 71.15 °C | 60 to 75 | brief10 | inside |
+| 1. Supplementary: rusty iron rooftop rooms (n 23) at 15:00, °C | 71.13 °C | 60 to 75 | brief10 | inside (supplementary, not counted) |
+| 2. The painted rusty-iron rooms (n 26): bare − newly white roof at 15:00, K | 20.88 K | 15 to 25 | brief10 | inside |
+| 2. Supplementary: every painted roof (n 65, iron and galvanised): bare − newly white at 15:00, K | 17.48 K | 15 to 25 | brief10 | inside (supplementary, not counted) |
+| 2. Supplementary: rusty iron rooms − rooms the residents painted white years ago (weathered, n 28) at 15:00, K | 13.27 K | 15 to 25 | brief10 | outside (supplementary, not counted) |
+| 3. Asbestos-cement roofs of the rooms (n 39) at 15:00, °C | 67.85 °C | 50 to 62 | brief10 | **outside** |
+| 4. Sky view of the village lanes 1.5–3 m (n 990 lane cells): mean | 0.050 | 0.03 to 0.16 | brief10 | inside |
+| 4. The same: lowest lane cell | 0.031 | 0.03 to 0.16 | brief10 | inside |
+| 4. The same: highest lane cell | 0.083 | 0.03 to 0.16 | brief10 | inside |
+| 4. Supplementary: the same cells on the 5 m grid (the raster, not used): mean | 0.199 | 0.03 to 0.16 | brief10 | outside (supplementary, not counted) |
+| 4. Supplementary: the brief's centre-line form cos(atan(2H/W)) on the same cells: mean | 0.050 | 0.03 to 0.16 | brief10 | inside (supplementary, not counted) |
+| 4. Supplementary: Market Lane (6 m) | 0.143 | 0.03 to 0.16 | brief10 | inside (supplementary, not counted) |
+| 5. Village lanes at 12:00: Tmrt − air, K | 21.48 K | ≤ 8 | brief10 | **outside** |
+| 5. The open square at 12:00 (n 405 sunlit cells): Tmrt − air, K | 34.95 K | ≥ 25 | brief10 | inside |
+| 5. Supplementary: village lanes at solar noon (12:30): Tmrt − air, K | 31.51 K | ≤ 8 | brief10 | outside (supplementary, not counted) |
+| 5. Supplementary: village lanes at 15:00: Tmrt − air, K | 19.23 K | ≤ 8 | brief10 | outside (supplementary, not counted) |
+| 5. Supplementary: the open square at 15:00: Tmrt − air, K | 37.63 K | ≥ 25 | brief10 | inside (supplementary, not counted) |
+| 6. Village lanes − the open square, Tmrt at 22:00, K | 5.44 K | 2 to 6 | brief10 | inside |
+| 6. Supplementary: the edge's alleys − the open square, Tmrt at 22:00, K | 4.65 K | 2 to 6 | brief10 | inside (supplementary, not counted) |
+| 7. Supplementary (by construction: n calibrated to it): illustrative room air under bare rusty iron, day's peak, K above the outdoor air (n 21.5 per hour) | 3.00 K | 2 to 4 | brief10 | inside (supplementary, not counted) |
+| 7. White paint on the painted rusty-iron rooms (n 26): change of the illustrative room air's day's peak, K (semi-constructed: the +3 K calibration target × the roofs' relative cooling) | -1.68 K | -2.5 to -1 | vellingiri2020 | inside |
+| 7. Supplementary: the same with the calibration target at the brief's +2 K (the change scales with the target), K | -1.12 K | -2.5 to -1 | vellingiri2020 | inside (supplementary, not counted) |
+| 7. Supplementary: the same with the calibration target at the brief's +4 K (the change scales with the target), K | -2.24 K | -2.5 to -1 | vellingiri2020 | inside (supplementary, not counted) |
+| 8. Illustrative room-air values shown beyond ±5 K (250 sheet roofs × 96 times × 2 roof states) | 0.000 | 0 | brief10 | inside |
+| 8. Supplementary: the largest raw value before the cap, K | 3.01 K | — (reported) | brief10 | reported (supplementary, not counted) |
+| Walkers at 15:00: density in shade over density in sun | 4.890 | ≥ 2 | melnikov | inside |
+| People dwelling at 15:00 (n 14) whose place is in shade | 1.000 | ≥ 0.5 | melnikov | inside |
+
+2 of 13 counted checks fall outside their band; 14 supplementary rows are not counted. By the brief's bands: 6 of 8 met (1, 2, 4, 6, 7, 8); missed: 3, 5. Band 7 is counted as met but is semi-constructed (its size follows from the calibration target × the roofs' relative cooling; it holds for every target in the brief's +2 to +4 K), so only 5 met bands are independent of a calibration. They are reported, not tuned away: every parameter value is the brief's central value (or the shared value the brief names), and the layout and every value were committed before the first model run of these bands; nothing in the scene's geometry or inputs changed after it (only the margin notes' label offsets, see Disclosures).
+
+Misses:
+- **Band 3** (asbestos cement 67.8 °C at 15:00 against 50–62 °C): the thin layer here has no loss through its underside to the room
+  (tested above, docs only: 56.2 °C with it); no parameter in the brief's ranges brings it inside (Sensitivity). Stated on the metal-roofs card.
+- **Band 5** (village lanes at 12:00, +21.5 K against ≤ +8 K): two causes, tested above (docs only): the direct sun on a
+  straight-walled lane floor at midday (the sun 82.9° high; no balconies or overhangs) and the shared warm-wall term
+  (engine), which sets every wall at air + 9.0 K at 12:00 whether in sun or shade. Stated on the lanes card.
+
+### Disclosures
+
+- **Invented place:** no real village, addresses or people; the layout (plots, storeys, lane widths, roofs, which roofs are painted)
+  is a design choice inside the brief's ranges, and it was committed before the first model run of the bands; nothing in the
+  scene's geometry or inputs changed after it. Afterwards only the margin notes' label offsets (`notes[].dx, dy`) were moved, so
+  the labels stay on screen at the opening view (drawing only).
+- **Air fixed:** no warm air held in the lanes at night, no wind in the lanes (Ren et al. 2025, cited by the brief for the lanes'
+  wind shadows, is not used), no heat from people, cooking or appliances.
+- **Lanes:** an endless straight-walled canyon per lane cell (no balconies, air-conditioner boxes, overhangs or washing); a crossing
+  is taken as the east–west lane; the edges of the village keep the grid's values. The raster's sky view of the same cells
+  (0.199) is reported, not used.
+- **Walls:** the shared warm-wall term (air + 2 K + 6 K × K/900, all orientations, in sun or shade) is an engine assumption; in a lane
+  that sees almost only walls it dominates Tmrt (band 5).
+- **Sheets:** thin layers that exchange heat at their top only (no loss into the room, bands 1 and 3); the tarpaulin held at the 2 kJ
+  floor; no measured albedo for rusty iron, asbestos cement or tarpaulin (the brief's assumptions).
+- **Indoor values are proxies:** the radiant proxy treats the ceiling as black at the roof's temperature; the air figure is
+  illustrative, calibrated to the brief's band (so that band is by construction) and capped at ±5 K; the room under a concrete slab is not computed.
+- **Thermal palette:** it tops out at 70 °C, so rusty iron at 15:00 (71.2 °C) and every sheet's daily peak (up to
+  79.9 °C) show in the top colour; the heat cards give the numbers.
+- **Engine sun** (`sun.js`, issue #24): against suncalc at this site, the altitude differs by +0.12° at 12:00 and −0.06° at 15:00 (azimuth −0.83°, +0.25°); the village lanes' sunlit floor is 36.9% against 35.7% and 20.9% against 22.5% with the reference sun: too small to move band 5.
+- **Language:** "urban village (城中村)", "informal settlement", "residents"; vulnerability is described as exposure plus a lack of
+  resources, with cited and hedged figures only; asbestos cement is named a health hazard in one line, without advice. The block's
+  text is checked for the words the brief rules out (`tests/unit/village.test.mjs`).
+
+## Block 11: desert courtyard neighbourhood
+
+The eleventh block (`cities/desert`) is an invented 400 m neighbourhood in the manner of a hot desert city like Phoenix,
+at 33.43° N, 112.0° W on 15 July (no daylight saving): air 30–43 °C with the warmest air at 16:30, vapour pressure
+12 hPa, wind 1.5 m/s, a clear sky. 50 one- and two-storey courtyard houses of light stucco (four wings
+around a 10 m courtyard on a 30 m plot) stand in gravel yards (xeriscape) with mesquites and palo verdes; east of the cross street,
+a gravel plaza has three shade sails, a ramada, eight mesquites and four palo verdes, a row of shops has an arcade along Main Street,
+and a café patio has a misted roof; south of Main Street lies an irrigated bermudagrass lawn (Lawn Park). Main Street carries a light
+reflective coating (`C`, the panel button or `?coat=0` shows it bare); the water each kind of ground uses is `L`, the panel button
+or `?water=1`. Its research brief is [`docs/research/desert-brief.md`](research/desert-brief.md).
+
+### Block 11 parameters
+
+The block's materials (`gravel`, `desertLawn`, `coolCoat`, `desertSail`, `ramada`, `arcadeRoof`, `mesquite`, `paloVerde`) are in
+the parameter table above; they are cut from the other pages at build time (`@page desert` in `engine/materials.js`). House roofs
+are the shared aged cool roof and dark membrane, sidewalks the shared concrete, the cross street and the residential streets the
+shared aged asphalt. The block's own values live in `engine/desert.js` (`DS`):
+
+| Parameter | Value |
+|---|---|
+| `lat` | 33.43 [brief11] *cited value*, unverified (site latitude, ° N (Phoenix Sky Harbor about 33.43); longitude −112.0, time zone UTC−7 (no daylight saving), 15 July) |
+| `taMin` | 30 [brief11] *interpretation of the source*, unverified (the design day's coolest air, °C: between the 1991–2020 July normal (29.2) and July 2023 (32.7), as the brief suggests; AZMET hot days 28.7) |
+| `taMax` | 43 [brief11] *interpretation of the source*, unverified (the design day's warmest air, °C: between the July normal (41.4) and July 2023 (45.9; the brief rounds it to 46.0), as the brief suggests) |
+| `tmaxHour` | 16.5 [ncei] *cited range*, unverified (clock hour of the warmest air: the hourly normals put it at 16–17 MST; 16:30, the middle (the spec). Every other block keeps 15:00) |
+| `vapour` | 12 [brief11] *interpretation of the source*, unverified (vapour pressure, hPa: the brief's 12 (dew point about 10 °C); AZMET hot days have dew points of 11–13 °C (13–15 hPa), June's normal 3.2 °C (7.7 hPa)) |
+| `wind` | 1.5 [azmet] *edge of cited range*, unverified (site wind, m/s, the h_c input: AZMET hot days 1.5–2.2 m/s (2 m), the lower end; Sky Harbor 10 m normals are 2.4–4.7 m/s and pedestrian-level wind in Tempe under 1 m/s (h_c uses the formula of the shared engine, issue #20)) |
+| `wallAlbedo` | 0.6 [brief11] *cited range*, unverified (the light stucco walls' albedo for the wall-reflection term (world.wallAlbedo, this block only; the shared value is 0.3): the brief's 0.5–0.7, the middle (the spec)) |
+| `sailZ` | 4 [engine] *engine assumption (no source)*, unverified (height of the shade sails, m (engine assumption)) |
+| `ramadaZ` | 3.2 [engine] *engine assumption (no source)*, unverified (height of the ramada roof, m (engine assumption); the café patio roof is 3 m) |
+| `arcadeZ` | 3.5 [engine] *engine assumption (no source)*, unverified (height of the arcade roof, m (engine assumption)) |
+| `hour` | 15 [brief11] *cited value*, unverified (the bands' hour, 15:00 (the brief's bands are at 15:00)) |
+| `noon` | 12 [engine] *engine assumption (no source)*, unverified (the coating's supplementary hour, 12:00 local clock time (the Phoenix trial's "noon"); solar noon here is about 12:34) |
+| `night` | 21 [engine] *engine assumption (no source)*, unverified (the "after sunset" hour, 21:00 (sunset about 19:35); set before the first run) |
+| `mesquiteTarget` | -16.7 [middel2021] *cited value*, unverified (the calibration target for the mesquite crown, K: ΔTmrt under Prosopis against open sun (Middel et al. 2021), as the brief says ("mesquite LAI: calibrate to −16.7 K")) |
+| `treeWater` | 1.4–4.3 [amwua] *cited range*, unverified (water a desert tree takes, L per m² of canopy a day: about 890 L every 7–21 days for a 6.1 m canopy (AMWUA via the brief); quoted on the cards and the water overlay, not modelled) |
+| `lawnApplied` | 6.4 [amwua] *cited value*, unverified (water a Phoenix lawn is given, mm (= L m⁻²) a day: every 3 days, about 6.4 mm a day (AMWUA via the brief); quoted) |
+| `eto` | 7.1–8.9 [azmet] *interpretation of the source*, unverified (reference evapotranspiration for band 4, mm a day: two AZMet Encanto figures of the brief joined into one range, the low end of the July mean (7.1-7.8) and the high end of the hot days of 2023-25 (7.8-8.9); not one cited range, so an interpretation) |
+| `kc` | 0.68 [az1195] *interpretation of the source*, unverified (bermudagrass crop coefficient for band 4: AZ1195 Table 2 gives 0.78 for July for fairway turf watered daily; its note lowers Kc by 0.1 for watering every 3 days (the AMWUA schedule used here), so 0.68 (round-2 reference check; the brief used 0.78 and the band 5–7 mm)) |
+| `misters` | 1.5–3.4 [huang2025] *cited range*, unverified (water a misted patio uses, L per m² an hour: 4.87 L h⁻¹ per nozzle at 0.3–0.7 nozzles per m² (Huang et al. 2025 via the brief); quoted, misting is not modelled) |
+| `warm` | 6 [engine] *engine assumption (no source)*, unverified (coarse 10-min spin-up days (block 3's opts.warm, with its stability guard); convergence is tested on 1-min days as everywhere) |
+
+### What is new in the engine (all other blocks pixel-identical)
+
+- **The hour of the warmest air** is a site setting, `site.tmaxHour` (default 15:00): the air is a cosine from `taMin` at sunrise to
+  `taMax` at that hour and back down to the next sunrise. Only this block sets it (16:30, the hourly normals' 16–17 MST [ncei]).
+  At 15:00 the air is 42.4 °C here, 0.6 K below the day's peak.
+- **A block's own wall albedo**, `world.wallAlbedo` (default the shared 0.3): the wall-reflection term K_wr = α_w·(1 − SVF_open)·c·K_wall
+  uses the light stucco's 0.6 here. It changes the sunlight walls throw onto the ground and onto a person, not the walls'
+  temperature: every wall is still the shared warm wall (air + 2 K + 6 K × K/900, issue #28).
+- Nothing else is new: sails, the ramada, the arcade and the patio are block 5's flat screens (their tr; the cells under them take the
+  crown factor for the sky view), the desert trees are block 5's species crowns, the lawn and gravel are ground materials, and the
+  coating toggle runs the street's cells again with aged asphalt (as block 10's white roofs) and merges them into the model.
+
+### Where people stand (cell classes)
+
+Defined before the first band run, by geometry only. The **open reference** is the plaza's gravel cells with nothing over their centre,
+no crown and sky view ≥ 0.85, by day those in full sun (sunlit > 0.95): 663 cells at 15:00. A cell counts for a **shade kind**
+at an hour if that kind's shadow alone covers its centre (shadow polygons; no building or other kind) and the model gives it at
+most the kind's transmission + 0.2 of the sun; at night, the cells under the kind's footprint (its screen, or within the crown's radius).
+Mean radiant temperature (°C) and its difference from the open reference (K):
+
+| Shade | footprint cells | cells 15:00 / 21:00 | SVF | sun | 12:00 | 15:00 | 21:00 | ground 15:00 °C |
+|---|---|---|---|---|---|---|---|---|
+| shade sails (τ 0.15, 4 m) | 48 | 36 / 48 | 0.25 | 15% | 48.0 (−21.9) | 50.8 (−22.9) | 38.2 (+9.8) | 47.2 |
+| ramada (opaque, 3.2 m) | 16 | 12 / 16 | 0.25 | 0% | 42.3 (−27.6) | 44.6 (−29.0) | 38.0 (+9.5) | 42.4 |
+| arcade (opaque, 3.5 m, beside the shops) | 33 | 32 / 33 | 0.17 | 0% | — | 46.7 (−27.0) | 39.1 (+10.7) | 43.7 |
+| café patio roof (opaque, 3 m, concrete) | 12 | 10 / 12 | 0.22 | 0% | 42.2 (−27.7) | 44.5 (−29.2) | 38.4 (+10.0) | 40.9 |
+| mesquites (crown τ 0.30, calibrated) | 45 | 36 / 45 | 0.52 | 36% | 53.3 (−16.5) | 56.9 (−16.8) | 36.3 (+7.9) | 52.5 |
+| palo verdes (crown τ 0.30, as the mesquite) | 6 | 7 / 6 | 0.40 | 41% | — | 64.8 (−8.8) | 35.4 (+6.9) | 57.3 |
+| the open reference (plaza gravel) | 726 | 663 / 726 | — | 100% | 69.9 | 73.6 | 28.5 | 65.7 |
+
+Air 38.3 / 42.4 / 39.5 °C. The 200 courtyard cells: sky view 0.43, 56% in sun at 15:00, Tmrt 68.5 °C at 15:00
+and 36.0 °C at 21:00; ground 59.9 °C at 15:00.
+
+### The mesquite calibration
+
+No measured leaf area was found for mesquite or palo verde (the brief); the brief says to calibrate the mesquite crown to the measured
+ΔTmrt under Prosopis, −16.7 K [middel2021]. `calibrateMesquite` (scripts/desert.mjs) bisects the crown transmission (both species
+together, as shipped) with the whole block run again at each step; it gave 0.302, shipped as 0.30 (an LAI of about 2.4 in exp(−0.5 LAI)):
+mesquites −16.76 K at 15:00. That row is **by construction** and the palo verdes, which take the same crown, are
+**semi-constructed**. The calibration ran after the parameter commit and before the first band run; it is the only value set from a model run.
+
+### Lawn, water and gravel
+
+Open lawn in full sun (748 cells): 40.9 °C at 15:00 (air 42.4 °C), 29.3 °C at 03:00. Water evaporated over
+the design day (`Thermal.evaporation`, EF × max(Q*, 0) over 2.45 MJ kg⁻¹ on the stored 15-min values): 6.47 mm (L m⁻²) on average,
+6.37–6.52 across the lawn, against 4.8–6.1 from reference ET 7.1–8.9 mm × the July crop coefficient for a lawn watered every 3 days, 0.68 [azmet, az1195] and about
+6.4 mm applied [amwua]. EF 0.9 is a fixed share of the positive net radiation: it does not respond to the dry air and
+draws no advected heat (the brief estimates a real lawn's latent flux at about its daily net radiation). Sunlit open gravel (1593 cells):
+65.9 °C at 15:00. Water used by the other covers (overlay and cards) is quoted, not modelled: desert trees 1.4–4.3 L per m² of crown a day
+[amwua], misters 1.5–3.4 L m⁻² for each hour they run [huang2025], gravel and sails none.
+
+### The coated street
+
+Main Street's 228 cells (the cross street's intersection is bare asphalt) carry the coating (α 0.345, the middle of the
+trial's 0.30–0.39); without it they are the shared aged asphalt (α 0.12; the trial's bare streets measured 0.036, so the
+change in reflectance here, 0.225, is likely smaller than the trial's). Sunlit cells, coated / bare:
+
+| Hour | surface °C | change K | Tmrt °C | change K |
+|---|---|---|---|---|
+| 12:00 | 57.7 / 66.6 | −8.9 | 70.7 / 65.4 | +5.29 |
+| 15:00 | 60.9 / 69.8 | −8.8 | 74.5 / 71.1 | +3.37 |
+| 21:00 | 37.9 / 39.3 | −1.5 | 29.4 / 30.1 | −0.77 |
+
+The cross street's sunlit asphalt is 69.7 °C at 15:00. Measured in the trial: −6.7 K at noon and −5.8 K in the afternoon at the surface,
+pedestrian Tmrt +3.2 K and +2.5 K [coolPave2024]; high-albedo canyons can worsen pedestrian heat stress [erell2014].
+
+### Dry air
+
+At 12 hPa the clear-sky emissivity at 03:00 is 0.781 (Brutsaert) against 0.840 at 20 hPa: 380.1 against 408.8 W m⁻² of
+sky longwave. The air's wet-bulb temperature (the engine's psychrometric balance, block 5) is 21.6 °C at 15:00 and 21.7 °C at
+the day's peak (the brief: about 22 °C at 43 °C and 12 hPa [stull2011]). Misting and the lawn's cooling of the air are not modelled.
+
+### Walkers
+
+Walkers choose the shadier of two equal routes (across the plaza under the sails and mesquites or in the open, under the arcade or on
+the sunlit sidewalk, both Main Street sidewalks, both cross-street sidewalks, the mesquite path or the lawn, a residential street or the
+path between the houses). At 15:00 their density in shade is 5.52 times that in sun; 14 people dwell under the sails, the
+ramada, the mesquites, the arcade and the patio, in the plaza and on the lawn, and at 15:00 100% of them are in shade.
+
+### Sensitivity
+
+One change at a time, inside the brief's ranges (docs only; nothing shipped changes). Gravel (shipped 65.9 °C sunlit at 15:00, the
+open reference's Tmrt 73.6 °C):
+
+| Case | sunlit gravel 15:00 °C | open reference Tmrt °C |
+|---|---|---|
+| gravel α 0.16 | 70.6 | 72.0 |
+| gravel α 0.39 | 61.2 | 75.3 |
+| gravel μ 600 | 66.8 | 74.0 |
+| gravel μ 1000 | 65.0 | 73.2 |
+
+Lawn (shipped −1.6 K against the air at 15:00, 6.47 mm a day):
+
+| Case | surface − air K | mm a day |
+|---|---|---|
+| lawn EF 0.85 | +0.2 | 5.99 |
+| lawn EF 0.95 | −3.4 | 6.96 |
+| lawn α 0.16 | −1.0 | 7.40 |
+
+Coating (shipped −8.8 K surface, +3.37 K Tmrt at 15:00):
+
+| Case | surface K | Tmrt K |
+|---|---|---|
+| coating α 0.3 | −7.1 | +2.69 |
+| coating α 0.39 | −10.7 | +4.06 |
+
+The whole block run again (ΔTmrt against open sun at 15:00, the sails after sunset at 21:00, the courtyards' Tmrt, sunlit gravel and the open
+reference at 15:00; shipped: sails −22.9, ramada −29.0, arcade −27.0, mesquites −16.8, night +9.8 K,
+courtyards 68.5 °C):
+
+| Case | sails | ramada | arcade | mesquites | sails 21:00 | courtyards °C | gravel °C | open Tmrt °C |
+|---|---|---|---|---|---|---|---|---|
+| sail transmission 0.1 | −24.8 | −29.0 | −27.0 | −16.8 | +9.7 | 68.5 | 65.9 | 73.6 |
+| sail transmission 0.25 | −19.1 | −29.0 | −27.0 | −16.8 | +9.9 | 68.5 | 65.9 | 73.6 |
+| stucco wall albedo 0.5 | −22.8 | −29.0 | −27.1 | −16.8 | +9.8 | 67.6 | 65.9 | 73.6 |
+| stucco wall albedo 0.7 | −22.9 | −29.0 | −26.8 | −16.7 | +9.8 | 69.3 | 65.9 | 73.7 |
+| desert tree crowns' transmission 0.25 | −22.9 | −29.0 | −27.0 | −18.3 | +9.8 | 68.2 | 65.9 | 73.6 |
+| desert tree crowns' transmission 0.35 | −22.9 | −29.0 | −27.0 | −15.2 | +9.8 | 68.7 | 65.9 | 73.6 |
+| warmest air at 15:00 (the shared default) | −22.7 | −28.8 | −26.8 | −16.6 | +9.7 | 69.0 | 66.6 | 74.1 |
+| vapour pressure 15 hPa (dew point about 13 °C) | −23.6 | −29.7 | −27.8 | −17.2 | +8.6 | 69.0 | 66.6 | 74.7 |
+
+The sails' transmission at the brief's upper end (0.25) brings them inside band 6; nothing in range brings the ramada or the night
+gap inside. Moving the warmest air back to 15:00 warms the 15:00 air by 0.6 K and the gravel by
+0.7 K.
+
+### Causes of the misses (docs-only runs)
+
+Nothing shipped changes.
+
+- **Band 1** (sunlit gravel 65.9 °C against 55–63 °C, measured at an air of 41.0 °C): the gravel cells run again with
+  - shipped: 65.9 °C (air 42.4 °C at 15:00)
+  - (a) the July normal air, 29.2 → 41.4 °C: 64.7 °C (air 40.8 °C at 15:00)
+  - (b) direct sun 7% weaker: 64.0 °C (air 42.4 °C at 15:00)
+  - (c) gravel α 0.39 (the brief's upper end): 61.2 °C (air 42.4 °C at 15:00)
+  - (a), (b) and (c) together: 58.3 °C (air 40.8 °C at 15:00)
+
+  Each of (a) and (b) alone leaves it outside; the brief's upper albedo alone, or all three together, bring it inside. Likely causes: the
+  engine's clear-sky sun (the brief: noon global irradiance about 1037 W m⁻², 5–10% above Tempe's measured clear-day peaks) and an air
+  1.4 K warmer than on the measurement day; the albedo is unverified (0.16–0.39).
+- **Band 4** (the lawn's water 6.47 mm against 4.8–6.1 mm): the band is reference ET 7.1–8.9 mm × Kc 0.68,
+  AZ1195's July 0.78 for turf watered every day lowered by 0.1 for watering every 3 days, the schedule of [amwua] (round-2 reference check; the brief
+  used 0.78 and 5–7 mm, which the model met). The model's mean is 7.1–8.9 mm × 0.73–0.91; daily-watered turf (0.78) gives
+  5.54–6.94 mm, which contains it; the lawn at EF 0.85 (sensitivity above) 5.99 mm. Likely cause: the brief's fixed
+  evaporative fraction (0.9) is that of a lawn wet every day; it does not dry between waterings. Not tuned.
+- **Band 6** (sails −22.9 K, ramada −29.0 K against −14 to −20 K): with the person's view of the ground spread
+  over the neighbourhood (`tmrtView`: the downward face and the sides see each ground cell within 40 m by its view factor from 1.1 m,
+  instead of the own cell only) the sails are −20.7 K and the ramada −26.2 K; with that view and the sails' transmission at 0.25,
+  −17.3 K (inside); sails and ramada of 10 m instead of 20 m (same centres): −22.3 K and −28.7 K. Likely causes: the
+  sail's transmission in the lower half of the brief's range and the one-cell ground view; the ramada is opaque, and the band's
+  −17.3 K was measured under sails and umbrellas (opaque arcades and overhangs: −22.8 to −30.9 K), so its miss is likely the band's
+  scope, not tested further.
+- **Band 7** (palo verdes −8.8 K, semi-constructed): 6 of the 7 cells are in house courtyards
+  (−7.4 K), where the stucco walls reflect sunlight onto the ground and a person and are the shared warm walls; with those
+  walls at air + 2 K (no sun term) −9.8 K; the one cell in the open plaza: −17.4 K (inside). A person in the crown's
+  full shade (sunlit = τ) instead of the 5 m cell's mean sun: −10.4 K; with the neighbourhood ground view as well, −9.9 K.
+  Likely cause: the courtyards' reflected sun (the light walls' α_w 0.6), not the crown. Noticed after the first run: every palo
+  verde is centred on a cell corner, so no cell centre lies within its 3–3.5 m crown and the cells in its shade keep their open
+  (or courtyard) sky view (the crown factor counts by cell centre; 6 footprint cells in all); not changed.
+- **Band 9** (after sunset, under the sails +9.8, the ramada +9.5, the arcade +10.7, the mesquites
+  +7.9 K against 0 to +5 K): what is overhead at night at the engine's own leaf temperature (air − 0.5 K) instead of the
+  shared warm-wall term (air + 2 K), the shade cells run again: +8.5, +8.2, +9.3, +6.9 K; at a thin sheet's
+  own night temperature (sky above, its ground below, h_c on both faces: about 3.0 K below the air), run again:
+  +7.2, +7.0, +8.0, +5.8 K; the neighbourhood ground view: +9.5, +9.3, +10.6, +7.6 K.
+  None brings it inside. The ground under the sails is 3.2 K warmer than the open plaza at 21:00 (measured: shaded
+  ground 2.7–4.5 K cooler after sunset). Likely causes, not tested further: the crown factor hides three quarters of the night sky under
+  any screen or crown, and the open plaza sees the engine's clear, dry Brutsaert sky (Tmrt 28.5 °C at an air of 39.5 °C).
+- **Band 10** (a person on the coated street +3.37 K against +2.5 to +3.2 K): with the neighbourhood ground view (sidewalks,
+  yards and the cross street in view as well as the coated road) +3.06 K (inside). Likely cause: the one-cell ground view.
+
+### Acceptance bands
+
+At 15:00 (the brief's bands), "after sunset" 21:00, the open reference as above.
+
+| Check (spec #17) | Model | Band | Source | |
+|---|---|---|---|---|
+| 1. Sunlit open gravel at 15:00 (n 1593), °C | 65.92 °C | 55 to 63 | middel2021 | **outside** |
+| 1. Supplementary: the plaza's open gravel in full sun at 15:00 (n 663), °C | 65.67 °C | 55 to 63 | middel2021 | outside (supplementary, not counted) |
+| 2. Main Street coated − the same street bare at 15:00 (n 228 sunlit cells), K | -8.85 K | ≤ -5 | coolPave2024 | inside |
+| 2. Supplementary: the same at 12:00, K | -8.95 K | ≤ -5 | coolPave2024 | inside (supplementary, not counted) |
+| 2. Supplementary: Main Street coated − the cross street's bare asphalt at 15:00 (n 160), K | -8.78 K | ≤ -5 | coolPave2024 | inside (supplementary, not counted) |
+| 3. Irrigated lawn in full sun at 15:00 (n 748): surface − air, K | -1.55 K | ≤ 2 | middel2021 | inside |
+| 4. Irrigated lawn: water evaporated over the day, mean of the open lawn cells, mm (= L m⁻²) | 6.47 mm | 4.8 to 6.1 | az1195 | **outside** |
+| 4. Supplementary: the same, lowest cell, mm | 6.37 mm | 4.8 to 6.1 | az1195 | outside (supplementary, not counted) |
+| 4. Supplementary: the same, highest cell, mm | 6.52 mm | 4.8 to 6.1 | az1195 | outside (supplementary, not counted) |
+| 5. The plaza's open gravel in full sun at 15:00 (n 663): Tmrt, °C | 73.64 °C | 65 to 76 | middel2021 | inside |
+| 5. Supplementary: all sunlit open gravel at 15:00 (n 1593): Tmrt, °C | 74.00 °C | 65 to 76 | middel2021 | inside (supplementary, not counted) |
+| 5. Supplementary: the cross street's sunlit asphalt at 15:00: Tmrt, °C | 71.00 °C | 65 to 76 | middel2021 | inside (supplementary, not counted) |
+| 6. Under the shade sails at 15:00 (n 36): Tmrt − open sun, K | -22.86 K | -20 to -14 | middel2021 | **outside** |
+| 6. Under the ramada at 15:00 (n 12): Tmrt − open sun, K | -29.00 K | -20 to -14 | middel2021 | **outside** |
+| 6. Supplementary: under the café patio roof at 15:00 (n 10, concrete): Tmrt − open sun, K | -29.17 K | -20 to -14 | middel2021 | outside (supplementary, not counted) |
+| 7. Supplementary (by construction: the crown is calibrated to it): under the mesquites at 15:00 (n 36): Tmrt − open sun, K | -16.76 K | -20 to -14 | middel2021 | inside (supplementary, not counted) |
+| 7. Under the palo verdes at 15:00 (n 7; semi-constructed: the mesquite's calibrated crown): Tmrt − open sun, K | -8.81 K | -20 to -14 | middel2021 | **outside** |
+| 7. Supplementary (added after the first run): the palo verde cells in the courtyards (n 6): Tmrt − open sun, K | -7.37 K | -20 to -14 | middel2021 | outside (supplementary, not counted) |
+| 7. Supplementary (added after the first run): the palo verde cells in the open plaza (n 1): Tmrt − open sun, K | -17.44 K | -20 to -14 | middel2021 | inside (supplementary, not counted) |
+| 8. Under the arcade at 15:00 (n 32): Tmrt − open sun, K | -26.96 K | -31 to -20 | middel2021 | inside |
+| 9. After sunset (21:00), under the sails (n 48): Tmrt − the open plaza, K | 9.76 K | 0 to 5 | middel2021 | **outside** |
+| 9. After sunset (21:00), under the ramada (n 16): Tmrt − the open plaza, K | 9.52 K | 0 to 5 | middel2021 | **outside** |
+| 9. After sunset (21:00), under the arcade (n 33): Tmrt − the open plaza, K | 10.67 K | 0 to 5 | middel2021 | **outside** |
+| 9. After sunset (21:00), under the mesquites (n 45): Tmrt − the open plaza, K | 7.89 K | 0 to 5 | middel2021 | **outside** |
+| 9. Supplementary: after sunset, under the palo verdes (n 6), K | 6.94 K | 0 to 5 | middel2021 | outside (supplementary, not counted) |
+| 10. A person on Main Street at 15:00: Tmrt coated − bare, K | 3.37 K | 2.5 to 3.2 | coolPave2024 | **outside** |
+| 10. Supplementary: the same at 12:00, K | 5.29 K | 2.5 to 3.2 | coolPave2024 | outside (supplementary, not counted) |
+| Walkers at 15:00: density in shade over density in sun | 5.515 | ≥ 2 | melnikov | inside |
+| People dwelling at 15:00 (n 14) whose place is in shade | 1.000 | ≥ 0.5 | melnikov | inside |
+
+10 of 16 counted checks fall outside their band; 13 supplementary rows are not counted. By the brief's ten bands: 4 of 9 independent bands met (2, 3, 5, 8); missed: 1, 4, 6, 9, 10; band 7 semi-constructed (missed). Band 7's only counted row (the palo verdes) is semi-constructed: their crown is the mesquite's, calibrated to the measured −16.7 K (the mesquite row is by construction and supplementary), so band 7 does not test the model independently. They are reported, not tuned away: every other parameter value is the brief's central value (or the shared value the brief names), committed before the first band run.
+
+Misses:
+- **Band 1** (sunlit gravel 65.9 °C against 55–63 °C): likely the engine's strong clear-sky sun and the warmer design-day air (tested
+  above); stated on the lawn card.
+- **Band 4** (the lawn's water 6.47 mm against 4.8–6.1 mm, the target corrected to Kc 0.68): likely the fixed evaporative
+  fraction of a lawn wet every day (tested above); stated on the lawn card.
+- **Band 6** (sails −22.9 K, ramada −29.0 K): likely the sail's transmission and the one-cell ground view; for the
+  ramada, the band's scope (tested above); stated on the sails card.
+- **Band 7** (palo verdes −8.8 K, semi-constructed): likely the courtyards' reflected sun (tested above); stated on the sails card.
+- **Band 9** (after sunset +7.9 to +10.7 K): likely the crown factor and the dry night sky (the tests above
+  narrow it but do not close it); stated on the arcades card.
+- **Band 10** (+3.37 K): likely the one-cell ground view (tested above); stated on the coating card.
+
+### Disclosures
+
+- **Invented place:** no real neighbourhood, addresses or people; the street names are generic. The layout (plots, storeys, roofs,
+  the sails', ramada's and arcade's sizes and heights, which courtyards have a tree) is a design choice, committed with every parameter
+  value (commit 29ae537) before any model run; the mesquite crown was calibrated next (03e3d62), and the bands and cell classes were
+  committed (b6bd935) before the first band run.
+- **After the first band run:** two supplementary rows were added to band 7 (the palo verde cells in the courtyards and in the open), to
+  show where its miss comes from; they are not counted. Also noticed then, and not changed: the palo verdes stand on cell corners, so
+  the crown factor (sky view) applies to almost none of the cells in their shade (band 7 above). Drawing only, with no geometry or model input changed: the margin notes' label
+  offsets were moved so the five labels stay on screen at the opening view, and the coating layer was split at the cross street so it
+  is not drawn over the bare intersection. The card texts name the misses and their tested causes.
+- **Air fixed:** misters and the lawn do not cool the air; the patio's misters are drawn and quoted only; no wind from the streets, no
+  traffic or air-conditioner heat.
+- **Engine:** the shared warm-wall term (every wall and every screen or crown seen from below at air + 2 K, more in the sun; issue #28)
+  whatever its colour or shade; the person sees only their own cell's ground; h_c from the 1.5 m/s site wind with the shared formula
+  (issue #20); the engine's clear-sky sun, about 5–10% strong at noon by the brief; the lawn's EF is fixed (no response to the dry air,
+  no advection).
+- **Engine sun** (`sun.js`, issue #24): against suncalc at this site the sun differs by +0.15° in altitude and +0.13° in azimuth at 12:00, −0.04° in altitude and +0.27° in azimuth at 15:00: too small to move any band here.
+- **Thermal palette:** it tops out at 70 °C; the hottest surfaces here (the dark membrane roofs, up to 77.9 °C at 14:00) show in its top colour; the heat cards give the numbers.
+- **Health wording:** the heat-deaths card quotes the county's counts and its named risk factors, hedged, without advice beyond the
+  county's; nothing on it is modelled.
+
+## Block 12: night market street
+
+The twelfth block (`cities/nightmarket`) is an invented 400 m street in the manner of a subtropical city like Taipei, at
+25.09° N, 121.52° E on 15 July: air 27–34 °C (warmest at 15:00), vapour pressure 30 hPa, wind 1 m/s, a clear sky.
+Lantern Street is 20 m of granite paving between three- and four-storey shophouses with canvas awnings (north) and one- and two-storey
+shops (south); from 16:00 to midnight it is a night market: 77 stalls (11 charcoal grills, 11 wok stalls, 34 gas griddles and steamers, 21 drinks stalls) in a row down the
+street and in a food court on Temple Square, which opens off the street to the north, string lights, and a crowd that peaks from
+20:00 to 23:00. Two 5 m alleys between three-storey walls lead off the street. The page opens at 21:00. `Q` (the panel button or `?heat=1`)
+shows the heat given off by source; `M` (or `?market=0`) closes the market. Its research brief is
+[`docs/research/nightmarket-brief.md`](research/nightmarket-brief.md).
+
+### Block 12 parameters
+
+The paving is the shared stone (α 0.3, ε 0.92, admittance 1500, EF 0.05): the brief gives no granite values. The shop awnings are
+the block's one material (`marketAwning`, opaque, in the parameter table above, `@page nightmarket`). Roofs are the shared grey tile,
+membrane, aged cool roof and (on the one-storey shops) metal; the back streets the shared aged asphalt; the lanes the shared concrete.
+The block's own values live in `engine/market.js` (`NM`):
+
+| Parameter | Value |
+|---|---|
+| `lat` | 25.09 [engine] *engine assumption (no source)*, unverified (site latitude, ° N, a subtropical city like Taipei (about 25.0–25.1); longitude 121.52, time zone UTC+8, 15 July) |
+| `taMin` | 27 [cwaTaipei] *interpretation of the source*, unverified (the design day's coolest air, °C: about the July normal minimum of Taipei (not in the brief; from memory)) |
+| `taMax` | 34 [cwaTaipei] *interpretation of the source*, unverified (the design day's warmest air, °C (at 15:00, the shared hour): about the July normal maximum of Taipei (not in the brief; from memory). With it the air is about 31 °C at 21:00, close to the brief's worked example of 30 °C) |
+| `vapour` | 30 [brief12] *cited value*, unverified (vapour pressure, hPa: the brief's e_a 30 hPa for the Brutsaert sky (a humid subtropical night; dew point about 24 °C)) |
+| `wind` | 1 [brief12] *cited value*, unverified (site wind, m/s, the h_c input: the brief's 1 m/s (h_c 9.5 W m⁻² K⁻¹ with the shared formula, issue #20)) |
+| `hour` | 21 [brief12] *cited value*, unverified (the bands' evening hour, 21:00 (the brief's "stone 21 h")) |
+| `late` | 23 [brief12] *cited value*, unverified (a later evening hour quoted on the cards, 23:00 (the brief's stone target at 23:00)) |
+| `day` | 15 [engine] *engine assumption (no source)*, unverified (the walkers' check hour, 15:00 (the shared hour of the other blocks; the market is closed)) |
+| `opens` | 16 [travelTaipei] *interpretation of the source*, unverified (the market opens, clock hour: Shilin Night Market 16:00 (Taipei Travel via the brief; a tourism page, not a measurement, so tagged as an interpretation: timing for an invented market, no physical number rests on it)) |
+| `closes` | 24 [travelTaipei] *interpretation of the source*, unverified (the market closes, clock hour: midnight (24:00) (the same tourism page; an interpretation)) |
+| `peakFrom` | 20 [shilinWiki] *interpretation of the source*, unverified (start of the busiest hours: 20:00 (Wikipedia; guides say 19:00; a wiki and travel guides, so tagged as an interpretation)) |
+| `peakTo` | 23 [shilinWiki] *interpretation of the source*, unverified (end of the busiest hours: 23:00 (Wikipedia; guides say 22:00; an interpretation, as above)) |
+| `peak` | 1 [brief12] *cited range*, unverified (crowd density at the peak in the busiest aisles, people per m²: the brief's 1.0 (0.3–2.0, an assumption: no night-market measurement found)) |
+| `cap` | 1.5 [engine] *engine assumption (no source)*, unverified (the largest density allowed anywhere, people per m²: the spec's 1.5 (below the event limit of about 2)) |
+| `walk` | 210 [ashrae55] *cited value*, unverified (heat of a person walking slowly (0.9 m/s, about 2.0 met), W (ASHRAE 55 / ISO 8996 via the brief, from memory)) |
+| `stand` | 125 [ashrae55] *cited value*, unverified (heat of a person standing (about 1.2 met), W (as above)) |
+| `walkShare` | 0.5 [engine] *engine assumption (no source)*, unverified (share of the crowd walking (the rest standing at stalls), engine assumption) |
+| `sensible` | 0.4 [brief12] *cited range*, unverified (the share of body heat that warms the air directly at 30 °C (0.3–0.55, an assumption of the brief); quoted on the cards only) |
+| `lpg` | 8 [brief12] *cited range*, unverified (heat of a gas stall (griddle, steamer, fryer), kW of fuel: the brief's 8 (5–15, unverified)) |
+| `wok` | 32.5 [wokVendor] *cited range*, unverified (heat of a jet wok burner, kW: 28–37 (vendor data via the brief), the middle) |
+| `charcoal` | 12 [brief12] *cited range*, unverified (heat of a charcoal grill, kW of fuel: 8–16 (the brief, partly vendor data), the middle) |
+| `duty` | 0.5 [brief12] *cited value*, unverified (share of the time a gas stall burns: the brief's 0.5 (unverified); woks take the same) |
+| `coalDuty` | 1 [engine] *engine assumption (no source)*, unverified (share of the time a charcoal bed burns while open: 1 (a bed glows all evening), engine assumption) |
+| `coalArea` | 0.2 [brief12] *engine assumption (no source)*, unverified (area of a grill's coal bed, m²: the brief's 0.2 (an assumption)) |
+| `coalTemp` | 600 [brief12] *engine assumption (no source)*, unverified (temperature of the coal bed, °C: the brief's 600 (an assumption)) |
+| `coalEps` | 0.95 [engine] *engine assumption (no source)*, unverified (emissivity of the coal bed: 0.95, which reproduces the brief's +490 W m⁻² at 1 m (engine assumption)) |
+| `grillMin` | 0.5 [brief12] *cited value*, unverified (nearest distance in the point-source formula, m (the brief: d ≥ 0.5 m)) |
+| `grillMax` | 3 [brief12] *cited value*, unverified (the term is added in full within this distance of an open grill, m (the spec: ≤ 3 m)) |
+| `grillTaper` | 4 [engine] *engine assumption (no source)*, unverified (the term fades out by a cosine taper from the distance above to zero at this one, m (engine choice, so there is no step at 3 m; review of PR #33)) |
+| `keepAway` | 1.5 [engine] *engine assumption (no source)*, unverified (the crowd keeps at least this far from a grill's coals, m (engine assumption; the cooks stand nearer)) |
+| `vendorAt` | 0.9 [engine] *engine assumption (no source)*, unverified (where a cook stands, m from the stall's centre (engine assumption)) |
+| `lights` | 0.6 [brief12] *cited range*, unverified (heat of the string lights over the street and the square when on, W m⁻²: LED strings 0.2–1 (the brief, unverified), the middle) |
+| `figures` | 260 [engine] *engine assumption (no source)*, unverified (figures drawn for the market's crowd at its peak (each stands for many people; engine choice)) |
+| `warm` | 6 [engine] *engine assumption (no source)*, unverified (coarse 10-min spin-up days (block 3's opts.warm, with its stability guard); convergence is tested on 1-min days as everywhere) |
+
+### What is new in the engine (all other blocks pixel-identical)
+
+- **A scene's opening hour**, `scene.startHour` (default 15:00): this page opens at 21:00. No other scene sets it.
+- Nothing else in the shared engine is new. The model run keeps the ground heat flux G (block 6's `opts.flux`) to check the stone's
+  release against the model's own budget; the awnings are block 5's flat screens (the cells under them take the crown factor for the
+  sky view); the people near a grill carry a point Tmrt, as block 9's waiting people do; the crowd joins the walkers through the
+  block's plugin, as block 10's rooftop people do. The crowd, the stalls, the lights and the grills never enter the model.
+
+### Places (cell classes)
+
+By geometry only, defined before the first band run. Surface temperature (°C, and above the air, K), the stone's net release
+Q = ε(σT_s⁴ − L↓) + h_c(T_s − T_a) with L↓ = SVF·L_sky + (1 − SVF)·σT_w⁴ as in the model (W m⁻², radiated + to the air), the model's own −G,
+the gross emission εσT_s⁴ and Tmrt (°C, and against the air, K). Air 34.0 / 31.4 / 29.8 °C at 15:00 / 21:00 / 23:00.
+
+| Place | cells | SVF | 15:00 | 21:00 | 23:00 | Q 21:00 | −G 21:00 | εσT⁴ 21:00 | Tmrt 21:00 |
+|---|---|---|---|---|---|---|---|---|---|
+| the open square (sky view ≥ 0.85, outside the food court) | 71 | 0.90 | 58.7 | 34.7 (+3.3) | 33.3 (+3.4) | 95 (63 + 32) | 95 | 469 | 29.0 (−2.4) |
+| all of Temple Square | 320 | 0.77 | 56.1 | 34.6 (+3.3) | 33.2 (+3.4) | 86 (55 + 31) | 86 | 468 | 29.6 (−1.7) |
+| Lantern Street, open aisle (y 195–200) | 80 | 0.78 | 59.4 | 35.6 (+4.3) | 34.0 (+4.2) | 102 (61 + 41) | 102 | 474 | 30.1 (−1.3) |
+| under the awnings (y 185–190) | 63 | 0.14 | 35.2 | 32.4 (+1.1) | 31.5 (+1.6) | 13 (3 + 10) | 13 | 455 | 32.1 (+0.8) |
+| the stall row (y 190–195) | 80 | 0.76 | 59.3 | 35.4 (+4.0) | 33.9 (+4.0) | 96 (58 + 38) | 97 | 473 | 30.1 (−1.3) |
+| the south side (y 200–205) | 80 | 0.63 | 60.1 | 36.3 (+5.0) | 34.7 (+4.8) | 104 (57 + 47) | 104 | 479 | 31.3 (−0.1) |
+| all of Lantern Street | 320 | 0.62 | 54.7 | 35.1 (+3.7) | 33.6 (+3.8) | 83 (48 + 35) | 83 | 471 | 30.7 (−0.6) |
+| the narrow alleys (5 m, three-storey walls) | 30 | 0.23 | 42.0 | 33.7 (+2.3) | 32.6 (+2.8) | 38 (16 + 22) | 38 | 463 | 32.3 (+0.9) |
+
+The model's own budget agrees: at night the stone has no sun and no evaporation (EF acts only on a positive net radiation), so
+−G = Q; the stored surface temperature is a minute later than the step that gives G, hence the small gap (band 2's supplementary row).
+
+### Heat given off (the Q overlay)
+
+Shown, not felt: the air temperature is fixed, so none of this warms the air or changes a surface or a person's Tmrt here. Per 5 m
+cell: the stone (radiated and to the air, from the model), the crowd ρ_p·M (M = 0.5 × 210 + 0.5 × 125 = 167.5 W; ρ_p the peak
+1 m⁻² × the hour's share × the place's weight: busy aisles 1, the stall row 0.5, the south side 0.6, the food court 0.8, the rest of
+the square 0.3, the alleys 0.2; capped at 1.5), the stalls (P·duty over the 25 m² cell: gas 4.0 kW, woks 16.25 kW,
+charcoal 12.0 kW), the lights (0.6 W m⁻² over the street and the square from sunset to midnight). Means, W m⁻²:
+
+| Where | stone, radiated | stone, to the air | crowd | stalls | lights | total |
+|---|---|---|---|---|---|---|
+| Lantern Street, 21:00 | 48 | 35 | 130 | 45 | 0.6 | 258 |
+| Lantern Street, 23:00 | 47 | 36 | 130 | 45 | 0.6 | 258 |
+| Temple Square, 21:00 | 55 | 31 | 80 | 11 | 0.6 | 177 |
+
+The street's 358.25 kW of stalls over its 8000 m² come to 45 W m⁻² (the brief's estimate: about 60 W m⁻² for 60 stalls × 8 kW × 0.5
+over 400 m × 10 m). The crowd's sensible share (0.4) is quoted on the cards; the overlay shows the whole metabolic heat.
+
+### The crowd over the evening
+
+ρ_p in the busy aisles (weight 1), people per m², and their heat, W m⁻²:
+
+| Hour | 0:00 | 15:00 | 16:00 | 17:00 | 18:00 | 19:00 | 20:00 | 21:00 | 22:00 | 23:00 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| ρ_p | 0.00 | 0.00 | 0.00 | 0.15 | 0.50 | 0.85 | 1.00 | 1.00 | 1.00 | 1.00 |
+| ρ_p·M | 0 | 0 | 0 | 25 | 84 | 143 | 168 | 168 | 168 | 168 |
+
+260 figures are drawn at the peak (each stands for about 39 people): strollers on six lanes of the street,
+customers in front of a stall (a new stall every minute) and people walking the food court, plus one cook behind each stall,
+0.9 m from its centre. From 16:00 to midnight nobody but the cooks comes nearer than 2.12 m to a grill's coals (the rule:
+1.5 m); the cooks of the grill stalls stand 0.90–0.91 m from them, and every one of them (1760 of 1760 samples) carries a Tmrt
+of 65 °C or more, so they show the sweat cue. Walkers at 15:00 (the market closed): density in shade over density in sun 3.45;
+100% of the 12 people dwelling are in shade.
+
+### The grill's radiant term
+
+The brief's illustrative point source, added to the Tmrt of a point (a person drawn, a heat card's cell centre), never to the grid:
+ΔS = ε_c·σ·(T_c⁴ − T_b⁴)·A_c / (4πd²), d ≥ 0.5 m, summed over the open grills, in full within 3 m and times a cosine taper
+(1 + cos(π(d − 3) / 1))/2 down to zero at 4 m (so a person walking away meets no step at 3 m; band 5 still
+reads the full term at 3 m), T_b the air, Tmrt' = (Tmrt⁴ + ΔS/σ)^¼.
+At 21:00 on the stall row (Tmrt 30.1 °C):
+
+| d, m | 0.5 | 0.9 | 1 | 1.5 | 2 | 2.5 | 3 | 3.25 | 3.5 | 3.75 | 4 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| ΔS, W m⁻² | 1964 | 606 | 491 | 218 | 123 | 79 | 55 | 40 | 20 | 5 | 0 |
+| Tmrt, °C | 182.5 | 98.8 | 88.5 | 59.9 | 47.9 | 41.8 | 38.4 | 36.2 | 33.2 | 30.9 | 30.1 |
+| ΔTmrt, K | 152.4 | 68.7 | 58.5 | 29.8 | 17.8 | 11.7 | 8.3 | 6.1 | 3.1 | 0.8 | 0.0 |
+
+The brief: about +490 W m⁻² at 1 m (Tmrt about 88 °C) and about +120 at 2 m (about 48 °C). Without the taper the term would fall
+below 5 K at 3.89 m.
+
+### Sensitivity
+
+One change at a time (docs only; nothing shipped changes). The stone's cells run again (no lateral coupling); the drier sky runs the
+whole block. At 21:00: the open aisle's stone − air (K) and net release, the open square's and the alleys' net release (W m⁻²), Tmrt − air
+on the open square and in the alleys (K):
+
+| Case | aisle T_s − T_a | aisle Q | square Q | alleys Q | square Tmrt − T_a | alleys Tmrt − T_a |
+|---|---|---|---|---|---|---|
+| shipped | +4.3 | 102 | 95 | 38 | −2.4 | +0.9 |
+| stone α 0.2 (cited 0.20–0.40) | +5.1 | 115 | 107 | 41 | −2.0 | +1.0 |
+| stone α 0.4 (cited 0.20–0.40) | +3.4 | 89 | 82 | 35 | −2.8 | +0.8 |
+| stone admittance 1065 (brick) | +2.7 | 78 | 72 | 30 | −3.1 | +0.7 |
+| stone admittance 2220 (solid stone) | +6.2 | 132 | 122 | 47 | −1.5 | +1.2 |
+| site wind 1.5 m/s (h_c 11.4) | +3.4 | 95 | 88 | 36 | −2.8 | +0.7 |
+| direct sun 7% weaker (the engine's noon sun is likely a few per cent strong) | +3.9 | 96 | 89 | 37 | −2.6 | +0.9 |
+| vapour pressure 25 hPa (a drier sky) | +3.8 | 102 | 95 | 38 | −3.5 | +0.6 |
+
+The overlay over the street at 21:00 (W m⁻²; arithmetic on the shipped model):
+
+| Case | crowd | stalls | lights |
+|---|---|---|---|
+| shipped | 130 | 45 | 0.6 |
+| peak density 0.3 | 39 | 45 | 0.6 |
+| peak density 2.0 (capped at 1.5) | 218 | 45 | 0.6 |
+| gas stalls 5 kW | 130 | 40 | 0.6 |
+| gas stalls 15 kW | 130 | 56 | 0.6 |
+| charcoal 8 kW, woks 28 kW | 130 | 38 | 0.6 |
+| charcoal 16 kW, woks 37 kW | 130 | 52 | 0.6 |
+| filament lights 5 W m⁻² | 130 | 45 | 5.0 |
+
+The grill term (ΔTmrt, K, at 1 / 2 / 3 m; the brief gives no range for the coal bed, so these are illustrative):
+
+| Case | 1 m | 2 m | 3 m |
+|---|---|---|---|
+| shipped (0.2 m², 600 °C) | +58.5 | +17.8 | +8.3 |
+| coal bed 0.1 m² | +33.0 | +9.3 | +4.2 |
+| coal bed 500 °C | +39.1 | +11.2 | +5.1 |
+| coal bed 700 °C | +81.4 | +26.4 | +12.6 |
+
+### Causes of the misses (docs-only runs, after the first band run)
+
+Nothing shipped changes.
+
+- **Band 5** (the grill term at 3 m +8.3 K against < 5 K): the brief's own formula with its own coal bed (0.2 m² at 600 °C, ε 0.95) gives
+  491 W m⁻² at 1 m, its "about +490", and 55 W m⁻² at 3 m, +8.3 K on the stall row's Tmrt: the two statements of the brief do
+  not agree, and the term falls below 5 K only at 3.89 m. So the miss is the formula's (tested): an isotropic point source with
+  nothing in the way, an upper bound; a smaller or cooler bed would meet it (sensitivity above). Not tuned.
+- **The awnings' net release** (a supplementary row, 13 W m⁻² against 30–150): the brief's own formula at the awnings' sky view
+  (0.14) and surface (+1.1 K above the air), walls and canvas at air + 2 K, gives 13 W m⁻² (at a sky view of 0.4 and +2 K,
+  43: the brief's 42). With what the awning cells see overhead and around at the air temperature after dark, run again:
+  6 W m⁻² (surface +0.6 K above the air). The band is for an open street; under a canvas that hides most of the sky
+  the stone keeps its heat, as the brief's "lower at low SVF" says.
+
+### Acceptance bands
+
+At 21:00 (the brief's "stone 21 h"); the places as above.
+
+| Check (spec #15) | Model | Band | Source | |
+|---|---|---|---|---|
+| 1. Stone − air at 21:00, the open square (n 71), K | 3.34 K | 1 to 6 | brief12 | inside |
+| 1. Supplementary: the same, the street's open aisle (n 80), K | 4.28 K | 1 to 6 | brief12 | inside (supplementary, not counted) |
+| 1. Supplementary: the same, under the awnings (n 63), K | 1.06 K | 1 to 6 | brief12 | inside (supplementary, not counted) |
+| 1. Supplementary: the same, the narrow alleys (n 30), K | 2.35 K | 1 to 6 | brief12 | inside (supplementary, not counted) |
+| 1. Supplementary: the same, the stall row (n 80), K | 3.99 K | 1 to 6 | brief12 | inside (supplementary, not counted) |
+| 1. Supplementary: the same, the street's south side (n 80), K | 4.97 K | 1 to 6 | brief12 | inside (supplementary, not counted) |
+| 1. Supplementary: the same at 23:00, the street's open aisle, K | 4.18 K | 1 to 6 | brief12 | inside (supplementary, not counted) |
+| 2. Net release at 21:00, the open square, W m⁻² | 94.68 W m⁻² | 30 to 150 | brief12 | inside |
+| 2. Net release at 21:00, the street's open aisle, W m⁻² | 102.10 W m⁻² | 30 to 150 | brief12 | inside |
+| 2. Net release at 21:00, the narrow alleys, W m⁻² | 38.17 W m⁻² | 30 to 150 | brief12 | inside |
+| 2. Lower at a low sky view: the narrow alleys − the open square, W m⁻² | -56.51 W m⁻² | ≤ 0 | brief12 | inside |
+| 2. Supplementary: net release at 21:00, under the awnings, W m⁻² | 13.22 W m⁻² | 30 to 150 | brief12 | outside (supplementary, not counted) |
+| 2. Supplementary: net release at 23:00, the street's open aisle, W m⁻² | 99.24 W m⁻² | 30 to 150 | brief12 | inside (supplementary, not counted) |
+| 2. Supplementary: the model's own budget, −G − Q at 21:00 on the open square, W m⁻² | 0.25 W m⁻² | — (reported) | brief12 | reported (supplementary, not counted) |
+| 3. Gross emission at 21:00, the open square, W m⁻² | 468.63 W m⁻² | 430 to 500 | brief12 | inside |
+| 3. Gross emission at 21:00, the street's open aisle, W m⁻² | 474.34 W m⁻² | 430 to 500 | brief12 | inside |
+| 3. Supplementary: the stone's coolest surface at 21:00 (square and street), °C | 34.27 °C | 28 to 38 | brief12 | inside (supplementary, not counted) |
+| 3. Supplementary: the stone's warmest surface at 21:00 (square and street), °C | 35.99 °C | 28 to 38 | brief12 | inside (supplementary, not counted) |
+| 4. Tmrt − air at 21:00, the open square (sky view 0.90), K | -2.40 K | -6 to 2 | brief12 | inside |
+| 4. Tmrt − air at 21:00, the street's open aisle (sky view 0.78), K | -1.27 K | -6 to 2 | brief12 | inside |
+| 4. Tmrt − air at 21:00, under the awnings (sky view 0.14), K | 0.77 K | -6 to 2 | brief12 | inside |
+| 4. Tmrt − air at 21:00, the narrow alleys (sky view 0.23), K | 0.92 K | -6 to 2 | brief12 | inside |
+| 4. Higher at a low sky view: the narrow alleys − the open square, K | 3.32 K | ≥ 0 | brief12 | inside |
+| 4. Supplementary: under the awnings − the open square, K | 3.17 K | ≥ 0 | brief12 | inside (supplementary, not counted) |
+| 5. Grill term at 3 m (the stall row's Tmrt at 21:00), K | 8.28 K | ≤ 5 | brief12 | **outside** |
+| 5. ∝ 1/d² (by construction): the term at 1 m over the term at 2 m, W m⁻² over W m⁻² | 4.000 | 4 | brief12 | inside |
+| 5. Zero when closed (by construction): the largest term next to a grill outside the opening hours or with the market closed, W m⁻² | 0.00 W m⁻² | 0 | brief12 | inside |
+| 5. Zero from 4 m on (by construction; a cosine taper from 3 to 4 m): the term at 4 m, W m⁻² | 0.00 W m⁻² | 0 | brief12 | inside |
+| 5. Supplementary: the tapered term at 3.5 m (the stall row's Tmrt at 21:00), K | 3.12 K | — (reported) | brief12 | reported (supplementary, not counted) |
+| 5. Supplementary: Tmrt 1 m from a grill at 21:00 (the brief: about 88 °C), °C | 88.53 °C | — (reported) | brief12 | reported (supplementary, not counted) |
+| 5. Supplementary: Tmrt 2 m from a grill at 21:00 (the brief: about 48 °C), °C | 47.86 °C | — (reported) | brief12 | reported (supplementary, not counted) |
+| 5. Supplementary: distance where the uncut term falls below 5 K, m | 3.89 m | — (reported) | brief12 | reported (supplementary, not counted) |
+| 6. Crowd heat = ρ_p × M (by construction): largest absolute difference over the market cells, every 15 min, W m⁻² | 0.00 W m⁻² | 0 to 1e-9 | brief12 | inside |
+| 7. Density ≤ 2 (by construction): largest anywhere, any time, people per m² | 1.00 m⁻² | 0 to 2 | crowdLimits | inside |
+| 7. Zero before 16:00 and after midnight (by construction): largest crowd, stall or light value outside the hours or closed | 0.000 | 0 | travelTaipei | inside |
+| 8. Overlays leave the model bit-identical (by construction): changed Ts, Tmrt or stored values | 0.000 | 0 | brief12 | inside |
+| 9. Overlay total = sum of its parts (by construction): largest absolute difference, W m⁻² | 0.00 W m⁻² | 0 to 1e-6 | brief12 | inside |
+| Walkers at 15:00: density in shade over density in sun | 3.453 | ≥ 2 | melnikov | inside |
+| People dwelling at 15:00 (n 12) whose place is in shade | 1.000 | ≥ 0.5 | melnikov | inside |
+| Supplementary (by construction): the crowd's nearest approach to a grill's coals, 16:00–24:00, m | 2.12 m | ≥ 1.5 | brief12 | inside (supplementary, not counted) |
+
+1 of 23 counted checks fall outside their band; 17 supplementary rows are not counted. By the brief's bands: 4 of 5 independent bands met (1, 2, 3, 4); missed: 5; bands 6–9 check the overlays' bookkeeping by construction (4 of 4 met). Band 5's ∝ 1/d², closed and from-4-m rows are by construction too; its 3 m row is the one that tests the brief's numbers. They are reported, not tuned away: every parameter value is the brief's central value (or the shared value the brief names), committed before the first band run.
+
+Misses:
+- **Band 5** (the grill term at 3 m +8.3 K): the brief's formula and coal bed give it (tested above); stated on the grill card with its number.
+- Supplementary, outside its band: the awnings' net release 13 W m⁻² (the sky view of 0.14, tested above); stated on the stone card.
+
+### Disclosures
+
+- **Invented place:** no real street, addresses, stalls or vendors; the names (Lantern Street, Temple Square, Well Alley, Lamp Alley)
+  are generic. The layout (plots, storeys, awnings, the stall row and the food court, the stall types, the alleys) and every parameter
+  value were committed (commit 9c2ad47) before any model run of the bands; the bands and places were committed (d3d1f47) before the first
+  band run.
+- **After the first band run:** drawing and wording only, with no geometry or model input changed: four margin notes' label offsets
+  were moved so the five labels stay on screen at the opening view, the crowd note was shortened, and the grill card names the tested
+  cause of band 5. A helper bug in the docs' crowd statistics (the cooks' distance counted under 0.6 m instead of under 1.2 m) was
+  fixed; it changes no band row. The docs-only runs of the misses' causes were added.
+- **Air fixed:** the crowd, the stalls and the lights are shown (Q), not felt: they do not warm the air, the stone or a person. Only the
+  grills' radiant term reaches a person, at points, illustrative and an upper bound. No smoke, no air quality, no food safety.
+- **The site** (taMin, taMax) is a Taipei-like July day from memory (not in the brief, unverified); every band is relative to the air.
+- **The paving** is the atlas's shared stone (no granite values in the brief; solid granite is denser, sensitivity above).
+- **Crowd density and timing** are invented (no night-market measurement found); the awnings, the stalls and the crowd's bodies are not
+  in the sky view (the brief: Tmrt likely 0.5–1 K too cool under them); stalls are drawn, not shade.
+- **Engine:** the shared warm-wall term (every wall and the awnings seen from below at air + 2 K at night; issue #28); a person sees only
+  their own cell's ground (issue #28); h_c from the 1 m/s site wind with the shared formula (issue #20); the stone's stored heat comes from
+  the engine's clear-sky sun, likely a few per cent strong at noon (sensitivity above).
+- **Engine sun** (`sun.js`, issue #24): against suncalc at this site the sun differs by +0.11° in altitude and +1.80° in azimuth at 12:00, −0.08° in altitude and +0.21° in azimuth at 15:00.
+- **No measured night data** for any real night-market street was found (the brief); the bands compare with the brief's physics.

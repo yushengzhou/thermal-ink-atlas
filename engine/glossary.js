@@ -6,13 +6,13 @@
 //                  (materials.js SOURCES), or
 //   model(stats) - values computed from this model at load (glossaryStats),
 //                  shown as "In this model" so they cannot go stale.
-import { cellMat } from './thermal.js';
+import { cellMat, isWater } from './thermal.js';
 
 export const GLOSSARY = {
   albedo: {
     term: 'Albedo (α)',
     text: 'The share of sunlight a surface reflects: 0 absorbs everything, 1 reflects everything.',
-    range: 'Fresh asphalt 0.05, aged asphalt 0.12–0.15, grass 0.16–0.26, new white roof 0.65 or more.',
+    range: 'Fresh asphalt about 0.05, aged asphalt about 0.12 ± 0.03 (after about 5 years), grass 0.16–0.26, new white roof 0.65 or more.',
     src: 'lbnl, brief',
     why: 'Each extra 0.1 of albedo turns away roughly 100 W/m² of midday sun, so dark surfaces run far hotter.',
   },
@@ -58,22 +58,22 @@ export const GLOSSARY = {
     why: 'Hot surfaces warm the air above them and radiate heat onto people nearby.',
   },
   tmrt: {
-    term: 'Mean radiant temperature (Tmrt)',
-    text: 'One number for all the sunshine and infrared heat falling on a standing person from every direction.',
-    model: (S) => `At 3 pm: ${S.tmrtShade} °C in building shade, ${S.tmrtSun} °C on sunlit ground (5th–95th percentile).`,
-    why: 'It shapes how hot it feels outdoors more than air temperature does.',
+    term: 'Radiant heat on you (mean radiant temperature, Tmrt)',
+    text: 'One number for all the sunshine and the heat from hot ground and walls falling on a standing person from every direction. In the sun it runs far above the air temperature, because it counts the sunshine on your body, not the air around you. It is not the "feels like" of a weather app, which also takes in the air, humidity and wind: a drop of 20 degrees in radiant heat feels like a much smaller drop than 20 degrees.',
+    model: (S) => S.tmrtLine ?? `At 3 pm: ${S.tmrtShade} °C in building shade, ${S.tmrtSun} °C on sunlit ground (5th–95th percentile).`,
+    why: 'Out in the sun it decides how hot you feel more than the air does; shade takes most of it away.',
   },
   forceRestore: {
-    term: 'Force-restore model (simulation)',
-    text: 'A simple surface energy balance (Deardorff 1978): sun, sky and air heat each 5 m cell, and a deep-ground term pulls it back toward its daily mean (thin metal roofs have no deep term).',
-    model: (S) => `5 m grid, 1-minute steps, the design day repeated ${S.days} times until it settles.`,
-    why: 'It captures daytime heating and night lag cheaply enough to run in your browser. All temperatures here are modelled, not measured.',
+    term: 'How the temperatures are calculated',
+    text: 'Nobody measured this block. Your browser works out, minute by minute, how much the sun, the sky and the air warm or cool each patch of ground and each roof, using values from published measurements. Stone and soil store heat and give it back at night; a thin metal sheet does not.',
+    model: (S) => `In 5 m squares, minute by minute, over the same hot day run ${S.days} times until it settles (a "force-restore" surface model, Deardorff 1978).`,
+    why: 'It shows the day heating up and the night cooling down slowly. Every temperature here is calculated, not measured.',
   },
   nightLag: {
     term: 'Thermal inertia / night lag',
     text: 'Heavy materials store heat during the day and release it after sunset, so they stay warm into the night.',
     model: (S) => S.lagLine,
-    why: 'Night lag keeps cities warm at night, when people most need to cool down.',
+    why: 'So the street is still above the air temperature at 11 pm, while the lawn has dropped below it.',
   },
   coolRoof: {
     term: 'Cool roof',
@@ -135,10 +135,10 @@ export const GLOSSARY = {
     range: 'Sky view factor at the centre of a long canyon: 1/√(1 + (2H/W)²), i.e. 0.45 at H/W 1, 0.24 at 2, 0.16 at 3, 0.10 at 5. Oke (1981): calm-night urban–rural air difference about 7.45 + 3.97 ln(H/W) K (secondary source).',
     src: 'brief3, oke1981',
     why: 'Deep canyons shade the street by day but see little cold sky at night, so they cool slowly after dark.',
-    scenes: ['glass-cbd'],
+    scenes: ['glass-cbd', 'hutong'],
   },
   lowE: {
-    term: 'Low-e glass',
+    term: 'Coated (low-e) glass',
     text: 'Glass with a thin metal-oxide coating that keeps out much of the sun’s heat (solar control) and holds in indoor heat (low emissivity on the coated face).',
     range: 'Solar reflectance about 0.15–0.35 head-on; Singapore caps glass daylight reflectance at 20%.',
     src: 'brief3, bca',
@@ -152,6 +152,253 @@ export const GLOSSARY = {
     src: 'xie2016, sailor2011',
     why: 'It warms the street air; this model holds the air temperature fixed, so the heat is shown but not felt.',
     scenes: ['glass-cbd'],
+  },
+  // ---- block 4 (waterfront) -------------------------------------------------
+  windFactor: {
+    term: 'Wind factor (f_w)',
+    text: 'How much of the open-site wind reaches a spot: 1 in the open, lower in the lee of buildings, a little above 1 in streets that point along the wind. Here it is a geometric rule (shelter × channelling), not a flow simulation.',
+    model: (S) => S.windLine,
+    why: 'More wind carries heat off a sunlit pavement faster and makes a hot day feel cooler; it does not change the air temperature here.',
+    scenes: ['waterfront'],
+  },
+  ventilationCorridor: {
+    term: 'Ventilation corridor',
+    text: 'A wide, open street or green strip that lines up with the prevailing wind, so the breeze (here, off the river) can run into the city.',
+    range: 'Planning guides ask for corridors within about 30° of the prevailing wind; along the Ota River (Hiroshima) river cooling was detected 150–500 m inland along streets perpendicular to the river (not yet checked).',
+    src: 'corridor, ota',
+    why: 'Streets across the wind are sheltered by the buildings upwind; corridors keep the wind moving.',
+    scenes: ['waterfront'],
+  },
+  fetch: {
+    term: 'Fetch',
+    text: 'The distance the wind has travelled over a surface. Air that has just crossed water carries a little of its coolness for a short fetch over land, then mixes with the city air.',
+    range: 'River Don, Sheffield: about 30 m with open banks; Cheonggyecheon, Seoul: 30–80 m; small water bodies: −0.2 K typical in the afternoon.',
+    src: 'hathway2012, cheonggyecheon, jacobs2020',
+    why: 'The cooling of the air by water fades within tens of metres, so it helps the promenade, not the streets behind.',
+    scenes: ['waterfront'],
+  },
+  sheltering: {
+    term: 'Sheltering (lee)',
+    text: 'The slow, gusty zone downwind of a building, where the wind is much weaker than in the open and recovers only gradually.',
+    range: 'Recirculation behind a building about 1.6–2.6 times its width; recovery to the open wind after about 5 building heights is an assumption of this model.',
+    src: 'wake, brief4',
+    why: 'A sheltered sunlit pavement loses less heat to the air, so it runs hotter than an exposed one.',
+    scenes: ['waterfront'],
+  },
+  apparentTemp: {
+    term: 'Apparent temperature',
+    text: 'A feels-like temperature from air temperature, humidity, wind and the extra radiation a person absorbs (Steadman 1994). Used here as a simple stand-in for UTCI.',
+    range: 'AT = Ta + 0.348 e − 0.70 ws + 0.70 Q/(ws + 10) − 4.25 (e in hPa, ws the 10 m wind in m/s, Q in W m⁻²; as given by the Australian Bureau of Meteorology).',
+    src: 'bom, steadman1994',
+    why: 'It lets the walkers weigh a breeze against shade: both make a hot afternoon feel cooler.',
+    scenes: ['waterfront'],
+  },
+  // ---- block 5 (hutong) -----------------------------------------------------
+  siheyuan: {
+    term: 'Siheyuan (四合院)',
+    text: 'A courtyard house: four single-storey houses (the main house, two side houses and a gate house) around a paved yard, entered from the lane through a gate in one corner.',
+    model: (S) => S.courtLine,
+    why: 'Walls on all four sides shade the edges of the yard; the rest needs trees, vines or an awning. Measured courtyards can hold air a few degrees cooler than the lane, which this model does not simulate.',
+    scenes: ['hutong'],
+  },
+  tianpeng: {
+    term: 'Tianpeng (天棚), the summer mat awning',
+    text: 'A shed of reed mats on poles built over a Beijing courtyard each summer, higher than the eaves, with side mats that roll up to let the air through.',
+    range: 'Reed mats let through about 10–30% of the sun (not yet checked); this model uses 20%.',
+    src: 'deng, brief5',
+    why: 'It shades the whole courtyard at midday, when the low walls give almost no shade.',
+    scenes: ['hutong'],
+  },
+  waterStore: {
+    term: 'Surface water store (W)',
+    text: 'The water left lying on the paving after a splash, in millimetres (1 mm is 1 litre per square metre). While it lasts it evaporates, and the heat that takes comes out of the paving.',
+    model: (S) => S.waterLine,
+    why: 'Only water that is there can cool: when the store runs dry, the cooling stops.',
+    scenes: ['hutong'],
+  },
+  wetBulb: {
+    term: 'Wet-bulb temperature',
+    text: 'The temperature a wet surface cools to when evaporation alone sets it, from the air temperature and humidity: the drier the air, the further below the air it lies.',
+    model: (S) => S.wetBulbLine,
+    why: 'Splashed paving cannot get colder than this by evaporating, so it bounds how much a splash can cool.',
+    scenes: ['hutong', 'desert'],
+  },
+  // ---- block 6 (car park and brownfield) -------------------------------------
+  heatStorage: {
+    term: 'Heat storage',
+    text: 'Heat a surface soaks down into its own material by day and gives back after dark. Thick, dense paving stores a lot; a thin metal sheet almost none.',
+    model: (S) => S.storageLine,
+    why: 'Stored heat is why a car park stays warm long after sunset, while a tin roof is cold within the hour.',
+    scenes: ['parking'],
+  },
+  dampingDepth: {
+    term: 'Damping depth (d)',
+    text: 'How deep the daily swing of the surface temperature reaches into the ground: at depth d it is down to about a third, at 3d to a twentieth. d = √(κτ/π), κ the thermal diffusivity and τ one day.',
+    model: (S) => S.dampingLine,
+    why: 'A slab much thicker than d holds a full day\'s heat; thin paving over loose stone holds less, so it runs hotter by day and cooler at night.',
+    scenes: ['parking'],
+  },
+  groundFlux: {
+    term: 'Ground heat flux (G)',
+    text: 'The heat going into the ground through its surface (positive) or coming back out (negative), in watts per square metre. The night-release strokes draw it.',
+    model: (S) => S.fluxLine,
+    why: 'At night G is the heat the pavement keeps feeding to its surface, so the surface cannot cool down to the air.',
+    scenes: ['parking'],
+  },
+  thermalInertia: {
+    term: 'Thermal inertia',
+    text: 'How slowly a surface changes temperature when its heating changes: high for thick, dense materials (asphalt, concrete), low for loose or thin ones (soil, ballast, sheet metal). Measured here by the admittance μ.',
+    model: (S) => S.inertiaLine,
+    why: 'High-inertia surfaces lag behind the sun: they peak late and stay warm into the night.',
+    scenes: ['parking'],
+  },
+  // ---- block 7 (older high-rise estate) ---------------------------------------
+  sunlightRule: {
+    term: 'Midwinter sunlight rule (大寒日)',
+    text: 'The Chinese planning rule that every home gets a minimum of direct sun at its ground-floor window on the Great Cold day (大寒, about 20 January), counted from 08:00 to 16:00 solar time at the sill.',
+    range: 'GB 50180-2018: at least 2 h on 大寒 in zones I, II, III and VII for cities of 500,000 or more (3 h in smaller ones); flats for the elderly 2 h on the winter solstice (冬至); new homes in old-area renovation 1 h on 大寒 (table values not checked against the standard, not yet checked). The draft of the Zhejiang rules (DB33/1050, now the 2016 edition): only stretches of 10 min or more count, steps of at most 5 min, the point 0.9 m above the floor.',
+    src: 'gb50180, db33',
+    why: 'It sets how far apart the slab rows stand, and it is written for the winter sun: the same spacing leaves the courtyards open to the high summer sun.',
+    scenes: ['estate'],
+  },
+  effectiveHeight: {
+    term: 'Effective height (H_eff)',
+    text: 'The height of the building that shades a window, measured from the window sill of the ground floor behind it: roof height minus (ground-floor level + 0.9 m).',
+    range: '18 floors of 2.9 m with the ground floor at grade: 52.2 − 0.9 = 51.3 m.',
+    src: 'brief7, db33',
+    why: 'The rule protects the lowest window, so the spacing scales with the height above that window, not with the height above the ground.',
+    scenes: ['estate'],
+  },
+  spacingCoefficient: {
+    term: 'Spacing coefficient (G / H_eff)',
+    text: 'The clear distance between two rows of east-west slabs divided by the effective height of the southern row: a quick way to meet the sunlight rule for long, parallel slabs.',
+    range: 'At 35° N for long slabs: 1.45 for 1 h, 1.47 for 2 h and 1.52 for 3 h of 大寒 sun; 1.64–1.74 on the winter solstice (a worked estimate). The coefficient method is "no longer appropriate" for high-rises in the draft of the Zhejiang rules (DB33/1050).',
+    src: 'brief7, db33',
+    why: 'At 1.47 the July noon shadow covers only about a sixth of the courtyard.',
+    scenes: ['estate'],
+  },
+  condenserHeat: {
+    term: 'Condenser heat rejection',
+    text: 'The heat an air conditioner\'s outdoor unit blows out: the heat taken from the flat plus the electricity used to move it, Q_rej = Q_cool (1 + 1/EER).',
+    range: 'A 3.5 kW split unit with EER 3.3 rejects about 4.6 kW; at 0.5–0.7 m³/s of fan air that is 5.5–7.5 K above the air (a worked estimate). Measured in Changsha: exhaust 5.2 K above the air by day, 6.5 K at night (Mu et al. 2025).',
+    src: 'brief7, mu2025',
+    why: 'Stacked on a façade, hundreds of units put tens of watts per square metre of site into the air, most of it in the evening.',
+    scenes: ['estate'],
+  },
+  eer: {
+    term: 'EER (energy efficiency ratio)',
+    text: 'Cooling delivered per unit of electricity used, in W/W: an EER of 3.3 moves 3.3 kW of heat out of the flat for every 1 kW of power.',
+    range: 'Split air conditioners about 3–4; this block uses 3.3.',
+    src: 'brief7',
+    why: 'A lower EER means more heat out of the condenser for the same cooling, and the hotter the air at the condenser, the lower the EER.',
+    scenes: ['estate'],
+  },
+  // ---- block 8 (campus) -------------------------------------------------------
+  artificialTurf: {
+    term: 'Artificial turf',
+    text: 'A pitch of green plastic blades standing in a bed of loose infill, usually black crumb rubber (SBR) and sand, on a shock pad. It needs no water or mowing and can be played on all year.',
+    range: 'In summer sun 65–80 °C, at times over 85 °C: 9.4–34 K hotter than natural grass at the surface, but only 0.5–1.2 K warmer in the air above (review of 23 studies); at night it cools to about the grass temperature.',
+    src: 'singh2024, jim2016',
+    why: 'Grass spends sunshine on evaporating water; dry plastic and rubber cannot, and they hold little heat, so they get very hot by day and cool fast at night.',
+    scenes: ['campus'],
+  },
+  crumbRubber: {
+    term: 'Crumb-rubber infill',
+    text: 'Black granules ground from old tyres (styrene-butadiene rubber, SBR), spread between the turf blades to cushion and steady them; some pitches use paler TPE or cork instead.',
+    range: 'Lab tests: SBR 53.5 °C against TPE 45.6 °C under the same lamp; a shock pad adds about 1.8 K, the blade colour 1–2 K.',
+    src: 'singh2024',
+    why: 'It is the darkest part of the pitch and it is dry: most of the heat of artificial turf sits in it.',
+    scenes: ['campus'],
+  },
+  contactBurn: {
+    term: 'Contact-burn threshold',
+    text: 'The surface temperature at which touching a hot surface with bare skin starts to burn it, for a given material and contact time (ISO 13732-1). Metal conducts heat into the skin fastest, so its limit is lowest.',
+    range: '1 min of contact: metal 51 °C, ceramics, glass and stone 56 °C, plastics and wood 60 °C; 10 min: 48 °C for all of them; 8 h: 43 °C. From 1 min on these apply to children too (CENELEC Guide 29).',
+    src: 'iso13732',
+    why: 'Children sit, kneel and slide on play surfaces for longer than a minute, so the 10-minute limit of 48 °C is the one that matters, and a surface "only" at 60 °C can burn them.',
+    scenes: ['campus'],
+  },
+  shadeSail: {
+    term: 'Shade sail',
+    text: 'A sheet of knitted plastic cloth (HDPE) stretched between posts a few metres above a play area or a seating area.',
+    range: 'Lets through about 10–30% of the sun (not yet checked); Gilbert, Arizona at noon: rubber 46.7 °C under a sail against 87.2 °C in sun; Lubbock: 168 W m⁻² less radiation absorbed by a child.',
+    src: 'brief8, vanos2016, vanos2017',
+    why: 'It is the quickest shade a school can add; unlike a tree it does not cool the air by evaporation, and after sunset it holds a little warmth over the ground.',
+    scenes: ['campus', 'desert'],
+  },
+  // ---- block 9 (busstop) -------------------------------------------------------
+  transmittance: {
+    term: 'Solar transmittance (τ)',
+    text: 'The share of direct sunlight that passes through a roof sheet, a screen or a pane: 0 for an opaque sheet, 1 for nothing in the way.',
+    range: '10 mm twinwall polycarbonate: clear 0.80, opal 0.47, bronze 0.43 (a datasheet, not yet checked); opaque metal, PV and ad panels 0; the solar heat gain coefficient of a window is a different number.',
+    src: 'brettMartin, brief9',
+    why: 'A see-through roof keeps the rain off but lets most of the sun through to the people under it.',
+    scenes: ['busstop'],
+  },
+  profileAngle: {
+    term: 'Profile angle (φ)',
+    text: 'The sun\'s height seen edge-on to a façade or a shelter side: tan φ = tan(sun height) / cos(sun azimuth − the side\'s facing direction).',
+    range: 'At 35° N on 20 July the sun stands 61° high at 14:00 and 25° at 17:00, from the west-south-west to the west; a roof 1.45 m above a seated head must reach (that height) / tan φ past the head to shade it.',
+    src: 'brief9',
+    why: 'When the sun is low and to the side, a roof edge casts its shade far from where people stand; a vertical screen on that side shades right behind it.',
+    scenes: ['busstop'],
+  },
+  headway: {
+    term: 'Headway',
+    text: 'The time between two buses of a route at a stop.',
+    range: 'Here 10 min (an assumption, 5–15 min), with gaps spread by a coefficient of variation of 0.4 (0.3–0.5, not yet checked); riders who arrive at random then wait (h / 2)(1 + cv²) on average.',
+    src: 'brief9, fan2002',
+    why: 'The longer and the less regular the gap between buses, the longer people stand at the stop in the heat.',
+    scenes: ['busstop'],
+  },
+  heatDose: {
+    term: 'Heat dose of a wait',
+    text: 'This page\'s own measure of how much heat a wait brings: the minutes waited times how far the apparent temperature (with the sun\'s radiation) is above 32 °C, summed minute by minute (K·min).',
+    range: 'No standard dose exists for a few minutes of waiting; its definition uses UTCI, which this engine does not compute, so the apparent temperature stands in.',
+    src: 'brief9, bom',
+    why: 'It adds up how long and how hot: a short wait in the sun and a long wait in the shade can come out alike.',
+    scenes: ['busstop'],
+  },
+  burnThreshold: {
+    term: 'Contact-burn threshold (benches, rails, decks)',
+    text: 'The surface temperature at which touching it with bare skin starts to burn, for a material and a contact time (ISO 13732-1). Metal conducts heat into the skin fastest, so its limit is lowest.',
+    range: '1 min of contact: metal 51 °C, ceramics, glass and stone 56 °C (concrete read with them), plastics and wood 60 °C; 10 min: 48 °C; bare metal burns in about 1 s at 65–70 °C (not yet checked).',
+    src: 'iso13732, brief9',
+    why: 'A hand on a sunlit handrail or bare legs on a metal bench meet the hottest metal of the street; from 1 min of contact the limits apply to children too, and for short touches it is safer to read at least 4 s for older people and children.',
+    scenes: ['busstop'],
+  },
+  // ---- block 10 (village) ------------------------------------------------------
+  urbanVillage: {
+    term: 'Urban village (城中村)',
+    text: 'A former farming village that a growing city has surrounded. The villagers kept their housing plots and built them up into rooms and flats to rent, often to people who have moved to the city for work.',
+    range: 'In Shenzhen, satellite surface heat islands of about 3.5 K over high-density urban villages, against 2.6 K for multi-storey and 1.6 K for high-rise housing; urban villages had the worst summer thermal-humidity index in one Shenzhen study.',
+    src: 'wu2015, yi2022, brief10',
+    why: 'Dense, low-cost housing close to work: its narrow lanes keep out much of the sun by day, and keep people from cooling off under the open night sky.',
+    scenes: ['village'],
+  },
+  handshakeBuilding: {
+    term: 'Handshake building (握手楼)',
+    text: 'A house built to the very edge of its plot, so close to the next one that neighbours could almost shake hands from window to window across the lane.',
+    range: 'Lanes about 1–3 m wide between walls 18–25 m high: a sky view of about 0.04–0.16 at the lane floor (canyon formula).',
+    src: 'brief10',
+    why: 'Such deep, narrow lanes are shaded for much of the day but see little sky, so a person in one loses little heat to the cold night sky after sunset.',
+    scenes: ['village'],
+  },
+  indoorRadiant: {
+    term: 'Indoor radiant temperature (proxy)',
+    text: 'How warm a room under a sheet roof feels from its surfaces: the ceiling, which is the roof itself, takes a share F_r of the view, the walls the rest. Here it is a proxy computed from the roof\'s temperature, not a simulation of the room.',
+    range: 'Measured rooms under tin roofs: 0.6–4 K above the outdoor air (Delhi, Yavatmal, Ahmedabad); white paint on tin cooled the room by about 1 K, other cool roofs 2.0–2.4 K.',
+    src: 'tasgaonkar2022, vellingiri2020, brief10',
+    why: 'A hot ceiling radiates onto the people below it even when the room\'s air is only a little warmer than outside.',
+    scenes: ['village'],
+  },
+  heatVulnerability: {
+    term: 'Heat vulnerability',
+    text: 'Who is most likely to be harmed by heat: it comes from exposure (a hot room, outdoor work) together with what people have to cope with it (cooling, rest, care, health), not from who they are.',
+    range: 'China, 66 communities: +5.0% deaths on heat-wave days (2.9–7.2%), more among older people, women and in dense communities; in India about 5–8% of households had an air conditioner (2020–24).',
+    src: 'ma2015, carbonBriefAc, brief10',
+    why: 'The same heat wave weighs most on people whose rooms are hottest and who can least afford to cool them.',
+    scenes: ['village'],
   },
   // ---- block 2 (sponge-retrofit) --------------------------------------------
   permeablePaving: {
@@ -189,7 +436,7 @@ export const GLOSSARY = {
   bowen: {
     term: 'Bowen ratio and evaporative fraction',
     text: 'Two ways to describe how much of a surface’s energy goes into evaporating water. In this model the evaporative fraction (EF) is the share of the positive net radiation spent on evaporation (EF × max(Q*, 0)). The Bowen ratio, used in field studies, is sensible heat ÷ latent heat; if heat stored in the ground is ignored, EF ≈ 1 ÷ (1 + Bowen ratio).',
-    range: 'Green roofs: Bowen ratio below 1 to about 2 in field data; this block uses EF 0.5 for a wet and 0.25 for a dry green roof (the brief’s values); dry paving EF near 0.',
+    range: 'Green roofs: Bowen ratio below 1 to about 2 in field data; this block uses EF 0.5 for a wet and 0.25 for a dry green roof (values chosen for this block); dry paving EF near 0.',
     src: 'heusinger, brief2',
     why: 'The more energy goes into evaporation, the less is left to heat the surface.',
     scenes: ['sponge-retrofit'],
@@ -209,6 +456,70 @@ export const GLOSSARY = {
     src: 'ko2022, chicago',
     why: 'A retrofit judged by its brand-new albedo overstates the cooling people will get over its life.',
     scenes: ['sponge-retrofit'],
+  },
+  xeriscape: {
+    term: 'Xeriscape',
+    text: 'A garden or yard planned to need little or no watering: gravel or crushed granite instead of a lawn, with desert plants and trees.',
+    range: 'In Phoenix neighbourhoods, xeric yards were the warmest by day, then "oasis" yards, then fully watered (mesic) ones; by day the form of a neighbourhood mattered more than its landscaping.',
+    src: 'middel2014, brief11',
+    why: 'It saves a great deal of water, but bare gravel in the sun gets hot: the shade has to come from trees, sails or roofs instead.',
+    scenes: ['desert'],
+  },
+  ramada: {
+    term: 'Ramada',
+    text: 'An open-sided shelter: a solid roof on posts, without walls, the usual shade in desert parks and playgrounds.',
+    range: 'Sails, umbrellas and similar light shade lowered the radiant heat on a person by about 17 K in Tempe; arcades and overhangs by about 23–31 K.',
+    src: 'middel2021, colter2019, brief11',
+    why: 'Shade from a roof needs no water; the air moves freely beneath it.',
+    scenes: ['desert'],
+  },
+  referenceEt: {
+    term: 'Reference evapotranspiration (ET₀)',
+    text: 'The water a well-watered short grass would evaporate in a day under the local weather, in millimetres (1 mm is 1 litre per square metre). A real crop uses ET₀ times its crop coefficient.',
+    range: 'Phoenix in July about 7–9 mm a day (up to 10); bermudagrass watered every day uses about 0.78 of it, watered every 3 days about 0.68, so about 5–6 L per m² a day.',
+    src: 'azmet, az1195, brief11',
+    why: 'It is what a lawn costs in water: in a desert summer, several litres per square metre every day.',
+    scenes: ['desert'],
+  },
+  vapourPressure: {
+    term: 'Vapour pressure (e_a)',
+    text: 'How much water vapour the air holds, as the part of the air pressure it makes up, in hectopascals (hPa).',
+    range: 'Desert summer air about 8–15 hPa (dew point 3–13 °C); a humid summer city 25–30 hPa.',
+    src: 'ncei, azmet, brief11',
+    why: 'Dry air makes a colder night sky and strong evaporation, so lawns, misters and sweat cool well, but only while there is water.',
+    scenes: ['desert'],
+  },
+  // ---- block 12 (night market street) ----------------------------------------------
+  netLongwave: {
+    term: 'Net longwave (infrared) loss',
+    text: 'Every surface sends out invisible infrared heat and takes some back from the sky and the walls around it; the difference is what it really loses. Warm stone under a clear night sky loses a lot, under an awning or in a narrow alley much less.',
+    model: (S) => S.netLwLine,
+    why: 'After sunset this, with the warm air rising off it, is how paving gives back the heat it stored by day.',
+    scenes: ['nightmarket'],
+  },
+  metabolicRate: {
+    term: 'Metabolic rate (met)',
+    text: 'The heat a body makes, in "met": 1 met is 58.2 watts per square metre of skin, about 105 W for an adult sitting still.',
+    range: 'Standing about 1.2 met (about 125 W), walking slowly about 2 met (about 210 W).',
+    src: 'ashrae55',
+    why: 'A packed crowd of about one person per square metre gives off as much heat as warm paving at night.',
+    scenes: ['nightmarket'],
+  },
+  anthropogenicHeat: {
+    term: 'Anthropogenic heat',
+    text: 'Heat that people add to a place: from engines, air conditioners, cooking fires, lights and their own bodies.',
+    range: 'Whole cities usually 20–70 W m⁻², more in dense centres; a night market\'s stalls about 60 W m⁻² over the street, several kW over a stall.',
+    src: 'sailor2011, brief12',
+    why: 'It warms the air of a street; this page keeps the air temperature fixed, so it is shown but not felt.',
+    scenes: ['nightmarket'],
+  },
+  sensibleLatent: {
+    term: 'Sensible and latent heat',
+    text: 'Sensible heat warms the air directly; latent heat leaves as water vapour (from sweat or breath) and warms the air only where the vapour condenses again.',
+    range: 'People at about 26 °C: about 73 W sensible and 59 W latent each in a shop; at 30 °C only about 40% of a body\'s heat is sensible.',
+    src: 'ashraeRetail, brief12',
+    why: 'On a warm night most of a crowd\'s heat goes into the air as moisture, which makes it feel muggy rather than hotter.',
+    scenes: ['nightmarket'],
   },
 };
 
@@ -234,7 +545,7 @@ export function glossaryStats(world, thermal, extra = {}) {
   for (let i = 0; i < N; i++) {
     if (world.bld[i] >= 0) continue;
     const m = cellMat(world, i);
-    if (m === 'water') continue;
+    if (isWater(m)) continue;
     const s = thermal.sunlit(i, 15);
     if (s > 0.95) sun.push(thermal.tmrt(i, 15));
     else if (s < 0.05 && world.canopy[i] === 0) shade.push(thermal.tmrt(i, 15));
@@ -268,6 +579,12 @@ export function glossaryStats(world, thermal, extra = {}) {
     out.svfLine = `Street-level ground ${r2(q(ground, 0.1))}–${r2(q(ground, 0.9))}; Silk Lane floor ${r2(c.svf)} (an endless canyon of the same H/W: ${r2(c.svfCanyon)}).`;
     out.lagLine = `At 5 am the Silk Lane floor is ${r1(c.lag05)} °C warmer than an open stone surface (walls fixed at air + 2 K at night, an engine assumption).`;
   }
+  if (extra.wind) {
+    const w = extra.wind;
+    out.windLine = `Over the river ${r2(w.river)}; along Quay Street ${r2(w.corridor)}; Rope Walk, behind the warehouses, ${r2(w.shelter)} (mean), ${r2(w.lee)} within one building height of the wall.`;
+  }
+  if (extra.hutong) Object.assign(out, extra.hutong);
+  if (extra.parking) Object.assign(out, extra.parking);
   if (extra.spot) {
     const s = extra.spot;
     out.spotLine = `At 3 pm with ${s.glassName}: Tmrt ${r0(s.tmrtSpotShade)} °C in shaded spots vs ${r0(s.tmrtShade)} °C in plain shade and ${r0(s.tmrtSun)} °C in sun.`;
