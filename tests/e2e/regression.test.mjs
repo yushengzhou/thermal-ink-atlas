@@ -16,7 +16,9 @@
 // instead of "feels like" and avoid the page's panels, the bar and each other
 // (leaders drawn under the boxes), long shadows are clipped to the board, and the
 // title box changed height (so bottom overlay labels may sit elsewhere); probe
-// values equal on all 65 cases. Both pages run in the same browser here, so
+// values equal on all 65 cases. Busstop and desert were refreshed again from
+// adb137c (urbanist re-check of #33): the stop-A, footbridge and sail labels
+// changed wording; probe values equal on all their 13 cases. Both pages run in the same browser here, so
 // the comparison does not depend on the platform.
 // A deliberate change to these blocks must refresh the fixtures: commit the
 // rebuilt pages, then `npm run fixtures` (gzips them from HEAD) and commit.

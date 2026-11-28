@@ -11,7 +11,9 @@
 // only the label strip moved, probes and notes equal). All eleven were refreshed
 // again from 8bf78e3 (outside evaluation of #33: radiant-heat wording in the notes,
 // note placement, board-clipped shadows, the title box; probes equal on all 65
-// cases). Earlier origins: blocks 1-3 8e76f7a, 4 189b7e1, 5 40b5366,
+// cases). Busstop and desert were refreshed again from adb137c (urbanist re-check of
+// #33: map labels for stop A, the footbridges and the sails; probes equal).
+// Earlier origins: blocks 1-3 8e76f7a, 4 189b7e1, 5 40b5366,
 // 6 577a750, 7 1e292a5, 8 8735385, 9 de54f2a, 10 f751d00.
 import { execFileSync } from 'node:child_process';
 import { writeFileSync, mkdirSync } from 'node:fs';
