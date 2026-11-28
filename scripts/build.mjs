@@ -243,14 +243,16 @@ export function ownSources(city, keys = pageParts(city).keys) {
  */
 /**
  * The shared core's budget, bytes per page (tests/unit/build.test.mjs). Set at
- * 290,000 B while blocks 7-12 were still to come; raised to 295,000 B in the
- * outside-evaluation pass (#29), whose shared page furniture (the bar's heat
- * and hour buttons, the loading hint, the phone layout, the foldable panels,
- * the plain-words heat card with its closed expert part) belongs in the core
- * on purpose. All twelve blocks are built and the largest page is under
- * 400 KB of the 500 KB limit.
+ * 290,000 B while blocks 7-12 were still to come; raised to 300,000 B in the
+ * outside-evaluation pass (#29), whose shared page parts (the bar's heat and
+ * hour buttons, the loading hint, the phone layout, the foldable panels, the
+ * plain-words heat card with its closed expert part, notes kept on the
+ * canvas, lit windows behind nearer roofs, the glass block's patch outline
+ * and façade colours in the renderer) belong in the core on purpose: the core
+ * went from 282,913-286,762 B to 291,174-294,943 B. All twelve blocks are
+ * built and the largest page is 392 KB of the 500 KB limit.
  */
-export const CORE_BUDGET = 295000;
+export const CORE_BUDGET = 300000;
 
 export function coreBytes(city) {
   const size = Buffer.byteLength(read(`cities/${city}/index.html`));
