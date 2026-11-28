@@ -29,6 +29,10 @@
   #legendBar { height: 12px; border: 1px solid #2b2621; margin: 4px 0 2px; }
   #legend .ends { display: flex; justify-content: space-between; font-size: 12px; white-space: nowrap; }
   #legend .cap { font-size: 11px; opacity: .7; margin-top: 2px; }
+  #legend .hand,#legend .vs{display:flex;justify-content:space-between;gap:6px;font-size:11px}
+  #scaleBtn{font:11px inherit;font-family:inherit;padding:1px 6px;border:1px solid #2b2621;border-radius:3px 6px 3px 5px;background:#fbf7ee;color:#2b2621;cursor:pointer}
+  #legendTicks{position:relative;height:14px;font-size:11px}#legendTicks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+  #legend.abs #legendTicks,#legend.abs .vs,#legend.abs #legendAir,#legend:not(.abs) .ends{display:none}
   #card { display: none; position: fixed; z-index: 5; width: 350px; max-height: calc(100vh - 20px); overflow: auto; box-sizing: border-box; padding: 12px 14px; background: #fbf7ee; border: 1.5px solid #2b2621;
     border-radius: 4px 10px 5px 9px; box-shadow: 3px 4px 0 rgba(43,38,33,.2); font-size: 13px; }
   #card h3 { margin: 0 0 2px; font-size: 17px; }
@@ -97,7 +101,8 @@
   <p class="plain">__PLAIN__</p>
   <details class="site"><summary>For experts</summary><p>__SUBTITLE__</p></details>
 </div>
-<div id="legend"><div class="hand"><span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">surface temperature</span></div><div id="legendBar"></div>
+<div id="legend"><div class="hand"><span><span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">surface temperature</span><span id="legendVs"> minus the air</span></span><button type="button" id="scaleBtn" aria-pressed="false" title="colour by absolute surface temperature instead">°C scale</button></div><div id="legendBar"></div>
+  <div id="legendTicks"></div><div class="vs"><span>← cooler than the air</span><span>hotter than the air →</span></div><div id="legendAir"></div>
   <div class="ends"><span id="legendLo"></span><span id="legendHi"></span></div>
   <div class="cap">Calculated for a made-up block, not measured (<span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">how</span>).</div></div>
 <div id="bar">

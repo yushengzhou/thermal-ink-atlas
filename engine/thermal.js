@@ -1201,11 +1201,29 @@ export const PALETTE_STOPS = [
   [70, '#7e4038'],
 ];
 
-const STOP_RGB = PALETTE_STOPS.map(([t, c]) => [t, hexRgb(c)]);
+// Default heat view (#36): surface minus air (K). Paper within ~1 K of the air,
+// blue below, amber -> cinnabar above, darker both ways; limits: docs/sources.md.
+export const DT_STOPS = [
+  [-8, '#2b4060'],
+  [-5, '#3b6573'],
+  [-2.5, '#6f958f'],
+  [-1, '#c2cbc6'],
+  [0, '#e9e1cb'],
+  [1, '#e6d9bd'],
+  [5, '#dcb987'],
+  [12, '#d3965f'],
+  [20, '#b96d4d'],
+  [27, '#9e5040'],
+  [34, '#7e4038'],
+  [40, '#62332f'],
+];
 
-/** Palette colour [r,g,b] for a temperature in deg C. */
-export function heatRgb(t) {
-  const s = STOP_RGB;
+const rgbStops = (st) => st.map(([t, c]) => [t, hexRgb(c)]);
+const STOP_RGB = rgbStops(PALETTE_STOPS);
+const DT_RGB = rgbStops(DT_STOPS);
+
+/** Colour [r,g,b] at t on [[t, rgb]] stops, clamped. */
+function rampRgb(s, t) {
   if (t <= s[0][0]) return s[0][1].slice();
   for (let k = 1; k < s.length; k++) {
     if (t <= s[k][0]) {
@@ -1218,12 +1236,17 @@ export function heatRgb(t) {
   return s[s.length - 1][1].slice();
 }
 
-/** Lookup table: 1 entry per 0.25 C across the palette, for pixel inversion. */
-export function paletteLut() {
+/** Colour [r,g,b] for a temperature in deg C (absolute 18-70 C scale). */
+export const heatRgb = (t) => rampRgb(STOP_RGB, t);
+
+/** Colour [r,g,b] for surface minus air, d in K. */
+export const dtRgb = (d) => rampRgb(DT_RGB, d);
+
+/** Read-back table [deg C, rgb] per 0.25 step: absolute, or with air given the ΔT scale keyed by air + ΔT. */
+export function paletteLut(air) {
+  const st = air == null ? PALETTE_STOPS : DT_STOPS;
   const out = [];
-  for (let t = PALETTE_STOPS[0][0]; t <= PALETTE_STOPS[PALETTE_STOPS.length - 1][0]; t += 0.25) {
-    out.push([t, heatRgb(t).map(Math.round)]);
-  }
+  for (let t = st[0][0]; t <= st.at(-1)[0]; t += 0.25) out.push([(air ?? 0) + t, (air == null ? heatRgb(t) : dtRgb(t)).map(Math.round)]);
   return out;
 }
 

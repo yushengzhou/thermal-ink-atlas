@@ -4,7 +4,7 @@
 // function of (frame, camera, look); caches only skip repeated work. The one
 // exception is the scrub preview during a slider drag (see previewHours).
 import { iso, hash3, noise2, clamp, smooth, rgbCss, mixRgb, scaleRgb, hexRgb, PAPER, INK, ISO_C, ISO_S, ISO_Z, DEG } from './core.js';
-import { shadowPolys, heatRgb } from './thermal.js';
+import { shadowPolys, heatRgb, dtRgb } from './thermal.js';
 import { sweatState, shadeAt } from './life.js';
 
 export const TILE = 512;
@@ -127,6 +127,7 @@ export class Renderer {
     this.pins = {}; // mode -> Set of `z|hour|dpr` the scrub preview needs
     this.clip = null; // [x0, x1] device px: draw only this vertical band (split view)
     this.glass = 'lowe'; // glass type (block 3): pane colours
+    this.dt = true; // heat view: surface minus air (#36), or false: absolute
     this.spotFor = null; // (hq) -> reflection spot field on the 2 m grid, or null (block 3)
     this.wind = null; // block 4: {lines, items} wind lines (wind.js windLines + pen.stream items)
     this.flux = null; // block 6: (hq) -> [{x, y, z, g}] ground heat flux samples (parking.js fluxSamples)
@@ -147,6 +148,19 @@ export class Renderer {
     this.hourCache.clear();
     this.tmrtCache = null;
     this.scaffold = null;
+  }
+
+  /** Heat view colour of t deg C at hour hq. */
+  heatOf(t, hq) {
+    return this.dt ? dtRgb(t - this.thermal.air(hq)) : heatRgb(t);
+  }
+
+  /** Heat view scale; drops the heat bakes. */
+  setScale(dt) {
+    if (this.dt === dt) return;
+    this.dt = dt;
+    for (const hc of this.hourCache.values()) hc.heatImg = null;
+    for (const k of [...this.tiles.keys()]) if (k.startsWith('thermal|')) this.tiles.delete(k);
   }
 
   /** New model results (days since rain changed): drop heat-dependent caches. */
@@ -307,7 +321,7 @@ export class Renderer {
         const sh = sample(ground, wx + jx, wy + jy);
         const so = sample(soft, wx, wy);
         const t = so + (sh - so) * 0.9;
-        const c = heatRgb(t);
+        const c = this.heatOf(t, hc.hq);
         const edge = 1 - Math.min(0.08, Math.abs(sh - so) * 0.012);
         const pig = 1 - 0.035 * noise2(wx / 3.5, wy / 3.5, 33);
         const k = (y * M + x) * 4;
@@ -438,13 +452,13 @@ export class Renderer {
     if (mode === 'thermal') {
       if (it.t === 'g' || it.t === 'gm') return null;
       if (it.t === 'slab') return scaleRgb(THERMAL_WALL, 0.85);
-      if (it.t === 'r' || it.t === 'rd') return it.b >= 0 ? heatRgb(hc.roof[it.b]) : null;
+      if (it.t === 'r' || it.t === 'rd') return it.b >= 0 ? this.heatOf(hc.roof[it.b], hc.hq) : null;
       if (it.t === 'tree') return null;
       if (it.t === 'car') return null; // block 6: parked cars are outlines over the wash (not modelled)
       if (it.t === 'win') return null;
       const n = f.n ?? [0, 1];
       // block 3 (#29 item 7): a glass face takes the colour of its own surface temperature
-      if (f.k === 'glass' && this.thermal.glassTemp) return scaleRgb(heatRgb(this.thermal.glassTemp(n[0] ? 'E' : 'S', hc.hq)), n[0] ? 0.92 : 1);
+      if (f.k === 'glass' && this.thermal.glassTemp) return scaleRgb(this.heatOf(this.thermal.glassTemp(n[0] ? 'E' : 'S', hc.hq), hc.hq), n[0] ? 0.92 : 1);
       return scaleRgb(THERMAL_WALL, n[0] ? 0.9 : 1);
     }
     if (Array.isArray(f)) return f;
