@@ -379,7 +379,10 @@ function filmPage(W, H) {
       // the heat view's scale (#36): surface minus the air, ticks and the air at the hour from the page's own legend
       const ticks = [...this.doc.querySelectorAll('#legendTicks span:not(.m)')].map((e) => [parseFloat(e.style.left) / 100, e.textContent]); // the phone's ticks: room for the labels
       const air = this.A.probes().air;
-      return { stops, ticks, air };
+      // block 3: the page's legend adds "glass façades: calculated"
+      const lw = this.doc.querySelector('#legend .lw');
+      const glass = !!lw && this.doc.defaultView.getComputedStyle(lw, '::after').content !== 'none';
+      return { stops, ticks, air, glass };
     },
     /** Draw film frame `s` (see frameSpec) into base and out. */
     render(s) {
@@ -497,7 +500,8 @@ function filmPage(W, H) {
       const w = 400;
       const x = W - 56 - w;
       const hasLeg = mix > 0;
-      const h = (hasLeg ? 270 : 86) + (o.state ? 34 : 0);
+      const L0 = hasLeg ? this.legend() : null;
+      const h = (hasLeg ? 270 + (L0.glass ? 22 : 0) : 86) + (o.state ? 34 : 0);
       this.card(g, x, 52, w, h);
       g.fillStyle = INK;
       g.font = `600 30px ${SERIF}`;
@@ -515,7 +519,7 @@ function filmPage(W, H) {
         g.fillText(o.state, x + 22, 52 + h - 16);
       }
       if (hasLeg) {
-        const L = this.legend();
+        const L = L0;
         g.globalAlpha = o.a * Math.min(1, mix * 1.5);
         const bx = x + 22;
         const bw = w - 44;
@@ -556,9 +560,9 @@ function filmPage(W, H) {
         g.font = `14px ${SERIF}`;
         g.fillStyle = 'rgba(43,38,33,.75)';
         g.fillText('blue side stretched: small cooling shows', bx, by + 124);
-        g.fillStyle = '#cec4d4';
+        g.fillStyle = '#a0a0a0';
         g.fillRect(bx, by + 136, 20, 12);
-        g.strokeStyle = '#8f8a91';
+        g.strokeStyle = '#6e6e6e';
         g.lineWidth = 1;
         g.save();
         g.beginPath();
@@ -578,6 +582,12 @@ function filmPage(W, H) {
         g.font = `14px ${ZH}`;
         g.textAlign = 'right';
         g.fillText('墙面未计算', bx + bw, by + 147);
+        if (L.glass) {
+          g.fillText('玻璃幕墙：已计算', bx + bw, by + 169);
+          g.font = `14px ${SERIF}`;
+          g.textAlign = 'left';
+          g.fillText('glass façades: calculated', bx, by + 169);
+        }
       }
       g.restore();
     },
