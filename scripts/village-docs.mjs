@@ -2,6 +2,7 @@
 // generated from the code and model runs (scripts/village.mjs).
 import { BASIS, MATERIALS } from '../engine/materials.js';
 import { VG, laneSvf } from '../engine/village.js';
+import { DT_STOPS } from '../engine/thermal.js';
 import { base10, bands10, bandVerdicts, sensitivity10, causes10, walkers10, sheetRun, sunCheck10, VG_NOTES } from './village.mjs';
 
 const f1 = (x) => (Math.round(x * 10) / 10).toFixed(1);
@@ -283,7 +284,7 @@ Misses:
   floor; no measured albedo for rusty iron, asbestos cement or tarpaulin (the brief's assumptions).
 - **Indoor values are proxies:** the radiant proxy treats the ceiling as black at the roof's temperature; the air figure is
   illustrative, calibrated to the brief's band (so that band is by construction) and capped at ±5 K; the room under a concrete slab is not computed.
-- **Thermal palette:** the default heat view (surface minus air, issue #36) tops out at +40 K, 75 °C at 15:00 (air 35 °C), so rusty iron at
+- **Thermal palette:** the default heat view (surface minus air, issue #36) tops out at +${DT_STOPS.at(-1)[0]} K, ${f1(T.air(15) + DT_STOPS.at(-1)[0])} °C at 15:00 (air ${f1(T.air(15))} °C), so rusty iron at
   15:00 (${f1(st.edge.rustTin.ts15)} °C) keeps its own colour; the sheets near their daily peak (up to
   ${f1(Math.max(...Object.values(st.edge).filter(Boolean).map((r) => r.peak)))} °C) may reach the top colour. The absolute scale (the legend's °C toggle) tops
   out at 70 °C, so there both show in the top colour; the heat cards give the numbers.

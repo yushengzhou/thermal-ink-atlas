@@ -335,9 +335,12 @@ ${Object.entries(SOURCES).map(([k, v]) => `- **[${k}]** ${v}`).join('\n')}
 
 Drawing only: no model value depends on it. By default (issue #36) the heat view colours each surface by **ΔT = Ts − Ta(t)**,
 its difference from the page's own air temperature at the hour shown, on a diverging scale from −${-DT_STOPS[0][0]} K to +${DT_STOPS.at(-1)[0]} K:
-paper-toned at 0 K (within about ±1 K), Prussian blue / blue-green below the air, amber → cinnabar above it. Lightness is highest at
-0 K and falls steadily both ways, so the order also reads in grey and with colour-vision deficiencies (checked in
-\`tests/unit/thermal.test.mjs\` with the Machado et al. 2009 deuteranopia, protanopia and tritanopia simulations). Colour stops (K):
+paper-toned at 0 K (within about ±1 K), Prussian blue / blue-green below the air, amber → cinnabar above it. **Lightness shows how
+far a surface is from the air, hue shows which side**: lightness is highest at 0 K and falls steadily both ways, so in grey alone the
+sign is lost (block 1 at 15:00: the pond, −5 K, and sunlit asphalt, +29 K, have about the same lightness, L* 40 and 38). The
+blue-versus-amber/red hue carries the sign, and that difference survives the Machado et al. 2009 deuteranopia, protanopia and
+tritanopia simulations (checked in \`tests/unit/thermal.test.mjs\`: lightness order on each side, and colour differences between
+the block 1 surfaces). Colour stops (K):
 ${DT_STOPS.map(([d, c]) => `${d > 0 ? '+' : d < 0 ? '−' : ''}${Math.abs(d)} ${c}`).join(' · ')}.
 
 The limits are the same on every block, so blocks stay comparable. They were picked from the model's ΔT over every cell (ground
@@ -354,12 +357,21 @@ Most sunlit roofs and roads sit at +29 to +36 K at 15:00 (block medians up to +3
 So the cool end, −${-DT_STOPS[0][0]} K, holds the coolest cell anywhere with 1.5 K to spare, and the warm end, +${DT_STOPS.at(-1)[0]} K, holds every
 block's 99th percentile as the page opens (largest +39.1 K, block 3; +40.1 K with its mirror glass); only block 3's reflected hot
 spots (about 1% of its cells, up to +46 K) show in the top colour. The
-asymmetry (−8 / +40 rather than symmetric) lets both sides use their whole colour range. \`tests/e2e/delta.test.mjs\` re-checks on
+asymmetry (−8 / +40 rather than symmetric) lets both sides use their whole colour range. **The cool side is stretched**: its
+8 K run through as much colour as the warm side's 40 K, so −3 K looks about as strong as +15 to +20 K, and small cooling shows
+(lawns just below the air at night, tree shade). The legend says so: its bar is drawn in two equal halves (−8 … 0 and 0 … +40, like
+a two-slope colour bar), with ticks at −8, −4, 0 and +10, +20, +30, +40 (−8, 0, +20, +40 on a phone), and the line "blue side
+stretched: small cooling shows". A trade-off of the diverging scale: at 15:00 on block 1 the pond stands a little less far from
+the asphalt in colour than on the absolute scale (RGB distance 95 against 122; tree shade and lawn stand further: 169 against
+136 and 148 against 125). \`tests/e2e/delta.test.mjs\` re-checks on
 every block (as it opens) that the coolest cell stays above the cool end and the 99th percentile below the warm end.
 
-The legend shows the air at the hour (0 K) and "cooler than the air / hotter than the air"; its °C toggle (or \`?scale=abs\`)
-switches to the earlier absolute scale, ${PALETTE_STOPS[0][0]}–${PALETTE_STOPS.at(-1)[0]} °C, for comparing absolute temperatures. Heat cards and margin notes keep
-absolute °C; the cards add how many degrees above or below the air.
+The legend speaks in degrees, not K: "how much hotter or cooler than the air (°C)", "0 = the air at 15:00, 35.0 °C" and "cooler /
+hotter than the air"; its button ("show real °C", or \`?scale=abs\`) switches to the earlier absolute scale,
+${PALETTE_STOPS[0][0]}–${PALETTE_STOPS.at(-1)[0]} °C, and back ("compare with the air"). Heat cards and margin notes keep absolute °C; the cards add how many
+degrees above or below the air. **Walls are not calculated** (only ground and roofs; block 3's glass faces are): in the heat view,
+on both scales, they are drawn in a hatched lavender grey (#cec4d4) that is in neither palette, and the legend says "walls: not
+calculated", so a wall is never read as being at the air's temperature.
 
 ## Glossary sources
 
