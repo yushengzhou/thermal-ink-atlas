@@ -29,10 +29,10 @@
   #legendBar { height: 12px; border: 1px solid #2b2621; margin: 4px 0 2px; }
   #legend .ends { display: flex; justify-content: space-between; font-size: 12px; white-space: nowrap; }
   #legend .cap { font-size: 11px; opacity: .7; margin-top: 2px; }
-  #legend .vs,#legend .lw{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:11px}
+  #legend .vs,#legend .lw{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:0 6px;font-size:11px}
   #scaleBtn{font:11px/1.3 serif;font-family:inherit;white-space:nowrap;padding:1px 6px;border:1px solid #2b2621;border-radius:3px 6px 3px 5px;background:#fbf7ee;color:#2b2621;cursor:pointer}
   #legendTicks{position:relative;height:14px;font-size:11px}#legendTicks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
-  #legend .lx{font-size:11px;opacity:.75}#legend i{font-style:normal}.wl{display:inline-block;width:14px;height:9px;margin-right:4px;border:1px solid;background:repeating-linear-gradient(135deg,#cec4d4 0 3px,#8f8a91 0 4px)}
+  #legend .lx{font-size:11px;opacity:.75}#legend i{font-style:normal}.wl{display:inline-block;width:14px;height:9px;margin-right:4px;border:1px solid;background:repeating-linear-gradient(135deg,#a0a0a0 0 3px,#6e6e6e 0 4px)}[data-glass] .lw:after{content:'glass façades: calculated';flex-basis:100%}
   #legend.abs #legendTicks,#legend.abs .vs,#legend.abs #legendAir,#legend.abs .lx,#legend:not(.abs) .ends{display:none}
   #card { display: none; position: fixed; z-index: 5; width: 350px; max-height: calc(100vh - 20px); overflow: auto; box-sizing: border-box; padding: 12px 14px; background: #fbf7ee; border: 1.5px solid #2b2621;
     border-radius: 4px 10px 5px 9px; box-shadow: 3px 4px 0 rgba(43,38,33,.2); font-size: 13px; }
@@ -103,7 +103,7 @@
   <details class="site"><summary>For experts</summary><p>A hot, humid July day and evening in a subtropical city like Taipei (25° N): air 27–34 °C, humid (vapour pressure 30 hPa), light wind 1 m/s. Made-up block, calculated temperatures; the air temperature is fixed: the crowd, the stalls and the lights do not warm it here.</p></details>
 </div>
 <div id="legend"><div class="hand"><span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">surface</span><span id="legendVs"></span></div><div id="legendBar"></div>
-  <div id="legendTicks"></div><div class="vs"><span>← cooler<i> than the air</i></span><span>hotter<i> than the air</i> →</span></div><div id="legendAir"></div><div class="lx">blue side stretched: small cooling shows</div>
+  <div id="legendTicks"></div><div class="vs"><span>← cooler<i> than the air</i></span><span>hotter<i> than the air</i> →</span></div><div id="legendAir"></div><div class="lx">blue side stretched<i>: small cooling shows</i></div>
   <div class="ends"><span id="legendLo"></span><span id="legendHi"></span></div>
   <div class="lw"><span><b class="wl"></b>walls: not calculated</span><button type="button" id="scaleBtn" aria-pressed="false"></button></div>
   <div class="cap">Calculated for a made-up block, not measured (<span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">how</span>).</div></div>
@@ -3623,7 +3623,7 @@ const quantHour = (h) => (Math.round((((h % 24) + 24) % 24) / HOUR_STEP) * HOUR_
 
 const PAPER_CSS = rgbCss(PAPER);
 const SHADOW_RGB = hexRgb('#4b5a78');
-const THERMAL_WALL = hexRgb('#cec4d4'); // walls (not calculated): hatched grey, in no palette
+const THERMAL_WALL = hexRgb('#a0a0a0'); // heat view walls: in no palette
 const NIGHT_RGB = hexRgb('#27355a');
 const LIT = hexRgb('#f4cf7a');
 const SWEAT_CSS = 'rgba(143,182,207,0.95)';
@@ -4087,7 +4087,7 @@ class Renderer {
       if (bb && (b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3])) continue;
       const t = it.t;
       if (t === 'glint' && mode === 'thermal') continue;
-      // hatch: by day on faces from the sun; heat view: every opaque wall (t ends in g on glass)
+      // hatch: day, faces from the sun; heat view, opaque walls
       if (t && t.startsWith('hatch') && (mode === 'thermal' ? t[6] : mode !== 'day' || !hc.up || (t[5] === 'S' ? hc.lightS : hc.lightE) > 0.8)) continue;
       let alpha = it.a ?? 1;
       let strokeA = alpha;
@@ -6641,7 +6641,7 @@ const { nmApp } = __m['nmui'];
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
 const fmt = (v) => (Math.round(v * 10) / 10).toFixed(1);
-// tag: no line break in "30.9 °C", "a / b", "3 pm"
+// no break in "1 °C", "a / b", "3 pm"
 const nb = (a, ...v) => String.raw({ raw: a }, ...v).replace(/ (?=°C|\/ |[ap]m\b)|(?<= \/) /g, '\u00a0');
 const hhmm = (h) => {
   const m = Math.round((((h % 24) + 24) % 24) * 60);
@@ -7123,20 +7123,19 @@ function boot(scene, root = document) {
     legend.style.opacity = S.thermal ? '1' : '0';
     legend.classList.toggle('abs', !S.dt);
     legend.inert = !S.thermal;
-    $('legendVs').textContent = S.dt ? ': how much hotter or cooler than the air (°C)' : ' temperature (°C)';
-    scaleBtn.textContent = S.dt ? 'show real °C' : 'compare with the air';
+    $('legendVs').innerHTML = S.dt ? ': <i>how much </i>hotter or cooler<i> than the air</i> (°C)' : ' temperature (°C)';
+    scaleBtn.textContent = S.dt ? 'show plain °C' : 'compare with the air';
     scaleBtn.setAttribute('aria-pressed', String(!S.dt));
     $('legendAir').textContent = `0 = the air at ${hhmm(S.hour)}, ${fmt(thermal.air(S.hour))} °C`;
     root.body.classList.toggle('thermal', S.thermal);
     heatBtn.setAttribute('aria-pressed', String(!!S.thermal));
   };
-  // legend: absolute bar, or ΔT in two equal halves (cool side stretched)
+  // legend: ΔT bar in two halves
   const [dLo, dHi] = [DT_STOPS[0][0], DT_STOPS.at(-1)[0]];
   const pos = (st, t) => (st === DT_STOPS ? (t < 0 ? 1 - t / dLo : 1 + t / dHi) / 2 : (t - st[0][0]) / (st.at(-1)[0] - st[0][0]));
   const grad = (st, f) => `linear-gradient(90deg, ${st.map(([t]) => `rgb(${f(t).map(Math.round)}) ${(pos(st, t) * 100).toFixed(1)}%`)})`;
-  // ticks (class m: not on a phone)
   $('legendTicks').innerHTML = [dLo, dLo / 2, 0, 10, 20, 30, dHi].map((d, k) => `<span${k % 2 ? ' class="m"' : ''} style="left:${(pos(DT_STOPS, d) * 100).toFixed(1)}%${k ? '' : ';transform:none'}">${d > 0 ? '+' : d ? '−' : ''}${Math.abs(d)}</span>`).join('');
-  // phone: a chip, a tap opens it
+  // phone: a chip, tap to open
   legend.addEventListener('click', (e) => e.target.closest('button,.gl') || legend.classList.toggle('open'));
   $('legendLo').textContent = `${PALETTE_STOPS[0][0]} °C`;
   $('legendHi').textContent = `≥ ${PALETTE_STOPS.at(-1)[0]} °C`;
@@ -7353,7 +7352,7 @@ function boot(scene, root = document) {
     if (id === 'extreme') return extremeCard();
     const g = id.slice(6);
     const tower = world.buildings.find((b) => b.id === 't3');
-    const face = { name: `${tower.name}, south face`, face: 'S', theta15: incidence('S', 15), tg15: glassSet.model(g).glassTemp('S', 15) };
+    const face = { name: `${tower.name}, south face`, face: 'S', theta15: incidence('S', 15), tg15: glassSet.model(g).glassTemp('S', 15), m: glassSet.model(g), h: S.hour };
     return glassCard(g, { h12: spotStats(glassSet, world, g, 12), h15: spotStats(glassSet, world, g, 15) }, face);
   }
   function showCbdCard(id, anchor) {
@@ -8077,7 +8076,7 @@ function boot(scene, root = document) {
       }
       return S.dt ? 'dt' : 'abs';
     },
-    heatSpread(h, which) {
+    heatSpread(h = S.hour, which) {
       const { world: w, thermal: t } = vw(which);
       return Array.from({ length: w.n ** 2 }, (_, i) => t.ts(i, h) - t.air(h)).sort((x, y) => x - y);
     },

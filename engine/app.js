@@ -42,7 +42,7 @@ import { nmApp } from './nmui.js';
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
 const fmt = (v) => (Math.round(v * 10) / 10).toFixed(1);
-// tag: no line break in "30.9 °C", "a / b", "3 pm"
+// no break in "1 °C", "a / b", "3 pm"
 const nb = (a, ...v) => String.raw({ raw: a }, ...v).replace(/ (?=°C|\/ |[ap]m\b)|(?<= \/) /g, '\u00a0');
 const hhmm = (h) => {
   const m = Math.round((((h % 24) + 24) % 24) * 60);
@@ -524,20 +524,19 @@ export function boot(scene, root = document) {
     legend.style.opacity = S.thermal ? '1' : '0';
     legend.classList.toggle('abs', !S.dt);
     legend.inert = !S.thermal;
-    $('legendVs').textContent = S.dt ? ': how much hotter or cooler than the air (°C)' : ' temperature (°C)';
-    scaleBtn.textContent = S.dt ? 'show real °C' : 'compare with the air';
+    $('legendVs').innerHTML = S.dt ? ': <i>how much </i>hotter or cooler<i> than the air</i> (°C)' : ' temperature (°C)';
+    scaleBtn.textContent = S.dt ? 'show plain °C' : 'compare with the air';
     scaleBtn.setAttribute('aria-pressed', String(!S.dt));
     $('legendAir').textContent = `0 = the air at ${hhmm(S.hour)}, ${fmt(thermal.air(S.hour))} °C`;
     root.body.classList.toggle('thermal', S.thermal);
     heatBtn.setAttribute('aria-pressed', String(!!S.thermal));
   };
-  // legend: absolute bar, or ΔT in two equal halves (cool side stretched)
+  // legend: ΔT bar in two halves
   const [dLo, dHi] = [DT_STOPS[0][0], DT_STOPS.at(-1)[0]];
   const pos = (st, t) => (st === DT_STOPS ? (t < 0 ? 1 - t / dLo : 1 + t / dHi) / 2 : (t - st[0][0]) / (st.at(-1)[0] - st[0][0]));
   const grad = (st, f) => `linear-gradient(90deg, ${st.map(([t]) => `rgb(${f(t).map(Math.round)}) ${(pos(st, t) * 100).toFixed(1)}%`)})`;
-  // ticks (class m: not on a phone)
   $('legendTicks').innerHTML = [dLo, dLo / 2, 0, 10, 20, 30, dHi].map((d, k) => `<span${k % 2 ? ' class="m"' : ''} style="left:${(pos(DT_STOPS, d) * 100).toFixed(1)}%${k ? '' : ';transform:none'}">${d > 0 ? '+' : d ? '−' : ''}${Math.abs(d)}</span>`).join('');
-  // phone: a chip, a tap opens it
+  // phone: a chip, tap to open
   legend.addEventListener('click', (e) => e.target.closest('button,.gl') || legend.classList.toggle('open'));
   $('legendLo').textContent = `${PALETTE_STOPS[0][0]} °C`;
   $('legendHi').textContent = `≥ ${PALETTE_STOPS.at(-1)[0]} °C`;
@@ -754,7 +753,7 @@ export function boot(scene, root = document) {
     if (id === 'extreme') return extremeCard();
     const g = id.slice(6);
     const tower = world.buildings.find((b) => b.id === 't3');
-    const face = { name: `${tower.name}, south face`, face: 'S', theta15: incidence('S', 15), tg15: glassSet.model(g).glassTemp('S', 15) };
+    const face = { name: `${tower.name}, south face`, face: 'S', theta15: incidence('S', 15), tg15: glassSet.model(g).glassTemp('S', 15), m: glassSet.model(g), h: S.hour };
     return glassCard(g, { h12: spotStats(glassSet, world, g, 12), h15: spotStats(glassSet, world, g, 15) }, face);
   }
   function showCbdCard(id, anchor) {
@@ -1478,7 +1477,7 @@ export function boot(scene, root = document) {
       }
       return S.dt ? 'dt' : 'abs';
     },
-    heatSpread(h, which) {
+    heatSpread(h = S.hour, which) {
       const { world: w, thermal: t } = vw(which);
       return Array.from({ length: w.n ** 2 }, (_, i) => t.ts(i, h) - t.air(h)).sort((x, y) => x - y);
     },

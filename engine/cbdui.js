@@ -66,6 +66,18 @@ export function canyonCard(c) {
  * Glass card for one type. st: {h12, h15} spotStats() for that glass;
  * face: {name, theta15} the façade quoted.
  */
+/**
+ * The façades at the hour shown (#36): the glass temperature the heat view
+ * colours them by (glassTemp, per orientation), so a visitor can check it.
+ * face.m: the model for this glass, face.h: the hour.
+ */
+function glassFaces(face) {
+  const { m, h } = face;
+  const t = (f) => `${fmt(m.glassTemp(f, h))} °C`;
+  const hh = `${String(Math.floor(h)).padStart(2, '0')}:${String(Math.round((h % 1) * 60)).padStart(2, '0')}`;
+  return `At ${hh} this glass on the ${face.name.split(',')[0]} is ${t('S')} on the south face and ${t('E')} on the east face, the two you see in the heat view, and ${t('W')} on the west face, with the air at ${fmt(m.air(h))} °C. These façade temperatures are calculated (and coloured) per face; glass out of the direct sun stays close to the air.`;
+}
+
 export function glassCard(id, st, face) {
   const g = GLASS[id];
   const row = (r) => (r.n ? `<tr class="t"><td>${r.h}:00</td><td>${dg(r.dTmrt)}</td><td>${dg(r.dTmrtMax)}</td></tr><tr><td></td><td class="sub" colspan="2">${r.n} places (5 m squares) in the patch; radiant heat on you in a patch in shade ${fmt(r.tmrtSpotShade)} °C against ${fmt(r.tmrtShade)} °C in plain shade</td></tr>` : `<tr><td>${r.h}:00</td><td colspan="2">no reflected patch on the street</td></tr>`);
@@ -74,6 +86,7 @@ export function glassCard(id, st, face) {
     ${close}
     <h3>${g.name}${id === 'lowe' ? ' (coated glass)' : ''}</h3>
     <p class="lead">At 3 pm the sun only grazes the ${face.name} (it comes in ${Math.round(face.theta15)}° off straight-on), so just a sliver of sunlight reaches it; of that sliver the glass bounces ${Math.round(glassRho(g.rho0.value, face.theta15) * 100)}% back down onto the street${st.h15.n ? `, and people in the bright patch get about ${Math.max(1, Math.round(st.h15.dTmrt))} degrees more ${gl('tmrt', 'radiant heat')}` : ''}. At such a glancing angle every kind of glass bounces most of it, so the glass type matters little here.</p>
+    <p>${glassFaces(face)}</p>
     <table class="cmp">
       <tr><td>in the bright reflected patch</td><td>hotter, on average</td><td>at most</td></tr>
       ${row(st.h12)}

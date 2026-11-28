@@ -15,7 +15,7 @@ export const quantHour = (h) => (Math.round((((h % 24) + 24) % 24) / HOUR_STEP) 
 
 const PAPER_CSS = rgbCss(PAPER);
 const SHADOW_RGB = hexRgb('#4b5a78');
-export const THERMAL_WALL = hexRgb('#cec4d4'); // walls (not calculated): hatched grey, in no palette
+export const THERMAL_WALL = hexRgb('#a0a0a0'); // heat view walls: in no palette
 const NIGHT_RGB = hexRgb('#27355a');
 const LIT = hexRgb('#f4cf7a');
 const SWEAT_CSS = 'rgba(143,182,207,0.95)';
@@ -479,7 +479,7 @@ export class Renderer {
       if (bb && (b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3])) continue;
       const t = it.t;
       if (t === 'glint' && mode === 'thermal') continue;
-      // hatch: by day on faces from the sun; heat view: every opaque wall (t ends in g on glass)
+      // hatch: day, faces from the sun; heat view, opaque walls
       if (t && t.startsWith('hatch') && (mode === 'thermal' ? t[6] : mode !== 'day' || !hc.up || (t[5] === 'S' ? hc.lightS : hc.lightE) > 0.8)) continue;
       let alpha = it.a ?? 1;
       let strokeA = alpha;
