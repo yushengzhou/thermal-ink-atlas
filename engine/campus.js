@@ -31,7 +31,7 @@ export const CP = {
   burnStone: v(56, 'iso13732', 'cited'),
   burnPlastic: v(60, 'iso13732', 'cited'),
   burn10min: v(48, 'iso13732', 'cited'),
-  asphaltClass: v('stone and concrete', 'iso13732', 'interp'),
+  asphaltClass: v('ceramics, glass and stone', 'iso13732', 'interp'),
   playTimes: v('10:00-10:30, 12:00-13:00, 15:00-15:30', 'engine', 'engine'),
   kidSize: v(0.7, 'engine', 'engine'),
 };

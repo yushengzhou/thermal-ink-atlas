@@ -54,8 +54,8 @@ export function turfCard(d) {
       ${row('track', 'running track')}
     </table>
     <p class="note">At 3 pm the pitch is ${fmt(t.turf.ts[15] - t.grass.ts[15])} K hotter than the watered grass field beside it (peak ${fmt(d.st.turfPeak.t)} °C at ${hm(d.st.turfPeak.h)}). It is dark, dry and holds little heat, so it heats fast in the sun and loses it fast after dark: by 5 am it is ${fmt(Math.abs(t.turf.ts[5] - t.grass.ts[5]))} K ${t.turf.ts[5] < t.grass.ts[5] ? 'below' : 'above'} the grass.</p>
-    <p class="lit">Hong Kong: turf 74.6 °C vs grass 36.9 °C (Jim 2016), 73.8 vs 37.3 °C at 34.4 °C air (Jim 2017); at night both near 23 °C. Review of 23 studies: turf 9.4–33.7 K hotter than grass at the surface, but only 0.5–1.2 K in the air (Singh et al. 2024). Brigham Young University: up to 93 °C (via the New York State health department).</p>
-    <p class="caveat">The air here is fixed: the hot layer just above the turf (54 °C at 15 cm over a 74 °C pitch, Jim 2016) is not modelled, so a child on the pitch is hotter than the numbers say. The turf's emissivity and admittance are assumptions of the brief; its albedo is cited.</p>
+    <p class="lit">Hong Kong: turf 70.2 °C against under 40 °C for grass (Jim 2016), 72.4 vs 36.6 °C on a sunny day (Jim 2017); at night both near 23 °C (via the brief). Review of 23 studies: turf 9.4–33.7 K hotter than grass at the surface, but only 0.5–1.2 K in the air (Singh et al. 2024). Brigham Young University: up to 93 °C (via the New York State health department).</p>
+    <p class="caveat">The air here is fixed: the hot layer just above the turf (54 °C at 15 cm over a 70 °C pitch, Jim 2016 via the brief) is not modelled, so a child on the pitch is hotter than the numbers say. The turf's emissivity and admittance are assumptions of the brief; its albedo is cited.</p>
     ${srcLine(['jim2016', 'jim2017', 'singh2024', 'nydoh', 'brief8'])}`;
 }
 
@@ -152,9 +152,9 @@ export function courtsCard(d) {
       <tr><td>artificial turf</td><td>${fmt(t.turf.ts[12])} / ${fmt(t.turf.ts[15])} °C</td><td>${K(t.turf.ts[15] - a)}</td></tr>
     </table>
     <p class="note">Both are a thin coat on asphalt: as hot as dark paving, a little below the turf, which holds less heat.</p>
-    <p class="lit">A school report from Kinmen: a PU track more than 15 K above the air at noon; Aoki (2004): track 42.2 °C against turf 67.0 °C. Court-coating makers: a standard acrylic court about 52 °C in 30 °C air (vendor claims). An asphalt court measured albedo 0.24 (Vanos et al. 2017).</p>
+    <p class="lit">A school report from Kinmen: a PU track more than 15 K above the air at noon; In Japan at 11 am in August, an artificial running track 63.9 °C against artificial turf 67.0 °C and natural turf 42.2 °C (Aoki 2009). Court-coating makers: a standard acrylic court about 52 °C in 30 °C air (vendor claims). An asphalt court measured albedo 0.24 (Vanos et al. 2017).</p>
     <p class="caveat">${d.courtMiss ? `The courts come out ${fmt(t.courts.ts[15] - a)} K above the air at 3 pm, just over the vendors' 15–25 K: band missed (see docs/sources.md); not tuned. ` : ''}${d.trackMiss ? `The track comes out ${fmt(t.track.ts[15] - a)} K above the air at 3 pm, outside 15–30 K: band missed; not tuned. ` : ''}Weak sources: one school report, one study and vendor claims; the albedos, emissivities and heat stores are the brief's unverified values.</p>
-    ${srcLine(['kinmen', 'aoki2004', 'courtVendor', 'vanos2017', 'brief8'])}`;
+    ${srcLine(['kinmen', 'aoki2009', 'courtVendor', 'vanos2017', 'brief8'])}`;
 }
 
 /** Burn limits. d: {st, cells}. */
@@ -168,15 +168,15 @@ export function burnCard(d) {
     <table class="cmp">
       <tr><td>material</td><td>1 min</td><td>10 min</td><td>8 h</td></tr>
       <tr><td>metal (the slide)</td><td>${CP.burnMetal.value} °C</td><td>48 °C</td><td>43 °C</td></tr>
-      <tr><td>stone and concrete (asphalt read with them${tag(CP.asphaltClass)})</td><td>${CP.burnStone.value} °C</td><td>48 °C</td><td>43 °C</td></tr>
+      <tr><td>ceramics, glass and stone (concrete and asphalt read with them${tag(CP.asphaltClass)})</td><td>${CP.burnStone.value} °C</td><td>48 °C</td><td>43 °C</td></tr>
       <tr><td>plastics and wood (turf, rubber, track, courts)</td><td>${CP.burnPlastic.value} °C</td><td>48 °C</td><td>43 °C</td></tr>
     </table>
     <table class="cmp">
       <tr><td>ground above its 1-min limit at 15:00</td><td>${Object.entries(by).map(([id, n]) => `${name(id)} ${n}`).join(' · ') || 'none'}</td></tr>
     </table>
-    <p class="note">Press <kbd>U</kbd>: every ground cell above its 1-min limit at this hour is hatched. A child sitting on the turf or sliding on sunny metal can stay in contact for longer than a minute, so the lower 10-minute limit of ${CP.burn10min.value} °C${tag(CP.burn10min)} is the safer reading for children.</p>
+    <p class="note">Press <kbd>U</kbd>: every ground cell above its 1-min limit at this hour is hatched. A child sitting on the turf or sliding on sunny metal can stay in contact for longer than a minute, so the lower 10-minute limit of ${CP.burn10min.value} °C${tag(CP.burn10min)} is the safer reading for long contact.</p>
     <p class="lit">Press coverage of Vanos's studies: 60 °C burns skin in 1 min, 74 °C in 5 s and 77 °C in 3 s (the standard not named). Gilbert, Arizona: a metal slide 71.7 °C in sun (Vanos et al. 2016).</p>
-    <p class="caveat">The ISO 13732-1 values are for healthy adult skin; children's skin may burn sooner. The limits depend on the material and the contact time; the model gives surface temperatures, not skin. The slide is drawn but not modelled; no metal ground is hatched.</p>
+    <p class="caveat">For contact of a minute or longer the guide says these limits apply to children as well; only for brief touches (1–10 s) does it advise the low end of its range for children. The limits depend on the material and the contact time; the model gives surface temperatures, not skin. The slide is drawn but not modelled; no metal ground is hatched.</p>
     ${srcLine(['iso13732', 'vanosPress', 'vanos2016', 'brief8'])}`;
 }
 

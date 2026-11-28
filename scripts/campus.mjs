@@ -19,10 +19,10 @@ export const CP_NOTES = {
   irrigateTau: 'decay time of the pulse, minutes; brief 10-20 min, the middle value; the model steps every minute and stores every 15 min',
   sailHeight: 'height of the shade sails, m; an assumption of this block',
   burnMetal: '1-min contact-burn threshold for bare metal (ISO 13732-1 via CENELEC Guide 29, via the brief)',
-  burnStone: '1-min contact-burn threshold for stone and concrete (as above)',
+  burnStone: '1-min contact-burn threshold for ceramics, glass and stone (as above); concrete is read with them',
   burnPlastic: '1-min contact-burn threshold for plastics and wood (as above); used for the turf, the rubber, the track and the courts',
-  burn10min: 'the 10-min threshold, 48 C for every material group (as above); quoted on the burn card for children',
-  asphaltClass: 'ISO 13732-1 has no asphalt group; asphalt (stone aggregate in bitumen) is read with stone and concrete',
+  burn10min: 'the 10-min threshold, 48 C for every material group (as above); quoted on the burn card for long contact',
+  asphaltClass: 'ISO 13732-1 has no concrete or asphalt group; concrete and asphalt (stone aggregate in bitumen) are read with ceramics, glass and stone',
   playTimes: 'when the children come out (a summer day camp): engine assumption',
   kidSize: 'children are drawn at 0.7 of an adult figure; drawing only',
 };
@@ -151,7 +151,7 @@ export function bands8() {
   add('3. Natural grass at 15:00, °C', t.grass.ts[15], 33, 42, 'jim2016', '°C');
   add('4. Turf − grass at 05:00, K', t.turf.ts[5] - t.grass.ts[5], -2, 2, 'jim2016', 'K');
   add(`5. Running track at 15:00 above the air (n ${C.track.length}), K`, t.track.ts[15] - a(15), 15, 30, 'kinmen', 'K');
-  add('5. Running track − turf at 15:00, K (below the turf)', t.track.ts[15] - t.turf.ts[15], null, -1e-6, 'aoki2004', 'K');
+  add('5. Running track − turf at 15:00, K (below the turf)', t.track.ts[15] - t.turf.ts[15], null, -1e-6, 'aoki2009', 'K');
   add('5. Supplementary: running track at 14:00 above the air, K', t.track.ts[14] - a(14), 15, 30, 'kinmen', 'K', { supp: true });
   add(`6. Acrylic courts at 15:00 above the air (n ${C.courts.length}), K`, t.courts.ts[15] - a(15), 15, 25, 'courtVendor', 'K');
   add(`7. Rubber under a sail at 15:00 above the air (n ${s15.sail.n}), K`, s15.sail.ts - a(15), 0, 8, 'vanos2016', 'K');

@@ -224,13 +224,13 @@ test('cards: turf, playground, sails, watering, children, track and courts, burn
   }
   const html = await page.evaluate((ids) => Object.fromEntries(ids.map((id) => [id, window.atlas.campus.html(id)])), ids);
   const st = await page.evaluate(() => window.atlas.campus.stats());
-  assert.ok(html.turf.includes('74.6') && html.turf.includes('Singh') && html.turf.includes(`${st.table.turf.ts[15].toFixed(1)}`));
+  assert.ok(html.turf.includes('70.2') && html.turf.includes('72.4') && html.turf.includes('Singh') && html.turf.includes(`${st.table.turf.ts[15].toFixed(1)}`));
   assert.ok(html.play.includes('87.2') && /band is missed/.test(html.play), 'playground card states the tree-shade miss');
   assert.ok(html.sail.includes('168 W') && /band is missed/.test(html.sail) && html.sail.includes((st.split[15].sun.ts - st.split[15].sail.ts).toFixed(1)), 'sail card states the 25 K miss');
   assert.ok(html.water.includes('79 °C') && /Band missed/.test(html.water) && html.water.includes('McNitt'));
   assert.ok(/Qualitative only/.test(html.kids) && !/child-height Tmrt of/.test(html.kids));
   assert.ok(/band missed/.test(html.courts) && html.courts.includes('vendor'), 'courts card states the miss');
-  assert.ok(html.burn.includes('ISO 13732-1') && html.burn.includes('51 °C') && html.burn.includes('56 °C') && html.burn.includes('60 °C') && html.burn.includes('48 °C') && html.burn.includes('healthy adult skin') && !/pulls away/.test(html.burn));
+  assert.ok(html.burn.includes('ISO 13732-1') && html.burn.includes('51 °C') && html.burn.includes('56 °C') && html.burn.includes('60 °C') && html.burn.includes('48 °C') && html.burn.includes('apply to children as well') && html.burn.includes('1–10 s') && !html.burn.includes('may burn sooner') && html.burn.includes('ceramics, glass and stone') && !/pulls away/.test(html.burn));
   for (const h of Object.values(html)) assert.ok(!/https?:/.test(h));
   const d = await page.evaluate(() => [window.atlas.card('ground', 155, 125), window.atlas.card('ground', 130, 252.5), window.atlas.card('ground', 302.5, 187.5)]);
   assert.ok(d[0].campus && d[0].campus.limit === 60 && d[0].campus.over, JSON.stringify(d[0].campus));

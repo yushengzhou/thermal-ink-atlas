@@ -182,7 +182,7 @@ test('every block-8 value has a source, a basis tag, a verified flag and a note;
   // the brief's central values
   assert.deepEqual([MATERIALS.turf.alpha.value, MATERIALS.turf.eps.value, MATERIALS.turf.mu.value, MATERIALS.turf.ef.value], [0.08, 0.93, 350, 0]);
   assert.deepEqual([MATERIALS.track.alpha.value, MATERIALS.track.mu.value, MATERIALS.acrylic.alpha.value, MATERIALS.acrylic.mu.value, MATERIALS.shadeSail.tr.value], [0.12, 950, 0.2, 1200, 0.2]);
-  for (const k of ['brief8', 'jim2016', 'jim2017', 'singh2024', 'nydoh', 'mcnitt2008', 'pfautsch2020', 'vanos2016', 'vanos2017', 'vanos2015', 'paolini', 'kinmen', 'aoki2004', 'courtVendor', 'iso13732', 'vanosPress']) assert.ok(md.includes(`**[${k}]**`), k);
+  for (const k of ['brief8', 'jim2016', 'jim2017', 'singh2024', 'nydoh', 'mcnitt2008', 'pfautsch2020', 'vanos2016', 'vanos2017', 'vanos2015', 'paolini', 'kinmen', 'aoki2009', 'courtVendor', 'iso13732', 'vanosPress']) assert.ok(md.includes(`**[${k}]**`), k);
 });
 
 test('glossary: artificial turf, crumb rubber, contact burn, shade sail, on the campus page only', () => {

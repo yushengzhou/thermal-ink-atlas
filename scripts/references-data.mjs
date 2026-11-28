@@ -718,7 +718,7 @@ export const REFS = {
     title: 'Observation of surface temperature at Kinmen Senior High School',
     venue: 'GLOBE student research report (globe.gov)',
   },
-  aoki2004: {
+  aoki2009: {
     authors: 'Aoki, T.', year: 2009,
     title: 'Effect of solar illuminance and albedo on surface temperature of outdoor sport surfaces',
     venue: '自然と環境 (Nature and its Environment) 11, 40–48 (Biwako Seikei Sport College repository, record 2776; measured 11 August 2004). Related: Aoki (2005) Bulletin of Biwako Seikei Sport College 4, 105–111',

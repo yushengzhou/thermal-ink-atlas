@@ -313,9 +313,9 @@ export const GLOSSARY = {
   contactBurn: {
     term: 'Contact-burn threshold',
     text: 'The surface temperature at which touching a hot surface with bare skin starts to burn it, for a given material and contact time (ISO 13732-1). Metal conducts heat into the skin fastest, so its limit is lowest.',
-    range: '1 min of contact: metal 51 °C, stone and concrete 56 °C, plastics and wood 60 °C; 10 min: 48 °C for all of them; 8 h: 43 °C. The lower end for children (unverified, via CENELEC Guide 29).',
+    range: '1 min of contact: metal 51 °C, ceramics, glass and stone 56 °C, plastics and wood 60 °C; 10 min: 48 °C for all of them; 8 h: 43 °C. From 1 min on these apply to children too (CENELEC Guide 29).',
     src: 'iso13732',
-    why: 'Children sit, kneel and slide on play surfaces for longer than a minute and pull away more slowly, so a surface "only" at 60 °C can burn them.',
+    why: 'Children sit, kneel and slide on play surfaces for longer than a minute and pull away more slowly, so the 10-minute limit of 48 °C is the one that matters, and a surface "only" at 60 °C can burn them.',
     scenes: ['campus'],
   },
   shadeSail: {
@@ -362,7 +362,7 @@ export const GLOSSARY = {
   burnThreshold: {
     term: 'Contact-burn threshold (benches, rails, decks)',
     text: 'The surface temperature at which touching it with bare skin starts to burn, for a material and a contact time (ISO 13732-1). Metal conducts heat into the skin fastest, so its limit is lowest.',
-    range: '1 min of contact: metal 51 °C, stone, concrete and glass 56 °C, plastics and wood 60 °C; 10 min: 48 °C; bare metal burns in about 1 s at 65–70 °C (unverified).',
+    range: '1 min of contact: metal 51 °C, ceramics, glass and stone 56 °C (concrete read with them), plastics and wood 60 °C; 10 min: 48 °C; bare metal burns in about 1 s at 65–70 °C (unverified).',
     src: 'iso13732, brief9',
     why: 'A hand on a sunlit handrail or bare legs on a metal bench meet the hottest metal of the street; the brief advises reading at least 4 s of contact for older people and children.',
     scenes: ['busstop'],

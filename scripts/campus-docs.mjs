@@ -82,11 +82,12 @@ surface temperature (°C) and Tmrt of a standing adult (°C):
 |---|---|---|---|---|---|---|---|---|---|
 ${classes.join('\n')}
 
-The turf peaks at ${f1(st.turfPeak.t)} °C at ${hm(st.turfPeak.h)} (Hong Kong: 74.6 °C [jim2016]); at 15:00 it is ${signed(t.turf.ts[15] - t.grass.ts[15])} K on the grass
+The turf peaks at ${f1(st.turfPeak.t)} °C at ${hm(st.turfPeak.h)} (Hong Kong: 70.2 °C [jim2016], 72.4 °C [jim2017]); at 15:00 it is ${signed(t.turf.ts[15] - t.grass.ts[15])} K on the grass
 (review: 9.4–33.7 K [singh2024]; Penn State 20–30 K [nydoh]), and at 05:00 ${signed(t.turf.ts[5] - t.grass.ts[5])} K (Jim: both near 23 °C). Low admittance
 (μ ${MATERIALS.turf.mu.value}) and a dark, dry surface make it fast both ways. The track and the courts are a thin coat on asphalt: at 15:00 the
-track is ${signed(t.track.ts[15] - T.air(15))} K above the air and the courts ${signed(t.courts.ts[15] - T.air(15))} K (bands 5 and 6; weak sources [kinmen], [aoki2004],
-vendor claims [courtVendor]).
+track is ${signed(t.track.ts[15] - T.air(15))} K above the air and the courts ${signed(t.courts.ts[15] - T.air(15))} K (bands 5 and 6; weak sources [kinmen], [aoki2009],
+vendor claims [courtVendor]). Aoki's artificial track was 63.9 °C against 67.0 °C on the artificial turf (11:00, August 2004),
+below the turf as here (band 5: ${signed(t.track.ts[15] - t.turf.ts[15])} K); his 42.2 °C is the natural turf [aoki2009].
 
 Rubber of the playground by what shades the cell's centre (shadow polygons of the sails and the crowns; the cell's sunlit
 share from the model), 12:00 / 15:00 (\`shadeSplit\`):
@@ -125,9 +126,10 @@ parameters nobody measured for turf.
 
 ### Contact burns
 
-ISO 13732-1 via CENELEC Guide 29 [iso13732], 1 min of contact: metal ${CP.burnMetal.value} °C, stone and concrete ${CP.burnStone.value} °C, plastics and wood
+ISO 13732-1 via CENELEC Guide 29 [iso13732], 1 min of contact: metal ${CP.burnMetal.value} °C, ceramics, glass and stone ${CP.burnStone.value} °C, plastics and wood
 ${CP.burnPlastic.value} °C (10 min: ${CP.burn10min.value} °C; 8 h: 43 °C). Material classes: ${Object.entries(BURN_CLASS).map(([id, c]) => `\`${id}\` ${c}`).join(', ')}; grass, water and leaves
-have none. Asphalt is read with stone and concrete (an *interpretation*). The overlay hatches every ground cell above its
+have none. The table has no concrete or asphalt row: concrete and asphalt are read with ceramics, glass and stone (an *interpretation*).
+For contact of 1 min or longer CENELEC Guide 29 says Table A.1 applies to children too (its low end for children is for 1–10 s contacts only). The overlay hatches every ground cell above its
 limit at the hour shown (\`burnCells\`). Cells over the limit at 12:00: ${burnRows(b12)}; at 15:00: ${burnRows(b15)}. The slide
 is drawn, not modelled (no metal ground is hatched); Vanos et al. measured a slide at 71.7 °C in sun [vanos2016].
 
@@ -183,12 +185,12 @@ ${bands8Markdown(rows)}
 
 ### Disclosures (block 8)
 
-- **Air fixed:** no near-ground air layer (54 °C at 15 cm over a 74 °C pitch in Hong Kong [jim2016] is not modelled), no
+- **Air fixed:** no near-ground air layer (54 °C at 15 cm over a 70 °C pitch in Hong Kong [jim2016], via the brief, is not modelled), no
   cooling of the air by the grass or the sprinklers; a child's exposure on the turf is understated.
 - **No height-resolved Tmrt:** every Tmrt is for a standing adult; the children card is qualitative, and no child-height
   number is quoted.
 - **Burn limits depend on the material and the contact time:** the overlay uses the 1-min limits per material class
-  (asphalt read with stone and concrete); children's longer contact makes the 10-min ${CP.burn10min.value} °C the safer reading; the slide
+  (concrete and asphalt read with ceramics, glass and stone); the limits apply to children from 1 min of contact on, and children's longer contact makes the 10-min ${CP.burn10min.value} °C the safer reading; the slide
   is not modelled.
 - **Irrigation lasts minutes, and here it is weak:** the brief's EF pulse cools the turf ${f1(-water.min.d)} K at most, far short of the measured
   drops to near the air (band 9 missed); not tuned. The bulk water store of block 5 would come closer but has no turf values.
