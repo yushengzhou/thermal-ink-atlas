@@ -43,7 +43,7 @@ test('heat card, header and legend terms open footnotes (click, hover, focus); c
     assert.equal(await fnKey(page), key, `card ${key}`);
   }
   // click outside (on the cartouche text) closes
-  await page.click('#cartouche h1');
+  await page.click('#cartouche p.hand');
   assert.equal(await fnKey(page), null);
   // the card, taller with its expert part open, may reach the legend: close it (Escape)
   await page.keyboard.press('Escape');

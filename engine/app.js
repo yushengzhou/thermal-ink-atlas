@@ -487,10 +487,11 @@ export function boot(scene, root = document) {
     card.style.top = `${Math.max(10, Math.min(top, window.innerHeight - card.offsetHeight - 10))}px`;
   }, true);
   // a tap opens the card on pointerup; the click the browser sends next lands on the new card
-  // (on a phone, often on its "For experts" fold): swallow that one click so the fold stays closed
+  // (on a phone, often on its "For experts" fold): swallow that one click, at the tap's own spot, so the fold stays closed
   card.addEventListener('click', (e) => {
-    if (card._shownAt && performance.now() - card._shownAt < 400) {
-      card._shownAt = 0;
+    const g = card._shownAt;
+    if (g && performance.now() - g.t < 400 && Math.abs(e.clientX - g.x) < 12 && Math.abs(e.clientY - g.y) < 12) {
+      card._shownAt = null;
       e.preventDefault();
       e.stopPropagation();
     }
@@ -938,7 +939,7 @@ export function boot(scene, root = document) {
       const p = pick(e.clientX, e.clientY);
       if (p) {
         showCard(p, e.clientX, e.clientY);
-        card._shownAt = performance.now();
+        card._shownAt = { t: performance.now(), x: e.clientX, y: e.clientY };
       } else hideCard();
     }
   });

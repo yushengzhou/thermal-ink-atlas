@@ -66,7 +66,7 @@ test('glass query modes, buttons and the G key', async () => {
     const st = await page.evaluate(() => ({ ...window.atlas.glass.state(), pressed: document.querySelector('#glass [aria-pressed="true"][data-glass]').dataset.glass, notes: window.atlas.notes().map((n) => n.text.join(' ')).join(' | ') }));
     assert.equal(st.glass, want, q);
     assert.equal(st.pressed, want);
-    assert.ok(st.notes.includes(GLASS[want].name.toLowerCase()), `${q}: note names the glass`);
+    assert.ok(st.notes.includes({ clear: 'clear glass', lowe: 'coated glass', mirror: 'mirror glass' }[want]), `${q}: note names the glass in plain words`);
     assert.deepEqual(errors, []);
     await context.close();
   }

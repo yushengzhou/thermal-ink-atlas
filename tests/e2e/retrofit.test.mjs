@@ -222,7 +222,7 @@ test('measure cards: ΔTs and ΔTmrt at 12:00 and 15:00, unverified flags, sourc
     assert.match(text, /12:00/);
     assert.match(text, /15:00/);
     assert.match(text, /surface/);
-    assert.match(text, /how it feels/);
+    assert.match(text, /radiant heat on you/);
     assert.match(text, /[−+]\d+\.\d°/);
     assert.match(text, /Sources:/);
     assert.match(text, /unverified/i, `${m.id}: unverified inputs are flagged`);

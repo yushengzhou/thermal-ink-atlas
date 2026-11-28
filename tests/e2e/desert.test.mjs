@@ -262,9 +262,9 @@ test('block-11 glossary terms open their footnotes; notes carry their terms and 
   const st = B.st;
   const txt = (k) => notes.find((n) => n.key === k).text.join(' ');
   assert.ok(txt('lawn').includes(`${st.lawn.ts15.toFixed(1)} °C`) && txt('lawn').includes(st.lawn.evap.toFixed(1)));
-  assert.ok(txt('sail').includes(`${Math.round(-st.shade.sail[15].d)} degrees cooler`));
-  assert.ok(txt('arcade').includes(`${Math.round(-st.shade.arcade[15].d)} degrees cooler`));
-  assert.ok(txt('street').includes(`${st.coat[15].dTmrt.toFixed(1)} degrees hotter`));
+  assert.ok(txt('sail').includes(`${Math.round(-st.shade.sail[15].d)} degrees less radiant heat`));
+  assert.ok(txt('arcade').includes(`${Math.round(-st.shade.arcade[15].d)} degrees less radiant heat`));
+  assert.ok(txt('street').includes(`${st.coat[15].dTmrt.toFixed(1)} degrees more radiant heat`));
   assert.ok(txt('plaza').includes(`${st.gravel.ts15.toFixed(1)} °C`));
   for (const n of notes) assert.ok(!/\bK\b|Tmrt|albedo/.test(n.text.join(' ')), n.key);
   assert.ok((await page.evaluate(() => window.atlas.noteTerms())).length >= 5);

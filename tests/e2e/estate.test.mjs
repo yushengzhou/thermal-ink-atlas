@@ -214,7 +214,7 @@ test('cards: winter spacing (with the section), July courtyard, towers, condense
   assert.ok(html.court.includes('Lai') && html.court.includes('north faces'));
   assert.ok(html.ac.includes('Changsha') && html.ac.includes('Bruelisauer') && html.ac.includes(`${st.qRej.toFixed(1)} kW`) && html.ac.includes('not changed'));
   assert.ok(html.lawn.includes('9.87 K') && html.lawn.includes('irrigated'));
-  assert.ok(html.towers.includes('大寒'));
+  assert.ok(html.towers.includes('midwinter'));
   const d = await page.evaluate(() => [window.atlas.card('ground', 72.5, 152.5), window.atlas.card('building', 'slab2a'), window.atlas.card('building', 'shops1')]);
   assert.ok(d[0].estate && d[0].estate.p > 0 && d[0].estate.dT > 0, `path: ${JSON.stringify(d[0].estate)}`);
   assert.ok(d[1].estate && d[1].estate.flats === 144 && d[1].estate.rule.min >= 2, `slab: ${JSON.stringify(d[1].estate)}`);
@@ -225,7 +225,7 @@ test('cards: winter spacing (with the section), July courtyard, towers, condense
   const [x, y] = await page.evaluate(() => window.atlas.project(300, 355, 30));
   await page.mouse.click(x, y);
   const t = await page.locator('#card').textContent();
-  assert.ok(/condensers now/.test(t) && /大寒 sun at the sills/.test(t), t);
+  assert.ok(/condensers now/.test(t) && /midwinter sun at the sills/.test(t), t);
   assert.deepEqual(errors, []);
   await context.close();
 });
