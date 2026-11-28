@@ -25,6 +25,28 @@ const GLINT = [255, 246, 214];
 const SPOT_INK = [176, 98, 40];
 export const HAND_FONT = '"Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive';
 
+/**
+ * Left edge of a bottom overlay label w px wide whose text baseline is at by
+ * (box: 5 px either side, 18 px above to 4 px below): centred, kept 8 px inside
+ * the canvas, and moved beside any page panel it would sit behind (R.avoid:
+ * the panels' boxes in canvas pixels, set by the app before each frame) when
+ * there is room; otherwise as far from the panel as the canvas allows.
+ */
+export function labelX(R, w, W, by) {
+  const d = R.dpr;
+  let bx = clamp(W / 2 - w / 2, 8 * d, W - w - 8 * d);
+  for (const r of R.avoid ?? []) {
+    if (r[3] <= by - 18 * d || r[1] >= by + 4 * d || r[2] <= bx - 5 * d || r[0] >= bx + w + 5 * d) continue;
+    const right = r[2] + 13 * d;
+    const left = r[0] - 13 * d - w;
+    if (right <= W - w - 8 * d) bx = right;
+    else if (left >= 8 * d) bx = left;
+    // no room beside it: as far from the panel as the canvas allows, so the least of the label is hidden
+    else bx = r[0] + r[2] < W ? W - w - 8 * d : 8 * d;
+  }
+  return bx;
+}
+
 function makeCanvas(w, h) {
   if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(w, h);
   const c = document.createElement('canvas');

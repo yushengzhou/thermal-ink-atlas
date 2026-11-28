@@ -6,7 +6,7 @@
 // reaches the drawing through world.draw (set by campus.js prepWorld); the
 // overlays are the renderer's R.overlay (set by cpui.js).
 import { hexRgb, scaleRgb, iso, rgbCss, clamp } from './core.js';
-import { HAND_FONT } from './render.js';
+import { HAND_FONT, labelX } from './render.js';
 import { GROUND_RGB, box, jitter } from './kit.js';
 
 // the block's ground colours (kit.js GROUND_RGB is keyed by material id)
@@ -158,8 +158,8 @@ function label(R, ctx, text, ink, W, H, row = 0) {
   ctx.font = `${Math.round(13 * d)}px ${HAND_FONT}`;
   ctx.textBaseline = 'bottom';
   const w = ctx.measureText(text).width;
-  const bx = clamp(W / 2 - w / 2, 8 * d, W - w - 8 * d);
   const by = H - (84 + row * 26) * d;
+  const bx = labelX(R, w, W, by);
   ctx.fillStyle = 'rgba(248,243,231,0.94)';
   ctx.fillRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
   ctx.strokeStyle = rgbCss(ink, 0.7);

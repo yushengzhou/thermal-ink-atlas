@@ -5,7 +5,7 @@ import { SOURCES, BASIS, MODEL } from './materials.js';
 import { gl } from './glossary.js';
 import { OVERLAY, overlayDT, dayWeight } from './wind.js';
 import { rgbCss, clamp, hexRgb } from './core.js';
-import { HAND_FONT } from './render.js';
+import { HAND_FONT, labelX } from './render.js';
 
 const fmt = (v) => (Math.round(v * 10) / 10).toFixed(1);
 const f2 = (v) => v.toFixed(2);
@@ -285,8 +285,8 @@ export function drawWind(R, ctx, f, cam, W, H, alpha, look, hq) {
   ctx.textBaseline = 'bottom';
   labels.forEach(([c, text], k) => {
     const w = ctx.measureText(text).width;
-    const bx = clamp(W / 2 - w / 2, 8 * d, W - w - 8 * d);
     const by = H - (84 + (labels.length - 1 - k) * 26) * d;
+    const bx = labelX(R, w, W, by);
     ctx.fillStyle = 'rgba(248,243,231,0.94)';
     ctx.fillRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
     ctx.strokeStyle = rgbCss(c, 0.7);

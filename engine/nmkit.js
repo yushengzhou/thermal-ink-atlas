@@ -10,7 +10,7 @@
 // the hour and the toggles.
 import { hash3, hexRgb, scaleRgb, iso, rgbCss, clamp, ISO_Z } from './core.js';
 import { box, jitter, building, WIN } from './kit.js';
-import { HAND_FONT } from './render.js';
+import { HAND_FONT, labelX } from './render.js';
 
 const CLOTH = ['#b5533c', '#c9973f', '#3f6e6a', '#8e4b5e', '#d9cfb8', '#5b6b8c'].map(hexRgb);
 const SIGNS = ['#b5533c', '#c9973f', '#e8c75a', '#3f6e6a', '#8e4b5e', '#d07a5a'].map(hexRgb);
@@ -171,8 +171,8 @@ function label(R, ctx, text, W, H, rgb, row = 0) {
   ctx.font = `${Math.round(13 * d)}px ${HAND_FONT}`;
   ctx.textBaseline = 'bottom';
   const w = ctx.measureText(text).width;
-  const bx = clamp(W / 2 - w / 2, 8 * d, W - w - 8 * d);
   const by = H - (84 + 26 * row) * d;
+  const bx = labelX(R, w, W, by);
   ctx.fillStyle = 'rgba(248,243,231,0.94)';
   ctx.fillRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
   ctx.strokeStyle = rgbCss(rgb, 0.7);

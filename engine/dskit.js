@@ -8,7 +8,7 @@
 // R.overlay (set by dsui.js dsApp), so the other pages do not carry this code.
 import { hash3, hexRgb, scaleRgb, mixRgb, iso, rgbCss, clamp, makeRng } from './core.js';
 import { box, jitter, WIN, ROOF_RGB } from './kit.js';
-import { HAND_FONT } from './render.js';
+import { HAND_FONT, labelX } from './render.js';
 
 const DOOR = hexRgb('#7a5638');
 const STEEL = hexRgb('#5e6166');
@@ -269,8 +269,8 @@ function label(R, ctx, text, W, H) {
   ctx.font = `${Math.round(13 * d)}px ${HAND_FONT}`;
   ctx.textBaseline = 'bottom';
   const w = ctx.measureText(text).width;
-  const bx = clamp(W / 2 - w / 2, 8 * d, W - w - 8 * d);
   const by = H - 84 * d;
+  const bx = labelX(R, w, W, by);
   ctx.fillStyle = 'rgba(248,243,231,0.94)';
   ctx.fillRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
   ctx.strokeStyle = rgbCss(INK_RGB, 0.7);

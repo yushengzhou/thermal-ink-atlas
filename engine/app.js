@@ -407,8 +407,25 @@ export function boot(scene, root = document) {
     return [{ v: l, clip: [0, sx] }, { v: r, clip: [sx, canvas.width] }];
   };
   let notesR = R; // renderer whose note hit boxes are live
+  // the page panels a bottom overlay label moves beside (render.js labelX), in canvas pixels
+  const avoidRects = () => {
+    const c = canvas.getBoundingClientRect();
+    const k = canvas.width / (c.width || 1);
+    const out = [];
+    for (const el of root.querySelectorAll('.blockpanel, #cartouche, #legend')) {
+      const r = el.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) out.push([(r.left - c.left) * k, (r.top - c.top) * k, (r.right - c.left) * k, (r.bottom - c.top) * k]);
+    }
+    return out;
+  };
+  // a panel folded or opened moves the labels: draw again
+  root.addEventListener('toggle', () => {
+    dirty = true;
+  }, true);
   const draw = () => {
     const tDraw = performance.now();
+    const avoid = avoidRects();
+    for (const v of Object.values(V)) v.R.avoid = avoid;
     if (!retro) lastStats = R.frame(S.frame, S.cam, look(S.frame));
     else {
       const lk = look(S.frame);

@@ -9,7 +9,7 @@
 import { hash3, hexRgb, scaleRgb, iso, rgbCss, clamp } from './core.js';
 import { box, jitter, WIN } from './kit.js';
 import { heatRgb } from './thermal.js';
-import { HAND_FONT } from './render.js';
+import { HAND_FONT, labelX } from './render.js';
 
 /** Roof colours by material (day view). */
 export const VG_ROOF = {
@@ -223,8 +223,8 @@ function label(R, ctx, text, W, H) {
   ctx.font = `${Math.round(13 * d)}px ${HAND_FONT}`;
   ctx.textBaseline = 'bottom';
   const w = ctx.measureText(text).width;
-  const bx = clamp(W / 2 - w / 2, 8 * d, W - w - 8 * d);
   const by = H - 84 * d;
+  const bx = labelX(R, w, W, by);
   ctx.fillStyle = 'rgba(248,243,231,0.94)';
   ctx.fillRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
   ctx.strokeStyle = rgbCss(INK_RGB, 0.7);
