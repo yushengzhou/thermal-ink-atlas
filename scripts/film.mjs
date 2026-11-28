@@ -116,6 +116,7 @@ const SHOTS = [
   },
   {
     id: 'waterfront',
+    capLift: 50, // the page's overlay label (bottom centre, 978-1000 px) sits under the caption: lift the caption clear of it
     n: 4,
     q: 'f=640&thermal&hour=15',
     cam: { z: 2.6, cx: 205, cy: 200 },
@@ -148,6 +149,7 @@ const SHOTS = [
   },
   {
     id: 'parking',
+    capLift: 50, // the page's overlay label (bottom centre, 978-1000 px) sits under the caption: lift the caption clear of it
     n: 6,
     q: 'f=640&thermal&hour=23&flux=1',
     cam: { z: 4.4, cx: 140, cy: 170 },
@@ -163,6 +165,7 @@ const SHOTS = [
   },
   {
     id: 'estate',
+    capLift: 50, // the page's overlay label (bottom centre, 978-1000 px) sits under the caption: lift the caption clear of it
     n: 7,
     q: 'f=640&hour=20&ac=1',
     cam: { z: 3.8, cx: 230, cy: 250 },
@@ -191,6 +194,7 @@ const SHOTS = [
   },
   {
     id: 'busstop',
+    capLift: 50, // the page's overlay label (bottom centre, 978-1000 px) sits under the caption: lift the caption clear of it
     n: 9,
     q: 'f=1650&hour=15&spots=1',
     f0: 1650,
@@ -311,7 +315,7 @@ function frameSpec(i, notesOf) {
   if (s.set) spec.set = s.set(p);
   spec.dissolve = t < DIS ? 1 - smooth((t + 1) / DIS) : 0;
   const c = s.cap(notesOf(si));
-  spec.overlay.caption = { ...c, a: fadeIO(t, DIS - 2, s.len, 7) };
+  spec.overlay.caption = { ...c, lift: s.capLift ?? 0, a: fadeIO(t, DIS - 2, s.len, 7) };
   spec.overlay.tag = { n: s.n, en: s.tag[0], zh: s.tag[1], a: fadeIO(t, DIS - 4, s.len, 6) };
   spec.overlay.hour = { h: s.hour, a: fadeIO(t, DIS - 4, s.len, 6), state: s.state ? s.state(p) : null };
   if (t === s.len - 1) spec.save = true;
@@ -444,7 +448,7 @@ function filmPage(W, H) {
       const w = Math.max(we, wz) + 56;
       const h = 118;
       const x = 64;
-      const y = H - 64 - h;
+      const y = H - 64 - h - (c.lift ?? 0);
       this.card(g, x, y, w, h);
       g.fillStyle = INK;
       g.textBaseline = 'alphabetic';
