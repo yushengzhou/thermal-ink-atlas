@@ -290,19 +290,19 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[iso13732]** ISO 13732-1:2006, hot surfaces, via CENELEC Guide 29 (2007) Table A.1 (checked against the guide): burn thresholds for 1 min / 10 min / 8 h of contact, metal 51 / 48 / 43 C, ceramics, glass and stone 56 / 48 / 43 C, plastics and wood 60 / 48 / 43 C (the table has no concrete or asphalt row); for contact of 1 min or longer the guide says Table A.1 applies to children too; its lower end for children is for contacts of 1-10 s only
 - **[vanosPress]** Press coverage of Vanos's playground studies, via the block-8 brief: 60 C burns skin in 1 min, 74 C in 5 s, 77 C in 3 s (the standard behind it not named; unverified)
 - **[brief9]** Research brief docs/research/busstop-brief.md (block 9; values compiled from the sources below, items marked unverified there are flagged here; the shelter, footbridge and headway dimensions are assumptions of the brief; the 1 s contact-burn value for bare metal, about 65-70 C, is unverified)
-- **[dzyuban2022]** Dzyuban et al. (2022) International Journal of Biometeorology 66, 345, doi 10.1007/s00484-021-02074-4, Phoenix bus stops, June-July 2018 (via the block-9 brief): air 41.8 / 41.2 C, globe 52.0 / 44.3 C, PET 68.2 / 49.5 C in sun / shade; shade 19 C PET cooler on average (maximum PET 81.6 C); metal roof 20.6, ad panel 20.3, polycarbonate 18.2 C PET cooler, sparse vine not significant; stops without side panels worse; concrete 57.4 / 41.3 C, metal bench 47.7 / 40.4 C; most riders arrive less than 5 min before the bus (unverified)
-- **[lanza2025]** Lanza et al. (2025) Transportation Research Part D 140, 104653, doi 10.1016/j.trd.2025.104653, 17 bus stops in Houston (via the block-9 brief): tree shade 3.2 C WBGT cooler; enclosed shelters without overhead shade more than 3 C hotter than open sun (unverified)
-- **[chenWalk2024]** Chen et al. (2024) Sustainable Cities and Society 100, 105048, doi 10.1016/j.scs.2023.105048, a covered walkway in Hong Kong (via the block-9 brief): Tmrt 53.5-68.0 C on the open sidewalk vs 19.9-39.6 C under the cover (gap 19.8-34.8 K); PET 32.6-37.3 and 45.8-51.1 C (in that order in the brief); air -0.4 to 1.5 K; a footbridge raised street PET by up to 2.7 K (simulated) (unverified)
-- **[hyd047]** Highways Department, Hong Kong, Guidance Note BS/GN/047 (November 2018), via the block-9 brief: bus shelters opaque, translucent materials avoided; walkway covers translucent on at most 1/3 of the width at the sides; low headroom or wider covers and fascias; flat covers better than upward-sloped ones; check with a sun-shadow analysis (unverified)
+- **[dzyuban2022]** Dzyuban, Hondula, Coseo & Redman (2022) International Journal of Biometeorology 66(2), 345-356, doi 10.1007/s00484-021-02074-4, Phoenix bus stops, June-July 2018 (via the block-9 brief): air 41.8 / 41.2 C, globe 52.0 / 44.3 C, PET 68.2 / 49.5 C in sun / shade; shade 19 C PET cooler on average (maximum PET 81.6 C); metal roof 20.6, ad panel 20.3, polycarbonate 18.2 C PET cooler, a vegetated awning not significant in the afternoon (the abstract: every design helped in the morning); stops without side panels worse; concrete 57.4 / 41.3 C, metal bench 47.7 / 40.4 C; most riders arrive less than 5 min before the bus (unverified)
+- **[lanza2025]** Lanza, Ernst, Watkins & Chen (2025) Transportation Research Part D 140, 104653, doi 10.1016/j.trd.2025.104653, 17 bus stops in Houston, 13 days in 2023 (checked against the abstract): tree shade 3.2 C WBGT cooler; enclosed shelters without overhead shade more than 3 C hotter than open sun
+- **[chenWalk2024]** Chen, Mak, Hang & Dai (2024) Sustainable Cities and Society 100, 105048, doi 10.1016/j.scs.2023.105048, an elevated walkway in hot-humid Hong Kong, measured and CFD-modelled (checked against the abstract): PET on the walkway level 2-17 K lower than in the open, and the walkway raised the ground-level PET by up to 2.7 K. Via the block-9 brief, not checked (the full text embargoed): Tmrt 53.5-68.0 C on the open sidewalk vs 19.9-39.6 C under the walkway (gap 19.8-34.8 K); PET 32.6-37.3 and 45.8-51.1 C; air -0.4 to 1.5 K (unverified)
+- **[hyd047]** Highways Department, Hong Kong, Guidance Notes on Design of Covers for Walkways and Passenger Shelters, BS/GN/047 (November 2018; checked against sections 3.1-3.5): bus shelters opaque, translucent materials avoided; walkway covers translucent on at most 1/3 of the width at the sides; low headroom or wider covers and fascias; flat covers better than upward-sloped ones; check with a sun-shadow analysis
 - **[brettMartin]** Brett Martin polycarbonate datasheet, 10 mm twinwall sheet (via the block-9 brief): solar transmission clear 0.80, opal 0.47, bronze 0.43; the solar heat gain coefficient is not the transmittance (unverified)
 - **[asuFilm]** Arizona State University radiative-cooling film on a bus shelter roof (via the block-9 brief): Tmrt 1-2 K lower, roof 10-20 F cooler (not peer reviewed, unverified)
 - **[sgWalkway]** Singapore covered walkways (secondary, via the block-9 brief): strong heat stress more than 77% of the time (unverified)
 - **[ucla]** UCLA study of Los Angeles Metro bus stops (via the block-9 brief): 26% of 10,526 stops sheltered (unverified)
-- **[fan2002]** Fan & Machemehl (2002) and a City University review, via the block-9 brief: passengers arrive at random for headways up to about 10-12 min, the mean wait is about half the headway (unverified)
-- **[fraser2017]** Fraser & Chester (2017) Journal of Transport & Health 4, 216 (via the block-9 brief): heat exposure and vulnerability of transit riders (unverified)
-- **[liu2025]** Liu et al. (2025) Journal of Transport Geography 128, 104383 (via the block-9 brief): walking to the stop adds more heat exposure than waiting at it (unverified)
+- **[fan2002]** Salek & Machemehl (1999) Characterizing Bus Transit Passenger Wait Times, SWUTC/99/167211-1, Center for Transportation Research, University of Texas at Austin (rosap.ntl.bts.gov/view/dot/40714). The block-9 brief cited this as Fan & Machemehl (2002), with a City University review; no such SWUTC report was found, so the verifiable report with that title is cited instead (the 2002 paper, reportedly a conference paper, not checked). The claim, as the citing papers describe it: passengers arrive at random for headways up to about 10-12 min, the mean wait is about half the headway (unverified)
+- **[fraser2017]** Fraser & Chester (2017) Journal of Transport & Health 4, 216-225, doi 10.1016/j.jth.2016.07.005 (via the block-9 brief): heat exposure and vulnerability of transit riders (a general claim)
+- **[liu2025]** Liu, Li, Pereira & Yan (2025) Journal of Transport Geography 128, 104383, doi 10.1016/j.jtrangeo.2025.104383, Miami (checked against the abstract): walking to the stop, not waiting at it, is the main source of heat exposure
 - **[cpsc]** US Consumer Product Safety Commission, via the block-9 brief: sunlit steel decks can burn bare skin in seconds (unverified)
-- **[deckSteel]** Steel bridge deck surfacing, Materials 18(13) 3109, doi 10.3390/ma18133109 (via the block-9 brief): steel deck surfacing 60-70 C in summer sun (unverified)
+- **[deckSteel]** Mao, Gu, Jiang, Zhang & Lei (2025) Materials 18(13) 3109, doi 10.3390/ma18133109, thermal field of epoxy steel bridge-deck paving (checked against the abstract): a finite-element model of extreme conditions with laboratory tests at 70 C; airflow under the girders cuts the peaks by up to 20 K. The brief's "60-70 C in summer sun" is not shown in it (unverified)
 - **[lasVegas]** Las Vegas surface measurements, via the block-9 brief: sunlit metal up to 62 C (unverified)
 - **[brief10]** Research brief docs/research/village-brief.md (block 10; values compiled from the sources below, items marked unverified there are flagged here; the roof albedos for rusty iron, asbestos cement and tarpaulin are assumptions of the brief, no measured value was found; the indoor proxies and their coefficients are assumptions of the brief)
 - **[pingshan]** Guo, Zou, Li & Qiu, mobile traverses in an urban village in Pingshan, Shenzhen, 2011-12 (journal not confirmed; via the block-10 brief): heat island largest 20:00-24:00, mean 1.71 K over 18-24 h, peak 3.95 K; thermal-humidity index worse than a green reference, especially at night (unverified)
@@ -2230,7 +2230,7 @@ brief's 0.50–0.65 (band 2 **missed**); bronze (τ 0.43) is inside.
 
 Buses come every 10 min with gaps h (1 + a (2u − 1)), u uniform, a = cv √3 (cv 0.4), from 06:00 to 23:00; riders
 arrive at random (exponential gaps, 0.4 a minute at each stop) and board the next bus (`daySchedule`, a pure function of the
-seed and the stop). For random arrivals E[W] = (h / 2)(1 + cv²) = 5.80 min [brief9], [fan2002]; simulated: 5.74 min over
+seed and the stop). For random arrivals E[W] = (h / 2)(1 + cv²) = 5.80 min [brief9], [fan2002] (Salek & Machemehl 1999, cited by the brief as Fan & Machemehl 2002); simulated: 5.74 min over
 2082 riders (A 5.85, B 5.51, C 5.20, D 6.19, E 5.95). When it is hot (air above 28 °C, by day) a rider takes the free waiting place with
 the lowest Tmrt at that moment, else the first free one (the bench first). On the page the bus clock runs 12 times faster than the
 animation over the 15 min after the hour shown, looping.
@@ -2251,14 +2251,14 @@ No standard heat dose exists for a few minutes of waiting [brief9]; it compares 
 | handrail, open bridge, °C | 75.7 | 67.1 | 48.5 | 76.2 |
 | handrail, covered bridge (south edge), °C | 76.4 | 68.2 | 34.2 | 77.0 |
 
-At 15:00 the cover takes 31.7 K of Tmrt off a person on the deck (Hong Kong covered walkway: 19.8–34.8 K [chenWalk2024]). The open
-steel deck peaks at 76.2 °C, above the 60–70 °C measured for steel deck surfacing [deckSteel] (supplementary, not counted): likely
+At 15:00 the cover takes 31.7 K of Tmrt off a person on the deck (Hong Kong elevated walkway: 19.8–34.8 K via the brief, not in the abstract, which gives PET 2–17 K lower on the walkway [chenWalk2024]). The open
+steel deck peaks at 76.2 °C, above the brief's 60–70 °C for steel deck surfacing (supplementary, not counted; the source [deckSteel] models extreme conditions and tests at 70 °C, it does not show 60–70 °C in summer sun): likely
 because the plate is heated from above and loses no heat from below in this thin-layer model, so deck and rail temperatures
 are upper bounds. The covered bridge's south handrail still gets the sun under the eaves.
 
 ### Contact burns
 
-ISO 13732-1 via CENELEC Guide 29 [iso13732], 1 min of contact: metal 51 °C, stone, concrete and glass 56 °C, plastics and wood
+ISO 13732-1 via CENELEC Guide 29 [iso13732], 1 min of contact: metal 51 °C, ceramics, glass and stone 56 °C (concrete read with them), plastics and wood
 60 °C; bare metal in about 1 s at 65–70 °C (unverified [brief9]; the flag at 65 °C, the low end). Display only. At 15:00:
 
 | Surface | °C | 1-min limit | above it | 1-s flag |
@@ -2274,8 +2274,8 @@ ISO 13732-1 via CENELEC Guide 29 [iso13732], 1 min of contact: metal 51 °C, sto
 | handrail, open footbridge (metal) | 67.1 | 51 | yes | yes |
 
 11 of 21 bench, rail and deck points carry the 1-min flag at 15:00, 9 the 1-s flag. Sunlit steel decks can burn in seconds
-[cpsc]; sunlit metal reached 62 °C in Las Vegas [lasVegas]; the brief advises reading at least 4 s of contact for older
-people and children.
+[cpsc]; sunlit metal reached 62 °C in Las Vegas [lasVegas]; for 1–10 s contacts CENELEC Guide 29 advises the low end of its range for children (from 1 min on Table A.1
+applies to children as is), and the brief advises reading at least 4 s of contact for older people and children.
 
 ### Walkers and riders
 
@@ -2369,7 +2369,7 @@ form) against the brief's NOAA table: the gap is the engine approximation (about
 | 6. Supplementary: the same at mid-span, K | 31.75 K | 20 to 35 | chenWalk2024 | inside (supplementary, not counted) |
 | 7. Surfaces at 15:00 (21 bench, rail and deck points) whose 1-min flag disagrees with its ISO 13732-1 limit | 0.000 | 0 | iso13732 | inside |
 | 7. Metal surfaces at 15:00 whose 1-s flag disagrees with ≈65 °C | 0.000 | 0 | brief9 | inside |
-| 7. Supplementary: open steel deck, daily peak (mean of the deck points), °C | 76.21 °C | 60 to 70 | deckSteel | outside (supplementary, not counted) |
+| 7. Supplementary: open steel deck, daily peak (mean of the deck points; the brief's 60–70 °C), °C | 76.21 °C | 60 to 70 | deckSteel | outside (supplementary, not counted) |
 | Riders arriving 15:00–16:00 (n 125) waiting with their head in shade | 0.736 | ≥ 0.5 | melnikov | inside |
 | Walkers at 15:00: density in shade over density in sun | 1.162 | ≥ 2 | melnikov | **outside** |
 
@@ -2389,8 +2389,8 @@ form) against the brief's NOAA table: the gap is the engine approximation (about
   not follow a body heating up over a wait. The heat dose is the engine's own measure, on the apparent temperature (UTCI is
   not implemented), not a health threshold; the stairs' extra effort is not modelled.
 - **Thin plates:** decks, handrails and bench seats are horizontal thin layers heated from above only (no cooling from below
-  or round a tube), so their temperatures are upper bounds; the open deck's peak (76.2 °C) is above the measured 60–70 °C.
-- **Burn limits depend on the material and the contact time:** the 1-min ISO limits are for healthy adult skin; the 1-s value
+  or round a tube), so their temperatures are upper bounds; the open deck's peak (76.2 °C) is above the brief's 60–70 °C.
+- **Burn limits depend on the material and the contact time:** the 1-min ISO limits apply to adults and, from 1 min on, to children; the 1-s value
   for bare metal is unverified; flags are display only.
 - **Misses:** band 2 (opal 0.47 of the opaque cut, against 0.50–0.65), band 3 (concrete under stop A's roof −1.4 K from the air at
   15:00, against 0–8 K above it; likely the roof underside taken at the shared warm-wall temperature, which the sensitivity run

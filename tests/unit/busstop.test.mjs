@@ -199,7 +199,7 @@ const PINNED_OUTSIDE = {
   'Walkers at 15:00: density in shade over density in sun': [1.162, 0.05],
   '1. Supplementary: stop E (glass box, centre) at 15:00, Tmrt at the kerb − under the roof, K': [3.997, 0.05],
   '5. Supplementary: stop C (n riders)': [0.897, 0.005],
-  '7. Supplementary: open steel deck, daily peak (mean of the deck points), °C': [76.207, 0.05],
+  '7. Supplementary: open steel deck, daily peak (mean of the deck points; the brief\'s 60–70 °C), °C': [76.207, 0.05],
   '1. Supplementary: an opaque roof on the avenue\'s east kerb (stop B\'s shelter, mirrored: open front to the west) at 15:00, standing: Tmrt at the kerb − under the roof, K': [0.022, 0.05],
 };
 const key = (label) => label.replace(/\(\d+ riders\)/g, '(n riders)').replace(/\bn \d+\b/g, 'n');

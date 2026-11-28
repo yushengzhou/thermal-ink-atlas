@@ -191,7 +191,7 @@ export function phoenixCard(d) {
       <tr><td>this model, stop A at 15:00: Tmrt</td><td>${fmt(A.open[15].tmrt)} °C</td><td>${fmt(A.centre[15].tmrt)} °C</td></tr>
       <tr><td>this model: concrete</td><td>${fmt(A.open[15].ts)} °C</td><td>${fmt(A.centre[15].ts)} °C</td></tr>
     </table>
-    <p class="note">Shade cut PET by 19 °C on average; metal roofs (20.6 °C) and ad panels (20.3 °C) did a little better than polycarbonate (18.2 °C), sparse vines made no significant difference, and stops without side panels did worse. Most riders arrived less than 5 min before their bus.</p>
+    <p class="note">Shade cut PET by 19 °C on average; metal roofs (20.6 °C) and ad panels (20.3 °C) did a little better than polycarbonate (18.2 °C), a vegetated awning made no significant difference in the afternoon, and stops without side panels did worse. Most riders arrived less than 5 min before their bus.</p>
     <p class="caveat">${d.misses.groundMiss ? `The shaded concrete here is ${fmt(d.misses.groundShade)} K from the air at 3 pm, outside the brief's 0–8 K above it (Phoenix: 41.3 °C at 41.2 °C air): band missed, see docs/sources.md; likely because the roof's underside is taken at the shared warm-wall temperature (a sunlit metal roof is far hotter underneath) and a 2 m strip of shade at a point gets no heat from the sunlit slab around it; not tuned. ` : ''}Phoenix is hotter and drier than this design day (air 35 °C here), and globe temperature and PET are not Tmrt, so the rows compare only the direction and the rough size of the effect.</p>
     ${srcLine(['dzyuban2022', 'brief9'])}`;
 }
@@ -251,8 +251,8 @@ export function bridgeCard(d) {
       <tr><td>covered steel deck, surface</td>${H.map((h) => `<td>${fmt(cv.deck[h])}</td>`).join('')}</tr>
       <tr><td>handrail, open bridge</td>${H.map((h) => `<td>${fmt(op.rail[h])}</td>`).join('')}</tr>
     </table>
-    <p class="note">At 3 pm the cover takes ${fmt(op.tmrt[15] - cv.tmrt[15])} K of Tmrt off the people crossing and keeps the deck at ${fmt(cv.deck[15])} °C instead of ${fmt(op.deck[15])} °C (daily peak of the open deck ${fmt(op.deckPeak)} °C${op.deckPeak > 70 ? ', above the 60–70 °C measured for steel deck surfacing: likely because the plate here loses no heat from below' : ''}). The handrail on the cover's south edge still sees the sun under the eaves.</p>
-    <p class="lit">Hong Kong: Tmrt 53.5–68.0 °C on the open sidewalk against 19.9–39.6 °C under a covered walkway, a gap of 19.8–34.8 K; a footbridge itself raised the street's PET by up to 2.7 K in a simulation (Chen et al. 2024). Singapore: covered walkways still in strong heat stress more than 77% of the time (via the brief). Steel deck surfacing: 60–70 °C in summer sun.</p>
+    <p class="note">At 3 pm the cover takes ${fmt(op.tmrt[15] - cv.tmrt[15])} K of Tmrt off the people crossing and keeps the deck at ${fmt(cv.deck[15])} °C instead of ${fmt(op.deck[15])} °C (daily peak of the open deck ${fmt(op.deckPeak)} °C${op.deckPeak > 70 ? ', above the 60–70 °C the brief gives for steel deck surfacing (a paving study tests at 70 °C): likely because the plate here loses no heat from below' : ''}). The handrail on the cover's south edge still sees the sun under the eaves.</p>
+    <p class="lit">Hong Kong, an elevated walkway: PET on it 2–17 K lower than in the open, and the street below up to 2.7 K higher (Chen et al. 2024); Tmrt 53.5–68.0 °C in the open against 19.9–39.6 °C under it, a gap of 19.8–34.8 K (via the brief, not checked). Singapore: covered walkways still in strong heat stress more than 77% of the time (via the brief). Steel deck paving is designed and tested for 70 °C (Mao et al. 2025).</p>
     <p class="caveat">The deck plate and the handrail are thin layers heated from above only (no cooling from below or round a tube), so their temperatures are upper bounds; climbing the stairs adds body heat, which is not modelled. The covered deck's sides are open.</p>
     ${srcLine(['chenWalk2024', 'sgWalkway', 'deckSteel', 'brief9'])}`;
 }
@@ -267,16 +267,16 @@ export function burnCard(d) {
     <table class="cmp">
       <tr><td>material</td><td>1 min</td><td>10 min</td><td>8 h</td></tr>
       <tr><td>metal</td><td>${BS.burnMetal.value} °C</td><td>48 °C</td><td>43 °C</td></tr>
-      <tr><td>stone and concrete (glass and ceramics too)</td><td>${BS.burnStone.value} °C</td><td>48 °C</td><td>43 °C</td></tr>
+      <tr><td>ceramics, glass and stone (concrete read with them)</td><td>${BS.burnStone.value} °C</td><td>48 °C</td><td>43 °C</td></tr>
       <tr><td>plastics and wood</td><td>${BS.burnPlastic.value} °C</td><td>48 °C</td><td>43 °C</td></tr>
     </table>
     <table class="cmp">
       <tr><td>surface at 15:00</td><td>model</td><td>1-min limit</td><td>flag</td></tr>
       ${rows}
     </table>
-    <p class="note">Press <kbd>U</kbd>: every bench seat, handrail and deck point above its 1-min limit at this hour carries a flag, "1 s" where metal passes about ${BS.burn1s.value} °C. A hand on a rail or a bare leg on a bench can stay in contact for seconds or longer.</p>
-    <p class="lit">Bare metal burns in about 1 s at 65–70 °C (unverified); the brief advises reading at least 4 s of contact for older people and children. The US Consumer Product Safety Commission warns that sunlit steel decks can burn in seconds; sunlit metal reached 62 °C in Las Vegas.</p>
-    <p class="caveat">The ISO values are for healthy adult skin; the limits depend on the material and the contact time, and the model gives surface temperatures, not skin. Rails and decks are thin plates heated from above only, so their temperatures are upper bounds.</p>
+    <p class="note">Press <kbd>U</kbd>: every bench seat, handrail and deck point above its 1-min limit at this hour carries a flag, "1 s" where metal passes about ${BS.burn1s.value} °C. A hand on a rail or a bare leg on a bench can stay in contact for seconds or longer; from 1 min of contact on, the guide says these limits apply to children too.</p>
+    <p class="lit">Bare metal burns in about 1 s at 65–70 °C (unverified); for touches of 1–10 s the guide advises the low end of its range for children, and the brief advises reading at least 4 s of contact for older people and children. The US Consumer Product Safety Commission warns that sunlit steel decks can burn in seconds; sunlit metal reached 62 °C in Las Vegas.</p>
+    <p class="caveat">The limits depend on the material and the contact time, and the model gives surface temperatures, not skin. Rails and decks are thin plates heated from above only, so their temperatures are upper bounds.</p>
     ${srcLine(['iso13732', 'brief9', 'cpsc', 'lasVegas'])}`;
 }
 
@@ -296,7 +296,7 @@ export function waitCard(d) {
       ${rows}
     </table>
     <p class="note">The heat dose of a wait is this page's own measure: the minutes spent times how far the apparent temperature (with the sun's radiation) is above ${BS.doseBase.value} °C${tag(BS.doseBase)}, summed. When it is hot, riders take the coolest free place; the rest wait in the sun.</p>
-    <p class="lit">Riders arrive at random when buses come every 10–12 min or more often, and then wait about half the headway (Fan &amp; Machemehl 2002, via the brief); in Phoenix most arrived less than 5 min before the bus (Dzyuban et al. 2022). Walking to the stop adds more exposure than the wait (Liu et al. 2025); transit riders are among those most exposed (Fraser &amp; Chester 2017).</p>
+    <p class="lit">Riders arrive at random when buses come every 10–12 min or more often, and then wait about half the headway (a University of Texas study, Salek &amp; Machemehl 1999, which the brief cites as Fan &amp; Machemehl 2002); in Phoenix most arrived less than 5 min before the bus (Dzyuban et al. 2022). Walking to the stop adds more exposure than the wait (Liu et al. 2025); transit riders are among those most exposed (Fraser &amp; Chester 2017).</p>
     <p class="caveat">No standard heat dose exists for a few minutes of waiting. The brief defines it on UTCI, which this engine does not compute; the apparent temperature of block 4 stands in for it, so the numbers compare stops and are not a measure of risk.</p>
     ${srcLine(['fan2002', 'dzyuban2022', 'liu2025', 'fraser2017', 'bom', 'brief9'])}`;
 }

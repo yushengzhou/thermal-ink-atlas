@@ -177,7 +177,7 @@ brief's 0.50–0.65 (band 2 **missed**); bronze (τ 0.43) is inside.
 
 Buses come every ${BS.headway.value} min with gaps h (1 + a (2u − 1)), u uniform, a = cv √3 (cv ${BS.cv.value}), from 06:00 to 23:00; riders
 arrive at random (exponential gaps, ${BS.riders.value} a minute at each stop) and board the next bus (\`daySchedule\`, a pure function of the
-seed and the stop). For random arrivals E[W] = (h / 2)(1 + cv²) = ${f2(meanWait())} min [brief9], [fan2002]; simulated: ${f2(w.wait)} min over
+seed and the stop). For random arrivals E[W] = (h / 2)(1 + cv²) = ${f2(meanWait())} min [brief9], [fan2002] (Salek & Machemehl 1999, cited by the brief as Fan & Machemehl 2002); simulated: ${f2(w.wait)} min over
 ${w.n} riders (${w.per.map((p) => `${p.id} ${f2(p.wait)}`).join(', ')}). When it is hot (air above 28 °C, by day) a rider takes the free waiting place with
 the lowest Tmrt at that moment, else the first free one (the bench first). On the page the bus clock runs ${BS.clock.value} times faster than the
 animation over the 15 min after the hour shown, looping.
@@ -198,14 +198,14 @@ No standard heat dose exists for a few minutes of waiting [brief9]; it compares 
 | handrail, open bridge, °C | ${H3.map((h) => f1(op.rail[h])).join(' | ')} | ${f1(op.railPeak)} |
 | handrail, covered bridge (south edge), °C | ${H3.map((h) => f1(cv.rail[h])).join(' | ')} | ${f1(cv.railPeak)} |
 
-At 15:00 the cover takes ${f1(op.tmrt[15] - cv.tmrt[15])} K of Tmrt off a person on the deck (Hong Kong covered walkway: 19.8–34.8 K [chenWalk2024]). The open
-steel deck peaks at ${f1(op.deckPeak)} °C, above the 60–70 °C measured for steel deck surfacing [deckSteel] (supplementary, not counted): likely
+At 15:00 the cover takes ${f1(op.tmrt[15] - cv.tmrt[15])} K of Tmrt off a person on the deck (Hong Kong elevated walkway: 19.8–34.8 K via the brief, not in the abstract, which gives PET 2–17 K lower on the walkway [chenWalk2024]). The open
+steel deck peaks at ${f1(op.deckPeak)} °C, above the brief's 60–70 °C for steel deck surfacing (supplementary, not counted; the source [deckSteel] models extreme conditions and tests at 70 °C, it does not show 60–70 °C in summer sun): likely
 because the plate is heated from above and loses no heat from below in this thin-layer model, so deck and rail temperatures
 are upper bounds. The covered bridge's south handrail still gets the sun under the eaves.
 
 ### Contact burns
 
-ISO 13732-1 via CENELEC Guide 29 [iso13732], 1 min of contact: metal ${BS.burnMetal.value} °C, stone, concrete and glass ${BS.burnStone.value} °C, plastics and wood
+ISO 13732-1 via CENELEC Guide 29 [iso13732], 1 min of contact: metal ${BS.burnMetal.value} °C, ceramics, glass and stone ${BS.burnStone.value} °C (concrete read with them), plastics and wood
 ${BS.burnPlastic.value} °C; bare metal in about 1 s at 65–70 °C (unverified [brief9]; the flag at ${BS.burn1s.value} °C, the low end). Display only. At 15:00:
 
 | Surface | °C | 1-min limit | above it | 1-s flag |
@@ -213,8 +213,8 @@ ${BS.burnPlastic.value} °C; bare metal in about 1 s at 65–70 °C (unverified 
 ${flagRows.join('\n')}
 
 ${fl.flagged} of ${fl.n} bench, rail and deck points carry the 1-min flag at 15:00, ${fl.s1} the 1-s flag. Sunlit steel decks can burn in seconds
-[cpsc]; sunlit metal reached 62 °C in Las Vegas [lasVegas]; the brief advises reading at least 4 s of contact for older
-people and children.
+[cpsc]; sunlit metal reached 62 °C in Las Vegas [lasVegas]; for 1–10 s contacts CENELEC Guide 29 advises the low end of its range for children (from 1 min on Table A.1
+applies to children as is), and the brief advises reading at least 4 s of contact for older people and children.
 
 ### Walkers and riders
 
@@ -284,8 +284,8 @@ ${bands9Markdown(rows)}
   not follow a body heating up over a wait. The heat dose is the engine's own measure, on the apparent temperature (UTCI is
   not implemented), not a health threshold; the stairs' extra effort is not modelled.
 - **Thin plates:** decks, handrails and bench seats are horizontal thin layers heated from above only (no cooling from below
-  or round a tube), so their temperatures are upper bounds; the open deck's peak (${f1(op.deckPeak)} °C) is above the measured 60–70 °C.
-- **Burn limits depend on the material and the contact time:** the 1-min ISO limits are for healthy adult skin; the 1-s value
+  or round a tube), so their temperatures are upper bounds; the open deck's peak (${f1(op.deckPeak)} °C) is above the brief's 60–70 °C.
+- **Burn limits depend on the material and the contact time:** the 1-min ISO limits apply to adults and, from 1 min on, to children; the 1-s value
   for bare metal is unverified; flags are display only.
 - **Misses:** band 2 (opal ${f2(swap.polyOpal.benefit / swap.roofMetal.benefit)} of the opaque cut, against 0.50–0.65), band 3 (concrete under stop A's roof ${signed(g15)} K from the air at
   15:00, against 0–8 K above it; likely the roof underside taken at the shared warm-wall temperature, which the sensitivity run

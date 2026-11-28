@@ -243,7 +243,7 @@ export function bands9() {
   const f = flags9(15);
   add(`7. Surfaces at 15:00 (${f.n} bench, rail and deck points) whose 1-min flag disagrees with its ISO 13732-1 limit`, f.bad1, 0, 0, 'iso13732');
   add('7. Metal surfaces at 15:00 whose 1-s flag disagrees with ≈65 °C', f.badS, 0, 0, 'brief9');
-  add('7. Supplementary: open steel deck, daily peak (mean of the deck points), °C', op.deckPeak, 60, 70, 'deckSteel', '°C', { supp: true });
+  add('7. Supplementary: open steel deck, daily peak (mean of the deck points; the brief\'s 60–70 °C), °C', op.deckPeak, 60, 70, 'deckSteel', '°C', { supp: true });
   const wk = walkers9(15);
   add(`Riders arriving 15:00–16:00 (n ${wk.riders}) waiting with their head in shade`, wk.shade, 0.5, null, 'melnikov');
   add('Walkers at 15:00: density in shade over density in sun', wk.ratio, 2, null, 'melnikov');
