@@ -31,14 +31,14 @@ export function pkNotes(scene, d) {
     asphalt: [`Open asphalt: ${fmt(d.asphalt15)} °C at 3 pm,`, `still ${fmt(d.asphalt23)} °C at 11 pm, giving back the day's heat`],
     shed: [`Rusty shed roof: ${fmt(d.shed15)} °C at 3 pm,`, `${fmt(d.shed23)} °C at 11 pm, below the ${fmt(d.air23)} °C air`],
     pv: ['Under the solar canopy:', `${fmt(d.pv15)} °C at 3 pm; open asphalt ${fmt(d.asphalt15)} °C`],
-    soil: ['Bare soil and ballast cool sooner:', `soil ${fmt(d.soil23)} °C at 11 pm, ${degs(d.asphalt23 - d.soil23)} below the asphalt`],
+    soil: ['Bare soil and track gravel cool sooner:', `soil ${fmt(d.soil23)} °C at 11 pm, ${degs(d.asphalt23 - d.soil23)} below the asphalt`],
     yard: [`Concrete yard: ${fmt(d.yard15)} °C at 3 pm (cooler),`, `${fmt(d.yard23)} °C at 11 pm (asphalt ${fmt(d.asphalt23)} °C)`],
   };
   const terms = {
     asphalt: [['groundFlux', "giving back the day's heat"], ['nightLag', `still ${fmt(d.asphalt23)} °C at 11 pm`]],
     shed: [['heatCapacity', 'Rusty shed roof']],
     pv: [['svf', 'Under the solar canopy']],
-    soil: [['thermalInertia', 'Bare soil and ballast cool sooner']],
+    soil: [['thermalInertia', 'Bare soil and track gravel cool sooner']],
     yard: [['heatStorage', `${fmt(d.yard23)} °C at 11 pm`]],
   };
   return scene.notes.slice(0, 5).map((n) => ({ ...n, text: text[n.key], terms: terms[n.key] }));
@@ -53,9 +53,9 @@ export function storageCard(d) {
   const lead = (d.st.ranges.openAsphalt.hMax - d.st.peakG.h + 24) % 24;
   return `
     ${close}
-    <h3>${gl('heatStorage', 'Thick pavement')}: hot by day, warm all night</h3>
-    <p class="lead">Thick asphalt soaks up heat all day and gives it back all night: at 11 pm the open lot is still ${fmt(t.openAsphalt.t23)} °C, warmer than the ${fmt(d.st.air.t23)} °C air.</p>
-    <div class="mat">${gl('groundFlux', 'Heat into the ground')}: + going in, − given back · ${d.flux ? 'night-release strokes on (G)' : 'the night-release button (G) shows it'}</div>
+    <h3>${gl('heatStorage', 'Thick pavement')}: hot by day, a little warmer than the air all night</h3>
+    <p class="lead">Thick asphalt soaks up heat all day and keeps giving some of it back all night, so it stays a little warmer than the air: at 11 pm the open lot is ${fmt(t.openAsphalt.t23)} °C, ${fmt(t.openAsphalt.t23 - d.st.air.t23)} degrees above the ${fmt(d.st.air.t23)} °C air.</p>
+    <div class="mat">${gl('groundFlux', 'Heat into the ground')}: + going in, − given back · ${d.flux ? 'night-release strokes on' : 'the night-release button shows it'}</div>
     <table class="cmp">
       <tr><td>°C (heat into or out of the ground below, watts per m²)</td>${head}</tr>
       ${rows}
@@ -90,7 +90,7 @@ export function pvCard(d) {
     </table>
     <p class="note">The panels take the sun off the bays all day, so the asphalt beneath stays near the air temperature; at night they hide the cold sky, so it cools a little less than the open lot. Cars under the canopy are out of the sun too. The day's range shrinks by ${red(p.empty)} here, more than the 60 to 75% measured in Phoenix (outside the measured range; not tuned).</p>
     ${experts(`<p class="lit">Ground beneath: ${gl('svf', 'sky view')} ${MODEL.pvSvf.value}${tag(MODEL.pvSvf)} (as measured by Golden et al.).</p><p class="lit">Phoenix, 17 June 2004 (air up to 41 °C): exposed asphalt 63.5 / 28.5 °C (max / min), under a PV canopy 37.0 / 27.7 °C, the daily range about 70% smaller (Golden et al. 2007; the paper has internal inconsistencies).</p>
-    <p class="caveat">Here the range shrinks by ${red(p.empty)}, more than in Phoenix and outside the spec's −60 to −75% band (docs/sources.md, block 6): the open asphalt swings ${fmt(p.open.range)} K here against 35.0 K there, the bay under the canopy ${fmt(p.empty.range)} K against 9.3 K, on a cooler day. Not tuned. The panel undersides count as warm walls (air + 2 K, more by day); a test run with hotter undersides by day and cooler ones at night brings the range inside the band (a sensitivity in docs/sources.md, not used here). The panels' own heat, their electricity and the air under them are not modelled.</p>`, ['golden2007', 'brief6'])}`;
+    <p class="caveat">Here the range shrinks by ${red(p.empty)}, more than in Phoenix and outside the spec's −60 to −75% band: the open asphalt swings ${fmt(p.open.range)} K here against 35.0 K there, the bay under the canopy ${fmt(p.empty.range)} K against 9.3 K, on a cooler day. Not tuned. The panel undersides count as warm walls (air + 2 K, more by day); a test run with hotter undersides by day and cooler ones at night brings the range inside the band (a test run, not used here). The panels' own heat, their electricity and the air under them are not modelled.</p>`, ['golden2007', 'brief6'])}`;
 }
 
 /** Lot trees. d: {trees, openBays (15:00 Ts of the bay rows), share}. */
@@ -132,7 +132,7 @@ export function shedCard(d) {
       <tr><td>time constant C / (4εσT³ + h_c)</td><td>${fmt(d.tau)} min</td></tr>
       <tr><td>${gl('groundFlux', 'G')} at 23:00</td><td>${W(d.shed.g23)}</td></tr>
     </table>
-    <p class="caveat">In the first hour after sunset the asphalt, concrete and soil cool faster than the roof, so the spec's "steepest cooling after sunset" is not met (band 4 missed; docs/sources.md, block 6): the roof's fastest cooling comes before sunset. Not tuned. The shed's walls, its dark inside and the air in it are not modelled; the roof is one cell layer at 5–8 m. Emissivity of rusted steel varies widely (0.69–0.88 in emissivity tables, unverified); with a lower ε the roof cools less at night.</p>`, ['optris', 'brief6'])}`;
+    <p class="caveat">In the first hour after sunset the asphalt, concrete and soil cool faster than the roof, so the spec's "steepest cooling after sunset" is not met (band 4 missed): the roof's fastest cooling comes before sunset. Not tuned. The shed's walls, its dark inside and the air in it are not modelled; the roof is one cell layer at 5–8 m. Emissivity of rusted steel varies widely (0.69–0.88 in emissivity tables, unverified); with a lower ε the roof cools less at night.</p>`, ['optris', 'brief6'])}`;
 }
 
 /** Brownfield ground. d: {st}. */
@@ -141,20 +141,20 @@ export function soilCard(d) {
   const row = (k, name) => `<tr><td>${name}</td><td>${fmt(t[k].t15)}</td><td>${fmt(t[k].t23)}</td><td>${r0(t[k].g23)}</td></tr>`;
   return `
     ${close}
-    <h3>Brownfield: soil, scrub and ballast cool sooner</h3>
-    <p class="lead">Bare soil and ballast get nearly as hot as asphalt in the sun, but hold less heat: by 11 pm the soil is ${fmt(t.openAsphalt.t23 - t.soil.t23)} degrees cooler than the asphalt.</p>
+    <h3>The old rail yard: soil, weeds and track gravel cool sooner</h3>
+    <p class="lead">Bare soil and the gravel under rail tracks get nearly as hot as asphalt in the sun, but hold less heat: by 11 pm the soil is ${fmt(t.openAsphalt.t23 - t.soil.t23)} degrees cooler than the asphalt.</p>
     <div class="mat">Open ground · °C at 3 pm and 11 pm, ${gl('groundFlux', 'heat out of the ground')} at 11 pm</div>
     <table class="cmp">
       <tr><td></td><td>3 pm</td><td>11 pm</td><td>watts per m², 11 pm</td></tr>
       ${row('openAsphalt', 'open asphalt')}
       ${row('soil', 'bare compacted soil')}
       ${row('scrub', 'scrubby dry vegetation')}
-      ${row('ballast', 'rail ballast')}
+      ${row('ballast', 'track gravel')}
       ${row('lawn', 'irrigated lawn')}
     </table>
-    <p class="note">Dry soil and loose ballast get nearly as hot as asphalt in the afternoon sun, but they hold less heat (lower ${gl('admittance', 'admittance')}), so by 11 pm they are ${fmt(t.openAsphalt.t23 - t.soil.t23)}–${fmt(t.openAsphalt.t23 - t.ballast.t23)} degrees cooler and give back less. Only the watered lawn, which spends sunshine on evaporation, stays cool by day.</p>
+    <p class="note">Dry soil and loose track gravel get nearly as hot as asphalt in the afternoon sun, but they hold less heat (lower ${gl('admittance', 'admittance')}), so by 11 pm they are ${fmt(t.openAsphalt.t23 - t.soil.t23)}–${fmt(t.openAsphalt.t23 - t.ballast.t23)} degrees cooler and give back less. Only the watered lawn, which spends sunshine on evaporation, stays cool by day.</p>
     ${experts(`<p class="lit">At its hottest, asphalt sends out about 150 W m⁻² more infrared than bare soil (Asaeda, Ca &amp; Wake 1996, via the brief, unverified).</p>
-    <p class="caveat">The brownfield values (soil, scrub, ballast: albedo, admittance, evaporation) are the brief's assumptions, not measurements; real brownfield soils vary with moisture, rubble and crust. Moisture after rain is not modelled.</p>`, ['asaeda1996', 'oke', 'brief6'])}`;
+    <p class="caveat">The old rail yard's values (soil, scrub, track gravel (ballast): albedo, admittance, evaporation) are the brief's assumptions, not measurements; real soils on disused land vary with moisture, rubble and crust. Moisture after rain is not modelled.</p>`, ['asaeda1996', 'oke', 'brief6'])}`;
 }
 
 /** The hot car: information only (not modelled). d: {openBay15, openAsphalt15}. */
@@ -186,7 +186,7 @@ export const PK_CARDS = [
   ['pv', 'Solar canopy'],
   ['trees', 'Lot trees'],
   ['shed', 'Rusty shed'],
-  ['soil', 'Brownfield'],
+  ['soil', 'Old rail yard'],
   ['car', 'Hot car (info)'],
 ];
 
@@ -218,7 +218,7 @@ export function pkApp(env) {
   root.body.insertAdjacentHTML(
     'beforeend',
     `<div id="parking" class="blockpanel" aria-label="Car park controls">
-        <div class="seg">${btn('data-flux', '1', 'night release G')}</div>
+        <div class="seg">${btn('data-flux', '1', 'night release', 'title="keyboard shortcut: G"')}</div>
         <div class="measures"><div class="hand">Cards</div>${PK_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'car' ? 'class="warn"' : '')).join('')}</div>
       </div>`,
   );

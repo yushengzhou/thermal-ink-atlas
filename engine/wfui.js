@@ -25,14 +25,14 @@ export function wfNotes(scene, d) {
     pond: [`Lily Pond ${fmt(d.pond04)} °C at 4 am,`, `warmer than the ${fmt(d.air04)} °C air`],
     corridor: [`Quay Street, along the wind (${Math.round(d.corridorFw * 100)}% of the open breeze):`, `asphalt ${fmt(d.corridorTs)} °C at 3 pm`],
     sheltered: [`Rope Walk, behind the warehouses (${Math.round(d.shelterFw * 100)}% of it):`, `asphalt ${fmt(d.shelterTs)} °C at 3 pm`],
-    shade: [`Under the riverside trees it feels like ${fmt(d.shadeTmrt)} °C,`, `in the sun beside them ${fmt(d.sunTmrt)} °C`],
+    shade: [`Under the riverside trees, radiant heat on you ${fmt(d.shadeTmrt)} °C;`, `in the sun beside them ${fmt(d.sunTmrt)} °C`],
   };
   const terms = {
     river: [['surfaceTemp', `River ${fmt(d.river15)} °C at 3 pm`], ['fetch', `fades within about ${d.reach} m`]],
     pond: [['nightLag', `Lily Pond ${fmt(d.pond04)} °C at 4 am`]],
     corridor: [['ventilationCorridor', 'along the wind'], ['windFactor', 'of the open breeze']],
     sheltered: [['sheltering', 'behind the warehouses'], ['windFactor', `${Math.round(d.shelterFw * 100)}% of it`]],
-    shade: [['tmrt', 'it feels like']],
+    shade: [['tmrt', 'radiant heat on you']],
   };
   return scene.notes.slice(0, 5).map((n) => ({ ...n, text: text[n.key], terms: terms[n.key] }));
 }
@@ -131,10 +131,10 @@ export function shadeCard(d) {
   return `
     ${close}
     <h3>Riverside shade: the biggest lever near water</h3>
-    <p class="lead">Under the riverside trees it feels like ${fmt(d.shadeTmrt)} °C at 3 pm, against ${fmt(d.sunTmrt)} °C in the sun beside them: the shade does more than the river.</p>
+    <p class="lead">Under the riverside trees the radiant heat on you is ${fmt(d.shadeTmrt)} °C at 3 pm, against ${fmt(d.sunTmrt)} °C in the sun beside them: the shade does more than the river.</p>
     <div class="mat">The promenade under the riverside trees, 15:00</div>
     <table class="cmp">
-      <tr><td></td><td>${gl('tmrt', 'feels like')}</td><td>${gl('apparentTemp', 'with the wind')}</td></tr>
+      <tr><td></td><td>${gl('tmrt', 'radiant heat')}</td><td>${gl('apparentTemp', 'feels like, with the wind')}</td></tr>
       <tr class="t"><td>under the trees</td><td>${fmt(d.shadeTmrt)} °C</td><td>${fmt(d.shadeAT)} °C</td></tr>
       <tr><td>in the sun beside them</td><td>${fmt(d.sunTmrt)} °C</td><td>${fmt(d.sunAT)} °C</td></tr>
       <tr><td>shade minus sun</td><td>${K(d.shadeTmrt - d.sunTmrt)}</td><td>${K(d.shadeAT - d.sunAT)}</td></tr>

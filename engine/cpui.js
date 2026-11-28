@@ -53,7 +53,7 @@ export function turfCard(d) {
     <p class="lead">At 3 pm the artificial pitch is ${fmt(t.turf.ts[15])} °C, ${fmt(t.turf.ts[15] - t.grass.ts[15])} degrees hotter than the watered grass beside it; after dark it cools fast.</p>
     <div class="mat">Pitch: green plastic blades in black ${gl('crumbRubber', 'crumb rubber')} · no water to evaporate</div>
     <table class="cmp">
-      <tr><td>surface, °C</td><td>05:00</td><td>12:00</td><td>15:00</td><td>23:00</td><td>feels like, 15:00</td></tr>
+      <tr><td>surface, °C</td><td>05:00</td><td>12:00</td><td>15:00</td><td>23:00</td><td>radiant heat, 15:00</td></tr>
       ${row('turf', 'artificial turf (pitch)')}
       ${row('grass', 'natural grass (field)')}
       ${row('track', 'running track')}
@@ -74,14 +74,14 @@ export function playCard(d) {
     <p class="lead">In full sun the rubber play surface reaches ${fmt(s15.sun.ts)} °C at 3 pm; under the sails it stays at ${fmt(s15.sail.ts)} °C.</p>
     <div class="mat">Poured rubber play surface · places (5 m squares), then noon / 3 pm</div>
     <table class="cmp">
-      <tr><td></td><td>places</td><td>surface</td><td>${gl('tmrt', 'feels like')}</td></tr>
+      <tr><td></td><td>places</td><td>surface</td><td>${gl('tmrt', 'radiant heat')}</td></tr>
       ${row('sun', 'rubber in full sun')}
       ${row('sail', 'rubber under a sail')}
       ${row('tree', 'rubber under a tree')}
     </table>
     <p class="note">In full sun the rubber reaches ${fmt(s15.sun.ts)} °C at 3 pm, ${fmt(s15.sun.ts - d.air15)} degrees above the air. Under the sails it stays at ${fmt(s15.sail.ts)} °C${d.sailMiss ? MISS : ''} and under the trees ${fmt(s15.tree.ts)} °C${d.treeMiss ? MISS : ''}. The slide is drawn but not modelled.</p>
     ${experts(`<p class="lit">Gilbert, Arizona, at noon in 41.6 °C air: rubber 87.2 °C in sun, 46.7 °C under a shade sail and 42.2 °C under a tree; a metal slide 71.7 °C in sun and 43.9 °C in shade (Vanos et al. 2016).</p>
-    <p class="caveat">${d.treeMiss ? `Under the trees the model gives ${fmt(s15.tree.ts - d.air15)} K above the air at 3 pm, more than the brief's 0–5 K: the band is missed (see docs/sources.md); not tuned. ` : ''}${d.sailMiss ? `The sails cut the rubber by ${fmt(s15.sun.ts - s15.sail.ts)} K at 3 pm, short of the brief's 25 K or more (band missed, see docs/sources.md; ${fmt(s12.sun.ts - s12.sail.ts)} K at noon); not tuned. ` : ''}The play surface has no measured albedo or heat store here: the brief's track values stand in for it${tag(MATERIALS.rubber.alpha)}.</p>`, ['vanos2016', 'brief8'])}`;
+    <p class="caveat">${d.treeMiss ? `Under the trees the model gives ${fmt(s15.tree.ts - d.air15)} K above the air at 3 pm, more than the brief's 0–5 K: the band is missed; not tuned. ` : ''}${d.sailMiss ? `The sails cut the rubber by ${fmt(s15.sun.ts - s15.sail.ts)} K at 3 pm, short of the brief's 25 K or more (band missed; ${fmt(s12.sun.ts - s12.sail.ts)} K at noon); not tuned. ` : ''}The play surface has no measured albedo or heat store here: the brief's track values stand in for it${tag(MATERIALS.rubber.alpha)}.</p>`, ['vanos2016', 'brief8'])}`;
 }
 
 /** The shade sails. d: {st}. */
@@ -98,11 +98,11 @@ export function sailCard(d) {
       <tr><td></td><td>12:00</td><td>15:00</td></tr>
       <tr><td>rubber in sun − under a sail, surface</td><td>${K(s12.sun.ts - s12.sail.ts)}</td><td>${K(s15.sun.ts - s15.sail.ts)}${d.sailMiss ? MISS : ''}</td></tr>
       <tr><td>under a sail, surface above the air</td><td>${K(s12.sail.ts - d.air12)}</td><td>${K(s15.sail.ts - d.air15)}</td></tr>
-      <tr><td>how it ${gl('tmrt', 'feels')}: in sun − under a sail</td><td>${K(s12.sun.tmrt - s12.sail.tmrt)}</td><td>${K(s15.sun.tmrt - s15.sail.tmrt)}</td></tr>
+      <tr><td>${gl('tmrt', 'radiant heat')}: in sun − under a sail</td><td>${K(s12.sun.tmrt - s12.sail.tmrt)}</td><td>${K(s15.sun.tmrt - s15.sail.tmrt)}</td></tr>
     </table>
     <p class="note">A sail stops most of the sun before it reaches the rubber and the child. It is not a roof: the sky still shows round its edges, and as the sun moves its shadow slides off the cells beneath it, so the sails here sit over the slide and the climbing frame, where children stay longest.</p>
     ${experts(`<p class="lit">Sail height ${CP.sailHeight.value} m${tag(CP.sailHeight)}, transmission ${tr.value}${tag(tr)}.</p><p class="lit">Lubbock, Texas: a shade sail cut the radiation a child absorbs by 168 W m⁻²; concrete 40.0 °C in sun vs 29.2 °C in shade (Vanos et al. 2017). New South Wales schools: shade cooled black asphalt by about 25 K, the black globe by more than 10 K; shaded turf 35 °C vs 61 °C sunlit (Pfautsch et al. 2020). Phoenix: buildings shade best, then trees, then light structures; after sunset every kind of shade keeps a person a little warmer (Middel et al. 2021).</p>
-    <p class="caveat">${d.sailMiss ? `Model: ${fmt(s15.sun.ts - s15.sail.ts)} K less at 3 pm (${fmt(s12.sun.ts - s12.sail.ts)} K at noon), short of the brief's 25 K or more: the band is missed (see docs/sources.md); not tuned. ` : ''}The cloth is a flat screen in this model; its own temperature is not computed: the cells under it see it as a warm wall (air + 2 K, more by day), so they stay a little warmer after dark.</p>`, ['vanos2017', 'pfautsch2020', 'middel2021', 'brief8'])}`;
+    <p class="caveat">${d.sailMiss ? `Model: ${fmt(s15.sun.ts - s15.sail.ts)} K less at 3 pm (${fmt(s12.sun.ts - s12.sail.ts)} K at noon), short of the brief's 25 K or more: the band is missed; not tuned. ` : ''}The cloth is a flat screen in this model; its own temperature is not computed: the cells under it see it as a warm wall (air + 2 K, more by day), so they stay a little warmer after dark.</p>`, ['vanos2017', 'pfautsch2020', 'middel2021', 'brief8'])}`;
 }
 
 /** Watering the pitch. d: {w (irrigationStats), on}. */
@@ -113,7 +113,7 @@ export function waterCard(d) {
     ${close}
     <h3>Watering the pitch helps for minutes</h3>
     <p class="lead">Watering the hot pitch cools it for only a few minutes: ${fmt(-w.min.d)} degrees at ${hm(w.min.h)}, and it is hot again within half an hour.</p>
-    <div class="mat">Sprinklers at ${hm(CP.irrigateHour.value)} · ${d.on ? 'on (the watering button, I, switches it off)' : 'off (the watering button, I, turns it on)'}</div>
+    <div class="mat">Sprinklers at ${hm(CP.irrigateHour.value)} · ${d.on ? 'on (the watering button switches it off)' : 'off (the watering button turns it on)'}</div>
     <table class="cmp">
       <tr><td>turf, °C</td>${rows.map((r) => `<td>${hm(r.h)}</td>`).join('')}</tr>
       <tr><td>dry</td>${rows.map((r) => `<td>${fmt(r.dry)}</td>`).join('')}</tr>
@@ -121,7 +121,7 @@ export function waterCard(d) {
     </table>
     <p class="note">The water takes the heat of the sun into evaporation for a few minutes, then the turf dries and heats again: the pitch is ${fmt(-w.min.d)} degrees cooler at ${hm(w.min.h)}, ${fmt(-w.later.d)} half an hour later, and ${fmt(w.residual)} three hours on.${w.min.wet - w.min.air > 5 ? ` Measured watering takes turf down to near the air; here it stays ${fmt(w.min.wet - w.min.air)} degrees above it${MISS}.` : ''}</p>
     ${experts(`<p class="lit">Evaporative fraction ${CP.efPeak.value}${tag(CP.efPeak)} falling to ${CP.efRes.value}${tag(CP.efRes)} with τ ${CP.irrigateTau.value} min${tag(CP.irrigateTau)}, from ${hm(CP.irrigateHour.value)}${tag(CP.irrigateHour)}: ${rows.map((r) => `${hm(r.h)} ${efAt((r.h - CP.irrigateHour.value) * 60).toFixed(2)}`).join(', ')}.</p><p class="lit">Brigham Young University: watering took turf from 79 °C to 29 °C; it was back at 49 °C after 5 min and 73 °C after 20 min (via the New York State health department). Penn State: 54–71 °C down to 24 °C, 32–49 °C within 30 min, then about steady for 3 h (McNitt et al. 2008).</p>
-    <p class="caveat">${w.min.wet - w.min.air > 5 ? `The measured drop to near the air is far deeper than this model gives (${fmt(w.min.wet - w.min.air)} K above the air at its coolest, against within 5 K): likely because the brief's pulse spends at most ${CP.efPeak.value} of the net radiation on evaporation, while real sprinkler water probably also cools the turf with its own heat and evaporates faster from a hot surface than the net radiation allows. Band missed (see docs/sources.md); not tuned. ` : ''}Turf cells only, every 15 min; the air is not cooled.</p>`, ['nydoh', 'mcnitt2008', 'brief8'])}`;
+    <p class="caveat">${w.min.wet - w.min.air > 5 ? `The measured drop to near the air is far deeper than this model gives (${fmt(w.min.wet - w.min.air)} K above the air at its coolest, against within 5 K): likely because the brief's pulse spends at most ${CP.efPeak.value} of the net radiation on evaporation, while real sprinkler water probably also cools the turf with its own heat and evaporates faster from a hot surface than the net radiation allows. Band missed; not tuned. ` : ''}Turf cells only, every 15 min; the air is not cooled.</p>`, ['nydoh', 'mcnitt2008', 'brief8'])}`;
 }
 
 /** Children. d: {st, kids}. */
@@ -133,7 +133,7 @@ export function kidsCard(d) {
     <div class="mat">Play times: ${CP.playTimes.value} · drawn smaller (${pct(CP.kidSize.value)} of an adult)</div>
     <table class="cmp">
       <tr><td>children at 15:00 / in shade</td><td>${d.kids.n} / ${pct(d.kids.shade)}</td></tr>
-      <tr><td>how it ${gl('tmrt', 'feels')} at 3 pm on the sunny rubber / under a sail (adult height)</td><td>${fmt(d.st.split[15].sun.tmrt)} / ${fmt(d.st.split[15].sail.tmrt)} °C</td></tr>
+      <tr><td>${gl('tmrt', 'radiant heat')} at 3 pm on the sunny rubber / under a sail (adult height)</td><td>${fmt(d.st.split[15].sun.tmrt)} / ${fmt(d.st.split[15].sail.tmrt)} °C</td></tr>
     </table>
     <p class="note">At play times the children make for the sails and the trees; the ones still in the sun on the rubber or the pitch show the sweat cue. A child's head and body are closer to a 60–70 °C surface than an adult's, they play hard, and they do not always notice or say that they are too hot.</p>
     ${experts(`<p class="lit">Play times${tag(CP.playTimes)}; figure size${tag(CP.kidSize)}.</p><p class="lit">Lubbock playgrounds: children's bodies are nearer the hot ground, and a shade sail cut the radiation they absorb by 168 W m⁻² (Vanos et al. 2017); children's heat vulnerability outdoors is reviewed by Vanos (2015). In weak wind the air at 0.3 m was up to 1 K warmer than at 1.5 m (Paolini et al.).</p>
@@ -157,7 +157,7 @@ export function courtsCard(d) {
     </table>
     <p class="note">Both are a thin coat on asphalt: as hot as dark paving, a little below the turf, which holds less heat.</p>
     ${experts(`<p class="lit">Albedo: track ${MATERIALS.track.alpha.value}${tag(MATERIALS.track.alpha)}, courts ${MATERIALS.acrylic.alpha.value}${tag(MATERIALS.acrylic.alpha)}.</p><p class="lit">A school report from Kinmen: a PU track more than 15 K above the air at noon; in Japan at 11 am in August, an artificial running track 63.9 °C against artificial turf 67.0 °C and natural turf 42.2 °C (Aoki 2009). Court-coating makers: a standard acrylic court about 52 °C in 30 °C air (vendor claims). An asphalt court measured albedo 0.24 (Vanos et al. 2017).</p>
-    <p class="caveat">${d.courtMiss ? `The courts come out ${fmt(t.courts.ts[15] - a)} K above the air at 3 pm, just over the vendors' 15–25 K: band missed (see docs/sources.md); not tuned. ` : ''}${d.trackMiss ? `The track comes out ${fmt(t.track.ts[15] - a)} K above the air at 3 pm, outside 15–30 K: band missed; not tuned. ` : ''}Weak sources: one school report, one study and vendor claims; the albedos, emissivities and heat stores are the brief's unverified values.</p>`, ['kinmen', 'aoki2009', 'courtVendor', 'vanos2017', 'brief8'])}`;
+    <p class="caveat">${d.courtMiss ? `The courts come out ${fmt(t.courts.ts[15] - a)} K above the air at 3 pm, just over the vendors' 15–25 K: band missed; not tuned. ` : ''}${d.trackMiss ? `The track comes out ${fmt(t.track.ts[15] - a)} K above the air at 3 pm, outside 15–30 K: band missed; not tuned. ` : ''}Weak sources: one school report, one study and vendor claims; the albedos, emissivities and heat stores are the brief's unverified values.</p>`, ['kinmen', 'aoki2009', 'courtVendor', 'vanos2017', 'brief8'])}`;
 }
 
 /** Burn limits. d: {st, cells}. */
@@ -178,7 +178,7 @@ export function burnCard(d) {
     <table class="cmp">
       <tr><td>ground above its 1-minute limit at 3 pm (places)</td><td>${Object.entries(by).map(([id, n]) => `${name(id)} ${n}`).join(' · ') || 'none'}</td></tr>
     </table>
-    <p class="note">The burn-limits button (U) hatches every patch of ground above its 1-minute limit at this hour. A child sitting on the turf or sliding on sunny metal can stay in contact for longer than a minute, so the lower 10-minute limit of ${CP.burn10min.value} °C is the safer reading for long contact.</p>
+    <p class="note">The burn-limits button hatches every patch of ground above its 1-minute limit at this hour. A child sitting on the turf or sliding on sunny metal can stay in contact for longer than a minute, so the lower 10-minute limit of ${CP.burn10min.value} °C is the safer reading for long contact.</p>
     ${experts(`<p class="lit">ISO 13732-1 (via CENELEC Guide 29), Table A.1, 1 min of contact${tag(CP.burnPlastic)}; concrete and asphalt read with ceramics, glass and stone${tag(CP.asphaltClass)}; 10 min${tag(CP.burn10min)}.</p><p class="lit">Press coverage of Vanos's studies: 60 °C burns skin in 1 min, 74 °C in 5 s and 77 °C in 3 s (the standard not named). Gilbert, Arizona: a metal slide 71.7 °C in sun (Vanos et al. 2016).</p>
     <p class="caveat">For contact of a minute or longer the guide says these limits apply to children as well; only for brief touches (1–10 s) does it advise the low end of its range for children. The limits depend on the material and the contact time; the model gives surface temperatures, not skin. The slide is drawn but not modelled; no metal ground is hatched.</p>`, ['iso13732', 'vanosPress', 'vanos2016', 'brief8'])}`;
 }
@@ -254,7 +254,7 @@ export function cpApp(env) {
       const turfNow = tsMean(thermal, set.cells, hq);
       const dryNow = tsMean(set.base, set.cells, hq);
       return t < 0
-        ? `Pitch watered at ${hm(CP.irrigateHour.value)} (the watering button, I, switches it off) · the turf now ${fmt(turfNow)} °C, dry`
+        ? `Pitch watered at ${hm(CP.irrigateHour.value)} (the watering button switches it off) · the turf now ${fmt(turfNow)} °C, dry`
         : `Pitch watered at ${hm(CP.irrigateHour.value)}: the turf ${fmt(turfNow)} °C, ${fmt(Math.abs(turfNow - dryNow))} degrees ${turfNow < dryNow ? 'cooler' : 'warmer'} than the dry pitch (the air is not cooled)`;
     },
     layer: null,

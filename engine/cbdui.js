@@ -23,17 +23,19 @@ const close = '<button class="x" aria-label="close">×</button>';
 const degs = (v) => `${Math.max(1, Math.round(Math.abs(v)))} degree${Math.round(Math.abs(v)) > 1 ? 's' : ''}`;
 /** A height-to-width ratio in words: 2.3 -> 'over twice'. */
 const times = (x) => `${x - Math.floor(x) > 0.05 ? 'over ' : ''}${['', 'once', 'twice', 'three times', 'four times', 'five times'][Math.floor(x)] ?? `${Math.floor(x)} times`}`;
+/** The glass types in plain words (the panel buttons: clear, coated, mirror). */
+const PLAIN_GLASS = { clear: 'clear glass', lowe: 'coated glass', mirror: 'mirror glass' };
 export function cbdNotes(scene, d) {
   const g = GLASS[d.glass];
   const text = {
-    spot: [`Reflection spot: in shade, yet it feels like`, `${fmt(d.spotTmrt)} °C at 3 pm (plain shade ${fmt(d.shadeTmrt)} °C)`],
-    glass: [`${d.towerName}, ${g.name.toLowerCase()}:`, `bounces back ${Math.round(d.rhoNow * 100)}% of the sun at 3 pm`],
+    spot: [`Reflection spot: in shade, yet radiant heat on you`, `${fmt(d.spotTmrt)} °C at 3 pm (plain shade ${fmt(d.shadeTmrt)} °C)`],
+    glass: [`${d.towerName}, ${PLAIN_GLASS[d.glass] ?? g.name.toLowerCase()}: the 3 pm sun only grazes it;`, `it bounces back ${Math.round(d.rhoNow * 100)}% of that sliver`],
     lane: [`Silk Lane: buildings ${times(d.laneHw)} as tall as it is wide;`, `${fmt(d.lane05)} °C at 5 am, ${degs(d.lag05)} ${d.lag05 < 0 ? 'cooler' : 'warmer'} than open stone`],
     plaza: [`Plaza paving ${fmt(d.plaza15)} °C at 3 pm`],
   };
   const terms = {
-    spot: [['reflectionSpot', 'Reflection spot'], ['tmrt', 'it feels like']],
-    glass: [['fresnel', `bounces back ${Math.round(d.rhoNow * 100)}% of the sun`]],
+    spot: [['reflectionSpot', 'Reflection spot'], ['tmrt', 'radiant heat on you']],
+    glass: [['fresnel', `bounces back ${Math.round(d.rhoNow * 100)}% of that sliver`]],
     lane: [['canyon', 'as tall as it is wide'], ['nightLag', `${fmt(d.lane05)} °C at 5 am`]],
     plaza: [['surfaceTemp', 'Plaza paving']],
   };
@@ -51,7 +53,7 @@ export function canyonCard(c) {
     <table class="cmp">
       <tr><td>Exchange Street and Silk Lane</td><td>here</td><td>in the open</td></tr>
       <tr class="t"><td>Exchange St. floor at 3 pm${D.shadeSince !== null ? `, in shade since ${hm(D.shadeSince)}` : ''}</td><td>${fmt(D.ts15Shade)} °C</td><td>${fmt(D.open15)} °C asphalt in sun</td></tr>
-      <tr><td>how hot it ${gl('tmrt', 'feels')} there at 3 pm</td><td>${fmt(D.tmrt15Shade)} °C</td><td></td></tr>
+      <tr><td>${gl('tmrt', 'radiant heat')} on you there at 3 pm</td><td>${fmt(D.tmrt15Shade)} °C</td><td></td></tr>
       <tr class="t"><td>Silk Lane floor at 5 am</td><td>${fmt(L.ts05)} °C</td><td>${fmt(L.open05)} °C open stone</td></tr>
       <tr><td>${gl('nightLag', 'slower to cool')}: at 5 am</td><td>${dg(L.lag05)}</td><td>air ${fmt(L.air05)} °C</td></tr>
     </table>
@@ -66,12 +68,12 @@ export function canyonCard(c) {
  */
 export function glassCard(id, st, face) {
   const g = GLASS[id];
-  const row = (r) => (r.n ? `<tr class="t"><td>${r.h}:00</td><td>${dg(r.dTmrt)}</td><td>${dg(r.dTmrtMax)}</td></tr><tr><td></td><td class="sub" colspan="2">${r.n} places (5 m squares) in the patch; a patch in shade feels like ${fmt(r.tmrtSpotShade)} °C against ${fmt(r.tmrtShade)} °C in plain shade</td></tr>` : `<tr><td>${r.h}:00</td><td colspan="2">no reflected patch on the street</td></tr>`);
+  const row = (r) => (r.n ? `<tr class="t"><td>${r.h}:00</td><td>${dg(r.dTmrt)}</td><td>${dg(r.dTmrtMax)}</td></tr><tr><td></td><td class="sub" colspan="2">${r.n} places (5 m squares) in the patch; radiant heat on you in a patch in shade ${fmt(r.tmrtSpotShade)} °C against ${fmt(r.tmrtShade)} °C in plain shade</td></tr>` : `<tr><td>${r.h}:00</td><td colspan="2">no reflected patch on the street</td></tr>`);
   const rhoAt = (th) => f2(glassRho(g.rho0.value, th));
   return `
     ${close}
-    <h3>${g.name}</h3>
-    <p class="lead">At 3 pm the ${face.name} bounces ${Math.round(glassRho(g.rho0.value, face.theta15) * 100)}% of the sun that hits it back down onto the street${st.h15.n ? `, and people in the bright patch feel about ${Math.max(1, Math.round(st.h15.dTmrt))} degrees hotter` : ''}.</p>
+    <h3>${g.name}${id === 'lowe' ? ' (coated glass)' : ''}</h3>
+    <p class="lead">At 3 pm the sun only grazes the ${face.name} (it comes in ${Math.round(face.theta15)}° off straight-on), so just a sliver of sunlight reaches it; of that sliver the glass bounces ${Math.round(glassRho(g.rho0.value, face.theta15) * 100)}% back down onto the street${st.h15.n ? `, and people in the bright patch get about ${Math.max(1, Math.round(st.h15.dTmrt))} degrees more ${gl('tmrt', 'radiant heat')}` : ''}. At such a glancing angle every kind of glass bounces most of it, so the glass type matters little here.</p>
     <table class="cmp">
       <tr><td>in the bright reflected patch</td><td>hotter, on average</td><td>at most</td></tr>
       ${row(st.h12)}
@@ -96,9 +98,9 @@ export function spotCard(st, id) {
   return `
     ${close}
     <h3>${gl('reflectionSpot', 'Reflection spot')}: out of the sun, still hot</h3>
-    <p class="lead">Standing in a tower's shade but in the sunlight its glass bounces down, it feels like ${fmt(st.tmrtSpotShade)} °C at 3 pm, against ${fmt(st.tmrtShade)} °C in plain shade.</p>
+    <p class="lead">Standing in a tower's shade but in the sunlight its glass bounces down, the radiant heat on you is ${fmt(st.tmrtSpotShade)} °C at 3 pm, against ${fmt(st.tmrtShade)} °C in plain shade.</p>
     <table class="cmp">
-      <tr><td>${g.name}, 3 pm</td><td>${gl('tmrt', 'feels like')}</td></tr>
+      <tr><td>${g.name}, 3 pm</td><td>${gl('tmrt', 'radiant heat on you')}</td></tr>
       <tr><td>plain building shade</td><td>${fmt(st.tmrtShade)} °C</td></tr>
       <tr class="t"><td>reflection spot in shade</td><td>${fmt(st.tmrtSpotShade)} °C</td></tr>
       <tr><td>full sun</td><td>${fmt(st.tmrtSun)} °C</td></tr>
@@ -124,7 +126,7 @@ export function acCard() {
       <tr><td>central Tokyo, daytime</td><td>over ${AC.tokyo} watts per m²</td></tr>
     </table>
     <p class="note">The plumes on the roofs mark where this heat leaves the towers.</p>
-    <p class="caveat"><b>Not felt in this model:</b> the air temperature is a fixed design-day curve, so waste heat cannot warm the street or anyone in it, and it is not added to any surface or how-hot-it-feels value.</p>
+    <p class="caveat"><b>Not felt in this model:</b> the air temperature is a fixed design-day curve, so waste heat cannot warm the street or anyone in it, and it is not added to any surface or radiant-heat value.</p>
     ${experts('<p class="caveat">Not added to any surface temperature or Tmrt. No figure per m² of office floor was found for a CBD like this one.</p>', ['xie2016', 'sailor2011'])}`;
 }
 

@@ -24,16 +24,16 @@ export function htNotes(scene, d) {
   const text = {
     lane: ['Jujube Lane, 5 m wide between 4 m walls:', `at noon ${pct(d.laneNoon)} of the floor is in sun`],
     roofs: [`Grey tile roofs ${fmt(d.roof15)} °C at 3 pm,`, 'hotter than the 50–62 °C measured'],
-    awning: ['Under the mat awning (天棚) it feels like', `${fmt(d.awningTmrt)} °C; in the open courtyard sun ${fmt(d.sunTmrt)} °C`],
-    splash: [`Splash at 7 pm (P): Lantern Lane ${degs(d.d20)} ${d.d20 < 0 ? 'cooler' : 'warmer'} by 8 pm,`, `${degs(d.d23)} at 11 pm`],
-    tree: ['Pagoda trees on the main lane: it feels like', `${fmt(d.treeTmrt)} °C beneath, ${fmt(d.laneSunTmrt)} °C in the sun`],
+    awning: ['Under the mat awning (天棚), radiant heat on you', `${fmt(d.awningTmrt)} °C; in the open courtyard sun ${fmt(d.sunTmrt)} °C`],
+    splash: [`Splash at 7 pm: Lantern Lane ${degs(d.d20)} ${d.d20 < 0 ? 'cooler' : 'warmer'} by 8 pm,`, `${degs(d.d23)} at 11 pm`],
+    tree: ['Pagoda trees on the main lane: radiant heat on you', `${fmt(d.treeTmrt)} °C beneath, ${fmt(d.laneSunTmrt)} °C in the sun`],
   };
   const terms = {
     lane: [['canyon', '4 m walls']],
     roofs: [['surfaceTemp', `${fmt(d.roof15)} °C at 3 pm`]],
-    awning: [['tianpeng', 'mat awning (天棚)'], ['tmrt', 'it feels like']],
-    splash: [['waterStore', 'Splash at 7 pm (P)']],
-    tree: [['tmrt', 'it feels like']],
+    awning: [['tianpeng', 'mat awning (天棚)'], ['tmrt', 'radiant heat on you']],
+    splash: [['waterStore', 'Splash at 7 pm']],
+    tree: [['tmrt', 'radiant heat on you']],
   };
   return scene.notes.slice(0, 5).map((n) => ({ ...n, text: text[n.key], terms: terms[n.key] }));
 }
@@ -62,10 +62,10 @@ export function courtyardCard(d) {
   return `
     ${close}
     <h3>${gl('siheyuan', 'Courtyards')}: shade from above</h3>
-    <p class="lead">At 3 pm it feels like ${fmt(c.awning.tmrt)} °C under a mat awning and ${fmt(c.sun.tmrt)} °C in the open sun of the same courtyards.</p>
+    <p class="lead">At 3 pm the radiant heat on you is ${fmt(c.awning.tmrt)} °C under a mat awning and ${fmt(c.sun.tmrt)} °C in the open sun of the same courtyards.</p>
     <div class="mat">Paved grey-brick courtyards, 15:00 · air ${fmt(c.air)} °C</div>
     <table class="cmp">
-      <tr><td></td><td>${gl('svf', 'open to the sky')}</td><td>${gl('surfaceTemp', 'paving')}</td><td>${gl('tmrt', 'feels like')}</td></tr>
+      <tr><td></td><td>${gl('svf', 'open to the sky')}</td><td>${gl('surfaceTemp', 'paving')}</td><td>${gl('tmrt', 'radiant heat on you')}</td></tr>
       <tr class="t"><td>under a mat awning</td><td>${f2(c.awning.svf)}</td><td>${fmt(c.awning.ts)} °C</td><td>${fmt(c.awning.tmrt)} °C</td></tr>
       <tr><td>under a vine pergola</td><td>${f2(c.pergola.svf)}</td><td>${fmt(c.pergola.ts)} °C</td><td>${fmt(c.pergola.tmrt)} °C</td></tr>
       <tr><td>under a tree crown</td><td>${f2(c.crown.svf)}</td><td>${fmt(c.crown.ts)} °C</td><td>${fmt(c.crown.tmrt)} °C</td></tr>
@@ -84,12 +84,12 @@ export function tianpengCard(d) {
   return `
     ${close}
     <h3>天棚 · The summer mat awning</h3>
-    <p class="lead">Old Beijing families roofed their courtyards with reed mats in summer: under one it feels like ${fmt(c.awning.tmrt)} °C at 3 pm, against ${fmt(c.sun.tmrt)} °C in the open sun.</p>
+    <p class="lead">Old Beijing families roofed their courtyards with reed mats in summer: under one the radiant heat on you is ${fmt(c.awning.tmrt)} °C at 3 pm, against ${fmt(c.sun.tmrt)} °C in the open sun.</p>
     <div class="mat">天棚鱼缸石榴树 · an old Beijing saying: "tianpeng, fish bowl, pomegranate tree"</div>
     <p lang="zh-Hans">老北京夏天在院里搭天棚：芦席棚顶高出屋檐，四周席子可卷起通风。老北京俗语“天棚鱼缸石榴树”说的就是四合院的夏景，漫画家李滨声曾以此作画（见邓云乡《天棚遮阴》）。院中多种枣树、槐树，石榴寓意多子。傍晚往地上洒水降温，与日本江户时代以来的“打ち水”（洒水）同理。</p>
     <p lang="en">In old Beijing summers a family built a tianpeng over the courtyard: a roof of reed mats on poles, higher than the eaves, with side mats that roll up to let the air through. An old Beijing saying sums up a courtyard summer as "tianpeng, fish bowl, pomegranate tree"; the cartoonist Li Binsheng drew it (as recorded by Deng Yunxiang, "Tianpeng zheyin"). Courtyards were planted with jujube and pagoda trees, and the pomegranate stands for many children. Sprinkling water on the ground in the evening cools it, the same idea as Japan's uchimizu (打ち水), practised since the Edo period.</p>
     <table class="cmp">
-      <tr><td></td><td>${gl('tmrt', 'feels like')}, 3 pm</td></tr>
+      <tr><td></td><td>${gl('tmrt', 'radiant heat')}, 3 pm</td></tr>
       <tr class="t"><td>under the awning (lets through ${pct(a.tr.value)} of the sun)</td><td>${fmt(c.awning.tmrt)} °C</td></tr>
       <tr><td>the same courtyards' open sun</td><td>${fmt(c.sun.tmrt)} °C</td></tr>
     </table>
@@ -110,7 +110,7 @@ export function splashCard(d) {
       <tr class="t"><td>paving, ${hhmm(s.peakAt)} (largest within 1 h)</td><td>${K(s.peak)}</td></tr>
       <tr><td>paving, 21:00 / 23:00</td><td>${K(s.d21)} / ${K(s.d23)}</td></tr>
       <tr><td>paving, next day 15:00</td><td>${K(s.next15)}</td></tr>
-      <tr class="t"><td>how it ${gl('tmrt', 'feels')}, 8 pm / 9 pm</td><td>${K(s.tmrt20)} / ${K(s.tmrt21)}</td></tr>
+      <tr class="t"><td>${gl('tmrt', 'radiant heat')} on you, 8 pm / 9 pm</td><td>${K(s.tmrt20)} / ${K(s.tmrt21)}</td></tr>
       <tr><td>water left at 21:00 / 23:00</td><td>${f2(s.w21)} / ${f2(s.w23)} mm</td></tr>
       <tr><td>evaporated per splash (at most)</td><td>${f2(s.perSplash)} of ${s.w0} mm</td></tr>
     </table>
@@ -123,7 +123,7 @@ export function splashCard(d) {
       <tr><td>the old evaporation term alone (EF × Q*)</td><td>${K(-d.ef.max)}</td></tr>
       ${d.sens.map((x) => `<tr><td class="sub">β_wet ${x.beta}: largest / 23:00</td><td class="sub">${K(x.peak)} / ${K(x.d23)}</td></tr>`).join('')}
     </table><p class="lit">Paris, Rue du Louvre: about 1 L m⁻² per cycle, the surface −7.5 K at 19:30 and −6 K at 20:30, lasting several hours (Hendel et al. 2015); air −0.79 K at most and Tmrt −1.76 K (Hendel et al. 2016). Kobe: 0.025 mm per pass cools −2 to −4 K at once but is gone within 30 minutes in sun, so evening watering is recommended (Takebayashi et al. 2023). A watered road fell from 50 to 40 °C in about an hour (Kato et al. 2008, unverified).</p>
-    <p class="caveat">The model's old evaporation term needs positive net radiation, which is gone after sunset, so it cannot show an evening splash; the water store W is a separate term (bulk evaporation${tag(P('waterStore'))}). The air is fixed: the splash cools the paving and the radiation people feel, not the air. The design day repeats with a splash every evening, so the paving is about ${fmt(Math.abs(s.before))} K cooler even before the splash. W0 sits at the top edge of the brief's 0.5–1.0 mm; β_wet is the brief's range (0.3–1).</p>`, ['hendel2015', 'hendel2016', 'takebayashi2023', 'kato2008', 'bolton1980', 'brief5'])}`;
+    <p class="caveat">The model's old evaporation term needs positive net radiation, which is gone after sunset, so it cannot show an evening splash; the water store W is a separate term (bulk evaporation${tag(P('waterStore'))}). The air is fixed: the splash cools the paving and the radiant heat on people, not the air. The design day repeats with a splash every evening, so the paving is about ${fmt(Math.abs(s.before))} K cooler even before the splash. W0 sits at the top edge of the brief's 0.5–1.0 mm; β_wet is the brief's range (0.3–1).</p>`, ['hendel2015', 'hendel2016', 'takebayashi2023', 'kato2008', 'bolton1980', 'brief5'])}`;
 }
 
 /** Trees and screens card. d: {trees (treeStats at 15:00), court}. */
@@ -132,9 +132,9 @@ export function treesCard(d) {
   return `
     ${close}
     <h3>Pagoda, jujube, pomegranate: shade by species</h3>
-    <p class="lead">Under a pagoda tree it feels like ${fmt(d.trees.pagodaTree ? d.trees.pagodaTree.tmrt : d.court.crown.tmrt)} °C at 3 pm, against ${fmt(d.court.sun.tmrt)} °C in full sun: its dense crown lets through only ${pct(MATERIALS.pagodaTree.tr.value)} of the sun.</p>
+    <p class="lead">Under a pagoda tree the radiant heat on you is ${fmt(d.trees.pagodaTree ? d.trees.pagodaTree.tmrt : d.court.crown.tmrt)} °C at 3 pm, against ${fmt(d.court.sun.tmrt)} °C in full sun: its dense crown lets through only ${pct(MATERIALS.pagodaTree.tr.value)} of the sun.</p>
     <table class="cmp">
-      <tr><td>3 pm</td><td>lets through</td><td>${gl('tmrt', 'feels like')} at the trunk</td></tr>
+      <tr><td>3 pm</td><td>lets through</td><td>${gl('tmrt', 'radiant heat')} at the trunk</td></tr>
       ${sp.map((k) => `<tr><td>${MATERIALS[k].name}</td><td>${pct(MATERIALS[k].tr.value)}</td><td>${fmt(d.trees[k].tmrt)} °C</td></tr>`).join('')}
       <tr><td>${MATERIALS.pergola.name}</td><td>${pct(MATERIALS.pergola.tr.value)}</td><td>${fmt(d.court.pergola.tmrt)} °C</td></tr>
       <tr><td>${MATERIALS.awning.name}</td><td>${pct(MATERIALS.awning.tr.value)}</td><td>${fmt(d.court.awning.tmrt)} °C</td></tr>
@@ -211,7 +211,7 @@ export function htApp(env, splash0) {
   root.body.insertAdjacentHTML(
     'beforeend',
     `<div id="hutong" class="blockpanel" aria-label="Hutong controls">
-        <div class="seg">${btn('data-splash', '1', 'splash at 19:00 (P)')}</div>
+        <div class="seg">${btn('data-splash', '1', 'splash at 19:00', 'title="keyboard shortcut: P"')}</div>
         <div class="measures"><div class="hand">Cards</div>${HT_CARDS.map(([id, label]) => btn('data-card', id, label)).join('')}</div>
       </div>`,
   );

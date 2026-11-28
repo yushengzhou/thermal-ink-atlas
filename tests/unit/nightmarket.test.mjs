@@ -309,7 +309,7 @@ test('build: the awning is one @page nightmarket group on this page only; its mo
   for (const c of ['desert', 'asphalt-park']) assert.ok(!pageParts(c).bundle.includes('marketAwning: {'), c);
   assert.ok(coreBytes('nightmarket') < CORE_BUDGET);
   const html = read('cities/nightmarket/index.html');
-  assert.ok(html.includes('heat given off (Q)') && html.includes('market open (M)') && html.includes('id="heatBtn"'));
+  assert.ok(html.includes('heat given off') && html.includes('pm–midnight`') && html.includes('keyboard shortcut: M') && html.includes('id="heatBtn"'));
 });
 
 test('cards (#29 rules from the start): one everyday sentence first, the expert part closed at the bottom, no file paths or "the brief" in the visible part, links only to the references page; notes in plain words', () => {

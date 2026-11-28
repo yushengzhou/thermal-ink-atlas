@@ -58,16 +58,16 @@ export const GLOSSARY = {
     why: 'Hot surfaces warm the air above them and radiate heat onto people nearby.',
   },
   tmrt: {
-    term: 'Mean radiant temperature (Tmrt)',
-    text: 'One number for all the sunshine and infrared heat falling on a standing person from every direction.',
+    term: 'Radiant heat on you (mean radiant temperature, Tmrt)',
+    text: 'One number for all the sunshine and the heat from hot ground and walls falling on a standing person from every direction. In the sun it runs far above the air temperature, because it counts the sunshine on your body, not the air around you. It is not the "feels like" of a weather app, which also takes in the air, humidity and wind: a drop of 20 degrees in radiant heat feels like a much smaller drop than 20 degrees.',
     model: (S) => S.tmrtLine ?? `At 3 pm: ${S.tmrtShade} °C in building shade, ${S.tmrtSun} °C on sunlit ground (5th–95th percentile).`,
-    why: 'It shapes how hot it feels outdoors more than air temperature does.',
+    why: 'Out in the sun it decides how hot you feel more than the air does; shade takes most of it away.',
   },
   forceRestore: {
-    term: 'Force-restore model (simulation)',
-    text: 'A simple surface energy balance (Deardorff 1978): sun, sky and air heat each 5 m cell, and a deep-ground term pulls it back toward its daily mean (thin metal roofs have no deep term).',
-    model: (S) => `5 m grid, 1-minute steps, the design day repeated ${S.days} times until it settles.`,
-    why: 'It captures daytime heating and night lag cheaply enough to run in your browser. All temperatures here are modelled, not measured.',
+    term: 'How the temperatures are calculated',
+    text: 'Nobody measured this block. Your browser works out, minute by minute, how much the sun, the sky and the air warm or cool each patch of ground and each roof, using values from published measurements. Stone and soil store heat and give it back at night; a thin metal sheet does not.',
+    model: (S) => `In 5 m squares, minute by minute, over the same hot day run ${S.days} times until it settles (a "force-restore" surface model, Deardorff 1978).`,
+    why: 'It shows the day heating up and the night cooling down slowly. Every temperature here is calculated, not measured.',
   },
   nightLag: {
     term: 'Thermal inertia / night lag',
@@ -138,7 +138,7 @@ export const GLOSSARY = {
     scenes: ['glass-cbd', 'hutong'],
   },
   lowE: {
-    term: 'Low-e glass',
+    term: 'Coated (low-e) glass',
     text: 'Glass with a thin metal-oxide coating that keeps out much of the sun’s heat (solar control) and holds in indoor heat (low emissivity on the coated face).',
     range: 'Solar reflectance about 0.15–0.35 head-on; Singapore caps glass daylight reflectance at 20%.',
     src: 'brief3, bca',
@@ -240,7 +240,7 @@ export const GLOSSARY = {
   },
   groundFlux: {
     term: 'Ground heat flux (G)',
-    text: 'The heat going into the ground through its surface (positive) or coming back out (negative), in watts per square metre. The night-release strokes (G) draw it.',
+    text: 'The heat going into the ground through its surface (positive) or coming back out (negative), in watts per square metre. The night-release strokes draw it.',
     model: (S) => S.fluxLine,
     why: 'At night G is the heat the pavement keeps feeding to its surface, so the surface cannot cool down to the air.',
     scenes: ['parking'],
@@ -254,7 +254,7 @@ export const GLOSSARY = {
   },
   // ---- block 7 (older high-rise estate) ---------------------------------------
   sunlightRule: {
-    term: '大寒日 sunlight rule',
+    term: 'Midwinter sunlight rule (大寒日)',
     text: 'The Chinese planning rule that every home gets a minimum of direct sun at its ground-floor window on the Great Cold day (大寒, about 20 January), counted from 08:00 to 16:00 solar time at the sill.',
     range: 'GB 50180-2018: at least 2 h on 大寒 in zones I, II, III and VII for cities of 500,000 or more (3 h in smaller ones); flats for the elderly 2 h on the winter solstice (冬至); new homes in old-area renovation 1 h on 大寒 (table values not checked against the standard, not yet checked). The draft of the Zhejiang rules (DB33/1050, now the 2016 edition): only stretches of 10 min or more count, steps of at most 5 min, the point 0.9 m above the floor.',
     src: 'gb50180, db33',

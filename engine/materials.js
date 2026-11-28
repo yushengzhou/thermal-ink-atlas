@@ -251,7 +251,7 @@ export const MATERIALS = {
     mu: v(1400, 'brief', 'range', false, 'soil 600-2200'),
     ef: v(0.8, 'brief', 'edge', false, 'cited 0.6-0.8'),
     note: 'Watered grass spends much of its sunshine evaporating water, and at night it cools below the air.',
-    caveat: 'Its 3 pm place below shaded paving holds only with evaporative fraction and albedo at the top of their cited ranges (see Sensitivity in docs/sources.md).',
+    caveat: 'Its 3 pm place below shaded paving holds only with evaporative fraction and albedo at the top of their cited ranges (tested in the model notes).',
   },
   water: {
     name: 'Pond (open water)',
@@ -285,7 +285,7 @@ export const MATERIALS = {
     mu: v(450, 'brief', 'range', false, 'same build-up as the dark membrane'),
     ef: v(0, 'brief', 'cited', false, 'dry impervious'),
     note: 'The same roof build-up as its dark neighbour, painted white: it reflects most of the sun.',
-    caveat: 'Its 3 pm place below shaded paving holds only with albedo at the top of its cited range (see Sensitivity in docs/sources.md).',
+    caveat: 'Its 3 pm place below shaded paving holds only with albedo at the top of its cited range (tested in the model notes).',
   },
   canopy: {
     name: 'Tree canopy',
@@ -360,7 +360,7 @@ Object.assign(MATERIALS, {
     mu: v(870, 'engine', 'engine', false, 'dry, assumed'),
     ef: v(0.02, 'brief2', 'interp', false, 'dry; brief value'),
     efWet: v(0.5, 'brief2', 'interp', false, 'wet; brief value'),
-    tau: v(1, 'brief2', 'interp', false, 'days; the brief calls it calibrated to Li 2013, but in this model it does not reproduce Li at d = 1 (see docs/sources.md)'),
+    tau: v(1, 'brief2', 'interp', false, 'days; the brief calls it calibrated to Li 2013, but in this model it does not reproduce Li at d = 1'),
     storage: v(5, 'brief2', 'interp', false, 'brief: "a few mm", read as 5 mm; the daily water check needs >= 4.1 mm'),
     note: 'Pavers with open joints let rain soak in; the water evaporates over the next day or two and cools them while it lasts.',
   },
@@ -460,7 +460,7 @@ Object.assign(MATERIALS, {
 // shared asphalt and concrete (Oke values, inside the brief's ranges).
 Object.assign(MATERIALS, {
   ballast: {
-    name: 'Rail ballast (gravel)',
+    name: 'Track gravel (rail ballast)',
     alpha: v(0.2, 'brief6', 'engine', false, 'brief assumption 0.20 (0.10-0.30)'),
     eps: v(0.92, 'brief6', 'engine', false, 'brief assumption'),
     mu: v(700, 'brief6', 'engine', false, 'effective admittance of a loose, airy layer; brief assumption 700 (600-900)'),
@@ -481,7 +481,7 @@ Object.assign(MATERIALS, {
     eps: v(0.95, 'brief6', 'engine', false, 'brief assumption'),
     mu: v(800, 'brief6', 'engine', false, 'the dry soil beneath (brief assumption)'),
     ef: v(0.2, 'brief6', 'engine', false, 'sparse, drought-stressed plants: little water to spend (brief assumption)'),
-    note: 'Weeds and dry grass that took over the brownfield: a little evaporation, not much shade.',
+    note: 'Weeds and dry grass that took over the disused land: a little evaporation, not much shade.',
   },
   rustShed: {
     name: 'Rusty corrugated steel shed roof',

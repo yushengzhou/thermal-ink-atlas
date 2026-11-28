@@ -39,17 +39,17 @@ const PLACE = { ref: 'the open square', aisle: 'the street, open aisle', awning:
 /** Margin notes (at most 5), in plain words. d: numbers from the plugin (noteData). */
 export function nmNotes(scene, d) {
   const text = {
-    stone: [`Granite at 9 pm: ${fmt(d.stoneDTs)} degrees above the air,`, `still giving off about ${r0(d.stoneNet)} watts per m²`],
-    square: [`The open square at 9 pm feels ${deg(d.squareDT)}`, `than the air: the clear sky draws heat away`],
-    awning: ['Under the awnings it feels', `${Math.abs(d.awningDT) < 1 ? 'about as warm as the air' : deg(d.awningDT) + ' than the air'}: the canvas hides the sky`],
-    grill: [`1 m from a charcoal grill it feels like ${r0(d.grill1)} °C;`, `3 m away, still ${fmt(d.grill3)} degrees more (an upper bound)`],
-    crowd: [`The crowd at 9 pm: ${r0(d.crowd)} watts per m²`, 'of body heat, shown, not felt'],
+    stone: [`Granite at 9 pm: ${fmt(d.stoneDTs)} degrees above the air,`, `still giving off about ${r0(d.stoneNet)} watts per m² (midday sun: about 1,000)`],
+    square: [`The open square at 9 pm: radiant heat on you ${deg(d.squareDT)}`, `than the air: the clear sky draws heat away`],
+    awning: ['Under the awnings, radiant heat on you', `${Math.abs(d.awningDT) < 1 ? 'about the same as the air' : deg(d.awningDT) + ' than the air'}: the canvas hides the sky`],
+    grill: [`1 m from a charcoal grill, radiant heat on you ${r0(d.grill1)} °C;`, `3 m away, still ${fmt(d.grill3)} degrees more (a high estimate)`],
+    crowd: [`The crowd at 9 pm: ${r0(d.crowd)} watts per m² of body heat`, '(midday sun: about 1,000), shown, not felt'],
   };
   const terms = {
     stone: [['netLongwave', 'still giving off']],
-    square: [['tmrt', 'feels']],
+    square: [['tmrt', 'radiant heat on you']],
     awning: [['svf', 'hides the sky']],
-    grill: [['tmrt', 'it feels like']],
+    grill: [['tmrt', 'radiant heat on you']],
     crowd: [['metabolicRate', 'body heat']],
   };
   return scene.notes.slice(0, 5).map((n) => ({ ...n, text: text[n.key], terms: terms[n.key] }));
@@ -99,9 +99,9 @@ export function crowdCard(d) {
       ${rows}
       <tr><td colspan="3" class="sub">At 9 pm over the whole street: about ${r0(st.heat.street.crowd)} watts per m² from the crowd, ${r0(st.heat.street.stoneRad + st.heat.street.stoneAir)} from the stone.</td></tr>
     </table>
-    <p class="note">On a warm night more than half of a body's heat leaves as sweat vapour; only about ${Math.round(NM.sensible.value * 100)}% warms the air directly. The page draws this heat (Q), shown, not felt: it does not warm the air here, because the air temperature is fixed. The crowd is made up; each figure drawn stands for about ${r0(d.perFigure)} people. Crowd-safety guidance treats about 2 people per m² as a limit for events.</p>
+    <p class="note">On a warm night more than half of a body's heat leaves as sweat vapour; only about ${Math.round(NM.sensible.value * 100)}% warms the air directly. The page draws this heat (the heat-given-off button), shown, not felt: it does not warm the air here, because the air temperature is fixed. The crowd is made up; each figure drawn stands for about ${r0(d.perFigure)} people. Crowd-safety guidance treats about 2 people per m² as a limit for events.</p>
     ${experts(`<p class="lit">Q_crowd = ρ_p·M with M = ${NM.walkShare.value}·${NM.walk.value} + ${1 - NM.walkShare.value}·${NM.stand.value} W (walking at 0.9 m/s about 2.0 met, standing about 1.2 met; 1 met = 58.2 W m⁻² of body surface, about 1.8 m²${tag(NM.walk)}); the walking share ${NM.walkShare.value}${tag(NM.walkShare)}; peak density ${NM.peak.value} m⁻²${tag(NM.peak)} (the brief: 0.3–2.0, an assumption; no night-market measurement found), capped at ${NM.cap.value}${tag(NM.cap)}; sensible share ${NM.sensible.value}${tag(NM.sensible)} at 30 °C (0.3–0.55). Retail heat gain from people: 73 W sensible and 59 W latent at 25.6 °C (copies disagree). In a city, metabolism is about 2–3% of all the heat people add.</p>
-      <p class="caveat">Not modelled: the warm, moist air of a crowd, and that bodies and awnings hide the sky (they would make a person feel about 0.5–1 degree warmer than shown).</p>`, ['ashrae55', 'ashraeRetail', 'sailorAms', 'crowdLimits', 'brief12'])}`;
+      <p class="caveat">Not modelled: the warm, moist air of a crowd, and that bodies and awnings hide the sky (they would add about 0.5–1 degree of radiant heat to what is shown).</p>`, ['ashrae55', 'ashraeRetail', 'sailorAms', 'crowdLimits', 'brief12'])}`;
 }
 
 /** The stalls card. d: {st}. */
@@ -117,7 +117,7 @@ export function stallsCard(d) {
     <table class="cmp">
       <tr><td>stall</td><td>here</td><td>heat while open, kW</td><td>per m² of stall</td></tr>
       ${rows}
-      <tr><td colspan="4" class="sub">Gas stalls burn about half the time; charcoal burns all evening. In a 5 m square of street holding a charcoal grill: about ${r0((NM.charcoal.value * 1000) / 25)} watts per m² while open. Shown (Q), not felt: the air here is fixed.</td></tr>
+      <tr><td colspan="4" class="sub">Gas stalls burn about half the time; charcoal burns all evening. In a 5 m square of street holding a charcoal grill: about ${r0((NM.charcoal.value * 1000) / 25)} watts per m² while open. Shown (the heat-given-off button), not felt: the air here is fixed.</td></tr>
     </table>
     <p class="note">Cooks stand right at the fire and feel its heat most (see "Next to the grill"); many stalls run floor fans. Smoke and cooking fumes raise fine-particle levels around night markets, a news report from Taiwan says. This page computes neither air quality nor anything about food safety: only heat.</p>
     ${experts(`<p class="lit">Q_stall = Σ P_fuel·duty / A_cell over each 5 m cell. Gas stall ${NM.lpg.value} kW${tag(NM.lpg)} (5–15), duty ${NM.duty.value}${tag(NM.duty)}; jet wok burners 28–37 kW (vendor data), here ${NM.wok.value}${tag(NM.wok)} at the same duty; charcoal ${NM.charcoal.value} kW${tag(NM.charcoal)} (8–16; a roaster burning about 1.2 kg an hour, about 29 MJ per kg), duty ${NM.coalDuty.value}${tag(NM.coalDuty)}. The stall footprint is 2.4 m × 1.8 m. The brief's estimate: 60 stalls × 8 kW × 0.5 over a 400 m × 10 m street, about 60 W m⁻². No stall's heat or the air around one has been measured.</p>
@@ -140,11 +140,11 @@ export function lightsCard(d) {
       <tr><td>the stone at 9 pm</td><td>about ${r0(st.place.aisle[h].net)}</td></tr>
       <tr><td colspan="2" class="sub">Lights on from sunset (${hm(d.sunset)}) to midnight, while the market runs.</td></tr>
     </table>
-    <p class="note">So the lights matter for seeing, not for heat. Shown (Q), not felt: the air here is fixed.</p>
+    <p class="note">So the lights matter for seeing, not for heat. Shown (the heat-given-off button), not felt: the air here is fixed.</p>
     ${experts(`<p class="lit">Lighting ${NM.lights.value} W m⁻²${tag(NM.lights)} over the street and the square when on (LED strings 0.2–1, filament 2–8 W m⁻²; the brief, unverified).</p>`, ['brief12'])}`;
 }
 
-/** How warm it feels at night card. d: {st}. */
+/** Radiant heat at night card. d: {st}. */
 export function nightCard(d) {
   const st = d.st;
   const h = NM.hour.value;
@@ -156,12 +156,12 @@ export function nightCard(d) {
   const order = P.alley[h].dTmrt > P.ref[h].dTmrt;
   return `
     ${close}
-    <h3>How warm it feels at night</h3>
-    <p class="lead">At 9 pm, standing in the open square feels about ${deg(P.ref[h].dTmrt)} than the air, because the clear sky draws heat away from you; under an awning it feels ${deg(P.awning[h].dTmrt)}, in a narrow alley ${deg(P.alley[h].dTmrt)} than the air.</p>
+    <h3>Radiant heat at night</h3>
+    <p class="lead">At 9 pm, standing in the open square, the ${gl('tmrt', 'radiant heat')} on you is about ${deg(P.ref[h].dTmrt)} than the air, because the clear sky draws heat away from you; under an awning ${deg(P.awning[h].dTmrt)}, in a narrow alley ${deg(P.alley[h].dTmrt)} than the air.</p>
     <table class="cmp">
-      <tr><td>9 pm, air ${fmt(st.air[h])} °C</td><td>sky seen</td><td>feels like</td><td>against the air</td></tr>
+      <tr><td>9 pm, air ${fmt(st.air[h])} °C</td><td>sky seen</td><td>radiant heat</td><td>against the air</td></tr>
       ${rows}
-      <tr><td colspan="4" class="sub">"Feels like" is the radiant heat on a standing person (${gl('tmrt', 'mean radiant temperature')}), not the air. Expected: 6 degrees cooler to 2 warmer than the air, warmer where less sky is seen${order ? '' : MISS}.</td></tr>
+      <tr><td colspan="4" class="sub">Radiant heat on a standing person (${gl('tmrt', 'mean radiant temperature')}), not the air and not a weather-app "feels like". Expected: 6 degrees cooler to 2 warmer than the air, warmer where less sky is seen${order ? '' : MISS}.</td></tr>
     </table>
     <p class="note">At night the hot sun is gone, so where you stand matters much less than by day. What makes a summer night uncomfortable is mostly the warm, humid air itself, which this page keeps fixed. Studies in Taipei found the streets uncomfortable in the afternoon and the evening depending on how wet the paving is; no study of a night market's comfort was found.</p>
     ${experts(`<p class="lit">The brief's arithmetic in this engine's form (air 30 °C, walls air + 2 K): Tmrt 25.7 / 27.8 / 28.9 °C under an open sky for a surface at the air / +4 / +6 K, 30.1–31.2 °C at a sky view of 0.3. Sky view: square ${f2(P.ref[h].svf)}, open aisle ${f2(P.aisle[h].svf)}, under the awnings ${f2(P.awning[h].svf)} (an awning counts as covering three quarters of the sky above), narrow alleys ${f2(P.alley[h].svf)}.</p>
@@ -177,13 +177,13 @@ export function grillCard(d) {
   return `
     ${close}
     <h3>Right next to the grill</h3>
-    <p class="lead">One metre from an open charcoal grill it feels like about ${r0(g(1).tmrt)} °C, while a few steps away in the aisle it feels like ${r0(st.place.stallRow[NM.hour.value].tmrt)} °C: the glowing coals are the one big source of radiant heat at a night market.</p>
+    <p class="lead">One metre from an open charcoal grill the ${gl('tmrt', 'radiant heat')} on you is about ${r0(g(1).tmrt)} °C, while a few steps away in the aisle it is ${r0(st.place.stallRow[NM.hour.value].tmrt)} °C: the glowing coals are the one big source of radiant heat at a night market.</p>
     <table class="cmp">
-      <tr><td>9 pm, from the coals</td><td>feels like</td><td>extra</td></tr>
+      <tr><td>9 pm, from the coals</td><td>radiant heat</td><td>extra</td></tr>
       ${rows}
       <tr><td colspan="3" class="sub">Between 3 and 4 m the page fades the extra heat out smoothly (no sudden step as you walk away) and adds nothing beyond 4 m; when the market is closed, nothing at all.${miss ? ` At 3 m the extra heat is ${fmt(g(3).dT)} degrees, more than the less than 5 expected: the same formula that gives about ${r0(g(1).tmrt)} °C at 1 m gives this at 3 m, because it treats the coal bed as a glowing patch facing you from every side with nothing in the way (an upper bound); it falls below 5 degrees only about ${fmt(st.under5)} m away.` : ''}</td></tr>
     </table>
-    <p class="note">This is an upper bound and only illustrative: a real grill is partly hidden by its own rim and the food on it, and the cook moves. It is the only stall heat this page lets reach a person, and only for people standing near a grill, not for the 5 m squares of the heat view. Cooks at the grill sweat; the crowd keeps a little distance.</p>
+    <p class="note">This is a high estimate and only illustrative: a real grill is partly hidden by its own rim and the food on it, and the cook moves. It is the only stall heat this page lets reach a person, and only for people standing near a grill, not for the 5 m squares of the heat view. Cooks at the grill sweat; the crowd keeps a little distance.</p>
     ${experts(`<p class="lit">ΔS = ε_c·σ·(T_c⁴ − T_b⁴)·A_c / (4πd²), d ≥ ${NM.grillMin.value} m, summed over the open grills, in full within ${NM.grillMax.value} m and times a cosine taper (1 + cos(π(d − ${NM.grillMax.value}) / ${NM.grillTaper.value - NM.grillMax.value}))/2 to zero at ${NM.grillTaper.value} m${tag(NM.grillTaper)}; Tmrt' = (Tmrt⁴ + ΔS/σ)^¼. Coal bed ${NM.coalArea.value} m²${tag(NM.coalArea)} at ${NM.coalTemp.value} °C${tag(NM.coalTemp)}, ε_c ${NM.coalEps.value}${tag(NM.coalEps)}, T_b the air. The brief: about +490 W m⁻² at 1 m (Tmrt about 88 °C) and about +120 at 2 m (about 48 °C), an upper bound. Here at 1 m +${r0(g(1).dS)} W m⁻², at 2 m +${r0(g(2).dS)}, at 3 m +${r0(g(3).dS)}, at 3.5 m +${r0(g(3.5).dS)} (tapered), at 4 m ${r0(g(4).dS)}.</p>
       <p class="caveat">Added to the Tmrt of a point (the people drawn, a heat card's cell centre), never to the grid model: surfaces, the air and the 5 m Tmrt are unchanged.</p>`, ['brief12', 'charcoalVendor'])}`;
 }
@@ -210,7 +210,7 @@ export const NM_CARDS = [
   ['crowd', 'A crowd is a heater'],
   ['stalls', 'Woks and charcoal'],
   ['lights', 'String lights'],
-  ['night', 'How warm it feels'],
+  ['night', 'Radiant heat at night'],
   ['grill', 'Next to the grill'],
   ['hours', 'Market hours'],
 ];
@@ -339,11 +339,11 @@ export function nmApp(env) {
   };
   life.at = (t, hq) => (st.open && isOpen(hq) ? baseAt(t, hq).concat(crowdAt(world, t, hq, heatOf(hq))) : baseAt(t, hq));
 
-  const btn = (attr, v, label) => `<button type="button" ${attr}="${v}">${label}</button>`;
+  const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
   root.body.insertAdjacentHTML(
     'beforeend',
     `<div id="market" class="blockpanel" aria-label="Night market controls"><details open><summary class="hand">Night market: buttons and cards</summary>
-        <div class="seg">${btn('data-give', '1', 'heat given off (Q)')}${btn('data-open', '1', 'market open (M)')}</div>
+        <div class="seg">${btn('data-give', '1', 'heat given off', 'title="keyboard shortcut: Q"')}${btn('data-open', '1', `market, open ${NM.opens.value - 12} pm–midnight`, 'title="keyboard shortcut: M. Outside the opening hours the street stays empty even when this is on."')}</div>
         <div class="measures"><div class="hand">Cards</div>${NM_CARDS.map(([id, label]) => btn('data-card', id, label)).join('')}</div>
       </details></div>`,
   );
@@ -450,12 +450,12 @@ export function nmApp(env) {
       return { ...p, grillD: g, grillDT: t.dT, open: st.open && isOpen(h), stalls: world.nm.stalls.filter((s) => world.cellIndex(s.x, s.y) === i).map((s) => s.type) };
     },
     cardRows: (f) => {
-      const rows = [`<tr><td colspan="2" class="sub">${gl('anthropogenicHeat', 'Heat given off')} here now, watts per m² (Q shows it; the air is fixed, so it is not felt):</td></tr>`,
+      const rows = [`<tr><td colspan="2" class="sub">${gl('anthropogenicHeat', 'Heat given off')} here now, watts per m² (the heat-given-off button shows it; the air is fixed, so it is not felt):</td></tr>`,
         `<tr><td>the stone, radiated / heat into the air</td><td>${r0(f.stoneRad)} / ${r0(f.stoneAir)}</td></tr>`];
       if (f.crowd > 0) rows.push(`<tr><td>the crowd (${f2(f.rho)} people per m²)</td><td>${r0(f.crowd)}</td></tr>`);
       if (f.stall > 0) rows.push(`<tr><td>stalls (${f.stalls.join(', ')})</td><td>${r0(f.stall)}</td></tr>`);
       if (f.light > 0) rows.push(`<tr><td>string lights</td><td>${fmt(f.light)}</td></tr>`);
-      if (f.grillD <= 6) rows.push(`<tr><td>nearest charcoal grill</td><td>${fmt(f.grillD)} m from this square's centre${f.grillDT > 0 ? `; there it feels ${fmt(f.grillDT)} degrees hotter` : ''}</td></tr>`);
+      if (f.grillD <= 6) rows.push(`<tr><td>nearest charcoal grill</td><td>${fmt(f.grillD)} m from this square's centre${f.grillDT > 0 ? `; there ${fmt(f.grillDT)} degrees more radiant heat` : ''}</td></tr>`);
       return rows.join('');
     },
     /** The shared sky-view, night-lag and Tmrt footnotes quote the block's own lines; the block's terms their numbers. */

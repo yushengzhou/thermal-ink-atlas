@@ -36,15 +36,15 @@ const ROOF_ROWS = [['rustTin', 'rusty corrugated iron'], ['galvTin', 'galvanised
 /** Margin notes (at most 5). d: numbers from the plugin (noteData). */
 export function vgNotes(scene, d) {
   const text = {
-    lane: [`Lanes 1.5–3 m wide between walls ${fmt(d.laneH)} m high:`, `it feels like ${fmt(d.lane15)} °C at 3 pm, ${fmt(d.lane22)} °C at 10 pm`],
-    square: [`The open square feels like ${fmt(d.sq15)} °C at 3 pm,`, `${fmt(d.sq22)} °C at 10 pm (lanes ${fmt(d.lane22)} °C)`],
+    lane: [`Lanes 1.5–3 m wide between walls ${fmt(d.laneH)} m high:`, `radiant heat on you ${fmt(d.lane15)} °C at 3 pm, ${fmt(d.lane22)} °C at 10 pm`],
+    square: [`The open square: radiant heat on you ${fmt(d.sq15)} °C at 3 pm,`, `${fmt(d.sq22)} °C at 10 pm (lanes ${fmt(d.lane22)} °C)`],
     tin: [`Rusty iron roofs ${fmt(d.rust15)} °C at 3 pm,`, `${fmt(d.rust03)} °C at 3 am`],
     white: [`Roofs the residents painted white: ${fmt(d.white15)} °C`, `at 3 pm; bare rusty iron ${fmt(d.rust15)} °C`],
-    under: [`Under bare iron (O): the room's radiant`, `temperature ${fmt(d.under15)} °C at 3 pm (air ${fmt(d.air15)} °C)`],
+    under: [`Under bare iron: the room's radiant`, `temperature ${fmt(d.under15)} °C at 3 pm (air ${fmt(d.air15)} °C)`],
   };
   const terms = {
-    lane: [['handshakeBuilding', 'Lanes 1.5–3 m wide'], ['tmrt', 'it feels like']],
-    square: [['tmrt', 'feels like']],
+    lane: [['handshakeBuilding', 'Lanes 1.5–3 m wide'], ['tmrt', 'radiant heat on you']],
+    square: [['tmrt', 'radiant heat on you']],
     tin: [['surfaceTemp', `${fmt(d.rust15)} °C at 3 pm`]],
     white: [['albedo', 'painted white']],
     under: [['indoorRadiant', "the room's radiant"]],
@@ -70,16 +70,16 @@ export function lanesCard(d) {
     <p class="lead">A lane two metres wide between walls twenty metres high sees only a sliver of sky: after dark it stays warmer than the open square, ${than(gap)} at ${hm(ni)}.</p>
     <div class="mat">${gl('handshakeBuilding', 'Handshake buildings')} 18–24 m high, lanes 1.5–3 m · air ${fmt(a[nn])} / ${fmt(a[15])} / ${fmt(a[ni])} °C at ${hm(nn)} / 15:00 / ${hm(ni)}</div>
     <table class="cmp">
-      <tr><td></td><td>width / walls</td><td>${gl('svf', 'open to the sky')}</td><td>${gl('tmrt', 'feels like')} ${hm(nn)} / 15:00 / ${hm(ni)}</td></tr>
+      <tr><td></td><td>width / walls</td><td>${gl('svf', 'open to the sky')}</td><td>${gl('tmrt', 'radiant heat')} ${hm(nn)} / 15:00 / ${hm(ni)}</td></tr>
       ${L.byW.filter((x) => x.n).map((x) => row(`${x.W} m lanes`, x)).join('')}
       ${row('Market Lane', L.market)}
       ${row('alleys of the low-rise edge', L.edge)}
       <tr class="t"><td>the open square</td><td>—</td><td>${f2(sq.svf)}</td><td>${fmt(sq.tmrt[nn])} / ${fmt(sq.tmrt[15])} / ${fmt(sq.tmrt[ni])} °C</td></tr>
-      <tr><td colspan="4" class="sub">In the village lanes it feels ${K(L.village.tmrt[nn] - a[nn])} against the air at ${hm(nn)}${noonMiss ? `, more than the expected +${VG_BANDS.laneNoon}${MISS}` : ''}; in the open square ${K(sq.tmrt[nn] - a[nn])}${openMiss ? `, less than the expected +${VG_BANDS.openNoon}${MISS}` : ''}. At ${hm(ni)} the lanes feel ${K(gap)} warmer than the square (expected +${VG_BANDS.night[0]} to +${VG_BANDS.night[1]}${nightMiss ? MISS : ''}).</td></tr>
+      <tr><td colspan="4" class="sub">In the village lanes the radiant heat on you is ${K(L.village.tmrt[nn] - a[nn])} against the air at ${hm(nn)}${noonMiss ? `, more than the expected +${VG_BANDS.laneNoon}${MISS}` : ''}; in the open square ${K(sq.tmrt[nn] - a[nn])}${openMiss ? `, less than the expected +${VG_BANDS.openNoon}${MISS}` : ''}. At ${hm(ni)} the lanes give ${K(gap)} of radiant heat against the square (expected +${VG_BANDS.night[0]} to +${VG_BANDS.night[1]}${nightMiss ? MISS : ''}).</td></tr>
     </table>
     <p class="note">A lane two metres wide between walls twenty metres high sees only a few per cent of the sky. By day the walls keep much of the sun off the floor; after sunset the same walls stand between the people in the lane and the cold night sky, so a person there stays warm into the night while the open square cools.</p>
     ${experts(`<p class="lit">An urban village in Pingshan, Shenzhen, was warmest against its surroundings between 20:00 and 24:00 (a summer mean of 1.71 K over 18–24 h; at most 3.95 K, at 20:00 in February), and its thermal-humidity index was worse than a green reference, especially at night. In old blocks of Guangzhou the pedestrian Tmrt peaked at 43.7 °C with the air at 41.3 °C (Deng et al. 2023). No measured Tmrt for lanes 1–3 m wide was found.</p>
-    <p class="caveat">The lanes are narrower than the 5 m grid: their sky view and sun come from an endless canyon of the lane's width and its two walls (the grid's own value is shown for comparison); a crossing of two lanes is taken as the east–west lane. Walls are straight: no balconies, air-conditioner boxes, overhangs or washing over the lane, so at noon, with the sun ${fmt(d.noonAlt)}° high, ${pct(L.village.sun[nn])} of a lane floor is in the sun. Every wall is the engine's shared warm wall (air + 2 K, more in the sun), so a lane that sees almost only walls cannot be much cooler than that.${noonMiss ? ` Both are tested in docs/sources.md (Block 10, docs-only runs): without the direct sun in the lanes and with their walls at air + 2 K the lanes come inside the brief's band; each alone does not.` : ''} The air is fixed: the heat held in the lanes' air at night, and the lack of wind, are not modelled.</p>`, ['pingshan', 'deng2023', 'brief10'])}`;
+    <p class="caveat">The lanes are narrower than the 5 m grid: their sky view and sun come from an endless canyon of the lane's width and its two walls (the grid's own value is shown for comparison); a crossing of two lanes is taken as the east–west lane. Walls are straight: no balconies, air-conditioner boxes, overhangs or washing over the lane, so at noon, with the sun ${fmt(d.noonAlt)}° high, ${pct(L.village.sun[nn])} of a lane floor is in the sun. Every wall is the engine's shared warm wall (air + 2 K, more in the sun), so a lane that sees almost only walls cannot be much cooler than that.${noonMiss ? ` Both are tested in the model notes (test runs only): without the direct sun in the lanes and with their walls at air + 2 K the lanes come inside the brief's band; each alone does not.` : ''} The air is fixed: the heat held in the lanes' air at night, and the lack of wind, are not modelled.</p>`, ['pingshan', 'deng2023', 'brief10'])}`;
 }
 
 /** Metal roofs card. d: {st}. */
@@ -106,7 +106,7 @@ export function roofsCard(d) {
       <tr><td colspan="2" class="sub">Expected at an air of 35 °C: rusty iron 60–75 °C at 3 pm${rustMiss ? MISS : ''}; asbestos cement 50–62 °C${asbMiss ? `${MISS}: likely because the sheet here loses no heat through its underside to the room` : ''}.</td></tr>
     </table>
     <p class="note">A sheet of iron holds almost no heat, so it follows the sun: rust turns it dark, it bakes in the afternoon and cools fast after sunset. Bright galvanised sheet reflects more of the sun but gives off little heat, so it is not much cooler. Asbestos-cement sheet is a recognised health hazard.</p>
-    ${experts(`<table class="cmp"><tr><td></td><td>${gl('albedo', 'α')} / ${gl('emissivity', 'ε')}</td><td>C kJ m⁻² K⁻¹</td></tr>${ROOF_ROWS.filter(([id]) => E[id]).map(([id, name]) => `<tr><td>${name}</td><td>${MATERIALS[id].alpha.value}${tag(MATERIALS[id].alpha)} / ${MATERIALS[id].eps.value}${tag(MATERIALS[id].eps)}</td><td>${MATERIALS[id].thinC.value / 1000}${tag(MATERIALS[id].thinC)}</td></tr>`).join('')}<tr><td>concrete slab roof</td><td>${MATERIALS.slabRoof.alpha.value} / ${MATERIALS.slabRoof.eps.value}</td><td>μ ${MATERIALS.slabRoof.mu.value}</td></tr></table>${asbMiss ? '<p class="caveat">The asbestos-cement band is the brief\'s; a docs-only run with the sheet losing heat to the room below (docs/sources.md) puts it inside the band, and rusty iron just below its band.</p>' : ''}<p class="lit">Measured rooms: in Delhi in April, tin-roofed rooms were 33.4 °C against 32.8 °C outdoors, in Yavatmal 3–4 K above outdoors in May and June, and warmer than outdoors at night (Tasgaonkar et al. 2022); in Ahmedabad, tin-roofed homes 34.6–35.8 °C, asbestos 32.5–36.8 °C, concrete 31.6–33.8 °C (Vellingiri et al. 2020); in Ghana, metal-roofed rooms 4.5 K warmer by day than mud or thatch and 1.5 K cooler at night (Wilby et al. 2021). In Bangkok one unshaded house at midday in April had a 68.1 °C roof and a 49.2 °C ceiling; a shaded house's roof was 45.5 °C (unverified).</p>
+    ${experts(`<table class="cmp"><tr><td></td><td>${gl('albedo', 'α')} / ${gl('emissivity', 'ε')}</td><td>C kJ m⁻² K⁻¹</td></tr>${ROOF_ROWS.filter(([id]) => E[id]).map(([id, name]) => `<tr><td>${name}</td><td>${MATERIALS[id].alpha.value}${tag(MATERIALS[id].alpha)} / ${MATERIALS[id].eps.value}${tag(MATERIALS[id].eps)}</td><td>${MATERIALS[id].thinC.value / 1000}${tag(MATERIALS[id].thinC)}</td></tr>`).join('')}<tr><td>concrete slab roof</td><td>${MATERIALS.slabRoof.alpha.value} / ${MATERIALS.slabRoof.eps.value}</td><td>μ ${MATERIALS.slabRoof.mu.value}</td></tr></table>${asbMiss ? '<p class="caveat">The asbestos-cement band is the brief\'s; a docs-only run with the sheet losing heat to the room below (model notes) puts it inside the band, and rusty iron just below its band.</p>' : ''}<p class="lit">Measured rooms: in Delhi in April, tin-roofed rooms were 33.4 °C against 32.8 °C outdoors, in Yavatmal 3–4 K above outdoors in May and June, and warmer than outdoors at night (Tasgaonkar et al. 2022); in Ahmedabad, tin-roofed homes 34.6–35.8 °C, asbestos 32.5–36.8 °C, concrete 31.6–33.8 °C (Vellingiri et al. 2020); in Ghana, metal-roofed rooms 4.5 K warmer by day than mud or thatch and 1.5 K cooler at night (Wilby et al. 2021). In Bangkok one unshaded house at midday in April had a 68.1 °C roof and a 49.2 °C ceiling; a shaded house's roof was 45.5 °C (unverified).</p>
     <p class="caveat">No measured albedo was found for rusty iron, asbestos cement or tarpaulin: the brief's assumptions. The model's sheet loses heat from its top only: nothing goes through it into the room below, which likely makes every sheet here run hotter than a real roof over a room. A real tarpaulin stores about 0.4 kJ m⁻² K⁻¹; here it is held at 2 kJ, the smallest the 60 s model step can take without going unstable.</p>`, ['tasgaonkar2022', 'vellingiri2020', 'wilby2021', 'khlongToey', 'emissTables', 'energyStarRoof', 'brief10'])}`;
 }
 
@@ -152,9 +152,9 @@ export function whiteCard(d) {
     ${close}
     <h3>The residents' white roofs</h3>
     <p class="lead">Painting a roof white is one of the few changes residents can make themselves: on rusty iron rooms the roof is ${rr ? fmt(-rr.d15) : '—'} degrees cooler at 3 pm.</p>
-    <div class="mat">${c.n} bare iron roofs repainted white · ${d.on ? 'white roofs on' : 'white roofs off (the white-roofs button, W, shows them)'}</div>
+    <div class="mat">${c.n} bare iron roofs repainted white · ${d.on ? 'white roofs on' : 'white roofs off (the white-roofs button shows them)'}</div>
     <table class="cmp">
-      <tr><td>roofs painted (W)</td><td>bare</td><td>new white paint</td><td>change</td></tr>
+      <tr><td>roofs painted</td><td>bare</td><td>new white paint</td><td>change</td></tr>
       ${rr ? `<tr class="t"><td>rusty iron rooms, roof at 15:00</td><td>${fmt(rr.ts15)} °C</td><td>${fmt(rr.cool15)} °C</td><td>${K(rr.d15)}${dMiss ? MISS : ''}</td></tr>
       <tr><td>the same, radiant under the roof 15:00</td><td>${fmt(rr.rad15)} °C</td><td>${fmt(rr.radW15)} °C</td><td>${K(rr.dRad15)}</td></tr>
       <tr class="t"><td>the same, air (illustrative), day's peak</td><td>${sAir(rr.airPeakBare)}</td><td>${sAir(rr.airPeakWhite)}</td><td>${K(rr.dAirPeak)}${aMiss ? MISS : ''}</td></tr>` : ''}
@@ -163,7 +163,7 @@ export function whiteCard(d) {
     </table>
     <p class="note">Painting a roof white is one of the few changes residents can make themselves, and many do, often together: in this block some roofs are already white, and W paints the rest of the bare iron. New white paint turns back most of the sun, so the sheet and the ceiling under it stay far cooler.</p>
     ${experts(`<p class="lit">New white paint ${gl('albedo', 'albedo')} ${MATERIALS.whiteTin.alpha.value}${tag(MATERIALS.whiteTin.alpha)}, weathered ${MATERIALS.whiteTinAged.alpha.value}.</p><p class="lit">In 16 homes in Ahmedabad, white paint on a tin roof cooled the room by about 1.1 K, a cool-roof sheet by 2.0 K and insulation under an asbestos roof by 2.4 K (Vellingiri et al. 2020, with MHT and IIPH). Simulated for 17 cities, cool roofs cut the hours of heat stress indoors by up to 91% (Nutkiewicz et al. 2022). A cluster randomised trial of cool roofs in Burkina Faso has published its protocol (Bunker et al. 2024); its results were found in the press only.</p>
-    <p class="caveat">Paint ages: the brief gives albedo 0.65 new and 0.50 weathered. The room figures are the proxies of the "Under the roof" card. ${dMiss || aMiss ? 'Where a band is missed, the likely cause is named in docs/sources.md (Block 10).' : ''}</p>`, ['vellingiri2020', 'nutkiewicz2022', 'bunker2024', 'brief10'])}`;
+    <p class="caveat">Paint ages: the brief gives albedo 0.65 new and 0.50 weathered. The room figures are the proxies of the "Under the roof" card. ${dMiss || aMiss ? 'Where a band is missed, the likely cause is named in the model notes.' : ''}</p>`, ['vellingiri2020', 'nutkiewicz2022', 'bunker2024', 'brief10'])}`;
 }
 
 /** Urban villages measured card. d: {st}. */
@@ -181,9 +181,9 @@ export function measuredCard(d) {
       <tr><td>Shenzhen, Pingshan traverses (2011–12)</td><td>heat island largest 20:00–24:00; 1.71 K summer mean 18–24 h, 3.95 K at most (February)</td></tr>
       <tr><td>Shenzhen, comfort survey</td><td>urban villages the worst summer thermal-humidity index; density worsens it, vegetation mitigates</td></tr>
       <tr><td>Nairobi, informal settlements</td><td>+3.1 K daily maximum, +1.83 K daily minimum against the station; sites with vegetation 0.7 K cooler</td></tr>
-      <tr class="t"><td>this model, ${hm(ni)}</td><td>village lanes feel like ${fmt(L.tmrt[ni])} °C, the open square ${fmt(sq.tmrt[ni])} °C (${K(L.tmrt[ni] - sq.tmrt[ni])})</td></tr>
+      <tr class="t"><td>this model, ${hm(ni)}</td><td>radiant heat in the village lanes ${fmt(L.tmrt[ni])} °C, the open square ${fmt(sq.tmrt[ni])} °C (${K(L.tmrt[ni] - sq.tmrt[ni])})</td></tr>
     </table>
-    <p class="note">The measurements are of the air, the surface or a comfort index; the model's numbers are of the radiation a person feels, with the air held fixed, so they show the same direction, a warm village in the evening, not the same quantity.</p>
+    <p class="note">The measurements are of the air, the surface or a comfort index; the model's numbers are of the radiant heat on a person, with the air held fixed, so they show the same direction, a warm village in the evening, not the same quantity.</p>
     ${experts(`<p class="caveat">Most of these figures come through the brief and are unverified (the Pingshan study's journal was not confirmed); a computational study of wind in Shenzhen's lanes (Ren et al. 2025) is not used here, as the lanes have no wind in this model.</p>`, ['wu2015', 'pingshan', 'yi2022', 'scott2017', 'ren2025', 'brief10'])}`;
 }
 
@@ -287,7 +287,7 @@ export function vgApp(env) {
   root.body.insertAdjacentHTML(
     'beforeend',
     `<div id="village" class="blockpanel" aria-label="Urban village controls">
-        <div class="seg">${btn('data-cool', '1', 'white roofs (W)')}${btn('data-under', '1', 'under the roof (O)')}</div>
+        <div class="seg">${btn('data-cool', '1', 'white roofs', 'title="keyboard shortcut: W"')}${btn('data-under', '1', 'under the roof', 'title="keyboard shortcut: O"')}</div>
         <div class="measures"><div class="hand">Cards</div>${VG_CARDS.map(([id, label]) => btn('data-card', id, label)).join('')}</div>
       </div>`,
   );

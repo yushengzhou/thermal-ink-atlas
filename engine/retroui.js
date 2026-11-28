@@ -19,14 +19,14 @@ export function retrofitNotes(scene, B, A, d, aged) {
   const dLabel = d === 0 ? 'a clear day after overnight rain' : `${d} day${d === 1 ? '' : 's'} after rain`;
   const text = {
     roofs: [`Cool roof (${aged ? 'aged' : 'new'} white paint): ${fmt(at(A, 'coolRoof', 15))} °C at 3 pm,`, `was ${fmt(at(B, 'coolRoof', 15))} °C as a dark membrane`],
-    coating: [`Coated Canal Street at noon: the road is ${degs(coat.dTs)} cooler,`, `but people on it feel ${degs(coat.dTmrt)} hotter`],
+    coating: [`Coated Canal Street at noon: the road is ${degs(coat.dTs)} cooler,`, `but people on it get ${degs(coat.dTmrt)} more radiant heat`],
     square: [`Permeable pavers, ${dLabel}:`, `${fmt(A.thermal.ts(cellOf('square'), 15))} °C at 3 pm (asphalt was ${fmt(B.thermal.ts(cellOf('square'), 15))} °C)`],
     trees: ['Young street trees: thin shade, but they', 'are what cools the walkers here'],
     green: [`Green roof ${fmt(at(A, 'greenRoof', 15))} °C at 3 pm,`, `was ${fmt(at(B, 'greenRoof', 15))} °C`],
   };
   const terms = {
     roofs: [['coolRoof', 'Cool roof'], ['albedoAgeing', aged ? 'aged' : 'new']],
-    coating: [['tmrt', 'people on it feel']],
+    coating: [['tmrt', 'radiant heat']],
     square: [['permeablePaving', 'Permeable pavers'], ['daysSinceRain', dLabel]],
     trees: [],
     green: [['greenRoof', 'Green roof']],
@@ -58,7 +58,7 @@ export function measureCard(m, st, mats, d, aged) {
     const r = st[`h${h}`];
     if (!r.n) return `<tr><td>${h}:00</td><td colspan="2">no cells in full sun</td></tr>`;
     const tm = m.roof ? '<td class="sub">roof</td>' : `<td>${dg(r.dTmrt)}</td>`;
-    return `<tr class="t"><td>${h}:00</td><td>${dg(r.dTs)}</td>${tm}</tr><tr><td></td><td class="sub" colspan="2">surface ${fmt(r.before)} → ${fmt(r.after)} °C${m.roof ? '' : `; feels like ${fmt(r.tmrtBefore)} → ${fmt(r.tmrtAfter)} °C`}</td></tr>`;
+    return `<tr class="t"><td>${h}:00</td><td>${dg(r.dTs)}</td>${tm}</tr><tr><td></td><td class="sub" colspan="2">surface ${fmt(r.before)} → ${fmt(r.after)} °C${m.roof ? '' : `; radiant heat on you ${fmt(r.tmrtBefore)} → ${fmt(r.tmrtAfter)} °C`}</td></tr>`;
   };
   const wet = mat.efWet ? `<p class="sub">${gl('daysSinceRain', 'Days since rain')} d = ${d}: ${gl('ef', 'evaporative fraction')} ${mat.ef.value.toFixed(2)} (wet ${mat.efWet.value}, dry ${mat.dry.ef.value}, τ ${mat.tau.value} d).</p>` : '';
   const age = m.mat === 'coolroofR' || m.mat === 'coolPave' ? `<p class="sub">Materials: ${aged ? 'aged' : 'new'}, ${gl('albedo', 'albedo')} ${mat.alpha.value.toFixed(2)} (${gl('albedoAgeing', 'aged vs new')}).</p>` : '';
@@ -68,13 +68,13 @@ export function measureCard(m, st, mats, d, aged) {
     ? m.line
     : m.roof
       ? `By 3 pm the roof is ${feelWords(r15.dTs)} than before (${fmt(r15.before)} → ${fmt(r15.after)} °C)${m.leadMore ? `; ${m.leadMore}` : ''}.`
-      : `By 3 pm the ground here is ${feelWords(r15.dTs)} than before, and standing on it feels ${feelWords(r15.dTmrt)}.`;
+      : `By 3 pm the ground here is ${feelWords(r15.dTs)} than before, and the radiant heat on someone standing on it is ${Math.abs(r15.dTmrt) < 0.5 ? 'about the same' : `${degs(r15.dTmrt)} ${r15.dTmrt < 0 ? 'lower' : 'higher'}`}.`;
   return `
     <button class="x" aria-label="close">×</button>
     <h3>${m.name}</h3>
     <p class="lead">${lead}</p>
     <table class="cmp">
-      <tr><td>After minus Before</td><td>${gl('surfaceTemp', 'surface')}</td><td>${gl('tmrt', 'how it feels')}</td></tr>
+      <tr><td>After minus Before</td><td>${gl('surfaceTemp', 'surface')}</td><td>${gl('tmrt', 'radiant heat on you')}</td></tr>
       ${row(12)}
       ${row(15)}
     </table>
@@ -93,9 +93,9 @@ export function tradeoffCard(st, matsNew, matsAged) {
   return `
     <button class="x" aria-label="close">×</button>
     <h3>Reflective pavement: cools the road, not the person</h3>
-    <p class="lead">At noon the coated road is ${degs(st.new.dTs)} cooler, but people on it feel ${degs(st.new.dTmrt)} hotter, because light paving bounces sunshine onto them.</p>
+    <p class="lead">At noon the coated road is ${degs(st.new.dTs)} cooler, but people on it get ${degs(st.new.dTmrt)} more radiant heat, because light paving bounces sunshine onto them.</p>
     <table class="cmp">
-      <tr><td>Canal Street coating, noon</td><td>road</td><td>how it feels</td></tr>
+      <tr><td>Canal Street coating, noon</td><td>road</td><td>radiant heat on you</td></tr>
       ${row('new', st.new)}
       ${row('after 1 year', st.aged)}
     </table>

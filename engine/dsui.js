@@ -34,15 +34,15 @@ const NAME = { sail: 'shade sails', ramada: 'the ramada', arcade: 'the arcade', 
 /** Margin notes (at most 5), in plain words. d: numbers from the plugin (noteData). */
 export function dsNotes(scene, d) {
   const text = {
-    sail: ['Under the sails at 3 pm it feels', `about ${r0(-d.sail)} degrees cooler than in the open sun`],
-    arcade: [`In the arcade: about ${r0(-d.arcade)} degrees cooler`, 'to stand in than the open sun at 3 pm'],
+    sail: ['Under the sails at 3 pm: about', `${r0(-d.sail)} degrees less radiant heat than in the open sun`],
+    arcade: [`In the arcade: about ${r0(-d.arcade)} degrees less radiant heat`, 'on you than in the open sun at 3 pm'],
     lawn: [`The watered lawn: ${fmt(d.lawn15)} °C at 3 pm (air ${fmt(d.air15)} °C);`, `it drinks about ${fmt(d.evap)} litres per m² a day`],
-    street: [`Light-coated Main Street: ${r0(-d.coatTs)} degrees cooler underfoot,`, `but ${fmt(d.coatTmrt)} degrees hotter to stand on at 3 pm`],
+    street: [`Light-coated Main Street: ${r0(-d.coatTs)} degrees cooler underfoot,`, `but ${fmt(d.coatTmrt)} degrees more radiant heat on you at 3 pm`],
     plaza: [`Open gravel in the sun: ${fmt(d.gravel15)} °C at 3 pm,`, 'the hottest place to stand in the plaza'],
   };
   const terms = {
     sail: [['shadeSail', 'Under the sails']],
-    arcade: [['tmrt', 'to stand in']],
+    arcade: [['tmrt', 'radiant heat']],
     lawn: [['referenceEt', 'it drinks about']],
     street: [['albedo', 'Light-coated']],
     plaza: [['xeriscape', 'Open gravel']],
@@ -85,15 +85,15 @@ export function sailsCard(d) {
   return `
     ${close}
     <h3>Sails or trees?</h3>
-    <p class="lead">At 3 pm, standing under a shade sail feels about ${r0(-S.sail[h].d)} degrees cooler than standing in the open sun; under a mesquite tree about ${r0(-S.mesquite[h].d)} degrees. The sail needs no water.</p>
+    <p class="lead">At 3 pm, standing under a shade sail takes about ${r0(-S.sail[h].d)} degrees of ${gl('tmrt', 'radiant heat')} off you compared with the open sun${sailMiss ? ' (more than the 14 to 20 measured in Tempe: the model\'s sails are likely too good)' : ''}; a mesquite tree about ${r0(-S.mesquite[h].d)} degrees. The sail needs no water.</p>
     <table class="cmp">
-      <tr><td>3 pm, standing under</td><td>feels like</td><td>against open sun</td><td>measured, degrees</td></tr>
+      <tr><td>3 pm, standing under</td><td>radiant heat</td><td>against open sun</td><td>measured, degrees</td></tr>
       <tr><td>open sun on the plaza</td><td>${r0(d.st.ref[h].tmrt)} °C</td><td>—</td><td>—</td></tr>
       ${row('sail', '−14', '−20', ' class="t"')}
       ${row('ramada', '−14', '−20')}
       ${row('mesquite', '−14', '−20')}
       ${row('paloVerde', '−14', '−20')}
-      <tr><td colspan="4" class="sub">"Feels like" is the radiant heat on a standing person (${gl('tmrt', 'mean radiant temperature')}), not the air. ${sailMiss || ramMiss || paloMiss ? `Outside the range measured in Tempe: ${[sailMiss ? 'the sails' : '', ramMiss ? 'the ramada' : '', paloMiss ? 'the palo verdes' : ''].filter(Boolean).join(', ')}${MISS}.` : 'All inside the range measured in Tempe.'}</td></tr>
+      <tr><td colspan="4" class="sub">Radiant heat on a standing person (${gl('tmrt', 'mean radiant temperature')}), not the air, and not a weather-app "feels like": a person feels a smaller drop than these degrees. ${sailMiss || ramMiss || paloMiss ? `Outside the range measured in Tempe: ${[sailMiss ? 'the sails' : '', ramMiss ? 'the ramada' : '', paloMiss ? 'the palo verdes' : ''].filter(Boolean).join(', ')}${MISS}.` : 'All inside the range measured in Tempe.'}</td></tr>
     </table>
     ${sailMiss || ramMiss || paloMiss ? `<p class="caveat">Why the model differs, likely: ${sailMiss ? `the sails here stop 85% of the direct sun, and a person under them sees only the shaded ground below, not the hot gravel around (in test runs, sails letting through 25% of the sun, the top of the suggested range, land at about −19 degrees; with the gravel around in view, about −21). ` : ''}${ramMiss ? `The ramada is a solid roof, so it acts like the arcade (measured 23 to 31 degrees cooler); the 14 to 20 degrees were measured under sails and umbrellas. ` : ''}${paloMiss ? `${d.palo.court.n} of the ${d.palo.court.n + d.palo.open.n} palo verde spots are in house courtyards, where the light walls throw sunlight back onto a person (${deg(d.palo.court.d)}); the one in the open plaza: ${deg(d.palo.open.d)}.` : ''}</p>` : ''}
     <p class="note">A sail stops most of the sunshine before it reaches you; a desert tree does the same with its leaves and also evaporates a little water. Here the air temperature is the same under both: measured shade in Tempe changed the air by less than 1.3 degrees.</p>
@@ -112,13 +112,13 @@ export function arcadeCard(d) {
   return `
     ${close}
     <h3>Arcades and courtyards: the deepest shade</h3>
-    <p class="lead">A covered walkway along the shops is the coolest place to stand at 3 pm: it feels about ${r0(-A[h].d)} degrees cooler than the open sun${arcMiss ? `, outside the 20 to 31 degrees measured${MISS}` : ', within the 20 to 31 degrees measured in Tempe'}.</p>
+    <p class="lead">A covered walkway along the shops is the coolest place to stand at 3 pm: about ${r0(-A[h].d)} degrees less ${gl('tmrt', 'radiant heat')} on you than in the open sun${arcMiss ? `, outside the 20 to 31 degrees measured${MISS}` : ', within the 20 to 31 degrees measured in Tempe'}.</p>
     <table class="cmp">
-      <tr><td>3 pm</td><td>feels like</td></tr>
+      <tr><td>3 pm</td><td>radiant heat</td></tr>
       <tr class="t"><td>under the arcade</td><td>${r0(A[h].tmrt)} °C</td></tr>
       <tr><td>in a house's courtyard</td><td>${r0(st.court.tmrt15)} °C</td></tr>
       <tr><td>open sun on the plaza</td><td>${r0(st.ref[h].tmrt)} °C</td></tr>
-      <tr><td colspan="2" class="sub">After dark (9 pm) the shade turns around: under a roof it feels warmer than in the open, because the roof hides the cold night sky. Measured: 0 to 5 degrees warmer.</td></tr>
+      <tr><td colspan="2" class="sub">After dark (9 pm) the shade turns around: under a roof there is more radiant heat on you than in the open, because the roof hides the cold night sky. Measured: 0 to 5 degrees warmer.</td></tr>
       ${nightRows}
     </table>
     ${nightRows.includes('outside') ? '<p class="caveat">After dark the model keeps every spot under a roof, a sail or a crown 6 to 11 degrees warmer than the open plaza, more than measured. Likely: the model hides three quarters of the night sky under any of them behind a surface near the air temperature, while the open plaza sees the cold, dry desert sky; in a test run, roofs and sails cooling 3 degrees below the air at night (as a thin sheet does here) still leave a gap of about 6 to 8 degrees.</p>' : ''}
@@ -177,7 +177,7 @@ export function coatCard(d) {
   return `
     ${close}
     <h3>The light street coating</h3>
-    <p class="lead">Main Street is coated pale grey: at 3 pm its surface is about ${r0(-c.dTs)} degrees cooler than bare asphalt, but a person standing on it feels about ${fmt(c.dTmrt)} degrees hotter, because more sunlight bounces up onto them.</p>
+    <p class="lead">Main Street is coated pale grey: at 3 pm its surface is about ${r0(-c.dTs)} degrees cooler than bare asphalt, but a person standing on it gets about ${fmt(c.dTmrt)} degrees more radiant heat, because more sunlight bounces up onto them.</p>
     <table class="cmp">
       <tr><td></td><td>coated / bare</td><td>change</td><td>measured</td></tr>
       <tr class="t"><td>road surface, 3 pm</td><td>${fmt(c.ts)} / ${fmt(c.tsBare)} °C</td><td>${deg(c.dTs)}${tsMiss ? MISS : ''}</td><td>about 6 cooler</td></tr>
@@ -266,11 +266,11 @@ export function dsApp(env) {
   };
   R.overlay = dsOverlay;
 
-  const btn = (attr, v, label) => `<button type="button" ${attr}="${v}">${label}</button>`;
+  const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
   root.body.insertAdjacentHTML(
     'beforeend',
     `<div id="desert" class="blockpanel" aria-label="Desert block controls"><details open><summary class="hand">Desert block: buttons and cards</summary>
-        <div class="seg">${btn('data-coat', '1', 'street coating (C)')}${btn('data-water', '1', 'water used (L)')}</div>
+        <div class="seg">${btn('data-coat', '1', 'street coating', 'title="keyboard shortcut: C"')}${btn('data-water', '1', 'water used', 'title="keyboard shortcut: L"')}</div>
         <div class="measures"><div class="hand">Cards</div>${DS_CARDS.map(([id, label]) => btn('data-card', id, label)).join('')}</div>
       </details></div>`,
   );
@@ -403,7 +403,7 @@ export function dsApp(env) {
       const rows = [];
       if (f.over) rows.push(`<tr><td>shade over this spot</td><td>${NAME[f.over.kind]}, lets through ${Math.round(f.over.tr * 100)}% of the sun</td></tr>`);
       if (f.water !== undefined) rows.push(`<tr><td>water evaporated a day</td><td>${fmt(f.water)} L per m²</td></tr>`);
-      if (f.coat) rows.push(`<tr><td>surface now, coated / bare</td><td>${fmt(f.coat.ts)} / ${fmt(f.coat.tsBare)} °C</td></tr><tr><td>${gl('tmrt', 'feels like')} now, coated / bare</td><td>${fmt(f.coat.tmrt)} / ${fmt(f.coat.tmrtBare)} °C</td></tr>${f.coat.on ? '' : '<tr><td colspan="2" class="sub">Coating off (C): the page shows the bare street.</td></tr>'}`);
+      if (f.coat) rows.push(`<tr><td>surface now, coated / bare</td><td>${fmt(f.coat.ts)} / ${fmt(f.coat.tsBare)} °C</td></tr><tr><td>${gl('tmrt', 'radiant heat')} now, coated / bare</td><td>${fmt(f.coat.tmrt)} / ${fmt(f.coat.tmrtBare)} °C</td></tr>${f.coat.on ? '' : '<tr><td colspan="2" class="sub">Coating off: the page shows the bare street.</td></tr>'}`);
       return rows.join('');
     },
     /** The shared sky-view, night-lag and wet-bulb footnotes quote the block's own lines (no shared lawn here). */
