@@ -40,6 +40,8 @@ export const DS = {
   mesquiteTarget: v(-16.7, 'middel2021', 'cited'),
   treeWater: v([1.4, 4.3], 'amwua', 'range'),
   lawnApplied: v(6.4, 'amwua', 'cited'),
+  eto: v([7.1, 8.9], 'azmet', 'range'),
+  kc: v(0.68, 'az1195', 'interp'),
   misters: v([1.5, 3.4], 'huang2025', 'range'),
   warm: v(6, 'engine', 'engine'),
 };

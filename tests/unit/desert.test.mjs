@@ -196,7 +196,11 @@ const PINS = [
   [/^People dwelling/, 1, 1e-9],
 ];
 
-test('acceptance bands: every row pinned; misses 1, 6, 7, 9, 10; verdicts; docs table in sync with the rows', () => {
+test('acceptance bands: every row pinned; misses 1, 4, 6, 7, 9, 10; verdicts; docs table in sync with the rows', () => {
+  // band 4's target: reference ET 7.1-8.9 mm x Kc 0.68 (AZ1195's July 0.78 for daily watering, 0.1 lower every 3 days)
+  assert.deepEqual(DS.eto.value, [7.1, 8.9]);
+  assert.equal(DS.kc.value, 0.68);
+  assert.deepEqual(DS_BANDS.evap, [4.8, 6.1]);
   const rows = bands11();
   assert.equal(rows.length, PINS.length);
   for (const r of rows) {
@@ -206,13 +210,13 @@ test('acceptance bands: every row pinned; misses 1, 6, 7, 9, 10; verdicts; docs 
   }
   const v = bandVerdicts(rows);
   assert.deepEqual(Object.keys(v).sort((a, b) => a - b), ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
-  assert.deepEqual(Object.keys(v).filter((k) => !v[k]).sort((a, b) => a - b), ['1', '6', '7', '9', '10']);
+  assert.deepEqual(Object.keys(v).filter((k) => !v[k]).sort((a, b) => a - b), ['1', '4', '6', '7', '9', '10']);
   // the supplementary rows outside their band are exactly these
   const out = rows.filter((r) => r.supp && !r.inside && !(r.lo === null && r.hi === null)).map((r) => r.label.slice(0, 40));
-  assert.equal(out.length, 5, out.join(' | '));
+  assert.equal(out.length, 7, out.join(' | '));
   const md = read('docs/sources.md');
   assert.ok(md.includes(bands11Markdown(rows)), 'run `node scripts/sources.mjs` and commit docs/sources.md');
-  assert.ok(md.includes('5 of 9 independent bands met (2, 3, 4, 5, 8); missed: 1, 6, 9, 10; band 7 semi-constructed (missed).'));
+  assert.ok(md.includes('4 of 9 independent bands met (2, 3, 5, 8); missed: 1, 4, 6, 9, 10; band 7 semi-constructed (missed).'));
 });
 
 test('the misses\' causes (docs only) and the numbers the cards quote from them', () => {

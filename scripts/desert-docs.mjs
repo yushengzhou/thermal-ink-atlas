@@ -2,6 +2,7 @@
 // generated from the code and model runs (scripts/desert.mjs).
 import { BASIS, MATERIALS, MODEL } from '../engine/materials.js';
 import { DS, KINDS } from '../engine/desert.js';
+import { DS_BANDS } from '../engine/dsui.js';
 import { base11, bands11, bandVerdicts, sensitivity11, causes11, walkers11, sunCheck11, DS_NOTES } from './desert.mjs';
 
 const f1 = (x) => (Math.round(x * 10) / 10).toFixed(1);
@@ -39,6 +40,7 @@ ${out} of ${counted.length} counted checks fall outside their band; ${rows.lengt
 export function desertMarkdown() {
   const { scene, world, T, st } = base11();
   const rows = bands11();
+  const bv4 = bandVerdicts(rows)['4'];
   const sens = sensitivity11();
   const cz = causes11();
   const wk = walkers11(15);
@@ -121,7 +123,7 @@ mesquites ${signed(st.shade.mesquite[h].d, 2)} K at 15:00. That row is **by cons
 
 Open lawn in full sun (${st.lawn.n} cells): ${f1(st.lawn.ts15)} °C at 15:00 (air ${f1(st.air[h])} °C), ${f1(st.lawn.ts03)} °C at 03:00. Water evaporated over
 the design day (\`Thermal.evaporation\`, EF × max(Q*, 0) over 2.45 MJ kg⁻¹ on the stored 15-min values): ${f2(st.lawn.evap)} mm (L m⁻²) on average,
-${f2(st.lawn.evapMin)}–${f2(st.lawn.evapMax)} across the lawn, against 5–7 from reference ET × the July crop coefficient [azmet, az1195] and about
+${f2(st.lawn.evapMin)}–${f2(st.lawn.evapMax)} across the lawn, against ${DS_BANDS.evap[0]}–${DS_BANDS.evap[1]} from reference ET ${DS.eto.value[0]}–${DS.eto.value[1]} mm × the July crop coefficient for a lawn watered every 3 days, ${DS.kc.value} [azmet, az1195] and about
 ${DS.lawnApplied.value} mm applied [amwua]. EF ${MATERIALS.desertLawn.ef.value} is a fixed share of the positive net radiation: it does not respond to the dry air and
 draws no advected heat (the brief estimates a real lawn's latent flux at about its daily net radiation). Sunlit open gravel (${st.gravel.n} cells):
 ${f1(st.gravel.ts15)} °C at 15:00. Water used by the other covers (overlay and cards) is quoted, not modelled: desert trees ${DS.treeWater.value.join('–')} L per m² of crown a day
@@ -196,7 +198,12 @@ ${cz.gravel.map((g) => `  - ${g.label}: ${f1(g.ts)} °C (air ${f1(g.air)} °C at
   Each of (a) and (b) alone leaves it outside; the brief's upper albedo alone, or all three together, bring it inside. Likely causes: the
   engine's clear-sky sun (the brief: noon global irradiance about 1037 W m⁻², 5–10% above Tempe's measured clear-day peaks) and an air
   ${f1(st.air[h] - 41)} K warmer than on the measurement day; the albedo is unverified (0.16–0.39).
-- **Band 6** (sails ${signed(st.shade.sail[h].d)} K, ramada ${signed(st.shade.ramada[h].d)} K against −14 to −20 K): with the person's view of the ground spread
+${bv4 ? '' : `- **Band 4** (the lawn's water ${f2(st.lawn.evap)} mm against ${DS_BANDS.evap[0]}–${DS_BANDS.evap[1]} mm): the band is reference ET ${DS.eto.value[0]}–${DS.eto.value[1]} mm × Kc ${DS.kc.value},
+  AZ1195's July 0.78 for turf watered every day lowered by 0.1 for watering every 3 days, the schedule of [amwua] (round-2 reference check; the brief
+  used 0.78 and 5–7 mm, which the model met). The model's mean is ${DS.eto.value[0]}–${DS.eto.value[1]} mm × ${f2(st.lawn.evap / DS.eto.value[1])}–${f2(st.lawn.evap / DS.eto.value[0])}; daily-watered turf (0.78) gives
+  ${f2(DS.eto.value[0] * 0.78)}–${f2(DS.eto.value[1] * 0.78)} mm, which contains it; the lawn at EF 0.85 (sensitivity above) ${f2(sens.lawn.find((r) => r.label === 'lawn EF 0.85').evap)} mm. Likely cause: the brief's fixed
+  evaporative fraction (${MATERIALS.desertLawn.ef.value}) is that of a lawn wet every day; it does not dry between waterings. Not tuned.
+`}- **Band 6** (sails ${signed(st.shade.sail[h].d)} K, ramada ${signed(st.shade.ramada[h].d)} K against −14 to −20 K): with the person's view of the ground spread
   over the neighbourhood (\`tmrtView\`: the downward face and the sides see each ground cell within 40 m by its view factor from 1.1 m,
   instead of the own cell only) the sails are ${signed(cz.view.sail.d)} K and the ramada ${signed(cz.view.ramada.d)} K; with that view and the sails' transmission at 0.25,
   ${signed(cz.sail25)} K (inside); sails and ramada of 10 m instead of 20 m (same centres): ${signed(cz.small.sail)} K and ${signed(cz.small.ramada)} K. Likely causes: the
@@ -230,7 +237,9 @@ ${bands11Markdown(rows)}
 Misses:
 - **Band 1** (sunlit gravel ${f1(st.gravel.ts15)} °C against 55–63 °C): likely the engine's strong clear-sky sun and the warmer design-day air (tested
   above); stated on the lawn card.
-- **Band 6** (sails ${signed(st.shade.sail[h].d)} K, ramada ${signed(st.shade.ramada[h].d)} K): likely the sail's transmission and the one-cell ground view; for the
+${bv4 ? '' : `- **Band 4** (the lawn's water ${f2(st.lawn.evap)} mm against ${DS_BANDS.evap[0]}–${DS_BANDS.evap[1]} mm, the target corrected to Kc ${DS.kc.value}): likely the fixed evaporative
+  fraction of a lawn wet every day (tested above); stated on the lawn card.
+`}- **Band 6** (sails ${signed(st.shade.sail[h].d)} K, ramada ${signed(st.shade.ramada[h].d)} K): likely the sail's transmission and the one-cell ground view; for the
   ramada, the band's scope (tested above); stated on the sails card.
 - **Band 7** (palo verdes ${signed(st.shade.paloVerde[h].d)} K, semi-constructed): likely the courtyards' reflected sun (tested above); stated on the sails card.
 - **Band 9** (after sunset +${f1(Math.min(...['sail', 'ramada', 'arcade', 'mesquite'].map((k) => st.shade[k][ni].d)))} to +${f1(Math.max(...['sail', 'ramada', 'arcade', 'mesquite'].map((k) => st.shade[k][ni].d)))} K): likely the crown factor and the dry night sky (the tests above

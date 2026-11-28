@@ -4986,7 +4986,7 @@ const GLOSSARY = {
   referenceEt: {
     term: 'Reference evapotranspiration (ET₀)',
     text: 'The water a well-watered short grass would evaporate in a day under the local weather, in millimetres (1 mm is 1 litre per square metre). A real crop uses ET₀ times its crop coefficient.',
-    range: 'Phoenix in July about 7–8 mm a day (up to 10); bermudagrass about 0.78 of it, so about 5–7 L per m² a day.',
+    range: 'Phoenix in July about 7–9 mm a day (up to 10); bermudagrass watered every day uses about 0.78 of it, watered every 3 days about 0.68, so about 5–6 L per m² a day.',
     src: 'azmet, az1195, brief11',
     why: 'It is what a lawn costs in water: in a desert summer, several litres per square metre every day.',
     scenes: ['desert'],
@@ -5519,6 +5519,8 @@ const DS = {
   mesquiteTarget: v(-16.7, 'middel2021', 'cited'),
   treeWater: v([1.4, 4.3], 'amwua', 'range'),
   lawnApplied: v(6.4, 'amwua', 'cited'),
+  eto: v([7.1, 8.9], 'azmet', 'range'),
+  kc: v(0.68, 'az1195', 'interp'),
   misters: v([1.5, 3.4], 'huang2025', 'range'),
   warm: v(6, 'engine', 'engine'),
 };
@@ -5757,7 +5759,7 @@ const MISS = ' <b>(outside the measured range)</b>';
 const outside = (x, [a, b]) => x < a || x > b;
 
 /** The brief's bands the cards quote (docs/sources.md, Block 11, checks them all). */
-const DS_BANDS = { gravel: [55, 63], coat: -5, lawnAir: 2, evap: [5, 7], open: [65, 76], sail: [-20, -14], tree: [-20, -14], arcade: [-31, -20], night: [0, 5], coatTmrt: [2.5, 3.2] };
+const DS_BANDS = { gravel: [55, 63], coat: -5, lawnAir: 2, evap: DS.eto.value.map((e) => Math.round(e * DS.kc.value * 10) / 10), open: [65, 76], sail: [-20, -14], tree: [-20, -14], arcade: [-31, -20], night: [0, 5], coatTmrt: [2.5, 3.2] };
 const NAME = { sail: 'shade sails', ramada: 'the ramada', arcade: 'the arcade', patio: 'the café patio', mesquite: 'mesquite trees', paloVerde: 'palo verde trees' };
 
 /** Margin notes (at most 5), in plain words. d: numbers from the plugin (noteData). */
@@ -5869,15 +5871,15 @@ function lawnCard(d) {
     <table class="cmp">
       <tr><td>water a day, litres per m²</td><td></td></tr>
       <tr class="t"><td>lawn, evaporated (this model)</td><td>${fmt(L.evap)}${evapMiss ? MISS : ''}</td></tr>
-      <tr><td>lawn, estimated from crop water needs</td><td>5–7</td></tr>
+      <tr><td>lawn, estimated from crop water needs</td><td>${DS_BANDS.evap[0]}–${DS_BANDS.evap[1]}</td></tr>
       <tr><td>lawn, watered as the guidance says</td><td>about ${w.lawnApplied}</td></tr>
       <tr><td>desert tree, per m² of its crown</td><td>${w.trees[0]}–${w.trees[1]}</td></tr>
       <tr><td>gravel yard, shade sail</td><td>0</td></tr>
       <tr><td colspan="2" class="sub">Lawn surface at 3 pm ${fmt(L.ts15)} °C${tsMiss ? ` (more than 2 degrees above the air${MISS})` : ' (measured: irrigated grass is never far above the air)'}; sunlit gravel ${fmt(d.st.gravel.ts15)} °C${outside(d.st.gravel.ts15, DS_BANDS.gravel) ? ` (measured 55–63 °C${MISS}: likely the engine's strong midday sun and an air 1.4 degrees warmer than on the measurement day; gravel at the light end of its likely range would be about 61 °C)` : ''}.</td></tr>
     </table>
     <p class="note">The lawn cools itself by evaporating water: the sun that would heat it goes into turning water to vapour. In dry desert air that works well, but it needs water every day. A neighbourhood study found that much more watering would cool the evenings only a little faster.</p>
-    ${experts(`<p class="lit">Reference evapotranspiration at Phoenix Encanto in July 7.1–7.8 mm a day; bermudagrass crop coefficient 0.78 in July, so about 5–7 mm a day (1 mm = 1 L m⁻²); lawns watered every 3 days, about 6.4 mm a day applied; a desert tree with a 6.1 m crown about 890 L every 7–21 days. Gober et al.: 32.8% more outdoor water for 0.41–0.82 K per hour faster evening cooling. Middel et al. (2014): xeric yards warmest, then oasis, then mesic; by day the form of a neighbourhood matters more than its landscaping. Middel et al. (2015): about −0.14 K of air per 1% more tree canopy.</p>
-      <p class="caveat">The lawn's ${gl('ef', 'evaporative fraction')} is ${MATERIALS.desertLawn.ef.value}${tag(MATERIALS.desertLawn.ef)}: a fixed share of its net sunshine. It does not depend on how dry the air is, and it cannot draw extra heat out of the hot, dry air blowing over the lawn (the "oasis effect": a real lawn here likely evaporates about as much water as all its net sunshine could). Here it evaporates ${L.evapMin.toFixed(1)}–${L.evapMax.toFixed(1)} L a day across the lawn, inside the 5–7 L estimate.</p>`, ['azmet', 'az1195', 'amwua', 'gober2009', 'middel2014', 'middel2015', 'templeton2018', 'brief11'])}`;
+    ${experts(`<p class="lit">Reference evapotranspiration at Phoenix Encanto in July 7.1–7.8 mm a day; bermudagrass crop coefficient 0.78 in July for turf watered every day, 0.1 lower when watered every 3 days, so ${DS.kc.value}${tag(DS.kc)} here; with reference evapotranspiration of ${DS.eto.value[0]}–${DS.eto.value[1]} mm a day${tag(DS.eto)} (the July mean to hot days) that is about ${DS_BANDS.evap[0]}–${DS_BANDS.evap[1]} mm a day (1 mm = 1 L m⁻²); lawns watered every 3 days, about 6.4 mm a day applied; a desert tree with a 6.1 m crown about 890 L every 7–21 days. Gober et al.: 32.8% more outdoor water for 0.41–0.82 K per hour faster evening cooling. Middel et al. (2014): xeric yards warmest, then oasis, then mesic; by day the form of a neighbourhood matters more than its landscaping. Middel et al. (2015): about −0.14 K of air per 1% more tree canopy.</p>
+      <p class="caveat">The lawn's ${gl('ef', 'evaporative fraction')} is ${MATERIALS.desertLawn.ef.value}${tag(MATERIALS.desertLawn.ef)}: a fixed share of its net sunshine. It does not depend on how dry the air is, and it cannot draw extra heat out of the hot, dry air blowing over the lawn (the "oasis effect": a real lawn here likely evaporates about as much water as all its net sunshine could). Here it evaporates ${L.evapMin.toFixed(1)}–${L.evapMax.toFixed(1)} L a day across the lawn, ${evapMiss ? `above the ${DS_BANDS.evap[0]}–${DS_BANDS.evap[1]} L estimate for a lawn watered every 3 days: likely because a fixed evaporative fraction of ${MATERIALS.desertLawn.ef.value} behaves like turf watered every day (crop coefficient 0.78: about ${(DS.eto.value[0] * 0.78).toFixed(1)}–${(DS.eto.value[1] * 0.78).toFixed(1)} L); not tuned` : `inside the ${DS_BANDS.evap[0]}–${DS_BANDS.evap[1]} L estimate`}.</p>`, ['azmet', 'az1195', 'amwua', 'gober2009', 'middel2014', 'middel2015', 'templeton2018', 'brief11'])}`;
 }
 
 /** Misters card (quoted, not modelled). */

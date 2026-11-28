@@ -66,7 +66,7 @@ Hand-inked isometric city blocks that show urban heat through one heat-wave day:
   sun and the arcade about 27 K; the lawn stays near the air but
   evaporates about 6.5 L per m² a day; the coating takes about 9 K off the
   road and adds about 3 K to the people on it (`C` takes it off, `L` shows
-  the water each surface uses). 5 of the 9 independent bands are met;
+  the water each surface uses). 4 of the 9 independent bands are met;
   band 7 is semi-constructed (missed); the misses are stated on the cards
   with their likely causes. Its cards follow the
   outside evaluation's plain-words layout (#29) from the start.

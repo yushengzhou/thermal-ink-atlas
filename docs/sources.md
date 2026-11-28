@@ -458,7 +458,7 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Ageing (aged vs new)** (sponge-retrofit only): Typical: Cool pavement coating 0.26 → 0.18 within a year; cool roofs must reach 0.72 new or 0.50 after 3 years (Chicago code). [ko2022, chicago]
 - **Xeriscape** (desert only): Typical: In Phoenix neighbourhoods, xeric yards were the warmest by day, then "oasis" yards, then fully watered (mesic) ones; by day the form of a neighbourhood mattered more than its landscaping. [middel2014, brief11]
 - **Ramada** (desert only): Typical: Sails, umbrellas and similar light shade lowered the radiant heat on a person by about 17 K in Tempe; arcades and overhangs by about 23–31 K. [middel2021, colter2019, brief11]
-- **Reference evapotranspiration (ET₀)** (desert only): Typical: Phoenix in July about 7–8 mm a day (up to 10); bermudagrass about 0.78 of it, so about 5–7 L per m² a day. [azmet, az1195, brief11]
+- **Reference evapotranspiration (ET₀)** (desert only): Typical: Phoenix in July about 7–9 mm a day (up to 10); bermudagrass watered every day uses about 0.78 of it, watered every 3 days about 0.68, so about 5–6 L per m² a day. [azmet, az1195, brief11]
 - **Vapour pressure (e_a)** (desert only): Typical: Desert summer air about 8–15 hPa (dew point 3–13 °C); a humid summer city 25–30 hPa. [ncei, azmet, brief11]
 - **Net longwave (infrared) loss** (nightmarket only): In this model: undefined [this model]
 - **Metabolic rate (met)** (nightmarket only): Typical: Standing about 1.2 met (about 125 W), walking slowly about 2 met (about 210 W). [ashrae55]
@@ -2750,6 +2750,8 @@ shared aged asphalt. The block's own values live in `engine/desert.js` (`DS`):
 | `mesquiteTarget` | -16.7 [middel2021] *cited value*, unverified (the calibration target for the mesquite crown, K: ΔTmrt under Prosopis against open sun (Middel et al. 2021), as the brief says ("mesquite LAI: calibrate to −16.7 K")) |
 | `treeWater` | 1.4–4.3 [amwua] *cited range*, unverified (water a desert tree takes, L per m² of canopy a day: about 890 L every 7–21 days for a 6.1 m canopy (AMWUA via the brief); quoted on the cards and the water overlay, not modelled) |
 | `lawnApplied` | 6.4 [amwua] *cited value*, unverified (water a Phoenix lawn is given, mm (= L m⁻²) a day: every 3 days, about 6.4 mm a day (AMWUA via the brief); quoted) |
+| `eto` | 7.1–8.9 [azmet] *cited range*, unverified (reference evapotranspiration for band 4, mm a day: AZMet Encanto, the July mean's low end (7.1) to the hot days' high end (8.9), via the brief) |
+| `kc` | 0.68 [az1195] *interpretation of the source*, unverified (bermudagrass crop coefficient for band 4: AZ1195 Table 2 gives 0.78 for July for fairway turf watered daily; its note lowers Kc by 0.1 for watering every 3 days (the AMWUA schedule used here), so 0.68 (round-2 reference check; the brief used 0.78 and the band 5–7 mm)) |
 | `misters` | 1.5–3.4 [huang2025] *cited range*, unverified (water a misted patio uses, L per m² an hour: 4.87 L h⁻¹ per nozzle at 0.3–0.7 nozzles per m² (Huang et al. 2025 via the brief); quoted, misting is not modelled) |
 | `warm` | 6 [engine] *engine assumption (no source)*, unverified (coarse 10-min spin-up days (block 3's opts.warm, with its stability guard); convergence is tested on 1-min days as everywhere) |
 
@@ -2798,7 +2800,7 @@ mesquites −16.76 K at 15:00. That row is **by construction** and the palo verd
 
 Open lawn in full sun (748 cells): 40.9 °C at 15:00 (air 42.4 °C), 29.3 °C at 03:00. Water evaporated over
 the design day (`Thermal.evaporation`, EF × max(Q*, 0) over 2.45 MJ kg⁻¹ on the stored 15-min values): 6.47 mm (L m⁻²) on average,
-6.37–6.52 across the lawn, against 5–7 from reference ET × the July crop coefficient [azmet, az1195] and about
+6.37–6.52 across the lawn, against 4.8–6.1 from reference ET 7.1–8.9 mm × the July crop coefficient for a lawn watered every 3 days, 0.68 [azmet, az1195] and about
 6.4 mm applied [amwua]. EF 0.9 is a fixed share of the positive net radiation: it does not respond to the dry air and
 draws no advected heat (the brief estimates a real lawn's latent flux at about its daily net radiation). Sunlit open gravel (1593 cells):
 65.9 °C at 15:00. Water used by the other covers (overlay and cards) is quoted, not modelled: desert trees 1.4–4.3 L per m² of crown a day
@@ -2892,6 +2894,11 @@ Nothing shipped changes.
   Each of (a) and (b) alone leaves it outside; the brief's upper albedo alone, or all three together, bring it inside. Likely causes: the
   engine's clear-sky sun (the brief: noon global irradiance about 1037 W m⁻², 5–10% above Tempe's measured clear-day peaks) and an air
   1.4 K warmer than on the measurement day; the albedo is unverified (0.16–0.39).
+- **Band 4** (the lawn's water 6.47 mm against 4.8–6.1 mm): the band is reference ET 7.1–8.9 mm × Kc 0.68,
+  AZ1195's July 0.78 for turf watered every day lowered by 0.1 for watering every 3 days, the schedule of [amwua] (round-2 reference check; the brief
+  used 0.78 and 5–7 mm, which the model met). The model's mean is 7.1–8.9 mm × 0.73–0.91; daily-watered turf (0.78) gives
+  5.54–6.94 mm, which contains it; the lawn at EF 0.85 (sensitivity above) 5.99 mm. Likely cause: the brief's fixed
+  evaporative fraction (0.9) is that of a lawn wet every day; it does not dry between waterings. Not tuned.
 - **Band 6** (sails −22.9 K, ramada −29.0 K against −14 to −20 K): with the person's view of the ground spread
   over the neighbourhood (`tmrtView`: the downward face and the sides see each ground cell within 40 m by its view factor from 1.1 m,
   instead of the own cell only) the sails are −20.7 K and the ramada −26.2 K; with that view and the sails' transmission at 0.25,
@@ -2929,9 +2936,9 @@ At 15:00 (the brief's bands), "after sunset" 21:00, the open reference as above.
 | 2. Supplementary: the same at 12:00, K | -8.95 K | ≤ -5 | coolPave2024 | inside (supplementary, not counted) |
 | 2. Supplementary: Main Street coated − the cross street's bare asphalt at 15:00 (n 160), K | -8.78 K | ≤ -5 | coolPave2024 | inside (supplementary, not counted) |
 | 3. Irrigated lawn in full sun at 15:00 (n 748): surface − air, K | -1.55 K | ≤ 2 | middel2021 | inside |
-| 4. Irrigated lawn: water evaporated over the day, mean of the open lawn cells, mm (= L m⁻²) | 6.47 mm | 5 to 7 | az1195 | inside |
-| 4. Supplementary: the same, lowest cell, mm | 6.37 mm | 5 to 7 | az1195 | inside (supplementary, not counted) |
-| 4. Supplementary: the same, highest cell, mm | 6.52 mm | 5 to 7 | az1195 | inside (supplementary, not counted) |
+| 4. Irrigated lawn: water evaporated over the day, mean of the open lawn cells, mm (= L m⁻²) | 6.47 mm | 4.8 to 6.1 | az1195 | **outside** |
+| 4. Supplementary: the same, lowest cell, mm | 6.37 mm | 4.8 to 6.1 | az1195 | outside (supplementary, not counted) |
+| 4. Supplementary: the same, highest cell, mm | 6.52 mm | 4.8 to 6.1 | az1195 | outside (supplementary, not counted) |
 | 5. The plaza's open gravel in full sun at 15:00 (n 663): Tmrt, °C | 73.64 °C | 65 to 76 | middel2021 | inside |
 | 5. Supplementary: all sunlit open gravel at 15:00 (n 1593): Tmrt, °C | 74.00 °C | 65 to 76 | middel2021 | inside (supplementary, not counted) |
 | 5. Supplementary: the cross street's sunlit asphalt at 15:00: Tmrt, °C | 71.00 °C | 65 to 76 | middel2021 | inside (supplementary, not counted) |
@@ -2953,11 +2960,13 @@ At 15:00 (the brief's bands), "after sunset" 21:00, the open reference as above.
 | Walkers at 15:00: density in shade over density in sun | 5.515 | ≥ 2 | melnikov | inside |
 | People dwelling at 15:00 (n 14) whose place is in shade | 1.000 | ≥ 0.5 | melnikov | inside |
 
-9 of 16 counted checks fall outside their band; 13 supplementary rows are not counted. By the brief's ten bands: 5 of 9 independent bands met (2, 3, 4, 5, 8); missed: 1, 6, 9, 10; band 7 semi-constructed (missed). Band 7's only counted row (the palo verdes) is semi-constructed: their crown is the mesquite's, calibrated to the measured −16.7 K (the mesquite row is by construction and supplementary), so band 7 does not test the model independently. They are reported, not tuned away: every other parameter value is the brief's central value (or the shared value the brief names), committed before the first band run.
+10 of 16 counted checks fall outside their band; 13 supplementary rows are not counted. By the brief's ten bands: 4 of 9 independent bands met (2, 3, 5, 8); missed: 1, 4, 6, 9, 10; band 7 semi-constructed (missed). Band 7's only counted row (the palo verdes) is semi-constructed: their crown is the mesquite's, calibrated to the measured −16.7 K (the mesquite row is by construction and supplementary), so band 7 does not test the model independently. They are reported, not tuned away: every other parameter value is the brief's central value (or the shared value the brief names), committed before the first band run.
 
 Misses:
 - **Band 1** (sunlit gravel 65.9 °C against 55–63 °C): likely the engine's strong clear-sky sun and the warmer design-day air (tested
   above); stated on the lawn card.
+- **Band 4** (the lawn's water 6.47 mm against 4.8–6.1 mm, the target corrected to Kc 0.68): likely the fixed evaporative
+  fraction of a lawn wet every day (tested above); stated on the lawn card.
 - **Band 6** (sails −22.9 K, ramada −29.0 K): likely the sail's transmission and the one-cell ground view; for the
   ramada, the band's scope (tested above); stated on the sails card.
 - **Band 7** (palo verdes −8.8 K, semi-constructed): likely the courtyards' reflected sun (tested above); stated on the sails card.

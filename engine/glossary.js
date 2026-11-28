@@ -476,7 +476,7 @@ export const GLOSSARY = {
   referenceEt: {
     term: 'Reference evapotranspiration (ET₀)',
     text: 'The water a well-watered short grass would evaporate in a day under the local weather, in millimetres (1 mm is 1 litre per square metre). A real crop uses ET₀ times its crop coefficient.',
-    range: 'Phoenix in July about 7–8 mm a day (up to 10); bermudagrass about 0.78 of it, so about 5–7 L per m² a day.',
+    range: 'Phoenix in July about 7–9 mm a day (up to 10); bermudagrass watered every day uses about 0.78 of it, watered every 3 days about 0.68, so about 5–6 L per m² a day.',
     src: 'azmet, az1195, brief11',
     why: 'It is what a lawn costs in water: in a desert summer, several litres per square metre every day.',
     scenes: ['desert'],

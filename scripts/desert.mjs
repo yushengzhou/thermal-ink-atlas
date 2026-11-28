@@ -9,6 +9,7 @@ import { buildWorld } from '../engine/world.js';
 import { shadeClassField, runModel } from '../engine/thermal.js';
 import { MATERIALS } from '../engine/materials.js';
 import { DS, desertSetup, desertStats, shadeCells, mean } from '../engine/desert.js';
+import { DS_BANDS } from '../engine/dsui.js';
 import { solarPosition } from '../engine/sun.js';
 import SunCalc from 'suncalc';
 import { Life, shadeDensity, shadeAt } from '../engine/life.js';
@@ -32,6 +33,8 @@ export const DS_NOTES = {
   mesquiteTarget: 'the calibration target for the mesquite crown, K: ΔTmrt under Prosopis against open sun (Middel et al. 2021), as the brief says ("mesquite LAI: calibrate to −16.7 K")',
   treeWater: 'water a desert tree takes, L per m² of canopy a day: about 890 L every 7–21 days for a 6.1 m canopy (AMWUA via the brief); quoted on the cards and the water overlay, not modelled',
   lawnApplied: 'water a Phoenix lawn is given, mm (= L m⁻²) a day: every 3 days, about 6.4 mm a day (AMWUA via the brief); quoted',
+  eto: 'reference evapotranspiration for band 4, mm a day: AZMet Encanto, the July mean\'s low end (7.1) to the hot days\' high end (8.9), via the brief',
+  kc: 'bermudagrass crop coefficient for band 4: AZ1195 Table 2 gives 0.78 for July for fairway turf watered daily; its note lowers Kc by 0.1 for watering every 3 days (the AMWUA schedule used here), so 0.68 (round-2 reference check; the brief used 0.78 and the band 5–7 mm)',
   misters: 'water a misted patio uses, L per m² an hour: 4.87 L h⁻¹ per nozzle at 0.3–0.7 nozzles per m² (Huang et al. 2025 via the brief); quoted, misting is not modelled',
   warm: 'coarse 10-min spin-up days (block 3\'s opts.warm, with its stability guard); convergence is tested on 1-min days as everywhere',
 };
@@ -127,9 +130,9 @@ export function bands11() {
   add('2. Supplementary: the same at 12:00, K', st.coat[nn].dTs, null, -5, 'coolPave2024', 'K', { supp: true });
   add(`2. Supplementary: Main Street coated − the cross street's bare asphalt at 15:00 (n ${st.cross.n}), K`, c.ts - st.cross.ts15, null, -5, 'coolPave2024', 'K', { supp: true });
   add(`3. Irrigated lawn in full sun at 15:00 (n ${st.lawn.n}): surface − air, K`, st.lawn.ts15 - st.air[h], null, 2, 'middel2021', 'K');
-  add(`4. Irrigated lawn: water evaporated over the day, mean of ${st.lawn.n ? 'the open lawn' : ''} cells, mm (= L m⁻²)`, st.lawn.evap, 5, 7, 'az1195', 'mm');
-  add('4. Supplementary: the same, lowest cell, mm', st.lawn.evapMin, 5, 7, 'az1195', 'mm', { supp: true });
-  add('4. Supplementary: the same, highest cell, mm', st.lawn.evapMax, 5, 7, 'az1195', 'mm', { supp: true });
+  add(`4. Irrigated lawn: water evaporated over the day, mean of ${st.lawn.n ? 'the open lawn' : ''} cells, mm (= L m⁻²)`, st.lawn.evap, ...DS_BANDS.evap, 'az1195', 'mm');
+  add('4. Supplementary: the same, lowest cell, mm', st.lawn.evapMin, ...DS_BANDS.evap, 'az1195', 'mm', { supp: true });
+  add('4. Supplementary: the same, highest cell, mm', st.lawn.evapMax, ...DS_BANDS.evap, 'az1195', 'mm', { supp: true });
   add(`5. The plaza's open gravel in full sun at 15:00 (n ${st.ref[h].n}): Tmrt, °C`, st.ref[h].tmrt, 65, 76, 'middel2021', '°C');
   add(`5. Supplementary: all sunlit open gravel at 15:00 (n ${st.gravel.n}): Tmrt, °C`, st.gravel.tmrt15, 65, 76, 'middel2021', '°C', { supp: true });
   add(`5. Supplementary: the cross street's sunlit asphalt at 15:00: Tmrt, °C`, st.cross.tmrt15, 65, 76, 'middel2021', '°C', { supp: true });
