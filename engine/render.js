@@ -1172,7 +1172,8 @@ export class Renderer {
     const [ox, oy, Z] = this.origin(cam, W, H);
     const d = this.dpr;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.font = `${Math.round(15 * d)}px "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive`;
+    const fs = W / d < 700 ? 12 : 15; // smaller hand on a phone (#29 item 4)
+    ctx.font = `${Math.round(fs * d)}px "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive`;
     ctx.textBaseline = 'top';
     notes.forEach((n, i) => {
       const p = iso(n.at[0], n.at[1], n.at[2] ?? 0);
@@ -1182,7 +1183,7 @@ export class Renderer {
       let ty = ay + n.dy * d;
       if (tx < -200 * d || tx > W + 50 || ty < -60 || ty > H + 20) return;
       const lines = n.text;
-      const lh = 18 * d;
+      const lh = (fs + 3) * d;
       const w = Math.max(...lines.map((l) => ctx.measureText(l).width));
       let bx = tx - (n.dx < 0 ? w + 6 * d : -6 * d);
       let by = ty - (n.dy < 0 ? lines.length * lh : 0);
@@ -1221,7 +1222,7 @@ export class Renderer {
         if (k < 0) continue;
         const x0 = bx + ctx.measureText(lines[k].slice(0, lines[k].indexOf(sub))).width;
         const w = ctx.measureText(sub).width;
-        const y = by + k * lh + 16 * d;
+        const y = by + k * lh + (fs + 1) * d;
         ctx.save();
         ctx.setLineDash([1.5 * d, 2 * d]);
         ctx.lineWidth = 1 * d;

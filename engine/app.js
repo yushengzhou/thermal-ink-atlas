@@ -459,6 +459,11 @@ export function boot(scene, root = document) {
   const legend = $('legend');
   const card = $('card');
   const heatBtn = $('heatBtn');
+  // opening a card's expert part makes it taller: keep the whole card on screen
+  card.addEventListener('toggle', () => {
+    const top = parseFloat(card.style.top) || 0;
+    card.style.top = `${Math.max(10, Math.min(top, window.innerHeight - card.offsetHeight - 10))}px`;
+  }, true);
   const inkHint = $('inkHint');
   // the bar's buttons (#29: every key has a visible button): T, H and h, as the keys
   $('bar').addEventListener('click', (e) => {

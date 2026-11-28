@@ -445,7 +445,7 @@ export const clockAt = (t, hq) => hq * 60 + ((t * BS.clock.value) / 60) % 15;
 
 // ---- contact burns -------------------------------------------------------------
 
-/** The 1-min contact-burn limit of a surface material (ISO 13732-1 groups): metal, stone and concrete, plastics. */
+/** The 1-min contact-burn limit of a surface material (ISO 13732-1 groups): metal; ceramics, glass and stone (concrete and asphalt read with them); plastics. */
 export const burnLimit = (mat) => (mat === 'metal' ? BS.burnMetal.value : mat === 'concrete' || mat === 'asphalt' ? BS.burnStone.value : BS.burnPlastic.value);
 
 /** The contact flags of a surface point at hour h: {ts, limit, min1 (above its 1-min limit), s1 (metal above about 65 C: the 1-s flag, unverified)}. */
