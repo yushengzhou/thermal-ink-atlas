@@ -181,9 +181,9 @@ test('the walkers\' relief comes from the young trees (disclosed on the card and
   assert.ok(D.walk.after.share < D.walk.before.share);
   assert.ok(D.walk.afterNoTrees.share >= D.walk.before.share - 0.005, 'without the trees the retrofit does not cool walkers');
   const trees = MEASURES.find((m) => m.id === 'trees');
-  assert.match(trees.lesson, /Shade is what cools people/);
+  assert.match(trees.lesson, /Here, only the trees lower what walkers feel/);
   // the card quotes the pavers' noon Tmrt rise; keep it in step with the model
-  assert.equal(`+${D.paversNoonTmrt.toFixed(1)} K`, trees.lesson.match(/\+\d\.\d K/)[0]);
+  assert.equal(`${D.paversNoonTmrt.toFixed(1)} degrees`, trees.lesson.match(/\d\.\d degrees/)[0]);
   // the coating's structural limit stated in the docs
   assert.ok(D.ratio < 0.7 && D.coat030.dTmrt >= 3 && D.coat030.dTs < -6);
   const md = readFileSync(new URL('../../docs/sources.md', import.meta.url), 'utf8');

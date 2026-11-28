@@ -10,7 +10,7 @@ import { irradiance } from '../engine/thermal.js';
 import { SCENE } from '../cities/asphalt-park/scene.js';
 import { base, targetRows, sensitivity, TIERS } from './regions.mjs';
 import { GLOSSARY, glossaryStats, rangeLine } from '../engine/glossary.js';
-import { base2, bandRows, water, sensitivity2, diagnostics } from './retrofit.mjs';
+import { base2, bandRows, water, sensitivity2, diagnostics, greenRoofCheck } from './retrofit.mjs';
 import { MEASURES, D_DEFAULT, D_MAX, decay } from '../engine/retrofit.js';
 import { cbdMarkdown, cbdGlossaryStats } from './cbd-docs.mjs';
 import { waterfrontMarkdown, wfGlossaryStats } from './waterfront-docs.mjs';
@@ -29,6 +29,7 @@ const UNITS = { mu: ' J m⁻² s⁻½ K⁻¹', muWet: ' J m⁻² s⁻½ K⁻¹',
 const cell = (p, k = '') =>
   `${p.value}${UNITS[k] ?? ''} [${p.source}] *${BASIS[p.basis]}*${p.verified ? '' : ', unverified'}${p.note ? ` (${p.note})` : ''}`;
 const f1 = (x) => (Math.round(x * 10) / 10).toFixed(1);
+const f2 = (x) => x.toFixed(2);
 const signed = (x, d = 1) => `${x < 0 ? '−' : '+'}${Math.abs(x).toFixed(d)}`;
 
 /** Largest value of the daytime wall term 6 K x K/900 on the design day. */
@@ -181,9 +182,29 @@ Tmrt is 65 °C or more — the sweat-cue threshold — is ${(D.walk.before.share
 ${(D.walk.afterNoTrees.share * 100).toFixed(1)}% for After **without the young street trees** (mean Tmrt ${f1(D.walk.before.mean)}, ${f1(D.walk.after.mean)} and ${f1(D.walk.afterNoTrees.mean)} °C).
 **The drop in sweating walkers After comes entirely from the young trees.** The roofs do not touch pedestrians, nobody
 walks on the coated road, and the sponge measures and reflective paving alone leave walkers as hot or slightly hotter
-(the lighter pavers add ${signed(D.paversNoonTmrt)} K Tmrt at noon). Shade is what cools people; the young-trees card says so.
+(the lighter pavers add ${signed(D.paversNoonTmrt)} K Tmrt at noon). Here, only the trees lower what walkers feel; the young-trees card says so.
 The trees' crown size (radius 2.6 m, centre 4.4 m) is an engine (scene) assumption, their transmission 0.47 the
 brief's mid value, and their kerb-side placement a design choice of this invented block.
+
+### The green roof against a white roof (outside evaluation #29, item 6)
+
+${(() => {
+  const G = greenRoofCheck();
+  const rows = G.cases.map((c) => `| ${c.label} | ${c.ts.map(f1).join(' | ')} |`).join('\n');
+  return `The evaluators saw the green roof hotter than the aged white roof at every wetness. That is what the cited inputs give, not a
+bug: the green roof (albedo ${MATERIALS.greenroof.alpha.value}) absorbs ${f2(1 - MATERIALS.greenroof.alpha.value)} of the sun against ${f2(1 - MATERIALS.coolroofAged.alpha.value)} for the aged white roof (${MATERIALS.coolroofAged.alpha.value}), and the
+${MATERIALS.greenroof.ef.value}–${MATERIALS.greenroof.efWet.value} of positive net radiation it spends on evaporation does not make up the gap. Roof surface at 15:00 (After, cells in full sun), °C;
+the aged white roof is ${f1(G.white)} °C and the dark membrane it replaces ${f1(G.dark)} °C:
+
+| Case (docs only; nothing shipped changes) | ${G.D.map((d) => `d = ${d}`).join(' | ')} |
+|---|${G.D.map(() => '---').join('|')}|
+${rows}
+
+Disclosures: the roof is **a single surface** (no plant canopy, no leaf temperature, no irrigation); the dry evaporative
+fraction ${MATERIALS.greenroof.ef.value} (Bowen ratio ${f1((1 - MATERIALS.greenroof.ef.value) / MATERIALS.greenroof.ef.value)}) sits at the dry edge of the Bowen ratios Heusinger & Weber measured (about < 1 to 2)
+[heusinger]. The card says it in plain words: cooler than the dark roof it replaces, warmer than a white roof by
+mid-afternoon, close to it only right after rain or if watered. No value was changed.`;
+})()}
 
 ### Water budget
 
