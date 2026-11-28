@@ -259,7 +259,7 @@ test('cards: canyon, each glass, reflection spot, AC heat, extreme case; heat ca
   t = await page.locator('#card').textContent();
   assert.match(t, /Exchange Tower|Plaza Tower/);
   assert.match(t, /Curtain wall/);
-  assert.match(t, /glass \d+\.\d °C/);
+  assert.match(t, /glass \d+\.\d\s°C/); // \s: the card keeps number and unit together (no-break space, #36)
   // a ground card carries the wall and glass reflection rows
   const d = await page.evaluate(() => window.atlas.card('ground', 147.5, 217.5));
   assert.ok(d.wallsNow > 0 && d.glassNow > 0, 'the shaded spot gets sun off walls and glass');
