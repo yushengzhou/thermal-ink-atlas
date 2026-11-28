@@ -5240,35 +5240,62 @@ function label(R, ctx, text, W, H, rgb, row = 0) {
   ctx.fillText(text, bx, by);
 }
 
-/** String lights, the stalls' lamps, smoke over the grills and steam over the woks (market open; lamps after dark). */
-function drawMarket(R, ctx, f, cam, W, H, alpha, M, hq) {
-  const [ox, oy, Z] = R.origin(cam, W, H);
-  const d = R.dpr;
-  const P = (x, y, z) => {
-    const q = iso(x, y, z);
-    return [ox + q[0] * Z, oy + q[1] * Z];
-  };
-  const night = R.hourCtx(hq).night;
-  const off = (X, Y) => X < -30 || Y < -30 || X > W + 30 || Y > H + 30;
+/**
+ * A cached layer: what paint(g) draws on a transparent canvas of the view's
+ * size, kept while its key (camera, size and what is drawn) stays the same,
+ * and laid onto the frame with the given alpha. The layer is a pure function
+ * of its key, and every frame (the first one too) is drawn through it, so
+ * the frame stays a pure function of frame, camera, hour and toggles.
+ * Returns the paint's own numbers (kept with the layer).
+ */
+function layer(R, ctx, name, key, W, H, alpha, paint) {
+  const C = R.market.layers ?? (R.market.layers = {});
+  let L = C[name];
+  if (!L || L.key !== key) {
+    const canvas = L && L.canvas.width === W && L.canvas.height === H ? L.canvas : document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const g = canvas.getContext('2d');
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.clearRect(0, 0, W, H);
+    g.lineCap = 'round';
+    g.lineJoin = 'round';
+    const out = paint(g);
+    C[name] = L = { key, canvas, out };
+  }
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  // the canvas state is set here, not inherited from the previous frame's people (a pure function of the frame)
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  {
+  ctx.globalAlpha = alpha;
+  ctx.drawImage(L.canvas, 0, 0);
+  ctx.restore();
+  return L.out;
+}
+
+/** The string lights (wires, bulbs lit after dark with a glow) and the stalls' lamps after dark, as a cached layer. */
+function drawLights(R, ctx, cam, W, H, alpha, M, hq) {
+  const night = R.hourCtx(hq).night;
+  const key = `${cam.z}|${cam.cx}|${cam.cy}|${W}|${H}|${R.dpr}|${M.lit ? 1 : 0}|${night}`;
+  const out = layer(R, ctx, 'lights', key, W, H, alpha, (g) => {
+    const [ox, oy, Z] = R.origin(cam, W, H);
+    const d = R.dpr;
+    const P = (x, y, z) => {
+      const q = iso(x, y, z);
+      return [ox + q[0] * Z, oy + q[1] * Z];
+    };
+    const off = (X, Y) => X < -30 || Y < -30 || X > W + 30 || Y > H + 30;
     // wires, then (lit after dark) a glow, and a core per bulb (one path each)
-    ctx.globalAlpha = alpha * 0.55;
-    ctx.strokeStyle = rgbCss(INK_RGB);
-    ctx.lineWidth = Math.max(0.6 * d, 0.05 * Z);
-    ctx.beginPath();
+    g.globalAlpha = 0.55;
+    g.strokeStyle = rgbCss(INK_RGB);
+    g.lineWidth = Math.max(0.6 * d, 0.05 * Z);
+    g.beginPath();
     for (const [a, b] of M.lights.wires) {
       const [X0, Y0] = P(a.x, a.y, a.z);
       if (off(X0, Y0)) continue;
       const [X1, Y1] = P(b.x, b.y, b.z);
-      ctx.moveTo(X0, Y0);
-      ctx.lineTo(X1, Y1);
+      g.moveTo(X0, Y0);
+      g.lineTo(X1, Y1);
     }
-    ctx.stroke();
+    g.stroke();
     const rg = Math.max(2.2 * d, 0.55 * Z);
     const rc = Math.max(1 * d, 0.16 * Z);
     const pts = [];
@@ -5277,40 +5304,55 @@ function drawMarket(R, ctx, f, cam, W, H, alpha, M, hq) {
       if (!off(X, Y)) pts.push(X, Y);
     }
     if (M.lit) {
-      ctx.globalAlpha = alpha * 0.28 * night;
-      ctx.fillStyle = rgbCss(GLOW);
-      ctx.beginPath();
+      g.globalAlpha = 0.28 * night;
+      g.fillStyle = rgbCss(GLOW);
+      g.beginPath();
       for (let k = 0; k < pts.length; k += 2) {
-        ctx.moveTo(pts[k] + rg, pts[k + 1]);
-        ctx.arc(pts[k], pts[k + 1], rg, 0, Math.PI * 2);
+        g.moveTo(pts[k] + rg, pts[k + 1]);
+        g.arc(pts[k], pts[k + 1], rg, 0, Math.PI * 2);
       }
-      ctx.fill();
+      g.fill();
     }
-    ctx.globalAlpha = alpha * (M.lit ? 0.5 + 0.5 * night : 0.8);
-    ctx.fillStyle = rgbCss(M.lit ? BULB : OFF);
-    ctx.beginPath();
+    g.globalAlpha = M.lit ? 0.5 + 0.5 * night : 0.8;
+    g.fillStyle = rgbCss(M.lit ? BULB : OFF);
+    g.beginPath();
     for (let k = 0; k < pts.length; k += 2) {
-      ctx.moveTo(pts[k] + rc, pts[k + 1]);
-      ctx.arc(pts[k], pts[k + 1], rc, 0, Math.PI * 2);
+      g.moveTo(pts[k] + rc, pts[k + 1]);
+      g.arc(pts[k], pts[k + 1], rc, 0, Math.PI * 2);
     }
-    ctx.fill();
-    R.stats.bulbs = M.lit ? pts.length / 2 : 0;
-  }
-  // stall lamps after dark: a warm pool under each visible canopy
-  if (night > 0) {
-    ctx.globalAlpha = alpha * 0.32 * night;
-    ctx.fillStyle = rgbCss(GLOW);
-    ctx.beginPath();
-    for (const s of M.stalls) {
-      if (!s.vis) continue;
-      const [X, Y] = P(s.x, s.y + 1.4, 0);
-      if (off(X, Y)) continue;
-      ctx.moveTo(X + 1.9 * Z, Y);
-      ctx.ellipse(X, Y, 1.9 * Z, 1.1 * Z, 0, 0, Math.PI * 2);
+    g.fill();
+    // stall lamps after dark: a warm pool under each visible canopy
+    if (night > 0) {
+      g.globalAlpha = 0.32 * night;
+      g.fillStyle = rgbCss(GLOW);
+      g.beginPath();
+      for (const s of M.stalls) {
+        if (!s.vis) continue;
+        const [X, Y] = P(s.x, s.y + 1.4, 0);
+        if (off(X, Y)) continue;
+        g.moveTo(X + 1.9 * Z, Y);
+        g.ellipse(X, Y, 1.9 * Z, 1.1 * Z, 0, 0, Math.PI * 2);
+      }
+      g.fill();
     }
-    ctx.fill();
-  }
-  // smoke over the grills, steam over the woks: three drifting strokes each (period 3 s)
+    return { bulbs: M.lit ? pts.length / 2 : 0 };
+  });
+  R.stats.bulbs = out.bulbs;
+}
+
+/** Smoke over the grills and steam over the woks (market open): three drifting strokes each, period 3 s. */
+function drawSmoke(R, ctx, f, cam, W, H, alpha, M) {
+  const [ox, oy, Z] = R.origin(cam, W, H);
+  const d = R.dpr;
+  const P = (x, y, z) => {
+    const q = iso(x, y, z);
+    return [ox + q[0] * Z, oy + q[1] * Z];
+  };
+  const off = (X, Y) => X < -30 || Y < -30 || X > W + 30 || Y > H + 30;
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  // the canvas state is set here, not inherited from the previous frame's people (a pure function of the frame)
+  ctx.lineJoin = 'round';
   const t = f / 60;
   ctx.lineCap = 'round';
   for (const [type, rgb, a0] of [['grill', hexRgb('#8f8a84'), 0.45], ['wok', hexRgb('#e9eef0'), 0.55]]) {
@@ -5370,48 +5412,49 @@ function drawRings(R, ctx, cam, W, H, alpha, M) {
  * the hour.
  */
 function drawHeat(R, ctx, cam, W, H, alpha, M, hq) {
-  const [ox, oy, Z] = R.origin(cam, W, H);
-  const cells = M.heat(hq);
-  const runs = Object.fromEntries(HEAT_KEYS.map((k) => [k, []]));
-  let n = 0;
-  for (const c of cells) {
-    const q = iso(c.x, c.y, 0);
-    const X = ox + q[0] * Z;
-    const Y = oy + q[1] * Z;
-    if (X < -20 || X > W + 20 || Y < -40 * Z || Y > H + 20) continue;
-    let z = 0;
+  const key = `${cam.z}|${cam.cx}|${cam.cy}|${W}|${H}|${R.dpr}|${hq}|${M.open ? 1 : 0}`;
+  const out = layer(R, ctx, 'heat', key, W, H, alpha, (g) => {
+    const [ox, oy, Z] = R.origin(cam, W, H);
+    const cells = M.heat(hq);
+    const runs = Object.fromEntries(HEAT_KEYS.map((k) => [k, []]));
+    let n = 0;
+    for (const c of cells) {
+      const q = iso(c.x, c.y, 0);
+      const X = ox + q[0] * Z;
+      const Y = oy + q[1] * Z;
+      if (X < -20 || X > W + 20 || Y < -40 * Z || Y > H + 20) continue;
+      let z = 0;
+      for (const k of HEAT_KEYS) {
+        const v = Math.max(0, c[k]);
+        if (v > 0) runs[k].push(X, Y - z * 0.03 * ISO_Z * Z, Y - (z + v) * 0.03 * ISO_Z * Z);
+        z += v;
+      }
+      n++;
+    }
+    g.lineCap = 'butt';
+    g.lineJoin = 'miter';
+    g.lineWidth = Math.max(2 * R.dpr, 0.9 * Z);
+    g.globalAlpha = 0.9;
     for (const k of HEAT_KEYS) {
-      const v = Math.max(0, c[k]);
-      if (v > 0) runs[k].push(X, Y - z * 0.03 * ISO_Z * Z, Y - (z + v) * 0.03 * ISO_Z * Z);
-      z += v;
+      const P = runs[k];
+      if (!P.length) continue;
+      g.strokeStyle = rgbCss(HEAT_RGB[k]);
+      g.beginPath();
+      for (let i = 0; i < P.length; i += 3) {
+        g.moveTo(P[i], P[i + 1]);
+        g.lineTo(P[i], P[i + 2]);
+      }
+      g.stroke();
     }
-    n++;
-  }
-  ctx.save();
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.lineCap = 'butt';
-  ctx.lineJoin = 'miter';
-  ctx.lineWidth = Math.max(2 * R.dpr, 0.9 * Z);
-  ctx.globalAlpha = alpha * 0.9;
-  for (const k of HEAT_KEYS) {
-    const P = runs[k];
-    if (!P.length) continue;
-    ctx.strokeStyle = rgbCss(HEAT_RGB[k]);
-    ctx.beginPath();
-    for (let i = 0; i < P.length; i += 3) {
-      ctx.moveTo(P[i], P[i + 1]);
-      ctx.lineTo(P[i], P[i + 2]);
-    }
-    ctx.stroke();
-  }
-  ctx.globalAlpha = alpha;
-  const text = 'Heat given off now, watts per m² (a bar 3 m tall = 100). Shown, not felt: the air temperature is fixed';
-  const key = 'pale ochre: stone, radiated · dark ochre: stone, warming the air (calculated) · rose: crowd · red: stalls · yellow: lights';
-  label(R, ctx, key, W, H, INK_RGB);
-  label(R, ctx, text, W, H, INK_RGB, 1);
-  ctx.restore();
-  R.stats.heatCells = n;
-  R.stats.heatLabel = `${text} | ${key}`;
+    g.globalAlpha = 1;
+    const text = 'Heat given off now, watts per m² (a bar 3 m tall = 100). Shown, not felt: the air temperature is fixed';
+    const legend = 'pale ochre: stone, radiated · dark ochre: stone, warming the air (calculated) · rose: crowd · red: stalls · yellow: lights';
+    label(R, g, legend, W, H, INK_RGB);
+    label(R, g, text, W, H, INK_RGB, 1);
+    return { n, label: `${text} | ${legend}` };
+  });
+  R.stats.heatCells = out.n;
+  R.stats.heatLabel = out.label;
 }
 
 /** Renderer overlay hook (render.js R.overlay): the market's live layer, the rings in the heat view, the bars when shown. */
@@ -5422,7 +5465,11 @@ function nmOverlay(R, ctx, f, cam, W, H, alpha, look, hq) {
   R.stats.heatCells = 0;
   if (!M) return;
   M.lit = look.lit;
-  if (look.open) drawMarket(R, ctx, f, cam, W, H, alpha, M, hq);
+  M.open = look.open;
+  if (look.open) {
+    drawLights(R, ctx, cam, W, H, alpha, M, hq);
+    drawSmoke(R, ctx, f, cam, W, H, alpha, M);
+  }
   if (look.open && (look.thermalMix ?? 0) > 0) drawRings(R, ctx, cam, W, H, alpha * look.thermalMix, M);
   if (look.heat) drawHeat(R, ctx, cam, W, H, alpha, M, hq);
 }
