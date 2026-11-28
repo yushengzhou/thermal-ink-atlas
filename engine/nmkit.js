@@ -390,7 +390,7 @@ function drawHeat(R, ctx, cam, W, H, alpha, M, hq) {
     }
     g.globalAlpha = 1;
     const text = 'Heat given off now, watts per m² (a bar 3 m tall = 100). Shown, not felt: the air temperature is fixed';
-    const legend = 'pale ochre: stone, radiated · dark ochre: stone, warming the air (calculated) · rose: crowd · red: stalls · yellow: lights';
+    const legend = 'pale ochre: stone, radiated · dark ochre: stone, heat into the air (calculated; the air is held fixed) · rose: crowd · red: stalls · yellow: lights';
     label(R, g, legend, W, H, INK_RGB);
     label(R, g, text, W, H, INK_RGB, 1);
     return { n, label: `${text} | ${legend}` };

@@ -73,7 +73,7 @@ export function stoneCard(d) {
     <h3>The stone gives back the day's heat</h3>
     <p class="lead">At 9 pm the granite street is still about ${fmt(a.dTs)} degrees warmer than the air, and each square metre gives off about ${r0(a.net)} watts: heat it soaked up in the afternoon sun.</p>
     <table class="cmp">
-      <tr><td>9 pm</td><td>stone</td><td>above the air, degrees</td><td>given off, watts per m²</td><td>of it, warming the air</td></tr>
+      <tr><td>9 pm</td><td>stone</td><td>above the air, degrees</td><td>given off, watts per m²</td><td>of it, heat into the air (the air is held fixed)</td></tr>
       ${rows}
       <tr><td colspan="5" class="sub">Expected: 1 to 6 degrees above the air, 30 to 150 watts per m², less where the sky is hidden${order ? ' (so it is here)' : `${MISS}`}. At 11 pm the street still gives off ${r0(L.net)} watts per m².</td></tr>
     </table>
@@ -472,7 +472,7 @@ export function nmApp(env) {
     },
     cardRows: (f) => {
       const rows = [`<tr><td colspan="2" class="sub">${gl('anthropogenicHeat', 'Heat given off')} here now, watts per m² (Q shows it; the air is fixed, so it is not felt):</td></tr>`,
-        `<tr><td>the stone, radiated / warming the air</td><td>${r0(f.stoneRad)} / ${r0(f.stoneAir)}</td></tr>`];
+        `<tr><td>the stone, radiated / heat into the air</td><td>${r0(f.stoneRad)} / ${r0(f.stoneAir)}</td></tr>`];
       if (f.crowd > 0) rows.push(`<tr><td>the crowd (${f2(f.rho)} people per m²)</td><td>${r0(f.crowd)}</td></tr>`);
       if (f.stall > 0) rows.push(`<tr><td>stalls (${f.stalls.join(', ')})</td><td>${r0(f.stall)}</td></tr>`);
       if (f.light > 0) rows.push(`<tr><td>string lights</td><td>${fmt(f.light)}</td></tr>`);
