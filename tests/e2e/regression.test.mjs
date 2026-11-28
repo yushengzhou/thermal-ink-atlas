@@ -11,7 +11,12 @@
 // branch tip before block 12). Parking, campus, estate and village were
 // refreshed again from c05dff3: their bottom overlay labels move beside the
 // controls panel (review of #33, N6); only the label strip (y 671-720 of 800)
-// moved, probes and notes equal on all their cases. Both pages run in the same browser here, so
+// moved, probes and notes equal on all their cases. All eleven were refreshed
+// again from 8bf78e3 (outside evaluation of #33): the notes say "radiant heat"
+// instead of "feels like" and avoid the page's panels, the bar and each other
+// (leaders drawn under the boxes), long shadows are clipped to the board, and the
+// title box changed height (so bottom overlay labels may sit elsewhere); probe
+// values equal on all 65 cases. Both pages run in the same browser here, so
 // the comparison does not depend on the platform.
 // A deliberate change to these blocks must refresh the fixtures: commit the
 // rebuilt pages, then `npm run fixtures` (gzips them from HEAD) and commit.
@@ -38,7 +43,7 @@ const CASES = {
   desert: ['hour=15&f=640', 'thermal&hour=15&f=640', 'thermal&hour=21&f=640&notes=0&cam=3.5,300,120', 'hour=15&f=640&water=1&notes=0&cam=3,300,200', 'thermal&hour=15&f=777&coat=0&cam=4,120,190', 'f=120', 'hour=12&f=1500&coat=0&water=1&cam=5,250,40'],
 };
 // which page each fixture is (for messages)
-const BEFORE = { 'asphalt-park': 'the #29 pass', 'sponge-retrofit': 'the #29 pass', 'glass-cbd': 'the #29 pass', waterfront: 'the #29 pass', hutong: 'the #29 pass', parking: 'the #29 pass', estate: 'the #29 pass', campus: 'the #29 pass', busstop: 'the #29 pass', village: 'the #29 pass', desert: 'block 12' };
+const BEFORE = Object.fromEntries(['asphalt-park', 'sponge-retrofit', 'glass-cbd', 'waterfront', 'hutong', 'parking', 'estate', 'campus', 'busstop', 'village', 'desert'].map((c) => [c, 'the #33 outside evaluation']));
 
 let browser;
 let dir;
