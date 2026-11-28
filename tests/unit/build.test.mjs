@@ -46,7 +46,7 @@ test('each page carries only its own block modules; left-out modules are predica
   }
 });
 
-test('external-reference rule: allow-listed relative links pass; schemes, hosts, root paths, tricks and climbs out of the repo fail', () => {
+test('external-reference rule: allow-listed relative links pass; schemes, hosts, root paths, tricks and climbs out of the repo fail, in href, form action / formaction and srcset alike', () => {
   const page = 'cities/hutong/index.html';
   for (const ok of ['<a href="../../references.html">r</a>', '<a href="#x">x</a>', '<a href="../../docs/sources.md#block-5">d</a>', "<a href='index.html'>i</a>", '<img src="data:image/png;base64,AA">'])
     assert.deepEqual(externalRefs(ok, page), [], ok);
@@ -68,7 +68,15 @@ test('external-reference rule: allow-listed relative links pass; schemes, hosts,
   for (const v of bad) {
     assert.ok(externalRefs(`<a href="${v}">x</a>`, page).length > 0, JSON.stringify(v));
     assert.ok(externalRefs(`<a href='${v}'>x</a>`, page).length > 0, JSON.stringify(v));
+    // the same allow-list for a form's action, a button's formaction and each srcset URL
+    assert.ok(externalRefs(`<form action="${v}"></form>`, page).length > 0, `action ${JSON.stringify(v)}`);
+    assert.ok(externalRefs(`<button formaction='${v}'>x</button>`, page).length > 0, `formaction ${JSON.stringify(v)}`);
+    if (!/[\s,]/.test(v)) assert.ok(externalRefs(`<img srcset="a.png 1x, ${v} 2x">`, page).length > 0, `srcset ${JSON.stringify(v)}`);
   }
+  assert.ok(externalRefs('<form action=https://x.y/a></form>', page).length > 0, 'unquoted action');
+  assert.ok(externalRefs('<img srcset="../../../x.png">', page).length > 0, 'srcset climbing out of the repo');
+  for (const ok of ['<form action="#x"></form>', '<img srcset="data-x.png 1x, ../../thumbs/a.jpg 2x">'])
+    assert.deepEqual(externalRefs(ok, page), [], ok);
   assert.ok(externalRefs('<a href=javascript:x>x</a>', page).length > 0, 'unquoted');
   assert.ok(externalRefs('<a href="../x">x</a>', 'references.html').length > 0, 'from the repo root, .. leaves it');
   for (const other of ['<script src="a.js"></script>', '<style>@import "x.css";</style>', '<div style="background:url(x.png)"></div>', 'fetch("//example.com/x")'])

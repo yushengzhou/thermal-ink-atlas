@@ -59,14 +59,27 @@ const LIMIT = 500 * 1024;
  */
 export function hrefProblems(html, page) {
   const out = [];
-  for (const m of html.matchAll(/\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/gi)) {
-    const v = m[1] ?? m[2] ?? m[3];
-    if (/^#[A-Za-z0-9._-]*$/.test(v)) continue;
+  const allowed = (v) => {
+    if (/^#[A-Za-z0-9._-]*$/.test(v)) return true;
     if (/^[A-Za-z0-9._/-]+(?:#[A-Za-z0-9._-]*)?$/.test(v) && !v.startsWith('/') && !v.includes('//')) {
       const target = posix.normalize(posix.join(posix.dirname(page), v.split('#')[0]));
-      if (target !== '..' && !target.startsWith('../') && !posix.isAbsolute(target)) continue;
+      if (target !== '..' && !target.startsWith('../') && !posix.isAbsolute(target)) return true;
     }
-    out.push(`href="${v}"`);
+    return false;
+  };
+  const value = (m) => m[1] ?? m[2] ?? m[3];
+  for (const m of html.matchAll(/\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/gi)) {
+    const v = value(m);
+    if (!allowed(v)) out.push(`href="${v}"`);
+  }
+  // the same allow-list for a form's action (and a button's formaction) and for every URL of a srcset
+  for (const m of html.matchAll(/\b(?:form)?action\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/gi)) {
+    const v = value(m);
+    if (!allowed(v)) out.push(`action="${v}"`);
+  }
+  for (const m of html.matchAll(/\bsrcset\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/gi)) {
+    const urls = value(m).split(',').map((c) => c.trim().split(/\s+/)[0]);
+    for (const u of urls) if (!allowed(u)) out.push(`srcset="${u}"`);
   }
   return out;
 }
@@ -76,7 +89,8 @@ export function hrefProblems(html, page) {
  * other than data: or #, @import, url() other than data: or #, and any href
  * outside the allow-list of hrefProblems (so no scheme, host, root path,
  * whitespace or entity tricks, and no relative path that climbs out of the
- * repository). Allowed links open offline and fetch nothing on load.
+ * repository); form actions and srcset URLs go through the same allow-list.
+ * Allowed links open offline and fetch nothing on load.
  */
 export function externalRefs(html, page) {
   const hits = html.match(/(?:https?:)?\/\/[a-z0-9.-]+\.[a-z]{2,}\/|\bsrc\s*=\s*["'](?!#|data:)|@import|url\((?!\s*["']?(?:data:|#))/gi) ?? [];
