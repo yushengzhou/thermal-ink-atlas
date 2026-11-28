@@ -33,7 +33,7 @@ export const DS_NOTES = {
   mesquiteTarget: 'the calibration target for the mesquite crown, K: ΔTmrt under Prosopis against open sun (Middel et al. 2021), as the brief says ("mesquite LAI: calibrate to −16.7 K")',
   treeWater: 'water a desert tree takes, L per m² of canopy a day: about 890 L every 7–21 days for a 6.1 m canopy (AMWUA via the brief); quoted on the cards and the water overlay, not modelled',
   lawnApplied: 'water a Phoenix lawn is given, mm (= L m⁻²) a day: every 3 days, about 6.4 mm a day (AMWUA via the brief); quoted',
-  eto: 'reference evapotranspiration for band 4, mm a day: AZMet Encanto, the July mean\'s low end (7.1) to the hot days\' high end (8.9), via the brief',
+  eto: 'reference evapotranspiration for band 4, mm a day: two AZMet Encanto figures of the brief joined into one range, the low end of the July mean (7.1-7.8) and the high end of the hot days of 2023-25 (7.8-8.9); not one cited range, so an interpretation',
   kc: 'bermudagrass crop coefficient for band 4: AZ1195 Table 2 gives 0.78 for July for fairway turf watered daily; its note lowers Kc by 0.1 for watering every 3 days (the AMWUA schedule used here), so 0.68 (round-2 reference check; the brief used 0.78 and the band 5–7 mm)',
   misters: 'water a misted patio uses, L per m² an hour: 4.87 L h⁻¹ per nozzle at 0.3–0.7 nozzles per m² (Huang et al. 2025 via the brief); quoted, misting is not modelled',
   warm: 'coarse 10-min spin-up days (block 3\'s opts.warm, with its stability guard); convergence is tested on 1-min days as everywhere',

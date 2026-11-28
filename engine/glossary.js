@@ -315,7 +315,7 @@ export const GLOSSARY = {
     text: 'The surface temperature at which touching a hot surface with bare skin starts to burn it, for a given material and contact time (ISO 13732-1). Metal conducts heat into the skin fastest, so its limit is lowest.',
     range: '1 min of contact: metal 51 °C, ceramics, glass and stone 56 °C, plastics and wood 60 °C; 10 min: 48 °C for all of them; 8 h: 43 °C. From 1 min on these apply to children too (CENELEC Guide 29).',
     src: 'iso13732',
-    why: 'Children sit, kneel and slide on play surfaces for longer than a minute and pull away more slowly, so the 10-minute limit of 48 °C is the one that matters, and a surface "only" at 60 °C can burn them.',
+    why: 'Children sit, kneel and slide on play surfaces for longer than a minute, so the 10-minute limit of 48 °C is the one that matters, and a surface "only" at 60 °C can burn them.',
     scenes: ['campus'],
   },
   shadeSail: {
