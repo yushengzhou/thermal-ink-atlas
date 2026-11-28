@@ -249,7 +249,7 @@ export function ownSources(city, keys = pageParts(city).keys) {
  * plain-words heat card with its closed expert part, notes kept on the
  * canvas, lit windows behind nearer roofs, the glass block's patch outline
  * and façade colours in the renderer) belong in the core on purpose: the core
- * went from 282,913-286,762 B to 291,174-294,943 B. All twelve blocks are
+ * went from 282,913-286,762 B to 291,550-295,319 B. All twelve blocks are
  * built and the largest page is 392 KB of the 500 KB limit.
  */
 export const CORE_BUDGET = 300000;
