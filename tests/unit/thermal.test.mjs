@@ -5,7 +5,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { SCENE } from '../../cities/asphalt-park/scene.js';
 import { runModel, heatRgb, paletteLut, dtRgb, DT_STOPS } from '../../engine/thermal.js';
-import { PAPER } from '../../engine/core.js';
+import { PAPER, scaleRgb } from '../../engine/core.js';
+import { THERMAL_WALL } from '../../engine/render.js';
 import { base, regions, regionMean, orderFlips, TIERS, TARGETS, targetRows } from '../../scripts/regions.mjs';
 import { targetsMarkdown } from '../../scripts/sources.mjs';
 
@@ -186,6 +187,15 @@ test('ΔT palette is ordered by lightness (lightest at 0 K, darker both ways), a
     for (const [a, b, min] of [[-5, 29.1, 25], [0, 29.1, 40], [3.4, 29.1, 35], [-1.1, 2.6, 15]]) {
       const e = dE(f(a), f(b));
       assert.ok(e >= min, `${name}: ${a} vs ${b} K only dE ${e.toFixed(1)}`);
+    }
+  }
+});
+
+test('heat view walls (not calculated) are in neither palette: hatched grey far from every ΔT and absolute colour', () => {
+  for (const wall of [THERMAL_WALL, scaleRgb(THERMAL_WALL, 0.9)]) {
+    for (const lut of [paletteLut(30), paletteLut()]) {
+      const near = Math.min(...lut.map(([, c]) => dE(wall, c)));
+      assert.ok(near > 8, `wall ${wall.map(Math.round)} only dE ${near.toFixed(1)} from a palette colour`);
     }
   }
 });
