@@ -194,6 +194,9 @@ function drawMarket(R, ctx, f, cam, W, H, alpha, M, hq) {
   const off = (X, Y) => X < -30 || Y < -30 || X > W + 30 || Y > H + 30;
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+  // the canvas state is set here, not inherited from the previous frame's people (a pure function of the frame)
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
   {
     // wires, then (lit after dark) a glow, and a core per bulb (one path each)
     ctx.globalAlpha = alpha * 0.55;
@@ -280,6 +283,7 @@ function drawRings(R, ctx, cam, W, H, alpha, M) {
   const [ox, oy, Z] = R.origin(cam, W, H);
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.lineCap = 'round';
   ctx.strokeStyle = rgbCss(hexRgb('#a2302a'));
   for (const [r, a] of [[1, 0.85], [2, 0.55], [3, 0.3]]) {
     ctx.globalAlpha = alpha * a;
@@ -328,6 +332,7 @@ function drawHeat(R, ctx, cam, W, H, alpha, M, hq) {
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.lineCap = 'butt';
+  ctx.lineJoin = 'miter';
   ctx.lineWidth = Math.max(2 * R.dpr, 0.9 * Z);
   ctx.globalAlpha = alpha * 0.9;
   for (const k of HEAT_KEYS) {
