@@ -8,11 +8,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { base9, compare9, bands9, bandVerdicts, waits9, walkers9, flags9, roofUnderside3, BS_NOTES } from '../../scripts/busstop.mjs';
+import { base9, compare9, bands9, bandVerdicts, waits9, walkers9, flags9, roofUnderside3, surround9, BS_NOTES } from '../../scripts/busstop.mjs';
 import { bands9Markdown } from '../../scripts/busstop-docs.mjs';
 import { BS, transmit, viewRect, pointSky, geometry, pointModel, daySchedule, meanWait, seatRiders, waitDose, apparentTemp, contactFlags, burnLimit, clockAt, isBus } from '../../engine/busstop.js';
 import { busAt } from '../../engine/bskit.js';
-import { crossersAt } from '../../engine/bsui.js';
+import { crossersAt, BS_SURROUND } from '../../engine/bsui.js';
 import { SOURCES, BASIS, MATERIALS } from '../../engine/materials.js';
 import { GLOSSARY, termsFor } from '../../engine/glossary.js';
 import { buildWorld, GROUND_MATS } from '../../engine/world.js';
@@ -226,6 +226,25 @@ test('band 3 sensitivity (docs only): the roof underside at the model\'s own met
   assert.ok(r.roof15 > 55 && r.wall15 < 45, JSON.stringify(r));
   assert.ok(r.shipped < 0 && r.above >= 0 && r.above <= 8, JSON.stringify(r));
   assert.ok(/Band 3, roof underside/.test(md) && /roof underside taken at the shared warm-wall temperature/.test(md));
+});
+
+test('shade ranking (docs only, outside evaluation of #33): with the ground around a person and the roof underside, stop A is no better than stop D\'s trees; the card quotes these numbers', () => {
+  const r = surround9();
+  const { st } = base9();
+  const A = st.stops.find((s) => s.id === 'A');
+  const D = st.stops.find((s) => s.id === 'D');
+  // the replica of Thermal.tmrt equals the shipped value at every person
+  for (const k of ['Acentre', 'Aopen', 'Dseat', 'Dopen']) assert.ok(Math.abs(r[k].replica - r[k].shipped) < 0.05, k);
+  assert.ok(Math.abs(r.Acentre.shipped - A.centre[15].tmrt) < 0.05 && Math.abs(r.Dseat.shipped - D.seat[15].tmrt) < 0.05);
+  // the surrounding ground is the big term; the roof seen from above adds about 1 K (the brief)
+  assert.ok(r.Acentre.ground - r.Acentre.shipped > 5, JSON.stringify(r.Acentre));
+  assert.ok(r.Acentre.both - r.Acentre.ground > 0.3 && r.Acentre.both - r.Acentre.ground < 2, JSON.stringify(r.Acentre));
+  assert.ok(Math.abs(r.Dseat.ground - r.Dseat.shipped) < 2, JSON.stringify(r.Dseat));
+  assert.ok(r.Acentre.both >= r.Dseat.ground, 'the measured order: trees at least as good as a light shelter');
+  // the card's constants are these numbers (rounded to 0.1)
+  const f = (x) => Math.round(x * 10) / 10;
+  assert.deepEqual(BS_SURROUND, { a15: [f(r.Acentre.both), f(r.Acentre.bothSides)], d15: f(r.Dseat.ground), roof15: f(r.Acentre.roofT) });
+  assert.ok(/Shade ranking: what a person under a roof sees/.test(md) && /likely too optimistic/.test(md) && /issues\/28/.test(md));
 });
 
 test('every band of the brief is checked: 1-7, each with at least one counted row', () => {

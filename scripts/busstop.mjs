@@ -260,3 +260,125 @@ export function bandVerdicts(rows) {
   }
   return out;
 }
+
+let around = null;
+/**
+ * Shade ranking (docs only, not shipped, not tuned; outside evaluation of
+ * #33): Thermal.tmrt lets a person see only the ground at its own point, and
+ * a shelter roof's underside as the shared warm-wall term. Here, at 15:00:
+ * (a) each of the four sideways directions sees the ground around the person
+ * instead: samples straight out at 0.25, 0.75, 1.5, 3 and 6 m, each with the
+ * share of a vertical sensor's downward view it takes from mid-body height c
+ * (2D: the ground beyond d takes c / sqrt(c^2 + d^2) of it), from the point
+ * model's own force-restore run at those samples (their own sun share; the
+ * grid's ground material there); a sight line that crosses an opaque panel
+ * takes the shared wall term instead; (b) the roof's share of the view
+ * (open x F at mid-body) at the roof's own temperature (a thin metal point
+ * on the roof), upward only (the brief's W_up 0.06) or upward and in the
+ * upper half of the sideways directions. Persons: stop A's centre and its
+ * open reference (standing), stop D's first bench place (seated) and its
+ * open reference.
+ */
+export function surround9(h = 15) {
+  if (around) return around;
+  const { world, T } = base9();
+  const SIG = 5.670374419e-8;
+  const K0 = 273.15;
+  const stop = (id) => SCENE.stops.find((s) => s.id === id);
+  const A = stop('A');
+  const D = stop('D');
+  const Hs = BS.headStand.value;
+  const persons = [
+    { key: 'Acentre', x: (A.roof.x0 + A.roof.x1) / 2, y: (A.roof.y0 + A.roof.y1) / 2, head: Hs, roof: A.roof },
+    { key: 'Aopen', x: A.open[0], y: A.open[1], head: Hs, roof: null },
+    { key: 'Dseat', x: D.slots[0][0], y: D.slots[0][1], head: BS.headSeat.value, roof: null },
+    { key: 'Dopen', x: D.open[0], y: D.open[1], head: Hs, roof: null },
+  ];
+  const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  const EDGES = [0, 0.5, 1, 2, 4, Infinity];
+  const MIDS = [0.25, 0.75, 1.5, 3, 6];
+  const ok = ['concrete', 'metal', 'asphalt', 'grass'];
+  const matAt = (x, y) => {
+    const i = Math.floor(y / world.cell) * world.n + Math.floor(x / world.cell);
+    const m = world.bld[i] >= 0 ? 'concrete' : cellMat(world, i);
+    return ok.includes(m) ? m : 'concrete';
+  };
+  const panels = SCENE.stops.flatMap((s) => s.panels.filter((P) => MATERIALS[P.kind].tr.value === 0));
+  const blocked = (x, y, c, x2, y2) => panels.some((P) => {
+    const alongX = P.y0 === P.y1;
+    const [a0, a1, b] = alongX ? [x, x2, P.y0] : [y, y2, P.x0];
+    const [o0, o1] = alongX ? [y, y2] : [x, x2];
+    if ((o0 - b) * (o1 - b) >= 0) return false;
+    const t = (b - o0) / (o1 - o0);
+    const u = a0 + (a1 - a0) * t;
+    const z = c * (1 - t);
+    return u >= (alongX ? P.x0 : P.y0) && u <= (alongX ? P.x1 : P.y1) && z >= P.z0 && z <= P.z1;
+  });
+  const pts = [];
+  const meta = persons.map((p) => {
+    const me = pts.push({ x: p.x, y: p.y, z: 0, mat: 'concrete', head: p.head }) - 1;
+    const c = 0.65 * p.head;
+    const dirs = DIRS.map(([dx, dy]) => MIDS.map((d, k) => {
+      const share = c / Math.hypot(c, EDGES[k]) - (EDGES[k + 1] === Infinity ? 0 : c / Math.hypot(c, EDGES[k + 1]));
+      const x2 = p.x + dx * d;
+      const y2 = p.y + dy * d;
+      if (blocked(p.x, p.y, c, x2, y2)) return { share, wall: true };
+      return { share, i: pts.push({ x: x2, y: y2, z: 0, mat: matAt(x2, y2), head: 0 }) - 1 };
+    }));
+    const roof = p.roof ? pts.push({ x: (p.roof.x0 + p.roof.x1) / 2, y: (p.roof.y0 + p.roof.y1) / 2, z: p.roof.z, mat: 'metal', head: 0 }) - 1 : -1;
+    return { ...p, me, dirs, roof };
+  });
+  const P = pointModel(world, geometry(world), pts, { suns: T.slots.suns });
+  const TB = P.TB;
+  const tm = (m, o) => {
+    const i = m.me;
+    const sw = TB.shortwave(i, h);
+    const b = Math.max(0, sw.sun.alt);
+    const fp = 0.308 * Math.cos(b * (1 - (b * b) / 48402) * (Math.PI / 180));
+    const v = TB.world.svf[i];
+    const mat = MATERIALS[pts[i].mat];
+    const eps = mat.eps.value;
+    const lsky = TB.hourConst(h).lsky;
+    const lw = TB.lwall(i, h);
+    const sk = P.skyB[i];
+    const roofT = m.roof >= 0 ? P.ts(m.roof, h) : null;
+    const Ld = v * lsky + (1 - v) * lw;
+    const LdRoof = roofT === null ? Ld : sk.svf * lsky + (1 - sk.open) * lw + sk.open * sk.F * SIG * (roofT + K0) ** 4;
+    const Lup = o.roof ? LdRoof : Ld;
+    const Lside = o.roof && o.roofSides ? LdRoof : Ld;
+    const Lg = eps * SIG * (P.ts(i, h) + K0) ** 4 + (1 - eps) * Ld;
+    const Kg = mat.alpha.value * sw.K;
+    let LgLat = Lg;
+    let KgLat = Kg;
+    if (o.ground) {
+      const side = m.dirs.map((ring) => ring.reduce((acc, s) => {
+        if (s.wall) return { L: acc.L + s.share * lw, K: acc.K };
+        const sm = MATERIALS[pts[s.i].mat];
+        const L = sm.eps.value * SIG * (P.ts(s.i, h) + K0) ** 4 + (1 - sm.eps.value) * Ld;
+        return { L: acc.L + s.share * L, K: acc.K + s.share * sm.alpha.value * P.T.shortwave(s.i, h).K };
+      }, { L: 0, K: 0 }));
+      LgLat = side.reduce((a, s) => a + s.L, 0) / 4;
+      KgLat = side.reduce((a, s) => a + s.K, 0) / 4;
+    }
+    const Ksky = v * sw.diffuse;
+    const S = 0.7 * (0.06 * Ksky + 0.06 * Kg + 0.88 * (0.5 * Ksky + 0.5 * KgLat + 0.5 * sw.walls) + fp * sw.beam * (P.body(i, h) + sw.r));
+    const L = 0.97 * (0.06 * Lup + 0.06 * Lg + 0.88 * (0.5 * Lside + 0.5 * LgLat));
+    return Math.pow((S + L) / (0.97 * SIG), 0.25) - K0;
+  };
+  const out = {};
+  for (const m of meta) {
+    out[m.key] = {
+      shipped: P.tmrt(m.me, h),
+      replica: tm(m, {}),
+      ground: tm(m, { ground: true }),
+      roofUp: tm(m, { roof: true }),
+      roofSides: tm(m, { roof: true, roofSides: true }),
+      both: tm(m, { ground: true, roof: true }),
+      bothSides: tm(m, { ground: true, roof: true, roofSides: true }),
+      roofT: m.roof >= 0 ? P.ts(m.roof, h) : null,
+      ts: P.ts(m.me, h),
+    };
+  }
+  around = { ...out, air: T.air(h), h };
+  return around;
+}

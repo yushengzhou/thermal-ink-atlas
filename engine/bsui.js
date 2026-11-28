@@ -14,6 +14,8 @@ import { hash3, hexRgb } from './core.js';
 const fmt = (v) => (Math.round(v * 10) / 10).toFixed(1);
 const pct = (v) => `${Math.round(v * 100)}%`;
 const K = (v) => `${v < 0 ? '−' : '+'}${fmt(Math.abs(v))}°`;
+/** A short hour label for narrow table headers (noon, 2 pm). */
+const hh = (h) => (h === 12 ? 'noon' : `${h % 12 || 12} ${h < 12 ? 'am' : 'pm'}`);
 const hm = (h) => `${String(Math.floor(h + 1e-9) % 24).padStart(2, '0')}:${String(Math.round((h % 1) * 60) % 60).padStart(2, '0')}`;
 const tag = (v) => (v.basis !== 'cited' ? ` <span class="basis">${BASIS[v.basis]}</span>` : '') + (v.verified ? '' : ' <span class="unv" title="value not yet checked against the primary source">unverified</span>');
 const ref = (k) => `<a href="../../references.html#busstop">[${k}]</a> ${SOURCES[k]}`;
@@ -21,20 +23,27 @@ const ref = (k) => `<a href="../../references.html#busstop">[${k}]</a> ${SOURCES
 const experts = (body, keys) => `<details class="expert"><summary>For experts</summary>${body}<p class="src">Sources: ${keys.map(ref).join('; ')}. Made-up block, calculated temperatures: a ${gl('forceRestore', 'force-restore')} surface model; the waiting places, decks, rails and benches at points (sub-cell), the rest on a 5 m grid; the air temperature is fixed.</p></details>`;
 const MISS = ' <b>(outside the measured range)</b>';
 const close = '<button class="x" aria-label="close">×</button>';
-const ADULT = 'how hot it feels to an adult (head 1.7 m standing, 1.2 m seated)';
+const ADULT = 'radiant heat on an adult (head 1.7 m standing, 1.2 m seated)';
+/**
+ * Stop A and stop D at 15:00 when the person also sees the sunlit ground around them and the
+ * roof's hot underside (docs-only test, scripts/busstop.mjs surround9; pinned by a unit test):
+ * radiant heat under stop A's roof with the roof's underside seen from above only / also from
+ * the sides, on stop D's bench, and the roof's own temperature (thin metal).
+ */
+export const BS_SURROUND = { a15: [44.8, 50.8], d15: 44.1, roof15: 67.2 };
 
 /** Margin notes (at most 5). d: numbers from the plugin (noteData). */
 export function bsNotes(scene, d) {
   const text = {
-    screen: [`Stop C, west screen: the bench feels like ${fmt(d.c17)} °C at 5 pm;`, `${fmt(d.c17no)} without it, ${fmt(d.c17big)} under a bigger roof`],
-    stopA: [`Stop A, metal roof: it feels like ${fmt(d.a15)} °C at 3 pm`, `standing in its shade, ${fmt(d.a15open)} °C at the kerb`],
-    glass: [`Glass box (stop E): it feels like ${fmt(d.e15)} °C inside,`, `${fmt(d.e15open)} °C outside at 3 pm (trapped air not modelled)`],
+    screen: [`Stop C, west screen: radiant heat on the bench ${fmt(d.c17)} °C at 5 pm;`, `${fmt(d.c17no)} without it, ${fmt(d.c17big)} under a bigger roof`],
+    stopA: [`Stop A, metal roof: radiant heat on you ${fmt(d.a15)} °C at 3 pm`, `in its shade (likely too low), ${fmt(d.a15open)} °C at the kerb`],
+    glass: [`Glass box (stop E): radiant heat on you ${fmt(d.e15)} °C inside,`, `${fmt(d.e15open)} °C outside at 3 pm (trapped air not modelled)`],
     deck: [`Open footbridge: steel deck ${fmt(d.deck15)} °C at 3 pm,`, `under the cover ${fmt(d.cdeck15)} °C`],
-    trees: [`Stop D, under the trees: the bench feels like ${fmt(d.d15)} °C`, 'at 3 pm, with no shelter at all'],
+    trees: [`Stop D, under the trees: radiant heat on the bench ${fmt(d.d15)} °C`, 'at 3 pm, with no shelter at all'],
   };
   const terms = {
     screen: [['profileAngle', 'west screen']],
-    stopA: [['tmrt', 'it feels like']],
+    stopA: [['tmrt', 'radiant heat on you']],
     glass: [['transmittance', 'Glass box']],
     deck: [['burnThreshold', 'steel deck']],
     trees: [['heatDose', 'under the trees']],
@@ -98,7 +107,7 @@ export function screenCard(d) {
     <div class="mat">Stop C: a milky plastic roof ${BS.shelterH.value} m up, ${BS.shelterDepth.value} m deep, a west end screen to ${BS.westScreen.value} m · the bigger roof: ${BS.biggerRoof.value} m more on every side, no screen</div>
     ${shadeDiagram(d.cmp, d.suns)}
     <table class="cmp">
-      <tr><td>how it ${gl('tmrt', 'feels')}, seated, °C</td>${H.map((h) => `<td>${hm(h)}</td>`).join('')}</tr>
+      <tr><td>${gl('tmrt', 'radiant heat')} on a seated person, °C</td>${H.map((h) => `<td>${hm(h)}</td>`).join('')}</tr>
       ${row('built', 'as built: roof and west screen')}
       ${row('noScreen', 'the same roof, no screen')}
       ${row('bigRoof', 'a bigger roof, no screen')}
@@ -117,7 +126,7 @@ const STOP_LIT = {
   D: 'Tempe: tree shade −28.1 K Tmrt (Middel et al. 2021). Houston: tree shade 3.2 °C WBGT cooler at bus stops (Lanza et al. 2025). Only 26% of Los Angeles Metro stops have a shelter (UCLA, via the brief).',
   E: 'Houston: enclosed shelters without overhead shade were more than 3 °C hotter than the open sun (Lanza et al. 2025).',
 };
-const STOP_SRC = { A: ['dzyuban2022', 'middel2021', 'asuFilm'], B: ['brettMartin', 'dzyuban2022', 'hyd047'], C: ['brettMartin', 'dzyuban2022'], D: ['middel2021', 'lanza2025', 'ucla'], E: ['lanza2025'] };
+const STOP_SRC = { A: ['dzyuban2022', 'middel2021', 'asuFilm'], B: ['brettMartin', 'dzyuban2022', 'hyd047', 'middel2021'], C: ['brettMartin', 'dzyuban2022', 'middel2021'], D: ['middel2021', 'lanza2025', 'ucla'], E: ['lanza2025', 'middel2021'] };
 
 /** One stop. d: {s (busStats stop), air, misses}. */
 export function stopCard(d) {
@@ -127,7 +136,7 @@ export function stopCard(d) {
   const hasRoof = !!s.centre;
   const lim = burnLimit(s.benchMat);
   const note = {
-    A: () => `Standing in the middle of the shelter at 3 pm it feels ${fmt(s.open[15].tmrt - s.centre[15].tmrt)} degrees cooler than at the kerb${d.misses && d.misses.groundMiss ? `, though the concrete in its shade stays warmer than measured${MISS}` : ''}; the seat at the open west end ${s.seat[15].head >= 0.5 ? 'is not: the low sun comes in under the roof from the side' : 'is shaded too'}.`,
+    A: () => `Standing in the middle of the shelter at 3 pm you get ${fmt(s.open[15].tmrt - s.centre[15].tmrt)} degrees less radiant heat than at the kerb${d.misses && d.misses.groundMiss ? `, though the concrete in its shade comes out cooler than measured${MISS}` : ''}; the seat at the open west end ${s.seat[15].head >= 0.5 ? 'is not: the low sun comes in under the roof from the side' : 'is shaded too'}. That cut is likely too big: here a person sees only the shaded ground at their feet, not the sunlit paving a metre or two away, and the roof's underside counts as a mild wall, not hot metal (about ${fmt(BS_SURROUND.roof15)} °C). Counting both in a test gives about ${fmt(BS_SURROUND.a15[0])}–${fmt(BS_SURROUND.a15[1])} °C under the roof, no better than the trees of stop D (${fmt(BS_SURROUND.d15)} °C), which matches field measurements: buildings and trees shade best, light shelters less.`,
     B: () => `The back panel faces west and stops the afternoon sun, so the bench is ${s.seat[15].head < 0.5 ? 'shaded' : 'still partly in sun'} at 3 pm; at noon the clear roof lets ${pct(MATERIALS.polyClear.tr.value)} of the sun through to the people under it.`,
     C: () => 'The opal roof halves the sun from above; the west screen stops the low afternoon sun from the side (see the West screen card).',
     D: () => 'No shelter: the crowns are the roof. They shade the bench in the afternoon as long as the sun stays behind them; there is nothing against rain.',
@@ -136,10 +145,10 @@ export function stopCard(d) {
   return `
     ${close}
     <h3>${s.name}</h3>
-    <p class="lead">${hasRoof ? `At 3 pm it feels like ${fmt(s.centre[15].tmrt)} °C under the shelter, against ${fmt(s.open[15].tmrt)} °C in the open by the kerb.` : `At 3 pm it feels like ${fmt(s.seat[15].tmrt)} °C on the bench under the trees, against ${fmt(s.open[15].tmrt)} °C in the open by the kerb.`}</p>
+    <p class="lead">${hasRoof ? `At 3 pm the ${gl('tmrt', 'radiant heat')} on you is ${fmt(s.centre[15].tmrt)} °C under the shelter${s.id === 'A' ? ' (likely too low, see below)' : ''}, against ${fmt(s.open[15].tmrt)} °C in the open by the kerb.` : `At 3 pm the ${gl('tmrt', 'radiant heat')} on you is ${fmt(s.seat[15].tmrt)} °C on the bench under the trees, against ${fmt(s.open[15].tmrt)} °C in the open by the kerb.`}</p>
     <div class="mat">${ADULT} · a bus every ${BS.headway.value} min, ${BS.riders.value} riders a minute</div>
     <table class="cmp">
-      <tr><td>how it ${gl('tmrt', 'feels')}, °C</td>${H.map((h) => `<td>${hm(h)}</td>`).join('')}</tr>
+      <tr><td>radiant heat, °C</td>${H.map((h) => `<td>${hm(h)}</td>`).join('')}</tr>
       ${hasRoof ? `<tr><td>under the roof (centre, standing)</td>${H.map((h) => `<td>${fmt(s.centre[h].tmrt)}</td>`).join('')}</tr>` : ''}
       <tr><td>on the bench (seated)</td>${H.map((h) => `<td>${fmt(s.seat[h].tmrt)}</td>`).join('')}</tr>
       <tr><td>in the open by the kerb (standing)</td>${H.map((h) => `<td>${fmt(s.open[h].tmrt)}</td>`).join('')}</tr>
@@ -148,13 +157,13 @@ export function stopCard(d) {
     <table class="cmp">
       <tr><td>riders arriving 15:00–16:00</td><td>${w.n}</td></tr>
       <tr><td>mean wait</td><td>${fmt(w.wait)} min</td></tr>
-      <tr><td>how it feels while waiting, on average</td><td>${fmt(w.tmrt)} °C</td></tr>
+      <tr><td>radiant heat while waiting, on average</td><td>${fmt(w.tmrt)} °C</td></tr>
       <tr><td>mean ${gl('heatDose', 'heat dose')} of a wait (degree-minutes)</td><td>${fmt(w.D)}</td></tr>
       <tr><td>bench above its ${gl('burnThreshold', '1-min burn limit')} (${lim} °C) at 15:00</td><td>${s.bench[15].ts > lim ? `yes, by ${fmt(s.bench[15].ts - lim)} degrees` : 'no'}</td></tr>
     </table>
     <p class="note">${note}</p>
     ${experts(`<p class="lit">Headway${tag(BS.headway)} (spread ${BS.cv.value}${tag(BS.cv)}), riders${tag(BS.riders)}; Tmrt and the dose in K·min.</p><p class="lit">${STOP_LIT[s.id]}</p>
-    <p class="caveat">Conditions while waiting, for an adult at the heights given: the model does not follow how a body heats up over a wait, and the dose is this page's own measure, not a health threshold. ${s.id === 'E' ? 'The warm air trapped in a glass box is not modelled (the air is fixed), so inside is understated. ' : ''}${d.misses && s.id === 'A' && d.misses.groundMiss ? `The shaded concrete under this roof comes out ${fmt(d.misses.groundShade)} K from the air at 3 pm, outside the brief's 0–8 K above it (band missed, docs/sources.md, block 9): likely because the roof's underside is taken at the shared warm-wall temperature (a sunlit metal roof is far hotter underneath) and a 2 m strip at a point gets no heat from the sunlit slab around it; not tuned. ` : ''}Panels and walls reflect no sunlight here.</p>`, ['brief9', ...STOP_SRC[s.id]])}`;
+    <p class="caveat">Conditions while waiting, for an adult at the heights given: the model does not follow how a body heats up over a wait, and the dose is this page's own measure, not a health threshold. ${s.id === 'E' ? 'The warm air trapped in a glass box is not modelled (the air is fixed), so inside is understated. ' : ''}${d.misses && s.id === 'A' && d.misses.groundMiss ? `The shaded concrete under this roof comes out ${fmt(d.misses.groundShade)} K from the air at 3 pm, outside the brief's 0–8 K above it (band missed): likely because the roof's underside is taken at the shared warm-wall temperature (a sunlit metal roof is far hotter underneath) and a 2 m strip at a point gets no heat from the sunlit slab around it; not tuned. ` : ''}${hasRoof ? `Shade ranking: in this model a person sees only the ground at their own point and takes a roof's underside at the shared warm-wall temperature, so under a small shelter the sunlit paving around it and a hot metal roof are left out and the cut is likely too big. A test that counts the ground out to 6 m in four directions and the roof at its own temperature (thin metal, ${fmt(BS_SURROUND.roof15)} °C) gives stop A ${fmt(BS_SURROUND.a15[0])} °C (roof seen from above only) to ${fmt(BS_SURROUND.a15[1])} °C (also from the sides)${s.id === 'A' ? ` instead of ${fmt(s.centre[15].tmrt)} °C` : ''}, and stop D's bench ${fmt(BS_SURROUND.d15)} °C; not shipped, because every block's radiant heat shares the simplification (issue #28 in the project repository). Tempe measurements ranked building shade first, trees second and light structures last (Middel et al. 2021). ` : ''}Panels and walls reflect no sunlight here.</p>`, ['brief9', ...STOP_SRC[s.id]])}`;
 }
 
 /** Which kerb. d: {kerb}. */
@@ -165,16 +174,16 @@ export function kerbCard(d) {
     ${close}
     <h3>Which kerb? The same shelter on either side of the avenue</h3>
     <p class="lead">The same shelter is much hotter on the east kerb of a north–south street: there its open front faces the afternoon sun, while on the west kerb its back panel blocks it.</p>
-    <div class="mat">Stop B's shelter with an opaque roof: as built on the west kerb (back panel to the west), and mirrored onto the east kerb (open front to the west) · ${ADULT}, point model</div>
+    <div class="mat">Stop B's shelter with an opaque roof: as built on the west kerb (back panel to the west), and mirrored onto the east kerb (open front to the west) · ${ADULT}, worked out at each place</div>
     <table class="cmp">
-      <tr><td>feels like, °C</td>${H.map((h) => `<td>${hm(h)}</td>`).join('')}</tr>
+      <tr><td>${gl('tmrt', 'radiant heat')}, °C</td>${H.map((h) => `<td>${hh(h)}</td>`).join('')}</tr>
       <tr><td>west kerb, seated</td>${H.map((h) => `<td>${fmt(k.west[h].seated)}</td>`).join('')}</tr>
       <tr><td>east kerb, seated</td>${H.map((h) => `<td>${fmt(k.east[h].seated)}</td>`).join('')}</tr>
       <tr><td>west kerb, standing under the roof</td>${H.map((h) => `<td>${fmt(k.west[h].standing)}</td>`).join('')}</tr>
       <tr><td>east kerb, standing under the roof</td>${H.map((h) => `<td>${fmt(k.east[h].standing)}</td>`).join('')}</tr>
     </table>
-    <p class="note">On a north–south street the afternoon sun comes from across the road. A shelter on the west kerb turns its back panel to it; on the east kerb its open front faces it, and the roof alone cannot keep the sun off: at 4 pm the seated places feel ${fmt(k.east[16].seated - k.west[16].seated)} degrees warmer on the east kerb. Standing under the roof at 3 pm, against the open 6 m away, the roof takes ${fmt(k.west[15].open - k.west[15].standing)} degrees off on the west kerb and only ${fmt(k.east[15].open - k.east[15].standing)} on the east kerb, far less than the 20–35 an opaque roof usually gives, because there the sun comes in under it.</p>
-    ${experts(`<p class="lit">Tmrt, °C; the east kerb against the brief's band 1 (20–35 K) is a supplementary row in docs/sources.md.</p><p class="lit">The brief: on a north–south arterial the west-kerb stop's back blocks the afternoon sun and the east-kerb stop's open front takes it; check every design with a sun-shadow analysis (Hong Kong Highways Department BS/GN/047).</p>
+    <p class="note">On a north–south street the afternoon sun comes from across the road. A shelter on the west kerb turns its back panel to it; on the east kerb its open front faces it, and the roof alone cannot keep the sun off: at 4 pm the seated places get ${fmt(k.east[16].seated - k.west[16].seated)} degrees more radiant heat on the east kerb. Standing under the roof at 3 pm, against the open 6 m away, the roof takes ${fmt(k.west[15].open - k.west[15].standing)} degrees of radiant heat off on the west kerb and only ${fmt(k.east[15].open - k.east[15].standing)} on the east kerb, far less than the 20–35 an opaque roof usually gives, because there the sun comes in under it.</p>
+    ${experts(`<p class="lit">Tmrt, °C; the east kerb against the brief's band 1 (20–35 K) is a supplementary check in the project's model notes.</p><p class="lit">The brief: on a north–south arterial the west-kerb stop's back blocks the afternoon sun and the east-kerb stop's open front takes it; check every design with a sun-shadow analysis (Hong Kong Highways Department BS/GN/047).</p>
     <p class="caveat">A comparison computed for this card only (the east-kerb shelter is not drawn). Panels reflect no sunlight; the air is fixed.</p>`, ['brief9', 'hyd047'])}`;
 }
 
@@ -192,11 +201,11 @@ export function phoenixCard(d) {
       <tr><td>PET</td><td>68.2 °C</td><td>49.5 °C</td></tr>
       <tr><td>concrete</td><td>57.4 °C</td><td>41.3 °C</td></tr>
       <tr><td>metal bench</td><td>47.7 °C</td><td>40.4 °C</td></tr>
-      <tr><td>this model, stop A at 3 pm: ${gl('tmrt', 'feels like')}</td><td>${fmt(A.open[15].tmrt)} °C</td><td>${fmt(A.centre[15].tmrt)} °C</td></tr>
+      <tr><td>this model, stop A at 3 pm: ${gl('tmrt', 'radiant heat')} (under the roof likely too low)</td><td>${fmt(A.open[15].tmrt)} °C</td><td>${fmt(A.centre[15].tmrt)} °C</td></tr>
       <tr><td>this model: concrete</td><td>${fmt(A.open[15].ts)} °C</td><td>${fmt(A.centre[15].ts)} °C${d.misses.groundMiss ? MISS : ''}</td></tr>
     </table>
     <p class="note">Shade cut PET by 19 °C on average; metal roofs (20.6 °C) and ad panels (20.3 °C) did a little better than polycarbonate (18.2 °C), a vegetated awning made no significant difference in the afternoon, and stops without side panels did worse. Most riders arrived less than 5 min before their bus.</p>
-    ${experts(`<p class="caveat">${d.misses.groundMiss ? `The shaded concrete here is ${fmt(d.misses.groundShade)} K from the air at 3 pm, outside the brief's 0–8 K above it (Phoenix: 41.3 °C at 41.2 °C air): band missed (docs/sources.md, block 9); likely because the roof's underside is taken at the shared warm-wall temperature (a sunlit metal roof is far hotter underneath) and a 2 m strip of shade at a point gets no heat from the sunlit slab around it; not tuned. ` : ''}Phoenix is hotter and drier than this design day (air 35 °C here), and globe temperature and PET are not Tmrt, so the rows compare only the direction and the rough size of the effect.</p>`, ['dzyuban2022', 'brief9'])}`;
+    ${experts(`<p class="caveat">${d.misses.groundMiss ? `The shaded concrete here is ${fmt(d.misses.groundShade)} K from the air at 3 pm, outside the brief's 0–8 K above it (Phoenix: 41.3 °C at 41.2 °C air): band missed; likely because the roof's underside is taken at the shared warm-wall temperature (a sunlit metal roof is far hotter underneath) and a 2 m strip of shade at a point gets no heat from the sunlit slab around it; not tuned. ` : ''}Phoenix is hotter and drier than this design day (air 35 °C here), and globe temperature and PET are not Tmrt, so the rows compare only the direction and the rough size of the effect.</p>`, ['dzyuban2022', 'brief9'])}`;
 }
 
 /** The glass box. d: {st}. */
@@ -205,16 +214,16 @@ export function glassCard(d) {
   return `
     ${close}
     <h3>The glass box: out of the wind, not out of the sun</h3>
-    <p class="lead">A bus shelter made all of glass keeps the wind off but not the sun: at 3 pm it feels like ${fmt(E.centre[15].tmrt)} °C inside, against ${fmt(E.open[15].tmrt)} °C outside.</p>
+    <p class="lead">A bus shelter made all of glass keeps the wind off but not the sun: at 3 pm the radiant heat on you is ${fmt(E.centre[15].tmrt)} °C inside, against ${fmt(E.open[15].tmrt)} °C outside.</p>
     <div class="mat">Stop E: glass roof and walls, ${pct(MATERIALS.glassBox.tr.value)} of the direct sun through each</div>
     <table class="cmp">
-      <tr><td>how it ${gl('tmrt', 'feels')}, °C</td><td>noon</td><td>3 pm</td><td>5 pm</td></tr>
+      <tr><td>${gl('tmrt', 'radiant heat')}, °C</td><td>noon</td><td>3 pm</td><td>5 pm</td></tr>
       <tr><td>inside, standing</td><td>${fmt(E.centre[12].tmrt)}</td><td>${fmt(E.centre[15].tmrt)}</td><td>${fmt(E.centre[17].tmrt)}</td></tr>
       <tr><td>outside by the kerb</td><td>${fmt(E.open[12].tmrt)}</td><td>${fmt(E.open[15].tmrt)}</td><td>${fmt(E.open[17].tmrt)}</td></tr>
       <tr><td>metal bench inside, surface</td><td>${fmt(E.bench[12].ts)}</td><td>${fmt(E.bench[15].ts)}</td><td>${fmt(E.bench[17].ts)}</td></tr>
     </table>
-    <p class="note">The glass takes off only a fifth of the sun, from every side, so people inside get nearly what they would get outside: ${fmt(E.open[15].tmrt - E.centre[15].tmrt)} degrees cooler at 3 pm, far from the 20–35 an opaque roof gives. Without a breeze the air inside a sunlit box also warms up; this model holds the air fixed, so it shows only the radiation.</p>
-    ${experts(`<p class="lit">Glass transmission ${MATERIALS.glassBox.tr.value}${tag(MATERIALS.glassBox.tr)}; the brief's band 1 (20–35 K) is for opaque shelters, so this row is supplementary in docs/sources.md.</p><p class="lit">Houston, 17 stops: enclosed shelters without overhead shade were more than 3 °C (WBGT) hotter than standing in the open sun; tree shade was 3.2 °C cooler (Lanza et al. 2025).</p>
+    <p class="note">The glass takes off only a fifth of the sun, from every side, so people inside get nearly what they would get outside: ${fmt(E.open[15].tmrt - E.centre[15].tmrt)} degrees less radiant heat at 3 pm, far from the 20–35 an opaque roof gives. Without a breeze the air inside a sunlit box also warms up; this model holds the air fixed, so it shows only the radiation.</p>
+    ${experts(`<p class="lit">Glass transmission ${MATERIALS.glassBox.tr.value}${tag(MATERIALS.glassBox.tr)}; the brief's band 1 (20–35 K) is for opaque shelters, so this row is a supplementary check in the project's model notes.</p><p class="lit">Houston, 17 stops: enclosed shelters without overhead shade were more than 3 °C (WBGT) hotter than standing in the open sun; tree shade was 3.2 °C cooler (Lanza et al. 2025).</p>
     <p class="caveat">Air fixed: no heat trap, no greenhouse effect inside the box; the glass transmission is the block-3 clear glass at normal incidence (less at a glancing angle, not modelled); the glass reflects no sunlight here.</p>`, ['lanza2025', 'brief3', 'brief9'])}`;
 }
 
@@ -230,12 +239,12 @@ export function hkCard(d) {
     <div class="mat">Highways Department, Hong Kong, guidance for covers of walkways and passenger shelters (2018)</div>
     <table class="cmp">
       <tr><td>the guidance</td><td>this model</td></tr>
-      <tr><td>bus shelter roofs opaque; avoid translucent sheets</td><td>stop A's shelter at 15:00: an opaque roof makes it feel ${fmt(sw.roofMetal.benefit)} degrees cooler, a milky one ${fmt(sw.polyOpal.benefit)} (${pct(share('polyOpal'))})${d.opalMiss ? MISS : ''}, a clear one ${fmt(sw.polyClear.benefit)} (${pct(share('polyClear'))})</td></tr>
+      <tr><td>bus shelter roofs opaque; avoid translucent sheets</td><td>stop A's shelter at 15:00: an opaque roof takes ${fmt(sw.roofMetal.benefit)} degrees of radiant heat off (likely too many, see stop A), a milky one ${fmt(sw.polyOpal.benefit)} (${pct(share('polyOpal'))})${d.opalMiss ? MISS : ''}, a clear one ${fmt(sw.polyClear.benefit)} (${pct(share('polyClear'))})</td></tr>
       <tr><td>low headroom, or wider covers and fascias</td><td>stop C at 17:00: west screen ${fmt(d.cmp.variants.built[17].tmrt)} °C, a roof 1 m bigger ${fmt(d.cmp.variants.bigRoof[17].tmrt)} °C</td></tr>
       <tr><td>walkway covers: translucent on at most a third of the width, at the sides</td><td>the covered footbridge is opaque</td></tr>
       <tr><td>flat covers better than upward-sloped ones; check with a sun-shadow analysis</td><td>every roof here is flat; the shade at each waiting place is traced at points</td></tr>
     </table>
-    ${experts(`<p class="caveat">${d.opalMiss ? `Opal comes out at ${share('polyOpal').toFixed(2)} of the opaque cut, just under the brief's 0.50–0.65 (band missed, docs/sources.md, block 9): likely because the model passes the sheet's light as a direct beam, while opal scatters it; not tuned. ` : ''}The guidance note was read through the brief, not in the original (unverified). The comparisons are this model's, at points, for a standing or seated adult.</p>`, ['hyd047', 'brief9'])}`;
+    ${experts(`<p class="caveat">${d.opalMiss ? `Opal comes out at ${share('polyOpal').toFixed(2)} of the opaque cut, just under the brief's 0.50–0.65 (band missed): likely because the model passes the sheet's light as a direct beam, while opal scatters it; not tuned. ` : ''}The guidance note was read through the brief, not in the original (unverified). The comparisons are this model's, at points, for a standing or seated adult.</p>`, ['hyd047', 'brief9'])}`;
 }
 
 /** Footbridges. d: {st}. */
@@ -249,13 +258,13 @@ export function bridgeCard(d) {
     <div class="mat">Two steel footbridges ${BS.deckH.value} m up; one under an opaque cover · ${ADULT}, mean along each deck</div>
     <table class="cmp">
       <tr><td></td>${H.map((h) => `<td>${hm(h)}</td>`).join('')}</tr>
-      <tr><td>how it ${gl('tmrt', 'feels')} on the open deck</td>${H.map((h) => `<td>${fmt(op.tmrt[h])}</td>`).join('')}</tr>
-      <tr><td>how it feels on the covered deck</td>${H.map((h) => `<td>${fmt(cv.tmrt[h])}</td>`).join('')}</tr>
+      <tr><td>${gl('tmrt', 'radiant heat')} on the open deck</td>${H.map((h) => `<td>${fmt(op.tmrt[h])}</td>`).join('')}</tr>
+      <tr><td>radiant heat on the covered deck</td>${H.map((h) => `<td>${fmt(cv.tmrt[h])}</td>`).join('')}</tr>
       <tr><td>open steel deck, surface</td>${H.map((h) => `<td>${fmt(op.deck[h])}</td>`).join('')}</tr>
       <tr><td>covered steel deck, surface</td>${H.map((h) => `<td>${fmt(cv.deck[h])}</td>`).join('')}</tr>
       <tr><td>handrail, open bridge</td>${H.map((h) => `<td>${fmt(op.rail[h])}</td>`).join('')}</tr>
     </table>
-    <p class="note">At 3 pm the cover makes it feel ${fmt(op.tmrt[15] - cv.tmrt[15])} degrees cooler for the people crossing and keeps the deck at ${fmt(cv.deck[15])} °C instead of ${fmt(op.deck[15])} °C (daily peak of the open deck ${fmt(op.deckPeak)} °C${op.deckPeak > 70 ? ', above the 60–70 °C expected for steel decks, likely because the plate here loses no heat from below' : ''}). The handrail on the cover's south edge still sees the sun under the eaves.</p>
+    <p class="note">At 3 pm the cover takes ${fmt(op.tmrt[15] - cv.tmrt[15])} degrees of radiant heat off the people crossing and keeps the deck at ${fmt(cv.deck[15])} °C instead of ${fmt(op.deck[15])} °C (daily peak of the open deck ${fmt(op.deckPeak)} °C${op.deckPeak > 70 ? ', above the 60–70 °C expected for steel decks, likely because the plate here loses no heat from below' : ''}). The handrail on the cover's south edge still sees the sun under the eaves.</p>
     ${experts(`<p class="lit">Deck height${tag(BS.deckH)}; deck and handrail are the thin metal layer (as the dark metal roof), mean over ${op.n} points; the 60–70 °C is the brief's.</p><p class="lit">Hong Kong, an elevated walkway: PET on it 2–17 K lower than in the open, and the street below up to 2.7 K higher (Chen et al. 2024); Tmrt 53.5–68.0 °C in the open against 19.9–39.6 °C under it, a gap of 19.8–34.8 K (via the brief, not checked). Singapore: covered walkways still in strong heat stress more than 77% of the time (via the brief). Steel deck paving is designed and tested for 70 °C (Mao et al. 2025).</p>
     <p class="caveat">The deck plate and the handrail are thin layers heated from above only (no cooling from below or round a tube), so their temperatures are upper bounds; climbing the stairs adds body heat, which is not modelled. The covered deck's sides are open.</p>`, ['chenWalk2024', 'sgWalkway', 'deckSteel', 'brief9'])}`;
 }
@@ -278,7 +287,7 @@ export function burnCard(d) {
       <tr><td>surface at 3 pm</td><td>model</td><td>1-minute limit</td><td>flag</td></tr>
       ${rows}
     </table>
-    <p class="note">The burn-flags button (U) flags every bench seat, handrail and deck point above its 1-minute limit at this hour carries a flag, "1 s" where metal passes about ${BS.burn1s.value} °C. A hand on a rail or a bare leg on a bench can stay in contact for seconds or longer; from 1 min of contact on, the guide says these limits apply to children too.</p>
+    <p class="note">The burn-flags button flags every bench seat, handrail and deck point above its 1-minute limit at this hour carries a flag, "1 s" where metal passes about ${BS.burn1s.value} °C. A hand on a rail or a bare leg on a bench can stay in contact for seconds or longer; from 1 min of contact on, the guide says these limits apply to children too.</p>
     ${experts(`<p class="lit">ISO 13732-1 (via CENELEC Guide 29), Table A.1, 1 min of contact${tag(BS.burnMetal)}; the 1-s flag${tag(BS.burn1s)}.</p><p class="lit">Bare metal burns in about 1 s at 65–70 °C (unverified); for touches of 1–10 s the guide advises the low end of its range for children, and the brief advises reading at least 4 s of contact for older people and children. The US Consumer Product Safety Commission warns that sunlit steel decks can burn in seconds; sunlit metal reached 62 °C in Las Vegas.</p>
     <p class="caveat">The limits depend on the material and the contact time, and the model gives surface temperatures, not skin. Rails and decks are thin plates heated from above only, so their temperatures are upper bounds.</p>`, ['iso13732', 'brief9', 'cpsc', 'lasVegas'])}`;
 }
@@ -295,7 +304,7 @@ export function waitCard(d) {
       <tr><td>mean wait, simulated (all ${d.sim.n} riders of the day)</td><td>${fmt(d.sim.wait)} min</td></tr>
     </table>
     <table class="cmp">
-      <tr><td>stop</td><td>riders 3–4 pm</td><td>wait</td><td>feels like while waiting</td><td>dose, degree-minutes</td></tr>
+      <tr><td>stop</td><td>riders 3–4 pm</td><td>wait</td><td>radiant heat while waiting</td><td>dose, degree-minutes</td></tr>
       ${rows}
     </table>
     <p class="note">The heat dose of a wait is this page's own measure: the minutes spent times how far the apparent temperature (with the sun's radiation) is above ${BS.doseBase.value} °C, summed. When it is hot, riders take the coolest free place; the rest wait in the sun.</p>
@@ -590,7 +599,7 @@ export function bsApp(env) {
       }
       return null;
     },
-    cardRows: (f) => (f.stop ? `<tr><td>stop ${f.stop} (point model): ${gl('tmrt', 'Tmrt')} ${f.seated ? 'on the bench' : 'under the roof'} / at the kerb</td><td>${fmt(f.under)} / ${fmt(f.open)} °C (adult)</td></tr><tr><td>${f.seated ? 'seated' : 'standing'} head in direct sun</td><td>${pct(f.head)}</td></tr>` : `<tr><td>${f.bridge} footbridge deck above (point model)</td><td>${fmt(f.deck)} °C · ${f.deck > f.limit ? `<b>above</b> the 1-min metal limit ${f.limit} °C` : `below the 1-min metal limit ${f.limit} °C`}</td></tr><tr><td>${gl('tmrt', 'Tmrt')} on that deck (adult)</td><td>${fmt(f.tmrt)} °C</td></tr>`),
+    cardRows: (f) => (f.stop ? `<tr><td>stop ${f.stop} (worked out at the stop): ${gl('tmrt', 'Tmrt')} ${f.seated ? 'on the bench' : 'under the roof'} / at the kerb</td><td>${fmt(f.under)} / ${fmt(f.open)} °C (adult)</td></tr><tr><td>${f.seated ? 'seated' : 'standing'} head in direct sun</td><td>${pct(f.head)}</td></tr>` : `<tr><td>${f.bridge} footbridge deck above (point model)</td><td>${fmt(f.deck)} °C · ${f.deck > f.limit ? `<b>above</b> the 1-min metal limit ${f.limit} °C` : `below the 1-min metal limit ${f.limit} °C`}</td></tr><tr><td>${gl('tmrt', 'Tmrt')} on that deck (adult)</td><td>${fmt(f.tmrt)} °C</td></tr>`),
     glossary: () => ({}),
     /** Bus stop block (block 9) only: state {spots, burn}; set() it; numbers for the bands and cards; card HTML; riders and buses; flags. */
     api: {

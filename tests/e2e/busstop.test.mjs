@@ -240,7 +240,7 @@ test('cards: west screen, stops A-E, which kerb, waiting, footbridges, burn flag
   const [x, y] = await page.evaluate(() => window.atlas.project(303.5, 211, 0));
   await page.mouse.click(x, y);
   const t = await page.locator('#card').textContent();
-  assert.ok(/stop A \(point model\)/.test(t) && /at the kerb/.test(t), t);
+  assert.ok(/stop A \(worked out at the stop\)/.test(t) && /at the kerb/.test(t), t);
   assert.deepEqual(errors, []);
   await context.close();
 });

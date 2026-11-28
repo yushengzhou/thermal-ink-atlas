@@ -2,7 +2,7 @@
 // generated from the code and model runs (scripts/busstop.mjs).
 import { BASIS, MATERIALS } from '../engine/materials.js';
 import { BS, meanWait } from '../engine/busstop.js';
-import { base9, compare9, bands9, bandVerdicts, sensitivity9, walkers9, waits9, flags9, roofUnderside3, BS_NOTES } from './busstop.mjs';
+import { base9, compare9, bands9, bandVerdicts, sensitivity9, walkers9, waits9, flags9, roofUnderside3, surround9, BS_NOTES } from './busstop.mjs';
 
 const f1 = (x) => (Math.round(x * 10) / 10).toFixed(1);
 const f2 = (x) => x.toFixed(2);
@@ -53,6 +53,7 @@ export function busstopMarkdown() {
   const flagRows = fl.rows.filter((r) => r.p.kind !== 'deck' || r.p.x === world.bus.pts.filter((q) => q.kind === 'deck' && q.bridge === r.p.bridge)[3].x).map((r) => `| ${r.p.kind === 'bench' ? `bench seat, stop ${r.p.stop}` : r.p.kind === 'rail' ? `handrail, ${r.p.bridge} footbridge` : `deck, mid-span, ${r.p.bridge} footbridge`} (${r.p.mat}) | ${f1(r.ts)} | ${r.limit} | ${r.min1 ? 'yes' : 'no'} | ${r.s1 ? 'yes' : 'no'} |`);
   const g15 = A.centre[15].ts - T.air(15);
   const ru = roofUnderside3();
+  const su = surround9();
   const kc = (k) => kerb[k][15].open - kerb[k][15].standing;
   return `## Block 9: bus stops and footbridges
 
@@ -260,6 +261,35 @@ the brief's 0–8 K. So the shared wall term is a likely cause of the miss; the 
 around the 2 m strip is another, not tested. It stays as shipped: the wall term is shared by every block, as for block 6's
 PV undersides. The deck's peak barely moves with C: a thin layer in
 full sun sits near its radiative balance whatever its heat capacity.
+
+**Shade ranking: what a person under a roof sees (docs only, not shipped, not tuned).** The outside evaluation of #33 found
+the ranking upside down: stop A's thin metal roof (${f1(su.Acentre.shipped)} °C at 15:00, ${signed(su.Acentre.shipped - su.air)} K from the air) beats the trees of stop D
+(${f1(su.Dseat.shipped)} °C on the bench), while Tempe measured building shade first, trees second and lightweight structures last [middel2021].
+Two simplifications of \`Thermal.tmrt\` favour a small roof: a person sees **only the ground at their own point** (the shaded
+concrete under the roof, ${f1(su.Acentre.ts)} °C), not the sunlit paving a metre or two away, and the roof's underside counts as the shared
+warm wall, not as hot metal. A test at 15:00 (\`surround9\` in \`scripts/busstop.mjs\`): each sideways direction sees the ground
+straight out at 0.25, 0.75, 1.5, 3 and 6 m, weighted by the share of a vertical sensor's downward view each band takes from
+mid-body height (c / √(c² + d²) beyond distance d), from the point model's own force-restore run at those samples; a sight line
+through an opaque panel takes the wall term. The roof is a thin metal point on the roof (${f1(su.Acentre.roofT)} °C), its share of the view
+(open × F at mid-body) seen from above only (the brief's W_up 0.06) or also in the upper half of the sideways directions:
+
+| Point, 15:00 | shipped | sees the ground around | + roof underside, up | + roof underside, up and sides |
+|---|---|---|---|---|
+| stop A, centre under the roof (standing) | ${f1(su.Acentre.shipped)} °C | ${f1(su.Acentre.ground)} °C | ${f1(su.Acentre.both)} °C | ${f1(su.Acentre.bothSides)} °C |
+| stop A, open reference (standing) | ${f1(su.Aopen.shipped)} °C | ${f1(su.Aopen.ground)} °C | — | — |
+| stop D, bench under the trees (seated) | ${f1(su.Dseat.shipped)} °C | ${f1(su.Dseat.ground)} °C | — | — |
+| stop D, open reference (standing) | ${f1(su.Dopen.shipped)} °C | ${f1(su.Dopen.ground)} °C | — | — |
+
+The ground around a person decides it: ${signed(su.Acentre.ground - su.Acentre.shipped)} K under stop A's roof, ${signed(su.Dseat.ground - su.Dseat.shipped)} K on stop D's shaded bench (its ground is
+shaded all round), ${signed(su.Aopen.ground - su.Aopen.shipped)} K in the open; the roof's underside adds ${signed(su.Acentre.both - su.Acentre.ground)} K seen from above only (as the brief
+expects, "≈1 K"), ${signed(su.Acentre.bothSides - su.Acentre.ground)} K seen from the sides too. With both, stop A's cut is ${f1(su.Aopen.bothSides - su.Acentre.bothSides)} to ${f1(su.Aopen.both - su.Acentre.both)} K (shipped
+${f1(su.Aopen.shipped - su.Acentre.shipped)} K; band 1: 20–35 K) and the shelter is no better than the trees (${f1(su.Dseat.ground)} °C), the measured order. So the
+shipped shelter values are **likely too optimistic**; the page says so on stop A's card and in the expert part of every
+roofed stop. Not shipped: every block's Tmrt sees only its own cell's ground (grid blocks: a 5 m cell, so the gap is largest
+for the sub-cell shelters here), and fixing it in one block would make shade values incomparable across blocks; it belongs
+to the engine change of [issue #28](https://github.com/yushengzhou/thermal-ink-atlas/issues/28). Block 1's park trees are not thin (crown transmission
+0.17, the engine's LAI 3.5): fully shaded lawn cells come out about 20 K below the open lawn at 15:00; a 5 m cell only partly in
+a crown's shadow mixes sun and shade, and its heat card now says so.
 
 ### Acceptance bands (block 9)
 
