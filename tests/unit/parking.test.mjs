@@ -158,7 +158,7 @@ test('thin layer: a lower admittance raises the daily maximum and lowers the min
 });
 
 test('the hot-car card quotes its sources (band 7, information only)', () => {
-  assert.deepEqual(cabinNumbers(), { sun: 46, shade: 38, trees: 26 });
+  assert.deepEqual(cabinNumbers(), { sun: 47.6, shade: 39.5, trees: 26 });
 });
 
 test('every block-6 value has a source and a basis tag; unverified values are flagged; values inside the brief ranges', () => {

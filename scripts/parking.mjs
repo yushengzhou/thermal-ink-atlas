@@ -146,7 +146,7 @@ export function pkGlossaryStats() {
 export function cabinNumbers() {
   const h = hotCarCard({ openBay15: 0, openAsphalt15: 0 });
   const pair = (re) => re.exec(h).slice(1).map(Number);
-  const [sun, shade] = pair(/cabin air after 1 h, in sun \/ in shade \(Tempe\)<\/td><td>(\d+) \/ (\d+) °C/);
+  const [sun, shade] = pair(/cabin air, in sun \/ in shade \(Tempe, the study's steady-state mean\)<\/td><td>([\d.]+) \/ ([\d.]+) °C/);
   const [trees] = pair(/cabins under lot trees<\/td><td>−(\d+) K/);
   return { sun, shade, trees };
 }
@@ -192,7 +192,7 @@ export function bands6() {
   add(`6. Daily range under the PV canopy (${P.empty.range.toFixed(1)} K) vs open asphalt (${P.open.range.toFixed(1)} K): relative change`, P.empty.range / P.open.range - 1, -0.75, -0.6, 'golden2007');
   // 7: the cabin card quotes its sources (information only)
   const cab = cabinNumbers();
-  add('7. Hot-car card (information only): cabin air in sun minus in shade after 1 h, as quoted (Vanos et al. 2018)', cab.sun - cab.shade, 8, null, 'vanos2018', 'K');
+  add('7. Hot-car card (information only): cabin air in sun minus in shade, steady-state means, as quoted (Vanos et al. 2018)', cab.sun - cab.shade, 8, null, 'vanos2018', 'K');
   add('7. Hot-car card: cabins under lot trees, as quoted (Scott et al. 1999)', cab.trees, null, 26, 'scott1999', 'K');
   // 8: thin layer (lower effective admittance)
   add(`8. Thin paving (μ ${MODEL.thinPaving.value} vs ${MATERIALS.asphalt.mu.value}, n ${th.n}): change of the daily maximum`, th.thin.max - th.ref.max, 0, null, 'brief6', 'K');

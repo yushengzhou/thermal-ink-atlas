@@ -520,6 +520,12 @@ export const REFS = {
     venue: 'City and Environment Interactions 28, 100232 (Lisbon; the 71 °C black-roof figure is from a later paper by the same group, listed as matias2026)',
     doi: '10.1016/j.cacint.2025.100232',
   },
+  matias2026: {
+    authors: 'Matias, M., Silva, T., Mills, G. & Lopes, A.', year: 2026,
+    title: 'Recognising vehicles as thermally active surfaces…',
+    venue: 'Discover Environment 4, 93 (title shortened as in the reference check; the paper not read)',
+    doi: '10.1007/s44274-026-00593-8',
+  },
   levinson2011: {
     authors: 'Levinson, R., Pan, H., Ban-Weiss, G., Rosado, P., Paolini, R. & Akbari, H.', year: 2011,
     title: 'Potential benefits of solar reflective car shells: cooler cabins, fuel savings and emission reductions',

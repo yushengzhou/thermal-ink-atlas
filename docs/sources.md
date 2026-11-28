@@ -247,15 +247,16 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[stempihar2012]** Stempihar et al. (2012) Transportation Research Record 2293, doi 10.3141/2293-15: modelled Phoenix pavements, max 53-69 C, min 29-35 C; HMA k 1.2, rho 2238, c 921; PCC k 1.5, rho 2350, c 1000; eps 0.91; surface temperatures asymptotic above about 203 mm thickness
 - **[takebayashi2009]** Takebayashi & Moriyama (2009) Solar Energy 83, 1211, doi 10.1016/j.solener.2009.01.019: grass parking vs asphalt, sensible heat about 100-150 W m-2 lower by day and about 50 W m-2 lower at night
 - **[asaeda1996]** Asaeda, Ca & Wake (1996) Atmospheric Environment 30, 413-427, Heat storage of pavement and its effect on the lower atmosphere; via the block-6 brief: asphalt emits about 150 W m-2 more infrared than bare soil at its maximum (extra sensible heat 50 vs 200 W m-2 across abstracts, unverified)
-- **[zhu2022]** Zhu et al. (2022) Frontiers in Environmental Science, doi 10.3389/fenvs.2021.795474, ECOSTRESS Phoenix: roads the only class warming at night; a 100% road pixel about 4.5 K warmer than grass at night (interpretation, unverified)
-- **[hoehne2020]** Hoehne et al. (2020/2022) Sustainable and Resilient Infrastructure, doi 10.1080/23789689.2020.1773013: Phoenix pavement and vehicle sensible heat, 67% roads, 29% parking, 3.9% vehicles (snippet only, unverified)
-- **[matias2025]** Matias et al. (2025), Lisbon parked cars (abstract and press, unverified): black roofs about 71 C vs white about 45 C; air 2.5-3.8 K warmer next to black cars
-- **[levinson2011]** Levinson et al. (2011) Applied Energy, doi 10.1016/j.apenergy.2011.05.006: black vs silver car roof up to 25 K hotter; cabin soak air 5-6 K
-- **[vanos2018]** Vanos et al. (2018) Temperature, doi 10.1080/23328940.2018.1468205: Tempe, after 1 h: cabin air 46 C in sun vs 38 C in shade, dashboard 69 vs 48 C
-- **[mclaren2005]** McLaren, Null & Quinn (2005) Pediatrics (PMID 15995010): parked-car cabin +1.8 K per 5 min, 80% of the rise in the first 30 min, 47 C at 22 C ambient; cracking the windows did not help
+- **[zhu2022]** Zhu et al. (2022) Frontiers in Environmental Science, doi 10.3389/fenvs.2021.795474, ECOSTRESS Phoenix: roads the only class warming at night; a 100% road pixel about 4.5 K warmer than grass at night (interpretation; the abstract covers daytime only, so the night claim is unverified)
+- **[hoehne2020]** Hoehne et al. (2020/2022) Sustainable and Resilient Infrastructure, doi 10.1080/23789689.2020.1773013: Phoenix pavement and vehicle sensible heat, 67% roads, 29% parking, 3.9% vehicles (checked against the abstract)
+- **[matias2025]** Matias, Mills, Silva, Girotti & Lopes (2025) City and Environment Interactions 28, 100232, doi 10.1016/j.cacint.2025.100232, parked cars in Lisbon (abstract and press): air up to 3.8 K warmer next to a black car (about 2 K on average, per the press); the 71 C black-roof figure is from [matias2026]
+- **[matias2026]** Matias, Silva, Mills & Lopes (2026) Discover Environment 4, 93, doi 10.1007/s44274-026-00593-8, vehicles as thermally active surfaces, via the round-2 reference check: black car roofs a median of about 71 C, about 20 K above white ones (the paper not read; unverified)
+- **[levinson2011]** Levinson et al. (2011) Applied Energy 88(12) 4343-4357, doi 10.1016/j.apenergy.2011.05.006 (checked against the abstract): black vs silver car roof up to 25 K hotter; cabin soak air 5-6 K
+- **[vanos2018]** Vanos, Middel, Poletti & Selover (2018) Temperature 5(3) 276-292, doi 10.1080/23328940.2018.1468205: Tempe, steady-state mean cabin air 47.6 C in sun vs 39.5 C in shade (the abstract); after 1 h cabin 46 vs 38 C and dashboard 69 vs 48 C are the ASU press release's figures
+- **[mclaren2005]** McLaren, Null & Quinn (2005) Pediatrics 116(1) e109-e112, doi 10.1542/peds.2004-2368 (PMID 15995010; checked against the abstract): parked-car cabin +1.8 K per 5 min, 80% of the rise in the first 30 min, 47 C at 22 C ambient; cracking the windows did not help
 - **[nsc]** US National Safety Council, child hot-car deaths (via the block-6 brief): 1,010 US children 1998-2024, 39 in 2024
-- **[scott1999]** Scott, Simpson & McPherson (1999) Journal of Arboriculture 25, 129: parking-lot tree shade, asphalt -20 K, air at 0.5 m -1.3 K, car cabins -26 K
-- **[onishi2010]** Onishi et al. (2010) Urban Forestry & Urban Greening, doi 10.1016/j.ufug.2010.06.002: parking-lot greening, surface temperature up to -7.26 K
+- **[scott1999]** Scott, Simpson & McPherson (1999) Journal of Arboriculture 25(3) 129-142, doi 10.48044/jauf.1999.019 (checked against the paper): parking-lot tree shade, asphalt -20 K, air at 0.5 m -1.3 K, car cabins -26 K
+- **[onishi2010]** Onishi, Cao, Ito, Shi & Imura (2010) Urban Forestry & Urban Greening 9(4) 323-332, doi 10.1016/j.ufug.2010.06.002: greening parking lots in Nagoya, the largest modelled summer surface temperature drop -7.26 K for one lot; across the whole area the effect was slight
 - **[optris]** Optris and Fluke emissivity tables, via the block-6 brief: rusty or oxidised steel about 0.69-0.88 (unverified)
 - **[brief7]** Research brief docs/research/estate-brief.md (block 7; geometry calculated there, other values compiled from the sources below, items marked unverified there are flagged here; the estate counts, the AC profile and the condenser plume term are assumptions of the brief or of this block)
 - **[gb50180]** GB 50180-2018 Standard for urban residential area planning and design (issued 2018-07-10, in force 2018-12-01), clause 4.0.9 / Table 4.0.9 sunlight standards, via the block-7 brief (codeofchina): zones I, II, III and VII, cities of 500,000 or more, at least 2 h on the Great Cold day (大寒); table values from memory, unverified
@@ -1457,13 +1458,13 @@ panels' own temperature, their electricity and the air beneath are not modelled.
 
 Bay rows at 15:00: open 52.6 °C, under the trees 41.9 °C (−10.7 K); at 23:00
 31.0 and 30.5 °C. Sacramento lots: tree shade −20 K on the asphalt, −1.3 K air at 0.5 m, −26 K in
-car cabins [scott1999]; greening up to −7.26 K surface [onishi2010]. The 5 m cells mix crown shade and sun, so the cell
+car cabins [scott1999]; greening up to −7.26 K surface for one modelled lot, slight over the whole area [onishi2010]. The 5 m cells mix crown shade and sun, so the cell
 means differ by less than a spot right under a crown.
 
 The hot-car card is **information only**: cabins, car bodies and the air next to them are not simulated. It quotes
-[vanos2018] (Tempe, after 1 h: cabin 46 °C in sun vs 38 °C in shade, dashboard 69 vs 48 °C), [mclaren2005] (+1.8 K per
+[vanos2018] (Tempe: steady-state mean cabin air 47.6 °C in sun vs 39.5 °C in shade, the paper's abstract; dashboard 69 vs 48 °C after 1 h, the press release), [mclaren2005] (+1.8 K per
 5 min, 80% of the rise in 30 min, 47 °C at 22 °C ambient, cracked windows ineffective), [scott1999] (cabins −26 K under
-trees), [levinson2011] (black vs silver roof up to 25 K, cabin 5–6 K), [matias2025] (abstract and press, unverified)
+trees), [levinson2011] (black vs silver roof up to 25 K, cabin 5–6 K), [matias2025] (air up to 3.8 K warmer next to a black car), [matias2026] (black car roofs about 71 °C, unverified)
 and [nsc] (1,010 US child hot-car deaths 1998–2024, 39 in 2024; via the brief).
 
 ### The rusty shed: evening cooling
@@ -1556,7 +1557,7 @@ times that in sun on the walkable ground (footpaths, yard, lawn). The sweat cue 
 | 6. Empty bay under the PV canopy (n 144, SVF 0.11) minus open asphalt at 15:00 | −27.57 K | -30 to -20 | golden2007 | inside |
 | 6. Empty bay under the PV canopy minus open asphalt at dawn (sunrise 5.08 h) | −0.34 K | -1.5 to 1.5 | golden2007 | inside |
 | 6. Daily range under the PV canopy (8.2 K) vs open asphalt (38.7 K): relative change | -0.787 | -0.75 to -0.6 | golden2007 | **outside** |
-| 7. Hot-car card (information only): cabin air in sun minus in shade after 1 h, as quoted (Vanos et al. 2018) | 8 K | ≥ 8 | vanos2018 | inside |
+| 7. Hot-car card (information only): cabin air in sun minus in shade, steady-state means, as quoted (Vanos et al. 2018) | +8.10 K | ≥ 8 | vanos2018 | inside |
 | 7. Hot-car card: cabins under lot trees, as quoted (Scott et al. 1999) | 26 K | ≤ 26 | scott1999 | inside |
 | 8. Thin paving (μ 600 vs 1200, n 71): change of the daily maximum | +4.71 K | ≥ 0 | brief6 | inside |
 | 8. Thin paving: change of the daily minimum | −2.69 K | ≤ 0 | brief6 | inside |

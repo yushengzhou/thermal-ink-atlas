@@ -100,7 +100,7 @@ export function lotTreesCard(d) {
       <tr><td>difference</td><td>${K(d.trees.t15 - d.openBays.t15)}</td><td>${K(d.trees.t23 - d.openBays.t23)}</td></tr>
     </table>
     <p class="note">Shade keeps the sun off the asphalt and off the cars; less heat goes into the slab, so less comes out at night. The bay rows are about ${pct(d.share)} covered by cars in both sections, which shade the ground beneath them too.</p>
-    <p class="lit">Sacramento parking lots: tree shade lowered asphalt by about 20 K, the air at 0.5 m by 1.3 K and car cabins by 26 K (Scott, Simpson &amp; McPherson 1999); parking-lot greening in Japan lowered surface temperatures by up to 7.26 K (Onishi et al. 2010).</p>
+    <p class="lit">Sacramento parking lots: tree shade lowered asphalt by about 20 K, the air at 0.5 m by 1.3 K and car cabins by 26 K (Scott, Simpson &amp; McPherson 1999); in a model of Nagoya, greening one parking lot lowered its summer surface temperature by up to 7.26 K, though over the whole area the effect was slight (Onishi et al. 2010).</p>
     <p class="caveat">The model's 5 m cells mix shaded and sunlit ground under each crown, so the cell means differ by less than a spot right under a tree. The air under the trees is not simulated (fixed air).</p>
     ${srcLine(['scott1999', 'onishi2010', 'brief6'])}`;
 }
@@ -154,19 +154,20 @@ export function hotCarCard(d) {
     <h3>A parked car in the sun (information only)</h3>
     <div class="mat">Not modelled: cars here only shade the asphalt beneath them</div>
     <table class="cmp">
-      <tr><td>cabin air after 1 h, in sun / in shade (Tempe)</td><td>46 / 38 °C</td></tr>
-      <tr><td>dashboard after 1 h, sun / shade</td><td>69 / 48 °C</td></tr>
+      <tr><td>cabin air, in sun / in shade (Tempe, the study's steady-state mean)</td><td>47.6 / 39.5 °C</td></tr>
+      <tr><td>dashboard after 1 h, sun / shade (the university's press release)</td><td>69 / 48 °C</td></tr>
       <tr><td>cabin rise, first minutes</td><td>+1.8 K per 5 min; 80% of the rise in 30 min</td></tr>
       <tr><td>on a mild 22 °C day</td><td>cabin up to 47 °C</td></tr>
       <tr><td>cabins under lot trees</td><td>−26 K</td></tr>
       <tr><td>black vs silver car roof</td><td>up to 25 K hotter; cabin air 5–6 K</td></tr>
-      <tr><td>black vs white car roofs (Lisbon)</td><td>about 71 vs 45 °C</td></tr>
+      <tr><td>black vs white car roofs (Lisbon)</td><td>about 71 °C, about 20 degrees hotter</td></tr>
+      <tr><td>air next to a black car (Lisbon)</td><td>up to 3.8 degrees warmer</td></tr>
       <tr class="t"><td>US children who died in hot cars, 1998–2024</td><td>1,010 (39 in 2024)</td></tr>
     </table>
     <p class="note">A closed car is a small greenhouse: sunlight comes in through the glass and the heat stays. Most of the rise happens in the first half hour, and cracking the windows does not help. Never leave a child or a pet in a parked car.</p>
-    <p class="lit">Vanos et al. 2018 (Tempe, Arizona); McLaren, Null &amp; Quinn 2005; Scott, Simpson &amp; McPherson 1999; Levinson et al. 2011; Matias et al. 2025 (abstract and press, unverified); US National Safety Council (via the brief).</p>
+    <p class="lit">Vanos et al. 2018 (Tempe, Arizona); McLaren, Null &amp; Quinn 2005; Scott, Simpson &amp; McPherson 1999; Levinson et al. 2011; Matias et al. 2025 (air) and 2026 (car roofs, unverified); US National Safety Council (via the brief).</p>
     <p class="caveat">This model does not simulate cabins, car bodies or the warm air next to them. For scale, the asphalt in the open bays is ${fmt(d.openBay15)} °C at 15:00 and open asphalt ${fmt(d.openAsphalt15)} °C (model).</p>
-    ${srcLine(['vanos2018', 'mclaren2005', 'scott1999', 'levinson2011', 'matias2025', 'nsc'])}`;
+    ${srcLine(['vanos2018', 'mclaren2005', 'scott1999', 'levinson2011', 'matias2025', 'matias2026', 'nsc'])}`;
 }
 
 /** Button labels for the parking panel cards. */

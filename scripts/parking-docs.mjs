@@ -158,13 +158,13 @@ panels' own temperature, their electricity and the air beneath are not modelled.
 
 Bay rows at 15:00: open ${f1(t.openBays.t15)} °C, under the trees ${f1(t.treeBays.t15)} °C (${signed(t.treeBays.t15 - t.openBays.t15)} K); at 23:00
 ${f1(t.openBays.t23)} and ${f1(t.treeBays.t23)} °C. Sacramento lots: tree shade −20 K on the asphalt, −1.3 K air at 0.5 m, −26 K in
-car cabins [scott1999]; greening up to −7.26 K surface [onishi2010]. The 5 m cells mix crown shade and sun, so the cell
+car cabins [scott1999]; greening up to −7.26 K surface for one modelled lot, slight over the whole area [onishi2010]. The 5 m cells mix crown shade and sun, so the cell
 means differ by less than a spot right under a crown.
 
 The hot-car card is **information only**: cabins, car bodies and the air next to them are not simulated. It quotes
-[vanos2018] (Tempe, after 1 h: cabin 46 °C in sun vs 38 °C in shade, dashboard 69 vs 48 °C), [mclaren2005] (+1.8 K per
+[vanos2018] (Tempe: steady-state mean cabin air 47.6 °C in sun vs 39.5 °C in shade, the paper's abstract; dashboard 69 vs 48 °C after 1 h, the press release), [mclaren2005] (+1.8 K per
 5 min, 80% of the rise in 30 min, 47 °C at 22 °C ambient, cracked windows ineffective), [scott1999] (cabins −26 K under
-trees), [levinson2011] (black vs silver roof up to 25 K, cabin 5–6 K), [matias2025] (abstract and press, unverified)
+trees), [levinson2011] (black vs silver roof up to 25 K, cabin 5–6 K), [matias2025] (air up to 3.8 K warmer next to a black car), [matias2026] (black car roofs about 71 °C, unverified)
 and [nsc] (1,010 US child hot-car deaths 1998–2024, 39 in 2024; via the brief).
 
 ### The rusty shed: evening cooling
