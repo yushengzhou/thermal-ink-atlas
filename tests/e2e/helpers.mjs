@@ -49,6 +49,7 @@ export const pct = (a, p) => {
  * {key: [{x0, y0, x1, y1, z, b}]} cell boxes; occluders drawn in front are cut
  * out (boxes of the view `which`), the mask is eroded by `band` px, and each
  * pixel is read back through the palette; ink-like pixels are dropped.
+ * lum: true for mean luminance (day view), 'rgb' for the mean raw colour [r, g, b].
  * Returns {key: {n, mean, inkShare}}.
  */
 export function regionPixelMeans(page, spec, band, inkRes, which, lum = false) {
@@ -145,6 +146,15 @@ export function regionPixelMeans(page, spec, band, inkRes, which, lum = false) {
           const r = img[i * 4];
           const gg = img[i * 4 + 1];
           const bb = img[i * 4 + 2];
+          if (lum === 'rgb') {
+            // raw colour: mean [r, g, b] (0-255) instead of a temperature
+            if (!Array.isArray(sum)) sum = [0, 0, 0];
+            sum[0] += r;
+            sum[1] += gg;
+            sum[2] += bb;
+            n++;
+            continue;
+          }
           if (lum) {
             // day view: mean luminance (0-255) instead of a temperature
             sum += 0.299 * r + 0.587 * gg + 0.114 * bb;
@@ -167,7 +177,7 @@ export function regionPixelMeans(page, spec, band, inkRes, which, lum = false) {
           sum += best;
           n++;
         }
-        out[key] = { n, mean: n ? sum / n : NaN, inkShare: ink / Math.max(1, n + ink) };
+        out[key] = { n, mean: Array.isArray(sum) ? sum.map((v) => v / n) : n ? sum / n : NaN, inkShare: ink / Math.max(1, n + ink) };
       }
       return out;
     },
