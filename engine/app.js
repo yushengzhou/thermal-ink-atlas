@@ -1080,9 +1080,12 @@ export function boot(scene, root = document) {
       tmrtNow: tmrtCell !== null ? thermal.tmrt(tmrtCell, h) : null,
       // the share of the 5 m square in the sun now (a person's radiant heat takes the square's mean)
       sunNow: tmrtCell !== null ? thermal.sunlit(tmrtCell, h) : null,
+      // the same square with no direct sun on the person: the "fully in the shade" figure of a partly sunlit tree square
+      tmrtShadeNow: tmrtCell !== null ? thermal.tmrt(tmrtCell, h, 0) : null,
       tmrt15: tmrtCell !== null ? thermal.tmrt(tmrtCell, 15) : null,
       air: thermal.air(h),
       note: m.note,
+      leaf,
       hour: h,
       dryEf: m.dry ? m.dry.ef.value : null,
       dryMu: m.dry ? m.dry.mu.value : null,
@@ -1121,6 +1124,16 @@ export function boot(scene, root = document) {
     const feel = d.tmrtNow !== null ? `; the ${gl('tmrt', 'radiant heat')} on someone standing here is ${fmt(d.tmrtNow)} °C` : '';
     // a square only partly in shade: say so, since the number mixes sun and shade (outside evaluation of #33)
     const partial = d.tmrtNow !== null && d.sunNow > 0.1 && d.sunNow < 0.9 ? `<p class="sub">This 5 m square is about ${Math.round(d.sunNow * 10) * 10}% in the sun now, so the radiant heat here mixes sun and shade: standing fully in the shade is cooler than this.</p>` : '';
+    // a tree square partly or fully in the sun now: the shade sentence agrees with the sunlit share (urbanist re-check of #33)
+    const SHADE_CLAUSE = '; the ground beneath sits in their shade.';
+    const treeSun = d.leaf && d.sunNow !== null && d.sunNow > 0.1 && d.note && d.note.endsWith(SHADE_CLAUSE);
+    const note = !treeSun
+      ? d.note
+      : d.note.slice(0, -SHADE_CLAUSE.length) +
+        (d.sunNow < 0.9
+          ? `; part of this square is in their shade: standing fully in it, the ${gl('tmrt', 'radiant heat')} on you would be about ${fmt(d.tmrtShadeNow)} °C.`
+          : '; at this hour the sun gets in under the crown, so this square is not in their shade now.');
+    const groundRow = treeSun ? 'ground in this square now (sun and shade)' : 'ground beneath now';
     card.innerHTML = `
       <button class="x" aria-label="close">×</button>
       <h3>${d.title}</h3>
@@ -1130,14 +1143,14 @@ export function boot(scene, root = document) {
       <table>
         <tr class="t"><td>${gl('surfaceTemp', 'surface')} now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
         <tr class="t"><td>surface at 3 pm / ${gl('nightLag', '11 pm')}</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
-        ${d.groundNow !== null ? `<tr><td>ground beneath now</td><td>${fmt(d.groundNow)} °C</td></tr>` : ''}
+        ${d.groundNow !== null ? `<tr><td>${groundRow}</td><td>${fmt(d.groundNow)} °C</td></tr>` : ''}
         ${d.tmrtNow !== null ? `<tr><td>${gl('tmrt', 'radiant heat')} on you standing here, now / 3 pm</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
         <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
         ${blk && d[blk.cardKey] ? blk.cardRows(d[blk.cardKey]) : ''}
         ${d.wind && d.wind.at !== null ? `<tr><td>${gl('apparentTemp', 'feels like, with the wind')} now</td><td>${fmt(d.wind.at)} °C</td></tr>` : ''}
         ${cmp}
       </table>
-      <p class="note">${d.note}</p>
+      <p class="note">${note}</p>
       <details class="expert"><summary>For experts</summary>
       <table>
         <tr><td>${gl('albedo', 'albedo α')}</td><td>${P.alpha.value}${tag(P.alpha)}</td></tr>

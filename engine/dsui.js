@@ -34,7 +34,8 @@ const NAME = { sail: 'shade sails', ramada: 'the ramada', arcade: 'the arcade', 
 /** Margin notes (at most 5), in plain words. d: numbers from the plugin (noteData). */
 export function dsNotes(scene, d) {
   const text = {
-    sail: ['Under the sails at 3 pm: about', `${r0(-d.sail)} degrees less radiant heat than in the open sun`],
+    // the card's and the gallery's caveat on the map too (urbanist re-check of #33)
+    sail: [`Under the sails at 3 pm: about ${r0(-d.sail)} degrees less radiant heat`, `than in the open sun${outside(d.sail, DS_BANDS.sail) ? ` (likely too good; measured ${-DS_BANDS.sail[1]}–${-DS_BANDS.sail[0]})` : ''}`],
     arcade: [`In the arcade: about ${r0(-d.arcade)} degrees less radiant heat`, 'on you than in the open sun at 3 pm'],
     lawn: [`The watered lawn: ${fmt(d.lawn15)} °C at 3 pm (air ${fmt(d.air15)} °C);`, `it drinks about ${fmt(d.evap)} litres per m² a day`],
     street: [`Light-coated Main Street: ${r0(-d.coatTs)} degrees cooler underfoot,`, `but ${fmt(d.coatTmrt)} degrees more radiant heat on you at 3 pm`],

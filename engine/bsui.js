@@ -36,9 +36,11 @@ export const BS_SURROUND = { a15: [44.8, 50.8], d15: 44.1, roof15: 67.2 };
 export function bsNotes(scene, d) {
   const text = {
     screen: [`Stop C, west screen: radiant heat on the bench ${fmt(d.c17)} °C at 5 pm;`, `${fmt(d.c17no)} without it, ${fmt(d.c17big)} under a bigger roof`],
-    stopA: [`Stop A, metal roof: radiant heat on you ${fmt(d.a15)} °C at 3 pm`, `in its shade (likely too low), ${fmt(d.a15open)} °C at the kerb`],
+    // the shipped figure with the surround test's range beside it (BS_SURROUND, scripts/busstop.mjs surround9), urbanist re-check of #33
+    stopA: [`Stop A, metal roof: radiant heat on you ${fmt(d.a15)} °C in its shade at 3 pm`, `(likely too low; about ${BS_SURROUND.a15.map(Math.round).join('–')} in a test), ${fmt(d.a15open)} °C at the kerb`],
     glass: [`Glass box (stop E): radiant heat on you ${fmt(d.e15)} °C inside,`, `${fmt(d.e15open)} °C outside at 3 pm (trapped air not modelled)`],
-    deck: [`Open footbridge: steel deck ${fmt(d.deck15)} °C at 3 pm,`, `under the cover ${fmt(d.cdeck15)} °C`],
+    // deck surface temperatures, not radiant heat on a person (the covered deck's 36.3 only happens to equal stop A's radiant figure)
+    deck: [`Open footbridge: steel deck surface ${fmt(d.deck15)} °C at 3 pm;`, `the covered footbridge's deck surface ${fmt(d.cdeck15)} °C`],
     trees: [`Stop D, under the trees: radiant heat on the bench ${fmt(d.d15)} °C`, 'at 3 pm, with no shelter at all'],
   };
   const terms = {
