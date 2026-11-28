@@ -259,19 +259,19 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[onishi2010]** Onishi, Cao, Ito, Shi & Imura (2010) Urban Forestry & Urban Greening 9(4) 323-332, doi 10.1016/j.ufug.2010.06.002: greening parking lots in Nagoya, the largest modelled summer surface temperature drop -7.26 K for one lot; across the whole area the effect was slight
 - **[optris]** Optris and Fluke emissivity tables, via the block-6 brief: rusty or oxidised steel about 0.69-0.88 (unverified)
 - **[brief7]** Research brief docs/research/estate-brief.md (block 7; geometry calculated there, other values compiled from the sources below, items marked unverified there are flagged here; the estate counts, the AC profile and the condenser plume term are assumptions of the brief or of this block)
-- **[gb50180]** GB 50180-2018 Standard for urban residential area planning and design (issued 2018-07-10, in force 2018-12-01), clause 4.0.9 / Table 4.0.9 sunlight standards, via the block-7 brief (codeofchina): zones I, II, III and VII, cities of 500,000 or more, at least 2 h on the Great Cold day (大寒); table values from memory, unverified
-- **[db33]** Zhejiang DB33/1050 sunlight analysis rules (draft), via the block-7 brief: 大寒 08:00-16:00 and 冬至 09:00-15:00 true solar time, cumulative, only stretches of 10 min or more, steps of at most 5 min, test point 0.9 m above the floor (unverified)
-- **[gb55038]** GB 55038-2025, mandatory from 2025-05-01, via the block-7 brief: its restatement of the sunlight rule was not checked (unverified)
-- **[mu2025]** Mu et al. (2025) Atmosphere 16(1) 100, doi 10.3390/atmos16010100, Changsha: AC condenser exhaust 5.2 K above the air by day and 6.5 K at night, relative humidity -14.2% (snippet only, unverified)
-- **[chow1999]** Chow & Lin (1999), via the block-7 brief: condensers in a Hong Kong building re-entrant, air at the top floors more than 7 K above ambient (unverified)
-- **[bojic2001]** Bojic et al., via the block-7 brief: air at the condensers 4-9 K above ambient at the 30th storey of a high-rise (unverified)
-- **[bruelisauer2014]** Bruelisauer et al. (2014) Energy and Buildings 71, 28, via the block-7 brief: condenser air in the void of a Singapore high-rise 10-13 K above ambient, inlets near 50 C from floor 10, efficiency -32% (unverified)
-- **[demunck2013]** de Munck et al. (2013) International Journal of Climatology, via the block-7 brief: AC waste heat raises Paris street air by 0.5-2 K (simulated; unverified)
-- **[berlin2020]** Berlin AC waste-heat study (2020) Int. J. Environ. Res. Public Health 17(13) 4645, doi 10.3390/ijerph17134645, via the block-7 brief: street air +0.5 / +0.6 K (unverified)
+- **[gb50180]** GB 50180-2018 Standard for urban residential area planning and design (issued 2018-07-10, in force 2018-12-01), replaces GB 50180-93; clause 4.0.9 / Table 4.0.9 sunlight standards, via the block-7 brief (codeofchina): zones I, II, III and VII, cities of 500,000 or more, at least 2 h on the Great Cold day (大寒); the usual reading, table values not checked against the primary text (unverified)
+- **[db33]** Zhejiang DB33/1050 sunlight analysis rules: the brief read the draft (DB33/1050-20xx) that revised DB33/1050-2008; the standard in force is DB33/1050-2016 (from 2016-06-01). In the draft (sections 2.0.10, 3.5.3-3.5.7): 大寒 08:00-16:00 and 冬至 09:00-15:00 true solar time, cumulative, only stretches of 10 min or more, steps of at most 5 min, test point 0.9 m above the floor (not checked in the 2016 text; unverified)
+- **[gb55038]** GB 55038-2025 Project code for residential buildings, mandatory from 2025-05-01 (replaces GB 50368-2005), via the block-7 brief: each dwelling needs at least one bedroom or living room that meets the sunlight standard (news reports); the clause was not checked (unverified)
+- **[mu2025]** Mu et al. (2025) Atmosphere 16(1) 100, doi 10.3390/atmos16010100, Changsha: AC condenser exhaust 5.2 K above the air by day and 6.5 K at night, relative humidity -14.2% (residential split units; checked against the abstract)
+- **[chow1999]** Chow & Lin (1999) Applied Thermal Engineering 19(2) 117-132, doi 10.1016/S1359-4311(98)00042-8, via the block-7 brief: condensers in a Hong Kong building re-entrant, air at the top floors more than 7 K above ambient (unverified)
+- **[bojic2001]** Bojic, Lee & Yik (2001) Energy and Buildings 33(7) 737-751, doi 10.1016/S0378-7788(01)00061-5, window-type air-conditioners in recessed spaces of Hong Kong public housing, via the block-7 brief: air at the condensers 4-9 K above ambient at the 30th storey (not checked; unverified)
+- **[bruelisauer2014]** Bruelisauer et al. (2014) Energy and Buildings 71, 28-37, doi 10.1016/j.enbuild.2013.11.056, split condensing units in the void of a 24-storey Singapore building: the air rose 10-13 K along the height of the void (louvres added about 9 K more), inlets about 50 C from floor 10 up, efficiency -32% (checked against the abstract)
+- **[demunck2013]** de Munck et al. (2013) International Journal of Climatology 33(1) 210-227, doi 10.1002/joc.3415, simulated AC waste heat in Paris: street air +0.5 K with today's AC, +1 K if all of it were released as sensible heat, +2 K under a future doubling of AC (checked against the abstract)
+- **[berlin2020]** Jin, Schubert, Hefny Salim & Schneider (2020) Int. J. Environ. Res. Public Health 17(13) 4645, doi 10.3390/ijerph17134645, AC in Berlin, simulated (wall-mounted units, 22 C target, summer 2018): street air up to 0.6 K warmer (the abstract; the brief's +0.5 K is not in it)
 - **[lai2017]** Lai, Maing & Ng (2017) Building and Environment 114, 397-409, doi 10.1016/j.buildenv.2016.12.034, Hong Kong outdoor spaces under shade: Tmrt +1.6 K per +10 W m-2 of longwave, the longwave 0.1 less sky view brings (abstract checked against the paper)
 - **[plea2016]** Lai, Maing & Ng (2016) PLEA 2016 Los Angeles, Wo Che Estate, Sha Tin, Hong Kong: sky view factor 0.327 next to the sitting areas (checked against the paper; the brief gives 0.32-0.35 for the podium)
-- **[li2023]** Li et al. (2023) Building and Environment, doi 10.1016/j.buildenv.2023.110225, Hong Kong: a sky view factor threshold near 0.4 (via the block-7 brief, unverified)
-- **[yang2010]** Yang, Lau & Qian (2010) Building and Environment 45(1) 115, Shanghai high-rise housing quarters: vegetation matters more at night; the night heat island not explained by the site, so anthropogenic heat (via the block-7 brief, unverified)
+- **[li2023]** Li et al. (2023) Building and Environment, doi 10.1016/j.buildenv.2023.110225, Hong Kong residential public spaces in heat waves: a sky view factor threshold near 0.4 (checked against the abstract)
+- **[yang2010]** Yang, Lau & Qian (2010) Building and Environment 45(1) 115-134, doi 10.1016/j.buildenv.2009.05.010, Shanghai high-rise housing quarters: vegetation matters more at night; the night heat island not explained by the site, so anthropogenic heat (via the block-7 brief, unverified)
 - **[cai2017]** Cai & Hu (2017) Int. J. Environ. Sci. Dev. 8(5) 378-384, doi 10.18178/ijesd.2017.8.5.981, Wuhan, August 2015: under direct sun hard paving 9.87 K and open space 3.67 K hotter than grass (checked against the paper)
 - **[brief8]** Research brief docs/research/campus-brief.md (block 8; values compiled from the sources below, items marked unverified there are flagged here; the emissivities and admittances of the turf, track and court build-ups and the sail transmission are assumptions of the brief)
 - **[jim2016]** Jim (2016) Applied Energy 173, 520, via the block-8 brief and [singh2024]: artificial turf 74.6 C vs natural grass 36.9 C; air at 15 cm over the turf 54.2 C vs 36.0 C at 150 cm; daily minimum of the turf 23.1-23.4 C, about the grass 23.1 C (unverified)
@@ -431,10 +431,10 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Damping depth (d)** (parking only): In this model: With the Stempihar inputs: asphalt 0.127 m, concrete 0.132 m (admittance 1573 and 1877; the model uses 1200 and 1785). [this model]
 - **Ground heat flux (G)** (parking only): In this model: Open asphalt takes in up to 276 W m⁻² (at 11:00) and gives back 121 W m⁻² at 8 pm, 113 W m⁻² at 4 am. [this model]
 - **Thermal inertia** (parking only): In this model: At 11 pm: asphalt 30.9 °C, concrete 31.9 °C, ballast 28.8 °C, soil 28.8 °C, shed roof 25.5 °C (air 28.9 °C). [this model]
-- **大寒日 sunlight rule** (estate only): Typical: GB 50180-2018: at least 2 h on 大寒 in zones I, II, III and VII for cities of 500,000 or more (3 h in smaller ones); flats for the elderly 2 h on the winter solstice (冬至); new homes in old-area renovation 1 h on 大寒 (table values from memory, unverified). Draft Zhejiang rules: only stretches of 10 min or more count, steps of at most 5 min, the point 0.9 m above the floor. [gb50180, db33]
+- **大寒日 sunlight rule** (estate only): Typical: GB 50180-2018: at least 2 h on 大寒 in zones I, II, III and VII for cities of 500,000 or more (3 h in smaller ones); flats for the elderly 2 h on the winter solstice (冬至); new homes in old-area renovation 1 h on 大寒 (table values not checked against the standard, unverified). The draft of the Zhejiang rules (DB33/1050, now the 2016 edition): only stretches of 10 min or more count, steps of at most 5 min, the point 0.9 m above the floor. [gb50180, db33]
 - **Effective height (H_eff)** (estate only): Typical: 18 floors of 2.9 m with the ground floor at grade: 52.2 − 0.9 = 51.3 m. [brief7, db33]
-- **Spacing coefficient (G / H_eff)** (estate only): Typical: At 35° N for long slabs: 1.45 for 1 h, 1.47 for 2 h and 1.52 for 3 h of 大寒 sun; 1.64–1.74 on the winter solstice (calculated in the brief). The coefficient method is "no longer appropriate" for high-rises in the draft Zhejiang rules. [brief7, db33]
-- **Condenser heat rejection** (estate only): Typical: A 3.5 kW split unit with EER 3.3 rejects about 4.6 kW; at 0.5–0.7 m³/s of fan air that is 5.5–7.5 K above the air (calculated in the brief). Measured in Changsha: exhaust 5.2 K above the air by day, 6.5 K at night (snippet, unverified). [brief7, mu2025]
+- **Spacing coefficient (G / H_eff)** (estate only): Typical: At 35° N for long slabs: 1.45 for 1 h, 1.47 for 2 h and 1.52 for 3 h of 大寒 sun; 1.64–1.74 on the winter solstice (calculated in the brief). The coefficient method is "no longer appropriate" for high-rises in the draft of the Zhejiang rules (DB33/1050). [brief7, db33]
+- **Condenser heat rejection** (estate only): Typical: A 3.5 kW split unit with EER 3.3 rejects about 4.6 kW; at 0.5–0.7 m³/s of fan air that is 5.5–7.5 K above the air (calculated in the brief). Measured in Changsha: exhaust 5.2 K above the air by day, 6.5 K at night (Mu et al. 2025). [brief7, mu2025]
 - **EER (energy efficiency ratio)** (estate only): Typical: Split air conditioners about 3–4; the brief uses 3.3. [brief7]
 - **Artificial turf** (campus only): Typical: In summer sun 65–80 °C, at times over 85 °C: 9.4–34 K hotter than natural grass at the surface, but only 0.5–1.2 K warmer in the air above (review of 23 studies); at night it cools to about the grass temperature. [singh2024, jim2016]
 - **Crumb-rubber infill** (campus only): Typical: Lab tests: SBR 53.5 °C against TPE 45.6 °C under the same lamp; a shock pad adds about 1.8 K, the blade colour 1–2 K. [singh2024]
@@ -1606,8 +1606,8 @@ lawn trees `pagodaTree` (block 5). The block's own values live in `engine/estate
 |---|---|
 | `floorHeight` | 2.9 [brief7] *cited value*, unverified (storey height of the older slabs; 18 floors make 52.2 m, 30 floors 87.0 m (the brief: 18F about 54 m, 30F about 87 m)) |
 | `groundFloor` | 0 [engine] *engine assumption (no source)*, unverified (ground-floor level above the courtyard; older slabs often sit 0.3-0.45 m up (see Sensitivity)) |
-| `sillHeight` | 0.9 [db33] *cited value*, unverified (the test point of the rule, 0.9 m above the floor (draft Zhejiang rules); H_eff = roof - (ground floor + 0.9 m)) |
-| `ruleHours` | 2 [gb50180] *cited value*, unverified (大寒 >= 2 h, climate zone II (35° N cities such as Zhengzhou, Xi'an, Xuzhou), cities of 500,000 or more; table values from memory in the brief) |
+| `sillHeight` | 0.9 [db33] *cited value*, unverified (the test point of the rule, 0.9 m above the floor (the pre-2016 draft of Zhejiang DB33/1050); H_eff = roof - (ground floor + 0.9 m)) |
+| `ruleHours` | 2 [gb50180] *cited value*, unverified (大寒 >= 2 h, climate zone II (35° N cities such as Zhengzhou, Xi'an, Xuzhou), cities of 500,000 or more; table values as the brief read them, not checked against the standard) |
 | `ruleWindow` | 08:00-16:00 [db33] *cited value*, unverified (true solar time on 大寒 (20 January), as the draft Zhejiang rules; GB 50180 window not checked) |
 | `ruleStep` | 5 [db33] *cited value*, unverified (minutes per step (at most 5 min in the draft Zhejiang rules); samples at mid-step) |
 | `ruleSegment` | 10 [db33] *cited value*, unverified (only stretches of sun of at least this many minutes count (draft Zhejiang rules)) |
@@ -1640,8 +1640,8 @@ pixels depend on it:
 ### The 大寒 sunlight rule
 
 GB 50180-2018 Table 4.0.9 [gb50180]: in zone II (35° N cities such as Zhengzhou, Xi'an, Xuzhou), cities of 500,000 or more,
-every home gets at least 2 h of sun on 大寒 (the brief's reading; table values from memory, unverified). Counted
-here as the draft Zhejiang rules describe [db33]: 08:00–16:00 true solar time on 20 January, at a point 0.9 m above the
+every home gets at least 2 h of sun on 大寒 (the brief's reading; table values not checked against the standard, unverified). Counted
+here as the draft Zhejiang rules describe [db33] (the pre-2016 draft that revised DB33/1050-2008; the standard in force is DB33/1050-2016, in which these parameters were not checked): 08:00–16:00 true solar time on 20 January, at a point 0.9 m above the
 ground-floor level (the floor at grade, `groundFloor` 0), 5-min steps (sampled at mid-step), cumulative, only stretches
 of at least 10 min. A step counts when the sun is up, south of the façade (its rays reach the south face) and no
 building box is in the way (rays cast against every box; trees do not count). Sills every 2.5 m along each slab's south
@@ -1741,9 +1741,9 @@ each rejecting up to 3.3 kW (`perFlat`, the brief's estate estimate), times the 
 | 23:00 | 0.90 | 6166 | 38.5 |
 
 Peak 42.8 W m⁻² at 20:00 (the brief's estimate: about 50 W m⁻² for 2,400 flats on 16 ha). For scale, AC
-waste heat raised Paris street air 0.5–2 K in simulations [demunck2013], Berlin 0.5–0.6 K [berlin2020]; in stacks and
-recesses the upper condensers breathe air more than 7 K [chow1999], 4–9 K [bojic2001] or 10–13 K [bruelisauer2014] above
-ambient. **None of this is simulated:** the air is fixed. The overlay draws plumes on the visible condenser stacks (more
+waste heat raised Paris street air +0.5 K today, +1 K if all of it were sensible and +2 K under a future doubling, in simulations [demunck2013], Berlin up to 0.6 K [berlin2020]; in stacks and
+recesses the upper condensers breathe air more than 7 K [chow1999] or 4–9 K [bojic2001] above ambient, and a 24-storey void warmed 10–13 K
+from bottom to top [bruelisauer2014]. **None of this is simulated:** the air is fixed. The overlay draws plumes on the visible condenser stacks (more
 strokes when more flats run their AC) and the heat of each south face.
 
 **Plume wall term** (on by default in this block only): the walls in the condensers' plume zones are taken
@@ -1833,7 +1833,7 @@ sun. The north-face paths are hidden behind the next row in this view. The sweat
 - **Air fixed:** the condensers' heat, the stack effect (warmer intake air higher up) and the night heat island they feed
   are shown and quoted, not simulated; ground Ts does not feel the condensers.
 - **One wind**, the design day's 1.5 m/s everywhere; no flow between the slabs.
-- **National rule only:** GB 50180-2018 as the brief read it (table values from memory, unverified); GB 55038-2025 and local
+- **National rule only:** GB 50180-2018 as the brief read it (table values not checked against the standard, unverified); GB 55038-2025 and local
   rules (such as the Beijing coefficient 1.7, unverified) are not checked; older estates were approved under GB 50180-93.
 - **Rule counted at the sill, not the ground:** the rule's point is 0.9 m above the ground-floor level (the floor taken at
   grade); trees do not count; the towers' ground floors are lobbies and shops (not tested).

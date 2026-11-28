@@ -103,8 +103,8 @@ pixels depend on it:
 ### The 大寒 sunlight rule
 
 GB 50180-2018 Table 4.0.9 [gb50180]: in zone II (35° N cities such as Zhengzhou, Xi'an, Xuzhou), cities of 500,000 or more,
-every home gets at least ${ES.ruleHours.value} h of sun on 大寒 (the brief's reading; table values from memory, unverified). Counted
-here as the draft Zhejiang rules describe [db33]: 08:00–16:00 true solar time on 20 January, at a point ${ES.sillHeight.value} m above the
+every home gets at least ${ES.ruleHours.value} h of sun on 大寒 (the brief's reading; table values not checked against the standard, unverified). Counted
+here as the draft Zhejiang rules describe [db33] (the pre-2016 draft that revised DB33/1050-2008; the standard in force is DB33/1050-2016, in which these parameters were not checked): 08:00–16:00 true solar time on 20 January, at a point ${ES.sillHeight.value} m above the
 ground-floor level (the floor at grade, \`groundFloor\` ${ES.groundFloor.value}), ${ES.ruleStep.value}-min steps (sampled at mid-step), cumulative, only stretches
 of at least ${ES.ruleSegment.value} min. A step counts when the sun is up, south of the façade (its rays reach the south face) and no
 building box is in the way (rays cast against every box; trees do not count). Sills every 2.5 m along each slab's south
@@ -173,9 +173,9 @@ each rejecting up to ${ES.perFlat.value} kW (\`perFlat\`, the brief's estate est
 ${heat.join('\n')}
 
 Peak ${f1(st.peak.wm2)} W m⁻² at ${String(st.peak.h).padStart(2, '0')}:00 (the brief's estimate: about 50 W m⁻² for 2,400 flats on 16 ha). For scale, AC
-waste heat raised Paris street air 0.5–2 K in simulations [demunck2013], Berlin 0.5–0.6 K [berlin2020]; in stacks and
-recesses the upper condensers breathe air more than 7 K [chow1999], 4–9 K [bojic2001] or 10–13 K [bruelisauer2014] above
-ambient. **None of this is simulated:** the air is fixed. The overlay draws plumes on the visible condenser stacks (more
+waste heat raised Paris street air +0.5 K today, +1 K if all of it were sensible and +2 K under a future doubling, in simulations [demunck2013], Berlin up to 0.6 K [berlin2020]; in stacks and
+recesses the upper condensers breathe air more than 7 K [chow1999] or 4–9 K [bojic2001] above ambient, and a 24-storey void warmed 10–13 K
+from bottom to top [bruelisauer2014]. **None of this is simulated:** the air is fixed. The overlay draws plumes on the visible condenser stacks (more
 strokes when more flats run their AC) and the heat of each south face.
 
 **Plume wall term** (on by default in this block only): the walls in the condensers' plume zones are taken
@@ -224,7 +224,7 @@ ${bands7Markdown(rows)}
 - **Air fixed:** the condensers' heat, the stack effect (warmer intake air higher up) and the night heat island they feed
   are shown and quoted, not simulated; ground Ts does not feel the condensers.
 - **One wind**, the design day's 1.5 m/s everywhere; no flow between the slabs.
-- **National rule only:** GB 50180-2018 as the brief read it (table values from memory, unverified); GB 55038-2025 and local
+- **National rule only:** GB 50180-2018 as the brief read it (table values not checked against the standard, unverified); GB 55038-2025 and local
   rules (such as the Beijing coefficient 1.7, unverified) are not checked; older estates were approved under GB 50180-93.
 - **Rule counted at the sill, not the ground:** the rule's point is 0.9 m above the ground-floor level (the floor taken at
   grade); trees do not count; the towers' ground floors are lobbies and shops (not tested).

@@ -17,8 +17,8 @@ import { Life, shadeDensity, shadeAt } from '../engine/life.js';
 export const ES_NOTES = {
   floorHeight: 'storey height of the older slabs; 18 floors make 52.2 m, 30 floors 87.0 m (the brief: 18F about 54 m, 30F about 87 m)',
   groundFloor: 'ground-floor level above the courtyard; older slabs often sit 0.3-0.45 m up (see Sensitivity)',
-  sillHeight: 'the test point of the rule, 0.9 m above the floor (draft Zhejiang rules); H_eff = roof - (ground floor + 0.9 m)',
-  ruleHours: '大寒 >= 2 h, climate zone II (35° N cities such as Zhengzhou, Xi\'an, Xuzhou), cities of 500,000 or more; table values from memory in the brief',
+  sillHeight: 'the test point of the rule, 0.9 m above the floor (the pre-2016 draft of Zhejiang DB33/1050); H_eff = roof - (ground floor + 0.9 m)',
+  ruleHours: '大寒 >= 2 h, climate zone II (35° N cities such as Zhengzhou, Xi\'an, Xuzhou), cities of 500,000 or more; table values as the brief read them, not checked against the standard',
   ruleWindow: 'true solar time on 大寒 (20 January), as the draft Zhejiang rules; GB 50180 window not checked',
   ruleStep: 'minutes per step (at most 5 min in the draft Zhejiang rules); samples at mid-step',
   ruleSegment: 'only stretches of sun of at least this many minutes count (draft Zhejiang rules)',
