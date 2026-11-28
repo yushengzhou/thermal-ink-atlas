@@ -7426,7 +7426,7 @@ function boot(scene, root = document) {
       : '';
     const feel = d.tmrtNow !== null ? `; the ${gl('tmrt', 'radiant heat')} on someone standing here is ${fmt(d.tmrtNow)} °C` : '';
     // a square only partly in shade: say so, since the number mixes sun and shade (outside evaluation of #33)
-    const partial = d.tmrtNow !== null && d.sunNow > 0.1 && d.sunNow < 0.9 ? `<p class="sub">This 5 m square is about ${Math.round(d.sunNow * 10) * 10}% in the sun now, so the radiant heat here mixes sun and shade: standing fully in the shade is cooler than this.</p>` : '';
+    const partial = d.tmrtNow !== null && d.sunNow > 0.1 && d.sunNow < 0.9 ? `<p class="sub">This 5 m square is about ${Math.round(d.sunNow * 10) * 10}% in the sun now, so the radiant heat here mixes sun and shade: standing fully in the shade here, it is about ${fmt(d.tmrtShadeNow)} °C.</p>` : '';
     // a tree square partly or fully in the sun now: the shade sentence agrees with the sunlit share (urbanist re-check of #33)
     const SHADE_CLAUSE = '; the ground beneath sits in their shade.';
     const treeSun = d.leaf && d.sunNow !== null && d.sunNow > 0.1 && d.note && d.note.endsWith(SHADE_CLAUSE);
@@ -7434,7 +7434,7 @@ function boot(scene, root = document) {
       ? d.note
       : d.note.slice(0, -SHADE_CLAUSE.length) +
         (d.sunNow < 0.9
-          ? `; part of this square is in their shade: standing fully in it, the ${gl('tmrt', 'radiant heat')} on you would be about ${fmt(d.tmrtShadeNow)} °C.`
+          ? '; only part of this square is in their shade now (see the sunlit share above).'
           : '; at this hour the sun gets in under the crown, so this square is not in their shade now.');
     const groundRow = treeSun ? 'ground in this square now (sun and shade)' : 'ground beneath now';
     card.innerHTML = `
