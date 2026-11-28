@@ -376,9 +376,13 @@ function filmPage(W, H) {
     legend() {
       const bar = this.doc.getElementById('legendBar');
       const stops = [...(bar ? bar.style.background : '').matchAll(/rgb\((\d+), (\d+), (\d+)\)(?: (\d+(?:\.\d+)?)%)?/g)].map((m) => [m[4] === undefined ? null : Number(m[4]) / 100, `rgb(${m[1]},${m[2]},${m[3]})`]);
-      const lo = this.doc.getElementById('legendLo')?.textContent ?? '';
-      const hi = this.doc.getElementById('legendHi')?.textContent ?? '';
-      return { stops, lo, hi };
+      // the heat view's scale (#36): surface minus the air, ticks and the air at the hour from the page's own legend
+      const ticks = [...this.doc.querySelectorAll('#legendTicks span:not(.m)')].map((e) => [parseFloat(e.style.left) / 100, e.textContent]); // the phone's ticks: room for the labels
+      const air = this.A.probes().air;
+      // block 3: the page's legend adds "glass façades: calculated"
+      const lw = this.doc.querySelector('#legend .lw');
+      const glass = !!lw && this.doc.defaultView.getComputedStyle(lw, '::after').content !== 'none';
+      return { stops, ticks, air, glass };
     },
     /** Draw film frame `s` (see frameSpec) into base and out. */
     render(s) {
@@ -496,7 +500,8 @@ function filmPage(W, H) {
       const w = 400;
       const x = W - 56 - w;
       const hasLeg = mix > 0;
-      const h = (hasLeg ? 160 : 86) + (o.state ? 34 : 0);
+      const L0 = hasLeg ? this.legend() : null;
+      const h = (hasLeg ? 270 + (L0.glass ? 22 : 0) : 86) + (o.state ? 34 : 0);
       this.card(g, x, 52, w, h);
       g.fillStyle = INK;
       g.font = `600 30px ${SERIF}`;
@@ -514,7 +519,7 @@ function filmPage(W, H) {
         g.fillText(o.state, x + 22, 52 + h - 16);
       }
       if (hasLeg) {
-        const L = this.legend();
+        const L = L0;
         g.globalAlpha = o.a * Math.min(1, mix * 1.5);
         const bx = x + 22;
         const bw = w - 44;
@@ -527,13 +532,62 @@ function filmPage(W, H) {
         g.lineWidth = 1.2;
         g.strokeRect(bx, by, bw, 14);
         g.fillStyle = INK;
-        g.font = `16px ${SERIF}`;
-        g.fillText(L.lo, bx, by + 34);
-        g.textAlign = 'right';
-        g.fillText(L.hi, bx + bw, by + 34);
-        g.textAlign = 'center';
+        g.font = `15px ${SERIF}`;
+        // ticks where the page puts them (two equal halves: the cool side is stretched), ends aligned to the bar
+        L.ticks.forEach(([p, txt], k) => {
+          g.textAlign = k ? (k === L.ticks.length - 1 ? 'right' : 'center') : 'left';
+          g.fillText(txt, bx + p * bw, by + 32);
+        });
+        // "0 = air NN °C · 气温", each script in its own font, centred on the zero tick by its measured width
+        const zx = bx + L.ticks.find((t) => t[1] === '0')[0] * bw;
+        const en = `0 = the air, ${Math.round(L.air)} °C · `;
+        const zh = '气温';
+        const wEn = g.measureText(en).width;
         g.font = `15px ${ZH}`;
-        g.fillText('surface temperature · 地表温度', bx + bw / 2, by + 34);
+        const wZh = g.measureText(zh).width;
+        const x0 = Math.max(bx, Math.min(bx + bw - wEn - wZh, zx - (wEn + wZh) / 2));
+        g.textAlign = 'left';
+        g.fillText(zh, x0 + wEn, by + 56);
+        g.fillText('← 比气温凉', bx, by + 100);
+        g.textAlign = 'right';
+        g.fillText('比气温热 →', bx + bw, by + 100);
+        g.font = `15px ${SERIF}`;
+        g.fillText('hotter than the air →', bx + bw, by + 78);
+        g.textAlign = 'left';
+        g.fillText(en, x0, by + 56);
+        g.fillText('← cooler than the air', bx, by + 78);
+        // the cool side's stretch, and the walls (not calculated): hatched grey, as on the page
+        g.font = `14px ${SERIF}`;
+        g.fillStyle = 'rgba(43,38,33,.75)';
+        g.fillText('blue side stretched: small cooling shows', bx, by + 124);
+        g.fillStyle = '#a0a0a0';
+        g.fillRect(bx, by + 136, 20, 12);
+        g.strokeStyle = '#6e6e6e';
+        g.lineWidth = 1;
+        g.save();
+        g.beginPath();
+        g.rect(bx, by + 136, 20, 12);
+        g.clip();
+        g.beginPath();
+        for (let k = -12; k <= 20; k += 4) {
+          g.moveTo(bx + k, by + 148);
+          g.lineTo(bx + k + 12, by + 136);
+        }
+        g.stroke();
+        g.restore();
+        g.strokeStyle = INK;
+        g.strokeRect(bx, by + 136, 20, 12);
+        g.fillStyle = INK;
+        g.fillText('walls: not calculated', bx + 28, by + 147);
+        g.font = `14px ${ZH}`;
+        g.textAlign = 'right';
+        g.fillText('墙面未计算', bx + bw, by + 147);
+        if (L.glass) {
+          g.fillText('玻璃幕墙：已计算', bx + bw, by + 169);
+          g.font = `14px ${SERIF}`;
+          g.textAlign = 'left';
+          g.fillText('glass façades: calculated', bx, by + 169);
+        }
       }
       g.restore();
     },

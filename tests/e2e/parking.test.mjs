@@ -209,7 +209,7 @@ test('cards: storage, PV canopy, lot trees, shed, brownfield, hot car (quoted nu
   const [x, y] = await page.evaluate(() => window.atlas.project(117.5, 52.5, 0));
   await page.mouse.click(x, y);
   const t = await page.locator('#card').textContent();
-  assert.ok(/ground heat flux G now \/ 23:00/.test(t) && /giving heat back/.test(t), t);
+  assert.ok(/ground heat flux G now\s\/\s23:00/.test(t) && /giving heat back/.test(t), t);
   assert.deepEqual(errors, []);
   await context.close();
 });

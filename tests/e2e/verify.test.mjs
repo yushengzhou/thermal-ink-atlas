@@ -141,7 +141,7 @@ test('clicking a parcel opens a heat card with values, unverified labels and sou
   assert.match(text, /Aged asphalt/);
   assert.match(text, /albedo/);
   assert.match(text, /sky view factor/);
-  assert.match(text, /3 pm \/ 11 pm/);
+  assert.match(text, /3\spm\s\/\s11\spm/); // \s: no-break spaces keep the pair on one line (#36)
   assert.match(text, /Tmrt/);
   assert.match(text, /unverified/);
   assert.match(text, /Sources:/);

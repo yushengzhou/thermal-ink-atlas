@@ -6,7 +6,7 @@ import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { MATERIALS, MODEL, SOURCES, BASIS, paramKeys } from '../engine/materials.js';
 import { solarPosition } from '../engine/sun.js';
-import { irradiance } from '../engine/thermal.js';
+import { irradiance, DT_STOPS, PALETTE_STOPS } from '../engine/thermal.js';
 import { SCENE } from '../cities/asphalt-park/scene.js';
 import { base, targetRows, sensitivity, TIERS } from './regions.mjs';
 import { GLOSSARY, glossaryStats, rangeLine } from '../engine/glossary.js';
@@ -330,6 +330,67 @@ ${Object.entries(SOURCES).map(([k, v]) => `- **[${k}]** ${v}`).join('\n')}
   K_lat = 0.5·K_sky + 0.5·α·K↓ + 0.5·K_wr; glass adds a beam r·I_b from the mirrored sun (same altitude, same f_p).
 - Pedestrian route cost [melnikov]: sun distance + w_b × building-shade distance + w_t × tree-shade distance, with w_b = 1 − 0.16·s and w_t = 1 − 0.08·s.
   w_b = 0.84 at full heat is cited; w_t = 0.92 is an *interpretation* of "tree shade about half as effective"; the heat factor s rises linearly from 0 at air ≤ 26 °C to 1 at air ≥ 32 °C (*engine assumption*, not in the source). The same weights drive the sideways drift toward shade within a pavement (only when air > 28 °C).
+
+## Heat view colours
+
+Drawing only: no model value depends on it. By default (issue #36) the heat view colours each surface by **ΔT = Ts − Ta(t)**,
+its difference from the page's own air temperature at the hour shown, on a diverging scale from −${-DT_STOPS[0][0]} K to +${DT_STOPS.at(-1)[0]} K:
+paper-toned at 0 K (within about ±1 K), Prussian blue / blue-green below the air, amber → cinnabar above it. **Lightness shows how
+far a surface is from the air, hue shows which side**: lightness is highest at 0 K and falls steadily both ways, so in grey alone the
+sign is lost (block 1 at 15:00: the pond, −5 K, and sunlit asphalt, +29 K, have about the same lightness, L* 40 and 38). The
+blue-versus-amber/red hue carries the sign, and that difference survives the Machado et al. 2009 deuteranopia, protanopia and
+tritanopia simulations (checked in \`tests/unit/thermal.test.mjs\`: lightness order on each side, and colour differences between
+the block 1 surfaces). Colour stops (K):
+${DT_STOPS.map(([d, c]) => `${d > 0 ? '+' : d < 0 ? '−' : ''}${Math.abs(d)} ${c}`).join(' · ')}.
+
+The limits are the same on every block, so blocks stay comparable. They were picked from the model's ΔT over every cell (ground
+and roofs) of all 12 blocks at 15:00, 23:00 and 04:00 (and the retrofit's Before / After, the glass types, the white roofs, the
+coating, irrigation and AC variants), measured with \`atlas.heatSpread\` (2026-11-28):
+
+| | coolest cell | 99th percentile | hottest cell |
+|---|---|---|---|
+| 15:00 | −6.5 K (block 4's water) | +40.1 K (block 3, mirror glass) | +46.2 K (block 3, mirror glass: reflected hot spots) |
+| 23:00 | −4.2 K (block 11) | +6.5 K (block 12) | +7.2 K (block 3, mirror glass) |
+| 04:00 | −3.7 K (blocks 1, 2, 8, 9) | +7.1 K (block 12) | +8.0 K (block 3, mirror glass) |
+
+Most sunlit roofs and roads sit at +29 to +36 K at 15:00 (block medians up to +32.6 K), water, lawns and tree shade at −6.5 to +4 K.
+So the cool end, −${-DT_STOPS[0][0]} K, holds the coolest cell anywhere with 1.5 K to spare, and the warm end, +${DT_STOPS.at(-1)[0]} K, holds every
+block's 99th percentile as the page opens (largest +39.1 K, block 3; +40.1 K with its mirror glass); only block 3's reflected hot
+spots (about 1% of its cells, up to +46 K) show in the top colour. The
+asymmetry (−8 / +40 rather than symmetric) lets both sides use their whole colour range. **The cool side is stretched**: its
+8 K run through as much colour as the warm side's 40 K, so −3 K looks about as strong as +15 to +20 K, and small cooling shows
+(lawns just below the air at night, tree shade). The legend says so: its bar is drawn in two equal halves (−8 … 0 and 0 … +40, like
+a two-slope colour bar), with ticks at −8, −4, 0 and +10, +20, +30, +40 (−8, 0, +20, +40 on a phone), and the line "blue side
+stretched: small cooling shows". A trade-off of the diverging scale: at 15:00 on block 1 the pond stands a little less far from
+the asphalt in colour than on the absolute scale (RGB distance 95 against 122; tree shade and lawn stand further: 169 against
+136 and 148 against 125). \`tests/e2e/delta.test.mjs\` re-checks on
+every block (as it opens) that the coolest cell stays above the cool end and the 99th percentile below the warm end.
+
+The legend speaks in degrees, not K: "how much hotter or cooler than the air (°C)", "0 = the air at 15:00, 35.0 °C" and "cooler /
+hotter than the air"; its button ("show plain °C", or \`?scale=abs\`) switches to the earlier absolute scale,
+${PALETTE_STOPS[0][0]}–${PALETTE_STOPS.at(-1)[0]} °C, and back ("compare with the air"). Heat cards and margin notes keep absolute °C; the cards add how many
+degrees above or below the air.
+
+**Opaque walls are not calculated cell by cell.** The model gives them an assumed temperature (\`wallTemp\`: air + 2 K + 6 K ×
+K↓/900, see Equations), which feeds the longwave and reflected sunshine reaching the ground and people nearby, but no wall has a
+result of its own to show. In the heat view, on both scales, they are drawn in a hatched neutral grey (#a0a0a0: no hue, so it
+cannot be read as either side of the ΔT scale; at least ΔE 9 from every colour of both palettes, \`tests/unit/thermal.test.mjs\`),
+and the legend says "walls: not calculated", so a wall is never read as being at the air's temperature.
+
+**Block 3's glass façades are calculated**, per orientation: T_g = Ta + a_g·I_f/(h_o + h_i) (see *Glass surface temperature*:
+the brief's balance, with no measurement behind it, so there is no cited range to check it against). The heat view colours each
+glass face by that value, and on that page the legend adds "glass façades: calculated"; each glass card gives the façade
+temperatures at the hour shown. At 15:00 the two faces the drawing shows are out of the direct sun (the south face is grazed at
+84° from straight-on, the east face is in shade), so they sit close to the air:
+
+| Glass, 15:00 (air 35.0 °C) | south face | east face | west face (sunlit, not in view) |
+|---|---|---|---|
+| clear | 35.5 °C (+0.5) | 35.1 °C (+0.1) | 37.2 °C (+2.2) |
+| coated (low-e) | 36.4 °C (+1.4) | 35.4 °C (+0.4) | 41.6 °C (+6.6) |
+| mirror | 36.8 °C (+1.8) | 35.6 °C (+0.6) | 43.8 °C (+8.8) |
+
+Lit head-on the same balance gives air + 3.3 K (clear) to air + 13.4 K (mirror). No measured range is cited for glass surface
+temperatures, so these values are not checked against one; they are shown as calculated, not tuned.
 
 ## Glossary sources
 

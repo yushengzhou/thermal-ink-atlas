@@ -3,7 +3,7 @@
 import { iso, unIso, clamp, ISO_C, ISO_S } from './core.js';
 import { buildWorld } from './world.js';
 import { drawWorld } from './kit.js';
-import { runModel, shadeClassField, paletteLut, PALETTE_STOPS, heatRgb } from './thermal.js';
+import { runModel, shadeClassField, paletteLut, PALETTE_STOPS, DT_STOPS, heatRgb, dtRgb } from './thermal.js';
 import { Life, shadeDensity, shadeAt } from './life.js';
 import { Renderer, INTRO, quantHour } from './render.js';
 import { MATERIALS, SOURCES, BASIS, paramKeys } from './materials.js';
@@ -42,6 +42,8 @@ import { nmApp } from './nmui.js';
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
 const fmt = (v) => (Math.round(v * 10) / 10).toFixed(1);
+// no break in "1 °C", "a / b", "3 pm"
+const nb = (a, ...v) => String.raw({ raw: a }, ...v).replace(/ (?=°C|\/ |[ap]m\b)|(?<= \/) /g, '\u00a0');
 const hhmm = (h) => {
   const m = Math.round((((h % 24) + 24) % 24) * 60);
   return `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
@@ -249,6 +251,7 @@ export function boot(scene, root = document) {
     cam: { ...scene.startCam },
     hour: scene.startHour ?? 15, // block 12 opens in the evening
     thermal: false,
+    dt: q.get('scale') !== 'abs',
     since: -1e9,
     notes: q.get('notes') !== '0',
     people: q.get('people') !== '0',
@@ -481,6 +484,7 @@ export function boot(scene, root = document) {
   const legend = $('legend');
   const card = $('card');
   const heatBtn = $('heatBtn');
+  const scaleBtn = $('scaleBtn');
   // opening a card's expert part makes it taller: keep the whole card on screen
   card.addEventListener('toggle', () => {
     const top = parseFloat(card.style.top) || 0;
@@ -518,18 +522,35 @@ export function boot(scene, root = document) {
     slider.value = String(S.hour);
     hourLabel.textContent = `${hhmm(S.hour)}  ·  air ${fmt(thermal.air(S.hour))} °C`;
     legend.style.opacity = S.thermal ? '1' : '0';
+    legend.classList.toggle('abs', !S.dt);
+    legend.inert = !S.thermal;
+    $('legendVs').innerHTML = S.dt ? ': <i>how much </i>hotter or cooler<i> than the air</i> (°C)' : ' temperature (°C)';
+    scaleBtn.textContent = S.dt ? 'show plain °C' : 'compare with the air';
+    scaleBtn.setAttribute('aria-pressed', String(!S.dt));
+    $('legendAir').textContent = `0 = the air at ${hhmm(S.hour)}, ${fmt(thermal.air(S.hour))} °C`;
     root.body.classList.toggle('thermal', S.thermal);
     heatBtn.setAttribute('aria-pressed', String(!!S.thermal));
   };
-  // legend gradient from the palette
-  const lo = PALETTE_STOPS[0][0];
-  const hi = PALETTE_STOPS[PALETTE_STOPS.length - 1][0];
-  $('legendBar').style.background = `linear-gradient(90deg, ${PALETTE_STOPS.map(([t]) => {
-    const c = heatRgb(t);
-    return `rgb(${c.map(Math.round).join(',')}) ${(((t - lo) / (hi - lo)) * 100).toFixed(1)}%`;
-  }).join(', ')})`;
-  $('legendLo').textContent = `${lo} °C`;
-  $('legendHi').textContent = `≥ ${hi} °C`;
+  // legend: ΔT bar in two halves
+  const [dLo, dHi] = [DT_STOPS[0][0], DT_STOPS.at(-1)[0]];
+  const pos = (st, t) => (st === DT_STOPS ? (t < 0 ? 1 - t / dLo : 1 + t / dHi) / 2 : (t - st[0][0]) / (st.at(-1)[0] - st[0][0]));
+  const grad = (st, f) => `linear-gradient(90deg, ${st.map(([t]) => `rgb(${f(t).map(Math.round)}) ${(pos(st, t) * 100).toFixed(1)}%`)})`;
+  $('legendTicks').innerHTML = [dLo, dLo / 2, 0, 10, 20, 30, dHi].map((d, k) => `<span${k % 2 ? ' class="m"' : ''} style="left:${(pos(DT_STOPS, d) * 100).toFixed(1)}%${k ? '' : ';transform:none'}">${d > 0 ? '+' : d ? '−' : ''}${Math.abs(d)}</span>`).join('');
+  // phone: a chip, tap to open
+  legend.addEventListener('click', (e) => e.target.closest('button,.gl') || legend.classList.toggle('open'));
+  $('legendLo').textContent = `${PALETTE_STOPS[0][0]} °C`;
+  $('legendHi').textContent = `≥ ${PALETTE_STOPS.at(-1)[0]} °C`;
+  const setScale = (dt) => {
+    S.dt = dt;
+    for (const v of Object.values(V)) v.R.setScale(dt);
+    $('legendBar').style.background = dt ? grad(DT_STOPS, dtRgb) : grad(PALETTE_STOPS, heatRgb);
+  };
+  setScale(S.dt);
+  scaleBtn.addEventListener('click', () => {
+    setScale(!S.dt);
+    syncUi();
+    draw();
+  });
 
   const setHour = (h, scrub = false) => {
     S.hour = ((Math.round(h / 0.25) * 0.25) % 24 + 24) % 24;
@@ -732,7 +753,7 @@ export function boot(scene, root = document) {
     if (id === 'extreme') return extremeCard();
     const g = id.slice(6);
     const tower = world.buildings.find((b) => b.id === 't3');
-    const face = { name: `${tower.name}, south face`, face: 'S', theta15: incidence('S', 15), tg15: glassSet.model(g).glassTemp('S', 15) };
+    const face = { name: `${tower.name}, south face`, face: 'S', theta15: incidence('S', 15), tg15: glassSet.model(g).glassTemp('S', 15), m: glassSet.model(g), h: S.hour };
     return glassCard(g, { h12: spotStats(glassSet, world, g, 12), h15: spotStats(glassSet, world, g, 15) }, face);
   }
   function showCbdCard(id, anchor) {
@@ -1134,10 +1155,10 @@ export function boot(scene, root = document) {
           ? '; only part of this square is in their shade now (see the sunlit share above).'
           : '; at this hour the sun gets in under the crown, so this square is not in their shade now.');
     const groundRow = treeSun ? 'ground in this square now (sun and shade)' : 'ground beneath now';
-    card.innerHTML = `
+    card.innerHTML = nb`
       <button class="x" aria-label="close">×</button>
       <h3>${d.title}</h3>
-      <p class="lead">At ${hhmm(d.hour)} the ${d.groundNow !== null ? 'top' : 'surface'} here is ${fmt(d.tsNow)} °C${feel}, with the air at ${fmt(d.air)} °C.</p>
+      <p class="lead">At ${hhmm(d.hour)} the ${d.groundNow !== null ? 'top' : 'surface'} here is ${fmt(d.tsNow)} °C, ${Math.abs(d.tsNow - d.air) < 0.05 ? 'the same as the air' : `${fmt(Math.abs(d.tsNow - d.air))} degrees ${d.tsNow > d.air ? 'hotter' : 'cooler'} than the air`} (${fmt(d.air)} °C)${feel}.</p>
       ${partial}
       <div class="mat">${d.matId === 'coolroof' || d.matId === 'coolroofAged' || d.matId === 'coolroofNew' ? gl('coolRoof', d.material) : d.material}${retro ? ` · ${d.state === 'after' ? 'After' : 'Before'}` : ''}</div>
       <table>
@@ -1448,7 +1469,18 @@ export function boot(scene, root = document) {
       out.air = thermal.air(h);
       return out;
     },
-    palette: () => paletteLut(),
+    palette: (h = S.hour) => paletteLut(S.dt ? thermal.air(h) : null),
+    scale(dt) {
+      if (dt !== undefined) {
+        setScale(!!dt);
+        syncUi();
+      }
+      return S.dt ? 'dt' : 'abs';
+    },
+    heatSpread(h = S.hour, which) {
+      const { world: w, thermal: t } = vw(which);
+      return Array.from({ length: w.n ** 2 }, (_, i) => t.ts(i, h) - t.air(h)).sort((x, y) => x - y);
+    },
     agents(frame = S.frame, hour = S.hour, which) {
       const { life, shadeFor } = vw(which);
       const hq = quantHour(hour);

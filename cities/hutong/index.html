@@ -24,11 +24,16 @@
   #bar button[aria-pressed="true"] { background: #2b2621; color: #fbf7ee; }
   #inkHint { position: fixed; left: 50%; top: 18px; transform: translateX(-50%); padding: 6px 14px; background: rgba(246,240,226,.92); border: 1px solid #2b2621; border-radius: 6px 3px 8px 3px; font-size: 14px; }
   kbd { font: 12px/1 ui-monospace, Menlo, monospace; border: 1px solid #2b2621; border-radius: 3px; padding: 1px 4px; background: #fbf7ee; }
-  #legend { position: fixed; right: 18px; top: 18px; width: 240px; padding: 8px 12px; background: rgba(246,240,226,.92);
+  #legend { position: fixed; right: 18px; top: 18px; width: 260px; padding: 8px 12px; background: rgba(246,240,226,.92);
     border: 1.5px solid #2b2621; border-radius: 6px 3px 8px 3px; transition: opacity .6s; opacity: 0; }
   #legendBar { height: 12px; border: 1px solid #2b2621; margin: 4px 0 2px; }
   #legend .ends { display: flex; justify-content: space-between; font-size: 12px; white-space: nowrap; }
   #legend .cap { font-size: 11px; opacity: .7; margin-top: 2px; }
+  #legend .vs,#legend .lw{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:0 6px;font-size:11px}
+  #scaleBtn{font:11px/1.3 serif;font-family:inherit;white-space:nowrap;padding:1px 6px;border:1px solid #2b2621;border-radius:3px 6px 3px 5px;background:#fbf7ee;color:#2b2621;cursor:pointer}
+  #legendTicks{position:relative;height:14px;font-size:11px}#legendTicks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+  #legend .lx{font-size:11px;opacity:.75}#legend i{font-style:normal}.wl{display:inline-block;width:14px;height:9px;margin-right:4px;border:1px solid;background:repeating-linear-gradient(135deg,#a0a0a0 0 3px,#6e6e6e 0 4px)}[data-glass] .lw:after{content:'glass façades: calculated';flex-basis:100%}
+  #legend.abs #legendTicks,#legend.abs .vs,#legend.abs #legendAir,#legend.abs .lx,#legend:not(.abs) .ends{display:none}
   #card { display: none; position: fixed; z-index: 5; width: 350px; max-height: calc(100vh - 20px); overflow: auto; box-sizing: border-box; padding: 12px 14px; background: #fbf7ee; border: 1.5px solid #2b2621;
     border-radius: 4px 10px 5px 9px; box-shadow: 3px 4px 0 rgba(43,38,33,.2); font-size: 13px; }
   #card h3 { margin: 0 0 2px; font-size: 17px; }
@@ -84,7 +89,7 @@
   #card details.expert summary, .blockpanel summary { cursor: pointer; font-size: 12px; opacity: .85; }
   .blockpanel summary { font-size: 13px; margin-bottom: 4px; opacity: 1; }
 /* phones: the bar wraps to the width, panels and the legend shrink, the cartouche gives way */
-  @media (max-width:700px){#bar{left:6px;right:6px;bottom:6px;transform:none;flex-wrap:wrap;gap:6px 10px;padding:6px 8px;justify-content:center}#bar input[type=range]{width:100%;flex-basis:100%}#hourLabel{min-width:0}#keys{display:none}#cartouche{left:6px;top:6px;right:6px;max-width:none;padding:6px 10px}#cartouche h1{font-size:16px}#cartouche p.plain,#cartouche details.site{display:none}.blockpanel{left:6px;bottom:auto;top:92px;width:auto;max-width:calc(100vw - 12px);max-height:50vh;overflow:auto;box-sizing:border-box}#legend{right:6px;top:auto;bottom:118px;width:180px}#legend .cap{display:none}#card{left:6px !important;right:6px;width:auto;top:92px !important;max-height:calc(100vh - 210px)}#terms{right:6px;left:6px;width:auto;bottom:118px}#inkHint{top:92px;font-size:13px}}
+  @media (max-width:700px){#bar{left:6px;right:6px;bottom:6px;transform:none;flex-wrap:wrap;gap:6px 10px;padding:6px 8px;justify-content:center}#bar input[type=range]{width:100%;flex-basis:100%}#hourLabel{min-width:0}#keys{display:none}#cartouche{left:6px;top:6px;right:6px;max-width:none;padding:6px 10px}#cartouche h1{font-size:16px}#cartouche p.plain,#cartouche details.site{display:none}.blockpanel{left:6px;bottom:auto;top:92px;width:auto;max-width:calc(100vw - 12px);max-height:50vh;overflow:auto;box-sizing:border-box}#legend{right:6px;top:auto;bottom:118px;width:190px;padding:5px 8px;cursor:pointer}#legend .cap,#legend i,#legendTicks .m,#legend:not(.open) :is(.hand,.lx,.lw){display:none}#legend:not(.open) #legendAir:after{content:' ▸'}#legendTicks :last-child{transform:translateX(-100%)}#card{left:6px !important;right:6px;width:auto;top:92px !important;max-height:calc(100vh - 210px)}#terms{right:6px;left:6px;width:auto;bottom:118px}#inkHint{top:92px;font-size:13px}}
   #card .x { position: absolute; right: 6px; top: 4px; border: 0; background: none; font-size: 18px; cursor: pointer; color: #2b2621; }
 </style>
 </head>
@@ -97,8 +102,10 @@
   <p class="plain">A hot midsummer day in a northern Chinese city: the air goes from 25 °C at dawn to 35 °C in the afternoon.</p>
   <details class="site"><summary>For experts</summary><p>Assumed heat-wave day: 39.9° N, 21 June (the solstice), air 25–35 °C, vapour pressure 25 hPa, light wind 1 m/s. Air temperature is fixed: the courtyards’ cooler air is quoted, not simulated.</p></details>
 </div>
-<div id="legend"><div class="hand"><span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">surface temperature</span></div><div id="legendBar"></div>
+<div id="legend"><div class="hand"><span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">surface</span><span id="legendVs"></span></div><div id="legendBar"></div>
+  <div id="legendTicks"></div><div class="vs"><span>← cooler<i> than the air</i></span><span>hotter<i> than the air</i> →</span></div><div id="legendAir"></div><div class="lx">blue side stretched<i>: small cooling shows</i></div>
   <div class="ends"><span id="legendLo"></span><span id="legendHi"></span></div>
+  <div class="lw"><span><b class="wl"></b>walls: not calculated</span><button type="button" id="scaleBtn" aria-pressed="false"></button></div>
   <div class="cap">Calculated for a made-up block, not measured (<span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">how</span>).</div></div>
 <div id="bar">
   <input id="hour" type="range" min="0" max="23.75" step="0.25" value="15" aria-label="hour of day">
@@ -2102,11 +2109,27 @@ const PALETTE_STOPS = [
   [70, '#7e4038'],
 ];
 
-const STOP_RGB = PALETTE_STOPS.map(([t, c]) => [t, hexRgb(c)]);
+// Heat view: surface minus air (K); limits: docs/sources.md
+const DT_STOPS = [
+  [-8, '#2b4060'],
+  [-5, '#3b6573'],
+  [-2.5, '#6f958f'],
+  [-1, '#bfcad0'],
+  [0, '#e9e1cb'],
+  [1, '#e6d9bd'],
+  [5, '#dcb987'],
+  [12, '#d3965f'],
+  [20, '#b96d4d'],
+  [27, '#9e5040'],
+  [34, '#7e4038'],
+  [40, '#62332f'],
+];
 
-/** Palette colour [r,g,b] for a temperature in deg C. */
-function heatRgb(t) {
-  const s = STOP_RGB;
+const rgbStops = (st) => st.map(([t, c]) => [t, hexRgb(c)]);
+const STOP_RGB = rgbStops(PALETTE_STOPS);
+const DT_RGB = rgbStops(DT_STOPS);
+
+function rampRgb(s, t) {
   if (t <= s[0][0]) return s[0][1].slice();
   for (let k = 1; k < s.length; k++) {
     if (t <= s[k][0]) {
@@ -2119,17 +2142,21 @@ function heatRgb(t) {
   return s[s.length - 1][1].slice();
 }
 
-/** Lookup table: 1 entry per 0.25 C across the palette, for pixel inversion. */
-function paletteLut() {
+/** Colour [r,g,b] for a temperature in deg C (absolute 18-70 C scale). */
+const heatRgb = (t) => rampRgb(STOP_RGB, t);
+
+const dtRgb = (d) => rampRgb(DT_RGB, d);
+
+/** Read-back table [deg C, rgb]: absolute, or (air given) ΔT keyed by air + ΔT. */
+function paletteLut(air) {
+  const st = air == null ? PALETTE_STOPS : DT_STOPS;
   const out = [];
-  for (let t = PALETTE_STOPS[0][0]; t <= PALETTE_STOPS[PALETTE_STOPS.length - 1][0]; t += 0.25) {
-    out.push([t, heatRgb(t).map(Math.round)]);
-  }
+  for (let t = st[0][0]; t <= st.at(-1)[0]; t += 0.25) out.push([(air ?? 0) + t, (air == null ? heatRgb(t) : dtRgb(t)).map(Math.round)]);
   return out;
 }
 
 
-return { SIGMA, SLOTS, STORE, LATENT, WATER_KIND, isWater, waterTemp, daylight, airTemp, irradiance, skyEmissivity, svfAt, svfGridAt, shadowPolys, screenShadow, buildingMask, buildingMaskPoly, buildingMaskRay, sunlitField, shadeClassField, sunSlots, cellMat, runModel, CP_AIR, P_AIR, satVapour, specificHumidity, qSat, QSAT_T0, QSAT_DT, qSatTable, wetBulb, stepSplash, coarseStability, stepFlux, wallTemp, wallReflectCoef, wallShortwave, glassLongwave, Thermal, PALETTE_STOPS, heatRgb, paletteLut };
+return { SIGMA, SLOTS, STORE, LATENT, WATER_KIND, isWater, waterTemp, daylight, airTemp, irradiance, skyEmissivity, svfAt, svfGridAt, shadowPolys, screenShadow, buildingMask, buildingMaskPoly, buildingMaskRay, sunlitField, shadeClassField, sunSlots, cellMat, runModel, CP_AIR, P_AIR, satVapour, specificHumidity, qSat, QSAT_T0, QSAT_DT, qSatTable, wetBulb, stepSplash, coarseStability, stepFlux, wallTemp, wallReflectCoef, wallShortwave, glassLongwave, Thermal, PALETTE_STOPS, DT_STOPS, heatRgb, dtRgb, paletteLut };
 })();
 
 __m['wind'] = { isWindBlock: () => false };
@@ -3050,7 +3077,7 @@ function building(pen, B, world = null) {
       const b = Math.min(len, s);
       if (b - a < 0.5) continue;
       const P = (u, z) => (face === 'S' ? [x0 + u, y1, z] : [x1, y1 - u, z]);
-      pen.line([P(a, s - a), P(b, s - b)], { lw: 0.4, a: 0.28, over: 0.1, t: face === 'S' ? 'hatchS' : 'hatchE' });
+      pen.line([P(a, s - a), P(b, s - b)], { lw: 0.4, a: 0.28, over: 0.1, t: `hatch${face}${(face === 'S' ? gS : gE) ? 'g' : ''}` });
     }
   }
   if (gS) curtainWall(pen, B, 'S', B.index * 2);
@@ -3565,7 +3592,7 @@ __m['render'] = (() => {
 // function of (frame, camera, look); caches only skip repeated work. The one
 // exception is the scrub preview during a slider drag (see previewHours).
 const { iso, hash3, noise2, clamp, smooth, rgbCss, mixRgb, scaleRgb, hexRgb, PAPER, INK, ISO_C, ISO_S, ISO_Z, DEG } = __m['core'];
-const { shadowPolys, heatRgb } = __m['thermal'];
+const { shadowPolys, heatRgb, dtRgb } = __m['thermal'];
 const { sweatState, shadeAt } = __m['life'];
 
 const TILE = 512;
@@ -3576,7 +3603,7 @@ const quantHour = (h) => (Math.round((((h % 24) + 24) % 24) / HOUR_STEP) * HOUR_
 
 const PAPER_CSS = rgbCss(PAPER);
 const SHADOW_RGB = hexRgb('#4b5a78');
-const THERMAL_WALL = hexRgb('#e7dfcd');
+const THERMAL_WALL = hexRgb('#a0a0a0'); // heat view walls: in no palette
 const NIGHT_RGB = hexRgb('#27355a');
 const LIT = hexRgb('#f4cf7a');
 const SWEAT_CSS = 'rgba(143,182,207,0.95)';
@@ -3688,6 +3715,7 @@ class Renderer {
     this.pins = {}; // mode -> Set of `z|hour|dpr` the scrub preview needs
     this.clip = null; // [x0, x1] device px: draw only this vertical band (split view)
     this.glass = 'lowe'; // glass type (block 3): pane colours
+    this.dt = true; // heat view: surface minus air, or absolute
     this.spotFor = null; // (hq) -> reflection spot field on the 2 m grid, or null (block 3)
     this.wind = null; // block 4: {lines, items} wind lines (wind.js windLines + pen.stream items)
     this.flux = null; // block 6: (hq) -> [{x, y, z, g}] ground heat flux samples (parking.js fluxSamples)
@@ -3708,6 +3736,19 @@ class Renderer {
     this.hourCache.clear();
     this.tmrtCache = null;
     this.scaffold = null;
+  }
+
+  /** Heat view colour of t deg C at hour hq. */
+  heatOf(t, hq) {
+    return this.dt ? dtRgb(t - this.thermal.air(hq)) : heatRgb(t);
+  }
+
+  /** Heat view scale; drops the heat bakes. */
+  setScale(dt) {
+    if (this.dt === dt) return;
+    this.dt = dt;
+    for (const hc of this.hourCache.values()) hc.heatImg = null;
+    for (const k of [...this.tiles.keys()]) if (k.startsWith('thermal|')) this.tiles.delete(k);
   }
 
   /** New model results (days since rain changed): drop heat-dependent caches. */
@@ -3868,7 +3909,7 @@ class Renderer {
         const sh = sample(ground, wx + jx, wy + jy);
         const so = sample(soft, wx, wy);
         const t = so + (sh - so) * 0.9;
-        const c = heatRgb(t);
+        const c = this.heatOf(t, hc.hq);
         const edge = 1 - Math.min(0.08, Math.abs(sh - so) * 0.012);
         const pig = 1 - 0.035 * noise2(wx / 3.5, wy / 3.5, 33);
         const k = (y * M + x) * 4;
@@ -3999,13 +4040,13 @@ class Renderer {
     if (mode === 'thermal') {
       if (it.t === 'g' || it.t === 'gm') return null;
       if (it.t === 'slab') return scaleRgb(THERMAL_WALL, 0.85);
-      if (it.t === 'r' || it.t === 'rd') return it.b >= 0 ? heatRgb(hc.roof[it.b]) : null;
+      if (it.t === 'r' || it.t === 'rd') return it.b >= 0 ? this.heatOf(hc.roof[it.b], hc.hq) : null;
       if (it.t === 'tree') return null;
       if (it.t === 'car') return null; // block 6: parked cars are outlines over the wash (not modelled)
       if (it.t === 'win') return null;
       const n = f.n ?? [0, 1];
       // block 3 (#29 item 7): a glass face takes the colour of its own surface temperature
-      if (f.k === 'glass' && this.thermal.glassTemp) return scaleRgb(heatRgb(this.thermal.glassTemp(n[0] ? 'E' : 'S', hc.hq)), n[0] ? 0.92 : 1);
+      if (f.k === 'glass' && this.thermal.glassTemp) return scaleRgb(this.heatOf(this.thermal.glassTemp(n[0] ? 'E' : 'S', hc.hq), hc.hq), n[0] ? 0.92 : 1);
       return scaleRgb(THERMAL_WALL, n[0] ? 0.9 : 1);
     }
     if (Array.isArray(f)) return f;
@@ -4026,11 +4067,8 @@ class Renderer {
       if (bb && (b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3])) continue;
       const t = it.t;
       if (t === 'glint' && mode === 'thermal') continue;
-      if (t === 'hatchS' || t === 'hatchE') {
-        if (mode !== 'day') continue;
-        const L = t === 'hatchS' ? hc.lightS : hc.lightE;
-        if (!hc.up || L > 0.8) continue;
-      }
+      // hatch: day, faces from the sun; heat view, opaque walls
+      if (t && t.startsWith('hatch') && (mode === 'thermal' ? t[6] : mode !== 'day' || !hc.up || (t[5] === 'S' ? hc.lightS : hc.lightE) > 0.8)) continue;
       let alpha = it.a ?? 1;
       let strokeA = alpha;
       if (mode === 'thermal') {
@@ -4900,7 +4938,7 @@ class Renderer {
 }
 
 
-return { TILE, HOUR_STEP, INTRO, PREVIEW_BUDGET, quantHour, GLASS_RGB, HAND_FONT, labelX, Renderer };
+return { TILE, HOUR_STEP, INTRO, PREVIEW_BUDGET, quantHour, THERMAL_WALL, GLASS_RGB, HAND_FONT, labelX, Renderer };
 })();
 
 __m['glossary'] = (() => {
@@ -6131,7 +6169,7 @@ __m['app'] = (() => {
 const { iso, unIso, clamp, ISO_C, ISO_S } = __m['core'];
 const { buildWorld } = __m['world'];
 const { drawWorld } = __m['kit'];
-const { runModel, shadeClassField, paletteLut, PALETTE_STOPS, heatRgb } = __m['thermal'];
+const { runModel, shadeClassField, paletteLut, PALETTE_STOPS, DT_STOPS, heatRgb, dtRgb } = __m['thermal'];
 const { Life, shadeDensity, shadeAt } = __m['life'];
 const { Renderer, INTRO, quantHour } = __m['render'];
 const { MATERIALS, SOURCES, BASIS, paramKeys } = __m['materials'];
@@ -6170,6 +6208,8 @@ const { nmApp } = __m['nmui'];
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
 const fmt = (v) => (Math.round(v * 10) / 10).toFixed(1);
+// no break in "1 °C", "a / b", "3 pm"
+const nb = (a, ...v) => String.raw({ raw: a }, ...v).replace(/ (?=°C|\/ |[ap]m\b)|(?<= \/) /g, '\u00a0');
 const hhmm = (h) => {
   const m = Math.round((((h % 24) + 24) % 24) * 60);
   return `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
@@ -6377,6 +6417,7 @@ function boot(scene, root = document) {
     cam: { ...scene.startCam },
     hour: scene.startHour ?? 15, // block 12 opens in the evening
     thermal: false,
+    dt: q.get('scale') !== 'abs',
     since: -1e9,
     notes: q.get('notes') !== '0',
     people: q.get('people') !== '0',
@@ -6609,6 +6650,7 @@ function boot(scene, root = document) {
   const legend = $('legend');
   const card = $('card');
   const heatBtn = $('heatBtn');
+  const scaleBtn = $('scaleBtn');
   // opening a card's expert part makes it taller: keep the whole card on screen
   card.addEventListener('toggle', () => {
     const top = parseFloat(card.style.top) || 0;
@@ -6646,18 +6688,35 @@ function boot(scene, root = document) {
     slider.value = String(S.hour);
     hourLabel.textContent = `${hhmm(S.hour)}  ·  air ${fmt(thermal.air(S.hour))} °C`;
     legend.style.opacity = S.thermal ? '1' : '0';
+    legend.classList.toggle('abs', !S.dt);
+    legend.inert = !S.thermal;
+    $('legendVs').innerHTML = S.dt ? ': <i>how much </i>hotter or cooler<i> than the air</i> (°C)' : ' temperature (°C)';
+    scaleBtn.textContent = S.dt ? 'show plain °C' : 'compare with the air';
+    scaleBtn.setAttribute('aria-pressed', String(!S.dt));
+    $('legendAir').textContent = `0 = the air at ${hhmm(S.hour)}, ${fmt(thermal.air(S.hour))} °C`;
     root.body.classList.toggle('thermal', S.thermal);
     heatBtn.setAttribute('aria-pressed', String(!!S.thermal));
   };
-  // legend gradient from the palette
-  const lo = PALETTE_STOPS[0][0];
-  const hi = PALETTE_STOPS[PALETTE_STOPS.length - 1][0];
-  $('legendBar').style.background = `linear-gradient(90deg, ${PALETTE_STOPS.map(([t]) => {
-    const c = heatRgb(t);
-    return `rgb(${c.map(Math.round).join(',')}) ${(((t - lo) / (hi - lo)) * 100).toFixed(1)}%`;
-  }).join(', ')})`;
-  $('legendLo').textContent = `${lo} °C`;
-  $('legendHi').textContent = `≥ ${hi} °C`;
+  // legend: ΔT bar in two halves
+  const [dLo, dHi] = [DT_STOPS[0][0], DT_STOPS.at(-1)[0]];
+  const pos = (st, t) => (st === DT_STOPS ? (t < 0 ? 1 - t / dLo : 1 + t / dHi) / 2 : (t - st[0][0]) / (st.at(-1)[0] - st[0][0]));
+  const grad = (st, f) => `linear-gradient(90deg, ${st.map(([t]) => `rgb(${f(t).map(Math.round)}) ${(pos(st, t) * 100).toFixed(1)}%`)})`;
+  $('legendTicks').innerHTML = [dLo, dLo / 2, 0, 10, 20, 30, dHi].map((d, k) => `<span${k % 2 ? ' class="m"' : ''} style="left:${(pos(DT_STOPS, d) * 100).toFixed(1)}%${k ? '' : ';transform:none'}">${d > 0 ? '+' : d ? '−' : ''}${Math.abs(d)}</span>`).join('');
+  // phone: a chip, tap to open
+  legend.addEventListener('click', (e) => e.target.closest('button,.gl') || legend.classList.toggle('open'));
+  $('legendLo').textContent = `${PALETTE_STOPS[0][0]} °C`;
+  $('legendHi').textContent = `≥ ${PALETTE_STOPS.at(-1)[0]} °C`;
+  const setScale = (dt) => {
+    S.dt = dt;
+    for (const v of Object.values(V)) v.R.setScale(dt);
+    $('legendBar').style.background = dt ? grad(DT_STOPS, dtRgb) : grad(PALETTE_STOPS, heatRgb);
+  };
+  setScale(S.dt);
+  scaleBtn.addEventListener('click', () => {
+    setScale(!S.dt);
+    syncUi();
+    draw();
+  });
 
   const setHour = (h, scrub = false) => {
     S.hour = ((Math.round(h / 0.25) * 0.25) % 24 + 24) % 24;
@@ -6860,7 +6919,7 @@ function boot(scene, root = document) {
     if (id === 'extreme') return extremeCard();
     const g = id.slice(6);
     const tower = world.buildings.find((b) => b.id === 't3');
-    const face = { name: `${tower.name}, south face`, face: 'S', theta15: incidence('S', 15), tg15: glassSet.model(g).glassTemp('S', 15) };
+    const face = { name: `${tower.name}, south face`, face: 'S', theta15: incidence('S', 15), tg15: glassSet.model(g).glassTemp('S', 15), m: glassSet.model(g), h: S.hour };
     return glassCard(g, { h12: spotStats(glassSet, world, g, 12), h15: spotStats(glassSet, world, g, 15) }, face);
   }
   function showCbdCard(id, anchor) {
@@ -7262,10 +7321,10 @@ function boot(scene, root = document) {
           ? '; only part of this square is in their shade now (see the sunlit share above).'
           : '; at this hour the sun gets in under the crown, so this square is not in their shade now.');
     const groundRow = treeSun ? 'ground in this square now (sun and shade)' : 'ground beneath now';
-    card.innerHTML = `
+    card.innerHTML = nb`
       <button class="x" aria-label="close">×</button>
       <h3>${d.title}</h3>
-      <p class="lead">At ${hhmm(d.hour)} the ${d.groundNow !== null ? 'top' : 'surface'} here is ${fmt(d.tsNow)} °C${feel}, with the air at ${fmt(d.air)} °C.</p>
+      <p class="lead">At ${hhmm(d.hour)} the ${d.groundNow !== null ? 'top' : 'surface'} here is ${fmt(d.tsNow)} °C, ${Math.abs(d.tsNow - d.air) < 0.05 ? 'the same as the air' : `${fmt(Math.abs(d.tsNow - d.air))} degrees ${d.tsNow > d.air ? 'hotter' : 'cooler'} than the air`} (${fmt(d.air)} °C)${feel}.</p>
       ${partial}
       <div class="mat">${d.matId === 'coolroof' || d.matId === 'coolroofAged' || d.matId === 'coolroofNew' ? gl('coolRoof', d.material) : d.material}${retro ? ` · ${d.state === 'after' ? 'After' : 'Before'}` : ''}</div>
       <table>
@@ -7576,7 +7635,18 @@ function boot(scene, root = document) {
       out.air = thermal.air(h);
       return out;
     },
-    palette: () => paletteLut(),
+    palette: (h = S.hour) => paletteLut(S.dt ? thermal.air(h) : null),
+    scale(dt) {
+      if (dt !== undefined) {
+        setScale(!!dt);
+        syncUi();
+      }
+      return S.dt ? 'dt' : 'abs';
+    },
+    heatSpread(h = S.hour, which) {
+      const { world: w, thermal: t } = vw(which);
+      return Array.from({ length: w.n ** 2 }, (_, i) => t.ts(i, h) - t.air(h)).sort((x, y) => x - y);
+    },
     agents(frame = S.frame, hour = S.hour, which) {
       const { life, shadeFor } = vw(which);
       const hq = quantHour(hour);

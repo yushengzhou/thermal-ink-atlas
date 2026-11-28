@@ -4,7 +4,9 @@ import { test, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { SCENE } from '../../cities/asphalt-park/scene.js';
-import { runModel, heatRgb, paletteLut } from '../../engine/thermal.js';
+import { runModel, heatRgb, paletteLut, dtRgb, DT_STOPS } from '../../engine/thermal.js';
+import { PAPER, scaleRgb } from '../../engine/core.js';
+import { THERMAL_WALL } from '../../engine/render.js';
 import { base, regions, regionMean, orderFlips, TIERS, TARGETS, targetRows } from '../../scripts/regions.mjs';
 import { targetsMarkdown } from '../../scripts/sources.mjs';
 
@@ -112,4 +114,88 @@ test('palette is low saturation and invertible', () => {
     assert.ok(Math.abs(best - t) <= 0.5, `palette not invertible at ${t}`);
   }
   assert.deepEqual(heatRgb(-50), heatRgb(0));
+});
+
+// ---- heat view as surface minus air (#36) ----------------------------------------
+const lin = (c) => ((c /= 255) <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+const gam = (c) => 255 * (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055);
+/** CIELAB (D65) of an sRGB colour. */
+const lab = (rgb) => {
+  const [r, g, b] = rgb.map(lin);
+  const f = (t) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+  const X = f((0.4124 * r + 0.3576 * g + 0.1805 * b) / 0.95047);
+  const Y = f(0.2126 * r + 0.7152 * g + 0.0722 * b);
+  const Z = f((0.0193 * r + 0.1192 * g + 0.9505 * b) / 1.08883);
+  return [116 * Y - 16, 500 * (X - Y), 200 * (Y - Z)];
+};
+const dE = (a, b) => Math.hypot(...lab(a).map((v, i) => v - lab(b)[i]));
+// Machado, Oliveira & Fernandes (2009), severity 1.0, on linear RGB
+const CVD = {
+  deuteranopia: [[0.367322, 0.860646, -0.227968], [0.280085, 0.672501, 0.047413], [-0.01182, 0.04294, 0.968881]],
+  protanopia: [[0.152286, 1.052583, -0.204868], [0.114503, 0.786281, 0.099216], [-0.003882, -0.048116, 1.051998]],
+  tritanopia: [[1.255528, -0.076749, -0.178779], [-0.078411, 0.930809, 0.147602], [0.004733, 0.691367, 0.3039]],
+};
+const sim = (rgb, m) => {
+  const l = rgb.map(lin);
+  return m.map((r) => gam(Math.min(1, Math.max(0, r[0] * l[0] + r[1] * l[1] + r[2] * l[2]))));
+};
+
+test('ΔT palette: limits -8 / +40 K, paper-neutral at 0 within a narrow band, blue below and warm above, low saturation and invertible', () => {
+  assert.deepEqual([DT_STOPS[0][0], DT_STOPS.at(-1)[0]], [-8, 40]);
+  assert.ok(dE(dtRgb(0), PAPER) < 8, `0 K is paper-toned: dE ${dE(dtRgb(0), PAPER).toFixed(1)}`);
+  // narrow neutral band: within ±1 K the colour stays pale (L* > 80) and low in chroma
+  for (const d of [-1, -0.5, 0.5, 1]) {
+    const [L, a, b] = lab(dtRgb(d));
+    assert.ok(L > 80 && Math.hypot(a, b) < 16, `${d} K: L* ${L.toFixed(0)}, chroma ${Math.hypot(a, b).toFixed(0)}`);
+  }
+  // outside it the colour has left the paper: cool side bluer than red, warm side redder than blue
+  for (let d = -8; d <= -1; d += 0.25) assert.ok(dtRgb(d)[2] > dtRgb(d)[0], `${d} K on the cool side`);
+  for (let d = 0.25; d <= 40; d += 0.25) assert.ok(dtRgb(d)[0] > dtRgb(d)[2], `${d} K on the warm side`);
+  assert.deepEqual(dtRgb(-50), dtRgb(-8));
+  assert.deepEqual(dtRgb(90), dtRgb(40));
+  const lut = paletteLut(30);
+  assert.equal(lut[0][0], 22);
+  assert.equal(lut.at(-1)[0], 70);
+  for (const [, c] of lut) assert.ok((Math.max(...c) - Math.min(...c)) / Math.max(...c) < 0.62, `saturation too high ${c}`);
+  for (const [t, c] of lut) {
+    let best = null;
+    let bd = Infinity;
+    for (const [u, d] of lut) {
+      const e = (c[0] - d[0]) ** 2 + (c[1] - d[1]) ** 2 + (c[2] - d[2]) ** 2;
+      if (e < bd) [bd, best] = [e, u];
+    }
+    assert.ok(Math.abs(best - t) <= 0.5, `ΔT palette not invertible at ${t}`);
+  }
+});
+
+test('ΔT palette is ordered by lightness (lightest at 0 K, darker both ways), also for deuteranopia, protanopia and tritanopia; the block 1 contrasts survive', () => {
+  for (const [name, m] of [['normal', null], ...Object.entries(CVD)]) {
+    const f = (d) => (m ? sim(dtRgb(d), m) : dtRgb(d));
+    let prev = -Infinity;
+    for (let d = -8; d <= 0; d += 0.5) {
+      const L = lab(f(d))[0];
+      assert.ok(L > prev, `${name}: L* not rising towards 0 at ${d} K`);
+      prev = L;
+    }
+    prev = Infinity;
+    for (let d = 0; d <= 40; d += 0.5) {
+      const L = lab(f(d))[0];
+      assert.ok(L < prev, `${name}: L* not falling above 0 at ${d} K`);
+      prev = L;
+    }
+    // block 1 region means (model ΔT, K): 15:00 water -5.0, tree shade 0.0, lawn +3.4, asphalt +29.1; 23:00 lawn -1.1, asphalt +2.6
+    for (const [a, b, min] of [[-5, 29.1, 25], [0, 29.1, 40], [3.4, 29.1, 35], [-1.1, 2.6, 15]]) {
+      const e = dE(f(a), f(b));
+      assert.ok(e >= min, `${name}: ${a} vs ${b} K only dE ${e.toFixed(1)}`);
+    }
+  }
+});
+
+test('heat view walls (not calculated) are in neither palette: hatched grey far from every ΔT and absolute colour', () => {
+  for (const wall of [THERMAL_WALL, scaleRgb(THERMAL_WALL, 0.9)]) {
+    for (const lut of [paletteLut(30), paletteLut()]) {
+      const near = Math.min(...lut.map(([, c]) => dE(wall, c)));
+      assert.ok(near > 8, `wall ${wall.map(Math.round)} only dE ${near.toFixed(1)} from a palette colour`);
+    }
+  }
 });

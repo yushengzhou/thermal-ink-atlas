@@ -264,7 +264,7 @@ ${bv4 ? '' : `- **Band 4** (the lawn's water ${f2(st.lawn.evap)} mm against ${DS
   (issue #20); the engine's clear-sky sun, about 5–10% strong at noon by the brief; the lawn's EF is fixed (no response to the dry air,
   no advection).
 - **Engine sun** (\`sun.js\`, issue #24): against suncalc at this site the sun differs by ${sunTxt}: too small to move any band here.
-- **Thermal palette:** it tops out at 70 °C; the hottest surfaces here (the dark membrane roofs, up to ${f1(Math.max(...world.buildings.filter((B) => B.roof === 'membrane').map((B) => T.ts(world.cellIndex((B.x0 + B.x1) / 2, (B.y0 + B.y1) / 2), 14))))} °C at 14:00) show in its top colour; the heat cards give the numbers.
+- **Thermal palette:** the default heat view (surface minus air, issue #36) tops out at +40 K; the hottest surfaces here (the dark membrane roofs, up to ${f1(Math.max(...world.buildings.filter((B) => B.roof === 'membrane').map((B) => T.ts(world.cellIndex((B.x0 + B.x1) / 2, (B.y0 + B.y1) / 2), 14))))} °C at 14:00, ${signed(Math.max(...world.buildings.filter((B) => B.roof === 'membrane').map((B) => T.ts(world.cellIndex((B.x0 + B.x1) / 2, (B.y0 + B.y1) / 2), 14))) - T.air(14))} K against the air) stay below it. The absolute scale (the legend's °C toggle) tops out at 70 °C, so there they show in its top colour; the heat cards give the numbers.
 - **Health wording:** the heat-deaths card quotes the county's counts and its named risk factors, hedged, without advice beyond the
   county's; nothing on it is modelled.
 `;

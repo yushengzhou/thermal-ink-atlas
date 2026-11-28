@@ -31,7 +31,7 @@ Every key also has a button on the page.
 
 | Key or button | Does |
 |---|---|
-| `T` or **heat view** | switch between the drawing and the heat view (colours = surface temperature) |
+| `T` or **heat view** | switch between the drawing and the heat view (colours = how much hotter or cooler each surface is than the air; the legend's **show plain °C** button shows plain temperatures instead) |
 | `H` / `Shift+H`, **+1 h** / **−1 h**, or the slider | move through the day, hour by hour |
 | drag, mouse wheel | move around, zoom in and out |
 | click a spot | a card with that spot's material, temperatures and sources |
@@ -81,7 +81,8 @@ Each block is a grid of 5 m cells on one clear heat-wave day. For every hour the
 sun is, which cells it reaches past the buildings and trees (shade), and how much open sky each cell sees.
 It then balances the energy at every surface: sunshine absorbed, heat radiated to the sky and the walls,
 heat carried off by the air, heat soaked into and released from the ground, and water evaporating from grass,
-ponds or wet paving. The result is the **surface temperature**, the colour of the heat view. The "radiant heat on you"
+ponds or wet paving. The result is the **surface temperature**. The heat view colours it against the air at that hour: blue is cooler than the air,
+amber to deep red hotter, pale paper about the same; walls are not calculated and stay hatched grey. The "radiant heat on you"
 numbers are the **mean radiant temperature** (Tmrt): all the sunshine and the heat from the surfaces around a
 person, in one number. In the sun it runs far above the air temperature, because it counts the sunshine on
 the body, not the air. It is not a weather app's "feels like" (which also takes in the air, humidity and
@@ -230,7 +231,7 @@ MIT, see [`LICENSE`](LICENSE).
 
 | 按键或按钮 | 作用 |
 |---|---|
-| `T` 或 **heat view** | 在线描图和热力视图之间切换（颜色表示地表温度） |
+| `T` 或 **heat view** | 在线描图和热力视图之间切换（颜色表示地表比气温高或低多少；图例上的 **show plain °C** 按钮可改看绝对温度） |
 | `H` / `Shift+H`、**+1 h** / **−1 h** 或滑块 | 按小时前后移动时间 |
 | 拖动、鼠标滚轮 | 平移、缩放 |
 | 点击某处 | 弹出卡片：该处的材料、温度和文献来源 |
@@ -275,7 +276,7 @@ MIT, see [`LICENSE`](LICENSE).
 
 每个街区是一张 5 米网格，模拟晴朗热浪中的一天。引擎逐小时算出太阳的位置、阳光越过楼房和树木能照到哪些格子（阴影），
 以及每个格子能看到多少天空。然后在每个表面上做能量平衡：吸收的阳光、向天空和墙面辐射出去的热、被空气带走的热、
-渗入地面又放出来的热，以及草地、水面或湿路面蒸发的水。结果就是 **地表温度**，也就是热力视图的颜色。
+渗入地面又放出来的热，以及草地、水面或湿路面蒸发的水。结果就是 **地表温度**。热力视图拿它和当时的气温比：蓝色比气温凉，琥珀到深红比气温热，接近纸色表示和气温差不多；墙面没有计算，画成灰色斜线。
 "身上受到的辐射热"指的是 **平均辐射温度**（Tmrt）：阳光和周围所有表面照到一个人身上的热，合成一个数字。在太阳下它远高于气温，因为它算的是照在身上的阳光，而不是周围的空气。它不是天气软件里的"体感温度"（那还要算上气温、湿度和风）：辐射热降 20 度，人感觉到的降幅要小得多。**气温是固定的**，按热浪日曲线给定、
 不做模拟，所以图集里没有任何东西会让空气变热：人群、汽车和空调只显示出来，不计入辐射热。
 

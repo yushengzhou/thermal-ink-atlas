@@ -454,7 +454,7 @@ export function building(pen, B, world = null) {
       const b = Math.min(len, s);
       if (b - a < 0.5) continue;
       const P = (u, z) => (face === 'S' ? [x0 + u, y1, z] : [x1, y1 - u, z]);
-      pen.line([P(a, s - a), P(b, s - b)], { lw: 0.4, a: 0.28, over: 0.1, t: face === 'S' ? 'hatchS' : 'hatchE' });
+      pen.line([P(a, s - a), P(b, s - b)], { lw: 0.4, a: 0.28, over: 0.1, t: `hatch${face}${(face === 'S' ? gS : gE) ? 'g' : ''}` });
     }
   }
   if (gS) curtainWall(pen, B, 'S', B.index * 2);

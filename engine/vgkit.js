@@ -8,7 +8,6 @@
 // (set by vgui.js vgApp), so the other pages do not carry this code.
 import { hash3, hexRgb, scaleRgb, iso, rgbCss, clamp } from './core.js';
 import { box, jitter, WIN } from './kit.js';
-import { heatRgb } from './thermal.js';
 import { HAND_FONT, labelX } from './render.js';
 
 /** Roof colours by material (day view). */
@@ -263,7 +262,7 @@ export function drawUnder(R, ctx, cam, W, H, alpha, hq) {
       else ctx.moveTo(X, Y);
     });
     ctx.closePath();
-    ctx.fillStyle = rgbCss(heatRgb(u.radiant));
+    ctx.fillStyle = rgbCss(R.heatOf(u.radiant, hq));
     ctx.fill();
     ctx.stroke();
     n++;

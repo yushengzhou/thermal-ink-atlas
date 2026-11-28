@@ -18,7 +18,15 @@
 // title box changed height (so bottom overlay labels may sit elsewhere); probe
 // values equal on all 65 cases. Busstop and desert were refreshed again from
 // adb137c (urbanist re-check of #33): the stop-A, footbridge and sail labels
-// changed wording; probe values equal on all their 13 cases. Both pages run in the same browser here, so
+// changed wording; probe values equal on all their 13 cases. All eleven were
+// refreshed again after #36: the heat view is coloured by surface minus air
+// (every thermal case, and block 10's under-the-roof wash), and the taller legend
+// moves some margin notes near the top right (some day-view cases); probe values
+// and note texts equal on all 65 cases. Refreshed again after the #36 review: walls
+// hatched grey in the heat view, the legend's new layout (notes that avoid it move),
+// block 4's wind lines grey in the heat view; probes and note texts equal on all 65
+// cases. Refreshed once more after round 3 (walls neutral grey; the glass note on
+// block 3's legend): probes and note texts equal on all 65 cases. Both pages run in the same browser here, so
 // the comparison does not depend on the platform.
 // A deliberate change to these blocks must refresh the fixtures: commit the
 // rebuilt pages, then `npm run fixtures` (gzips them from HEAD) and commit.
@@ -45,7 +53,7 @@ const CASES = {
   desert: ['hour=15&f=640', 'thermal&hour=15&f=640', 'thermal&hour=21&f=640&notes=0&cam=3.5,300,120', 'hour=15&f=640&water=1&notes=0&cam=3,300,200', 'thermal&hour=15&f=777&coat=0&cam=4,120,190', 'f=120', 'hour=12&f=1500&coat=0&water=1&cam=5,250,40'],
 };
 // which page each fixture is (for messages)
-const BEFORE = Object.fromEntries(['asphalt-park', 'sponge-retrofit', 'glass-cbd', 'waterfront', 'hutong', 'parking', 'estate', 'campus', 'busstop', 'village', 'desert'].map((c) => [c, 'the #33 outside evaluation']));
+const BEFORE = Object.fromEntries(['asphalt-park', 'sponge-retrofit', 'glass-cbd', 'waterfront', 'hutong', 'parking', 'estate', 'campus', 'busstop', 'village', 'desert'].map((c) => [c, 'the #36 heat view colours']));
 
 let browser;
 let dir;
