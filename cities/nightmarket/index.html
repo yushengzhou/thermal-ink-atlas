@@ -44,6 +44,10 @@
   #card .src { margin: 4px 0 0; font-size: 11px; opacity: .75; }
   .noui #cartouche, .noui #bar, .noui #legend, .noui #terms, .noui #inkHint { display: none; }
   #cartouche .sim { font-size: 12px; opacity: .7; letter-spacing: .02em; }
+  #cartouche h1 a { color: inherit; text-decoration: none; }
+  #cartouche a.back { color: inherit; }
+  #cartouche details.site { margin-top: 3px; }
+  #cartouche details.site summary { cursor: pointer; font-size: 12px; opacity: .75; }
   .gl { border-bottom: 1px dotted currentColor; cursor: help; }
   .gl:focus-visible { outline: 1.5px dashed #8a2f22; outline-offset: 2px; }
   #terms { position: fixed; right: 18px; bottom: 74px; width: 250px; max-height: 50vh; overflow: auto; padding: 8px 12px; background: #fbf7ee;
@@ -70,6 +74,7 @@
   :is(#retro, #glass, #wind, #parking) .measures button.warn { border-color: #8a2f22; color: #8a2f22; }
   #terms .refs a { color: #8a2f22; }
   #card table.cmp td { text-align: right; }
+  #card table.cmp td + td { padding-left: 7px; }
   #card table.cmp td:first-child, #card table.cmp td.sub { text-align: left; }
   #card .sub { font-size: 11.5px; opacity: .8; font-weight: normal; }
   #card .lit { margin: 4px 0; font-size: 12px; }
@@ -79,17 +84,18 @@
   #card details.expert summary, .blockpanel summary { cursor: pointer; font-size: 12px; opacity: .85; }
   .blockpanel summary { font-size: 13px; margin-bottom: 4px; opacity: 1; }
 /* phones: the bar wraps to the width, panels and the legend shrink, the cartouche gives way */
-  @media (max-width:700px){#bar{left:6px;right:6px;bottom:6px;transform:none;flex-wrap:wrap;gap:6px 10px;padding:6px 8px;justify-content:center}#bar input[type=range]{width:100%;flex-basis:100%}#hourLabel{min-width:0}#keys{display:none}#cartouche{left:6px;top:6px;right:6px;max-width:none;padding:6px 10px}#cartouche h1{font-size:16px}#cartouche p:last-child{display:none}.blockpanel{left:6px;bottom:auto;top:92px;width:auto;max-width:calc(100vw - 12px);max-height:50vh;overflow:auto;box-sizing:border-box}#legend{right:6px;top:auto;bottom:118px;width:180px}#legend .cap{display:none}#card{left:6px !important;right:6px;width:auto;top:92px !important;max-height:calc(100vh - 210px)}#terms{right:6px;left:6px;width:auto;bottom:118px}#inkHint{top:92px;font-size:13px}}
+  @media (max-width:700px){#bar{left:6px;right:6px;bottom:6px;transform:none;flex-wrap:wrap;gap:6px 10px;padding:6px 8px;justify-content:center}#bar input[type=range]{width:100%;flex-basis:100%}#hourLabel{min-width:0}#keys{display:none}#cartouche{left:6px;top:6px;right:6px;max-width:none;padding:6px 10px}#cartouche h1{font-size:16px}#cartouche p.plain,#cartouche details.site{display:none}.blockpanel{left:6px;bottom:auto;top:92px;width:auto;max-width:calc(100vw - 12px);max-height:50vh;overflow:auto;box-sizing:border-box}#legend{right:6px;top:auto;bottom:118px;width:180px}#legend .cap{display:none}#card{left:6px !important;right:6px;width:auto;top:92px !important;max-height:calc(100vh - 210px)}#terms{right:6px;left:6px;width:auto;bottom:118px}#inkHint{top:92px;font-size:13px}}
   #card .x { position: absolute; right: 6px; top: 4px; border: 0; background: none; font-size: 18px; cursor: pointer; color: #2b2621; }
 </style>
 </head>
 <body>
 <canvas id="atlas" aria-label="Hand-inked isometric city block showing urban heat"></canvas>
 <div id="cartouche">
-  <h1>Thermal-Ink Atlas</h1>
+  <h1><a href="../../index.html" title="Back to all twelve blocks">Thermal-Ink Atlas</a></h1>
   <p class="hand">Night market street</p>
-  <p class="sim">Made-up block, <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">calculated</span> <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">temperatures</span></p>
-  <p>A hot, humid July day and evening in a subtropical city like Taipei (25° N): air 27–34 °C, humid (vapour pressure 30 hPa), light wind 1 m/s. Made-up block, calculated temperatures; the air temperature is fixed: the crowd, the stalls and the lights do not warm it here.</p>
+  <p class="sim"><a class="back" href="../../index.html">← all blocks</a> · Made-up block, <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">calculated</span> <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">temperatures</span></p>
+  <p class="plain">A hot, humid summer day and evening in a city like Taipei: the air goes from 27 °C to 34 °C.</p>
+  <details class="site"><summary>For experts</summary><p>A hot, humid July day and evening in a subtropical city like Taipei (25° N): air 27–34 °C, humid (vapour pressure 30 hPa), light wind 1 m/s. Made-up block, calculated temperatures; the air temperature is fixed: the crowd, the stalls and the lights do not warm it here.</p></details>
 </div>
 <div id="legend"><div class="hand"><span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">surface temperature</span></div><div id="legendBar"></div>
   <div class="ends"><span id="legendLo"></span><span id="legendHi"></span></div>
@@ -98,7 +104,7 @@
   <input id="hour" type="range" min="0" max="23.75" step="0.25" value="15" aria-label="hour of day">
   <span id="hourLabel" class="hand"></span>
   <button type="button" data-k="H" aria-label="one hour earlier">−1 h</button><button type="button" data-k="h" aria-label="one hour later">+1 h</button>
-  <button type="button" id="heatBtn" data-k="t" aria-pressed="false">heat view (T)</button>
+  <button type="button" id="heatBtn" data-k="t" aria-pressed="false" title="keyboard shortcut: T">heat view</button>
   <span id="keys">drag · zoom · click a spot</span>
   <button id="termsBtn" type="button" aria-expanded="false" aria-controls="terms">terms</button>
 </div>
@@ -553,7 +559,7 @@ const MATERIALS = {
     mu: v(1400, 'brief', 'range', false),
     ef: v(0.8, 'brief', 'edge', false),
     note: 'Watered grass spends much of its sunshine evaporating water, and at night it cools below the air.',
-    caveat: 'Its 3 pm place below shaded paving holds only with evaporative fraction and albedo at the top of their cited ranges (see Sensitivity in docs/sources.md).',
+    caveat: 'Its 3 pm place below shaded paving holds only with evaporative fraction and albedo at the top of their cited ranges (tested in the model notes).',
   },
   water: {
     name: 'Pond (open water)',
@@ -587,7 +593,7 @@ const MATERIALS = {
     mu: v(450, 'brief', 'range', false),
     ef: v(0, 'brief', 'cited', false),
     note: 'The same roof build-up as its dark neighbour, painted white: it reflects most of the sun.',
-    caveat: 'Its 3 pm place below shaded paving holds only with albedo at the top of its cited range (see Sensitivity in docs/sources.md).',
+    caveat: 'Its 3 pm place below shaded paving holds only with albedo at the top of its cited range (tested in the model notes).',
   },
   canopy: {
     name: 'Tree canopy',
@@ -762,7 +768,7 @@ Object.assign(MATERIALS, {
 // shared asphalt and concrete (Oke values, inside the brief's ranges).
 Object.assign(MATERIALS, {
   ballast: {
-    name: 'Rail ballast (gravel)',
+    name: 'Track gravel (rail ballast)',
     alpha: v(0.2, 'brief6', 'engine', false),
     eps: v(0.92, 'brief6', 'engine', false),
     mu: v(700, 'brief6', 'engine', false),
@@ -783,7 +789,7 @@ Object.assign(MATERIALS, {
     eps: v(0.95, 'brief6', 'engine', false),
     mu: v(800, 'brief6', 'engine', false),
     ef: v(0.2, 'brief6', 'engine', false),
-    note: 'Weeds and dry grass that took over the brownfield: a little evaporation, not much shade.',
+    note: 'Weeds and dry grass that took over the disused land: a little evaporation, not much shade.',
   },
   rustShed: {
     name: 'Rusty corrugated steel shed roof',
@@ -4306,6 +4312,17 @@ class Renderer {
       s.closePath();
     }
     s.fill('nonzero');
+    // keep the shadows on the board: a long low-sun shadow must not fall on the paper around it (outside evaluation of #33)
+    const W0 = this.world.size;
+    s.globalCompositeOperation = 'destination-in';
+    s.beginPath();
+    for (const [x, y] of [[0, 0], [W0, 0], [W0, W0], [0, W0]]) {
+      const q = iso(x, y, 0);
+      if (x === 0 && y === 0) s.moveTo(q[0], q[1]);
+      else s.lineTo(q[0], q[1]);
+    }
+    s.closePath();
+    s.fill();
     s.setTransform(1, 0, 0, 1, 0, 0);
     s.globalCompositeOperation = 'source-in';
     const strength = clamp(hc.sun.alt / 8, 0, 1);
@@ -4806,6 +4823,10 @@ class Renderer {
     const fs = W / d < 700 ? 12 : 15; // smaller hand on a phone (#29 item 4)
     ctx.font = `${Math.round(fs * d)}px "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive`;
     ctx.textBaseline = 'top';
+    const lh = (fs + 3) * d;
+    const top = (W / d < 700 ? 96 : 8) * d; // on a phone the cartouche spans the top
+    // first pass: where each note goes
+    const placed = [];
     notes.forEach((n, i) => {
       const p = iso(n.at[0], n.at[1], n.at[2] ?? 0);
       const ax = ox + p[0] * Z;
@@ -4814,19 +4835,44 @@ class Renderer {
       let ty = ay + n.dy * d;
       if (tx < -200 * d || tx > W + 50 || ty < -60 || ty > H + 20) return;
       const lines = n.text;
-      const lh = (fs + 3) * d;
       const w = Math.max(...lines.map((l) => ctx.measureText(l).width));
       let bx = tx - (n.dx < 0 ? w + 6 * d : -6 * d);
       let by = ty - (n.dy < 0 ? lines.length * lh : 0);
       // keep the whole note on the canvas (#29 items 4 and 7): shift the box and the leader's end with it
       const sx = Math.min(0, W - 8 * d - (bx + w + 5 * d)) || Math.max(0, 8 * d - (bx - 5 * d));
-      const top = (W / d < 700 ? 96 : 8) * d; // on a phone the cartouche spans the top
       const sy = Math.min(0, H - 8 * d - (by + lines.length * lh + 3 * d)) || Math.max(0, top - (by - 3 * d));
       bx += sx;
       by += sy;
       tx += sx;
       ty += sy;
-      ctx.globalAlpha = alpha;
+      // and out from under the page's panels and the bottom bar (R.avoidNotes, canvas px; outside evaluation of #33):
+      // up above a panel in the lower half of the canvas, down below one in the upper half, if it still fits
+      const bh = lines.length * lh + 6 * d;
+      for (const r of this.avoidNotes ?? []) {
+        if (r[2] <= bx - 5 * d || r[0] >= bx + w + 5 * d || r[3] <= by - 3 * d || r[1] >= by - 3 * d + bh) continue;
+        const dy = (r[1] + r[3]) / 2 > H / 2 ? r[1] - 4 * d - (by - 3 * d + bh) : r[3] + 4 * d - (by - 3 * d);
+        if (by + dy - 3 * d >= top && by + dy - 3 * d + bh <= H - 8 * d) {
+          by += dy;
+          ty += dy;
+        }
+      }
+      // and off the notes placed before it: below the other box, or above it if that does not fit
+      for (const o of placed) {
+        const oh = o.lines.length * lh + 6 * d;
+        if (o.bx + o.w + 5 * d <= bx - 5 * d || o.bx - 5 * d >= bx + w + 5 * d || o.by - 3 * d + oh <= by - 3 * d || o.by - 3 * d >= by - 3 * d + bh) continue;
+        const down = o.by - 3 * d + oh + 3 * d - (by - 3 * d);
+        const up = o.by - 3 * d - 3 * d - (by - 3 * d + bh);
+        const dy = by - 3 * d + bh + down <= H - 8 * d ? down : up;
+        if (by + dy - 3 * d >= top && by + dy - 3 * d + bh <= H - 8 * d) {
+          by += dy;
+          ty += dy;
+        }
+      }
+      placed.push({ n, i, ax, ay, tx, ty, bx, by, w, lines });
+    });
+    ctx.globalAlpha = alpha;
+    // second pass: every leader first, so no leader is drawn across another note's text
+    for (const { ax, ay, tx, ty } of placed) {
       // leader: a gently bowed ink line with a dot at the anchor
       ctx.strokeStyle = rgbCss(INK);
       ctx.lineWidth = 1.1 * d;
@@ -4840,6 +4886,9 @@ class Renderer {
       ctx.beginPath();
       ctx.arc(ax, ay, 2.2 * d, 0, Math.PI * 2);
       ctx.fill();
+    }
+    // third pass: the boxes and their text
+    for (const { n, i, bx, by, w, lines } of placed) {
       ctx.fillStyle = 'rgba(248,243,231,0.94)';
       ctx.fillRect(bx - 5 * d, by - 3 * d, w + 10 * d, lines.length * lh + 6 * d);
       ctx.strokeStyle = 'rgba(43,38,33,0.55)';
@@ -4852,7 +4901,7 @@ class Renderer {
         const k = lines.findIndex((l) => l.includes(sub));
         if (k < 0) continue;
         const x0 = bx + ctx.measureText(lines[k].slice(0, lines[k].indexOf(sub))).width;
-        const w = ctx.measureText(sub).width;
+        const tw = ctx.measureText(sub).width;
         const y = by + k * lh + (fs + 1) * d;
         ctx.save();
         ctx.setLineDash([1.5 * d, 2 * d]);
@@ -4860,12 +4909,12 @@ class Renderer {
         ctx.strokeStyle = ctx.fillStyle;
         ctx.beginPath();
         ctx.moveTo(x0, y);
-        ctx.lineTo(x0 + w, y);
+        ctx.lineTo(x0 + tw, y);
         ctx.stroke();
         ctx.restore();
-        this.noteHits.push({ key, x: x0 / d, y: y / d, w: w / d, h: lh / d });
+        this.noteHits.push({ key, x: x0 / d, y: y / d, w: tw / d, h: lh / d });
       }
-    });
+    }
     ctx.globalAlpha = 1;
   }
 }
@@ -4935,16 +4984,16 @@ const GLOSSARY = {
     why: 'Hot surfaces warm the air above them and radiate heat onto people nearby.',
   },
   tmrt: {
-    term: 'Mean radiant temperature (Tmrt)',
-    text: 'One number for all the sunshine and infrared heat falling on a standing person from every direction.',
+    term: 'Radiant heat on you (mean radiant temperature, Tmrt)',
+    text: 'One number for all the sunshine and the heat from hot ground and walls falling on a standing person from every direction. In the sun it runs far above the air temperature, because it counts the sunshine on your body, not the air around you. It is not the "feels like" of a weather app, which also takes in the air, humidity and wind: a drop of 20 degrees in radiant heat feels like a much smaller drop than 20 degrees.',
     model: (S) => S.tmrtLine ?? `At 3 pm: ${S.tmrtShade} °C in building shade, ${S.tmrtSun} °C on sunlit ground (5th–95th percentile).`,
-    why: 'It shapes how hot it feels outdoors more than air temperature does.',
+    why: 'Out in the sun it decides how hot you feel more than the air does; shade takes most of it away.',
   },
   forceRestore: {
-    term: 'Force-restore model (simulation)',
-    text: 'A simple surface energy balance (Deardorff 1978): sun, sky and air heat each 5 m cell, and a deep-ground term pulls it back toward its daily mean (thin metal roofs have no deep term).',
-    model: (S) => `5 m grid, 1-minute steps, the design day repeated ${S.days} times until it settles.`,
-    why: 'It captures daytime heating and night lag cheaply enough to run in your browser. All temperatures here are modelled, not measured.',
+    term: 'How the temperatures are calculated',
+    text: 'Nobody measured this block. Your browser works out, minute by minute, how much the sun, the sky and the air warm or cool each patch of ground and each roof, using values from published measurements. Stone and soil store heat and give it back at night; a thin metal sheet does not.',
+    model: (S) => `In 5 m squares, minute by minute, over the same hot day run ${S.days} times until it settles (a "force-restore" surface model, Deardorff 1978).`,
+    why: 'It shows the day heating up and the night cooling down slowly. Every temperature here is calculated, not measured.',
   },
   nightLag: {
     term: 'Thermal inertia / night lag',
@@ -6053,17 +6102,17 @@ const PLACE = { ref: 'the open square', aisle: 'the street, open aisle', awning:
 /** Margin notes (at most 5), in plain words. d: numbers from the plugin (noteData). */
 function nmNotes(scene, d) {
   const text = {
-    stone: [`Granite at 9 pm: ${fmt(d.stoneDTs)} degrees above the air,`, `still giving off about ${r0(d.stoneNet)} watts per m²`],
-    square: [`The open square at 9 pm feels ${deg(d.squareDT)}`, `than the air: the clear sky draws heat away`],
-    awning: ['Under the awnings it feels', `${Math.abs(d.awningDT) < 1 ? 'about as warm as the air' : deg(d.awningDT) + ' than the air'}: the canvas hides the sky`],
-    grill: [`1 m from a charcoal grill it feels like ${r0(d.grill1)} °C;`, `3 m away, still ${fmt(d.grill3)} degrees more (an upper bound)`],
-    crowd: [`The crowd at 9 pm: ${r0(d.crowd)} watts per m²`, 'of body heat, shown, not felt'],
+    stone: [`Granite at 9 pm: ${fmt(d.stoneDTs)} degrees above the air,`, `still giving off about ${r0(d.stoneNet)} watts per m² (midday sun: about 1,000)`],
+    square: [`The open square at 9 pm: radiant heat on you ${deg(d.squareDT)}`, `than the air: the clear sky draws heat away`],
+    awning: ['Under the awnings, radiant heat on you', `${Math.abs(d.awningDT) < 1 ? 'about the same as the air' : deg(d.awningDT) + ' than the air'}: the canvas hides the sky`],
+    grill: [`1 m from a charcoal grill, radiant heat on you ${r0(d.grill1)} °C;`, `3 m away, still ${fmt(d.grill3)} degrees more (a high estimate)`],
+    crowd: [`The crowd at 9 pm: ${r0(d.crowd)} watts per m² of body heat`, '(midday sun: about 1,000), shown, not felt'],
   };
   const terms = {
     stone: [['netLongwave', 'still giving off']],
-    square: [['tmrt', 'feels']],
+    square: [['tmrt', 'radiant heat on you']],
     awning: [['svf', 'hides the sky']],
-    grill: [['tmrt', 'it feels like']],
+    grill: [['tmrt', 'radiant heat on you']],
     crowd: [['metabolicRate', 'body heat']],
   };
   return scene.notes.slice(0, 5).map((n) => ({ ...n, text: text[n.key], terms: terms[n.key] }));
@@ -6113,9 +6162,9 @@ function crowdCard(d) {
       ${rows}
       <tr><td colspan="3" class="sub">At 9 pm over the whole street: about ${r0(st.heat.street.crowd)} watts per m² from the crowd, ${r0(st.heat.street.stoneRad + st.heat.street.stoneAir)} from the stone.</td></tr>
     </table>
-    <p class="note">On a warm night more than half of a body's heat leaves as sweat vapour; only about ${Math.round(NM.sensible.value * 100)}% warms the air directly. The page draws this heat (Q), shown, not felt: it does not warm the air here, because the air temperature is fixed. The crowd is made up; each figure drawn stands for about ${r0(d.perFigure)} people. Crowd-safety guidance treats about 2 people per m² as a limit for events.</p>
+    <p class="note">On a warm night more than half of a body's heat leaves as sweat vapour; only about ${Math.round(NM.sensible.value * 100)}% warms the air directly. The page draws this heat (the heat-given-off button), shown, not felt: it does not warm the air here, because the air temperature is fixed. The crowd is made up; each figure drawn stands for about ${r0(d.perFigure)} people. Crowd-safety guidance treats about 2 people per m² as a limit for events.</p>
     ${experts(`<p class="lit">Q_crowd = ρ_p·M with M = ${NM.walkShare.value}·${NM.walk.value} + ${1 - NM.walkShare.value}·${NM.stand.value} W (walking at 0.9 m/s about 2.0 met, standing about 1.2 met; 1 met = 58.2 W m⁻² of body surface, about 1.8 m²${tag(NM.walk)}); the walking share ${NM.walkShare.value}${tag(NM.walkShare)}; peak density ${NM.peak.value} m⁻²${tag(NM.peak)} (the brief: 0.3–2.0, an assumption; no night-market measurement found), capped at ${NM.cap.value}${tag(NM.cap)}; sensible share ${NM.sensible.value}${tag(NM.sensible)} at 30 °C (0.3–0.55). Retail heat gain from people: 73 W sensible and 59 W latent at 25.6 °C (copies disagree). In a city, metabolism is about 2–3% of all the heat people add.</p>
-      <p class="caveat">Not modelled: the warm, moist air of a crowd, and that bodies and awnings hide the sky (they would make a person feel about 0.5–1 degree warmer than shown).</p>`, ['ashrae55', 'ashraeRetail', 'sailorAms', 'crowdLimits', 'brief12'])}`;
+      <p class="caveat">Not modelled: the warm, moist air of a crowd, and that bodies and awnings hide the sky (they would add about 0.5–1 degree of radiant heat to what is shown).</p>`, ['ashrae55', 'ashraeRetail', 'sailorAms', 'crowdLimits', 'brief12'])}`;
 }
 
 /** The stalls card. d: {st}. */
@@ -6131,7 +6180,7 @@ function stallsCard(d) {
     <table class="cmp">
       <tr><td>stall</td><td>here</td><td>heat while open, kW</td><td>per m² of stall</td></tr>
       ${rows}
-      <tr><td colspan="4" class="sub">Gas stalls burn about half the time; charcoal burns all evening. In a 5 m square of street holding a charcoal grill: about ${r0((NM.charcoal.value * 1000) / 25)} watts per m² while open. Shown (Q), not felt: the air here is fixed.</td></tr>
+      <tr><td colspan="4" class="sub">Gas stalls burn about half the time; charcoal burns all evening. In a 5 m square of street holding a charcoal grill: about ${r0((NM.charcoal.value * 1000) / 25)} watts per m² while open. Shown (the heat-given-off button), not felt: the air here is fixed.</td></tr>
     </table>
     <p class="note">Cooks stand right at the fire and feel its heat most (see "Next to the grill"); many stalls run floor fans. Smoke and cooking fumes raise fine-particle levels around night markets, a news report from Taiwan says. This page computes neither air quality nor anything about food safety: only heat.</p>
     ${experts(`<p class="lit">Q_stall = Σ P_fuel·duty / A_cell over each 5 m cell. Gas stall ${NM.lpg.value} kW${tag(NM.lpg)} (5–15), duty ${NM.duty.value}${tag(NM.duty)}; jet wok burners 28–37 kW (vendor data), here ${NM.wok.value}${tag(NM.wok)} at the same duty; charcoal ${NM.charcoal.value} kW${tag(NM.charcoal)} (8–16; a roaster burning about 1.2 kg an hour, about 29 MJ per kg), duty ${NM.coalDuty.value}${tag(NM.coalDuty)}. The stall footprint is 2.4 m × 1.8 m. The brief's estimate: 60 stalls × 8 kW × 0.5 over a 400 m × 10 m street, about 60 W m⁻². No stall's heat or the air around one has been measured.</p>
@@ -6154,11 +6203,11 @@ function lightsCard(d) {
       <tr><td>the stone at 9 pm</td><td>about ${r0(st.place.aisle[h].net)}</td></tr>
       <tr><td colspan="2" class="sub">Lights on from sunset (${hm(d.sunset)}) to midnight, while the market runs.</td></tr>
     </table>
-    <p class="note">So the lights matter for seeing, not for heat. Shown (Q), not felt: the air here is fixed.</p>
+    <p class="note">So the lights matter for seeing, not for heat. Shown (the heat-given-off button), not felt: the air here is fixed.</p>
     ${experts(`<p class="lit">Lighting ${NM.lights.value} W m⁻²${tag(NM.lights)} over the street and the square when on (LED strings 0.2–1, filament 2–8 W m⁻²; the brief, unverified).</p>`, ['brief12'])}`;
 }
 
-/** How warm it feels at night card. d: {st}. */
+/** Radiant heat at night card. d: {st}. */
 function nightCard(d) {
   const st = d.st;
   const h = NM.hour.value;
@@ -6170,12 +6219,12 @@ function nightCard(d) {
   const order = P.alley[h].dTmrt > P.ref[h].dTmrt;
   return `
     ${close}
-    <h3>How warm it feels at night</h3>
-    <p class="lead">At 9 pm, standing in the open square feels about ${deg(P.ref[h].dTmrt)} than the air, because the clear sky draws heat away from you; under an awning it feels ${deg(P.awning[h].dTmrt)}, in a narrow alley ${deg(P.alley[h].dTmrt)} than the air.</p>
+    <h3>Radiant heat at night</h3>
+    <p class="lead">At 9 pm, standing in the open square, the ${gl('tmrt', 'radiant heat')} on you is about ${deg(P.ref[h].dTmrt)} than the air, because the clear sky draws heat away from you; under an awning ${deg(P.awning[h].dTmrt)}, in a narrow alley ${deg(P.alley[h].dTmrt)} than the air.</p>
     <table class="cmp">
-      <tr><td>9 pm, air ${fmt(st.air[h])} °C</td><td>sky seen</td><td>feels like</td><td>against the air</td></tr>
+      <tr><td>9 pm, air ${fmt(st.air[h])} °C</td><td>sky seen</td><td>radiant heat</td><td>against the air</td></tr>
       ${rows}
-      <tr><td colspan="4" class="sub">"Feels like" is the radiant heat on a standing person (${gl('tmrt', 'mean radiant temperature')}), not the air. Expected: 6 degrees cooler to 2 warmer than the air, warmer where less sky is seen${order ? '' : MISS}.</td></tr>
+      <tr><td colspan="4" class="sub">Radiant heat on a standing person (${gl('tmrt', 'mean radiant temperature')}), not the air and not a weather-app "feels like". Expected: 6 degrees cooler to 2 warmer than the air, warmer where less sky is seen${order ? '' : MISS}.</td></tr>
     </table>
     <p class="note">At night the hot sun is gone, so where you stand matters much less than by day. What makes a summer night uncomfortable is mostly the warm, humid air itself, which this page keeps fixed. Studies in Taipei found the streets uncomfortable in the afternoon and the evening depending on how wet the paving is; no study of a night market's comfort was found.</p>
     ${experts(`<p class="lit">The brief's arithmetic in this engine's form (air 30 °C, walls air + 2 K): Tmrt 25.7 / 27.8 / 28.9 °C under an open sky for a surface at the air / +4 / +6 K, 30.1–31.2 °C at a sky view of 0.3. Sky view: square ${f2(P.ref[h].svf)}, open aisle ${f2(P.aisle[h].svf)}, under the awnings ${f2(P.awning[h].svf)} (an awning counts as covering three quarters of the sky above), narrow alleys ${f2(P.alley[h].svf)}.</p>
@@ -6191,13 +6240,13 @@ function grillCard(d) {
   return `
     ${close}
     <h3>Right next to the grill</h3>
-    <p class="lead">One metre from an open charcoal grill it feels like about ${r0(g(1).tmrt)} °C, while a few steps away in the aisle it feels like ${r0(st.place.stallRow[NM.hour.value].tmrt)} °C: the glowing coals are the one big source of radiant heat at a night market.</p>
+    <p class="lead">One metre from an open charcoal grill the ${gl('tmrt', 'radiant heat')} on you is about ${r0(g(1).tmrt)} °C, while a few steps away in the aisle it is ${r0(st.place.stallRow[NM.hour.value].tmrt)} °C: the glowing coals are the one big source of radiant heat at a night market.</p>
     <table class="cmp">
-      <tr><td>9 pm, from the coals</td><td>feels like</td><td>extra</td></tr>
+      <tr><td>9 pm, from the coals</td><td>radiant heat</td><td>extra</td></tr>
       ${rows}
       <tr><td colspan="3" class="sub">Between 3 and 4 m the page fades the extra heat out smoothly (no sudden step as you walk away) and adds nothing beyond 4 m; when the market is closed, nothing at all.${miss ? ` At 3 m the extra heat is ${fmt(g(3).dT)} degrees, more than the less than 5 expected: the same formula that gives about ${r0(g(1).tmrt)} °C at 1 m gives this at 3 m, because it treats the coal bed as a glowing patch facing you from every side with nothing in the way (an upper bound); it falls below 5 degrees only about ${fmt(st.under5)} m away.` : ''}</td></tr>
     </table>
-    <p class="note">This is an upper bound and only illustrative: a real grill is partly hidden by its own rim and the food on it, and the cook moves. It is the only stall heat this page lets reach a person, and only for people standing near a grill, not for the 5 m squares of the heat view. Cooks at the grill sweat; the crowd keeps a little distance.</p>
+    <p class="note">This is a high estimate and only illustrative: a real grill is partly hidden by its own rim and the food on it, and the cook moves. It is the only stall heat this page lets reach a person, and only for people standing near a grill, not for the 5 m squares of the heat view. Cooks at the grill sweat; the crowd keeps a little distance.</p>
     ${experts(`<p class="lit">ΔS = ε_c·σ·(T_c⁴ − T_b⁴)·A_c / (4πd²), d ≥ ${NM.grillMin.value} m, summed over the open grills, in full within ${NM.grillMax.value} m and times a cosine taper (1 + cos(π(d − ${NM.grillMax.value}) / ${NM.grillTaper.value - NM.grillMax.value}))/2 to zero at ${NM.grillTaper.value} m${tag(NM.grillTaper)}; Tmrt' = (Tmrt⁴ + ΔS/σ)^¼. Coal bed ${NM.coalArea.value} m²${tag(NM.coalArea)} at ${NM.coalTemp.value} °C${tag(NM.coalTemp)}, ε_c ${NM.coalEps.value}${tag(NM.coalEps)}, T_b the air. The brief: about +490 W m⁻² at 1 m (Tmrt about 88 °C) and about +120 at 2 m (about 48 °C), an upper bound. Here at 1 m +${r0(g(1).dS)} W m⁻², at 2 m +${r0(g(2).dS)}, at 3 m +${r0(g(3).dS)}, at 3.5 m +${r0(g(3.5).dS)} (tapered), at 4 m ${r0(g(4).dS)}.</p>
       <p class="caveat">Added to the Tmrt of a point (the people drawn, a heat card's cell centre), never to the grid model: surfaces, the air and the 5 m Tmrt are unchanged.</p>`, ['brief12', 'charcoalVendor'])}`;
 }
@@ -6224,7 +6273,7 @@ const NM_CARDS = [
   ['crowd', 'A crowd is a heater'],
   ['stalls', 'Woks and charcoal'],
   ['lights', 'String lights'],
-  ['night', 'How warm it feels'],
+  ['night', 'Radiant heat at night'],
   ['grill', 'Next to the grill'],
   ['hours', 'Market hours'],
 ];
@@ -6353,11 +6402,11 @@ function nmApp(env) {
   };
   life.at = (t, hq) => (st.open && isOpen(hq) ? baseAt(t, hq).concat(crowdAt(world, t, hq, heatOf(hq))) : baseAt(t, hq));
 
-  const btn = (attr, v, label) => `<button type="button" ${attr}="${v}">${label}</button>`;
+  const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
   root.body.insertAdjacentHTML(
     'beforeend',
     `<div id="market" class="blockpanel" aria-label="Night market controls"><details open><summary class="hand">Night market: buttons and cards</summary>
-        <div class="seg">${btn('data-give', '1', 'heat given off (Q)')}${btn('data-open', '1', 'market open (M)')}</div>
+        <div class="seg">${btn('data-give', '1', 'heat given off', 'title="keyboard shortcut: Q"')}${btn('data-open', '1', `market, open ${NM.opens.value - 12} pm–midnight`, 'title="keyboard shortcut: M. Outside the opening hours the street stays empty even when this is on."')}</div>
         <div class="measures"><div class="hand">Cards</div>${NM_CARDS.map(([id, label]) => btn('data-card', id, label)).join('')}</div>
       </details></div>`,
   );
@@ -6464,12 +6513,12 @@ function nmApp(env) {
       return { ...p, grillD: g, grillDT: t.dT, open: st.open && isOpen(h), stalls: world.nm.stalls.filter((s) => world.cellIndex(s.x, s.y) === i).map((s) => s.type) };
     },
     cardRows: (f) => {
-      const rows = [`<tr><td colspan="2" class="sub">${gl('anthropogenicHeat', 'Heat given off')} here now, watts per m² (Q shows it; the air is fixed, so it is not felt):</td></tr>`,
+      const rows = [`<tr><td colspan="2" class="sub">${gl('anthropogenicHeat', 'Heat given off')} here now, watts per m² (the heat-given-off button shows it; the air is fixed, so it is not felt):</td></tr>`,
         `<tr><td>the stone, radiated / heat into the air</td><td>${r0(f.stoneRad)} / ${r0(f.stoneAir)}</td></tr>`];
       if (f.crowd > 0) rows.push(`<tr><td>the crowd (${f2(f.rho)} people per m²)</td><td>${r0(f.crowd)}</td></tr>`);
       if (f.stall > 0) rows.push(`<tr><td>stalls (${f.stalls.join(', ')})</td><td>${r0(f.stall)}</td></tr>`);
       if (f.light > 0) rows.push(`<tr><td>string lights</td><td>${fmt(f.light)}</td></tr>`);
-      if (f.grillD <= 6) rows.push(`<tr><td>nearest charcoal grill</td><td>${fmt(f.grillD)} m from this square's centre${f.grillDT > 0 ? `; there it feels ${fmt(f.grillDT)} degrees hotter` : ''}</td></tr>`);
+      if (f.grillD <= 6) rows.push(`<tr><td>nearest charcoal grill</td><td>${fmt(f.grillD)} m from this square's centre${f.grillDT > 0 ? `; there ${fmt(f.grillDT)} degrees more radiant heat` : ''}</td></tr>`);
       return rows.join('');
     },
     /** The shared sky-view, night-lag and Tmrt footnotes quote the block's own lines; the block's terms their numbers. */
@@ -6920,11 +6969,11 @@ function boot(scene, root = document) {
   };
   let notesR = R; // renderer whose note hit boxes are live
   // the page panels a bottom overlay label moves beside (render.js labelX), in canvas pixels
-  const avoidRects = () => {
+  const avoidRects = (sel = '.blockpanel, #cartouche, #legend') => {
     const c = canvas.getBoundingClientRect();
     const k = canvas.width / (c.width || 1);
     const out = [];
-    for (const el of root.querySelectorAll('.blockpanel, #cartouche, #legend')) {
+    for (const el of root.querySelectorAll(sel)) {
       const r = el.getBoundingClientRect();
       if (r.width > 0 && r.height > 0) out.push([(r.left - c.left) * k, (r.top - c.top) * k, (r.right - c.left) * k, (r.bottom - c.top) * k]);
     }
@@ -6937,7 +6986,12 @@ function boot(scene, root = document) {
   const draw = () => {
     const tDraw = performance.now();
     const avoid = avoidRects();
-    for (const v of Object.values(V)) v.R.avoid = avoid;
+    // margin notes also keep out from under the bottom bar (outside evaluation of #33)
+    const avoidNotes = avoidRects('.blockpanel, #cartouche, #legend, #bar');
+    for (const v of Object.values(V)) {
+      v.R.avoid = avoid;
+      v.R.avoidNotes = avoidNotes;
+    }
     if (!retro) lastStats = R.frame(S.frame, S.cam, look(S.frame));
     else {
       const lk = look(S.frame);
@@ -6992,6 +7046,16 @@ function boot(scene, root = document) {
   card.addEventListener('toggle', () => {
     const top = parseFloat(card.style.top) || 0;
     card.style.top = `${Math.max(10, Math.min(top, window.innerHeight - card.offsetHeight - 10))}px`;
+  }, true);
+  // a tap opens the card on pointerup; the click the browser sends next lands on the new card
+  // (on a phone, often on its "For experts" fold): swallow that one click, at the tap's own spot, so the fold stays closed
+  card.addEventListener('click', (e) => {
+    const g = card._shownAt;
+    if (g && performance.now() - g.t < 400 && Math.abs(e.clientX - g.x) < 12 && Math.abs(e.clientY - g.y) < 12) {
+      card._shownAt = null;
+      e.preventDefault();
+      e.stopPropagation();
+    }
   }, true);
   const inkHint = $('inkHint');
   // the bar's buttons (#29: every key has a visible button): T, H and h, as the keys
@@ -7183,7 +7247,7 @@ function boot(scene, root = document) {
     root.body.insertAdjacentHTML(
       'beforeend',
       `<div id="glass" class="blockpanel" aria-label="Glass controls">
-        <div class="seg" role="group" aria-label="Glass type"><span>${gl('curtainWall', 'glass')}:</span>${GLASS_IDS.map((id) => btn('data-glass', id, { clear: 'clear', lowe: 'low-e', mirror: 'mirror' }[id])).join('')}</div>
+        <div class="seg" role="group" aria-label="Glass type"><span>${gl('curtainWall', 'glass')}:</span>${GLASS_IDS.map((id) => btn('data-glass', id, { clear: 'clear', lowe: 'coated', mirror: 'mirror' }[id])).join('')}</div>
         <div class="seg">${btn('data-ac', '1', 'AC heat overlay', 'aria-pressed="false"')}</div>
         <div class="measures"><div class="hand">Cards</div>${CBD_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'extreme' || id === 'spot' ? 'class="warn"' : '')).join('')}</div>
       </div>`,
@@ -7255,7 +7319,7 @@ function boot(scene, root = document) {
       'beforeend',
       `<div id="wind" class="blockpanel" aria-label="Wind controls">
         <div class="seg" role="group" aria-label="Wind speed"><span>${gl('windFactor', 'wind')}:</span>${btn('data-u', '1', 'calm 1 m/s')}${btn('data-u', '3', 'breezy 3 m/s')}</div>
-        <div class="seg">${btn('data-lines', '1', 'wind lines (W)')}${btn('data-air', '1', 'air overlay (A)')}</div>
+        <div class="seg">${btn('data-lines', '1', 'wind lines', 'title="keyboard shortcut: W"')}${btn('data-air', '1', 'air overlay', 'title="keyboard shortcut: A"')}</div>
         <div class="measures"><div class="hand">Cards</div>${WF_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'shelter' ? 'class="warn"' : '')).join('')}</div>
       </div>`,
     );
@@ -7434,8 +7498,10 @@ function boot(scene, root = document) {
       }
       if (!fn.hidden) hideFn();
       const p = pick(e.clientX, e.clientY);
-      if (p) showCard(p, e.clientX, e.clientY);
-      else hideCard();
+      if (p) {
+        showCard(p, e.clientX, e.clientY);
+        card._shownAt = { t: performance.now(), x: e.clientX, y: e.clientY };
+      } else hideCard();
     }
   });
 
@@ -7573,6 +7639,8 @@ function boot(scene, root = document) {
       ts23: ts(23),
       groundNow: leaf ? mean(h) : null,
       tmrtNow: tmrtCell !== null ? thermal.tmrt(tmrtCell, h) : null,
+      // the share of the 5 m square in the sun now (a person's radiant heat takes the square's mean)
+      sunNow: tmrtCell !== null ? thermal.sunlit(tmrtCell, h) : null,
       tmrt15: tmrtCell !== null ? thermal.tmrt(tmrtCell, 15) : null,
       air: thermal.air(h),
       note: m.note,
@@ -7611,17 +7679,20 @@ function boot(scene, root = document) {
         ${d.compare.tmrtBefore !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} 15:00 Before → After</td><td>${fmt(d.compare.tmrtBefore)} → ${fmt(d.compare.tmrtAfter)} °C</td></tr>` : ''}
         <tr><td colspan="2" class="sub">Before: ${d.compare.beforeMat}; After: ${d.compare.afterMat}</td></tr>`
       : '';
-    const feel = d.tmrtNow !== null ? `; standing here feels like ${fmt(d.tmrtNow)} °C` : '';
+    const feel = d.tmrtNow !== null ? `; the ${gl('tmrt', 'radiant heat')} on someone standing here is ${fmt(d.tmrtNow)} °C` : '';
+    // a square only partly in shade: say so, since the number mixes sun and shade (outside evaluation of #33)
+    const partial = d.tmrtNow !== null && d.sunNow > 0.1 && d.sunNow < 0.9 ? `<p class="sub">This 5 m square is about ${Math.round(d.sunNow * 10) * 10}% in the sun now, so the radiant heat here mixes sun and shade: standing fully in the shade is cooler than this.</p>` : '';
     card.innerHTML = `
       <button class="x" aria-label="close">×</button>
       <h3>${d.title}</h3>
       <p class="lead">At ${hhmm(d.hour)} the ${d.groundNow !== null ? 'top' : 'surface'} here is ${fmt(d.tsNow)} °C${feel}, with the air at ${fmt(d.air)} °C.</p>
+      ${partial}
       <div class="mat">${d.matId === 'coolroof' || d.matId === 'coolroofAged' || d.matId === 'coolroofNew' ? gl('coolRoof', d.material) : d.material}${retro ? ` · ${d.state === 'after' ? 'After' : 'Before'}` : ''}</div>
       <table>
         <tr class="t"><td>${gl('surfaceTemp', 'surface')} now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
         <tr class="t"><td>surface at 3 pm / ${gl('nightLag', '11 pm')}</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
         ${d.groundNow !== null ? `<tr><td>ground beneath now</td><td>${fmt(d.groundNow)} °C</td></tr>` : ''}
-        ${d.tmrtNow !== null ? `<tr><td>how hot it ${gl('tmrt', 'feels')} to stand here, now / 3 pm</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
+        ${d.tmrtNow !== null ? `<tr><td>${gl('tmrt', 'radiant heat')} on you standing here, now / 3 pm</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
         <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
         ${blk && d[blk.cardKey] ? blk.cardRows(d[blk.cardKey]) : ''}
         ${d.wind && d.wind.at !== null ? `<tr><td>${gl('apparentTemp', 'feels like, with the wind')} now</td><td>${fmt(d.wind.at)} °C</td></tr>` : ''}
@@ -8228,6 +8299,7 @@ const SCENE = {
     taMax: 34,
     wind: 1,
     vapourHpa: 30,
+    plain: 'A hot, humid summer day and evening in a city like Taipei: the air goes from 27 °C to 34 °C.',
     note: 'A hot, humid July day and evening in a subtropical city like Taipei (25° N): air 27–34 °C, humid (vapour pressure 30 hPa), light wind 1 m/s. Made-up block, calculated temperatures; the air temperature is fixed: the crowd, the stalls and the lights do not warm it here.',
   },
   ground,

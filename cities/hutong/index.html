@@ -44,6 +44,10 @@
   #card .src { margin: 4px 0 0; font-size: 11px; opacity: .75; }
   .noui #cartouche, .noui #bar, .noui #legend, .noui #terms, .noui #inkHint { display: none; }
   #cartouche .sim { font-size: 12px; opacity: .7; letter-spacing: .02em; }
+  #cartouche h1 a { color: inherit; text-decoration: none; }
+  #cartouche a.back { color: inherit; }
+  #cartouche details.site { margin-top: 3px; }
+  #cartouche details.site summary { cursor: pointer; font-size: 12px; opacity: .75; }
   .gl { border-bottom: 1px dotted currentColor; cursor: help; }
   .gl:focus-visible { outline: 1.5px dashed #8a2f22; outline-offset: 2px; }
   #terms { position: fixed; right: 18px; bottom: 74px; width: 250px; max-height: 50vh; overflow: auto; padding: 8px 12px; background: #fbf7ee;
@@ -70,6 +74,7 @@
   :is(#retro, #glass, #wind, #parking) .measures button.warn { border-color: #8a2f22; color: #8a2f22; }
   #terms .refs a { color: #8a2f22; }
   #card table.cmp td { text-align: right; }
+  #card table.cmp td + td { padding-left: 7px; }
   #card table.cmp td:first-child, #card table.cmp td.sub { text-align: left; }
   #card .sub { font-size: 11.5px; opacity: .8; font-weight: normal; }
   #card .lit { margin: 4px 0; font-size: 12px; }
@@ -79,17 +84,18 @@
   #card details.expert summary, .blockpanel summary { cursor: pointer; font-size: 12px; opacity: .85; }
   .blockpanel summary { font-size: 13px; margin-bottom: 4px; opacity: 1; }
 /* phones: the bar wraps to the width, panels and the legend shrink, the cartouche gives way */
-  @media (max-width:700px){#bar{left:6px;right:6px;bottom:6px;transform:none;flex-wrap:wrap;gap:6px 10px;padding:6px 8px;justify-content:center}#bar input[type=range]{width:100%;flex-basis:100%}#hourLabel{min-width:0}#keys{display:none}#cartouche{left:6px;top:6px;right:6px;max-width:none;padding:6px 10px}#cartouche h1{font-size:16px}#cartouche p:last-child{display:none}.blockpanel{left:6px;bottom:auto;top:92px;width:auto;max-width:calc(100vw - 12px);max-height:50vh;overflow:auto;box-sizing:border-box}#legend{right:6px;top:auto;bottom:118px;width:180px}#legend .cap{display:none}#card{left:6px !important;right:6px;width:auto;top:92px !important;max-height:calc(100vh - 210px)}#terms{right:6px;left:6px;width:auto;bottom:118px}#inkHint{top:92px;font-size:13px}}
+  @media (max-width:700px){#bar{left:6px;right:6px;bottom:6px;transform:none;flex-wrap:wrap;gap:6px 10px;padding:6px 8px;justify-content:center}#bar input[type=range]{width:100%;flex-basis:100%}#hourLabel{min-width:0}#keys{display:none}#cartouche{left:6px;top:6px;right:6px;max-width:none;padding:6px 10px}#cartouche h1{font-size:16px}#cartouche p.plain,#cartouche details.site{display:none}.blockpanel{left:6px;bottom:auto;top:92px;width:auto;max-width:calc(100vw - 12px);max-height:50vh;overflow:auto;box-sizing:border-box}#legend{right:6px;top:auto;bottom:118px;width:180px}#legend .cap{display:none}#card{left:6px !important;right:6px;width:auto;top:92px !important;max-height:calc(100vh - 210px)}#terms{right:6px;left:6px;width:auto;bottom:118px}#inkHint{top:92px;font-size:13px}}
   #card .x { position: absolute; right: 6px; top: 4px; border: 0; background: none; font-size: 18px; cursor: pointer; color: #2b2621; }
 </style>
 </head>
 <body>
 <canvas id="atlas" aria-label="Hand-inked isometric city block showing urban heat"></canvas>
 <div id="cartouche">
-  <h1>Thermal-Ink Atlas</h1>
+  <h1><a href="../../index.html" title="Back to all twelve blocks">Thermal-Ink Atlas</a></h1>
   <p class="hand">Hutong lanes and courtyards</p>
-  <p class="sim">Made-up block, <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">calculated</span> <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">temperatures</span></p>
-  <p>Assumed heat-wave day: 39.9° N, 21 June (the solstice), air 25–35 °C, vapour pressure 25 hPa, light wind 1 m/s. Air temperature is fixed: the courtyards’ cooler air is quoted, not simulated.</p>
+  <p class="sim"><a class="back" href="../../index.html">← all blocks</a> · Made-up block, <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">calculated</span> <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">temperatures</span></p>
+  <p class="plain">A hot midsummer day in a northern Chinese city: the air goes from 25 °C at dawn to 35 °C in the afternoon.</p>
+  <details class="site"><summary>For experts</summary><p>Assumed heat-wave day: 39.9° N, 21 June (the solstice), air 25–35 °C, vapour pressure 25 hPa, light wind 1 m/s. Air temperature is fixed: the courtyards’ cooler air is quoted, not simulated.</p></details>
 </div>
 <div id="legend"><div class="hand"><span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">surface temperature</span></div><div id="legendBar"></div>
   <div class="ends"><span id="legendLo"></span><span id="legendHi"></span></div>
@@ -98,7 +104,7 @@
   <input id="hour" type="range" min="0" max="23.75" step="0.25" value="15" aria-label="hour of day">
   <span id="hourLabel" class="hand"></span>
   <button type="button" data-k="H" aria-label="one hour earlier">−1 h</button><button type="button" data-k="h" aria-label="one hour later">+1 h</button>
-  <button type="button" id="heatBtn" data-k="t" aria-pressed="false">heat view (T)</button>
+  <button type="button" id="heatBtn" data-k="t" aria-pressed="false" title="keyboard shortcut: T">heat view</button>
   <span id="keys">drag · zoom · click a spot</span>
   <button id="termsBtn" type="button" aria-expanded="false" aria-controls="terms">terms</button>
 </div>
@@ -548,7 +554,7 @@ const MATERIALS = {
     mu: v(1400, 'brief', 'range', false),
     ef: v(0.8, 'brief', 'edge', false),
     note: 'Watered grass spends much of its sunshine evaporating water, and at night it cools below the air.',
-    caveat: 'Its 3 pm place below shaded paving holds only with evaporative fraction and albedo at the top of their cited ranges (see Sensitivity in docs/sources.md).',
+    caveat: 'Its 3 pm place below shaded paving holds only with evaporative fraction and albedo at the top of their cited ranges (tested in the model notes).',
   },
   water: {
     name: 'Pond (open water)',
@@ -582,7 +588,7 @@ const MATERIALS = {
     mu: v(450, 'brief', 'range', false),
     ef: v(0, 'brief', 'cited', false),
     note: 'The same roof build-up as its dark neighbour, painted white: it reflects most of the sun.',
-    caveat: 'Its 3 pm place below shaded paving holds only with albedo at the top of its cited range (see Sensitivity in docs/sources.md).',
+    caveat: 'Its 3 pm place below shaded paving holds only with albedo at the top of its cited range (tested in the model notes).',
   },
   canopy: {
     name: 'Tree canopy',
@@ -757,7 +763,7 @@ Object.assign(MATERIALS, {
 // shared asphalt and concrete (Oke values, inside the brief's ranges).
 Object.assign(MATERIALS, {
   ballast: {
-    name: 'Rail ballast (gravel)',
+    name: 'Track gravel (rail ballast)',
     alpha: v(0.2, 'brief6', 'engine', false),
     eps: v(0.92, 'brief6', 'engine', false),
     mu: v(700, 'brief6', 'engine', false),
@@ -778,7 +784,7 @@ Object.assign(MATERIALS, {
     eps: v(0.95, 'brief6', 'engine', false),
     mu: v(800, 'brief6', 'engine', false),
     ef: v(0.2, 'brief6', 'engine', false),
-    note: 'Weeds and dry grass that took over the brownfield: a little evaporation, not much shade.',
+    note: 'Weeds and dry grass that took over the disused land: a little evaporation, not much shade.',
   },
   rustShed: {
     name: 'Rusty corrugated steel shed roof',
@@ -4286,6 +4292,17 @@ class Renderer {
       s.closePath();
     }
     s.fill('nonzero');
+    // keep the shadows on the board: a long low-sun shadow must not fall on the paper around it (outside evaluation of #33)
+    const W0 = this.world.size;
+    s.globalCompositeOperation = 'destination-in';
+    s.beginPath();
+    for (const [x, y] of [[0, 0], [W0, 0], [W0, W0], [0, W0]]) {
+      const q = iso(x, y, 0);
+      if (x === 0 && y === 0) s.moveTo(q[0], q[1]);
+      else s.lineTo(q[0], q[1]);
+    }
+    s.closePath();
+    s.fill();
     s.setTransform(1, 0, 0, 1, 0, 0);
     s.globalCompositeOperation = 'source-in';
     const strength = clamp(hc.sun.alt / 8, 0, 1);
@@ -4786,6 +4803,10 @@ class Renderer {
     const fs = W / d < 700 ? 12 : 15; // smaller hand on a phone (#29 item 4)
     ctx.font = `${Math.round(fs * d)}px "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive`;
     ctx.textBaseline = 'top';
+    const lh = (fs + 3) * d;
+    const top = (W / d < 700 ? 96 : 8) * d; // on a phone the cartouche spans the top
+    // first pass: where each note goes
+    const placed = [];
     notes.forEach((n, i) => {
       const p = iso(n.at[0], n.at[1], n.at[2] ?? 0);
       const ax = ox + p[0] * Z;
@@ -4794,19 +4815,44 @@ class Renderer {
       let ty = ay + n.dy * d;
       if (tx < -200 * d || tx > W + 50 || ty < -60 || ty > H + 20) return;
       const lines = n.text;
-      const lh = (fs + 3) * d;
       const w = Math.max(...lines.map((l) => ctx.measureText(l).width));
       let bx = tx - (n.dx < 0 ? w + 6 * d : -6 * d);
       let by = ty - (n.dy < 0 ? lines.length * lh : 0);
       // keep the whole note on the canvas (#29 items 4 and 7): shift the box and the leader's end with it
       const sx = Math.min(0, W - 8 * d - (bx + w + 5 * d)) || Math.max(0, 8 * d - (bx - 5 * d));
-      const top = (W / d < 700 ? 96 : 8) * d; // on a phone the cartouche spans the top
       const sy = Math.min(0, H - 8 * d - (by + lines.length * lh + 3 * d)) || Math.max(0, top - (by - 3 * d));
       bx += sx;
       by += sy;
       tx += sx;
       ty += sy;
-      ctx.globalAlpha = alpha;
+      // and out from under the page's panels and the bottom bar (R.avoidNotes, canvas px; outside evaluation of #33):
+      // up above a panel in the lower half of the canvas, down below one in the upper half, if it still fits
+      const bh = lines.length * lh + 6 * d;
+      for (const r of this.avoidNotes ?? []) {
+        if (r[2] <= bx - 5 * d || r[0] >= bx + w + 5 * d || r[3] <= by - 3 * d || r[1] >= by - 3 * d + bh) continue;
+        const dy = (r[1] + r[3]) / 2 > H / 2 ? r[1] - 4 * d - (by - 3 * d + bh) : r[3] + 4 * d - (by - 3 * d);
+        if (by + dy - 3 * d >= top && by + dy - 3 * d + bh <= H - 8 * d) {
+          by += dy;
+          ty += dy;
+        }
+      }
+      // and off the notes placed before it: below the other box, or above it if that does not fit
+      for (const o of placed) {
+        const oh = o.lines.length * lh + 6 * d;
+        if (o.bx + o.w + 5 * d <= bx - 5 * d || o.bx - 5 * d >= bx + w + 5 * d || o.by - 3 * d + oh <= by - 3 * d || o.by - 3 * d >= by - 3 * d + bh) continue;
+        const down = o.by - 3 * d + oh + 3 * d - (by - 3 * d);
+        const up = o.by - 3 * d - 3 * d - (by - 3 * d + bh);
+        const dy = by - 3 * d + bh + down <= H - 8 * d ? down : up;
+        if (by + dy - 3 * d >= top && by + dy - 3 * d + bh <= H - 8 * d) {
+          by += dy;
+          ty += dy;
+        }
+      }
+      placed.push({ n, i, ax, ay, tx, ty, bx, by, w, lines });
+    });
+    ctx.globalAlpha = alpha;
+    // second pass: every leader first, so no leader is drawn across another note's text
+    for (const { ax, ay, tx, ty } of placed) {
       // leader: a gently bowed ink line with a dot at the anchor
       ctx.strokeStyle = rgbCss(INK);
       ctx.lineWidth = 1.1 * d;
@@ -4820,6 +4866,9 @@ class Renderer {
       ctx.beginPath();
       ctx.arc(ax, ay, 2.2 * d, 0, Math.PI * 2);
       ctx.fill();
+    }
+    // third pass: the boxes and their text
+    for (const { n, i, bx, by, w, lines } of placed) {
       ctx.fillStyle = 'rgba(248,243,231,0.94)';
       ctx.fillRect(bx - 5 * d, by - 3 * d, w + 10 * d, lines.length * lh + 6 * d);
       ctx.strokeStyle = 'rgba(43,38,33,0.55)';
@@ -4832,7 +4881,7 @@ class Renderer {
         const k = lines.findIndex((l) => l.includes(sub));
         if (k < 0) continue;
         const x0 = bx + ctx.measureText(lines[k].slice(0, lines[k].indexOf(sub))).width;
-        const w = ctx.measureText(sub).width;
+        const tw = ctx.measureText(sub).width;
         const y = by + k * lh + (fs + 1) * d;
         ctx.save();
         ctx.setLineDash([1.5 * d, 2 * d]);
@@ -4840,12 +4889,12 @@ class Renderer {
         ctx.strokeStyle = ctx.fillStyle;
         ctx.beginPath();
         ctx.moveTo(x0, y);
-        ctx.lineTo(x0 + w, y);
+        ctx.lineTo(x0 + tw, y);
         ctx.stroke();
         ctx.restore();
-        this.noteHits.push({ key, x: x0 / d, y: y / d, w: w / d, h: lh / d });
+        this.noteHits.push({ key, x: x0 / d, y: y / d, w: tw / d, h: lh / d });
       }
-    });
+    }
     ctx.globalAlpha = 1;
   }
 }
@@ -4915,16 +4964,16 @@ const GLOSSARY = {
     why: 'Hot surfaces warm the air above them and radiate heat onto people nearby.',
   },
   tmrt: {
-    term: 'Mean radiant temperature (Tmrt)',
-    text: 'One number for all the sunshine and infrared heat falling on a standing person from every direction.',
+    term: 'Radiant heat on you (mean radiant temperature, Tmrt)',
+    text: 'One number for all the sunshine and the heat from hot ground and walls falling on a standing person from every direction. In the sun it runs far above the air temperature, because it counts the sunshine on your body, not the air around you. It is not the "feels like" of a weather app, which also takes in the air, humidity and wind: a drop of 20 degrees in radiant heat feels like a much smaller drop than 20 degrees.',
     model: (S) => S.tmrtLine ?? `At 3 pm: ${S.tmrtShade} °C in building shade, ${S.tmrtSun} °C on sunlit ground (5th–95th percentile).`,
-    why: 'It shapes how hot it feels outdoors more than air temperature does.',
+    why: 'Out in the sun it decides how hot you feel more than the air does; shade takes most of it away.',
   },
   forceRestore: {
-    term: 'Force-restore model (simulation)',
-    text: 'A simple surface energy balance (Deardorff 1978): sun, sky and air heat each 5 m cell, and a deep-ground term pulls it back toward its daily mean (thin metal roofs have no deep term).',
-    model: (S) => `5 m grid, 1-minute steps, the design day repeated ${S.days} times until it settles.`,
-    why: 'It captures daytime heating and night lag cheaply enough to run in your browser. All temperatures here are modelled, not measured.',
+    term: 'How the temperatures are calculated',
+    text: 'Nobody measured this block. Your browser works out, minute by minute, how much the sun, the sky and the air warm or cool each patch of ground and each roof, using values from published measurements. Stone and soil store heat and give it back at night; a thin metal sheet does not.',
+    model: (S) => `In 5 m squares, minute by minute, over the same hot day run ${S.days} times until it settles (a "force-restore" surface model, Deardorff 1978).`,
+    why: 'It shows the day heating up and the night cooling down slowly. Every temperature here is calculated, not measured.',
   },
   nightLag: {
     term: 'Thermal inertia / night lag',
@@ -5753,16 +5802,16 @@ function htNotes(scene, d) {
   const text = {
     lane: ['Jujube Lane, 5 m wide between 4 m walls:', `at noon ${pct(d.laneNoon)} of the floor is in sun`],
     roofs: [`Grey tile roofs ${fmt(d.roof15)} °C at 3 pm,`, 'hotter than the 50–62 °C measured'],
-    awning: ['Under the mat awning (天棚) it feels like', `${fmt(d.awningTmrt)} °C; in the open courtyard sun ${fmt(d.sunTmrt)} °C`],
-    splash: [`Splash at 7 pm (P): Lantern Lane ${degs(d.d20)} ${d.d20 < 0 ? 'cooler' : 'warmer'} by 8 pm,`, `${degs(d.d23)} at 11 pm`],
-    tree: ['Pagoda trees on the main lane: it feels like', `${fmt(d.treeTmrt)} °C beneath, ${fmt(d.laneSunTmrt)} °C in the sun`],
+    awning: ['Under the mat awning (天棚), radiant heat on you', `${fmt(d.awningTmrt)} °C; in the open courtyard sun ${fmt(d.sunTmrt)} °C`],
+    splash: [`Splash at 7 pm: Lantern Lane ${degs(d.d20)} ${d.d20 < 0 ? 'cooler' : 'warmer'} by 8 pm,`, `${degs(d.d23)} at 11 pm`],
+    tree: ['Pagoda trees on the main lane: radiant heat on you', `${fmt(d.treeTmrt)} °C beneath, ${fmt(d.laneSunTmrt)} °C in the sun`],
   };
   const terms = {
     lane: [['canyon', '4 m walls']],
     roofs: [['surfaceTemp', `${fmt(d.roof15)} °C at 3 pm`]],
-    awning: [['tianpeng', 'mat awning (天棚)'], ['tmrt', 'it feels like']],
-    splash: [['waterStore', 'Splash at 7 pm (P)']],
-    tree: [['tmrt', 'it feels like']],
+    awning: [['tianpeng', 'mat awning (天棚)'], ['tmrt', 'radiant heat on you']],
+    splash: [['waterStore', 'Splash at 7 pm']],
+    tree: [['tmrt', 'radiant heat on you']],
   };
   return scene.notes.slice(0, 5).map((n) => ({ ...n, text: text[n.key], terms: terms[n.key] }));
 }
@@ -5791,10 +5840,10 @@ function courtyardCard(d) {
   return `
     ${close}
     <h3>${gl('siheyuan', 'Courtyards')}: shade from above</h3>
-    <p class="lead">At 3 pm it feels like ${fmt(c.awning.tmrt)} °C under a mat awning and ${fmt(c.sun.tmrt)} °C in the open sun of the same courtyards.</p>
+    <p class="lead">At 3 pm the radiant heat on you is ${fmt(c.awning.tmrt)} °C under a mat awning and ${fmt(c.sun.tmrt)} °C in the open sun of the same courtyards.</p>
     <div class="mat">Paved grey-brick courtyards, 15:00 · air ${fmt(c.air)} °C</div>
     <table class="cmp">
-      <tr><td></td><td>${gl('svf', 'open to the sky')}</td><td>${gl('surfaceTemp', 'paving')}</td><td>${gl('tmrt', 'feels like')}</td></tr>
+      <tr><td></td><td>${gl('svf', 'open to the sky')}</td><td>${gl('surfaceTemp', 'paving')}</td><td>${gl('tmrt', 'radiant heat on you')}</td></tr>
       <tr class="t"><td>under a mat awning</td><td>${f2(c.awning.svf)}</td><td>${fmt(c.awning.ts)} °C</td><td>${fmt(c.awning.tmrt)} °C</td></tr>
       <tr><td>under a vine pergola</td><td>${f2(c.pergola.svf)}</td><td>${fmt(c.pergola.ts)} °C</td><td>${fmt(c.pergola.tmrt)} °C</td></tr>
       <tr><td>under a tree crown</td><td>${f2(c.crown.svf)}</td><td>${fmt(c.crown.ts)} °C</td><td>${fmt(c.crown.tmrt)} °C</td></tr>
@@ -5813,12 +5862,12 @@ function tianpengCard(d) {
   return `
     ${close}
     <h3>天棚 · The summer mat awning</h3>
-    <p class="lead">Old Beijing families roofed their courtyards with reed mats in summer: under one it feels like ${fmt(c.awning.tmrt)} °C at 3 pm, against ${fmt(c.sun.tmrt)} °C in the open sun.</p>
+    <p class="lead">Old Beijing families roofed their courtyards with reed mats in summer: under one the radiant heat on you is ${fmt(c.awning.tmrt)} °C at 3 pm, against ${fmt(c.sun.tmrt)} °C in the open sun.</p>
     <div class="mat">天棚鱼缸石榴树 · an old Beijing saying: "tianpeng, fish bowl, pomegranate tree"</div>
     <p lang="zh-Hans">老北京夏天在院里搭天棚：芦席棚顶高出屋檐，四周席子可卷起通风。老北京俗语“天棚鱼缸石榴树”说的就是四合院的夏景，漫画家李滨声曾以此作画（见邓云乡《天棚遮阴》）。院中多种枣树、槐树，石榴寓意多子。傍晚往地上洒水降温，与日本江户时代以来的“打ち水”（洒水）同理。</p>
     <p lang="en">In old Beijing summers a family built a tianpeng over the courtyard: a roof of reed mats on poles, higher than the eaves, with side mats that roll up to let the air through. An old Beijing saying sums up a courtyard summer as "tianpeng, fish bowl, pomegranate tree"; the cartoonist Li Binsheng drew it (as recorded by Deng Yunxiang, "Tianpeng zheyin"). Courtyards were planted with jujube and pagoda trees, and the pomegranate stands for many children. Sprinkling water on the ground in the evening cools it, the same idea as Japan's uchimizu (打ち水), practised since the Edo period.</p>
     <table class="cmp">
-      <tr><td></td><td>${gl('tmrt', 'feels like')}, 3 pm</td></tr>
+      <tr><td></td><td>${gl('tmrt', 'radiant heat')}, 3 pm</td></tr>
       <tr class="t"><td>under the awning (lets through ${pct(a.tr.value)} of the sun)</td><td>${fmt(c.awning.tmrt)} °C</td></tr>
       <tr><td>the same courtyards' open sun</td><td>${fmt(c.sun.tmrt)} °C</td></tr>
     </table>
@@ -5839,7 +5888,7 @@ function splashCard(d) {
       <tr class="t"><td>paving, ${hhmm(s.peakAt)} (largest within 1 h)</td><td>${K(s.peak)}</td></tr>
       <tr><td>paving, 21:00 / 23:00</td><td>${K(s.d21)} / ${K(s.d23)}</td></tr>
       <tr><td>paving, next day 15:00</td><td>${K(s.next15)}</td></tr>
-      <tr class="t"><td>how it ${gl('tmrt', 'feels')}, 8 pm / 9 pm</td><td>${K(s.tmrt20)} / ${K(s.tmrt21)}</td></tr>
+      <tr class="t"><td>${gl('tmrt', 'radiant heat')} on you, 8 pm / 9 pm</td><td>${K(s.tmrt20)} / ${K(s.tmrt21)}</td></tr>
       <tr><td>water left at 21:00 / 23:00</td><td>${f2(s.w21)} / ${f2(s.w23)} mm</td></tr>
       <tr><td>evaporated per splash (at most)</td><td>${f2(s.perSplash)} of ${s.w0} mm</td></tr>
     </table>
@@ -5852,7 +5901,7 @@ function splashCard(d) {
       <tr><td>the old evaporation term alone (EF × Q*)</td><td>${K(-d.ef.max)}</td></tr>
       ${d.sens.map((x) => `<tr><td class="sub">β_wet ${x.beta}: largest / 23:00</td><td class="sub">${K(x.peak)} / ${K(x.d23)}</td></tr>`).join('')}
     </table><p class="lit">Paris, Rue du Louvre: about 1 L m⁻² per cycle, the surface −7.5 K at 19:30 and −6 K at 20:30, lasting several hours (Hendel et al. 2015); air −0.79 K at most and Tmrt −1.76 K (Hendel et al. 2016). Kobe: 0.025 mm per pass cools −2 to −4 K at once but is gone within 30 minutes in sun, so evening watering is recommended (Takebayashi et al. 2023). A watered road fell from 50 to 40 °C in about an hour (Kato et al. 2008, unverified).</p>
-    <p class="caveat">The model's old evaporation term needs positive net radiation, which is gone after sunset, so it cannot show an evening splash; the water store W is a separate term (bulk evaporation${tag(P('waterStore'))}). The air is fixed: the splash cools the paving and the radiation people feel, not the air. The design day repeats with a splash every evening, so the paving is about ${fmt(Math.abs(s.before))} K cooler even before the splash. W0 sits at the top edge of the brief's 0.5–1.0 mm; β_wet is the brief's range (0.3–1).</p>`, ['hendel2015', 'hendel2016', 'takebayashi2023', 'kato2008', 'bolton1980', 'brief5'])}`;
+    <p class="caveat">The model's old evaporation term needs positive net radiation, which is gone after sunset, so it cannot show an evening splash; the water store W is a separate term (bulk evaporation${tag(P('waterStore'))}). The air is fixed: the splash cools the paving and the radiant heat on people, not the air. The design day repeats with a splash every evening, so the paving is about ${fmt(Math.abs(s.before))} K cooler even before the splash. W0 sits at the top edge of the brief's 0.5–1.0 mm; β_wet is the brief's range (0.3–1).</p>`, ['hendel2015', 'hendel2016', 'takebayashi2023', 'kato2008', 'bolton1980', 'brief5'])}`;
 }
 
 /** Trees and screens card. d: {trees (treeStats at 15:00), court}. */
@@ -5861,9 +5910,9 @@ function treesCard(d) {
   return `
     ${close}
     <h3>Pagoda, jujube, pomegranate: shade by species</h3>
-    <p class="lead">Under a pagoda tree it feels like ${fmt(d.trees.pagodaTree ? d.trees.pagodaTree.tmrt : d.court.crown.tmrt)} °C at 3 pm, against ${fmt(d.court.sun.tmrt)} °C in full sun: its dense crown lets through only ${pct(MATERIALS.pagodaTree.tr.value)} of the sun.</p>
+    <p class="lead">Under a pagoda tree the radiant heat on you is ${fmt(d.trees.pagodaTree ? d.trees.pagodaTree.tmrt : d.court.crown.tmrt)} °C at 3 pm, against ${fmt(d.court.sun.tmrt)} °C in full sun: its dense crown lets through only ${pct(MATERIALS.pagodaTree.tr.value)} of the sun.</p>
     <table class="cmp">
-      <tr><td>3 pm</td><td>lets through</td><td>${gl('tmrt', 'feels like')} at the trunk</td></tr>
+      <tr><td>3 pm</td><td>lets through</td><td>${gl('tmrt', 'radiant heat')} at the trunk</td></tr>
       ${sp.map((k) => `<tr><td>${MATERIALS[k].name}</td><td>${pct(MATERIALS[k].tr.value)}</td><td>${fmt(d.trees[k].tmrt)} °C</td></tr>`).join('')}
       <tr><td>${MATERIALS.pergola.name}</td><td>${pct(MATERIALS.pergola.tr.value)}</td><td>${fmt(d.court.pergola.tmrt)} °C</td></tr>
       <tr><td>${MATERIALS.awning.name}</td><td>${pct(MATERIALS.awning.tr.value)}</td><td>${fmt(d.court.awning.tmrt)} °C</td></tr>
@@ -5940,7 +5989,7 @@ function htApp(env, splash0) {
   root.body.insertAdjacentHTML(
     'beforeend',
     `<div id="hutong" class="blockpanel" aria-label="Hutong controls">
-        <div class="seg">${btn('data-splash', '1', 'splash at 19:00 (P)')}</div>
+        <div class="seg">${btn('data-splash', '1', 'splash at 19:00', 'title="keyboard shortcut: P"')}</div>
         <div class="measures"><div class="hand">Cards</div>${HT_CARDS.map(([id, label]) => btn('data-card', id, label)).join('')}</div>
       </div>`,
   );
@@ -6487,11 +6536,11 @@ function boot(scene, root = document) {
   };
   let notesR = R; // renderer whose note hit boxes are live
   // the page panels a bottom overlay label moves beside (render.js labelX), in canvas pixels
-  const avoidRects = () => {
+  const avoidRects = (sel = '.blockpanel, #cartouche, #legend') => {
     const c = canvas.getBoundingClientRect();
     const k = canvas.width / (c.width || 1);
     const out = [];
-    for (const el of root.querySelectorAll('.blockpanel, #cartouche, #legend')) {
+    for (const el of root.querySelectorAll(sel)) {
       const r = el.getBoundingClientRect();
       if (r.width > 0 && r.height > 0) out.push([(r.left - c.left) * k, (r.top - c.top) * k, (r.right - c.left) * k, (r.bottom - c.top) * k]);
     }
@@ -6504,7 +6553,12 @@ function boot(scene, root = document) {
   const draw = () => {
     const tDraw = performance.now();
     const avoid = avoidRects();
-    for (const v of Object.values(V)) v.R.avoid = avoid;
+    // margin notes also keep out from under the bottom bar (outside evaluation of #33)
+    const avoidNotes = avoidRects('.blockpanel, #cartouche, #legend, #bar');
+    for (const v of Object.values(V)) {
+      v.R.avoid = avoid;
+      v.R.avoidNotes = avoidNotes;
+    }
     if (!retro) lastStats = R.frame(S.frame, S.cam, look(S.frame));
     else {
       const lk = look(S.frame);
@@ -6559,6 +6613,16 @@ function boot(scene, root = document) {
   card.addEventListener('toggle', () => {
     const top = parseFloat(card.style.top) || 0;
     card.style.top = `${Math.max(10, Math.min(top, window.innerHeight - card.offsetHeight - 10))}px`;
+  }, true);
+  // a tap opens the card on pointerup; the click the browser sends next lands on the new card
+  // (on a phone, often on its "For experts" fold): swallow that one click, at the tap's own spot, so the fold stays closed
+  card.addEventListener('click', (e) => {
+    const g = card._shownAt;
+    if (g && performance.now() - g.t < 400 && Math.abs(e.clientX - g.x) < 12 && Math.abs(e.clientY - g.y) < 12) {
+      card._shownAt = null;
+      e.preventDefault();
+      e.stopPropagation();
+    }
   }, true);
   const inkHint = $('inkHint');
   // the bar's buttons (#29: every key has a visible button): T, H and h, as the keys
@@ -6750,7 +6814,7 @@ function boot(scene, root = document) {
     root.body.insertAdjacentHTML(
       'beforeend',
       `<div id="glass" class="blockpanel" aria-label="Glass controls">
-        <div class="seg" role="group" aria-label="Glass type"><span>${gl('curtainWall', 'glass')}:</span>${GLASS_IDS.map((id) => btn('data-glass', id, { clear: 'clear', lowe: 'low-e', mirror: 'mirror' }[id])).join('')}</div>
+        <div class="seg" role="group" aria-label="Glass type"><span>${gl('curtainWall', 'glass')}:</span>${GLASS_IDS.map((id) => btn('data-glass', id, { clear: 'clear', lowe: 'coated', mirror: 'mirror' }[id])).join('')}</div>
         <div class="seg">${btn('data-ac', '1', 'AC heat overlay', 'aria-pressed="false"')}</div>
         <div class="measures"><div class="hand">Cards</div>${CBD_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'extreme' || id === 'spot' ? 'class="warn"' : '')).join('')}</div>
       </div>`,
@@ -6822,7 +6886,7 @@ function boot(scene, root = document) {
       'beforeend',
       `<div id="wind" class="blockpanel" aria-label="Wind controls">
         <div class="seg" role="group" aria-label="Wind speed"><span>${gl('windFactor', 'wind')}:</span>${btn('data-u', '1', 'calm 1 m/s')}${btn('data-u', '3', 'breezy 3 m/s')}</div>
-        <div class="seg">${btn('data-lines', '1', 'wind lines (W)')}${btn('data-air', '1', 'air overlay (A)')}</div>
+        <div class="seg">${btn('data-lines', '1', 'wind lines', 'title="keyboard shortcut: W"')}${btn('data-air', '1', 'air overlay', 'title="keyboard shortcut: A"')}</div>
         <div class="measures"><div class="hand">Cards</div>${WF_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'shelter' ? 'class="warn"' : '')).join('')}</div>
       </div>`,
     );
@@ -7001,8 +7065,10 @@ function boot(scene, root = document) {
       }
       if (!fn.hidden) hideFn();
       const p = pick(e.clientX, e.clientY);
-      if (p) showCard(p, e.clientX, e.clientY);
-      else hideCard();
+      if (p) {
+        showCard(p, e.clientX, e.clientY);
+        card._shownAt = { t: performance.now(), x: e.clientX, y: e.clientY };
+      } else hideCard();
     }
   });
 
@@ -7140,6 +7206,8 @@ function boot(scene, root = document) {
       ts23: ts(23),
       groundNow: leaf ? mean(h) : null,
       tmrtNow: tmrtCell !== null ? thermal.tmrt(tmrtCell, h) : null,
+      // the share of the 5 m square in the sun now (a person's radiant heat takes the square's mean)
+      sunNow: tmrtCell !== null ? thermal.sunlit(tmrtCell, h) : null,
       tmrt15: tmrtCell !== null ? thermal.tmrt(tmrtCell, 15) : null,
       air: thermal.air(h),
       note: m.note,
@@ -7178,17 +7246,20 @@ function boot(scene, root = document) {
         ${d.compare.tmrtBefore !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} 15:00 Before → After</td><td>${fmt(d.compare.tmrtBefore)} → ${fmt(d.compare.tmrtAfter)} °C</td></tr>` : ''}
         <tr><td colspan="2" class="sub">Before: ${d.compare.beforeMat}; After: ${d.compare.afterMat}</td></tr>`
       : '';
-    const feel = d.tmrtNow !== null ? `; standing here feels like ${fmt(d.tmrtNow)} °C` : '';
+    const feel = d.tmrtNow !== null ? `; the ${gl('tmrt', 'radiant heat')} on someone standing here is ${fmt(d.tmrtNow)} °C` : '';
+    // a square only partly in shade: say so, since the number mixes sun and shade (outside evaluation of #33)
+    const partial = d.tmrtNow !== null && d.sunNow > 0.1 && d.sunNow < 0.9 ? `<p class="sub">This 5 m square is about ${Math.round(d.sunNow * 10) * 10}% in the sun now, so the radiant heat here mixes sun and shade: standing fully in the shade is cooler than this.</p>` : '';
     card.innerHTML = `
       <button class="x" aria-label="close">×</button>
       <h3>${d.title}</h3>
       <p class="lead">At ${hhmm(d.hour)} the ${d.groundNow !== null ? 'top' : 'surface'} here is ${fmt(d.tsNow)} °C${feel}, with the air at ${fmt(d.air)} °C.</p>
+      ${partial}
       <div class="mat">${d.matId === 'coolroof' || d.matId === 'coolroofAged' || d.matId === 'coolroofNew' ? gl('coolRoof', d.material) : d.material}${retro ? ` · ${d.state === 'after' ? 'After' : 'Before'}` : ''}</div>
       <table>
         <tr class="t"><td>${gl('surfaceTemp', 'surface')} now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
         <tr class="t"><td>surface at 3 pm / ${gl('nightLag', '11 pm')}</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
         ${d.groundNow !== null ? `<tr><td>ground beneath now</td><td>${fmt(d.groundNow)} °C</td></tr>` : ''}
-        ${d.tmrtNow !== null ? `<tr><td>how hot it ${gl('tmrt', 'feels')} to stand here, now / 3 pm</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
+        ${d.tmrtNow !== null ? `<tr><td>${gl('tmrt', 'radiant heat')} on you standing here, now / 3 pm</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
         <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
         ${blk && d[blk.cardKey] ? blk.cardRows(d[blk.cardKey]) : ''}
         ${d.wind && d.wind.at !== null ? `<tr><td>${gl('apparentTemp', 'feels like, with the wind')} now</td><td>${fmt(d.wind.at)} °C</td></tr>` : ''}
@@ -7816,6 +7887,7 @@ const SCENE = {
     taMax: 35,
     wind: 1,
     vapourHpa: 25,
+    plain: 'A hot midsummer day in a northern Chinese city: the air goes from 25 °C at dawn to 35 °C in the afternoon.',
     note: 'Assumed heat-wave day: 39.9° N, 21 June (the solstice), air 25–35 °C, vapour pressure 25 hPa, light wind 1 m/s. Air temperature is fixed: the courtyards’ cooler air is quoted, not simulated.',
   },
   // Ground parcels, painted in order (later wins). The base is courtyard brick.

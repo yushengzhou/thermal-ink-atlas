@@ -33,7 +33,7 @@ the sources listed below without checking them.
 | Cool roof, aged (`coolroofAged`) | 0.6 [brief2] *cited range*, unverified (brief: aged cool roofs 0.50-0.70, of which 0.60-0.70 unverified; Chicago code floor: 3-year aged >= 0.50 [chicago]) | 0.88 [lbnlRoof] *cited value*, unverified | μ 450 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (same build-up as the dark membrane) | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Cool roof, new (`coolroofNew`) | 0.8 [lbnlRoof] *cited value*, unverified (new white roof about 0.80; read second-hand via the compendium, so unverified as in block 1) | 0.88 [lbnlRoof] *cited value*, unverified | μ 450 J m⁻² s⁻½ K⁻¹ [brief] *cited range*, unverified (same build-up as the dark membrane) | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Extensive green roof (`greenroof`) | 0.2 [brief2] *cited range*, unverified (cited 0.15-0.25) | 0.95 [brief2] *cited value*, unverified | μ 600 J m⁻² s⁻½ K⁻¹ [brief2] *cited value*, unverified (dry substrate; wet 1200, decays with tau) | dry 0.25 [brief2] *interpretation of the source*, unverified (dry; the brief's value. Heusinger & Weber report Bowen ratio <1-2) | EF wet 0.5 [heusinger] *interpretation of the source*, unverified (wet; Bowen ratio about 1 (Heusinger & Weber: <1-2)); μ wet 1200 J m⁻² s⁻½ K⁻¹ [brief2] *cited value*, unverified (wet substrate); τ 4 d [brief2] *cited value*, unverified (substrate drying time, days); storage 30 mm [brief2] *cited range*, unverified (100 mm substrate holds 20-40 mm) |
-| Permeable pavers (`pavers`) | 0.26 [li2013] *cited value* | 0.92 [brief2] *cited value*, unverified | μ 870 J m⁻² s⁻½ K⁻¹ [engine] *engine assumption (no source)*, unverified (dry, assumed) | dry 0.02 [brief2] *interpretation of the source*, unverified (dry; brief value) | EF wet 0.5 [brief2] *interpretation of the source*, unverified (wet; brief value); τ 1 d [brief2] *interpretation of the source*, unverified (days; the brief calls it calibrated to Li 2013, but in this model it does not reproduce Li at d = 1 (see docs/sources.md)); storage 5 mm [brief2] *interpretation of the source*, unverified (brief: "a few mm", read as 5 mm; the daily water check needs >= 4.1 mm) |
+| Permeable pavers (`pavers`) | 0.26 [li2013] *cited value* | 0.92 [brief2] *cited value*, unverified | μ 870 J m⁻² s⁻½ K⁻¹ [engine] *engine assumption (no source)*, unverified (dry, assumed) | dry 0.02 [brief2] *interpretation of the source*, unverified (dry; brief value) | EF wet 0.5 [brief2] *interpretation of the source*, unverified (wet; brief value); τ 1 d [brief2] *interpretation of the source*, unverified (days; the brief calls it calibrated to Li 2013, but in this model it does not reproduce Li at d = 1); storage 5 mm [brief2] *interpretation of the source*, unverified (brief: "a few mm", read as 5 mm; the daily water check needs >= 4.1 mm) |
 | Porous asphalt (`porousAsphalt`) | 0.08 [li2013] *cited value* | 0.95 [brief2] *cited value*, unverified | μ 800 J m⁻² s⁻½ K⁻¹ [engine] *engine assumption (no source)*, unverified (dry, assumed) | dry 0.02 [brief2] *interpretation of the source*, unverified (dry; as pavers) | EF wet 0.5 [brief2] *interpretation of the source*, unverified (wet; as pavers); τ 1 d [brief2] *interpretation of the source*, unverified (days; as pavers); storage 5 mm [brief2] *interpretation of the source*, unverified (brief: "a few mm", read as 5 mm; the daily water check needs >= 4.1 mm) |
 | Cool pavement coating, 1 year old (`coolPaveAged`) | 0.18 [ko2022] *cited value*, unverified (0.26 -> 0.18 after one year) | 0.92 [brief2] *cited value*, unverified | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified (the asphalt underneath) | 0 [brief] *cited value*, unverified (dry impervious) | — |
 | Cool pavement coating, new (`coolPaveNew`) | 0.25 [middel2020] *cited value*, unverified | 0.92 [brief2] *cited value*, unverified | μ 1200 J m⁻² s⁻½ K⁻¹ [oke] *cited value*, unverified (the asphalt underneath) | 0 [brief] *cited value*, unverified (dry impervious) | — |
@@ -46,7 +46,7 @@ the sources listed below without checking them.
 | Pagoda tree (国槐) (`pagodaTree`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.7 [brief5] *cited value*, unverified (brief value) | sun let through, tr 0.17 [brief5] *interpretation of the source*, unverified (exp(-0.5 x 3.5); brief LAI 3-4 (no measured LAI), i.e. 0.14-0.22) |
 | Vine pergola (葡萄架) (`pergola`) | 0.18 [oke] *cited range*, unverified (cited 0.15-0.20) | 0.97 [oke] *cited range*, unverified (cited 0.97-0.99) | — | 0.6 [brief5] *cited value*, unverified (brief value) | sun let through, tr 0.29 [jjshs] *interpretation of the source*, unverified (exp(-0.5 x 2.5); vines LAI 2-3 [jjshs] (a yield study; an interpretation), overhead arbours > 90% cover [ucdavis]) |
 | Summer mat awning (天棚) (`awning`) | 0.3 [engine] *engine assumption (no source)*, unverified (not used: only the transmission of the mat matters here) | 0.9 [engine] *engine assumption (no source)*, unverified (not used) | — | 0 [engine] *engine assumption (no source)*, unverified (not used) | sun let through, tr 0.2 [brief5] *cited range*, unverified (brief 0.1-0.3 for reed mats (unverified)) |
-| Rail ballast (gravel) (`ballast`) | 0.2 [brief6] *engine assumption (no source)*, unverified (brief assumption 0.20 (0.10-0.30)) | 0.92 [brief6] *engine assumption (no source)*, unverified (brief assumption) | μ 700 J m⁻² s⁻½ K⁻¹ [brief6] *engine assumption (no source)*, unverified (effective admittance of a loose, airy layer; brief assumption 700 (600-900)) | 0 [brief6] *engine assumption (no source)*, unverified (dry, drains at once) | — |
+| Track gravel (rail ballast) (`ballast`) | 0.2 [brief6] *engine assumption (no source)*, unverified (brief assumption 0.20 (0.10-0.30)) | 0.92 [brief6] *engine assumption (no source)*, unverified (brief assumption) | μ 700 J m⁻² s⁻½ K⁻¹ [brief6] *engine assumption (no source)*, unverified (effective admittance of a loose, airy layer; brief assumption 700 (600-900)) | 0 [brief6] *engine assumption (no source)*, unverified (dry, drains at once) | — |
 | Bare compacted soil (`drySoil`) | 0.25 [brief6] *engine assumption (no source)*, unverified (brief assumption 0.25 (0.20-0.35)) | 0.93 [brief6] *engine assumption (no source)*, unverified (brief assumption) | μ 800 J m⁻² s⁻½ K⁻¹ [brief6] *interpretation of the source*, unverified (dry soil about 600 [oke], read up to 800 for compacted ground (brief assumption)) | 0.05 [brief6] *engine assumption (no source)*, unverified (dry, a little moisture left deep down (brief assumption)) | — |
 | Scrubby dry vegetation (`scrub`) | 0.22 [brief6] *engine assumption (no source)*, unverified (brief assumption) | 0.95 [brief6] *engine assumption (no source)*, unverified (brief assumption) | μ 800 J m⁻² s⁻½ K⁻¹ [brief6] *engine assumption (no source)*, unverified (the dry soil beneath (brief assumption)) | 0.2 [brief6] *engine assumption (no source)*, unverified (sparse, drought-stressed plants: little water to spend (brief assumption)) | — |
 | Rusty corrugated steel shed roof (`rustShed`) | 0.2 [brief6] *engine assumption (no source)*, unverified (brief assumption for rusted steel) | 0.75 [optris] *cited range*, unverified (oxidised steel 0.69-0.88 [optris]) | C 3000 J m⁻² K⁻¹ [brief6] *interpretation of the source*, unverified (one corrugated sheet about 0.7 mm of steel, rho c about 3.6 MJ m-3 K-1 (calculation in the brief); range 2-5 kJ m-2 K-1) | 0 [brief6] *cited value*, unverified (dry) | — |
@@ -110,8 +110,8 @@ Not used by the grid model:
 
 Shown on the heat cards as a caveat:
 
-- `grass`: Its 3 pm place below shaded paving holds only with evaporative fraction and albedo at the top of their cited ranges (see Sensitivity in docs/sources.md).
-- `coolroof`: Its 3 pm place below shaded paving holds only with albedo at the top of its cited range (see Sensitivity in docs/sources.md).
+- `grass`: Its 3 pm place below shaded paving holds only with evaporative fraction and albedo at the top of their cited ranges (tested in the model notes).
+- `coolroof`: Its 3 pm place below shaded paving holds only with albedo at the top of its cited range (tested in the model notes).
 
 ## Model constants
 
@@ -405,8 +405,8 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Evaporative fraction**: Typical: Dry paving 0; watered lawns and tree leaves 0.6–0.8. [brief]
 - **Sky view factor (SVF)**: In this model: Open lawn about 0.98; paved ground near buildings 0.54–0.87. [this model]
 - **Surface temperature**: Typical: On a hot afternoon (air 25–35 °C): lawn 30–40 °C, shaded paving 34–40 °C, aged asphalt 55–62 °C, fresh asphalt 60–68 °C. [brief]
-- **Mean radiant temperature (Tmrt)**: In this model: At 3 pm: 39–46 °C in building shade, 62–72 °C on sunlit ground (5th–95th percentile). [this model]
-- **Force-restore model (simulation)**: In this model: 5 m grid, 1-minute steps, the design day repeated 7 times until it settles. [this model]
+- **Radiant heat on you (mean radiant temperature, Tmrt)**: In this model: At 3 pm: 39–46 °C in building shade, 62–72 °C on sunlit ground (5th–95th percentile). [this model]
+- **How the temperatures are calculated**: In this model: In 5 m squares, minute by minute, over the same hot day run 7 times until it settles (a "force-restore" surface model, Deardorff 1978). [this model]
 - **Thermal inertia / night lag**: In this model: At 11 pm asphalt is 3.6 °C and concrete 4.4 °C warmer than the open lawn. [this model]
 - **Cool roof**: Typical: Albedo 0.65 or more when new, about 0.5–0.6 after weathering. [brief]
 - **Permeable paving** (asphalt-park only): Typical: Albedo 0.15–0.30; 5–10 °C cooler than concrete while wet (not modelled in this block). [brief]
@@ -416,7 +416,7 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Fresnel reflection** (glass-cbd only): Typical: Clear float glass (n = 1.52, two surfaces): 0.082 at 0°, 0.10 at 45°, 0.17 at 60°, 0.30 at 70°, 0.41 at 75°, 0.56 at 80°. [fresnel]
 - **Reflection spot** (glass-cbd only): In this model: At 3 pm with solar-control low-e glass: Tmrt 49 °C in shaded spots vs 40 °C in plain shade and 71 °C in sun. [this model]
 - **Street canyon (H/W)** (glass-cbd, hutong only): Typical: Sky view factor at the centre of a long canyon: 1/√(1 + (2H/W)²), i.e. 0.45 at H/W 1, 0.24 at 2, 0.16 at 3, 0.10 at 5. Oke (1981): calm-night urban–rural air difference about 7.45 + 3.97 ln(H/W) K (secondary source). [brief3, oke1981]
-- **Low-e glass** (glass-cbd only): Typical: Solar reflectance about 0.15–0.35 head-on; Singapore caps glass daylight reflectance at 20%. [brief3, bca]
+- **Coated (low-e) glass** (glass-cbd only): Typical: Solar reflectance about 0.15–0.35 head-on; Singapore caps glass daylight reflectance at 20%. [brief3, bca]
 - **AC waste heat** (glass-cbd only): Typical: Dense urban areas 20–70 W m⁻² of ground area, sometimes over 100; central Tokyo over 400 W m⁻² by day. [xie2016, sailor2011]
 - **Wind factor (f_w)** (waterfront only): In this model: Over the river 1.00; along Quay Street 1.20; Rope Walk, behind the warehouses, 0.46 (mean), 0.37 within one building height of the wall. [this model]
 - **Ventilation corridor** (waterfront only): Typical: Planning guides ask for corridors within about 30° of the prevailing wind; along the Ota River (Hiroshima) river cooling was detected 150–500 m inland along streets perpendicular to the river (not yet checked). [corridor, ota]
@@ -431,7 +431,7 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Damping depth (d)** (parking only): In this model: With the Stempihar inputs: asphalt 0.127 m, concrete 0.132 m (admittance 1573 and 1877; the model uses 1200 and 1785). [this model]
 - **Ground heat flux (G)** (parking only): In this model: Open asphalt takes in up to 276 W m⁻² (at 11:00) and gives back 121 W m⁻² at 8 pm, 113 W m⁻² at 4 am. [this model]
 - **Thermal inertia** (parking only): In this model: At 11 pm: asphalt 30.9 °C, concrete 31.9 °C, ballast 28.8 °C, soil 28.8 °C, shed roof 25.5 °C (air 28.9 °C). [this model]
-- **大寒日 sunlight rule** (estate only): Typical: GB 50180-2018: at least 2 h on 大寒 in zones I, II, III and VII for cities of 500,000 or more (3 h in smaller ones); flats for the elderly 2 h on the winter solstice (冬至); new homes in old-area renovation 1 h on 大寒 (table values not checked against the standard, not yet checked). The draft of the Zhejiang rules (DB33/1050, now the 2016 edition): only stretches of 10 min or more count, steps of at most 5 min, the point 0.9 m above the floor. [gb50180, db33]
+- **Midwinter sunlight rule (大寒日)** (estate only): Typical: GB 50180-2018: at least 2 h on 大寒 in zones I, II, III and VII for cities of 500,000 or more (3 h in smaller ones); flats for the elderly 2 h on the winter solstice (冬至); new homes in old-area renovation 1 h on 大寒 (table values not checked against the standard, not yet checked). The draft of the Zhejiang rules (DB33/1050, now the 2016 edition): only stretches of 10 min or more count, steps of at most 5 min, the point 0.9 m above the floor. [gb50180, db33]
 - **Effective height (H_eff)** (estate only): Typical: 18 floors of 2.9 m with the ground floor at grade: 52.2 − 0.9 = 51.3 m. [brief7, db33]
 - **Spacing coefficient (G / H_eff)** (estate only): Typical: At 35° N for long slabs: 1.45 for 1 h, 1.47 for 2 h and 1.52 for 3 h of 大寒 sun; 1.64–1.74 on the winter solstice (a worked estimate). The coefficient method is "no longer appropriate" for high-rises in the draft of the Zhejiang rules (DB33/1050). [brief7, db33]
 - **Condenser heat rejection** (estate only): Typical: A 3.5 kW split unit with EER 3.3 rejects about 4.6 kW; at 0.5–0.7 m³/s of fan air that is 5.5–7.5 K above the air (a worked estimate). Measured in Changsha: exhaust 5.2 K above the air by day, 6.5 K at night (Mu et al. 2025). [brief7, mu2025]
@@ -1361,9 +1361,9 @@ The night-release overlay is shown with `G`, the panel button or `?flux=1` (defa
 
 - `asphalt`: Aged asphalt. Dark, dense and dry: it soaks up most of the sun and gives the heat back long after dark.
 - `concrete`: Concrete paving. Lighter than asphalt so it peaks lower, but its mass keeps it warm into the night.
-- `ballast`: Rail ballast (gravel). Loose crushed stone under the rails: full of air, so it heats fast in the sun and lets go of the heat soon after dark.
+- `ballast`: Track gravel (rail ballast). Loose crushed stone under the rails: full of air, so it heats fast in the sun and lets go of the heat soon after dark.
 - `drySoil`: Bare compacted soil. Dry, compacted ground of the old works: lighter than asphalt and with less heat store, so it cools sooner after dark.
-- `scrub`: Scrubby dry vegetation. Weeds and dry grass that took over the brownfield: a little evaporation, not much shade.
+- `scrub`: Scrubby dry vegetation. Weeds and dry grass that took over the disused land: a little evaporation, not much shade.
 - `grass`: Irrigated lawn. Watered grass spends much of its sunshine evaporating water, and at night it cools below the air.
 - `rustShed`: Rusty corrugated steel shed roof. A single sheet of rusty steel over an open shed: almost no heat store, so it follows the sun up and drops below the air within minutes of sunset.
 - `pvCanopy`: Solar (PV) canopy over the bays. Rows of solar panels on steel posts over the parking bays: shade for the cars by day and a lid on the night sky.
@@ -2347,6 +2347,35 @@ the brief's 0–8 K. So the shared wall term is a likely cause of the miss; the 
 around the 2 m strip is another, not tested. It stays as shipped: the wall term is shared by every block, as for block 6's
 PV undersides. The deck's peak barely moves with C: a thin layer in
 full sun sits near its radiative balance whatever its heat capacity.
+
+**Shade ranking: what a person under a roof sees (docs only, not shipped, not tuned).** The outside evaluation of #33 found
+the ranking upside down: stop A's thin metal roof (36.3 °C at 15:00, +1.3 K from the air) beats the trees of stop D
+(43.6 °C on the bench), while Tempe measured building shade first, trees second and lightweight structures last [middel2021].
+Two simplifications of `Thermal.tmrt` favour a small roof: a person sees **only the ground at their own point** (the shaded
+concrete under the roof, 33.6 °C), not the sunlit paving a metre or two away, and the roof's underside counts as the shared
+warm wall, not as hot metal. A test at 15:00 (`surround9` in `scripts/busstop.mjs`): each sideways direction sees the ground
+straight out at 0.25, 0.75, 1.5, 3 and 6 m, weighted by the share of a vertical sensor's downward view each band takes from
+mid-body height (c / √(c² + d²) beyond distance d), from the point model's own force-restore run at those samples; a sight line
+through an opaque panel takes the wall term. The roof is a thin metal point on the roof (67.2 °C), its share of the view
+(open × F at mid-body) seen from above only (the brief's W_up 0.06) or also in the upper half of the sideways directions:
+
+| Point, 15:00 | shipped | sees the ground around | + roof underside, up | + roof underside, up and sides |
+|---|---|---|---|---|
+| stop A, centre under the roof (standing) | 36.3 °C | 44.0 °C | 44.8 °C | 50.8 °C |
+| stop A, open reference (standing) | 70.2 °C | 67.6 °C | — | — |
+| stop D, bench under the trees (seated) | 43.6 °C | 44.1 °C | — | — |
+| stop D, open reference (standing) | 69.1 °C | 67.6 °C | — | — |
+
+The ground around a person decides it: +7.7 K under stop A's roof, +0.5 K on stop D's shaded bench (its ground is
+shaded all round), −2.5 K in the open; the roof's underside adds +0.8 K seen from above only (as the brief
+expects, "≈1 K"), +6.8 K seen from the sides too. With both, stop A's cut is 16.9 to 22.8 K (shipped
+33.9 K; band 1: 20–35 K) and the shelter is no better than the trees (44.1 °C), the measured order. So the
+shipped shelter values are **likely too optimistic**; the page says so on stop A's card and in the expert part of every
+roofed stop. Not shipped: every block's Tmrt sees only its own cell's ground (grid blocks: a 5 m cell, so the gap is largest
+for the sub-cell shelters here), and fixing it in one block would make shade values incomparable across blocks; it belongs
+to the engine change of [issue #28](https://github.com/yushengzhou/thermal-ink-atlas/issues/28). Block 1's park trees are not thin (crown transmission
+0.17, the engine's LAI 3.5): fully shaded lawn cells come out about 20 K below the open lawn at 15:00; a 5 m cell only partly in
+a crown's shadow mixes sun and shade, and its heat card now says so.
 
 ### Acceptance bands (block 9)
 

@@ -44,6 +44,10 @@
   #card .src { margin: 4px 0 0; font-size: 11px; opacity: .75; }
   .noui #cartouche, .noui #bar, .noui #legend, .noui #terms, .noui #inkHint { display: none; }
   #cartouche .sim { font-size: 12px; opacity: .7; letter-spacing: .02em; }
+  #cartouche h1 a { color: inherit; text-decoration: none; }
+  #cartouche a.back { color: inherit; }
+  #cartouche details.site { margin-top: 3px; }
+  #cartouche details.site summary { cursor: pointer; font-size: 12px; opacity: .75; }
   .gl { border-bottom: 1px dotted currentColor; cursor: help; }
   .gl:focus-visible { outline: 1.5px dashed #8a2f22; outline-offset: 2px; }
   #terms { position: fixed; right: 18px; bottom: 74px; width: 250px; max-height: 50vh; overflow: auto; padding: 8px 12px; background: #fbf7ee;
@@ -70,6 +74,7 @@
   :is(#retro, #glass, #wind, #parking) .measures button.warn { border-color: #8a2f22; color: #8a2f22; }
   #terms .refs a { color: #8a2f22; }
   #card table.cmp td { text-align: right; }
+  #card table.cmp td + td { padding-left: 7px; }
   #card table.cmp td:first-child, #card table.cmp td.sub { text-align: left; }
   #card .sub { font-size: 11.5px; opacity: .8; font-weight: normal; }
   #card .lit { margin: 4px 0; font-size: 12px; }
@@ -79,17 +84,18 @@
   #card details.expert summary, .blockpanel summary { cursor: pointer; font-size: 12px; opacity: .85; }
   .blockpanel summary { font-size: 13px; margin-bottom: 4px; opacity: 1; }
 /* phones: the bar wraps to the width, panels and the legend shrink, the cartouche gives way */
-  @media (max-width:700px){#bar{left:6px;right:6px;bottom:6px;transform:none;flex-wrap:wrap;gap:6px 10px;padding:6px 8px;justify-content:center}#bar input[type=range]{width:100%;flex-basis:100%}#hourLabel{min-width:0}#keys{display:none}#cartouche{left:6px;top:6px;right:6px;max-width:none;padding:6px 10px}#cartouche h1{font-size:16px}#cartouche p:last-child{display:none}.blockpanel{left:6px;bottom:auto;top:92px;width:auto;max-width:calc(100vw - 12px);max-height:50vh;overflow:auto;box-sizing:border-box}#legend{right:6px;top:auto;bottom:118px;width:180px}#legend .cap{display:none}#card{left:6px !important;right:6px;width:auto;top:92px !important;max-height:calc(100vh - 210px)}#terms{right:6px;left:6px;width:auto;bottom:118px}#inkHint{top:92px;font-size:13px}}
+  @media (max-width:700px){#bar{left:6px;right:6px;bottom:6px;transform:none;flex-wrap:wrap;gap:6px 10px;padding:6px 8px;justify-content:center}#bar input[type=range]{width:100%;flex-basis:100%}#hourLabel{min-width:0}#keys{display:none}#cartouche{left:6px;top:6px;right:6px;max-width:none;padding:6px 10px}#cartouche h1{font-size:16px}#cartouche p.plain,#cartouche details.site{display:none}.blockpanel{left:6px;bottom:auto;top:92px;width:auto;max-width:calc(100vw - 12px);max-height:50vh;overflow:auto;box-sizing:border-box}#legend{right:6px;top:auto;bottom:118px;width:180px}#legend .cap{display:none}#card{left:6px !important;right:6px;width:auto;top:92px !important;max-height:calc(100vh - 210px)}#terms{right:6px;left:6px;width:auto;bottom:118px}#inkHint{top:92px;font-size:13px}}
   #card .x { position: absolute; right: 6px; top: 4px; border: 0; background: none; font-size: 18px; cursor: pointer; color: #2b2621; }
 </style>
 </head>
 <body>
 <canvas id="atlas" aria-label="Hand-inked isometric city block showing urban heat"></canvas>
 <div id="cartouche">
-  <h1>Thermal-Ink Atlas</h1>
+  <h1><a href="../../index.html" title="Back to all twelve blocks">Thermal-Ink Atlas</a></h1>
   <p class="hand">Desert courtyard neighbourhood</p>
-  <p class="sim">Made-up block, <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">calculated</span> <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">temperatures</span></p>
-  <p>A clear mid-July day in a hot desert city like Phoenix (33.4° N, no daylight saving): air 30–43 °C, warmest at 4:30 pm, very dry (vapour pressure 12 hPa), light wind 1.5 m/s. Made-up block, calculated temperatures; the air temperature is fixed: misters and the lawn do not cool it here.</p>
+  <p class="sim"><a class="back" href="../../index.html">← all blocks</a> · Made-up block, <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">calculated</span> <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">temperatures</span></p>
+  <p class="plain">A clear, very dry summer day in a desert city like Phoenix: the air goes from 30 °C at dawn to 43 °C in the late afternoon.</p>
+  <details class="site"><summary>For experts</summary><p>A clear mid-July day in a hot desert city like Phoenix (33.4° N, no daylight saving): air 30–43 °C, warmest at 4:30 pm, very dry (vapour pressure 12 hPa), light wind 1.5 m/s. Made-up block, calculated temperatures; the air temperature is fixed: misters and the lawn do not cool it here.</p></details>
 </div>
 <div id="legend"><div class="hand"><span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">surface temperature</span></div><div id="legendBar"></div>
   <div class="ends"><span id="legendLo"></span><span id="legendHi"></span></div>
@@ -98,7 +104,7 @@
   <input id="hour" type="range" min="0" max="23.75" step="0.25" value="15" aria-label="hour of day">
   <span id="hourLabel" class="hand"></span>
   <button type="button" data-k="H" aria-label="one hour earlier">−1 h</button><button type="button" data-k="h" aria-label="one hour later">+1 h</button>
-  <button type="button" id="heatBtn" data-k="t" aria-pressed="false">heat view (T)</button>
+  <button type="button" id="heatBtn" data-k="t" aria-pressed="false" title="keyboard shortcut: T">heat view</button>
   <span id="keys">drag · zoom · click a spot</span>
   <button id="termsBtn" type="button" aria-expanded="false" aria-controls="terms">terms</button>
 </div>
@@ -558,7 +564,7 @@ const MATERIALS = {
     mu: v(1400, 'brief', 'range', false),
     ef: v(0.8, 'brief', 'edge', false),
     note: 'Watered grass spends much of its sunshine evaporating water, and at night it cools below the air.',
-    caveat: 'Its 3 pm place below shaded paving holds only with evaporative fraction and albedo at the top of their cited ranges (see Sensitivity in docs/sources.md).',
+    caveat: 'Its 3 pm place below shaded paving holds only with evaporative fraction and albedo at the top of their cited ranges (tested in the model notes).',
   },
   water: {
     name: 'Pond (open water)',
@@ -592,7 +598,7 @@ const MATERIALS = {
     mu: v(450, 'brief', 'range', false),
     ef: v(0, 'brief', 'cited', false),
     note: 'The same roof build-up as its dark neighbour, painted white: it reflects most of the sun.',
-    caveat: 'Its 3 pm place below shaded paving holds only with albedo at the top of its cited range (see Sensitivity in docs/sources.md).',
+    caveat: 'Its 3 pm place below shaded paving holds only with albedo at the top of its cited range (tested in the model notes).',
   },
   canopy: {
     name: 'Tree canopy',
@@ -767,7 +773,7 @@ Object.assign(MATERIALS, {
 // shared asphalt and concrete (Oke values, inside the brief's ranges).
 Object.assign(MATERIALS, {
   ballast: {
-    name: 'Rail ballast (gravel)',
+    name: 'Track gravel (rail ballast)',
     alpha: v(0.2, 'brief6', 'engine', false),
     eps: v(0.92, 'brief6', 'engine', false),
     mu: v(700, 'brief6', 'engine', false),
@@ -788,7 +794,7 @@ Object.assign(MATERIALS, {
     eps: v(0.95, 'brief6', 'engine', false),
     mu: v(800, 'brief6', 'engine', false),
     ef: v(0.2, 'brief6', 'engine', false),
-    note: 'Weeds and dry grass that took over the brownfield: a little evaporation, not much shade.',
+    note: 'Weeds and dry grass that took over the disused land: a little evaporation, not much shade.',
   },
   rustShed: {
     name: 'Rusty corrugated steel shed roof',
@@ -4375,6 +4381,17 @@ class Renderer {
       s.closePath();
     }
     s.fill('nonzero');
+    // keep the shadows on the board: a long low-sun shadow must not fall on the paper around it (outside evaluation of #33)
+    const W0 = this.world.size;
+    s.globalCompositeOperation = 'destination-in';
+    s.beginPath();
+    for (const [x, y] of [[0, 0], [W0, 0], [W0, W0], [0, W0]]) {
+      const q = iso(x, y, 0);
+      if (x === 0 && y === 0) s.moveTo(q[0], q[1]);
+      else s.lineTo(q[0], q[1]);
+    }
+    s.closePath();
+    s.fill();
     s.setTransform(1, 0, 0, 1, 0, 0);
     s.globalCompositeOperation = 'source-in';
     const strength = clamp(hc.sun.alt / 8, 0, 1);
@@ -4875,6 +4892,10 @@ class Renderer {
     const fs = W / d < 700 ? 12 : 15; // smaller hand on a phone (#29 item 4)
     ctx.font = `${Math.round(fs * d)}px "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive`;
     ctx.textBaseline = 'top';
+    const lh = (fs + 3) * d;
+    const top = (W / d < 700 ? 96 : 8) * d; // on a phone the cartouche spans the top
+    // first pass: where each note goes
+    const placed = [];
     notes.forEach((n, i) => {
       const p = iso(n.at[0], n.at[1], n.at[2] ?? 0);
       const ax = ox + p[0] * Z;
@@ -4883,19 +4904,44 @@ class Renderer {
       let ty = ay + n.dy * d;
       if (tx < -200 * d || tx > W + 50 || ty < -60 || ty > H + 20) return;
       const lines = n.text;
-      const lh = (fs + 3) * d;
       const w = Math.max(...lines.map((l) => ctx.measureText(l).width));
       let bx = tx - (n.dx < 0 ? w + 6 * d : -6 * d);
       let by = ty - (n.dy < 0 ? lines.length * lh : 0);
       // keep the whole note on the canvas (#29 items 4 and 7): shift the box and the leader's end with it
       const sx = Math.min(0, W - 8 * d - (bx + w + 5 * d)) || Math.max(0, 8 * d - (bx - 5 * d));
-      const top = (W / d < 700 ? 96 : 8) * d; // on a phone the cartouche spans the top
       const sy = Math.min(0, H - 8 * d - (by + lines.length * lh + 3 * d)) || Math.max(0, top - (by - 3 * d));
       bx += sx;
       by += sy;
       tx += sx;
       ty += sy;
-      ctx.globalAlpha = alpha;
+      // and out from under the page's panels and the bottom bar (R.avoidNotes, canvas px; outside evaluation of #33):
+      // up above a panel in the lower half of the canvas, down below one in the upper half, if it still fits
+      const bh = lines.length * lh + 6 * d;
+      for (const r of this.avoidNotes ?? []) {
+        if (r[2] <= bx - 5 * d || r[0] >= bx + w + 5 * d || r[3] <= by - 3 * d || r[1] >= by - 3 * d + bh) continue;
+        const dy = (r[1] + r[3]) / 2 > H / 2 ? r[1] - 4 * d - (by - 3 * d + bh) : r[3] + 4 * d - (by - 3 * d);
+        if (by + dy - 3 * d >= top && by + dy - 3 * d + bh <= H - 8 * d) {
+          by += dy;
+          ty += dy;
+        }
+      }
+      // and off the notes placed before it: below the other box, or above it if that does not fit
+      for (const o of placed) {
+        const oh = o.lines.length * lh + 6 * d;
+        if (o.bx + o.w + 5 * d <= bx - 5 * d || o.bx - 5 * d >= bx + w + 5 * d || o.by - 3 * d + oh <= by - 3 * d || o.by - 3 * d >= by - 3 * d + bh) continue;
+        const down = o.by - 3 * d + oh + 3 * d - (by - 3 * d);
+        const up = o.by - 3 * d - 3 * d - (by - 3 * d + bh);
+        const dy = by - 3 * d + bh + down <= H - 8 * d ? down : up;
+        if (by + dy - 3 * d >= top && by + dy - 3 * d + bh <= H - 8 * d) {
+          by += dy;
+          ty += dy;
+        }
+      }
+      placed.push({ n, i, ax, ay, tx, ty, bx, by, w, lines });
+    });
+    ctx.globalAlpha = alpha;
+    // second pass: every leader first, so no leader is drawn across another note's text
+    for (const { ax, ay, tx, ty } of placed) {
       // leader: a gently bowed ink line with a dot at the anchor
       ctx.strokeStyle = rgbCss(INK);
       ctx.lineWidth = 1.1 * d;
@@ -4909,6 +4955,9 @@ class Renderer {
       ctx.beginPath();
       ctx.arc(ax, ay, 2.2 * d, 0, Math.PI * 2);
       ctx.fill();
+    }
+    // third pass: the boxes and their text
+    for (const { n, i, bx, by, w, lines } of placed) {
       ctx.fillStyle = 'rgba(248,243,231,0.94)';
       ctx.fillRect(bx - 5 * d, by - 3 * d, w + 10 * d, lines.length * lh + 6 * d);
       ctx.strokeStyle = 'rgba(43,38,33,0.55)';
@@ -4921,7 +4970,7 @@ class Renderer {
         const k = lines.findIndex((l) => l.includes(sub));
         if (k < 0) continue;
         const x0 = bx + ctx.measureText(lines[k].slice(0, lines[k].indexOf(sub))).width;
-        const w = ctx.measureText(sub).width;
+        const tw = ctx.measureText(sub).width;
         const y = by + k * lh + (fs + 1) * d;
         ctx.save();
         ctx.setLineDash([1.5 * d, 2 * d]);
@@ -4929,12 +4978,12 @@ class Renderer {
         ctx.strokeStyle = ctx.fillStyle;
         ctx.beginPath();
         ctx.moveTo(x0, y);
-        ctx.lineTo(x0 + w, y);
+        ctx.lineTo(x0 + tw, y);
         ctx.stroke();
         ctx.restore();
-        this.noteHits.push({ key, x: x0 / d, y: y / d, w: w / d, h: lh / d });
+        this.noteHits.push({ key, x: x0 / d, y: y / d, w: tw / d, h: lh / d });
       }
-    });
+    }
     ctx.globalAlpha = 1;
   }
 }
@@ -5004,16 +5053,16 @@ const GLOSSARY = {
     why: 'Hot surfaces warm the air above them and radiate heat onto people nearby.',
   },
   tmrt: {
-    term: 'Mean radiant temperature (Tmrt)',
-    text: 'One number for all the sunshine and infrared heat falling on a standing person from every direction.',
+    term: 'Radiant heat on you (mean radiant temperature, Tmrt)',
+    text: 'One number for all the sunshine and the heat from hot ground and walls falling on a standing person from every direction. In the sun it runs far above the air temperature, because it counts the sunshine on your body, not the air around you. It is not the "feels like" of a weather app, which also takes in the air, humidity and wind: a drop of 20 degrees in radiant heat feels like a much smaller drop than 20 degrees.',
     model: (S) => S.tmrtLine ?? `At 3 pm: ${S.tmrtShade} °C in building shade, ${S.tmrtSun} °C on sunlit ground (5th–95th percentile).`,
-    why: 'It shapes how hot it feels outdoors more than air temperature does.',
+    why: 'Out in the sun it decides how hot you feel more than the air does; shade takes most of it away.',
   },
   forceRestore: {
-    term: 'Force-restore model (simulation)',
-    text: 'A simple surface energy balance (Deardorff 1978): sun, sky and air heat each 5 m cell, and a deep-ground term pulls it back toward its daily mean (thin metal roofs have no deep term).',
-    model: (S) => `5 m grid, 1-minute steps, the design day repeated ${S.days} times until it settles.`,
-    why: 'It captures daytime heating and night lag cheaply enough to run in your browser. All temperatures here are modelled, not measured.',
+    term: 'How the temperatures are calculated',
+    text: 'Nobody measured this block. Your browser works out, minute by minute, how much the sun, the sky and the air warm or cool each patch of ground and each roof, using values from published measurements. Stone and soil store heat and give it back at night; a thin metal sheet does not.',
+    model: (S) => `In 5 m squares, minute by minute, over the same hot day run ${S.days} times until it settles (a "force-restore" surface model, Deardorff 1978).`,
+    why: 'It shows the day heating up and the night cooling down slowly. Every temperature here is calculated, not measured.',
   },
   nightLag: {
     term: 'Thermal inertia / night lag',
@@ -5920,15 +5969,15 @@ const NAME = { sail: 'shade sails', ramada: 'the ramada', arcade: 'the arcade', 
 /** Margin notes (at most 5), in plain words. d: numbers from the plugin (noteData). */
 function dsNotes(scene, d) {
   const text = {
-    sail: ['Under the sails at 3 pm it feels', `about ${r0(-d.sail)} degrees cooler than in the open sun`],
-    arcade: [`In the arcade: about ${r0(-d.arcade)} degrees cooler`, 'to stand in than the open sun at 3 pm'],
+    sail: ['Under the sails at 3 pm: about', `${r0(-d.sail)} degrees less radiant heat than in the open sun`],
+    arcade: [`In the arcade: about ${r0(-d.arcade)} degrees less radiant heat`, 'on you than in the open sun at 3 pm'],
     lawn: [`The watered lawn: ${fmt(d.lawn15)} °C at 3 pm (air ${fmt(d.air15)} °C);`, `it drinks about ${fmt(d.evap)} litres per m² a day`],
-    street: [`Light-coated Main Street: ${r0(-d.coatTs)} degrees cooler underfoot,`, `but ${fmt(d.coatTmrt)} degrees hotter to stand on at 3 pm`],
+    street: [`Light-coated Main Street: ${r0(-d.coatTs)} degrees cooler underfoot,`, `but ${fmt(d.coatTmrt)} degrees more radiant heat on you at 3 pm`],
     plaza: [`Open gravel in the sun: ${fmt(d.gravel15)} °C at 3 pm,`, 'the hottest place to stand in the plaza'],
   };
   const terms = {
     sail: [['shadeSail', 'Under the sails']],
-    arcade: [['tmrt', 'to stand in']],
+    arcade: [['tmrt', 'radiant heat']],
     lawn: [['referenceEt', 'it drinks about']],
     street: [['albedo', 'Light-coated']],
     plaza: [['xeriscape', 'Open gravel']],
@@ -5971,15 +6020,15 @@ function sailsCard(d) {
   return `
     ${close}
     <h3>Sails or trees?</h3>
-    <p class="lead">At 3 pm, standing under a shade sail feels about ${r0(-S.sail[h].d)} degrees cooler than standing in the open sun; under a mesquite tree about ${r0(-S.mesquite[h].d)} degrees. The sail needs no water.</p>
+    <p class="lead">At 3 pm, standing under a shade sail takes about ${r0(-S.sail[h].d)} degrees of ${gl('tmrt', 'radiant heat')} off you compared with the open sun${sailMiss ? ' (more than the 14 to 20 measured in Tempe: the model\'s sails are likely too good)' : ''}; a mesquite tree about ${r0(-S.mesquite[h].d)} degrees. The sail needs no water.</p>
     <table class="cmp">
-      <tr><td>3 pm, standing under</td><td>feels like</td><td>against open sun</td><td>measured, degrees</td></tr>
+      <tr><td>3 pm, standing under</td><td>radiant heat</td><td>against open sun</td><td>measured, degrees</td></tr>
       <tr><td>open sun on the plaza</td><td>${r0(d.st.ref[h].tmrt)} °C</td><td>—</td><td>—</td></tr>
       ${row('sail', '−14', '−20', ' class="t"')}
       ${row('ramada', '−14', '−20')}
       ${row('mesquite', '−14', '−20')}
       ${row('paloVerde', '−14', '−20')}
-      <tr><td colspan="4" class="sub">"Feels like" is the radiant heat on a standing person (${gl('tmrt', 'mean radiant temperature')}), not the air. ${sailMiss || ramMiss || paloMiss ? `Outside the range measured in Tempe: ${[sailMiss ? 'the sails' : '', ramMiss ? 'the ramada' : '', paloMiss ? 'the palo verdes' : ''].filter(Boolean).join(', ')}${MISS}.` : 'All inside the range measured in Tempe.'}</td></tr>
+      <tr><td colspan="4" class="sub">Radiant heat on a standing person (${gl('tmrt', 'mean radiant temperature')}), not the air, and not a weather-app "feels like": a person feels a smaller drop than these degrees. ${sailMiss || ramMiss || paloMiss ? `Outside the range measured in Tempe: ${[sailMiss ? 'the sails' : '', ramMiss ? 'the ramada' : '', paloMiss ? 'the palo verdes' : ''].filter(Boolean).join(', ')}${MISS}.` : 'All inside the range measured in Tempe.'}</td></tr>
     </table>
     ${sailMiss || ramMiss || paloMiss ? `<p class="caveat">Why the model differs, likely: ${sailMiss ? `the sails here stop 85% of the direct sun, and a person under them sees only the shaded ground below, not the hot gravel around (in test runs, sails letting through 25% of the sun, the top of the suggested range, land at about −19 degrees; with the gravel around in view, about −21). ` : ''}${ramMiss ? `The ramada is a solid roof, so it acts like the arcade (measured 23 to 31 degrees cooler); the 14 to 20 degrees were measured under sails and umbrellas. ` : ''}${paloMiss ? `${d.palo.court.n} of the ${d.palo.court.n + d.palo.open.n} palo verde spots are in house courtyards, where the light walls throw sunlight back onto a person (${deg(d.palo.court.d)}); the one in the open plaza: ${deg(d.palo.open.d)}.` : ''}</p>` : ''}
     <p class="note">A sail stops most of the sunshine before it reaches you; a desert tree does the same with its leaves and also evaporates a little water. Here the air temperature is the same under both: measured shade in Tempe changed the air by less than 1.3 degrees.</p>
@@ -5998,13 +6047,13 @@ function arcadeCard(d) {
   return `
     ${close}
     <h3>Arcades and courtyards: the deepest shade</h3>
-    <p class="lead">A covered walkway along the shops is the coolest place to stand at 3 pm: it feels about ${r0(-A[h].d)} degrees cooler than the open sun${arcMiss ? `, outside the 20 to 31 degrees measured${MISS}` : ', within the 20 to 31 degrees measured in Tempe'}.</p>
+    <p class="lead">A covered walkway along the shops is the coolest place to stand at 3 pm: about ${r0(-A[h].d)} degrees less ${gl('tmrt', 'radiant heat')} on you than in the open sun${arcMiss ? `, outside the 20 to 31 degrees measured${MISS}` : ', within the 20 to 31 degrees measured in Tempe'}.</p>
     <table class="cmp">
-      <tr><td>3 pm</td><td>feels like</td></tr>
+      <tr><td>3 pm</td><td>radiant heat</td></tr>
       <tr class="t"><td>under the arcade</td><td>${r0(A[h].tmrt)} °C</td></tr>
       <tr><td>in a house's courtyard</td><td>${r0(st.court.tmrt15)} °C</td></tr>
       <tr><td>open sun on the plaza</td><td>${r0(st.ref[h].tmrt)} °C</td></tr>
-      <tr><td colspan="2" class="sub">After dark (9 pm) the shade turns around: under a roof it feels warmer than in the open, because the roof hides the cold night sky. Measured: 0 to 5 degrees warmer.</td></tr>
+      <tr><td colspan="2" class="sub">After dark (9 pm) the shade turns around: under a roof there is more radiant heat on you than in the open, because the roof hides the cold night sky. Measured: 0 to 5 degrees warmer.</td></tr>
       ${nightRows}
     </table>
     ${nightRows.includes('outside') ? '<p class="caveat">After dark the model keeps every spot under a roof, a sail or a crown 6 to 11 degrees warmer than the open plaza, more than measured. Likely: the model hides three quarters of the night sky under any of them behind a surface near the air temperature, while the open plaza sees the cold, dry desert sky; in a test run, roofs and sails cooling 3 degrees below the air at night (as a thin sheet does here) still leave a gap of about 6 to 8 degrees.</p>' : ''}
@@ -6063,7 +6112,7 @@ function coatCard(d) {
   return `
     ${close}
     <h3>The light street coating</h3>
-    <p class="lead">Main Street is coated pale grey: at 3 pm its surface is about ${r0(-c.dTs)} degrees cooler than bare asphalt, but a person standing on it feels about ${fmt(c.dTmrt)} degrees hotter, because more sunlight bounces up onto them.</p>
+    <p class="lead">Main Street is coated pale grey: at 3 pm its surface is about ${r0(-c.dTs)} degrees cooler than bare asphalt, but a person standing on it gets about ${fmt(c.dTmrt)} degrees more radiant heat, because more sunlight bounces up onto them.</p>
     <table class="cmp">
       <tr><td></td><td>coated / bare</td><td>change</td><td>measured</td></tr>
       <tr class="t"><td>road surface, 3 pm</td><td>${fmt(c.ts)} / ${fmt(c.tsBare)} °C</td><td>${deg(c.dTs)}${tsMiss ? MISS : ''}</td><td>about 6 cooler</td></tr>
@@ -6152,11 +6201,11 @@ function dsApp(env) {
   };
   R.overlay = dsOverlay;
 
-  const btn = (attr, v, label) => `<button type="button" ${attr}="${v}">${label}</button>`;
+  const btn = (attr, v, label, extra = '') => `<button type="button" ${attr}="${v}" ${extra}>${label}</button>`;
   root.body.insertAdjacentHTML(
     'beforeend',
     `<div id="desert" class="blockpanel" aria-label="Desert block controls"><details open><summary class="hand">Desert block: buttons and cards</summary>
-        <div class="seg">${btn('data-coat', '1', 'street coating (C)')}${btn('data-water', '1', 'water used (L)')}</div>
+        <div class="seg">${btn('data-coat', '1', 'street coating', 'title="keyboard shortcut: C"')}${btn('data-water', '1', 'water used', 'title="keyboard shortcut: L"')}</div>
         <div class="measures"><div class="hand">Cards</div>${DS_CARDS.map(([id, label]) => btn('data-card', id, label)).join('')}</div>
       </details></div>`,
   );
@@ -6289,7 +6338,7 @@ function dsApp(env) {
       const rows = [];
       if (f.over) rows.push(`<tr><td>shade over this spot</td><td>${NAME[f.over.kind]}, lets through ${Math.round(f.over.tr * 100)}% of the sun</td></tr>`);
       if (f.water !== undefined) rows.push(`<tr><td>water evaporated a day</td><td>${fmt(f.water)} L per m²</td></tr>`);
-      if (f.coat) rows.push(`<tr><td>surface now, coated / bare</td><td>${fmt(f.coat.ts)} / ${fmt(f.coat.tsBare)} °C</td></tr><tr><td>${gl('tmrt', 'feels like')} now, coated / bare</td><td>${fmt(f.coat.tmrt)} / ${fmt(f.coat.tmrtBare)} °C</td></tr>${f.coat.on ? '' : '<tr><td colspan="2" class="sub">Coating off (C): the page shows the bare street.</td></tr>'}`);
+      if (f.coat) rows.push(`<tr><td>surface now, coated / bare</td><td>${fmt(f.coat.ts)} / ${fmt(f.coat.tsBare)} °C</td></tr><tr><td>${gl('tmrt', 'radiant heat')} now, coated / bare</td><td>${fmt(f.coat.tmrt)} / ${fmt(f.coat.tmrtBare)} °C</td></tr>${f.coat.on ? '' : '<tr><td colspan="2" class="sub">Coating off: the page shows the bare street.</td></tr>'}`);
       return rows.join('');
     },
     /** The shared sky-view, night-lag and wet-bulb footnotes quote the block's own lines (no shared lawn here). */
@@ -6745,11 +6794,11 @@ function boot(scene, root = document) {
   };
   let notesR = R; // renderer whose note hit boxes are live
   // the page panels a bottom overlay label moves beside (render.js labelX), in canvas pixels
-  const avoidRects = () => {
+  const avoidRects = (sel = '.blockpanel, #cartouche, #legend') => {
     const c = canvas.getBoundingClientRect();
     const k = canvas.width / (c.width || 1);
     const out = [];
-    for (const el of root.querySelectorAll('.blockpanel, #cartouche, #legend')) {
+    for (const el of root.querySelectorAll(sel)) {
       const r = el.getBoundingClientRect();
       if (r.width > 0 && r.height > 0) out.push([(r.left - c.left) * k, (r.top - c.top) * k, (r.right - c.left) * k, (r.bottom - c.top) * k]);
     }
@@ -6762,7 +6811,12 @@ function boot(scene, root = document) {
   const draw = () => {
     const tDraw = performance.now();
     const avoid = avoidRects();
-    for (const v of Object.values(V)) v.R.avoid = avoid;
+    // margin notes also keep out from under the bottom bar (outside evaluation of #33)
+    const avoidNotes = avoidRects('.blockpanel, #cartouche, #legend, #bar');
+    for (const v of Object.values(V)) {
+      v.R.avoid = avoid;
+      v.R.avoidNotes = avoidNotes;
+    }
     if (!retro) lastStats = R.frame(S.frame, S.cam, look(S.frame));
     else {
       const lk = look(S.frame);
@@ -6817,6 +6871,16 @@ function boot(scene, root = document) {
   card.addEventListener('toggle', () => {
     const top = parseFloat(card.style.top) || 0;
     card.style.top = `${Math.max(10, Math.min(top, window.innerHeight - card.offsetHeight - 10))}px`;
+  }, true);
+  // a tap opens the card on pointerup; the click the browser sends next lands on the new card
+  // (on a phone, often on its "For experts" fold): swallow that one click, at the tap's own spot, so the fold stays closed
+  card.addEventListener('click', (e) => {
+    const g = card._shownAt;
+    if (g && performance.now() - g.t < 400 && Math.abs(e.clientX - g.x) < 12 && Math.abs(e.clientY - g.y) < 12) {
+      card._shownAt = null;
+      e.preventDefault();
+      e.stopPropagation();
+    }
   }, true);
   const inkHint = $('inkHint');
   // the bar's buttons (#29: every key has a visible button): T, H and h, as the keys
@@ -7008,7 +7072,7 @@ function boot(scene, root = document) {
     root.body.insertAdjacentHTML(
       'beforeend',
       `<div id="glass" class="blockpanel" aria-label="Glass controls">
-        <div class="seg" role="group" aria-label="Glass type"><span>${gl('curtainWall', 'glass')}:</span>${GLASS_IDS.map((id) => btn('data-glass', id, { clear: 'clear', lowe: 'low-e', mirror: 'mirror' }[id])).join('')}</div>
+        <div class="seg" role="group" aria-label="Glass type"><span>${gl('curtainWall', 'glass')}:</span>${GLASS_IDS.map((id) => btn('data-glass', id, { clear: 'clear', lowe: 'coated', mirror: 'mirror' }[id])).join('')}</div>
         <div class="seg">${btn('data-ac', '1', 'AC heat overlay', 'aria-pressed="false"')}</div>
         <div class="measures"><div class="hand">Cards</div>${CBD_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'extreme' || id === 'spot' ? 'class="warn"' : '')).join('')}</div>
       </div>`,
@@ -7080,7 +7144,7 @@ function boot(scene, root = document) {
       'beforeend',
       `<div id="wind" class="blockpanel" aria-label="Wind controls">
         <div class="seg" role="group" aria-label="Wind speed"><span>${gl('windFactor', 'wind')}:</span>${btn('data-u', '1', 'calm 1 m/s')}${btn('data-u', '3', 'breezy 3 m/s')}</div>
-        <div class="seg">${btn('data-lines', '1', 'wind lines (W)')}${btn('data-air', '1', 'air overlay (A)')}</div>
+        <div class="seg">${btn('data-lines', '1', 'wind lines', 'title="keyboard shortcut: W"')}${btn('data-air', '1', 'air overlay', 'title="keyboard shortcut: A"')}</div>
         <div class="measures"><div class="hand">Cards</div>${WF_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'shelter' ? 'class="warn"' : '')).join('')}</div>
       </div>`,
     );
@@ -7259,8 +7323,10 @@ function boot(scene, root = document) {
       }
       if (!fn.hidden) hideFn();
       const p = pick(e.clientX, e.clientY);
-      if (p) showCard(p, e.clientX, e.clientY);
-      else hideCard();
+      if (p) {
+        showCard(p, e.clientX, e.clientY);
+        card._shownAt = { t: performance.now(), x: e.clientX, y: e.clientY };
+      } else hideCard();
     }
   });
 
@@ -7398,6 +7464,8 @@ function boot(scene, root = document) {
       ts23: ts(23),
       groundNow: leaf ? mean(h) : null,
       tmrtNow: tmrtCell !== null ? thermal.tmrt(tmrtCell, h) : null,
+      // the share of the 5 m square in the sun now (a person's radiant heat takes the square's mean)
+      sunNow: tmrtCell !== null ? thermal.sunlit(tmrtCell, h) : null,
       tmrt15: tmrtCell !== null ? thermal.tmrt(tmrtCell, 15) : null,
       air: thermal.air(h),
       note: m.note,
@@ -7436,17 +7504,20 @@ function boot(scene, root = document) {
         ${d.compare.tmrtBefore !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} 15:00 Before → After</td><td>${fmt(d.compare.tmrtBefore)} → ${fmt(d.compare.tmrtAfter)} °C</td></tr>` : ''}
         <tr><td colspan="2" class="sub">Before: ${d.compare.beforeMat}; After: ${d.compare.afterMat}</td></tr>`
       : '';
-    const feel = d.tmrtNow !== null ? `; standing here feels like ${fmt(d.tmrtNow)} °C` : '';
+    const feel = d.tmrtNow !== null ? `; the ${gl('tmrt', 'radiant heat')} on someone standing here is ${fmt(d.tmrtNow)} °C` : '';
+    // a square only partly in shade: say so, since the number mixes sun and shade (outside evaluation of #33)
+    const partial = d.tmrtNow !== null && d.sunNow > 0.1 && d.sunNow < 0.9 ? `<p class="sub">This 5 m square is about ${Math.round(d.sunNow * 10) * 10}% in the sun now, so the radiant heat here mixes sun and shade: standing fully in the shade is cooler than this.</p>` : '';
     card.innerHTML = `
       <button class="x" aria-label="close">×</button>
       <h3>${d.title}</h3>
       <p class="lead">At ${hhmm(d.hour)} the ${d.groundNow !== null ? 'top' : 'surface'} here is ${fmt(d.tsNow)} °C${feel}, with the air at ${fmt(d.air)} °C.</p>
+      ${partial}
       <div class="mat">${d.matId === 'coolroof' || d.matId === 'coolroofAged' || d.matId === 'coolroofNew' ? gl('coolRoof', d.material) : d.material}${retro ? ` · ${d.state === 'after' ? 'After' : 'Before'}` : ''}</div>
       <table>
         <tr class="t"><td>${gl('surfaceTemp', 'surface')} now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
         <tr class="t"><td>surface at 3 pm / ${gl('nightLag', '11 pm')}</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
         ${d.groundNow !== null ? `<tr><td>ground beneath now</td><td>${fmt(d.groundNow)} °C</td></tr>` : ''}
-        ${d.tmrtNow !== null ? `<tr><td>how hot it ${gl('tmrt', 'feels')} to stand here, now / 3 pm</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
+        ${d.tmrtNow !== null ? `<tr><td>${gl('tmrt', 'radiant heat')} on you standing here, now / 3 pm</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
         <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
         ${blk && d[blk.cardKey] ? blk.cardRows(d[blk.cardKey]) : ''}
         ${d.wind && d.wind.at !== null ? `<tr><td>${gl('apparentTemp', 'feels like, with the wind')} now</td><td>${fmt(d.wind.at)} °C</td></tr>` : ''}
@@ -8054,6 +8125,7 @@ const SCENE = {
     tmaxHour: 16.5,
     wind: 1.5,
     vapourHpa: 12,
+    plain: 'A clear, very dry summer day in a desert city like Phoenix: the air goes from 30 °C at dawn to 43 °C in the late afternoon.',
     note: 'A clear mid-July day in a hot desert city like Phoenix (33.4° N, no daylight saving): air 30–43 °C, warmest at 4:30 pm, very dry (vapour pressure 12 hPa), light wind 1.5 m/s. Made-up block, calculated temperatures; the air temperature is fixed: misters and the lawn do not cool it here.',
   },
   ground,
