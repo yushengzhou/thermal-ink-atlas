@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions: [Sem
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-28
+
 ### Added
 - Canvas 2D engine written from scratch: wobbly pen strokes, isometric kit, deterministic `seek` (#2).
 - First block, `asphalt-park`: an invented asphalt street next to a pocket park, as one offline HTML file (#2).
