@@ -144,7 +144,7 @@ test('legend: plain degrees, air at the hour, cooler / hotter words, two-slope b
   // honest ticks on two equal halves: -8 at 0 %, -4 at 25 %, 0 at 50 %, +10 at 62.5 %, ... +40 at 100 %
   assert.deepEqual(a.ticks, [['−8', 0], ['−4', 25], ['0', 50], ['+10', 62.5], ['+20', 75], ['+30', 87.5], ['+40', 100]]);
   assert.match(a.bar, / 50%/, 'the bar puts 0 at its middle');
-  assert.ok(a.vs && !a.ends && a.note && a.walls && a.pressed === 'false' && a.btn === 'show real °C', JSON.stringify(a));
+  assert.ok(a.vs && !a.ends && a.note && a.walls && a.pressed === 'false' && a.btn === 'show plain °C', JSON.stringify(a));
   assert.equal(a.p0, 35 + LO);
   const h0 = await page.evaluate(() => window.atlas.hash());
   await page.click('#scaleBtn');
@@ -221,7 +221,7 @@ for (const [w, h] of [[1280, 800], [375, 667], [390, 844]]) {
   });
 }
 
-test('walls (not calculated) are hatched grey in the heat view, on both scales: their colour is in neither palette', async () => {
+test('walls (not calculated) are hatched neutral grey in the heat view, on both scales: their colour is in neither palette', async () => {
   for (const q of ['', '&scale=abs']) {
     const { page, context } = await open(browser, `thermal&hour=15&f=400&notes=0&people=0${q}`, { city: 'glass-cbd' });
     const res = await page.evaluate(() => {
@@ -253,8 +253,8 @@ test('walls (not calculated) are hatched grey in the heat view, on both scales: 
       return out;
     });
     await context.close();
-    const glassFree = res.filter((r) => r.rgb[2] > r.rgb[1]); // opaque walls: the lavender grey (blue above green); glass faces take palette colours
-    console.log(`  glass-cbd${q || ' (ΔT)'}: ${res.length} south faces sampled, ${glassFree.length} lavender: ${glassFree.slice(0, 4).map((r) => `rgb(${r.rgb}) ${r.near} from the palette`).join('; ')}`);
+    const glassFree = res.filter((r) => Math.max(...r.rgb) - Math.min(...r.rgb) < 6); // opaque walls: the neutral grey; glass faces take palette colours
+    console.log(`  glass-cbd${q || ' (ΔT)'}: ${res.length} south faces sampled, ${glassFree.length} grey: ${glassFree.slice(0, 4).map((r) => `rgb(${r.rgb}) ${r.near} from the palette`).join('; ')}`);
     assert.ok(glassFree.length >= 3, 'some opaque walls in view');
     for (const r of glassFree) assert.ok(r.near > 8, `wall of building ${r.b}: rgb(${r.rgb}) only ${r.near} from a palette colour`);
   }
@@ -292,4 +292,26 @@ test('heat cards keep °C and say how far above or below the air', async () => {
     await page.click('#card button.x');
   }
   await context.close();
+});
+
+test('glass-cbd: the legend says glass façades are calculated (only there), and the glass cards give the façade temperatures at the hour shown', async () => {
+  const { page, context } = await open(browser, 'thermal&hour=15&f=640&notes=0', { city: 'glass-cbd' });
+  const note = await page.evaluate(() => getComputedStyle(document.querySelector('#legend .lw'), '::after').content);
+  assert.equal(note, '"glass façades: calculated"');
+  for (const g of ['clear', 'lowe', 'mirror']) {
+    await page.click(`#glass [data-card="glass-${g}"]`);
+    await page.waitForSelector('#card h3');
+    const t = await page.locator('#card').innerText();
+    const m = /At 15:00 this glass on the Exchange Tower is (\d+\.\d)\s°C on the south face and (\d+\.\d)\s°C on the east face.*?(\d+\.\d)\s°C on the west face, with the air at 35\.0\s°C/.exec(t);
+    assert.ok(m, `${g}: ${t.slice(0, 400)}`);
+    const card = await page.evaluate(() => window.atlas.card('building', 't3'));
+    console.log(`  ${g}: south ${m[1]}, east ${m[2]}, west ${m[3]} °C (air 35.0)`);
+    assert.ok(+m[1] >= 35 && +m[2] >= 35 && +m[3] > +m[1], `${g}: the sunlit west face is the warmest`);
+    if (g === 'lowe') assert.equal(m[1], card.glass.faces.find((f) => f.face === 'S').tg.toFixed(1), 'the card and the building card agree (default glass)');
+    await page.click('#card button.x');
+  }
+  await context.close();
+  const o = await open(browser, 'thermal&hour=15&f=400&notes=0');
+  assert.equal(await o.page.evaluate(() => getComputedStyle(document.querySelector('#legend .lw'), '::after').content), 'none');
+  await o.context.close();
 });
