@@ -22,7 +22,10 @@
 // refreshed again after #36: the heat view is coloured by surface minus air
 // (every thermal case, and block 10's under-the-roof wash), and the taller legend
 // moves some margin notes near the top right (some day-view cases); probe values
-// and note texts equal on all 65 cases. Both pages run in the same browser here, so
+// and note texts equal on all 65 cases. Refreshed again after the #36 review: walls
+// hatched grey in the heat view, the legend's new layout (notes that avoid it move),
+// block 4's wind lines grey in the heat view; probes and note texts equal on all 65
+// cases. Both pages run in the same browser here, so
 // the comparison does not depend on the platform.
 // A deliberate change to these blocks must refresh the fixtures: commit the
 // rebuilt pages, then `npm run fixtures` (gzips them from HEAD) and commit.
