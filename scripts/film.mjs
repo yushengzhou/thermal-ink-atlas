@@ -160,7 +160,7 @@ const SHOTS = [
     cap: (N) => {
       const [, night] = nums(note(N, 'asphalt'), '°C');
       const [, shed] = nums(note(N, 'shed'), '°C');
-      return { en: `11 pm: the car park asphalt is still ${r0(night)} °C, giving back some of the day's heat; the metal shed roofs are down to ${r0(shed)} °C`, zh: `晚上 11 点：停车场沥青仍有 ${r0(night)} °C，还在放出白天存下的一部分热；铁皮棚顶已降到 ${r0(shed)} °C` };
+      return { en: `11 pm: the car park asphalt is still ${r0(night)} °C, a little above the air; the metal shed roofs are down to ${r0(shed)} °C`, zh: `晚上 11 点：停车场沥青仍有 ${r0(night)} °C，略高于气温；铁皮棚顶已降到 ${r0(shed)} °C` };
     },
   },
   {
