@@ -8,7 +8,10 @@
 // (block 1-3 from 8e76f7a, 4 from 189b7e1, 5 from 40b5366, 6 from 577a750,
 // 7 from 1e292a5, 8 from 8735385, 9 from de54f2a, 10 from f751d00) before
 // the refresh. Block 11's fixture is still the one from d75de57 (the block 11
-// branch tip before block 12). Both pages run in the same browser here, so
+// branch tip before block 12). Parking, campus, estate and village were
+// refreshed again from c05dff3: their bottom overlay labels move beside the
+// controls panel (review of #33, N6); only the label strip (y 671-720 of 800)
+// moved, probes and notes equal on all their cases. Both pages run in the same browser here, so
 // the comparison does not depend on the platform.
 // A deliberate change to these blocks must refresh the fixtures: commit the
 // rebuilt pages, then `npm run fixtures` (gzips them from HEAD) and commit.

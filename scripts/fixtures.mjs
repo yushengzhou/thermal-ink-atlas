@@ -6,7 +6,9 @@
 // notes and overlay labels, notes kept on the canvas, lit windows behind
 // nearer roofs, block 3's reflected patch and façade colours; probe values
 // unchanged); the block 11 fixture from d75de57 (the block 11 branch tip
-// before block 12). Earlier origins: blocks 1-3 8e76f7a, 4 189b7e1, 5 40b5366,
+// before block 12). Parking, campus, estate and village were refreshed again
+// from c05dff3 (overlay labels moved beside the controls panel, review of #33 N6;
+// only the label strip moved, probes and notes equal). Earlier origins: blocks 1-3 8e76f7a, 4 189b7e1, 5 40b5366,
 // 6 577a750, 7 1e292a5, 8 8735385, 9 de54f2a, 10 f751d00.
 import { execFileSync } from 'node:child_process';
 import { writeFileSync, mkdirSync } from 'node:fs';
