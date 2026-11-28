@@ -19,6 +19,8 @@
 // And again after the #36 review (walls hatched grey in the heat view, the legend
 // in two halves with plain degrees, wind lines grey in the heat view on block 4):
 // probes and note texts equal on all 65 cases.
+// And again after round 3 (walls neutral grey, the phone legend wording, the
+// glass legend note on block 3): probes and note texts equal on all 65 cases.
 // Earlier origins: blocks 1-3 8e76f7a, 4 189b7e1, 5 40b5366,
 // 6 577a750, 7 1e292a5, 8 8735385, 9 de54f2a, 10 f751d00.
 import { execFileSync } from 'node:child_process';
