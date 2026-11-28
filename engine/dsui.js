@@ -63,8 +63,8 @@ export function designCard(d) {
       <tr><td></td><td>coolest / warmest air</td></tr>
       <tr class="t"><td>this block (made up)</td><td>${fmt(s.taMin)} / ${fmt(s.taMax)} °C</td></tr>
       <tr><td>an average July, 1991–2020</td><td>29.2 / 41.4 °C</td></tr>
-      <tr><td>July 2023, the hottest month on record there</td><td>32.7 / 46.0 °C</td></tr>
-      <tr><td colspan="2" class="sub">Air at noon ${fmt(a[12])} °C, at 3 pm ${fmt(a[15])} °C, at 9 pm ${fmt(a[21])} °C. In July 2023 the city had 31 days at or above 43 °C (110 °F); in 2024, 70 such days.</td></tr>
+      <tr><td>July 2023, the hottest month on record there</td><td>32.7 / 45.9 °C</td></tr>
+      <tr><td colspan="2" class="sub">Air at noon ${fmt(a[12])} °C, at 3 pm ${fmt(a[15])} °C, at 9 pm ${fmt(a[21])} °C. In July 2023 the city had 31 days in a row at or above 43 °C (110 °F); in the whole of 2024, a record 70 such days.</td></tr>
     </table>
     <p class="note">The warmest hour comes late, after 4 pm, because the ground keeps heating the air long after noon. The night stays warm too: the coolest hour, just before sunrise, is still ${fmt(s.taMin)} °C.</p>
     ${experts(`<p class="lit">Air: a cosine from ${fmt(s.taMin)} °C at sunrise to ${fmt(s.taMax)} °C at ${hm(s.tmaxHour)}${tag(DS.tmaxHour)} (hourly normals: warmest 16–17 h local standard time), between the 1991–2020 normal and July 2023. Vapour pressure ${s.vapourHpa} hPa${tag(DS.vapour)} (dew point about 10 °C; lowest relative humidity ${r0(rh)}%), wind ${s.wind} m/s${tag(DS.wind)}; no daylight saving. Hot days at a nearby weather station: dew point 11–13 °C, reference evapotranspiration 7.8–8.9 mm a day.</p>
@@ -188,7 +188,7 @@ export function coatCard(d) {
     </table>
     ${tmMiss ? `<p class="caveat">Likely why the model's change is above the measured 2.5–3.2 degrees: a person here sees only the coated road below them; in a test run with the sidewalks and yards around them in view, about +3.1 degrees.</p>` : ''}
     <p class="note">A light coating helps the road and the buildings next to it, and helps at night a little; for people walking at midday it is the wrong tool on its own. Shade over the sidewalk does both.</p>
-    ${experts(`<p class="lit">Phoenix cool pavement pilot, phase 2 (2024): coated road −6.7 K at noon, −5.8 K in the afternoon; pedestrian Tmrt +3.2 K at noon, +2.5 K in the afternoon; air −0.07 K on average, a little warmer at 8–9 pm. Erell et al. (2014): high-albedo street canyons can worsen pedestrian heat stress. Los Angeles coated streets: Middel et al. (2020).</p>
+    ${experts(`<p class="lit">Phoenix cool pavement pilot, phase 2 (2024): coated road −6.7 K at noon, −5.8 K in the afternoon; pedestrian Tmrt +3.2 K at noon, +2.5 K in the afternoon; air −0.07 K on average, the most cooling at 8 pm and a little warmer at 9 pm. Erell et al. (2014): high-albedo street canyons can worsen pedestrian heat stress. Los Angeles coated streets: Middel et al. (2020).</p>
       <p class="caveat">Coating ${gl('albedo', 'albedo')} ${MATERIALS.coolCoat.alpha.value}${tag(MATERIALS.coolCoat.alpha)}; the bare street is the atlas's aged asphalt (${MATERIALS.asphalt.alpha.value}), lighter than the 0.036 measured on the Phoenix streets, so the change in reflectance here (${f2(MATERIALS.coolCoat.alpha.value - MATERIALS.asphalt.alpha.value)}) is likely smaller than in the trial. No cars, no traffic heat, no wind from the street.</p>`, ['coolPave2024', 'erell2014', 'middel2020', 'middelKrayenhoff2019', 'brief11'])}`;
 }
 
@@ -222,7 +222,7 @@ export function deathsCard() {
       <tr><td>2023</td><td>645</td></tr>
       <tr><td>2024</td><td>608</td></tr>
       <tr><td>2025</td><td>430 (313 outdoors, 111 indoors)</td></tr>
-      <tr><td colspan="2" class="sub">In 2024, about half of the people who died were homeless, and drugs were involved in more than half of the deaths. Counts come from the county's public-health reports; news reports gave 427 for 2025.</td></tr>
+      <tr><td colspan="2" class="sub">In 2024, about half of the people who died were homeless, and drugs were involved in more than half of the deaths (as quoted from the report, not re-checked). Counts come from the county's public-health reports; the preliminary count for 2025 was 427.</td></tr>
     </table>
     <p class="note">People without a cool place to go, people working or living outside, and people with heart, lung or kidney illness are most at risk. Shade, water, cooling centres and checking on neighbours are the measures the county names most often. Nothing on this card is calculated by the page.</p>
     ${experts(`<p class="caveat">Figures from the county's 2025 annual report (April 2026) as quoted by the research brief, not re-checked; a preliminary count for 2026 is not shown. Deaths are counted where heat caused or contributed to them.</p>`, ['mcdph2025', 'brief11'])}`;

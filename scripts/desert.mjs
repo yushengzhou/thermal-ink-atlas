@@ -18,7 +18,7 @@ import { tmrtWalls as tmrtWallsVG } from './village.mjs';
 export const DS_NOTES = {
   lat: 'site latitude, ° N (Phoenix Sky Harbor about 33.43); longitude −112.0, time zone UTC−7 (no daylight saving), 15 July',
   taMin: 'the design day\'s coolest air, °C: between the 1991–2020 July normal (29.2) and July 2023 (32.7), as the brief suggests; AZMET hot days 28.7',
-  taMax: 'the design day\'s warmest air, °C: between the July normal (41.4) and July 2023 (46.0), as the brief suggests',
+  taMax: 'the design day\'s warmest air, °C: between the July normal (41.4) and July 2023 (45.9; the brief rounds it to 46.0), as the brief suggests',
   tmaxHour: 'clock hour of the warmest air: the hourly normals put it at 16–17 MST; 16:30, the middle (the spec). Every other block keeps 15:00',
   vapour: 'vapour pressure, hPa: the brief\'s 12 (dew point about 10 °C); AZMET hot days have dew points of 11–13 °C (13–15 hPa), June\'s normal 3.2 °C (7.7 hPa)',
   wind: 'site wind, m/s, the h_c input: AZMET hot days 1.5–2.2 m/s (2 m), the lower end; Sky Harbor 10 m normals are 2.4–4.7 m/s and pedestrian-level wind in Tempe under 1 m/s (h_c uses the formula of the shared engine, issue #20)',
