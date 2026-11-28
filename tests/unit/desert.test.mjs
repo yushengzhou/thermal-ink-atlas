@@ -16,7 +16,7 @@ import { DS, isDesert, UNCOATED, KINDS } from '../../engine/desert.js';
 import { DS_CARDS, DS_BANDS, dsNotes, designCard, sailsCard, arcadeCard, lawnCard, mistCard, coatCard, dryCard, deathsCard } from '../../engine/dsui.js';
 import { base11, bands11, bandVerdicts, causes11, sensitivity11, walkers11, calibrateMesquite, DS_NOTES, sunCheck11 } from '../../scripts/desert.mjs';
 import { bands11Markdown } from '../../scripts/desert-docs.mjs';
-import { pageParts, pageMaterialGroups, coreBytes } from '../../scripts/build.mjs';
+import { pageParts, pageMaterialGroups, coreBytes, CORE_BUDGET } from '../../scripts/build.mjs';
 
 const read = (p) => readFileSync(new URL(`../../${p}`, import.meta.url), 'utf8');
 const near = (a, b, tol, msg) => assert.ok(Math.abs(a - b) <= tol, `${msg ?? ''}: ${a} vs ${b} (± ${tol})`);
@@ -277,7 +277,7 @@ test('build: the block\'s materials are one @page desert group on the desert pag
   const p = pageParts('desert');
   assert.ok(p.matBytes > 2000 && p.ownBytes > 40000);
   for (const c of ['village', 'asphalt-park']) assert.ok(!pageParts(c).bundle.includes('desertLawn: {'), c);
-  assert.ok(coreBytes('desert') < 290000);
+  assert.ok(coreBytes('desert') < CORE_BUDGET);
 });
 
 test('cards (#29 rules from the start): one everyday sentence first, the expert part closed at the bottom, no file paths or "the brief" in the visible part, links only to the references page', () => {

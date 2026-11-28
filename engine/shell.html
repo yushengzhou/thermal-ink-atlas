@@ -14,11 +14,15 @@
     border: 1.5px solid #2b2621; border-radius: 3px 9px 4px 8px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); max-width: 360px; }
   #cartouche h1 { margin: 0; font-size: 20px; letter-spacing: .02em; }
   #cartouche p { margin: 2px 0 0; font-size: 13px; opacity: .8; }
-  #bar { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; gap: 14px; align-items: center;
+  #bar { position: fixed; left: calc(50% + 116px); bottom: 16px; transform: translateX(-50%); display: flex; gap: 14px; align-items: center;
     padding: 8px 16px; background: rgba(246,240,226,.92); border: 1.5px solid #2b2621; border-radius: 8px 3px 9px 4px; }
-  #bar input[type=range] { width: min(46vw, 420px); accent-color: #9a4a33; }
+  #bar input[type=range] { width: min(30vw, 320px); accent-color: #9a4a33; }
   #hourLabel { min-width: 150px; font-variant-numeric: tabular-nums; }
+  #bar button { white-space: nowrap; }
   #keys { font-size: 12px; opacity: .75; }
+  #bar button, #termsBtn { font: 12px/1 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; border-radius: 4px 7px 3px 6px; background: #fbf7ee; cursor: pointer; color: #2b2621; }
+  #bar button[aria-pressed="true"] { background: #2b2621; color: #fbf7ee; }
+  #inkHint { position: fixed; left: 50%; top: 18px; transform: translateX(-50%); padding: 6px 14px; background: rgba(246,240,226,.92); border: 1px solid #2b2621; border-radius: 6px 3px 8px 3px; font-size: 14px; }
   kbd { font: 12px/1 ui-monospace, Menlo, monospace; border: 1px solid #2b2621; border-radius: 3px; padding: 1px 4px; background: #fbf7ee; }
   #legend { position: fixed; right: 18px; top: 18px; width: 240px; padding: 8px 12px; background: rgba(246,240,226,.92);
     border: 1.5px solid #2b2621; border-radius: 6px 3px 8px 3px; transition: opacity .6s; opacity: 0; }
@@ -38,11 +42,10 @@
   #card .caveat { margin: 4px 0; padding: 4px 6px; font-size: 12px; background: #f3e3d6; border-left: 3px solid #8a2f22; }
   #card .note { margin: 8px 0 4px; font-style: italic; }
   #card .src { margin: 4px 0 0; font-size: 11px; opacity: .75; }
-  .noui #cartouche, .noui #bar, .noui #legend, .noui #terms { display: none; }
+  .noui #cartouche, .noui #bar, .noui #legend, .noui #terms, .noui #inkHint { display: none; }
   #cartouche .sim { font-size: 12px; opacity: .7; letter-spacing: .02em; }
   .gl { border-bottom: 1px dotted currentColor; cursor: help; }
   .gl:focus-visible { outline: 1.5px dashed #8a2f22; outline-offset: 2px; }
-  #termsBtn { font: 12px/1 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; border-radius: 4px 7px 3px 6px; background: #fbf7ee; cursor: pointer; color: #2b2621; }
   #terms { position: fixed; right: 18px; bottom: 74px; width: 250px; max-height: 50vh; overflow: auto; padding: 8px 12px; background: #fbf7ee;
     border: 1.5px solid #2b2621; border-radius: 6px 3px 8px 3px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); font-size: 13px; }
   #terms ul { margin: 4px 0 0; padding-left: 16px; }
@@ -71,6 +74,12 @@
   #card .sub { font-size: 11.5px; opacity: .8; font-weight: normal; }
   #card .lit { margin: 4px 0; font-size: 12px; }
   .noui .blockpanel { display: none; }
+  #card .lead { margin: 4px 0 8px; font-size: 14px; }
+  #card details.expert { margin-top: 8px; border-top: 1px dashed #6d6355; padding-top: 4px; }
+  #card details.expert summary, .blockpanel summary { cursor: pointer; font-size: 12px; opacity: .85; }
+  .blockpanel summary { font-size: 13px; margin-bottom: 4px; opacity: 1; }
+/* phones: the bar wraps to the width, panels and the legend shrink, the cartouche gives way */
+  @media (max-width:700px){#bar{left:6px;right:6px;bottom:6px;transform:none;flex-wrap:wrap;gap:6px 10px;padding:6px 8px;justify-content:center}#bar input[type=range]{width:100%;flex-basis:100%}#hourLabel{min-width:0}#keys{display:none}#cartouche{left:6px;top:6px;right:6px;max-width:none;padding:6px 10px}#cartouche h1{font-size:16px}#cartouche p:last-child{display:none}.blockpanel{left:6px;bottom:auto;top:92px;width:auto;max-width:calc(100vw - 12px);max-height:50vh;overflow:auto;box-sizing:border-box}#legend{right:6px;top:auto;bottom:118px;width:180px}#legend .cap{display:none}#card{left:6px !important;right:6px;width:auto;top:92px !important;max-height:calc(100vh - 210px)}#terms{right:6px;left:6px;width:auto;bottom:118px}#inkHint{top:92px;font-size:13px}}
   #card .x { position: absolute; right: 6px; top: 4px; border: 0; background: none; font-size: 18px; cursor: pointer; color: #2b2621; }
 </style>
 </head>
@@ -79,23 +88,26 @@
 <div id="cartouche">
   <h1>Thermal-Ink Atlas</h1>
   <p class="hand">__TITLE__</p>
-  <p class="sim">Simulated block · invented geometry · <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">modelled</span> <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">temperatures</span></p>
+  <p class="sim">Made-up block, <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">calculated</span> <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">temperatures</span></p>
   <p>__SUBTITLE__</p>
 </div>
 <div id="legend"><div class="hand"><span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">surface temperature</span></div><div id="legendBar"></div>
   <div class="ends"><span id="legendLo"></span><span id="legendHi"></span></div>
-  <div class="cap">Simulated with a <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">force-restore model</span> on an invented block, not measured. Inputs not yet verified are flagged on the cards.</div></div>
+  <div class="cap">Calculated for a made-up block, not measured (<span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">how</span>).</div></div>
 <div id="bar">
   <input id="hour" type="range" min="0" max="23.75" step="0.25" value="15" aria-label="hour of day">
   <span id="hourLabel" class="hand"></span>
-  <span id="keys"><kbd>T</kbd> heat · <kbd>H</kbd> hour · __KEYS__drag · wheel · click a parcel</span>
+  <button type="button" data-k="H" aria-label="one hour earlier">−1 h</button><button type="button" data-k="h" aria-label="one hour later">+1 h</button>
+  <button type="button" id="heatBtn" data-k="t" aria-pressed="false">heat view (T)</button>
+  <span id="keys">drag · zoom · click a spot</span>
   <button id="termsBtn" type="button" aria-expanded="false" aria-controls="terms">terms</button>
 </div>
 <div id="terms" role="dialog" aria-label="Glossary of terms" hidden>
   <div class="hand">Terms used here</div>
   <ul id="termsList"></ul>
-  <p class="refs">Full reference list for every block: <a id="refsLink" href="../../references.html">references.html</a> (in this repository, also linked from the gallery page); details in docs/sources.md.</p>
+  <p class="refs">Every source behind every block: <a id="refsLink" href="../../references.html">the reference list</a> (also linked from the gallery).</p>
 </div>
+<div id="inkHint" class="hand" role="status" hidden>Drawing the block… the colours come in as the ink dries</div>
 <div id="fn" role="tooltip" hidden></div>
 <div id="card" data-open="0"></div>
 <script>

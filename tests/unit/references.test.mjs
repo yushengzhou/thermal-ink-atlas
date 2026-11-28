@@ -60,7 +60,7 @@ test('the gallery links to references.html and every block page links to it (rel
   assert.match(readFileSync(new URL('index.html', root), 'utf8'), /href="references.html"/);
   for (const c of cities()) {
     const page = new URL(`cities/${c}/index.html`, root);
-    const m = /<a id="refsLink" href="([^"]+)">references\.html<\/a>/.exec(readFileSync(page, 'utf8'));
+    const m = /<a id="refsLink" href="([^"]+)">[^<]+<\/a>/.exec(readFileSync(page, 'utf8'));
     assert.ok(m, `${c}: no link to references.html`);
     assert.equal(m[1], '../../references.html', c);
     assert.ok(existsSync(new URL(m[1], page)), `${c}: link target missing`);

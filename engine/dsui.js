@@ -9,7 +9,7 @@
 // references page. Health wording is factual and hedged; no real addresses.
 import { SOURCES, BASIS, MATERIALS } from './materials.js';
 import { gl } from './glossary.js';
-import { INTRO, quantHour } from './render.js';
+import { quantHour } from './render.js';
 import { DS, desertStats, waterUse, KINDS, shadeCells } from './desert.js';
 import { DS_STREET, dsOverlay } from './dskit.js';
 
@@ -240,17 +240,11 @@ export const DS_CARDS = [
   ['deaths', 'Heat deaths'],
 ];
 
-const STYLE = `#dsHint{position:fixed;left:50%;top:18px;transform:translateX(-50%);padding:6px 14px;background:rgba(246,240,226,.92);border:1px solid #2b2621;border-radius:6px 3px 8px 3px;font-size:14px}
-.noui #dsHint{display:none}
-#desert summary{cursor:pointer;font-size:13px;margin-bottom:4px}
-#card details.expert{margin-top:8px;border-top:1px dashed #6d6355;padding-top:4px}
-#card details.expert summary{cursor:pointer;font-size:12px;opacity:.8}
-#card .lead{margin:4px 0 8px;font-size:14px}`;
 
 /**
  * The block's plugin for app.js: the street coating (C, button, ?coat=0 to
  * show it bare; default on, as built), the water overlay (L, button,
- * ?water=1), a heat-view button (T), the loading hint, the cards, notes,
+ * ?water=1), the cards, notes (the heat-view button and the loading hint are app.js's),
  * heat-card rows, renderer hooks and the API. env: {scene, world, thermal,
  * root, card, R, S, main, query, setup (desertSetup), hideCard(), reopen(),
  * redraw(), setModel(T), setNotes(n)}.
@@ -272,28 +266,23 @@ export function dsApp(env) {
   };
   R.overlay = dsOverlay;
 
-  root.head.insertAdjacentHTML('beforeend', `<style>${STYLE}</style>`);
   const btn = (attr, v, label) => `<button type="button" ${attr}="${v}">${label}</button>`;
   root.body.insertAdjacentHTML(
     'beforeend',
-    `<div id="dsHint" class="hand" role="status">Drawing the block… the colours come in as the ink dries</div>
-    <div id="desert" class="blockpanel" aria-label="Desert block controls"><details open><summary class="hand">Desert block: buttons and cards</summary>
-        <div class="seg">${btn('data-heat', '1', 'heat view (T)')}${btn('data-coat', '1', 'street coating (C)')}${btn('data-water', '1', 'water used (L)')}</div>
+    `<div id="desert" class="blockpanel" aria-label="Desert block controls"><details open><summary class="hand">Desert block: buttons and cards</summary>
+        <div class="seg">${btn('data-coat', '1', 'street coating (C)')}${btn('data-water', '1', 'water used (L)')}</div>
         <div class="measures"><div class="hand">Cards</div>${DS_CARDS.map(([id, label]) => btn('data-card', id, label)).join('')}</div>
       </details></div>`,
   );
   const el = root.getElementById('desert');
-  const hint = root.getElementById('dsHint');
   el.addEventListener('click', (e) => {
     const b = e.target.closest ? e.target.closest('button') : null;
     if (!b) return;
-    if (b.dataset.heat) window.dispatchEvent(new KeyboardEvent('keydown', { key: 't' }));
-    else if (b.dataset.coat) setCoat(!st.coat);
+    if (b.dataset.coat) setCoat(!st.coat);
     else if (b.dataset.water) setWater(!st.water);
     else if (b.dataset.card) show(b.dataset.card, b);
   });
   function sync() {
-    el.querySelector('[data-heat]').setAttribute('aria-pressed', String(!!S.thermal));
     el.querySelector('[data-coat]').setAttribute('aria-pressed', String(st.coat));
     el.querySelector('[data-water]').setAttribute('aria-pressed', String(st.water));
   }
@@ -378,22 +367,10 @@ export function dsApp(env) {
     for (const k of KINDS) if (F[k].includes(i)) return k;
     return null;
   };
-  let shown = null;
-  let heatShown = null;
   if (env.query.get('coat') === '0') setCoat(false, true);
   return {
     notes: () => dsNotes(scene, noteData()),
     look: () => {
-      // the loading hint while the pen draws and the washes come in (a DOM element, not the canvas)
-      const on = S.intro && S.frame < INTRO.wash;
-      if (on !== shown) {
-        shown = on;
-        hint.hidden = !on;
-      }
-      if (S.thermal !== heatShown) {
-        heatShown = S.thermal;
-        el.querySelector('[data-heat]').setAttribute('aria-pressed', String(!!S.thermal));
-      }
       return { water: st.water, budget: 1 };
     },
     sync,
@@ -422,7 +399,7 @@ export function dsApp(env) {
       return Object.keys(out).length ? out : null;
     },
     cardRows: (f) => {
-      if (f.wall) return `<tr><td colspan="2" class="sub">Light stucco walls: they reflect ${Math.round(DS.wallAlbedo.value * 100)}% of the sun that reaches them${tag(DS.wallAlbedo)}.</td></tr>`;
+      if (f.wall) return `<tr><td colspan="2" class="sub">Light stucco walls: they reflect ${Math.round(DS.wallAlbedo.value * 100)}% of the sun that reaches them.</td></tr>`;
       const rows = [];
       if (f.over) rows.push(`<tr><td>shade over this spot</td><td>${NAME[f.over.kind]}, lets through ${Math.round(f.over.tr * 100)}% of the sun</td></tr>`);
       if (f.water !== undefined) rows.push(`<tr><td>water evaporated a day</td><td>${fmt(f.water)} L per m²</td></tr>`);
@@ -457,7 +434,6 @@ export function dsApp(env) {
       show: (id) => show(id, root.querySelector(`#desert [data-card="${id}"]`)),
       shade: (h = S.hour) => Object.fromEntries(Object.entries(shadeCells(world, thermal, quantHour(h))).map(([k, v]) => [k, v.length])),
       coatRgb: () => (world.dsCoat ? world.dsCoat.slice() : null),
-      hint: () => !hint.hidden,
       models: () => set.cached(),
     },
   };

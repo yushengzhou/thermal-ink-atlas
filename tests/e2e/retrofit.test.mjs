@@ -13,6 +13,8 @@ import { MEASURES, measureCells } from '../../engine/retrofit.js';
 import { cellMat } from '../../engine/thermal.js';
 
 const CITY = { city: 'sponge-retrofit' };
+/** The measure cards sit in a folded list (#29 item 8): open it. */
+const openCards = (page) => page.evaluate(() => { document.querySelector('#retro details.cards').open = true; });
 const strict = process.env.PERF_STRICT === '1' || !process.env.CI;
 
 let browser;
@@ -43,6 +45,10 @@ test('state query modes, buttons and the B key', async () => {
   await page.keyboard.press('b');
   let st = await page.evaluate(() => ({ ...window.atlas.retro.state(), sides: window.atlas.seek(400).sides }));
   assert.deepEqual([st.swap, st.sides], [true, ['after', 'before']], 'B swaps the sides in split view');
+  // the same with the visible button (#29 item 2)
+  await page.click('#retro [data-swap]');
+  st = await page.evaluate(() => window.atlas.retro.state());
+  assert.equal(st.swap, false, 'the swap button swaps back');
   await page.click('#retro [data-state="after"]');
   assert.equal((await page.evaluate(() => window.atlas.retro.state())).state, 'after');
   await page.keyboard.press('B');
@@ -52,22 +58,31 @@ test('state query modes, buttons and the B key', async () => {
   await page.locator('#rain').fill('0');
   st = await page.evaluate(() => window.atlas.retro.state());
   assert.deepEqual([st.aged, st.d], [false, 0]);
-  assert.match(await page.locator('#rainLabel').textContent(), /best case: clear day after overnight rain/);
+  assert.match(await page.locator('#rainLabel').textContent(), /the day after overnight rain \(best case\)/);
   await context.close();
 });
 
-test('dragging the divider moves the split, not the camera', async () => {
+test('dragging the divider\'s round handle moves the split, not the camera; a drag anywhere else on the line pans the map (#29 item 8)', async () => {
   const { page, context } = await go('hour=15&f=400&notes=0');
   const cam0 = (await page.evaluate(() => window.atlas.state())).cam;
   const x0 = await page.evaluate(() => window.atlas.retro.divider());
-  await page.mouse.move(x0, 250);
+  // the handle sits half way down the canvas (800 px high here)
+  await page.mouse.move(x0, 400);
   await page.mouse.down();
-  await page.mouse.move(x0 + 120, 260, { steps: 6 });
-  await page.mouse.move(900, 270, { steps: 6 });
+  await page.mouse.move(x0 + 120, 405, { steps: 6 });
+  await page.mouse.move(900, 410, { steps: 6 });
   await page.mouse.up();
   const st = await page.evaluate(() => ({ ...window.atlas.retro.state(), cam: window.atlas.state().cam }));
   assert.ok(Math.abs(st.split - 900 / 1280) < 0.002, `split ${st.split}`);
   assert.deepEqual(st.cam, cam0);
+  // on the line, away from the handle: the map pans and the split stays
+  await page.mouse.move(900, 250);
+  await page.mouse.down();
+  await page.mouse.move(1000, 260, { steps: 6 });
+  await page.mouse.up();
+  const st2 = await page.evaluate(() => ({ ...window.atlas.retro.state(), cam: window.atlas.state().cam }));
+  assert.equal(st2.split, st.split);
+  assert.notDeepEqual(st2.cam, cam0);
   await context.close();
 });
 
@@ -200,6 +215,7 @@ test('walkers at 15:00: shade density >= 2x sun After; fewer sweating walkers Af
 test('measure cards: ΔTs and ΔTmrt at 12:00 and 15:00, unverified flags, sources; trade-off and sponge-city cards', async () => {
   const { page, context, errors } = await go('hour=15&f=400');
   for (const m of MEASURES) {
+    await openCards(page);
     await page.click(`#retro [data-measure="${m.id}"]`);
     const text = await page.locator('#card').textContent();
     assert.ok(text.includes(m.name), m.id);
@@ -212,7 +228,8 @@ test('measure cards: ΔTs and ΔTmrt at 12:00 and 15:00, unverified flags, sourc
     assert.match(text, /unverified/i, `${m.id}: unverified inputs are flagged`);
     assert.match(text, /no air cooling is modelled/);
   }
-  await page.click('#retro [data-measure="tradeoff"]');
+  await openCards(page);
+    await page.click('#retro [data-measure="tradeoff"]');
   let text = await page.locator('#card').textContent();
   assert.match(text, /cools the road, not the person/);
   assert.match(text, /shade/);
@@ -221,7 +238,8 @@ test('measure cards: ΔTs and ΔTmrt at 12:00 and 15:00, unverified flags, sourc
   assert.match(text, /diffuse wall reflection/);
   const coat = await page.evaluate(() => window.atlas.retro.measure('coating').h12);
   assert.ok(coat.dTs < 0 && coat.dTmrt > 0);
-  await page.click('#retro [data-measure="sponge"]');
+  await openCards(page);
+    await page.click('#retro [data-measure="sponge"]');
   text = await page.locator('#card').textContent();
   for (const s of ['渗、滞、蓄、净、用、排', '70%', '2015', 'co-benefit', 'does not quote one']) assert.ok(text.includes(s), s);
   // a heat card on a retrofitted parcel compares the states
@@ -270,7 +288,8 @@ test('single file < 500 KB, offline, zero external requests; loads in < 1.5 s', 
   await page.keyboard.press('b');
   await page.locator('#rain').fill('1');
   await page.click('#retro [data-aged="0"]');
-  await page.click('#retro [data-measure="sponge"]');
+  await openCards(page);
+    await page.click('#retro [data-measure="sponge"]');
   await page.mouse.click(900, 420);
   await page.waitForTimeout(400);
   assert.deepEqual(requests, []);

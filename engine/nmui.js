@@ -11,7 +11,7 @@
 // is said on every card that quotes them. No real addresses or vendors.
 import { SOURCES, BASIS, MATERIALS } from './materials.js';
 import { gl } from './glossary.js';
-import { INTRO, quantHour } from './render.js';
+import { quantHour } from './render.js';
 import { hash3, hexRgb } from './core.js';
 import { solarPosition } from './sun.js';
 import { NM, marketStats, heatParts, tmrtAt, grillAt, crowdShape, density, personW, isOpen, lightsOn, nearestGrill, centre, stallPower } from './market.js';
@@ -215,12 +215,6 @@ export const NM_CARDS = [
   ['hours', 'Market hours'],
 ];
 
-const STYLE = `#nmHint{position:fixed;left:50%;top:18px;transform:translateX(-50%);padding:6px 14px;background:rgba(246,240,226,.92);border:1px solid #2b2621;border-radius:6px 3px 8px 3px;font-size:14px}
-.noui #nmHint{display:none}
-#market summary{cursor:pointer;font-size:13px;margin-bottom:4px}
-#card details.expert{margin-top:8px;border-top:1px dashed #6d6355;padding-top:4px}
-#card details.expert summary{cursor:pointer;font-size:12px;opacity:.8}
-#card .lead{margin:4px 0 8px;font-size:14px}`;
 
 const SHIRTS = ['#b5533c', '#3f6e6a', '#c9973f', '#5b6b8c', '#e8e1d0', '#8e4b5e', '#2f3e52', '#d07a5a', '#6f8c52', '#d9c35a'].map(hexRgb);
 const LANES = [186.8, 188.9, 195.7, 197.6, 199.5, 201.6];
@@ -294,7 +288,7 @@ export function crowdAt(world, t, hq, heatOf) {
 /**
  * The block's plugin for app.js: the heat-given-off bars (Q, button,
  * ?heat=1), the market open or closed (M, button, ?market=0; default open),
- * a heat-view button (T), the loading hint, the cards, notes, heat-card
+ * the loading hint's wording (the hint and the heat-view button are app.js's), the cards, notes, heat-card
  * rows, the crowd and the cooks, renderer hooks and the API. env: {scene,
  * world, thermal, root, card, R, S, main, query, setup (marketSetup),
  * hideCard(), reopen(), redraw(), setModel(T), setNotes(n)}.
@@ -345,28 +339,25 @@ export function nmApp(env) {
   };
   life.at = (t, hq) => (st.open && isOpen(hq) ? baseAt(t, hq).concat(crowdAt(world, t, hq, heatOf(hq))) : baseAt(t, hq));
 
-  root.head.insertAdjacentHTML('beforeend', `<style>${STYLE}</style>`);
   const btn = (attr, v, label) => `<button type="button" ${attr}="${v}">${label}</button>`;
   root.body.insertAdjacentHTML(
     'beforeend',
-    `<div id="nmHint" class="hand" role="status">Drawing the street… the colours and the lights come in as the ink dries</div>
-    <div id="market" class="blockpanel" aria-label="Night market controls"><details open><summary class="hand">Night market: buttons and cards</summary>
-        <div class="seg">${btn('data-heat', '1', 'heat view (T)')}${btn('data-give', '1', 'heat given off (Q)')}${btn('data-open', '1', 'market open (M)')}</div>
+    `<div id="market" class="blockpanel" aria-label="Night market controls"><details open><summary class="hand">Night market: buttons and cards</summary>
+        <div class="seg">${btn('data-give', '1', 'heat given off (Q)')}${btn('data-open', '1', 'market open (M)')}</div>
         <div class="measures"><div class="hand">Cards</div>${NM_CARDS.map(([id, label]) => btn('data-card', id, label)).join('')}</div>
       </details></div>`,
   );
   const el = root.getElementById('market');
-  const hint = root.getElementById('nmHint');
+  // the shared loading hint (app.js), in this block's words
+  root.getElementById('inkHint').textContent = 'Drawing the street… the colours and the lights come in as the ink dries';
   el.addEventListener('click', (e) => {
     const b = e.target.closest ? e.target.closest('button') : null;
     if (!b) return;
-    if (b.dataset.heat) window.dispatchEvent(new KeyboardEvent('keydown', { key: 't' }));
-    else if (b.dataset.give) setHeat(!st.heat);
+    if (b.dataset.give) setHeat(!st.heat);
     else if (b.dataset.open) setOpen(!st.open);
     else if (b.dataset.card) show(b.dataset.card, b);
   });
   function sync() {
-    el.querySelector('[data-heat]').setAttribute('aria-pressed', String(!!S.thermal));
     el.querySelector('[data-give]').setAttribute('aria-pressed', String(st.heat));
     el.querySelector('[data-open]').setAttribute('aria-pressed', String(st.open));
   }
@@ -432,21 +423,9 @@ export function nmApp(env) {
       crowd: NM.peak.value * personW(),
     };
   }
-  let shown = null;
-  let heatShown = null;
   return {
     notes: () => nmNotes(scene, noteData()),
     look: () => {
-      // the loading hint while the pen draws and the washes come in (a DOM element, not the canvas)
-      const on = S.intro && S.frame < INTRO.wash;
-      if (on !== shown) {
-        shown = on;
-        hint.hidden = !on;
-      }
-      if (S.thermal !== heatShown) {
-        heatShown = S.thermal;
-        el.querySelector('[data-heat]').setAttribute('aria-pressed', String(!!S.thermal));
-      }
       const hq = quantHour(S.hour);
       return { heat: st.heat, open: st.open && isOpen(hq), lit: st.open && lightsOn(site, hq), budget: 1 };
     },
@@ -507,7 +486,6 @@ export function nmApp(env) {
       tmrtAt: (x, y, h = S.hour) => tmrtAt(world, base, x, y, h, st.open),
       crowd: (frame = S.frame, h = S.hour) => life.at(frame / 60, quantHour(h)).filter((a) => a.k >= 1215000).map((a) => ({ x: a.x, y: a.y, cook: !!a.cook, tmrt: a.heat ? a.heat.tmrt : null })),
       grills: () => world.nm.grills.map((g) => [g.x, g.y]),
-      hint: () => !hint.hidden,
       perFigure: () => perFigure(),
       stallW: (type) => stallPower(type),
     },

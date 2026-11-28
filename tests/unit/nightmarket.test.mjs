@@ -17,7 +17,7 @@ import { NM, isMarket, crowdShape, density, personW, grillFlux, grillRaw, grillT
 import { NM_CARDS, NM_BANDS, nmNotes, stoneCard, crowdCard, stallsCard, lightsCard, nightCard, grillCard, hoursCard } from '../../engine/nmui.js';
 import { base12, bands12, bandVerdicts12, causes12, sensitivity12, walkers12, crowd12, overlays12, NM_NOTES } from '../../scripts/nightmarket.mjs';
 import { bands12Markdown } from '../../scripts/nightmarket-docs.mjs';
-import { pageParts, pageMaterialGroups, coreBytes } from '../../scripts/build.mjs';
+import { pageParts, pageMaterialGroups, coreBytes, CORE_BUDGET } from '../../scripts/build.mjs';
 
 const read = (p) => readFileSync(new URL(`../../${p}`, import.meta.url), 'utf8');
 const near = (a, b, tol, msg) => assert.ok(Math.abs(a - b) <= tol, `${msg ?? ''}: ${a} vs ${b} (± ${tol})`);
@@ -307,9 +307,9 @@ test('build: the awning is one @page nightmarket group on this page only; its mo
   const p = pageParts('nightmarket');
   assert.ok(p.matBytes > 300 && p.ownBytes > 40000);
   for (const c of ['desert', 'asphalt-park']) assert.ok(!pageParts(c).bundle.includes('marketAwning: {'), c);
-  assert.ok(coreBytes('nightmarket') < 290000);
+  assert.ok(coreBytes('nightmarket') < CORE_BUDGET);
   const html = read('cities/nightmarket/index.html');
-  assert.ok(html.includes('<kbd>Q</kbd> heat given off · <kbd>M</kbd> market open · '));
+  assert.ok(html.includes('heat given off (Q)') && html.includes('market open (M)') && html.includes('id="heatBtn"'));
 });
 
 test('cards (#29 rules from the start): one everyday sentence first, the expert part closed at the bottom, no file paths or "the brief" in the visible part, links only to the references page; notes in plain words', () => {

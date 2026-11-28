@@ -355,17 +355,17 @@ export function boot(scene, root = document) {
   let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode || pkMode || esMode || cpMode || bsMode || vgMode || dsMode || nmMode ? null : block1Notes();
   function block1Notes() {
   const notesText = {
-    asphalt: ['Kiln Street, old asphalt (albedo 0.12):', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
+    asphalt: ['Kiln Street, old dark asphalt:', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
     lawn: [`Park lawn: ${fmt(at('grass', 15))} °C at 3 pm;`, `${fmt(at('grass', 23))} °C at 11 pm, below the ${fmt(thermal.air(23))} °C air`],
-    shade: ['In the hot hours walkers keep', 'to the shady pavement'],
+    shade: ['3 pm · walkers take', 'the shady side'],
     roofs: [`White roof ${fmt(at('coolRoof', 15))} °C,`, `dark roof ${fmt(at('darkRoof', 15))} °C at 3 pm`],
     pond: [`The pond stays near ${fmt(at('water', 15))} °C`],
   };
   // glossary terms inside the canvas notes: [key, exact substring of a line]
   const notesTerms = {
-    asphalt: [['albedo', 'albedo 0.12'], ['nightLag', `still ${fmt(at('asphalt', 23))} °C at 11 pm`]],
+    asphalt: [['albedo', 'old dark asphalt'], ['nightLag', `still ${fmt(at('asphalt', 23))} °C at 11 pm`]],
     lawn: [['surfaceTemp', `${fmt(at('grass', 15))} °C at 3 pm`], ['nightLag', `${fmt(at('grass', 23))} °C at 11 pm`]],
-    shade: [['tmrt', 'shady pavement']],
+    shade: [['tmrt', 'the shady side']],
     roofs: [['coolRoof', 'White roof']],
     pond: [],
   };
@@ -441,6 +441,9 @@ export function boot(scene, root = document) {
       lastStats.frameMs = performance.now() - tDraw;
     }
     dirty = false;
+    // the loading hint (#29 item 3) while the pen draws and the washes come in: a DOM element, never the canvas
+    const ink = S.intro && S.frame < INTRO.wash;
+    if (inkHint.hidden === ink) inkHint.hidden = !ink;
     // a released scrub ends once the frame is exact again
     if (S.scrub && S.released && !lastStats.preview) {
       S.scrub = false;
@@ -455,11 +458,31 @@ export function boot(scene, root = document) {
   const hourLabel = $('hourLabel');
   const legend = $('legend');
   const card = $('card');
+  const heatBtn = $('heatBtn');
+  const inkHint = $('inkHint');
+  // the bar's buttons (#29: every key has a visible button): T, H and h, as the keys
+  $('bar').addEventListener('click', (e) => {
+    const b = e.target.closest ? e.target.closest('button[data-k]') : null;
+    if (b) window.dispatchEvent(new KeyboardEvent('keydown', { key: b.dataset.k }));
+  });
+  // block panels fold (#29); on a narrow screen they start folded
+  const foldPanels = () => {
+    for (const p of root.querySelectorAll('.blockpanel')) {
+      if (p.querySelector(':scope > details:not(.cards)')) continue;
+      const d = root.createElement('details');
+      d.open = window.innerWidth > 700;
+      d.innerHTML = `<summary class="hand">${p.getAttribute('aria-label') ?? 'Controls'}</summary>`;
+      while (p.firstChild) d.appendChild(p.firstChild);
+      p.appendChild(d);
+    }
+    if (window.innerWidth <= 700) for (const d of root.querySelectorAll('.blockpanel > details')) d.open = false;
+  };
   const syncUi = () => {
     slider.value = String(S.hour);
     hourLabel.textContent = `${hhmm(S.hour)}  ·  air ${fmt(thermal.air(S.hour))} °C`;
     legend.style.opacity = S.thermal ? '1' : '0';
     root.body.classList.toggle('thermal', S.thermal);
+    heatBtn.setAttribute('aria-pressed', String(!!S.thermal));
   };
   // legend gradient from the palette
   const lo = PALETTE_STOPS[0][0];
@@ -502,10 +525,10 @@ export function boot(scene, root = document) {
     root.body.insertAdjacentHTML(
       'beforeend',
       `<div id="retro" class="blockpanel" aria-label="Retrofit controls">
-        <div class="seg" role="group" aria-label="Show Before, After or both">${btn('data-state', 'before', 'Before')}${btn('data-state', 'split', 'Split')}${btn('data-state', 'after', 'After')}</div>
+        <div class="seg" role="group" aria-label="Show Before, After or both">${btn('data-state', 'before', 'Before')}${btn('data-state', 'split', 'Split')}${btn('data-state', 'after', 'After')}${btn('data-swap', '1', 'swap (B)')}</div>
         <div class="row"><label for="rain">${gl('daysSinceRain', 'days since rain')}</label><input id="rain" type="range" min="0" max="${D_MAX}" step="1" aria-label="days since rain"><span id="rainLabel" class="hand"></span></div>
         <div class="seg" role="group" aria-label="Materials aged or new"><span>${gl('albedoAgeing', 'materials')}:</span>${btn('data-aged', '1', 'aged')}${btn('data-aged', '0', 'new')}</div>
-        <div class="measures"><div class="hand">Retrofit measures</div>${MEASURES.map((m) => btn('data-measure', m.id, m.name)).join('')}${btn('data-measure', 'tradeoff', 'Trade-off: reflective pavement', 'class="warn"')}${btn('data-measure', 'sponge', 'Sponge city (海绵城市)')}</div>
+        <details class="cards"><summary class="hand">What each measure does (${MEASURES.length + 2} cards)</summary><div class="measures">${MEASURES.map((m) => btn('data-measure', m.id, m.name)).join('')}${btn('data-measure', 'tradeoff', 'Trade-off: reflective pavement', 'class="warn"')}${btn('data-measure', 'sponge', 'Sponge city (海绵城市, China\'s rain plan)')}</div></details>
       </div>`,
     );
     const el = root.getElementById('retro');
@@ -513,7 +536,10 @@ export function boot(scene, root = document) {
       const b = e.target.closest ? e.target.closest('button') : null;
       if (!b) return;
       if (b.dataset.state) setState(b.dataset.state);
-      else if (b.dataset.aged) setAged(b.dataset.aged === '1');
+      else if (b.dataset.swap) {
+        swapStates();
+        redraw();
+      } else if (b.dataset.aged) setAged(b.dataset.aged === '1');
       else if (b.dataset.measure) showMeasure(b.dataset.measure, b);
     });
     const rain = root.getElementById('rain');
@@ -525,7 +551,7 @@ export function boot(scene, root = document) {
     for (const b of retroUi.el.querySelectorAll('[data-state]')) b.setAttribute('aria-pressed', String(b.dataset.state === S.state));
     for (const b of retroUi.el.querySelectorAll('[data-aged]')) b.setAttribute('aria-pressed', String((b.dataset.aged === '1') === S.aged));
     retroUi.rain.value = String(S.d);
-    retroUi.label.textContent = S.d === 0 ? 'd = 0 · best case: clear day after overnight rain' : `d = ${S.d}`;
+    retroUi.label.textContent = S.d === 0 ? 'the day after overnight rain (best case)' : `${S.d} day${S.d === 1 ? '' : 's'} after rain`;
     root.body.dataset.state = S.state;
   }
   const redraw = () => {
@@ -833,17 +859,19 @@ export function boot(scene, root = document) {
 
   // drag to pan, click to pick
   let drag = null;
-  /** True if a CSS-px x is on the split divider (handle or line). */
-  const onDivider = (x) => retro && S.state === 'split' && Math.abs(x * R.dpr - Math.round(S.split * canvas.width)) <= 12 * R.dpr;
+  /** True if a CSS-px point is on the split divider's round handle (#29 item 8: anywhere else a drag pans the map). */
+  const onDivider = (x, y) => retro && S.state === 'split' && Math.hypot(x * R.dpr - Math.round(S.split * canvas.width), y * R.dpr - canvas.height * 0.5) <= 20 * R.dpr;
   canvas.addEventListener('pointerdown', (e) => {
-    drag = { x: e.clientX, y: e.clientY, cam: { ...S.cam }, moved: false, divider: onDivider(e.clientX) };
+    // any press on the map closes an open footnote (hover or pinned), unless it lands on a margin note
+    if (!fn.hidden && !noteHit(e.clientX, e.clientY)) hideFn();
+    drag = { x: e.clientX, y: e.clientY, cam: { ...S.cam }, moved: false, divider: onDivider(e.clientX, e.clientY) };
     canvas.setPointerCapture(e.pointerId);
   });
   const noteHit = (x, y) => (notesR.noteHits ?? []).find((h) => x >= h.x && x <= h.x + h.w && y >= h.y - h.h && y <= h.y + 3);
   canvas.addEventListener('pointermove', (e) => {
     if (!drag) {
       const h = noteHit(e.clientX, e.clientY);
-      canvas.style.cursor = h ? 'help' : onDivider(e.clientX) ? 'ew-resize' : '';
+      canvas.style.cursor = h ? 'help' : onDivider(e.clientX, e.clientY) ? 'ew-resize' : '';
       if (h && fn.hidden) showFn(h.key, { left: h.x, right: h.x + h.w, top: h.y - h.h, bottom: h.y + 3 }, false);
       else if (!h && !fn.hidden && !fnPinned) hideFn();
       return;
@@ -1020,6 +1048,8 @@ export function boot(scene, root = document) {
     };
   }
 
+  /** A source key with its text, the key linking to this block's group on the references page (#29 item 5). */
+  const refLink = (k) => `<a class="ref" href="../../references.html">[${k}]</a> ${SOURCES[k]}`;
   function showCard(p, x, y) {
     if (!p) return;
     const d = cardData(p);
@@ -1047,10 +1077,24 @@ export function boot(scene, root = document) {
         ${d.compare.tmrtBefore !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} 15:00 Before → After</td><td>${fmt(d.compare.tmrtBefore)} → ${fmt(d.compare.tmrtAfter)} °C</td></tr>` : ''}
         <tr><td colspan="2" class="sub">Before: ${d.compare.beforeMat}; After: ${d.compare.afterMat}</td></tr>`
       : '';
+    const feel = d.tmrtNow !== null ? `; standing here feels like ${fmt(d.tmrtNow)} °C` : '';
     card.innerHTML = `
       <button class="x" aria-label="close">×</button>
       <h3>${d.title}</h3>
+      <p class="lead">At ${hhmm(d.hour)} the ${d.groundNow !== null ? 'top' : 'surface'} here is ${fmt(d.tsNow)} °C${feel}, with the air at ${fmt(d.air)} °C.</p>
       <div class="mat">${d.matId === 'coolroof' || d.matId === 'coolroofAged' || d.matId === 'coolroofNew' ? gl('coolRoof', d.material) : d.material}${retro ? ` · ${d.state === 'after' ? 'After' : 'Before'}` : ''}</div>
+      <table>
+        <tr class="t"><td>${gl('surfaceTemp', 'surface')} now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
+        <tr class="t"><td>surface at 3 pm / ${gl('nightLag', '11 pm')}</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
+        ${d.groundNow !== null ? `<tr><td>ground beneath now</td><td>${fmt(d.groundNow)} °C</td></tr>` : ''}
+        ${d.tmrtNow !== null ? `<tr><td>how hot it ${gl('tmrt', 'feels')} to stand here, now / 3 pm</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
+        <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
+        ${blk && d[blk.cardKey] ? blk.cardRows(d[blk.cardKey]) : ''}
+        ${d.wind && d.wind.at !== null ? `<tr><td>${gl('apparentTemp', 'feels like, with the wind')} now</td><td>${fmt(d.wind.at)} °C</td></tr>` : ''}
+        ${cmp}
+      </table>
+      <p class="note">${d.note}</p>
+      <details class="expert"><summary>For experts</summary>
       <table>
         <tr><td>${gl('albedo', 'albedo α')}</td><td>${P.alpha.value}${tag(P.alpha)}</td></tr>
         <tr><td>${gl('emissivity', 'emissivity ε')}</td><td>${P.eps.value}${tag(P.eps)}</td></tr>
@@ -1058,18 +1102,11 @@ export function boot(scene, root = document) {
         <tr><td>${gl('ef', 'evaporative fraction')}</td><td>${efCell}</td></tr>
         ${wet}
         <tr><td>${gl('svf', 'sky view factor')}</td><td>${d.svf.toFixed(2)}</td></tr>
-        <tr class="t"><td>${gl('surfaceTemp', 'surface')} now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
-        <tr class="t"><td>surface 15:00 / ${gl('nightLag', '23:00')}</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
-        ${d.groundNow !== null ? `<tr><td>ground beneath now</td><td>${fmt(d.groundNow)} °C</td></tr>` : ''}
-        ${d.tmrtNow !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} (person) now / 15:00</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
+        ${d.tmrtNow !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} now / 15:00</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
         ${d.wallsNow !== null ? `<tr><td>sun off the ${gl('wallReflection', 'walls')} now</td><td>${Math.round(d.wallsNow)} W m⁻²</td></tr>` : ''}
         ${d.glassNow !== null && glassMode ? `<tr><td>sun off the ${gl('specular', 'glass')} now</td><td>${Math.round(d.glassNow)} W m⁻²</td></tr>` : ''}
-        <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
-        ${blk && d[blk.cardKey] ? blk.cardRows(d[blk.cardKey]) : ''}
         ${d.wind ? `<tr><td>${gl('windFactor', 'wind factor f_w')}</td><td>${d.wind.fw.toFixed(2)} · ${fmt(d.wind.u)} of ${d.wind.site} m/s</td></tr>
-        <tr><td>convection h_c</td><td>${fmt(d.wind.hc)} W m⁻² K⁻¹</td></tr>
-        ${d.wind.at !== null ? `<tr><td>${gl('apparentTemp', 'apparent temp.')} now</td><td>${fmt(d.wind.at)} °C</td></tr>` : ''}` : ''}
-        ${cmp}
+        <tr><td>convection h_c</td><td>${fmt(d.wind.hc)} W m⁻² K⁻¹</td></tr>` : ''}
       </table>
       ${d.glass ? `<table>
         <tr><td colspan="2" class="sub">${gl('curtainWall', 'Curtain wall')}: ${d.glass.name}</td></tr>
@@ -1077,10 +1114,10 @@ export function boot(scene, root = document) {
         ${d.glass.faces.map((f) => `<tr><td>${f.face} face now</td><td>${f.rho !== null ? `${gl('fresnel', `ρ ${f.rho.toFixed(2)}`)} at θ ${Math.round(f.theta)}°` : 'not in sun'} · glass ${fmt(f.tg)} °C</td></tr>`).join('')}
         <tr><td>glass ${gl('emissivity', 'ε')} / absorptance</td><td>${d.glass.eps.value}${tag(d.glass.eps)} / ${d.glass.absorb.value}${tag(d.glass.absorb)}</td></tr>
       </table>` : ''}
-      <p class="note">${d.note}</p>
       ${d.caveat ? `<p class="caveat">${d.caveat}</p>` : ''}
       ${d.prescribed ? `<p class="caveat">${d.prescribed}</p>` : ''}
-      <p class="src">Sources: ${srcs.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: ${gl('forceRestore', 'force-restore')} (Deardorff 1978), simulated. Basis tags and the model-vs-literature table: docs/sources.md.</p>`;
+      <p class="src">Sources: ${srcs.map(refLink).join('; ')}. Made-up block, calculated temperatures: a ${gl('forceRestore', 'force-restore')} surface model (Deardorff 1978) on a 5 m grid; the air temperature is fixed.</p></details>`;
+    for (const a of card.querySelectorAll('a.ref')) a.setAttribute('href', `${a.getAttribute('href')}#${scene.id}`); // this block's group on the references page
     card.querySelector('.x').onclick = hideCard;
     card._pick = p;
     card._measure = null;
@@ -1278,6 +1315,7 @@ export function boot(scene, root = document) {
   syncGlass();
   syncWf();
   if (blk) blk.sync();
+  foldPanels();
   draw();
   requestAnimationFrame(loop);
 
@@ -1286,6 +1324,8 @@ export function boot(scene, root = document) {
   const vw = (which) => (which ? V[which] : main);
   const api = {
     ready: true,
+    /** True while the loading hint is shown (#29 item 3). */
+    hint: () => !inkHint.hidden,
     info: {
       worldMs: t1 - t0,
       modelMs: t2 - t1,

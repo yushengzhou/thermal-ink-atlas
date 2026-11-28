@@ -82,9 +82,9 @@ test('street coating and water used: coating on by default, ?coat=0 and ?water=1
   await page.click('#desert [data-water]');
   assert.deepEqual(await page.evaluate(() => window.atlas.desert.state()), { coat: true, water: false });
   // the heat-view button is T
-  await page.click('#desert [data-heat]');
+  await page.click('#heatBtn');
   assert.equal(await page.evaluate(() => window.atlas.state().thermal), true);
-  await page.click('#desert [data-heat]');
+  await page.click('#heatBtn');
   assert.equal(await page.evaluate(() => window.atlas.state().thermal), false);
   // R restarts the intro on this page as everywhere
   await page.evaluate(() => window.atlas.seek(400));
@@ -111,15 +111,15 @@ test('street coating and water used: coating on by default, ?coat=0 and ?water=1
 
 test('the loading hint (#29 item 3): shown while the pen draws and the washes come in, gone after; the canvas is the same either way', async () => {
   const { page, context } = await go('hour=15&f=60');
-  assert.equal(await page.evaluate(() => window.atlas.desert.hint()), true);
-  assert.ok(/Drawing the block/.test(await page.locator('#dsHint').textContent()));
+  assert.equal(await page.evaluate(() => window.atlas.hint()), true);
+  assert.ok(/Drawing the block/.test(await page.locator('#inkHint').textContent()));
   await page.evaluate(() => window.atlas.seek(400));
-  assert.equal(await page.evaluate(() => window.atlas.desert.hint()), false);
+  assert.equal(await page.evaluate(() => window.atlas.hint()), false);
   await page.evaluate(() => window.atlas.seek(60));
-  assert.equal(await page.evaluate(() => window.atlas.desert.hint()), true);
+  assert.equal(await page.evaluate(() => window.atlas.hint()), true);
   await context.close();
   const ui = await go('hour=15&f=60&ui=0');
-  assert.equal(await ui.page.locator('#dsHint').isVisible(), false, 'hidden with ?ui=0');
+  assert.equal(await ui.page.locator('#inkHint').isVisible(), false, 'hidden with ?ui=0');
   await ui.context.close();
 });
 

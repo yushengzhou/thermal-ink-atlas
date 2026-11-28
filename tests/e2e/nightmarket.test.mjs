@@ -82,9 +82,9 @@ test('opens at 21:00; Q and M, their buttons and ?heat=1 / ?market=0; the model 
   await page.keyboard.press('Q');
   await page.click('#market [data-open]');
   assert.deepEqual(await page.evaluate(() => window.atlas.market.state()), { heat: false, open: true });
-  await page.click('#market [data-heat]');
+  await page.click('#heatBtn');
   assert.equal(await page.evaluate(() => window.atlas.state().thermal), true);
-  await page.click('#market [data-heat]');
+  await page.click('#heatBtn');
   await page.evaluate(() => window.atlas.seek(400));
   await page.keyboard.press('r');
   const rs = await page.evaluate(() => ({ frame: window.atlas.state().frame, ...window.atlas.market.state() }));
@@ -116,13 +116,13 @@ test('opens at 21:00; Q and M, their buttons and ?heat=1 / ?market=0; the model 
 
 test('the loading hint (#29 item 3): shown while the pen draws and the washes come in, gone after', async () => {
   const { page, context } = await go('f=60');
-  assert.equal(await page.evaluate(() => window.atlas.market.hint()), true);
-  assert.ok(/Drawing the street/.test(await page.locator('#nmHint').textContent()));
+  assert.equal(await page.evaluate(() => window.atlas.hint()), true);
+  assert.ok(/Drawing the street/.test(await page.locator('#inkHint').textContent()));
   await page.evaluate(() => window.atlas.seek(400));
-  assert.equal(await page.evaluate(() => window.atlas.market.hint()), false);
+  assert.equal(await page.evaluate(() => window.atlas.hint()), false);
   await context.close();
   const ui = await go('f=60&ui=0');
-  assert.equal(await ui.page.locator('#nmHint').isVisible(), false, 'hidden with ?ui=0');
+  assert.equal(await ui.page.locator('#inkHint').isVisible(), false, 'hidden with ?ui=0');
   await ui.context.close();
 });
 

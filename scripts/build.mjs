@@ -193,11 +193,9 @@ function build(city) {
 
   const meta = /title: '([^']+)'/.exec(scene)[1];
   const sub = /note: '([^']+)'/.exec(scene)[1];
-  const keys = /retrofit: true/.test(scene) ? '<kbd>B</kbd> before/after · ' : /glassBlock: true/.test(scene) ? '<kbd>G</kbd> glass · ' : /windBlock: true/.test(scene) ? '<kbd>W</kbd> wind · <kbd>A</kbd> air · ' : /hutongBlock: true/.test(scene) ? '<kbd>P</kbd> splash · ' : /parkingBlock: true/.test(scene) ? '<kbd>G</kbd> night release · ' : /estateBlock: true/.test(scene) ? '<kbd>S</kbd> 大寒 · <kbd>C</kbd> condensers · ' : /campusBlock: true/.test(scene) ? '<kbd>I</kbd> water the pitch · <kbd>U</kbd> burn limits · ' : /busBlock: true/.test(scene) ? '<kbd>K</kbd> waiting places · <kbd>U</kbd> burn flags · ' : /villageBlock: true/.test(scene) ? '<kbd>W</kbd> white roofs · <kbd>O</kbd> under the roof · ' : /desertBlock: true/.test(scene) ? '<kbd>C</kbd> street coating · <kbd>L</kbd> water used · ' : /marketBlock: true/.test(scene) ? '<kbd>Q</kbd> heat given off · <kbd>M</kbd> market open · ' : '';
   const html = read('engine/shell.html')
     .replace(/__TITLE__/g, meta)
     .replace('__SUBTITLE__', sub)
-    .replace('__KEYS__', keys)
     .replace('__BUNDLE__', () => bundle.replace(/<\/script/gi, '<\\/script'));
 
   const external = externalRefs(html, `cities/${city}/index.html`);
@@ -229,6 +227,17 @@ export function ownSources(city, keys = pageParts(city).keys) {
  * (pageMaterialGroups). The shared core as this
  * page carries it: what every page pays for.
  */
+/**
+ * The shared core's budget, bytes per page (tests/unit/build.test.mjs). Set at
+ * 290,000 B while blocks 7-12 were still to come; raised to 295,000 B in the
+ * outside-evaluation pass (#29), whose shared page furniture (the bar's heat
+ * and hour buttons, the loading hint, the phone layout, the foldable panels,
+ * the plain-words heat card with its closed expert part) belongs in the core
+ * on purpose. All twelve blocks are built and the largest page is under
+ * 400 KB of the 500 KB limit.
+ */
+export const CORE_BUDGET = 295000;
+
 export function coreBytes(city) {
   const size = Buffer.byteLength(read(`cities/${city}/index.html`));
   const p = pageParts(city);
