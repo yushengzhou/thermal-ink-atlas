@@ -19,9 +19,10 @@ const THERMAL_WALL = hexRgb('#e7dfcd');
 const NIGHT_RGB = hexRgb('#27355a');
 const LIT = hexRgb('#f4cf7a');
 const SWEAT_CSS = 'rgba(143,182,207,0.95)';
-// glass pane colours by type (day view), and the reflection-spot glint
+// glass pane colours by type (day view), the reflection-spot glint and its outline ink
 export const GLASS_RGB = { clear: hexRgb('#7d9ea6'), lowe: hexRgb('#8ea4b8'), mirror: hexRgb('#b9c3c6') };
 const GLINT = [255, 246, 214];
+const SPOT_INK = [176, 98, 40];
 export const HAND_FONT = '"Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive';
 
 function makeCanvas(w, h) {
@@ -321,14 +322,26 @@ export class Renderer {
           if (py > q1) q1 = py;
         }
       }
-      const a = clamp(r[i] / 0.4, 0, 1);
+      const a = clamp(r[i] / 0.6, 0, 1);
       d.data[i * 4] = GLINT[0];
       d.data[i * 4 + 1] = GLINT[1];
       d.data[i * 4 + 2] = GLINT[2];
       d.data[i * 4 + 3] = Math.round(255 * (a > 0 ? 0.25 + 0.75 * a : 0));
     }
     g.putImageData(d, 0, 0);
-    hc.spotImg = { img, R: hc.spot.cell, bb: [p0 - 2, q0 - 2, p1 + 2, q1 + 2] };
+    // the patch's outline (#29 item 7): cell edges between a lit and an unlit cell, on the ground plane
+    const edge = [];
+    const on = (x, y) => x >= 0 && y >= 0 && x < n && y < n && r[y * n + x] > 0;
+    for (let y = 0; y < n; y++) {
+      for (let x = 0; x < n; x++) {
+        if (!on(x, y)) continue;
+        if (!on(x, y - 1)) edge.push([x, y, x + 1, y]);
+        if (!on(x, y + 1)) edge.push([x, y + 1, x + 1, y + 1]);
+        if (!on(x - 1, y)) edge.push([x, y, x, y + 1]);
+        if (!on(x + 1, y)) edge.push([x + 1, y, x + 1, y + 1]);
+      }
+    }
+    hc.spotImg = { img, R: hc.spot.cell, bb: [p0 - 2, q0 - 2, p1 + 2, q1 + 2], edge: edge.map(([a, b, c, e]) => [...iso(a * cell, b * cell, 0), ...iso(c * cell, e * cell, 0)]) };
     return hc.spotImg;
   }
 
@@ -377,6 +390,19 @@ export class Renderer {
     hz.globalCompositeOperation = 'source-over';
     g.globalAlpha = 0.4 * k;
     g.drawImage(this.hatchScratch, 0, 0);
+    // a dashed ink outline, so the patch reads as a shape that moves with the hour
+    g.setTransform(Z, 0, 0, Z, ox, oy);
+    g.globalAlpha = 0.75 * k;
+    g.strokeStyle = rgbCss(SPOT_INK);
+    g.lineWidth = (1.3 * this.dpr) / Z;
+    g.setLineDash([4 / Z, 3 / Z]);
+    g.beginPath();
+    for (const e of si.edge) {
+      g.moveTo(e[0], e[1]);
+      g.lineTo(e[2], e[3]);
+    }
+    g.stroke();
+    g.setLineDash([]);
     g.globalAlpha = 1;
   }
 
@@ -395,6 +421,8 @@ export class Renderer {
       if (it.t === 'car') return null; // block 6: parked cars are outlines over the wash (not modelled)
       if (it.t === 'win') return null;
       const n = f.n ?? [0, 1];
+      // block 3 (#29 item 7): a glass face takes the colour of its own surface temperature
+      if (f.k === 'glass' && this.thermal.glassTemp) return scaleRgb(heatRgb(this.thermal.glassTemp(n[0] ? 'E' : 'S', hc.hq)), n[0] ? 0.92 : 1);
       return scaleRgb(THERMAL_WALL, n[0] ? 0.9 : 1);
     }
     if (Array.isArray(f)) return f;
@@ -480,28 +508,78 @@ export class Renderer {
     ctx.globalAlpha = 1;
   }
 
-  /** Lit windows after dark (drawn above the night tint). */
+  /**
+   * Lit windows after dark (drawn above the night tint). A lit window that a
+   * later face of another building or a tree may hide (their boxes overlap)
+   * goes through a layer from which those later faces are cut out, so a tall
+   * tower's windows no longer shine through the nearer, lower roofs in front
+   * of it (#29 item 7); every other window is drawn straight onto the tile.
+   */
   litWindows(ctx, list, hc, Z, ox, oy, bb) {
-    ctx.setTransform(Z, 0, 0, Z, ox, oy);
-    for (const it of list) {
-      if (it.t !== 'win' || !it.f || it.f.k !== 'win') continue;
-      const b = it.bb;
-      if (bb && (b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3])) continue;
-      if (it.f.h > (it.f.shop ? 0.75 : 0.45)) continue;
-      const p = it.fp;
-      ctx.beginPath();
-      ctx.moveTo(p[0], p[1]);
+    const inTile = (b) => !bb || !(b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3]);
+    const items = list.filter((it) => inTile(it.bb));
+    const path = (g, p) => {
+      g.beginPath();
+      g.moveTo(p[0], p[1]);
       for (let i = 2; i < p.length; i += 2) {
         if (p[i] !== p[i]) {
-          ctx.closePath();
+          g.closePath();
           i += 2;
-          ctx.moveTo(p[i], p[i + 1]);
-        } else ctx.lineTo(p[i], p[i + 1]);
+          g.moveTo(p[i], p[i + 1]);
+        } else g.lineTo(p[i], p[i + 1]);
       }
-      ctx.closePath();
+      g.closePath();
+    };
+    const over = (a, b) => !(a[2] <= b[0] || a[0] >= b[2] || a[3] <= b[1] || a[1] >= b[3]);
+    const lit = (it) => it.t === 'win' && it.f && it.f.k === 'win' && !(it.f.h > (it.f.shop ? 0.75 : 0.45));
+    const face = (it) => it.t !== 'win' && it.fp && this.fillOf(it, 'day', hc);
+    const hidden = new Set();
+    for (let k = 0; k < items.length; k++) {
+      const w = items[k];
+      if (!lit(w)) continue;
+      for (let j = k + 1; j < items.length; j++) {
+        const o = items[j];
+        if (o.b !== w.b && face(o) && over(o.bb, w.bb)) {
+          hidden.add(k);
+          break;
+        }
+      }
+    }
+    ctx.setTransform(Z, 0, 0, Z, ox, oy);
+    ctx.fillStyle = rgbCss(LIT);
+    items.forEach((it, k) => {
+      if (!lit(it) || hidden.has(k)) return;
+      path(ctx, it.fp);
       ctx.globalAlpha = 0.85 * hc.night;
-      ctx.fillStyle = rgbCss(LIT);
       ctx.fill();
+    });
+    if (hidden.size) {
+      const L = this.winLayer ?? (this.winLayer = makeCanvas(TILE, TILE));
+      const g = L.getContext('2d');
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.globalCompositeOperation = 'source-over';
+      g.clearRect(0, 0, TILE, TILE);
+      g.setTransform(Z, 0, 0, Z, ox, oy);
+      g.fillStyle = rgbCss(LIT);
+      let drawn = false;
+      items.forEach((it, k) => {
+        if (hidden.has(k)) {
+          g.globalCompositeOperation = 'source-over';
+          g.globalAlpha = 0.85 * hc.night;
+          path(g, it.fp);
+          g.fill();
+          drawn = true;
+        } else if (drawn && face(it)) {
+          g.globalCompositeOperation = 'destination-out';
+          g.globalAlpha = it.a ?? 1;
+          path(g, it.fp);
+          g.fill();
+        }
+      });
+      g.globalCompositeOperation = 'source-over';
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = 1;
+      ctx.drawImage(L, 0, 0);
     }
     ctx.globalAlpha = 1;
   }
@@ -1100,9 +1178,22 @@ export class Renderer {
       const p = iso(n.at[0], n.at[1], n.at[2] ?? 0);
       const ax = ox + p[0] * Z;
       const ay = oy + p[1] * Z;
-      const tx = ax + n.dx * d;
-      const ty = ay + n.dy * d;
+      let tx = ax + n.dx * d;
+      let ty = ay + n.dy * d;
       if (tx < -200 * d || tx > W + 50 || ty < -60 || ty > H + 20) return;
+      const lines = n.text;
+      const lh = 18 * d;
+      const w = Math.max(...lines.map((l) => ctx.measureText(l).width));
+      let bx = tx - (n.dx < 0 ? w + 6 * d : -6 * d);
+      let by = ty - (n.dy < 0 ? lines.length * lh : 0);
+      // keep the whole note on the canvas (#29 items 4 and 7): shift the box and the leader's end with it
+      const sx = Math.min(0, W - 8 * d - (bx + w + 5 * d)) || Math.max(0, 8 * d - (bx - 5 * d));
+      const top = (W / d < 700 ? 96 : 8) * d; // on a phone the cartouche spans the top
+      const sy = Math.min(0, H - 8 * d - (by + lines.length * lh + 3 * d)) || Math.max(0, top - (by - 3 * d));
+      bx += sx;
+      by += sy;
+      tx += sx;
+      ty += sy;
       ctx.globalAlpha = alpha;
       // leader: a gently bowed ink line with a dot at the anchor
       ctx.strokeStyle = rgbCss(INK);
@@ -1117,11 +1208,6 @@ export class Renderer {
       ctx.beginPath();
       ctx.arc(ax, ay, 2.2 * d, 0, Math.PI * 2);
       ctx.fill();
-      const lines = n.text;
-      const lh = 18 * d;
-      const w = Math.max(...lines.map((l) => ctx.measureText(l).width));
-      const bx = tx - (n.dx < 0 ? w + 6 * d : -6 * d);
-      const by = ty - (n.dy < 0 ? lines.length * lh : 0);
       ctx.fillStyle = 'rgba(248,243,231,0.94)';
       ctx.fillRect(bx - 5 * d, by - 3 * d, w + 10 * d, lines.length * lh + 6 * d);
       ctx.strokeStyle = 'rgba(43,38,33,0.55)';

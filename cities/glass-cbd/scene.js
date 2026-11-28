@@ -155,7 +155,7 @@ export const SCENE = {
   notes: [
     { at: [147.5, 217.5, 0], dx: -40, dy: 95, key: 'spot' },
     { at: [210, 170, 70], dx: 110, dy: -70, key: 'glass' },
-    { at: [135, 306, 0], dx: 60, dy: 90, key: 'lane' },
+    { at: [135, 306, 0], dx: 100, dy: 150, key: 'lane' },
     { at: [262.5, 252.5, 0], dx: 90, dy: 30, key: 'plaza' },
   ],
   startCam: { z: 2, cx: 235, cy: 225 },
