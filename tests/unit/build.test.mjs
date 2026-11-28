@@ -152,3 +152,10 @@ test('every page bundles each source key its heat cards and cards can show (and 
     assert.ok(!/\bv\([^()\n]*,\s*(?:true|false),\s*'/.test(html), `${c}: a parameter note was bundled`);
   }
 });
+
+test('the promo film stays out of the pages and out of npm test (#34)', () => {
+  for (const c of CITIES) assert.ok(!/(^|[^@\w])media\//.test(readFileSync(file(c), 'utf8')), `${c} refers to media/`);
+  assert.ok(!/(^|[^@\w])media\//.test(readFileSync(`${root}index.html`, 'utf8')), 'the gallery refers to media/');
+  const pkg = JSON.parse(readFileSync(`${root}package.json`, 'utf8'));
+  for (const k of ['test', 'test:unit', 'test:e2e', 'build']) assert.ok(!/film/.test(pkg.scripts[k]), `npm run ${k} runs the film`);
+});
