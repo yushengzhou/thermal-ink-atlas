@@ -31,7 +31,7 @@ Every key also has a button on the page.
 
 | Key or button | Does |
 |---|---|
-| `T` or **heat view** | switch between the drawing and the heat view (colours = how much hotter or cooler each surface is than the air; the legend's **show real °C** button shows plain temperatures instead) |
+| `T` or **heat view** | switch between the drawing and the heat view (colours = how much hotter or cooler each surface is than the air; the legend's **show plain °C** button shows plain temperatures instead) |
 | `H` / `Shift+H`, **+1 h** / **−1 h**, or the slider | move through the day, hour by hour |
 | drag, mouse wheel | move around, zoom in and out |
 | click a spot | a card with that spot's material, temperatures and sources |
@@ -231,7 +231,7 @@ MIT, see [`LICENSE`](LICENSE).
 
 | 按键或按钮 | 作用 |
 |---|---|
-| `T` 或 **heat view** | 在线描图和热力视图之间切换（颜色表示地表比气温高或低多少；图例上的 **show real °C** 按钮可改看绝对温度） |
+| `T` 或 **heat view** | 在线描图和热力视图之间切换（颜色表示地表比气温高或低多少；图例上的 **show plain °C** 按钮可改看绝对温度） |
 | `H` / `Shift+H`、**+1 h** / **−1 h** 或滑块 | 按小时前后移动时间 |
 | 拖动、鼠标滚轮 | 平移、缩放 |
 | 点击某处 | 弹出卡片：该处的材料、温度和文献来源 |

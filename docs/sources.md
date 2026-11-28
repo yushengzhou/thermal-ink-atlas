@@ -429,11 +429,30 @@ the asphalt in colour than on the absolute scale (RGB distance 95 against 122; t
 every block (as it opens) that the coolest cell stays above the cool end and the 99th percentile below the warm end.
 
 The legend speaks in degrees, not K: "how much hotter or cooler than the air (°C)", "0 = the air at 15:00, 35.0 °C" and "cooler /
-hotter than the air"; its button ("show real °C", or `?scale=abs`) switches to the earlier absolute scale,
+hotter than the air"; its button ("show plain °C", or `?scale=abs`) switches to the earlier absolute scale,
 18–70 °C, and back ("compare with the air"). Heat cards and margin notes keep absolute °C; the cards add how many
-degrees above or below the air. **Walls are not calculated** (only ground and roofs; block 3's glass faces are): in the heat view,
-on both scales, they are drawn in a hatched lavender grey (#cec4d4) that is in neither palette, and the legend says "walls: not
-calculated", so a wall is never read as being at the air's temperature.
+degrees above or below the air.
+
+**Opaque walls are not calculated cell by cell.** The model gives them an assumed temperature (`wallTemp`: air + 2 K + 6 K ×
+K↓/900, see Equations), which feeds the longwave and reflected sunshine reaching the ground and people nearby, but no wall has a
+result of its own to show. In the heat view, on both scales, they are drawn in a hatched neutral grey (#a0a0a0: no hue, so it
+cannot be read as either side of the ΔT scale; at least ΔE 9 from every colour of both palettes, `tests/unit/thermal.test.mjs`),
+and the legend says "walls: not calculated", so a wall is never read as being at the air's temperature.
+
+**Block 3's glass façades are calculated**, per orientation: T_g = Ta + a_g·I_f/(h_o + h_i) (see *Glass surface temperature*:
+the brief's balance, with no measurement behind it, so there is no cited range to check it against). The heat view colours each
+glass face by that value, and on that page the legend adds "glass façades: calculated"; each glass card gives the façade
+temperatures at the hour shown. At 15:00 the two faces the drawing shows are out of the direct sun (the south face is grazed at
+84° from straight-on, the east face is in shade), so they sit close to the air:
+
+| Glass, 15:00 (air 35.0 °C) | south face | east face | west face (sunlit, not in view) |
+|---|---|---|---|
+| clear | 35.5 °C (+0.5) | 35.1 °C (+0.1) | 37.2 °C (+2.2) |
+| coated (low-e) | 36.4 °C (+1.4) | 35.4 °C (+0.4) | 41.6 °C (+6.6) |
+| mirror | 36.8 °C (+1.8) | 35.6 °C (+0.6) | 43.8 °C (+8.8) |
+
+Lit head-on the same balance gives air + 3.3 K (clear) to air + 13.4 K (mirror). No measured range is cited for glass surface
+temperatures, so these values are not checked against one; they are shown as calculated, not tuned.
 
 ## Glossary sources
 
