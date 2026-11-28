@@ -51,7 +51,7 @@ test('waiting places and burn flags: default off, ?spots= and ?burn=, keys K and
     window.atlas.seek(400);
     return window.atlas.stats();
   });
-  assert.ok(/1-min contact-burn limit/.test(s.flagsLabel) && /51 °C/.test(s.flagsLabel) && /unverified/.test(s.flagsLabel), s.flagsLabel);
+  assert.ok(/burn bare skin in a minute/.test(s.flagsLabel) && /51 °C/.test(s.flagsLabel) && !/unverified/.test(s.flagsLabel), s.flagsLabel);
   assert.ok(/head in direct sun/.test(s.spotsLabel) && /adult head height/.test(s.spotsLabel), s.spotsLabel);
   // the rings agree with the point model: as many red rings as places with more than half the sun on the head
   const lit = B.world.bus.pts.filter((p) => p.kind === 'slot' && B.P.head(p.k, 15) >= 0.5).length;
