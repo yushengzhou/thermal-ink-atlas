@@ -1,12 +1,15 @@
 // Blocks 1-11 are unchanged by later blocks: every page renders the same
 // pixels, notes and probe values as its fixture page, kept gzipped in
-// tests/fixtures/base-pages: blocks 1-3 as built before block 4 (main at
-// 8e76f7a), block 4 as built before block 5 (189b7e1), block 5 as built
-// before block 6 (40b5366, the block 5 branch), block 6 as first built
-// (577a750, before the shared-core diet), block 7 as on its branch before
-// block 8 (1e292a5), block 8 as on its branch before block 9 (8735385), block 9 as on its branch
-// before block 10 (de54f2a), block 10 as on its branch before block 11 (f751d00), block 11 as on its branch before block 12 (d75de57). Both pages run in the
-// same browser here, so the comparison does not depend on the platform.
+// tests/fixtures/base-pages. Blocks 1-10 were refreshed deliberately in the
+// final pass (outside evaluation #29) from ec0417e: plain-word margin notes and
+// overlay labels, notes kept on the canvas, lit windows no longer shining
+// through nearer roofs, and the glass block's reflected patch and façade
+// colours; their probe values were checked equal to the earlier fixtures
+// (block 1-3 from 8e76f7a, 4 from 189b7e1, 5 from 40b5366, 6 from 577a750,
+// 7 from 1e292a5, 8 from 8735385, 9 from de54f2a, 10 from f751d00) before
+// the refresh. Block 11's fixture is still the one from d75de57 (the block 11
+// branch tip before block 12). Both pages run in the same browser here, so
+// the comparison does not depend on the platform.
 // A deliberate change to these blocks must refresh the fixtures: commit the
 // rebuilt pages, then `npm run fixtures` (gzips them from HEAD) and commit.
 import { test, after, before } from 'node:test';
@@ -32,7 +35,7 @@ const CASES = {
   desert: ['hour=15&f=640', 'thermal&hour=15&f=640', 'thermal&hour=21&f=640&notes=0&cam=3.5,300,120', 'hour=15&f=640&water=1&notes=0&cam=3,300,200', 'thermal&hour=15&f=777&coat=0&cam=4,120,190', 'f=120', 'hour=12&f=1500&coat=0&water=1&cam=5,250,40'],
 };
 // which page each fixture is (for messages)
-const BEFORE = { 'asphalt-park': 'block 4', 'sponge-retrofit': 'block 4', 'glass-cbd': 'block 4', waterfront: 'block 5', hutong: 'block 6', parking: 'the shared-core diet', estate: 'block 8', campus: 'block 9', busstop: 'block 10', village: 'block 11', desert: 'block 12' };
+const BEFORE = { 'asphalt-park': 'the #29 pass', 'sponge-retrofit': 'the #29 pass', 'glass-cbd': 'the #29 pass', waterfront: 'the #29 pass', hutong: 'the #29 pass', parking: 'the #29 pass', estate: 'the #29 pass', campus: 'the #29 pass', busstop: 'the #29 pass', village: 'the #29 pass', desert: 'block 12' };
 
 let browser;
 let dir;

@@ -2,15 +2,12 @@
 // of the block 1-11 pages as committed at a git ref (default HEAD). Run it only
 // after a deliberate, reviewed change to those blocks, and commit the result.
 // Usage: npm run fixtures [-- <git-ref> [city ...]]   (default: every block 1-11 city)
-// The block 1-3 fixtures come from 8e76f7a (before block 4), the block 4
-// fixture from 189b7e1 (the block 4 branch before block 5), the block 5
-// fixture from 40b5366 (the block 5 branch before block 6), the block 6
-// fixture from 577a750 (block 6 before its shared-core diet), the block 7
-// fixture from 1e292a5 (the block 7 branch tip before block 8), the block 8
-// fixture from 8735385 (the block 8 branch tip before block 9), the block 9
-// fixture from de54f2a (the block 9 branch tip before block 10), the block 10
-// fixture from f751d00 (the block 10 branch tip before block 11), the block 11
-// fixture from d75de57 (the block 11 branch tip before block 12).
+// The block 1-10 fixtures come from ec0417e (the final #29 pass: plain-word
+// notes and overlay labels, notes kept on the canvas, lit windows behind
+// nearer roofs, block 3's reflected patch and façade colours; probe values
+// unchanged); the block 11 fixture from d75de57 (the block 11 branch tip
+// before block 12). Earlier origins: blocks 1-3 8e76f7a, 4 189b7e1, 5 40b5366,
+// 6 577a750, 7 1e292a5, 8 8735385, 9 de54f2a, 10 f751d00.
 import { execFileSync } from 'node:child_process';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
