@@ -492,7 +492,7 @@ const SOURCES = {
   nwsPsr: 'NWS Phoenix (PSR), 2024 Year in Review and July 2024 Climate Summary (checked via the round-2 reference check): 70 days at or above 110 F (43.3 C) in the whole of 2024, a record; 118 F (47.8 C) on 5 and 8 July',
   middelKrayenhoff2019: 'Middel & Krayenhoff (2019) Science of the Total Environment 687, 137-151, doi 10.1016/j.scitotenv.2019.06.085, pedestrian thermal exposure in Tempe during record heat (MaRTy cart); the block-11 brief quotes it together with Middel et al. 2021: peak sunlit Tmrt 76.2 C, 76.4 C in a bright east-west canyon at an air of 48.5 C, pedestrian wind under 1 m/s on average (unverified)',
   colter2019: 'Colter, Middel & Martin (2019) Urban Forestry & Urban Greening 44, 126429, doi 10.1016/j.ufug.2019.126429, natural and artificial shade (trees and ramadas) in Phoenix neighbourhood parks (the brief gives no numbers from it; unverified)',
-  az1195: 'University of Arizona Cooperative Extension publication AZ1195, via the block-11 brief: bermudagrass crop coefficient 0.78 in July (title not recorded; unverified)',
+  az1195: 'Brown & Kopec (rev. 2014) Converting Reference Evapotranspiration into Turf Water Use, University of Arizona Cooperative Extension AZ1195 (checked via the round-2 reference check): bermudagrass Kc 0.78 in July for turf watered daily, 0.1 lower for watering every 3 days (Table 2 note), so 0.68 here',
   amwua: 'Arizona Municipal Water Users Association (AMWUA), Landscaping with Style: Watering Schedules, via the block-11 brief: a lawn watered every 3 days, about 6.4 mm a day applied; a desert tree with a 6.1 m canopy about 890 L every 7-21 days, i.e. about 1.4-4.3 L per m2 of canopy a day (the schedule is an image; the figures not checked; unverified)',
   templeton2018: 'Templeton, Vivoni, Wang & Schreiner-McGraw (2018) J. Geophys. Res. Atmospheres 123(4), 2111-2128, doi 10.1002/2017JD027845, water and energy fluxes over urban land covers in Phoenix (checked against the abstract): irrigated turf grass has the highest evaporative fraction',
   gober2009: 'Gober, Brazel, Quay, Myint et al. (2010, online 2009) J. American Planning Association 76(1), 109-121, doi 10.1080/01944360903433113, watered landscapes and the Phoenix heat island (via the block-11 brief): 32.8% more outdoor water for 0.41-0.82 K per hour faster evening cooling (unverified)',
@@ -3669,6 +3669,28 @@ const GLINT = [255, 246, 214];
 const SPOT_INK = [176, 98, 40];
 const HAND_FONT = '"Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive';
 
+/**
+ * Left edge of a bottom overlay label w px wide whose text baseline is at by
+ * (box: 5 px either side, 18 px above to 4 px below): centred, kept 8 px inside
+ * the canvas, and moved beside any page panel it would sit behind (R.avoid:
+ * the panels' boxes in canvas pixels, set by the app before each frame) when
+ * there is room; otherwise as far from the panel as the canvas allows.
+ */
+function labelX(R, w, W, by) {
+  const d = R.dpr;
+  let bx = clamp(W / 2 - w / 2, 8 * d, W - w - 8 * d);
+  for (const r of R.avoid ?? []) {
+    if (r[3] <= by - 18 * d || r[1] >= by + 4 * d || r[2] <= bx - 5 * d || r[0] >= bx + w + 5 * d) continue;
+    const right = r[2] + 13 * d;
+    const left = r[0] - 13 * d - w;
+    if (right <= W - w - 8 * d) bx = right;
+    else if (left >= 8 * d) bx = left;
+    // no room beside it: as far from the panel as the canvas allows, so the least of the label is hidden
+    else bx = r[0] + r[2] < W ? W - w - 8 * d : 8 * d;
+  }
+  return bx;
+}
+
 function makeCanvas(w, h) {
   if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(w, h);
   const c = document.createElement('canvas');
@@ -4160,8 +4182,47 @@ class Renderer {
    * of it (#29 item 7); every other window is drawn straight onto the tile.
    */
   litWindows(ctx, list, hc, Z, ox, oy, bb) {
-    const inTile = (b) => !bb || !(b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3]);
-    const items = list.filter((it) => inTile(it.bb));
+    // which windows a later face may hide depends only on the display list and the tile (a face's day
+    // fill is never null by the hour), so it is worked out once per list and tile, not for every hour a
+    // drag bakes; the object list is a fresh slice of this.items on every bake, so the memo hangs on those
+    const memo = this.winMemo ?? (this.winMemo = new WeakMap());
+    const own = list.length === this.items.length - this.groundCount && list[0] === this.items[this.groundCount] ? this.items : list;
+    let perList = memo.get(own);
+    if (!perList) memo.set(own, (perList = new Map()));
+    const key = `${list.length},${Z},${ox},${oy},${bb ? bb.join(',') : ''}`;
+    let hit = perList.get(key);
+    if (!hit) {
+      const inTile = (b) => !bb || !(b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3]);
+      const its = list.filter((it) => inTile(it.bb));
+      const over = (a, b) => !(a[2] <= b[0] || a[0] >= b[2] || a[3] <= b[1] || a[1] >= b[3]);
+      const lit0 = (it) => it.t === 'win' && it.f && it.f.k === 'win' && !(it.f.h > (it.f.shop ? 0.75 : 0.45));
+      const face0 = (it) => it.t !== 'win' && it.fp && this.fillOf(it, 'day', hc);
+      const hid = new Set();
+      for (let k = 0; k < its.length; k++) {
+        const w = its[k];
+        if (!lit0(w)) continue;
+        for (let j = k + 1; j < its.length; j++) {
+          const o = its[j];
+          if (o.b !== w.b && face0(o) && over(o.bb, w.bb)) {
+            hid.add(k);
+            break;
+          }
+        }
+      }
+      if (perList.size > 256) perList.clear(); // pans and zooms make new tiles; keep the memo small
+      // the layer only holds the hidden windows, so only a later face over one of them can cut anything:
+      // those faces (boxes grown by 2 px for the anti-aliased edge) and the box around the hidden windows
+      const m = 2 / Z;
+      const grow = (b) => [b[0] - m, b[1] - m, b[2] + m, b[3] + m];
+      const hb = [...hid].map((k) => grow(its[k].bb));
+      const first = hid.size ? Math.min(...hid) : its.length;
+      const cut = its.map((it, j) => j > first && !hid.has(j) && !!face0(it) && hb.some((b) => over(grow(it.bb), b)));
+      const box = hb.length ? hb.reduce((a, b) => [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[2], b[2]), Math.max(a[3], b[3])]) : null;
+      hit = { items: its, hidden: hid, lit: its.map(lit0), cut, box };
+      perList.set(key, hit);
+    }
+    const { items, hidden } = hit;
+    const lit = (it, k) => hit.lit[k];
     const path = (g, p) => {
       g.beginPath();
       g.moveTo(p[0], p[1]);
@@ -4174,56 +4235,51 @@ class Renderer {
       }
       g.closePath();
     };
-    const over = (a, b) => !(a[2] <= b[0] || a[0] >= b[2] || a[3] <= b[1] || a[1] >= b[3]);
-    const lit = (it) => it.t === 'win' && it.f && it.f.k === 'win' && !(it.f.h > (it.f.shop ? 0.75 : 0.45));
-    const face = (it) => it.t !== 'win' && it.fp && this.fillOf(it, 'day', hc);
-    const hidden = new Set();
-    for (let k = 0; k < items.length; k++) {
-      const w = items[k];
-      if (!lit(w)) continue;
-      for (let j = k + 1; j < items.length; j++) {
-        const o = items[j];
-        if (o.b !== w.b && face(o) && over(o.bb, w.bb)) {
-          hidden.add(k);
-          break;
-        }
-      }
-    }
     ctx.setTransform(Z, 0, 0, Z, ox, oy);
     ctx.fillStyle = rgbCss(LIT);
     items.forEach((it, k) => {
-      if (!lit(it) || hidden.has(k)) return;
+      if (!lit(it, k) || hidden.has(k)) return;
       path(ctx, it.fp);
       ctx.globalAlpha = 0.85 * hc.night;
       ctx.fill();
     });
     if (hidden.size) {
-      const L = this.winLayer ?? (this.winLayer = makeCanvas(TILE, TILE));
-      const g = L.getContext('2d');
-      g.setTransform(1, 0, 0, 1, 0, 0);
-      g.globalCompositeOperation = 'source-over';
-      g.clearRect(0, 0, TILE, TILE);
-      g.setTransform(Z, 0, 0, Z, ox, oy);
-      g.fillStyle = rgbCss(LIT);
-      let drawn = false;
-      items.forEach((it, k) => {
-        if (hidden.has(k)) {
-          g.globalCompositeOperation = 'source-over';
-          g.globalAlpha = 0.85 * hc.night;
-          path(g, it.fp);
-          g.fill();
-          drawn = true;
-        } else if (drawn && face(it)) {
-          g.globalCompositeOperation = 'destination-out';
-          g.globalAlpha = it.a ?? 1;
-          path(g, it.fp);
-          g.fill();
-        }
-      });
-      g.globalCompositeOperation = 'source-over';
+      // the layer depends only on the tile and the windows' alpha, so after dark (night = 1, alpha 0.85)
+      // every hour of a tile shares one: a few layers are kept (1 MB each), keyed like the memo
+      const alpha = 0.85 * hc.night;
+      const lk = `${key}|${alpha}`;
+      const layers = this.winLayers ?? (this.winLayers = new Map());
+      let L = layers.get(lk)?.get(own);
+      if (!L) {
+        L = makeCanvas(TILE, TILE);
+        const g = L.getContext('2d');
+        g.setTransform(Z, 0, 0, Z, ox, oy);
+        g.fillStyle = rgbCss(LIT);
+        items.forEach((it, k) => {
+          if (hidden.has(k)) {
+            g.globalCompositeOperation = 'source-over';
+            g.globalAlpha = alpha;
+            path(g, it.fp);
+            g.fill();
+          } else if (hit.cut[k]) {
+            g.globalCompositeOperation = 'destination-out';
+            g.globalAlpha = it.a ?? 1;
+            path(g, it.fp);
+            g.fill();
+          }
+        });
+        g.globalCompositeOperation = 'source-over';
+        if (layers.size >= 8) layers.delete(layers.keys().next().value);
+        layers.set(lk, new WeakMap([[own, L]]));
+      }
+      // the pixel box around the hidden windows: outside it the layer is empty
+      const px0 = clamp(Math.floor(ox + hit.box[0] * Z) - 2, 0, TILE);
+      const py0 = clamp(Math.floor(oy + hit.box[1] * Z) - 2, 0, TILE);
+      const px1 = clamp(Math.ceil(ox + hit.box[2] * Z) + 2, 0, TILE);
+      const py1 = clamp(Math.ceil(oy + hit.box[3] * Z) + 2, 0, TILE);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.globalAlpha = 1;
-      ctx.drawImage(L, 0, 0);
+      if (px1 > px0 && py1 > py0) ctx.drawImage(L, px0, py0, px1 - px0, py1 - py0, px0, py0, px1 - px0, py1 - py0);
     }
     ctx.globalAlpha = 1;
   }
@@ -4884,7 +4940,7 @@ class Renderer {
 }
 
 
-return { TILE, HOUR_STEP, INTRO, PREVIEW_BUDGET, quantHour, GLASS_RGB, HAND_FONT, Renderer };
+return { TILE, HOUR_STEP, INTRO, PREVIEW_BUDGET, quantHour, GLASS_RGB, HAND_FONT, labelX, Renderer };
 })();
 
 __m['glossary'] = (() => {
@@ -5244,7 +5300,7 @@ __m['dskit'] = (() => {
 // R.overlay (set by dsui.js dsApp), so the other pages do not carry this code.
 const { hash3, hexRgb, scaleRgb, mixRgb, iso, rgbCss, clamp, makeRng } = __m['core'];
 const { box, jitter, WIN, ROOF_RGB } = __m['kit'];
-const { HAND_FONT } = __m['render'];
+const { HAND_FONT, labelX } = __m['render'];
 
 const DOOR = hexRgb('#7a5638');
 const STEEL = hexRgb('#5e6166');
@@ -5505,8 +5561,8 @@ function label(R, ctx, text, W, H) {
   ctx.font = `${Math.round(13 * d)}px ${HAND_FONT}`;
   ctx.textBaseline = 'bottom';
   const w = ctx.measureText(text).width;
-  const bx = clamp(W / 2 - w / 2, 8 * d, W - w - 8 * d);
   const by = H - 84 * d;
+  const bx = labelX(R, w, W, by);
   ctx.fillStyle = 'rgba(248,243,231,0.94)';
   ctx.fillRect(bx - 5 * d, by - 18 * d, w + 10 * d, 22 * d);
   ctx.strokeStyle = rgbCss(INK_RGB, 0.7);
@@ -5618,7 +5674,7 @@ const DS = {
   mesquiteTarget: v(-16.7, 'middel2021', 'cited'),
   treeWater: v([1.4, 4.3], 'amwua', 'range'),
   lawnApplied: v(6.4, 'amwua', 'cited'),
-  eto: v([7.1, 8.9], 'azmet', 'range'),
+  eto: v([7.1, 8.9], 'azmet', 'interp'),
   kc: v(0.68, 'az1195', 'interp'),
   misters: v([1.5, 3.4], 'huang2025', 'range'),
   warm: v(6, 'engine', 'engine'),
@@ -5977,7 +6033,7 @@ function lawnCard(d) {
       <tr><td colspan="2" class="sub">Lawn surface at 3 pm ${fmt(L.ts15)} °C${tsMiss ? ` (more than 2 degrees above the air${MISS})` : ' (measured: irrigated grass is never far above the air)'}; sunlit gravel ${fmt(d.st.gravel.ts15)} °C${outside(d.st.gravel.ts15, DS_BANDS.gravel) ? ` (measured 55–63 °C${MISS}: likely the engine's strong midday sun and an air 1.4 degrees warmer than on the measurement day; gravel at the light end of its likely range would be about 61 °C)` : ''}.</td></tr>
     </table>
     <p class="note">The lawn cools itself by evaporating water: the sun that would heat it goes into turning water to vapour. In dry desert air that works well, but it needs water every day. A neighbourhood study found that much more watering would cool the evenings only a little faster.</p>
-    ${experts(`<p class="lit">Reference evapotranspiration at Phoenix Encanto in July 7.1–7.8 mm a day; bermudagrass crop coefficient 0.78 in July for turf watered every day, 0.1 lower when watered every 3 days, so ${DS.kc.value}${tag(DS.kc)} here; with reference evapotranspiration of ${DS.eto.value[0]}–${DS.eto.value[1]} mm a day${tag(DS.eto)} (the July mean to hot days) that is about ${DS_BANDS.evap[0]}–${DS_BANDS.evap[1]} mm a day (1 mm = 1 L m⁻²); lawns watered every 3 days, about 6.4 mm a day applied; a desert tree with a 6.1 m crown about 890 L every 7–21 days. Gober et al.: 32.8% more outdoor water for 0.41–0.82 K per hour faster evening cooling. Middel et al. (2014): xeric yards warmest, then oasis, then mesic; by day the form of a neighbourhood matters more than its landscaping. Middel et al. (2015): about −0.14 K of air per 1% more tree canopy.</p>
+    ${experts(`<p class="lit">Reference evapotranspiration at Phoenix Encanto: July mean 7.1–7.8 mm a day, hot days of 2023–25 7.8–8.9 mm; bermudagrass crop coefficient 0.78 in July for turf watered every day, 0.1 lower when watered every 3 days, so ${DS.kc.value}${tag(DS.kc)} here; with reference evapotranspiration of ${DS.eto.value[0]}–${DS.eto.value[1]} mm a day${tag(DS.eto)} (the low end of the July mean to the high end of the hot days) that is about ${DS_BANDS.evap[0]}–${DS_BANDS.evap[1]} mm a day (1 mm = 1 L m⁻²); lawns watered every 3 days, about 6.4 mm a day applied; a desert tree with a 6.1 m crown about 890 L every 7–21 days. Gober et al.: 32.8% more outdoor water for 0.41–0.82 K per hour faster evening cooling. Middel et al. (2014): xeric yards warmest, then oasis, then mesic; by day the form of a neighbourhood matters more than its landscaping. Middel et al. (2015): about −0.14 K of air per 1% more tree canopy.</p>
       <p class="caveat">The lawn's ${gl('ef', 'evaporative fraction')} is ${MATERIALS.desertLawn.ef.value}${tag(MATERIALS.desertLawn.ef)}: a fixed share of its net sunshine. It does not depend on how dry the air is, and it cannot draw extra heat out of the hot, dry air blowing over the lawn (the "oasis effect": a real lawn here likely evaporates about as much water as all its net sunshine could). Here it evaporates ${L.evapMin.toFixed(1)}–${L.evapMax.toFixed(1)} L a day across the lawn, ${evapMiss ? `above the ${DS_BANDS.evap[0]}–${DS_BANDS.evap[1]} L estimate for a lawn watered every 3 days: likely because a fixed evaporative fraction of ${MATERIALS.desertLawn.ef.value} behaves like turf watered every day (crop coefficient 0.78: about ${(DS.eto.value[0] * 0.78).toFixed(1)}–${(DS.eto.value[1] * 0.78).toFixed(1)} L); not tuned` : `inside the ${DS_BANDS.evap[0]}–${DS_BANDS.evap[1]} L estimate`}.</p>`, ['azmet', 'az1195', 'amwua', 'gober2009', 'middel2014', 'middel2015', 'templeton2018', 'brief11'])}`;
 }
 
@@ -6688,8 +6744,25 @@ function boot(scene, root = document) {
     return [{ v: l, clip: [0, sx] }, { v: r, clip: [sx, canvas.width] }];
   };
   let notesR = R; // renderer whose note hit boxes are live
+  // the page panels a bottom overlay label moves beside (render.js labelX), in canvas pixels
+  const avoidRects = () => {
+    const c = canvas.getBoundingClientRect();
+    const k = canvas.width / (c.width || 1);
+    const out = [];
+    for (const el of root.querySelectorAll('.blockpanel, #cartouche, #legend')) {
+      const r = el.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) out.push([(r.left - c.left) * k, (r.top - c.top) * k, (r.right - c.left) * k, (r.bottom - c.top) * k]);
+    }
+    return out;
+  };
+  // a panel folded or opened moves the labels: draw again
+  root.addEventListener('toggle', () => {
+    dirty = true;
+  }, true);
   const draw = () => {
     const tDraw = performance.now();
+    const avoid = avoidRects();
+    for (const v of Object.values(V)) v.R.avoid = avoid;
     if (!retro) lastStats = R.frame(S.frame, S.cam, look(S.frame));
     else {
       const lk = look(S.frame);
