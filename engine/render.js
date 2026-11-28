@@ -516,8 +516,47 @@ export class Renderer {
    * of it (#29 item 7); every other window is drawn straight onto the tile.
    */
   litWindows(ctx, list, hc, Z, ox, oy, bb) {
-    const inTile = (b) => !bb || !(b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3]);
-    const items = list.filter((it) => inTile(it.bb));
+    // which windows a later face may hide depends only on the display list and the tile (a face's day
+    // fill is never null by the hour), so it is worked out once per list and tile, not for every hour a
+    // drag bakes; the object list is a fresh slice of this.items on every bake, so the memo hangs on those
+    const memo = this.winMemo ?? (this.winMemo = new WeakMap());
+    const own = list.length === this.items.length - this.groundCount && list[0] === this.items[this.groundCount] ? this.items : list;
+    let perList = memo.get(own);
+    if (!perList) memo.set(own, (perList = new Map()));
+    const key = `${list.length},${Z},${ox},${oy},${bb ? bb.join(',') : ''}`;
+    let hit = perList.get(key);
+    if (!hit) {
+      const inTile = (b) => !bb || !(b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3]);
+      const its = list.filter((it) => inTile(it.bb));
+      const over = (a, b) => !(a[2] <= b[0] || a[0] >= b[2] || a[3] <= b[1] || a[1] >= b[3]);
+      const lit0 = (it) => it.t === 'win' && it.f && it.f.k === 'win' && !(it.f.h > (it.f.shop ? 0.75 : 0.45));
+      const face0 = (it) => it.t !== 'win' && it.fp && this.fillOf(it, 'day', hc);
+      const hid = new Set();
+      for (let k = 0; k < its.length; k++) {
+        const w = its[k];
+        if (!lit0(w)) continue;
+        for (let j = k + 1; j < its.length; j++) {
+          const o = its[j];
+          if (o.b !== w.b && face0(o) && over(o.bb, w.bb)) {
+            hid.add(k);
+            break;
+          }
+        }
+      }
+      if (perList.size > 256) perList.clear(); // pans and zooms make new tiles; keep the memo small
+      // the layer only holds the hidden windows, so only a later face over one of them can cut anything:
+      // those faces (boxes grown by 2 px for the anti-aliased edge) and the box around the hidden windows
+      const m = 2 / Z;
+      const grow = (b) => [b[0] - m, b[1] - m, b[2] + m, b[3] + m];
+      const hb = [...hid].map((k) => grow(its[k].bb));
+      const first = hid.size ? Math.min(...hid) : its.length;
+      const cut = its.map((it, j) => j > first && !hid.has(j) && !!face0(it) && hb.some((b) => over(grow(it.bb), b)));
+      const box = hb.length ? hb.reduce((a, b) => [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[2], b[2]), Math.max(a[3], b[3])]) : null;
+      hit = { items: its, hidden: hid, lit: its.map(lit0), cut, box };
+      perList.set(key, hit);
+    }
+    const { items, hidden } = hit;
+    const lit = (it, k) => hit.lit[k];
     const path = (g, p) => {
       g.beginPath();
       g.moveTo(p[0], p[1]);
@@ -530,56 +569,51 @@ export class Renderer {
       }
       g.closePath();
     };
-    const over = (a, b) => !(a[2] <= b[0] || a[0] >= b[2] || a[3] <= b[1] || a[1] >= b[3]);
-    const lit = (it) => it.t === 'win' && it.f && it.f.k === 'win' && !(it.f.h > (it.f.shop ? 0.75 : 0.45));
-    const face = (it) => it.t !== 'win' && it.fp && this.fillOf(it, 'day', hc);
-    const hidden = new Set();
-    for (let k = 0; k < items.length; k++) {
-      const w = items[k];
-      if (!lit(w)) continue;
-      for (let j = k + 1; j < items.length; j++) {
-        const o = items[j];
-        if (o.b !== w.b && face(o) && over(o.bb, w.bb)) {
-          hidden.add(k);
-          break;
-        }
-      }
-    }
     ctx.setTransform(Z, 0, 0, Z, ox, oy);
     ctx.fillStyle = rgbCss(LIT);
     items.forEach((it, k) => {
-      if (!lit(it) || hidden.has(k)) return;
+      if (!lit(it, k) || hidden.has(k)) return;
       path(ctx, it.fp);
       ctx.globalAlpha = 0.85 * hc.night;
       ctx.fill();
     });
     if (hidden.size) {
-      const L = this.winLayer ?? (this.winLayer = makeCanvas(TILE, TILE));
-      const g = L.getContext('2d');
-      g.setTransform(1, 0, 0, 1, 0, 0);
-      g.globalCompositeOperation = 'source-over';
-      g.clearRect(0, 0, TILE, TILE);
-      g.setTransform(Z, 0, 0, Z, ox, oy);
-      g.fillStyle = rgbCss(LIT);
-      let drawn = false;
-      items.forEach((it, k) => {
-        if (hidden.has(k)) {
-          g.globalCompositeOperation = 'source-over';
-          g.globalAlpha = 0.85 * hc.night;
-          path(g, it.fp);
-          g.fill();
-          drawn = true;
-        } else if (drawn && face(it)) {
-          g.globalCompositeOperation = 'destination-out';
-          g.globalAlpha = it.a ?? 1;
-          path(g, it.fp);
-          g.fill();
-        }
-      });
-      g.globalCompositeOperation = 'source-over';
+      // the layer depends only on the tile and the windows' alpha, so after dark (night = 1, alpha 0.85)
+      // every hour of a tile shares one: a few layers are kept (1 MB each), keyed like the memo
+      const alpha = 0.85 * hc.night;
+      const lk = `${key}|${alpha}`;
+      const layers = this.winLayers ?? (this.winLayers = new Map());
+      let L = layers.get(lk)?.get(own);
+      if (!L) {
+        L = makeCanvas(TILE, TILE);
+        const g = L.getContext('2d');
+        g.setTransform(Z, 0, 0, Z, ox, oy);
+        g.fillStyle = rgbCss(LIT);
+        items.forEach((it, k) => {
+          if (hidden.has(k)) {
+            g.globalCompositeOperation = 'source-over';
+            g.globalAlpha = alpha;
+            path(g, it.fp);
+            g.fill();
+          } else if (hit.cut[k]) {
+            g.globalCompositeOperation = 'destination-out';
+            g.globalAlpha = it.a ?? 1;
+            path(g, it.fp);
+            g.fill();
+          }
+        });
+        g.globalCompositeOperation = 'source-over';
+        if (layers.size >= 8) layers.delete(layers.keys().next().value);
+        layers.set(lk, new WeakMap([[own, L]]));
+      }
+      // the pixel box around the hidden windows: outside it the layer is empty
+      const px0 = clamp(Math.floor(ox + hit.box[0] * Z) - 2, 0, TILE);
+      const py0 = clamp(Math.floor(oy + hit.box[1] * Z) - 2, 0, TILE);
+      const px1 = clamp(Math.ceil(ox + hit.box[2] * Z) + 2, 0, TILE);
+      const py1 = clamp(Math.ceil(oy + hit.box[3] * Z) + 2, 0, TILE);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.globalAlpha = 1;
-      ctx.drawImage(L, 0, 0);
+      if (px1 > px0 && py1 > py0) ctx.drawImage(L, px0, py0, px1 - px0, py1 - py0, px0, py0, px1 - px0, py1 - py0);
     }
     ctx.globalAlpha = 1;
   }
