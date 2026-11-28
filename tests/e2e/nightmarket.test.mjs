@@ -184,7 +184,7 @@ test('deterministic in every mode (heat given off, market open, heat view, intro
   }
 });
 
-test('thermal 21:00: the stone of the street and the square read close to the model, warmer than the asphalt back street', async () => {
+test('thermal 21:00: the stone of the street and the open square read close to the model', async () => {
   const cam = '3,200,150';
   const F = B.world.nm.F;
   const square = visibleCells(F.ref, cam);
@@ -321,7 +321,8 @@ test('single file < 500 KB, offline, zero external requests; loads in < 1.5 s', 
   await context.close();
 });
 
-for (const [name, query] of [['night', ''], ['thermal', 'thermal'], ['heat given off', 'heat=1'], ['day', 'hour=15']]) {
+// an hour in the query opens the page after the intro (as the other blocks' pacing tests do)
+for (const [name, query] of [['night', 'hour=21'], ['thermal', 'thermal&hour=21'], ['heat given off', 'hour=21&heat=1'], ['day', 'hour=15']]) {
   test(`frame pacing, ${name} view`, async () => {
     const { page, context } = await go(query);
     await page.evaluate(() => window.atlas.perf(30));
