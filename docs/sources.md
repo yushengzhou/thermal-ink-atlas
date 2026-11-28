@@ -249,7 +249,7 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - **[asaeda1996]** Asaeda, Ca & Wake (1996) Atmospheric Environment 30(3), 413-427, doi 10.1016/1352-2310(94)00140-5, Heat storage of pavement and its effect on the lower atmosphere; via the block-6 brief: asphalt emits about 150 W m-2 more infrared than bare soil at its maximum (extra sensible heat 50 vs 200 W m-2 across abstracts, unverified)
 - **[zhu2022]** Zhu et al. (2022) Frontiers in Environmental Science, doi 10.3389/fenvs.2021.795474, ECOSTRESS Phoenix: roads the only class warming at night; a 100% road pixel about 4.5 K warmer than grass at night (interpretation; the abstract covers daytime only, so the night claim is unverified)
 - **[hoehne2020]** Hoehne et al. (2020/2022) Sustainable and Resilient Infrastructure, doi 10.1080/23789689.2020.1773013: Phoenix pavement and vehicle sensible heat, 67% roads, 29% parking, 3.9% vehicles (checked against the abstract)
-- **[matias2025]** Matias, Mills, Silva, Girotti & Lopes (2025) City and Environment Interactions 28, 100232, doi 10.1016/j.cacint.2025.100232, parked cars in Lisbon (abstract and press): air up to 3.8 K warmer next to a black car (about 2 K on average, per the press); the 71 C black-roof figure is from [matias2026]
+- **[matias2025]** Matias, Mills, Silva, Girotti & Lopes (2025) City and Environment Interactions 28, 100232, doi 10.1016/j.cacint.2025.100232, parked cars in Lisbon (abstract and press): air up to 3.8 K warmer next to a black car (about 2 K on average, per the press); the 71 C black-roof figure is from [matias2026] (a later paper)
 - **[matias2026]** Matias, Silva, Mills & Lopes (2026) Discover Environment 4, 93, doi 10.1007/s44274-026-00593-8, vehicles as thermally active surfaces, via the round-2 reference check: black car roofs a median of about 71 C, about 20 K above white ones (the paper not read; unverified)
 - **[levinson2011]** Levinson et al. (2011) Applied Energy 88(12) 4343-4357, doi 10.1016/j.apenergy.2011.05.006 (checked against the abstract): black vs silver car roof up to 25 K hotter; cabin soak air 5-6 K
 - **[vanos2018]** Vanos, Middel, Poletti & Selover (2018) Temperature 5(3) 276-292, doi 10.1080/23328940.2018.1468205: Tempe, steady-state mean cabin air 47.6 C in sun vs 39.5 C in shade (the abstract); after 1 h cabin 46 vs 38 C and dashboard 69 vs 48 C are the ASU press release's figures
@@ -419,32 +419,32 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Low-e glass** (glass-cbd only): Typical: Solar reflectance about 0.15–0.35 head-on; Singapore caps glass daylight reflectance at 20%. [brief3, bca]
 - **AC waste heat** (glass-cbd only): Typical: Dense urban areas 20–70 W m⁻² of ground area, sometimes over 100; central Tokyo over 400 W m⁻² by day. [xie2016, sailor2011]
 - **Wind factor (f_w)** (waterfront only): In this model: Over the river 1.00; along Quay Street 1.20; Rope Walk, behind the warehouses, 0.46 (mean), 0.37 within one building height of the wall. [this model]
-- **Ventilation corridor** (waterfront only): Typical: Planning guides ask for corridors within about 30° of the prevailing wind; along the Ota River (Hiroshima) river cooling was detected 150–500 m inland along streets perpendicular to the river (unverified). [corridor, ota]
+- **Ventilation corridor** (waterfront only): Typical: Planning guides ask for corridors within about 30° of the prevailing wind; along the Ota River (Hiroshima) river cooling was detected 150–500 m inland along streets perpendicular to the river (not yet checked). [corridor, ota]
 - **Fetch** (waterfront only): Typical: River Don, Sheffield: about 30 m with open banks; Cheonggyecheon, Seoul: 30–80 m; small water bodies: −0.2 K typical in the afternoon. [hathway2012, cheonggyecheon, jacobs2020]
 - **Sheltering (lee)** (waterfront only): Typical: Recirculation behind a building about 1.6–2.6 times its width; recovery to the open wind after about 5 building heights is an assumption of this model. [wake, brief4]
 - **Apparent temperature** (waterfront only): Typical: AT = Ta + 0.348 e − 0.70 ws + 0.70 Q/(ws + 10) − 4.25 (e in hPa, ws the 10 m wind in m/s, Q in W m⁻²; as given by the Australian Bureau of Meteorology). [bom, steadman1994]
 - **Siheyuan (四合院)** (hutong only): In this model: Courtyard sky view 0.21–0.87 (10th–90th percentile), under a mat awning 0.18; Harbin's traditional courtyards measured 0.22–0.37. [this model]
-- **Tianpeng (天棚), the summer mat awning** (hutong only): Typical: Reed mats let through about 10–30% of the sun (the brief, unverified); this model uses 20%. [deng, brief5]
+- **Tianpeng (天棚), the summer mat awning** (hutong only): Typical: Reed mats let through about 10–30% of the sun (not yet checked); this model uses 20%. [deng, brief5]
 - **Surface water store (W)** (hutong only): In this model: Each splash leaves 1 mm at 19:00; on the splashed lanes 0.49 mm is left at 21:00 and 0.20 mm at 23:00, and it is gone by morning. [this model]
 - **Wet-bulb temperature** (hutong, desert only): In this model: At 21:00 the air is 31.0 °C and its wet-bulb 23.9 °C; the coolest wet paving stays 2.7 K above the wet-bulb. [this model]
 - **Heat storage** (parking only): In this model: At 11 pm open asphalt is 1.9 °C above the air and still gives back 105 W m⁻²; bare soil 68 W m⁻², the rusty shed roof 1 W m⁻². [this model]
 - **Damping depth (d)** (parking only): In this model: With the Stempihar inputs: asphalt 0.127 m, concrete 0.132 m (admittance 1573 and 1877; the model uses 1200 and 1785). [this model]
 - **Ground heat flux (G)** (parking only): In this model: Open asphalt takes in up to 276 W m⁻² (at 11:00) and gives back 121 W m⁻² at 8 pm, 113 W m⁻² at 4 am. [this model]
 - **Thermal inertia** (parking only): In this model: At 11 pm: asphalt 30.9 °C, concrete 31.9 °C, ballast 28.8 °C, soil 28.8 °C, shed roof 25.5 °C (air 28.9 °C). [this model]
-- **大寒日 sunlight rule** (estate only): Typical: GB 50180-2018: at least 2 h on 大寒 in zones I, II, III and VII for cities of 500,000 or more (3 h in smaller ones); flats for the elderly 2 h on the winter solstice (冬至); new homes in old-area renovation 1 h on 大寒 (table values not checked against the standard, unverified). The draft of the Zhejiang rules (DB33/1050, now the 2016 edition): only stretches of 10 min or more count, steps of at most 5 min, the point 0.9 m above the floor. [gb50180, db33]
+- **大寒日 sunlight rule** (estate only): Typical: GB 50180-2018: at least 2 h on 大寒 in zones I, II, III and VII for cities of 500,000 or more (3 h in smaller ones); flats for the elderly 2 h on the winter solstice (冬至); new homes in old-area renovation 1 h on 大寒 (table values not checked against the standard, not yet checked). The draft of the Zhejiang rules (DB33/1050, now the 2016 edition): only stretches of 10 min or more count, steps of at most 5 min, the point 0.9 m above the floor. [gb50180, db33]
 - **Effective height (H_eff)** (estate only): Typical: 18 floors of 2.9 m with the ground floor at grade: 52.2 − 0.9 = 51.3 m. [brief7, db33]
-- **Spacing coefficient (G / H_eff)** (estate only): Typical: At 35° N for long slabs: 1.45 for 1 h, 1.47 for 2 h and 1.52 for 3 h of 大寒 sun; 1.64–1.74 on the winter solstice (calculated in the brief). The coefficient method is "no longer appropriate" for high-rises in the draft of the Zhejiang rules (DB33/1050). [brief7, db33]
-- **Condenser heat rejection** (estate only): Typical: A 3.5 kW split unit with EER 3.3 rejects about 4.6 kW; at 0.5–0.7 m³/s of fan air that is 5.5–7.5 K above the air (calculated in the brief). Measured in Changsha: exhaust 5.2 K above the air by day, 6.5 K at night (Mu et al. 2025). [brief7, mu2025]
-- **EER (energy efficiency ratio)** (estate only): Typical: Split air conditioners about 3–4; the brief uses 3.3. [brief7]
+- **Spacing coefficient (G / H_eff)** (estate only): Typical: At 35° N for long slabs: 1.45 for 1 h, 1.47 for 2 h and 1.52 for 3 h of 大寒 sun; 1.64–1.74 on the winter solstice (a worked estimate). The coefficient method is "no longer appropriate" for high-rises in the draft of the Zhejiang rules (DB33/1050). [brief7, db33]
+- **Condenser heat rejection** (estate only): Typical: A 3.5 kW split unit with EER 3.3 rejects about 4.6 kW; at 0.5–0.7 m³/s of fan air that is 5.5–7.5 K above the air (a worked estimate). Measured in Changsha: exhaust 5.2 K above the air by day, 6.5 K at night (Mu et al. 2025). [brief7, mu2025]
+- **EER (energy efficiency ratio)** (estate only): Typical: Split air conditioners about 3–4; this block uses 3.3. [brief7]
 - **Artificial turf** (campus only): Typical: In summer sun 65–80 °C, at times over 85 °C: 9.4–34 K hotter than natural grass at the surface, but only 0.5–1.2 K warmer in the air above (review of 23 studies); at night it cools to about the grass temperature. [singh2024, jim2016]
 - **Crumb-rubber infill** (campus only): Typical: Lab tests: SBR 53.5 °C against TPE 45.6 °C under the same lamp; a shock pad adds about 1.8 K, the blade colour 1–2 K. [singh2024]
 - **Contact-burn threshold** (campus only): Typical: 1 min of contact: metal 51 °C, ceramics, glass and stone 56 °C, plastics and wood 60 °C; 10 min: 48 °C for all of them; 8 h: 43 °C. From 1 min on these apply to children too (CENELEC Guide 29). [iso13732]
-- **Shade sail** (campus, desert only): Typical: Lets through about 10–30% of the sun (unverified); Gilbert, Arizona at noon: rubber 46.7 °C under a sail against 87.2 °C in sun; Lubbock: 168 W m⁻² less radiation absorbed by a child. [brief8, vanos2016, vanos2017]
-- **Solar transmittance (τ)** (busstop only): Typical: 10 mm twinwall polycarbonate: clear 0.80, opal 0.47, bronze 0.43 (a datasheet, unverified); opaque metal, PV and ad panels 0; the solar heat gain coefficient of a window is a different number. [brettMartin, brief9]
+- **Shade sail** (campus, desert only): Typical: Lets through about 10–30% of the sun (not yet checked); Gilbert, Arizona at noon: rubber 46.7 °C under a sail against 87.2 °C in sun; Lubbock: 168 W m⁻² less radiation absorbed by a child. [brief8, vanos2016, vanos2017]
+- **Solar transmittance (τ)** (busstop only): Typical: 10 mm twinwall polycarbonate: clear 0.80, opal 0.47, bronze 0.43 (a datasheet, not yet checked); opaque metal, PV and ad panels 0; the solar heat gain coefficient of a window is a different number. [brettMartin, brief9]
 - **Profile angle (φ)** (busstop only): Typical: At 35° N on 20 July the sun stands 61° high at 14:00 and 25° at 17:00, from the west-south-west to the west; a roof 1.45 m above a seated head must reach (that height) / tan φ past the head to shade it. [brief9]
-- **Headway** (busstop only): Typical: Here 10 min (an assumption of the brief, 5–15 min), with gaps spread by a coefficient of variation of 0.4 (0.3–0.5, unverified); riders who arrive at random then wait (h / 2)(1 + cv²) on average. [brief9, fan2002]
-- **Heat dose of a wait** (busstop only): Typical: No standard dose exists for a few minutes of waiting; the brief defines it on UTCI, which this engine does not compute, so the apparent temperature stands in. [brief9, bom]
-- **Contact-burn threshold (benches, rails, decks)** (busstop only): Typical: 1 min of contact: metal 51 °C, ceramics, glass and stone 56 °C (concrete read with them), plastics and wood 60 °C; 10 min: 48 °C; bare metal burns in about 1 s at 65–70 °C (unverified). [iso13732, brief9]
+- **Headway** (busstop only): Typical: Here 10 min (an assumption, 5–15 min), with gaps spread by a coefficient of variation of 0.4 (0.3–0.5, not yet checked); riders who arrive at random then wait (h / 2)(1 + cv²) on average. [brief9, fan2002]
+- **Heat dose of a wait** (busstop only): Typical: No standard dose exists for a few minutes of waiting; its definition uses UTCI, which this engine does not compute, so the apparent temperature stands in. [brief9, bom]
+- **Contact-burn threshold (benches, rails, decks)** (busstop only): Typical: 1 min of contact: metal 51 °C, ceramics, glass and stone 56 °C (concrete read with them), plastics and wood 60 °C; 10 min: 48 °C; bare metal burns in about 1 s at 65–70 °C (not yet checked). [iso13732, brief9]
 - **Urban village (城中村)** (village only): Typical: In Shenzhen, satellite surface heat islands of about 3.5 K over high-density urban villages, against 2.6 K for multi-storey and 1.6 K for high-rise housing; urban villages had the worst summer thermal-humidity index in one Shenzhen study. [wu2015, yi2022, brief10]
 - **Handshake building (握手楼)** (village only): Typical: Lanes about 1–3 m wide between walls 18–25 m high: a sky view of about 0.04–0.16 at the lane floor (canyon formula). [brief10]
 - **Indoor radiant temperature (proxy)** (village only): Typical: Measured rooms under tin roofs: 0.6–4 K above the outdoor air (Delhi, Yavatmal, Ahmedabad); white paint on tin cooled the room by about 1 K, other cool roofs 2.0–2.4 K. [tasgaonkar2022, vellingiri2020, brief10]
@@ -453,7 +453,7 @@ Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature range
 - **Green roof** (sponge-retrofit only): Typical: Albedo about 0.15–0.25; up to 18 °C cooler than a black roof in a New York case; Bowen ratio about 1–2. [brief2, noaaGreen, heusinger]
 - **Rain garden** (sponge-retrofit only): Typical: No measured cooling figure in our sources; this block uses engine assumptions (evaporative fraction 0.8 wet, 0.35 dry, 3-day drying). [engine, mccoll]
 - **Days since rain (d)** (sponge-retrofit only): Typical: Wet surfaces dry with a time scale τ: pavers about 1 day, soils about 3 days, green-roof substrate about 4 days. [brief2, mccoll]
-- **Bowen ratio and evaporative fraction** (sponge-retrofit only): Typical: Green roofs: Bowen ratio below 1 to about 2 in field data; this block uses EF 0.5 for a wet and 0.25 for a dry green roof (the brief’s values); dry paving EF near 0. [heusinger, brief2]
+- **Bowen ratio and evaporative fraction** (sponge-retrofit only): Typical: Green roofs: Bowen ratio below 1 to about 2 in field data; this block uses EF 0.5 for a wet and 0.25 for a dry green roof (values chosen for this block); dry paving EF near 0. [heusinger, brief2]
 - **Sponge city (海绵城市)** (sponge-retrofit only): Typical: Target: absorb and use 70% of rainfall on site; 20% of built-up area by 2020, 80% by 2030. [sponge2015]
 - **Ageing (aged vs new)** (sponge-retrofit only): Typical: Cool pavement coating 0.26 → 0.18 within a year; cool roofs must reach 0.72 new or 0.50 after 3 years (Chicago code). [ko2022, chicago]
 - **Xeriscape** (desert only): Typical: In Phoenix neighbourhoods, xeric yards were the warmest by day, then "oasis" yards, then fully watered (mesic) ones; by day the form of a neighbourhood mattered more than its landscaping. [middel2014, brief11]
@@ -592,9 +592,27 @@ Tmrt is 65 °C or more — the sweat-cue threshold — is 69.9% Before, 66.3% Af
 69.9% for After **without the young street trees** (mean Tmrt 65.0, 64.5 and 65.2 °C).
 **The drop in sweating walkers After comes entirely from the young trees.** The roofs do not touch pedestrians, nobody
 walks on the coated road, and the sponge measures and reflective paving alone leave walkers as hot or slightly hotter
-(the lighter pavers add +3.7 K Tmrt at noon). Shade is what cools people; the young-trees card says so.
+(the lighter pavers add +3.7 K Tmrt at noon). Here, only the trees lower what walkers feel; the young-trees card says so.
 The trees' crown size (radius 2.6 m, centre 4.4 m) is an engine (scene) assumption, their transmission 0.47 the
 brief's mid value, and their kerb-side placement a design choice of this invented block.
+
+### The green roof against a white roof (outside evaluation #29, item 6)
+
+The evaluators saw the green roof hotter than the aged white roof at every wetness. That is what the cited inputs give, not a
+bug: the green roof (albedo 0.2) absorbs 0.80 of the sun against 0.40 for the aged white roof (0.6), and the
+0.25–0.5 of positive net radiation it spends on evaporation does not make up the gap. Roof surface at 15:00 (After, cells in full sun), °C;
+the aged white roof is 47.5 °C and the dark membrane it replaces 67.2 °C:
+
+| Case (docs only; nothing shipped changes) | d = 0 | d = 3 | d = 7 |
+|---|---|---|---|
+| shipped (EF dry 0.25 / wet 0.5, α 0.2) | 49.1 | 53.8 | 56.3 |
+| EF dry 0.33 / wet 0.67 (Bowen ratio about 2 / 0.5) | 44.0 | 50.6 | 54.0 |
+| a watered roof: EF 0.6 wet and dry, α 0.25 | 45.2 | 46.3 | 47.0 |
+
+Disclosures: the roof is **a single surface** (no plant canopy, no leaf temperature, no irrigation); the dry evaporative
+fraction 0.25 (Bowen ratio 3.0) sits at the dry edge of the Bowen ratios Heusinger & Weber measured (about < 1 to 2)
+[heusinger]. The card says it in plain words: cooler than the dark roof it replaces, warmer than a white roof by
+mid-afternoon, close to it only right after rain or if watered. No value was changed.
 
 ### Water budget
 
@@ -1221,7 +1239,7 @@ The splashed lanes (n 10, sky view 0.54), dry vs splash, °C:
 - Water: one splash evaporates at most 1.00 of its 1 mm before the next (what is left at 19:00 is topped up, not
   added); the day's evaporation balances the store to 2.2e-15 mm; the store's day-to-day drift is
   1.9e-3 mm (the model day is not exactly periodic). W is never negative.
-- The wet paving stays at least 2.70 K above the air's wet-bulb temperature while water is left (checked
+- The wet paving stays at least 2.71 K above the air's wet-bulb temperature while water is left (checked
   inside the model at every 1-min step of the last model day, over all 1138 wet-able cells).
 - Literature: Paris, about 1 L m⁻² per cycle, surface −7.5 K at 19:30 and −6 K at 20:30, lasting several hours
   [hendel2015]; air −0.79 K at most and Tmrt −1.76 K [hendel2016]; Kobe, 0.025 mm per pass, −2 to −4 K at once, gone

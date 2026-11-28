@@ -14,11 +14,15 @@
     border: 1.5px solid #2b2621; border-radius: 3px 9px 4px 8px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); max-width: 360px; }
   #cartouche h1 { margin: 0; font-size: 20px; letter-spacing: .02em; }
   #cartouche p { margin: 2px 0 0; font-size: 13px; opacity: .8; }
-  #bar { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; gap: 14px; align-items: center;
+  #bar { position: fixed; left: calc(50% + 116px); bottom: 16px; transform: translateX(-50%); display: flex; gap: 14px; align-items: center;
     padding: 8px 16px; background: rgba(246,240,226,.92); border: 1.5px solid #2b2621; border-radius: 8px 3px 9px 4px; }
-  #bar input[type=range] { width: min(46vw, 420px); accent-color: #9a4a33; }
+  #bar input[type=range] { width: min(30vw, 320px); accent-color: #9a4a33; }
   #hourLabel { min-width: 150px; font-variant-numeric: tabular-nums; }
+  #bar button { white-space: nowrap; }
   #keys { font-size: 12px; opacity: .75; }
+  #bar button, #termsBtn { font: 12px/1 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; border-radius: 4px 7px 3px 6px; background: #fbf7ee; cursor: pointer; color: #2b2621; }
+  #bar button[aria-pressed="true"] { background: #2b2621; color: #fbf7ee; }
+  #inkHint { position: fixed; left: 50%; top: 18px; transform: translateX(-50%); padding: 6px 14px; background: rgba(246,240,226,.92); border: 1px solid #2b2621; border-radius: 6px 3px 8px 3px; font-size: 14px; }
   kbd { font: 12px/1 ui-monospace, Menlo, monospace; border: 1px solid #2b2621; border-radius: 3px; padding: 1px 4px; background: #fbf7ee; }
   #legend { position: fixed; right: 18px; top: 18px; width: 240px; padding: 8px 12px; background: rgba(246,240,226,.92);
     border: 1.5px solid #2b2621; border-radius: 6px 3px 8px 3px; transition: opacity .6s; opacity: 0; }
@@ -38,11 +42,10 @@
   #card .caveat { margin: 4px 0; padding: 4px 6px; font-size: 12px; background: #f3e3d6; border-left: 3px solid #8a2f22; }
   #card .note { margin: 8px 0 4px; font-style: italic; }
   #card .src { margin: 4px 0 0; font-size: 11px; opacity: .75; }
-  .noui #cartouche, .noui #bar, .noui #legend, .noui #terms { display: none; }
+  .noui #cartouche, .noui #bar, .noui #legend, .noui #terms, .noui #inkHint { display: none; }
   #cartouche .sim { font-size: 12px; opacity: .7; letter-spacing: .02em; }
   .gl { border-bottom: 1px dotted currentColor; cursor: help; }
   .gl:focus-visible { outline: 1.5px dashed #8a2f22; outline-offset: 2px; }
-  #termsBtn { font: 12px/1 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; border-radius: 4px 7px 3px 6px; background: #fbf7ee; cursor: pointer; color: #2b2621; }
   #terms { position: fixed; right: 18px; bottom: 74px; width: 250px; max-height: 50vh; overflow: auto; padding: 8px 12px; background: #fbf7ee;
     border: 1.5px solid #2b2621; border-radius: 6px 3px 8px 3px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); font-size: 13px; }
   #terms ul { margin: 4px 0 0; padding-left: 16px; }
@@ -71,6 +74,12 @@
   #card .sub { font-size: 11.5px; opacity: .8; font-weight: normal; }
   #card .lit { margin: 4px 0; font-size: 12px; }
   .noui .blockpanel { display: none; }
+  #card .lead { margin: 4px 0 8px; font-size: 14px; }
+  #card details.expert { margin-top: 8px; border-top: 1px dashed #6d6355; padding-top: 4px; }
+  #card details.expert summary, .blockpanel summary { cursor: pointer; font-size: 12px; opacity: .85; }
+  .blockpanel summary { font-size: 13px; margin-bottom: 4px; opacity: 1; }
+/* phones: the bar wraps to the width, panels and the legend shrink, the cartouche gives way */
+  @media (max-width:700px){#bar{left:6px;right:6px;bottom:6px;transform:none;flex-wrap:wrap;gap:6px 10px;padding:6px 8px;justify-content:center}#bar input[type=range]{width:100%;flex-basis:100%}#hourLabel{min-width:0}#keys{display:none}#cartouche{left:6px;top:6px;right:6px;max-width:none;padding:6px 10px}#cartouche h1{font-size:16px}#cartouche p:last-child{display:none}.blockpanel{left:6px;bottom:auto;top:92px;width:auto;max-width:calc(100vw - 12px);max-height:50vh;overflow:auto;box-sizing:border-box}#legend{right:6px;top:auto;bottom:118px;width:180px}#legend .cap{display:none}#card{left:6px !important;right:6px;width:auto;top:92px !important;max-height:calc(100vh - 210px)}#terms{right:6px;left:6px;width:auto;bottom:118px}#inkHint{top:92px;font-size:13px}}
   #card .x { position: absolute; right: 6px; top: 4px; border: 0; background: none; font-size: 18px; cursor: pointer; color: #2b2621; }
 </style>
 </head>
@@ -79,23 +88,26 @@
 <div id="cartouche">
   <h1>Thermal-Ink Atlas</h1>
   <p class="hand">Waterfront and wind corridors</p>
-  <p class="sim">Simulated block · invented geometry · <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">modelled</span> <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">temperatures</span></p>
+  <p class="sim">Made-up block, <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">calculated</span> <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">temperatures</span></p>
   <p>Assumed heat-wave day: 35° N, 20 July, air 25–35 °C, wind from the river (north) at 3 m/s (breezy) or 1 m/s (calm). Air temperature is fixed: the air effect of the water is an illustrative overlay only.</p>
 </div>
 <div id="legend"><div class="hand"><span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">surface temperature</span></div><div id="legendBar"></div>
   <div class="ends"><span id="legendLo"></span><span id="legendHi"></span></div>
-  <div class="cap">Simulated with a <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">force-restore model</span> on an invented block, not measured. Inputs not yet verified are flagged on the cards.</div></div>
+  <div class="cap">Calculated for a made-up block, not measured (<span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">how</span>).</div></div>
 <div id="bar">
   <input id="hour" type="range" min="0" max="23.75" step="0.25" value="15" aria-label="hour of day">
   <span id="hourLabel" class="hand"></span>
-  <span id="keys"><kbd>T</kbd> heat · <kbd>H</kbd> hour · <kbd>W</kbd> wind · <kbd>A</kbd> air · drag · wheel · click a parcel</span>
+  <button type="button" data-k="H" aria-label="one hour earlier">−1 h</button><button type="button" data-k="h" aria-label="one hour later">+1 h</button>
+  <button type="button" id="heatBtn" data-k="t" aria-pressed="false">heat view (T)</button>
+  <span id="keys">drag · zoom · click a spot</span>
   <button id="termsBtn" type="button" aria-expanded="false" aria-controls="terms">terms</button>
 </div>
 <div id="terms" role="dialog" aria-label="Glossary of terms" hidden>
   <div class="hand">Terms used here</div>
   <ul id="termsList"></ul>
-  <p class="refs">Full reference list for every block: <a id="refsLink" href="../../references.html">references.html</a> (in this repository, also linked from the gallery page); details in docs/sources.md.</p>
+  <p class="refs">Every source behind every block: <a id="refsLink" href="../../references.html">the reference list</a> (also linked from the gallery).</p>
 </div>
+<div id="inkHint" class="hand" role="status" hidden>Drawing the block… the colours come in as the ink dries</div>
 <div id="fn" role="tooltip" hidden></div>
 <div id="card" data-open="0"></div>
 <script>
@@ -3998,9 +4010,10 @@ const THERMAL_WALL = hexRgb('#e7dfcd');
 const NIGHT_RGB = hexRgb('#27355a');
 const LIT = hexRgb('#f4cf7a');
 const SWEAT_CSS = 'rgba(143,182,207,0.95)';
-// glass pane colours by type (day view), and the reflection-spot glint
+// glass pane colours by type (day view), the reflection-spot glint and its outline ink
 const GLASS_RGB = { clear: hexRgb('#7d9ea6'), lowe: hexRgb('#8ea4b8'), mirror: hexRgb('#b9c3c6') };
 const GLINT = [255, 246, 214];
+const SPOT_INK = [176, 98, 40];
 const HAND_FONT = '"Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive';
 
 function makeCanvas(w, h) {
@@ -4300,14 +4313,26 @@ class Renderer {
           if (py > q1) q1 = py;
         }
       }
-      const a = clamp(r[i] / 0.4, 0, 1);
+      const a = clamp(r[i] / 0.6, 0, 1);
       d.data[i * 4] = GLINT[0];
       d.data[i * 4 + 1] = GLINT[1];
       d.data[i * 4 + 2] = GLINT[2];
       d.data[i * 4 + 3] = Math.round(255 * (a > 0 ? 0.25 + 0.75 * a : 0));
     }
     g.putImageData(d, 0, 0);
-    hc.spotImg = { img, R: hc.spot.cell, bb: [p0 - 2, q0 - 2, p1 + 2, q1 + 2] };
+    // the patch's outline (#29 item 7): cell edges between a lit and an unlit cell, on the ground plane
+    const edge = [];
+    const on = (x, y) => x >= 0 && y >= 0 && x < n && y < n && r[y * n + x] > 0;
+    for (let y = 0; y < n; y++) {
+      for (let x = 0; x < n; x++) {
+        if (!on(x, y)) continue;
+        if (!on(x, y - 1)) edge.push([x, y, x + 1, y]);
+        if (!on(x, y + 1)) edge.push([x, y + 1, x + 1, y + 1]);
+        if (!on(x - 1, y)) edge.push([x, y, x, y + 1]);
+        if (!on(x + 1, y)) edge.push([x + 1, y, x + 1, y + 1]);
+      }
+    }
+    hc.spotImg = { img, R: hc.spot.cell, bb: [p0 - 2, q0 - 2, p1 + 2, q1 + 2], edge: edge.map(([a, b, c, e]) => [...iso(a * cell, b * cell, 0), ...iso(c * cell, e * cell, 0)]) };
     return hc.spotImg;
   }
 
@@ -4356,6 +4381,19 @@ class Renderer {
     hz.globalCompositeOperation = 'source-over';
     g.globalAlpha = 0.4 * k;
     g.drawImage(this.hatchScratch, 0, 0);
+    // a dashed ink outline, so the patch reads as a shape that moves with the hour
+    g.setTransform(Z, 0, 0, Z, ox, oy);
+    g.globalAlpha = 0.75 * k;
+    g.strokeStyle = rgbCss(SPOT_INK);
+    g.lineWidth = (1.3 * this.dpr) / Z;
+    g.setLineDash([4 / Z, 3 / Z]);
+    g.beginPath();
+    for (const e of si.edge) {
+      g.moveTo(e[0], e[1]);
+      g.lineTo(e[2], e[3]);
+    }
+    g.stroke();
+    g.setLineDash([]);
     g.globalAlpha = 1;
   }
 
@@ -4374,6 +4412,8 @@ class Renderer {
       if (it.t === 'car') return null; // block 6: parked cars are outlines over the wash (not modelled)
       if (it.t === 'win') return null;
       const n = f.n ?? [0, 1];
+      // block 3 (#29 item 7): a glass face takes the colour of its own surface temperature
+      if (f.k === 'glass' && this.thermal.glassTemp) return scaleRgb(heatRgb(this.thermal.glassTemp(n[0] ? 'E' : 'S', hc.hq)), n[0] ? 0.92 : 1);
       return scaleRgb(THERMAL_WALL, n[0] ? 0.9 : 1);
     }
     if (Array.isArray(f)) return f;
@@ -4459,28 +4499,78 @@ class Renderer {
     ctx.globalAlpha = 1;
   }
 
-  /** Lit windows after dark (drawn above the night tint). */
+  /**
+   * Lit windows after dark (drawn above the night tint). A lit window that a
+   * later face of another building or a tree may hide (their boxes overlap)
+   * goes through a layer from which those later faces are cut out, so a tall
+   * tower's windows no longer shine through the nearer, lower roofs in front
+   * of it (#29 item 7); every other window is drawn straight onto the tile.
+   */
   litWindows(ctx, list, hc, Z, ox, oy, bb) {
-    ctx.setTransform(Z, 0, 0, Z, ox, oy);
-    for (const it of list) {
-      if (it.t !== 'win' || !it.f || it.f.k !== 'win') continue;
-      const b = it.bb;
-      if (bb && (b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3])) continue;
-      if (it.f.h > (it.f.shop ? 0.75 : 0.45)) continue;
-      const p = it.fp;
-      ctx.beginPath();
-      ctx.moveTo(p[0], p[1]);
+    const inTile = (b) => !bb || !(b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3]);
+    const items = list.filter((it) => inTile(it.bb));
+    const path = (g, p) => {
+      g.beginPath();
+      g.moveTo(p[0], p[1]);
       for (let i = 2; i < p.length; i += 2) {
         if (p[i] !== p[i]) {
-          ctx.closePath();
+          g.closePath();
           i += 2;
-          ctx.moveTo(p[i], p[i + 1]);
-        } else ctx.lineTo(p[i], p[i + 1]);
+          g.moveTo(p[i], p[i + 1]);
+        } else g.lineTo(p[i], p[i + 1]);
       }
-      ctx.closePath();
+      g.closePath();
+    };
+    const over = (a, b) => !(a[2] <= b[0] || a[0] >= b[2] || a[3] <= b[1] || a[1] >= b[3]);
+    const lit = (it) => it.t === 'win' && it.f && it.f.k === 'win' && !(it.f.h > (it.f.shop ? 0.75 : 0.45));
+    const face = (it) => it.t !== 'win' && it.fp && this.fillOf(it, 'day', hc);
+    const hidden = new Set();
+    for (let k = 0; k < items.length; k++) {
+      const w = items[k];
+      if (!lit(w)) continue;
+      for (let j = k + 1; j < items.length; j++) {
+        const o = items[j];
+        if (o.b !== w.b && face(o) && over(o.bb, w.bb)) {
+          hidden.add(k);
+          break;
+        }
+      }
+    }
+    ctx.setTransform(Z, 0, 0, Z, ox, oy);
+    ctx.fillStyle = rgbCss(LIT);
+    items.forEach((it, k) => {
+      if (!lit(it) || hidden.has(k)) return;
+      path(ctx, it.fp);
       ctx.globalAlpha = 0.85 * hc.night;
-      ctx.fillStyle = rgbCss(LIT);
       ctx.fill();
+    });
+    if (hidden.size) {
+      const L = this.winLayer ?? (this.winLayer = makeCanvas(TILE, TILE));
+      const g = L.getContext('2d');
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.globalCompositeOperation = 'source-over';
+      g.clearRect(0, 0, TILE, TILE);
+      g.setTransform(Z, 0, 0, Z, ox, oy);
+      g.fillStyle = rgbCss(LIT);
+      let drawn = false;
+      items.forEach((it, k) => {
+        if (hidden.has(k)) {
+          g.globalCompositeOperation = 'source-over';
+          g.globalAlpha = 0.85 * hc.night;
+          path(g, it.fp);
+          g.fill();
+          drawn = true;
+        } else if (drawn && face(it)) {
+          g.globalCompositeOperation = 'destination-out';
+          g.globalAlpha = it.a ?? 1;
+          path(g, it.fp);
+          g.fill();
+        }
+      });
+      g.globalCompositeOperation = 'source-over';
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = 1;
+      ctx.drawImage(L, 0, 0);
     }
     ctx.globalAlpha = 1;
   }
@@ -5079,9 +5169,22 @@ class Renderer {
       const p = iso(n.at[0], n.at[1], n.at[2] ?? 0);
       const ax = ox + p[0] * Z;
       const ay = oy + p[1] * Z;
-      const tx = ax + n.dx * d;
-      const ty = ay + n.dy * d;
+      let tx = ax + n.dx * d;
+      let ty = ay + n.dy * d;
       if (tx < -200 * d || tx > W + 50 || ty < -60 || ty > H + 20) return;
+      const lines = n.text;
+      const lh = 18 * d;
+      const w = Math.max(...lines.map((l) => ctx.measureText(l).width));
+      let bx = tx - (n.dx < 0 ? w + 6 * d : -6 * d);
+      let by = ty - (n.dy < 0 ? lines.length * lh : 0);
+      // keep the whole note on the canvas (#29 items 4 and 7): shift the box and the leader's end with it
+      const sx = Math.min(0, W - 8 * d - (bx + w + 5 * d)) || Math.max(0, 8 * d - (bx - 5 * d));
+      const top = (W / d < 700 ? 96 : 8) * d; // on a phone the cartouche spans the top
+      const sy = Math.min(0, H - 8 * d - (by + lines.length * lh + 3 * d)) || Math.max(0, top - (by - 3 * d));
+      bx += sx;
+      by += sy;
+      tx += sx;
+      ty += sy;
       ctx.globalAlpha = alpha;
       // leader: a gently bowed ink line with a dot at the anchor
       ctx.strokeStyle = rgbCss(INK);
@@ -5096,11 +5199,6 @@ class Renderer {
       ctx.beginPath();
       ctx.arc(ax, ay, 2.2 * d, 0, Math.PI * 2);
       ctx.fill();
-      const lines = n.text;
-      const lh = 18 * d;
-      const w = Math.max(...lines.map((l) => ctx.measureText(l).width));
-      const bx = tx - (n.dx < 0 ? w + 6 * d : -6 * d);
-      const by = ty - (n.dy < 0 ? lines.length * lh : 0);
       ctx.fillStyle = 'rgba(248,243,231,0.94)';
       ctx.fillRect(bx - 5 * d, by - 3 * d, w + 10 * d, lines.length * lh + 6 * d);
       ctx.strokeStyle = 'rgba(43,38,33,0.55)';
@@ -5211,7 +5309,7 @@ const GLOSSARY = {
     term: 'Thermal inertia / night lag',
     text: 'Heavy materials store heat during the day and release it after sunset, so they stay warm into the night.',
     model: (S) => S.lagLine,
-    why: 'Night lag keeps cities warm at night, when people most need to cool down.',
+    why: 'So the street is still above the air temperature at 11 pm, while the lawn has dropped below it.',
   },
   coolRoof: {
     term: 'Cool roof',
@@ -5271,7 +5369,7 @@ const GLOSSARY = {
   ventilationCorridor: {
     term: 'Ventilation corridor',
     text: 'A wide, open street or green strip that lines up with the prevailing wind, so the breeze (here, off the river) can run into the city.',
-    range: 'Planning guides ask for corridors within about 30° of the prevailing wind; along the Ota River (Hiroshima) river cooling was detected 150–500 m inland along streets perpendicular to the river (unverified).',
+    range: 'Planning guides ask for corridors within about 30° of the prevailing wind; along the Ota River (Hiroshima) river cooling was detected 150–500 m inland along streets perpendicular to the river (not yet checked).',
     src: 'corridor, ota',
     why: 'Streets across the wind are sheltered by the buildings upwind; corridors keep the wind moving.',
     scenes: ['waterfront'],
@@ -5813,9 +5911,12 @@ const { HAND_FONT } = __m['render'];
 const fmt = (v) => (Math.round(v * 10) / 10).toFixed(1);
 const f2 = (v) => v.toFixed(2);
 const sgn = (v) => `${v < 0 ? '−' : '+'}${fmt(Math.abs(v))}`;
-const K = (v) => `${sgn(v)} K`;
+const K = (v) => `${sgn(v)}°`;
 const tag = (v) => (v.basis !== 'cited' ? ` <span class="basis">${BASIS[v.basis]}</span>` : '') + (v.verified ? '' : ' <span class="unv" title="value not yet checked against the primary source">unverified</span>');
-const srcLine = (keys) => `<p class="src">Sources: ${keys.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: ${gl('forceRestore', 'force-restore')}, simulated; the air temperature is fixed, and the wind is a geometric ${gl('windFactor', 'wind factor')}, not computed flow.</p>`;
+const ref = (k) => `<a href="../../references.html#waterfront">[${k}]</a> ${SOURCES[k]}`;
+/** The closed part at the bottom of a card (#29): the model's terms, flags and sources, with links to the references page. */
+const experts = (body, keys) => `<details class="expert"><summary>For experts</summary>${body}<p class="src">Sources: ${keys.map(ref).join('; ')}. Made-up block, calculated temperatures: a ${gl('forceRestore', 'force-restore')} surface model on a 5 m grid; the air temperature is fixed, and the wind is a geometric ${gl('windFactor', 'wind factor')}, not computed flow.</p></details>`;
+const degs = (v) => `${Math.max(1, Math.round(Math.abs(v)))} degree${Math.round(Math.abs(v)) > 1 ? 's' : ''}`;
 const close = '<button class="x" aria-label="close">×</button>';
 
 /** Margin notes (at most 5). d: numbers from the app (app.js wfNoteData). */
@@ -5823,16 +5924,16 @@ function wfNotes(scene, d) {
   const text = {
     river: [`River ${fmt(d.river15)} °C at 3 pm (air ${fmt(d.air15)} °C);`, `its air effect fades within about ${d.reach} m`],
     pond: [`Lily Pond ${fmt(d.pond04)} °C at 4 am,`, `warmer than the ${fmt(d.air04)} °C air`],
-    corridor: [`Quay Street, along the wind: f_w ${f2(d.corridorFw)},`, `asphalt ${fmt(d.corridorTs)} °C at 3 pm`],
-    sheltered: [`Rope Walk, behind the warehouses: f_w ${f2(d.shelterFw)},`, `asphalt ${fmt(d.shelterTs)} °C at 3 pm`],
-    shade: [`Under the riverside trees: Tmrt ${fmt(d.shadeTmrt)} °C,`, `in the sun beside them ${fmt(d.sunTmrt)} °C`],
+    corridor: [`Quay Street, along the wind (${Math.round(d.corridorFw * 100)}% of the open breeze):`, `asphalt ${fmt(d.corridorTs)} °C at 3 pm`],
+    sheltered: [`Rope Walk, behind the warehouses (${Math.round(d.shelterFw * 100)}% of it):`, `asphalt ${fmt(d.shelterTs)} °C at 3 pm`],
+    shade: [`Under the riverside trees it feels like ${fmt(d.shadeTmrt)} °C,`, `in the sun beside them ${fmt(d.sunTmrt)} °C`],
   };
   const terms = {
     river: [['surfaceTemp', `River ${fmt(d.river15)} °C at 3 pm`], ['fetch', `fades within about ${d.reach} m`]],
     pond: [['nightLag', `Lily Pond ${fmt(d.pond04)} °C at 4 am`]],
-    corridor: [['ventilationCorridor', 'along the wind'], ['windFactor', `f_w ${f2(d.corridorFw)}`]],
-    sheltered: [['sheltering', 'behind the warehouses'], ['windFactor', `f_w ${f2(d.shelterFw)}`]],
-    shade: [['tmrt', 'Tmrt']],
+    corridor: [['ventilationCorridor', 'along the wind'], ['windFactor', 'of the open breeze']],
+    sheltered: [['sheltering', 'behind the warehouses'], ['windFactor', `${Math.round(d.shelterFw * 100)}% of it`]],
+    shade: [['tmrt', 'it feels like']],
   };
   return scene.notes.slice(0, 5).map((n) => ({ ...n, text: text[n.key], terms: terms[n.key] }));
 }
@@ -5844,21 +5945,21 @@ function riverCard(d) {
   return `
     ${close}
     <h3>The river: cool, but only close by</h3>
+    <p class="lead">At 3 pm the river is ${fmt(r.t15)} °C, below the ${fmt(r.a15)} °C air, but its cooling reaches only a few tens of metres inland.</p>
     <div class="mat">River surface prescribed; its effect on the air is an illustrative overlay, not simulated</div>
     <table class="cmp">
       <tr><td></td><td>model</td><td>air</td></tr>
       <tr class="t"><td>river surface, 15:00</td><td>${fmt(r.t15)} °C</td><td>${fmt(r.a15)} °C</td></tr>
       <tr><td>river surface, 04:00</td><td>${fmt(r.t04)} °C</td><td>${fmt(r.a04)} °C</td></tr>
-      <tr><td>daily range of the river</td><td>${fmt(r.range)} K</td><td></td></tr>
+      <tr><td>daily range of the river</td><td>${fmt(r.range)}°</td><td></td></tr>
       <tr><td colspan="3" class="sub">Air overlay along the ${gl('fetch', 'wind lines')} by day (illustrative, from literature):</td></tr>
       <tr><td>at the bank (first 2.5 m)</td><td>${K(o.at0)}</td><td></td></tr>
       <tr><td>30 m inland</td><td>${K(o.at30)}</td><td></td></tr>
       <tr><td>80 m inland</td><td>${K(o.at80)}</td><td></td></tr>
     </table>
     <p class="note">Measured urban rivers and canals cool the air beside them only a little and over a short distance. A large river barely warms through the day, so its surface stays below the afternoon air; at night it can be warmer than the air.</p>
-    <p class="lit">River Don, Sheffield: about 1 K cooler than the city reference, reaching about 30 m with open banks; vegetated banks about 2 K cooler than paved ones (Hathway &amp; Sharples 2012, via secondary sources). Cheonggyecheon, Seoul: more than 1 K to 70–80 m on one side, about 0.5 K to 30–50 m on the other. Small Dutch water bodies (ENVI-met): −0.2 K typical, −0.6 K at most in the afternoon, "negligible in design" (Jacobs et al. 2020). A review of 27 studies gives about 2.5 K, inflated by satellite surface temperatures (Völker et al. 2013).</p>
-    <p class="caveat">The air temperature in this model is fixed, so the river cannot cool the air or anyone in it. The overlay uses ΔT₀ ${OVERLAY.day} K${tag(MODEL.airDay)} and L ${OVERLAY.L} m${tag(MODEL.airL)} (${OVERLAY.Laligned} m in streets along the wind${tag(MODEL.airLaligned)}). The river curve (daily mean air − 2 K, ±0.5 K) is an assumption.</p>
-    ${srcLine(['hathway2012', 'cheonggyecheon', 'jacobs2020', 'volker2013', 'webb2008', 'brief4'])}`;
+    ${experts(`<p class="lit">River Don, Sheffield: about 1 K cooler than the city reference, reaching about 30 m with open banks; vegetated banks about 2 K cooler than paved ones (Hathway &amp; Sharples 2012, via secondary sources). Cheonggyecheon, Seoul: more than 1 K to 70–80 m on one side, about 0.5 K to 30–50 m on the other. Small Dutch water bodies (ENVI-met): −0.2 K typical, −0.6 K at most in the afternoon, "negligible in design" (Jacobs et al. 2020). A review of 27 studies gives about 2.5 K, inflated by satellite surface temperatures (Völker et al. 2013).</p>
+    <p class="caveat">The air temperature in this model is fixed, so the river cannot cool the air or anyone in it. The overlay uses ΔT₀ ${OVERLAY.day} K${tag(MODEL.airDay)} and L ${OVERLAY.L} m${tag(MODEL.airL)} (${OVERLAY.Laligned} m in streets along the wind${tag(MODEL.airLaligned)}). The river curve (daily mean air − 2 K, ±0.5 K) is an assumption.</p>`, ['hathway2012', 'cheonggyecheon', 'jacobs2020', 'volker2013', 'webb2008', 'brief4'])}`;
 }
 
 /** Pond-at-night card. d: {water, lawn04, overlayNight}. */
@@ -5867,18 +5968,18 @@ function pondCard(d) {
   return `
     ${close}
     <h3>The still pond at night: warmer than the air</h3>
+    <p class="lead">Before dawn the shallow pond is ${fmt(p.t04)} °C, warmer than the ${fmt(p.a04)} °C air: it gives back the day's sun at night.</p>
     <div class="mat">Lily Pond, shallow and still · surface prescribed</div>
     <table class="cmp">
       <tr><td></td><td>pond</td><td>air</td></tr>
       <tr class="t"><td>04:00</td><td>${fmt(p.t04)} °C</td><td>${fmt(p.a04)} °C</td></tr>
       <tr><td>15:00</td><td>${fmt(p.t15)} °C</td><td>${fmt(p.a15)} °C</td></tr>
-      <tr><td>daily range of the pond</td><td>${fmt(p.range)} K</td><td></td></tr>
+      <tr><td>daily range of the pond</td><td>${fmt(p.range)}°</td><td></td></tr>
       <tr><td>garden lawn, 04:00</td><td>${fmt(d.lawn04)} °C</td><td></td></tr>
     </table>
     <p class="note">Shallow water soaks up the day's sun and gives it back after dark. Before dawn the pond is the warmest open surface in the garden, a few degrees above the air, while the lawn beside it has cooled below the air.</p>
-    <p class="lit">A Delft pond was warmer than the air at night and released about 2.7 MJ m⁻² per night: 43% as longwave radiation, 39% as evaporation, 11% as sensible heat (Solcerova et al. 2019). In Rotterdam, water bodies raise the hottest nights' urban heat island (Steeneveld et al. 2014); in a model, water warmer than the air worsens night-time comfort (Theeuwes et al. 2013).</p>
-    <p class="caveat">The pond curve (daily mean air − 0.5 K, ±2 K, peak at 16:00) is an assumption${tag(MODEL.pondCurve)}; that a pond is warmer than the air at night is cited. The air overlay at night is +${OVERLAY.night} K at the river bank${tag(MODEL.airNight)} (the pond's ×${f2(OVERLAY.pond)}), illustrative only.</p>
-    ${srcLine(['solcerova2019', 'steeneveld2014', 'theeuwes2013', 'brief4'])}`;
+    ${experts(`<p class="lit">A Delft pond was warmer than the air at night and released about 2.7 MJ m⁻² per night: 43% as longwave radiation, 39% as evaporation, 11% as sensible heat (Solcerova et al. 2019). In Rotterdam, water bodies raise the hottest nights' urban heat island (Steeneveld et al. 2014); in a model, water warmer than the air worsens night-time comfort (Theeuwes et al. 2013).</p>
+    <p class="caveat">The pond curve (daily mean air − 0.5 K, ±2 K, peak at 16:00) is an assumption${tag(MODEL.pondCurve)}; that a pond is warmer than the air at night is cited. The air overlay at night is +${OVERLAY.night} K at the river bank${tag(MODEL.airNight)} (the pond's ×${f2(OVERLAY.pond)}), illustrative only.</p>`, ['solcerova2019', 'steeneveld2014', 'theeuwes2013', 'brief4'])}`;
 }
 
 /** Ventilation-corridor card. d: {st (windStats), ac (asphaltContrast), hc (hcStats), u}. */
@@ -5887,21 +5988,20 @@ function corridorCard(d) {
   return `
     ${close}
     <h3>${gl('ventilationCorridor', 'Ventilation corridor')}: Quay Street</h3>
+    <p class="lead">Quay Street points along the wind, so the breeze runs down it: its sunlit asphalt is ${fmt(d.ac.exposed.ts)} °C at 3 pm, against ${fmt(d.ac.sheltered.ts)} °C behind the warehouses.</p>
     <div class="mat">A wide street running south from the river, along the wind</div>
     <table class="cmp">
       <tr><td></td><td>model</td></tr>
-      <tr><td>street axis vs wind</td><td>${Math.round(c.delta)}° (cut-off 30°)</td></tr>
-      <tr><td>H/W (facing walls)</td><td>${f2(c.hw)} (channelling above ${MODEL.channelHw.value})</td></tr>
-      <tr class="t"><td>${gl('windFactor', 'wind factor f_w')}, street mean</td><td>${f2(d.st.corridorMean)}</td></tr>
-      <tr><td>local wind u = u_site × f_w</td><td>${fmt(d.u * d.st.corridorMean)} m/s</td></tr>
-      <tr><td>convection h_c</td><td>${fmt(5.7 + 3.8 * d.u * d.st.corridorMean)} W m⁻² K⁻¹</td></tr>
+      <tr><td>the street's angle to the wind</td><td>${Math.round(c.delta)}°</td></tr>
+      <tr class="t"><td>${gl('windFactor', 'share of the open wind')} in the street</td><td>${Math.round(d.st.corridorMean * 100)}%</td></tr>
+      <tr><td>wind in the street</td><td>${fmt(d.u * d.st.corridorMean)} m/s</td></tr>
       <tr class="t"><td>sunlit exposed asphalt, 15:00</td><td>${fmt(d.ac.exposed.ts)} °C</td></tr>
       <tr><td>sunlit sheltered asphalt, 15:00</td><td>${fmt(d.ac.sheltered.ts)} °C</td></tr>
     </table>
     <p class="note">A street that points along the wind lets it run in unobstructed, and the walls funnel it a little. A stronger wind carries heat off the pavement faster, so the corridor's asphalt runs cooler than asphalt behind the buildings.</p>
-    <p class="lit">Along the Ota River in Hiroshima, river cooling was detectable 150–500 m inland along streets perpendicular to the river, more with wind, wider streets and lower density (AIJ papers, unverified). Planning guides ask for corridors within about 30° of the prevailing wind (Chinese planning criteria; Givoni 20–30°).</p>
-    <p class="caveat">A geometric heuristic, not a flow solution: f_w = clamp(S × C, 0.3, 1.2) with C = 1 + 0.2 max(0, cos 3δ) in aligned streets with H/W > 0.4 (c_ch, f_min, f_max are assumptions${tag(MODEL.channelC)}). One wind direction (from the river) and speed; no vortices, corner jets or river breezes. The wind changes the surface (via h_c) and the walkers' comfort, not the air temperature.</p>
-    ${srcLine(['ota', 'corridor', 'oke1988', 'brief4'])}`;
+    ${experts(`<p class="lit">Along the Ota River in Hiroshima, river cooling was detectable 150–500 m inland along streets perpendicular to the river, more with wind, wider streets and lower density (AIJ papers, unverified). Planning guides ask for corridors within about 30° of the prevailing wind (Chinese planning criteria; Givoni 20–30°).</p>
+    <p class="lit">H/W ${f2(c.hw)} (channelling above ${MODEL.channelHw.value}); f_w ${f2(d.st.corridorMean)}; h_c ${fmt(5.7 + 3.8 * d.u * d.st.corridorMean)} W m⁻² K⁻¹; axis ${Math.round(c.delta)}° off the wind (cut-off 30°).</p>
+    <p class="caveat">A geometric heuristic, not a flow solution: f_w = clamp(S × C, 0.3, 1.2) with C = 1 + 0.2 max(0, cos 3δ) in aligned streets with H/W > 0.4 (c_ch, f_min, f_max are assumptions${tag(MODEL.channelC)}). One wind direction (from the river) and speed; no vortices, corner jets or river breezes. The wind changes the surface (via h_c) and the walkers' comfort, not the air temperature.</p>`, ['ota', 'corridor', 'oke1988', 'brief4'])}`;
 }
 
 /** Sheltered-street card. d: {st, ac, u, profile: [{d, fw}]}. */
@@ -5910,21 +6010,21 @@ function shelterCard(d) {
   return `
     ${close}
     <h3>${gl('sheltering', 'Sheltered street')}: Rope Walk</h3>
+    <p class="lead">Behind the warehouses the wind drops, and the sunlit asphalt of Rope Walk is ${fmt(d.ac.sheltered.ts)} °C at 3 pm, ${degs(d.ac.diff)} hotter than in the open breeze.</p>
     <div class="mat">Across the wind, in the lee of the Wharf Warehouses (${d.st.lee01.h} m)</div>
     <table class="cmp">
       <tr><td></td><td>model</td></tr>
-      <tr><td>H/W (facing walls)</td><td>${f2(s.hw)}</td></tr>
-      <tr class="t"><td>${gl('windFactor', 'wind factor f_w')}, street mean</td><td>${f2(d.st.shelterMean)}</td></tr>
-      ${d.profile.map((p) => `<tr><td>${p.d} m behind the wall</td><td>f_w ${f2(p.fw)}</td></tr>`).join('')}
+      <tr class="t"><td>${gl('windFactor', 'share of the open wind')} in the street</td><td>${Math.round(d.st.shelterMean * 100)}%</td></tr>
+      ${d.profile.map((p) => `<tr><td>${p.d} m behind the wall</td><td>${Math.round(p.fw * 100)}%</td></tr>`).join('')}
       <tr><td>local wind there</td><td>${fmt(d.u * d.st.shelterMean)} m/s</td></tr>
-      <tr class="t"><td>sunlit sheltered asphalt, 15:00</td><td>${fmt(d.ac.sheltered.ts)} °C (f_w ${f2(d.ac.sheltered.fw)})</td></tr>
-      <tr><td>sunlit exposed asphalt, 15:00</td><td>${fmt(d.ac.exposed.ts)} °C (f_w ${f2(d.ac.exposed.fw)})</td></tr>
+      <tr class="t"><td>sunlit sheltered asphalt, 15:00</td><td>${fmt(d.ac.sheltered.ts)} °C (${Math.round(d.ac.sheltered.fw * 100)}% of the wind)</td></tr>
+      <tr><td>sunlit exposed asphalt, 15:00</td><td>${fmt(d.ac.exposed.ts)} °C (${Math.round(d.ac.exposed.fw * 100)}% of the wind)</td></tr>
       <tr><td>difference</td><td>${K(d.ac.diff)}</td></tr>
     </table>
-    <p class="note">Behind a row of buildings the wind drops and only slowly recovers. With less wind the sunlit asphalt keeps more of its heat: in this model it runs ${fmt(d.ac.diff)} K hotter than exposed asphalt at 3 pm.</p>
-    <p class="lit">Wind tunnel and CFD studies put the recirculation behind a building at about 1.6–2.6 times its width; streets switch flow regime at H/W about 0.3–0.4 and 0.65–0.7 (Oke 1988, unverified).</p>
-    <p class="caveat">S rises linearly from 0.3 at the wall to 1 at 5 building heights downwind; the 5H recovery and f_min 0.3 are assumptions${tag(MODEL.windFmin)}. Part of the difference comes from the narrower street (sky view ${f2(d.ac.sheltered.svf)} vs ${f2(d.ac.exposed.svf)}). Most of it comes from h_c = 5.7 + 3.8 u, a flat-plate fit for the wind just above a surface, fed here with the 10 m wind × f_w: that overstates street-level convection and how strongly it changes with wind, so this contrast is likely too large.${d.ac.diff > 8 || d.ac.diff < 2 ? ` The difference is outside the brief's 2–8 K engine-plausibility band at ${d.u} m/s (reported, not tuned; see docs/sources.md).` : ''}</p>
-    ${srcLine(['wake', 'oke1988', 'brief4'])}`;
+    <p class="note">Behind a row of buildings the wind drops and only slowly recovers. With less wind the sunlit asphalt keeps more of its heat: in this model it runs ${fmt(d.ac.diff)} degrees hotter than exposed asphalt at 3 pm.</p>
+    ${experts(`<p class="lit">Wind tunnel and CFD studies put the recirculation behind a building at about 1.6–2.6 times its width; streets switch flow regime at H/W about 0.3–0.4 and 0.65–0.7 (Oke 1988, unverified).</p>
+    <p class="lit">Rope Walk H/W ${f2(s.hw)}; f_w ${f2(d.st.shelterMean)} (sheltered ${f2(d.ac.sheltered.fw)}, exposed ${f2(d.ac.exposed.fw)}).</p>
+    <p class="caveat">S rises linearly from 0.3 at the wall to 1 at 5 building heights downwind; the 5H recovery and f_min 0.3 are assumptions${tag(MODEL.windFmin)}. Part of the difference comes from the narrower street (sky view ${f2(d.ac.sheltered.svf)} vs ${f2(d.ac.exposed.svf)}). Most of it comes from h_c = 5.7 + 3.8 u, a flat-plate fit for the wind just above a surface, fed here with the 10 m wind × f_w: that overstates street-level convection and how strongly it changes with wind, so this contrast is likely too large.${d.ac.diff > 8 || d.ac.diff < 2 ? ` The difference is outside the brief's 2–8 K engine-plausibility band at ${d.u} m/s (reported, not tuned).` : ''}</p>`, ['wake', 'oke1988', 'brief4'])}`;
 }
 
 /** Riverside shade card. d: {shadeTmrt, sunTmrt, shadeAT, sunAT, waterAir}. */
@@ -5932,18 +6032,18 @@ function shadeCard(d) {
   return `
     ${close}
     <h3>Riverside shade: the biggest lever near water</h3>
+    <p class="lead">Under the riverside trees it feels like ${fmt(d.shadeTmrt)} °C at 3 pm, against ${fmt(d.sunTmrt)} °C in the sun beside them: the shade does more than the river.</p>
     <div class="mat">The promenade under the riverside trees, 15:00</div>
     <table class="cmp">
-      <tr><td></td><td>${gl('tmrt', 'Tmrt')}</td><td>${gl('apparentTemp', 'apparent temp.')}</td></tr>
+      <tr><td></td><td>${gl('tmrt', 'feels like')}</td><td>${gl('apparentTemp', 'with the wind')}</td></tr>
       <tr class="t"><td>under the trees</td><td>${fmt(d.shadeTmrt)} °C</td><td>${fmt(d.shadeAT)} °C</td></tr>
       <tr><td>in the sun beside them</td><td>${fmt(d.sunTmrt)} °C</td><td>${fmt(d.sunAT)} °C</td></tr>
       <tr><td>shade minus sun</td><td>${K(d.shadeTmrt - d.sunTmrt)}</td><td>${K(d.shadeAT - d.sunAT)}</td></tr>
       <tr><td>the river's air effect at the bank</td><td colspan="2">${K(d.waterAir)} (illustrative)</td></tr>
     </table>
     <p class="note">The breeze off the river is welcome, but what makes the promenade bearable at 3 pm is the shade of its trees. Walkers here take the tree-shaded, breezy riverside over sunny, sheltered Rope Walk.</p>
-    <p class="lit">Jacobs et al. (2020): next to small urban water bodies, PET fell by 0.6 K typically (1.9 K at most), while shade lowered PET by 1–7 K.</p>
-    <p class="caveat">Apparent temperature (Steadman 1994, coefficients as given by the Australian Bureau of Meteorology) stands in for UTCI, which is not implemented; wind at the person is u_site × f_w, clamped to 0.5–17 m/s. The extra radiation is linearised as Q = 6.1 (Tmrt − Ta)${tag(MODEL.atRadiation)}: about 30% low in full sun, partly offset by counting the whole body surface, so the absolute apparent temperatures are approximate. The air temperature is fixed.</p>
-    ${srcLine(['jacobs2020', 'bom', 'steadman1994', 'brief4'])}`;
+    ${experts(`<p class="lit">Jacobs et al. (2020): next to small urban water bodies, PET fell by 0.6 K typically (1.9 K at most), while shade lowered PET by 1–7 K.</p>
+    <p class="caveat">Apparent temperature (Steadman 1994, coefficients as given by the Australian Bureau of Meteorology) stands in for UTCI, which is not implemented; wind at the person is u_site × f_w, clamped to 0.5–17 m/s. The extra radiation is linearised as Q = 6.1 (Tmrt − Ta)${tag(MODEL.atRadiation)}: about 30% low in full sun, partly offset by counting the whole body surface, so the absolute apparent temperatures are approximate. The air temperature is fixed.</p>`, ['jacobs2020', 'bom', 'steadman1994', 'brief4'])}`;
 }
 
 /** Button labels for the wind panel cards. */
@@ -6514,17 +6614,17 @@ function boot(scene, root = document) {
   let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode || pkMode || esMode || cpMode || bsMode || vgMode || dsMode || nmMode ? null : block1Notes();
   function block1Notes() {
   const notesText = {
-    asphalt: ['Kiln Street, old asphalt (albedo 0.12):', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
+    asphalt: ['Kiln Street, old dark asphalt:', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
     lawn: [`Park lawn: ${fmt(at('grass', 15))} °C at 3 pm;`, `${fmt(at('grass', 23))} °C at 11 pm, below the ${fmt(thermal.air(23))} °C air`],
-    shade: ['In the hot hours walkers keep', 'to the shady pavement'],
+    shade: ['3 pm · walkers take', 'the shady side'],
     roofs: [`White roof ${fmt(at('coolRoof', 15))} °C,`, `dark roof ${fmt(at('darkRoof', 15))} °C at 3 pm`],
     pond: [`The pond stays near ${fmt(at('water', 15))} °C`],
   };
   // glossary terms inside the canvas notes: [key, exact substring of a line]
   const notesTerms = {
-    asphalt: [['albedo', 'albedo 0.12'], ['nightLag', `still ${fmt(at('asphalt', 23))} °C at 11 pm`]],
+    asphalt: [['albedo', 'old dark asphalt'], ['nightLag', `still ${fmt(at('asphalt', 23))} °C at 11 pm`]],
     lawn: [['surfaceTemp', `${fmt(at('grass', 15))} °C at 3 pm`], ['nightLag', `${fmt(at('grass', 23))} °C at 11 pm`]],
-    shade: [['tmrt', 'shady pavement']],
+    shade: [['tmrt', 'the shady side']],
     roofs: [['coolRoof', 'White roof']],
     pond: [],
   };
@@ -6600,6 +6700,9 @@ function boot(scene, root = document) {
       lastStats.frameMs = performance.now() - tDraw;
     }
     dirty = false;
+    // the loading hint (#29 item 3) while the pen draws and the washes come in: a DOM element, never the canvas
+    const ink = S.intro && S.frame < INTRO.wash;
+    if (inkHint.hidden === ink) inkHint.hidden = !ink;
     // a released scrub ends once the frame is exact again
     if (S.scrub && S.released && !lastStats.preview) {
       S.scrub = false;
@@ -6614,11 +6717,31 @@ function boot(scene, root = document) {
   const hourLabel = $('hourLabel');
   const legend = $('legend');
   const card = $('card');
+  const heatBtn = $('heatBtn');
+  const inkHint = $('inkHint');
+  // the bar's buttons (#29: every key has a visible button): T, H and h, as the keys
+  $('bar').addEventListener('click', (e) => {
+    const b = e.target.closest ? e.target.closest('button[data-k]') : null;
+    if (b) window.dispatchEvent(new KeyboardEvent('keydown', { key: b.dataset.k }));
+  });
+  // block panels fold (#29); on a narrow screen they start folded
+  const foldPanels = () => {
+    for (const p of root.querySelectorAll('.blockpanel')) {
+      if (p.querySelector(':scope > details:not(.cards)')) continue;
+      const d = root.createElement('details');
+      d.open = window.innerWidth > 700;
+      d.innerHTML = `<summary class="hand">${p.getAttribute('aria-label') ?? 'Controls'}</summary>`;
+      while (p.firstChild) d.appendChild(p.firstChild);
+      p.appendChild(d);
+    }
+    if (window.innerWidth <= 700) for (const d of root.querySelectorAll('.blockpanel > details')) d.open = false;
+  };
   const syncUi = () => {
     slider.value = String(S.hour);
     hourLabel.textContent = `${hhmm(S.hour)}  ·  air ${fmt(thermal.air(S.hour))} °C`;
     legend.style.opacity = S.thermal ? '1' : '0';
     root.body.classList.toggle('thermal', S.thermal);
+    heatBtn.setAttribute('aria-pressed', String(!!S.thermal));
   };
   // legend gradient from the palette
   const lo = PALETTE_STOPS[0][0];
@@ -6661,10 +6784,10 @@ function boot(scene, root = document) {
     root.body.insertAdjacentHTML(
       'beforeend',
       `<div id="retro" class="blockpanel" aria-label="Retrofit controls">
-        <div class="seg" role="group" aria-label="Show Before, After or both">${btn('data-state', 'before', 'Before')}${btn('data-state', 'split', 'Split')}${btn('data-state', 'after', 'After')}</div>
+        <div class="seg" role="group" aria-label="Show Before, After or both">${btn('data-state', 'before', 'Before')}${btn('data-state', 'split', 'Split')}${btn('data-state', 'after', 'After')}${btn('data-swap', '1', 'swap (B)')}</div>
         <div class="row"><label for="rain">${gl('daysSinceRain', 'days since rain')}</label><input id="rain" type="range" min="0" max="${D_MAX}" step="1" aria-label="days since rain"><span id="rainLabel" class="hand"></span></div>
         <div class="seg" role="group" aria-label="Materials aged or new"><span>${gl('albedoAgeing', 'materials')}:</span>${btn('data-aged', '1', 'aged')}${btn('data-aged', '0', 'new')}</div>
-        <div class="measures"><div class="hand">Retrofit measures</div>${MEASURES.map((m) => btn('data-measure', m.id, m.name)).join('')}${btn('data-measure', 'tradeoff', 'Trade-off: reflective pavement', 'class="warn"')}${btn('data-measure', 'sponge', 'Sponge city (海绵城市)')}</div>
+        <details class="cards"><summary class="hand">What each measure does (${MEASURES.length + 2} cards)</summary><div class="measures">${MEASURES.map((m) => btn('data-measure', m.id, m.name)).join('')}${btn('data-measure', 'tradeoff', 'Trade-off: reflective pavement', 'class="warn"')}${btn('data-measure', 'sponge', 'Sponge city (海绵城市, China\'s rain plan)')}</div></details>
       </div>`,
     );
     const el = root.getElementById('retro');
@@ -6672,7 +6795,10 @@ function boot(scene, root = document) {
       const b = e.target.closest ? e.target.closest('button') : null;
       if (!b) return;
       if (b.dataset.state) setState(b.dataset.state);
-      else if (b.dataset.aged) setAged(b.dataset.aged === '1');
+      else if (b.dataset.swap) {
+        swapStates();
+        redraw();
+      } else if (b.dataset.aged) setAged(b.dataset.aged === '1');
       else if (b.dataset.measure) showMeasure(b.dataset.measure, b);
     });
     const rain = root.getElementById('rain');
@@ -6684,7 +6810,7 @@ function boot(scene, root = document) {
     for (const b of retroUi.el.querySelectorAll('[data-state]')) b.setAttribute('aria-pressed', String(b.dataset.state === S.state));
     for (const b of retroUi.el.querySelectorAll('[data-aged]')) b.setAttribute('aria-pressed', String((b.dataset.aged === '1') === S.aged));
     retroUi.rain.value = String(S.d);
-    retroUi.label.textContent = S.d === 0 ? 'd = 0 · best case: clear day after overnight rain' : `d = ${S.d}`;
+    retroUi.label.textContent = S.d === 0 ? 'the day after overnight rain (best case)' : `${S.d} day${S.d === 1 ? '' : 's'} after rain`;
     root.body.dataset.state = S.state;
   }
   const redraw = () => {
@@ -6992,17 +7118,19 @@ function boot(scene, root = document) {
 
   // drag to pan, click to pick
   let drag = null;
-  /** True if a CSS-px x is on the split divider (handle or line). */
-  const onDivider = (x) => retro && S.state === 'split' && Math.abs(x * R.dpr - Math.round(S.split * canvas.width)) <= 12 * R.dpr;
+  /** True if a CSS-px point is on the split divider's round handle (#29 item 8: anywhere else a drag pans the map). */
+  const onDivider = (x, y) => retro && S.state === 'split' && Math.hypot(x * R.dpr - Math.round(S.split * canvas.width), y * R.dpr - canvas.height * 0.5) <= 20 * R.dpr;
   canvas.addEventListener('pointerdown', (e) => {
-    drag = { x: e.clientX, y: e.clientY, cam: { ...S.cam }, moved: false, divider: onDivider(e.clientX) };
+    // any press on the map closes an open footnote (hover or pinned), unless it lands on a margin note
+    if (!fn.hidden && !noteHit(e.clientX, e.clientY)) hideFn();
+    drag = { x: e.clientX, y: e.clientY, cam: { ...S.cam }, moved: false, divider: onDivider(e.clientX, e.clientY) };
     canvas.setPointerCapture(e.pointerId);
   });
   const noteHit = (x, y) => (notesR.noteHits ?? []).find((h) => x >= h.x && x <= h.x + h.w && y >= h.y - h.h && y <= h.y + 3);
   canvas.addEventListener('pointermove', (e) => {
     if (!drag) {
       const h = noteHit(e.clientX, e.clientY);
-      canvas.style.cursor = h ? 'help' : onDivider(e.clientX) ? 'ew-resize' : '';
+      canvas.style.cursor = h ? 'help' : onDivider(e.clientX, e.clientY) ? 'ew-resize' : '';
       if (h && fn.hidden) showFn(h.key, { left: h.x, right: h.x + h.w, top: h.y - h.h, bottom: h.y + 3 }, false);
       else if (!h && !fn.hidden && !fnPinned) hideFn();
       return;
@@ -7179,6 +7307,8 @@ function boot(scene, root = document) {
     };
   }
 
+  /** A source key with its text, the key linking to this block's group on the references page (#29 item 5). */
+  const refLink = (k) => `<a class="ref" href="../../references.html">[${k}]</a> ${SOURCES[k]}`;
   function showCard(p, x, y) {
     if (!p) return;
     const d = cardData(p);
@@ -7206,10 +7336,24 @@ function boot(scene, root = document) {
         ${d.compare.tmrtBefore !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} 15:00 Before → After</td><td>${fmt(d.compare.tmrtBefore)} → ${fmt(d.compare.tmrtAfter)} °C</td></tr>` : ''}
         <tr><td colspan="2" class="sub">Before: ${d.compare.beforeMat}; After: ${d.compare.afterMat}</td></tr>`
       : '';
+    const feel = d.tmrtNow !== null ? `; standing here feels like ${fmt(d.tmrtNow)} °C` : '';
     card.innerHTML = `
       <button class="x" aria-label="close">×</button>
       <h3>${d.title}</h3>
+      <p class="lead">At ${hhmm(d.hour)} the ${d.groundNow !== null ? 'top' : 'surface'} here is ${fmt(d.tsNow)} °C${feel}, with the air at ${fmt(d.air)} °C.</p>
       <div class="mat">${d.matId === 'coolroof' || d.matId === 'coolroofAged' || d.matId === 'coolroofNew' ? gl('coolRoof', d.material) : d.material}${retro ? ` · ${d.state === 'after' ? 'After' : 'Before'}` : ''}</div>
+      <table>
+        <tr class="t"><td>${gl('surfaceTemp', 'surface')} now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
+        <tr class="t"><td>surface at 3 pm / ${gl('nightLag', '11 pm')}</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
+        ${d.groundNow !== null ? `<tr><td>ground beneath now</td><td>${fmt(d.groundNow)} °C</td></tr>` : ''}
+        ${d.tmrtNow !== null ? `<tr><td>how hot it ${gl('tmrt', 'feels')} to stand here, now / 3 pm</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
+        <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
+        ${blk && d[blk.cardKey] ? blk.cardRows(d[blk.cardKey]) : ''}
+        ${d.wind && d.wind.at !== null ? `<tr><td>${gl('apparentTemp', 'feels like, with the wind')} now</td><td>${fmt(d.wind.at)} °C</td></tr>` : ''}
+        ${cmp}
+      </table>
+      <p class="note">${d.note}</p>
+      <details class="expert"><summary>For experts</summary>
       <table>
         <tr><td>${gl('albedo', 'albedo α')}</td><td>${P.alpha.value}${tag(P.alpha)}</td></tr>
         <tr><td>${gl('emissivity', 'emissivity ε')}</td><td>${P.eps.value}${tag(P.eps)}</td></tr>
@@ -7217,18 +7361,11 @@ function boot(scene, root = document) {
         <tr><td>${gl('ef', 'evaporative fraction')}</td><td>${efCell}</td></tr>
         ${wet}
         <tr><td>${gl('svf', 'sky view factor')}</td><td>${d.svf.toFixed(2)}</td></tr>
-        <tr class="t"><td>${gl('surfaceTemp', 'surface')} now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
-        <tr class="t"><td>surface 15:00 / ${gl('nightLag', '23:00')}</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
-        ${d.groundNow !== null ? `<tr><td>ground beneath now</td><td>${fmt(d.groundNow)} °C</td></tr>` : ''}
-        ${d.tmrtNow !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} (person) now / 15:00</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
+        ${d.tmrtNow !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} now / 15:00</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
         ${d.wallsNow !== null ? `<tr><td>sun off the ${gl('wallReflection', 'walls')} now</td><td>${Math.round(d.wallsNow)} W m⁻²</td></tr>` : ''}
         ${d.glassNow !== null && glassMode ? `<tr><td>sun off the ${gl('specular', 'glass')} now</td><td>${Math.round(d.glassNow)} W m⁻²</td></tr>` : ''}
-        <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
-        ${blk && d[blk.cardKey] ? blk.cardRows(d[blk.cardKey]) : ''}
         ${d.wind ? `<tr><td>${gl('windFactor', 'wind factor f_w')}</td><td>${d.wind.fw.toFixed(2)} · ${fmt(d.wind.u)} of ${d.wind.site} m/s</td></tr>
-        <tr><td>convection h_c</td><td>${fmt(d.wind.hc)} W m⁻² K⁻¹</td></tr>
-        ${d.wind.at !== null ? `<tr><td>${gl('apparentTemp', 'apparent temp.')} now</td><td>${fmt(d.wind.at)} °C</td></tr>` : ''}` : ''}
-        ${cmp}
+        <tr><td>convection h_c</td><td>${fmt(d.wind.hc)} W m⁻² K⁻¹</td></tr>` : ''}
       </table>
       ${d.glass ? `<table>
         <tr><td colspan="2" class="sub">${gl('curtainWall', 'Curtain wall')}: ${d.glass.name}</td></tr>
@@ -7236,10 +7373,10 @@ function boot(scene, root = document) {
         ${d.glass.faces.map((f) => `<tr><td>${f.face} face now</td><td>${f.rho !== null ? `${gl('fresnel', `ρ ${f.rho.toFixed(2)}`)} at θ ${Math.round(f.theta)}°` : 'not in sun'} · glass ${fmt(f.tg)} °C</td></tr>`).join('')}
         <tr><td>glass ${gl('emissivity', 'ε')} / absorptance</td><td>${d.glass.eps.value}${tag(d.glass.eps)} / ${d.glass.absorb.value}${tag(d.glass.absorb)}</td></tr>
       </table>` : ''}
-      <p class="note">${d.note}</p>
       ${d.caveat ? `<p class="caveat">${d.caveat}</p>` : ''}
       ${d.prescribed ? `<p class="caveat">${d.prescribed}</p>` : ''}
-      <p class="src">Sources: ${srcs.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: ${gl('forceRestore', 'force-restore')} (Deardorff 1978), simulated. Basis tags and the model-vs-literature table: docs/sources.md.</p>`;
+      <p class="src">Sources: ${srcs.map(refLink).join('; ')}. Made-up block, calculated temperatures: a ${gl('forceRestore', 'force-restore')} surface model (Deardorff 1978) on a 5 m grid; the air temperature is fixed.</p></details>`;
+    for (const a of card.querySelectorAll('a.ref')) a.setAttribute('href', `${a.getAttribute('href')}#${scene.id}`); // this block's group on the references page
     card.querySelector('.x').onclick = hideCard;
     card._pick = p;
     card._measure = null;
@@ -7437,6 +7574,7 @@ function boot(scene, root = document) {
   syncGlass();
   syncWf();
   if (blk) blk.sync();
+  foldPanels();
   draw();
   requestAnimationFrame(loop);
 
@@ -7445,6 +7583,8 @@ function boot(scene, root = document) {
   const vw = (which) => (which ? V[which] : main);
   const api = {
     ready: true,
+    /** True while the loading hint is shown (#29 item 3). */
+    hint: () => !inkHint.hidden,
     info: {
       worldMs: t1 - t0,
       modelMs: t2 - t1,

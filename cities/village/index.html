@@ -14,11 +14,15 @@
     border: 1.5px solid #2b2621; border-radius: 3px 9px 4px 8px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); max-width: 360px; }
   #cartouche h1 { margin: 0; font-size: 20px; letter-spacing: .02em; }
   #cartouche p { margin: 2px 0 0; font-size: 13px; opacity: .8; }
-  #bar { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; gap: 14px; align-items: center;
+  #bar { position: fixed; left: calc(50% + 116px); bottom: 16px; transform: translateX(-50%); display: flex; gap: 14px; align-items: center;
     padding: 8px 16px; background: rgba(246,240,226,.92); border: 1.5px solid #2b2621; border-radius: 8px 3px 9px 4px; }
-  #bar input[type=range] { width: min(46vw, 420px); accent-color: #9a4a33; }
+  #bar input[type=range] { width: min(30vw, 320px); accent-color: #9a4a33; }
   #hourLabel { min-width: 150px; font-variant-numeric: tabular-nums; }
+  #bar button { white-space: nowrap; }
   #keys { font-size: 12px; opacity: .75; }
+  #bar button, #termsBtn { font: 12px/1 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; border-radius: 4px 7px 3px 6px; background: #fbf7ee; cursor: pointer; color: #2b2621; }
+  #bar button[aria-pressed="true"] { background: #2b2621; color: #fbf7ee; }
+  #inkHint { position: fixed; left: 50%; top: 18px; transform: translateX(-50%); padding: 6px 14px; background: rgba(246,240,226,.92); border: 1px solid #2b2621; border-radius: 6px 3px 8px 3px; font-size: 14px; }
   kbd { font: 12px/1 ui-monospace, Menlo, monospace; border: 1px solid #2b2621; border-radius: 3px; padding: 1px 4px; background: #fbf7ee; }
   #legend { position: fixed; right: 18px; top: 18px; width: 240px; padding: 8px 12px; background: rgba(246,240,226,.92);
     border: 1.5px solid #2b2621; border-radius: 6px 3px 8px 3px; transition: opacity .6s; opacity: 0; }
@@ -38,11 +42,10 @@
   #card .caveat { margin: 4px 0; padding: 4px 6px; font-size: 12px; background: #f3e3d6; border-left: 3px solid #8a2f22; }
   #card .note { margin: 8px 0 4px; font-style: italic; }
   #card .src { margin: 4px 0 0; font-size: 11px; opacity: .75; }
-  .noui #cartouche, .noui #bar, .noui #legend, .noui #terms { display: none; }
+  .noui #cartouche, .noui #bar, .noui #legend, .noui #terms, .noui #inkHint { display: none; }
   #cartouche .sim { font-size: 12px; opacity: .7; letter-spacing: .02em; }
   .gl { border-bottom: 1px dotted currentColor; cursor: help; }
   .gl:focus-visible { outline: 1.5px dashed #8a2f22; outline-offset: 2px; }
-  #termsBtn { font: 12px/1 inherit; font-family: inherit; padding: 3px 8px; border: 1px solid #2b2621; border-radius: 4px 7px 3px 6px; background: #fbf7ee; cursor: pointer; color: #2b2621; }
   #terms { position: fixed; right: 18px; bottom: 74px; width: 250px; max-height: 50vh; overflow: auto; padding: 8px 12px; background: #fbf7ee;
     border: 1.5px solid #2b2621; border-radius: 6px 3px 8px 3px; box-shadow: 2px 3px 0 rgba(43,38,33,.18); font-size: 13px; }
   #terms ul { margin: 4px 0 0; padding-left: 16px; }
@@ -71,6 +74,12 @@
   #card .sub { font-size: 11.5px; opacity: .8; font-weight: normal; }
   #card .lit { margin: 4px 0; font-size: 12px; }
   .noui .blockpanel { display: none; }
+  #card .lead { margin: 4px 0 8px; font-size: 14px; }
+  #card details.expert { margin-top: 8px; border-top: 1px dashed #6d6355; padding-top: 4px; }
+  #card details.expert summary, .blockpanel summary { cursor: pointer; font-size: 12px; opacity: .85; }
+  .blockpanel summary { font-size: 13px; margin-bottom: 4px; opacity: 1; }
+/* phones: the bar wraps to the width, panels and the legend shrink, the cartouche gives way */
+  @media (max-width:700px){#bar{left:6px;right:6px;bottom:6px;transform:none;flex-wrap:wrap;gap:6px 10px;padding:6px 8px;justify-content:center}#bar input[type=range]{width:100%;flex-basis:100%}#hourLabel{min-width:0}#keys{display:none}#cartouche{left:6px;top:6px;right:6px;max-width:none;padding:6px 10px}#cartouche h1{font-size:16px}#cartouche p:last-child{display:none}.blockpanel{left:6px;bottom:auto;top:92px;width:auto;max-width:calc(100vw - 12px);max-height:50vh;overflow:auto;box-sizing:border-box}#legend{right:6px;top:auto;bottom:118px;width:180px}#legend .cap{display:none}#card{left:6px !important;right:6px;width:auto;top:92px !important;max-height:calc(100vh - 210px)}#terms{right:6px;left:6px;width:auto;bottom:118px}#inkHint{top:92px;font-size:13px}}
   #card .x { position: absolute; right: 6px; top: 4px; border: 0; background: none; font-size: 18px; cursor: pointer; color: #2b2621; }
 </style>
 </head>
@@ -79,23 +88,26 @@
 <div id="cartouche">
   <h1>Thermal-Ink Atlas</h1>
   <p class="hand">Urban village and informal edge</p>
-  <p class="sim">Simulated block · invented geometry · <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">modelled</span> <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">temperatures</span></p>
+  <p class="sim">Made-up block, <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">calculated</span> <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">temperatures</span></p>
   <p>Assumed heat-wave day: 22.5° N, 20 July, air 27–35 °C, vapour pressure 28 hPa, light wind 1 m/s. Air temperature is fixed: no warm air held in the lanes at night, no wind in the lanes, no heat from people or appliances.</p>
 </div>
 <div id="legend"><div class="hand"><span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="surfaceTemp">surface temperature</span></div><div id="legendBar"></div>
   <div class="ends"><span id="legendLo"></span><span id="legendHi"></span></div>
-  <div class="cap">Simulated with a <span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">force-restore model</span> on an invented block, not measured. Inputs not yet verified are flagged on the cards.</div></div>
+  <div class="cap">Calculated for a made-up block, not measured (<span class="gl" tabindex="0" role="button" aria-expanded="false" data-gl="forceRestore">how</span>).</div></div>
 <div id="bar">
   <input id="hour" type="range" min="0" max="23.75" step="0.25" value="15" aria-label="hour of day">
   <span id="hourLabel" class="hand"></span>
-  <span id="keys"><kbd>T</kbd> heat · <kbd>H</kbd> hour · <kbd>W</kbd> white roofs · <kbd>O</kbd> under the roof · drag · wheel · click a parcel</span>
+  <button type="button" data-k="H" aria-label="one hour earlier">−1 h</button><button type="button" data-k="h" aria-label="one hour later">+1 h</button>
+  <button type="button" id="heatBtn" data-k="t" aria-pressed="false">heat view (T)</button>
+  <span id="keys">drag · zoom · click a spot</span>
   <button id="termsBtn" type="button" aria-expanded="false" aria-controls="terms">terms</button>
 </div>
 <div id="terms" role="dialog" aria-label="Glossary of terms" hidden>
   <div class="hand">Terms used here</div>
   <ul id="termsList"></ul>
-  <p class="refs">Full reference list for every block: <a id="refsLink" href="../../references.html">references.html</a> (in this repository, also linked from the gallery page); details in docs/sources.md.</p>
+  <p class="refs">Every source behind every block: <a id="refsLink" href="../../references.html">the reference list</a> (also linked from the gallery).</p>
 </div>
+<div id="inkHint" class="hand" role="status" hidden>Drawing the block… the colours come in as the ink dries</div>
 <div id="fn" role="tooltip" hidden></div>
 <div id="card" data-open="0"></div>
 <script>
@@ -3634,9 +3646,10 @@ const THERMAL_WALL = hexRgb('#e7dfcd');
 const NIGHT_RGB = hexRgb('#27355a');
 const LIT = hexRgb('#f4cf7a');
 const SWEAT_CSS = 'rgba(143,182,207,0.95)';
-// glass pane colours by type (day view), and the reflection-spot glint
+// glass pane colours by type (day view), the reflection-spot glint and its outline ink
 const GLASS_RGB = { clear: hexRgb('#7d9ea6'), lowe: hexRgb('#8ea4b8'), mirror: hexRgb('#b9c3c6') };
 const GLINT = [255, 246, 214];
+const SPOT_INK = [176, 98, 40];
 const HAND_FONT = '"Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive';
 
 function makeCanvas(w, h) {
@@ -3936,14 +3949,26 @@ class Renderer {
           if (py > q1) q1 = py;
         }
       }
-      const a = clamp(r[i] / 0.4, 0, 1);
+      const a = clamp(r[i] / 0.6, 0, 1);
       d.data[i * 4] = GLINT[0];
       d.data[i * 4 + 1] = GLINT[1];
       d.data[i * 4 + 2] = GLINT[2];
       d.data[i * 4 + 3] = Math.round(255 * (a > 0 ? 0.25 + 0.75 * a : 0));
     }
     g.putImageData(d, 0, 0);
-    hc.spotImg = { img, R: hc.spot.cell, bb: [p0 - 2, q0 - 2, p1 + 2, q1 + 2] };
+    // the patch's outline (#29 item 7): cell edges between a lit and an unlit cell, on the ground plane
+    const edge = [];
+    const on = (x, y) => x >= 0 && y >= 0 && x < n && y < n && r[y * n + x] > 0;
+    for (let y = 0; y < n; y++) {
+      for (let x = 0; x < n; x++) {
+        if (!on(x, y)) continue;
+        if (!on(x, y - 1)) edge.push([x, y, x + 1, y]);
+        if (!on(x, y + 1)) edge.push([x, y + 1, x + 1, y + 1]);
+        if (!on(x - 1, y)) edge.push([x, y, x, y + 1]);
+        if (!on(x + 1, y)) edge.push([x + 1, y, x + 1, y + 1]);
+      }
+    }
+    hc.spotImg = { img, R: hc.spot.cell, bb: [p0 - 2, q0 - 2, p1 + 2, q1 + 2], edge: edge.map(([a, b, c, e]) => [...iso(a * cell, b * cell, 0), ...iso(c * cell, e * cell, 0)]) };
     return hc.spotImg;
   }
 
@@ -3992,6 +4017,19 @@ class Renderer {
     hz.globalCompositeOperation = 'source-over';
     g.globalAlpha = 0.4 * k;
     g.drawImage(this.hatchScratch, 0, 0);
+    // a dashed ink outline, so the patch reads as a shape that moves with the hour
+    g.setTransform(Z, 0, 0, Z, ox, oy);
+    g.globalAlpha = 0.75 * k;
+    g.strokeStyle = rgbCss(SPOT_INK);
+    g.lineWidth = (1.3 * this.dpr) / Z;
+    g.setLineDash([4 / Z, 3 / Z]);
+    g.beginPath();
+    for (const e of si.edge) {
+      g.moveTo(e[0], e[1]);
+      g.lineTo(e[2], e[3]);
+    }
+    g.stroke();
+    g.setLineDash([]);
     g.globalAlpha = 1;
   }
 
@@ -4010,6 +4048,8 @@ class Renderer {
       if (it.t === 'car') return null; // block 6: parked cars are outlines over the wash (not modelled)
       if (it.t === 'win') return null;
       const n = f.n ?? [0, 1];
+      // block 3 (#29 item 7): a glass face takes the colour of its own surface temperature
+      if (f.k === 'glass' && this.thermal.glassTemp) return scaleRgb(heatRgb(this.thermal.glassTemp(n[0] ? 'E' : 'S', hc.hq)), n[0] ? 0.92 : 1);
       return scaleRgb(THERMAL_WALL, n[0] ? 0.9 : 1);
     }
     if (Array.isArray(f)) return f;
@@ -4095,28 +4135,78 @@ class Renderer {
     ctx.globalAlpha = 1;
   }
 
-  /** Lit windows after dark (drawn above the night tint). */
+  /**
+   * Lit windows after dark (drawn above the night tint). A lit window that a
+   * later face of another building or a tree may hide (their boxes overlap)
+   * goes through a layer from which those later faces are cut out, so a tall
+   * tower's windows no longer shine through the nearer, lower roofs in front
+   * of it (#29 item 7); every other window is drawn straight onto the tile.
+   */
   litWindows(ctx, list, hc, Z, ox, oy, bb) {
-    ctx.setTransform(Z, 0, 0, Z, ox, oy);
-    for (const it of list) {
-      if (it.t !== 'win' || !it.f || it.f.k !== 'win') continue;
-      const b = it.bb;
-      if (bb && (b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3])) continue;
-      if (it.f.h > (it.f.shop ? 0.75 : 0.45)) continue;
-      const p = it.fp;
-      ctx.beginPath();
-      ctx.moveTo(p[0], p[1]);
+    const inTile = (b) => !bb || !(b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3]);
+    const items = list.filter((it) => inTile(it.bb));
+    const path = (g, p) => {
+      g.beginPath();
+      g.moveTo(p[0], p[1]);
       for (let i = 2; i < p.length; i += 2) {
         if (p[i] !== p[i]) {
-          ctx.closePath();
+          g.closePath();
           i += 2;
-          ctx.moveTo(p[i], p[i + 1]);
-        } else ctx.lineTo(p[i], p[i + 1]);
+          g.moveTo(p[i], p[i + 1]);
+        } else g.lineTo(p[i], p[i + 1]);
       }
-      ctx.closePath();
+      g.closePath();
+    };
+    const over = (a, b) => !(a[2] <= b[0] || a[0] >= b[2] || a[3] <= b[1] || a[1] >= b[3]);
+    const lit = (it) => it.t === 'win' && it.f && it.f.k === 'win' && !(it.f.h > (it.f.shop ? 0.75 : 0.45));
+    const face = (it) => it.t !== 'win' && it.fp && this.fillOf(it, 'day', hc);
+    const hidden = new Set();
+    for (let k = 0; k < items.length; k++) {
+      const w = items[k];
+      if (!lit(w)) continue;
+      for (let j = k + 1; j < items.length; j++) {
+        const o = items[j];
+        if (o.b !== w.b && face(o) && over(o.bb, w.bb)) {
+          hidden.add(k);
+          break;
+        }
+      }
+    }
+    ctx.setTransform(Z, 0, 0, Z, ox, oy);
+    ctx.fillStyle = rgbCss(LIT);
+    items.forEach((it, k) => {
+      if (!lit(it) || hidden.has(k)) return;
+      path(ctx, it.fp);
       ctx.globalAlpha = 0.85 * hc.night;
-      ctx.fillStyle = rgbCss(LIT);
       ctx.fill();
+    });
+    if (hidden.size) {
+      const L = this.winLayer ?? (this.winLayer = makeCanvas(TILE, TILE));
+      const g = L.getContext('2d');
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.globalCompositeOperation = 'source-over';
+      g.clearRect(0, 0, TILE, TILE);
+      g.setTransform(Z, 0, 0, Z, ox, oy);
+      g.fillStyle = rgbCss(LIT);
+      let drawn = false;
+      items.forEach((it, k) => {
+        if (hidden.has(k)) {
+          g.globalCompositeOperation = 'source-over';
+          g.globalAlpha = 0.85 * hc.night;
+          path(g, it.fp);
+          g.fill();
+          drawn = true;
+        } else if (drawn && face(it)) {
+          g.globalCompositeOperation = 'destination-out';
+          g.globalAlpha = it.a ?? 1;
+          path(g, it.fp);
+          g.fill();
+        }
+      });
+      g.globalCompositeOperation = 'source-over';
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = 1;
+      ctx.drawImage(L, 0, 0);
     }
     ctx.globalAlpha = 1;
   }
@@ -4715,9 +4805,22 @@ class Renderer {
       const p = iso(n.at[0], n.at[1], n.at[2] ?? 0);
       const ax = ox + p[0] * Z;
       const ay = oy + p[1] * Z;
-      const tx = ax + n.dx * d;
-      const ty = ay + n.dy * d;
+      let tx = ax + n.dx * d;
+      let ty = ay + n.dy * d;
       if (tx < -200 * d || tx > W + 50 || ty < -60 || ty > H + 20) return;
+      const lines = n.text;
+      const lh = 18 * d;
+      const w = Math.max(...lines.map((l) => ctx.measureText(l).width));
+      let bx = tx - (n.dx < 0 ? w + 6 * d : -6 * d);
+      let by = ty - (n.dy < 0 ? lines.length * lh : 0);
+      // keep the whole note on the canvas (#29 items 4 and 7): shift the box and the leader's end with it
+      const sx = Math.min(0, W - 8 * d - (bx + w + 5 * d)) || Math.max(0, 8 * d - (bx - 5 * d));
+      const top = (W / d < 700 ? 96 : 8) * d; // on a phone the cartouche spans the top
+      const sy = Math.min(0, H - 8 * d - (by + lines.length * lh + 3 * d)) || Math.max(0, top - (by - 3 * d));
+      bx += sx;
+      by += sy;
+      tx += sx;
+      ty += sy;
       ctx.globalAlpha = alpha;
       // leader: a gently bowed ink line with a dot at the anchor
       ctx.strokeStyle = rgbCss(INK);
@@ -4732,11 +4835,6 @@ class Renderer {
       ctx.beginPath();
       ctx.arc(ax, ay, 2.2 * d, 0, Math.PI * 2);
       ctx.fill();
-      const lines = n.text;
-      const lh = 18 * d;
-      const w = Math.max(...lines.map((l) => ctx.measureText(l).width));
-      const bx = tx - (n.dx < 0 ? w + 6 * d : -6 * d);
-      const by = ty - (n.dy < 0 ? lines.length * lh : 0);
       ctx.fillStyle = 'rgba(248,243,231,0.94)';
       ctx.fillRect(bx - 5 * d, by - 3 * d, w + 10 * d, lines.length * lh + 6 * d);
       ctx.strokeStyle = 'rgba(43,38,33,0.55)';
@@ -4847,7 +4945,7 @@ const GLOSSARY = {
     term: 'Thermal inertia / night lag',
     text: 'Heavy materials store heat during the day and release it after sunset, so they stay warm into the night.',
     model: (S) => S.lagLine,
-    why: 'Night lag keeps cities warm at night, when people most need to cool down.',
+    why: 'So the street is still above the air temperature at 11 pm, while the lawn has dropped below it.',
   },
   coolRoof: {
     term: 'Cool roof',
@@ -5369,7 +5467,7 @@ function drawUnder(R, ctx, cam, W, H, alpha, hq) {
   }
   ctx.globalAlpha = alpha;
   const s = E.under(hq).summary;
-  const text = `Under the roof (O): indoor radiant temperature under the sheet roofs at ${E.hm(hq)}, a proxy (F_r ${E.fr}) · bare rusty iron ${s.rust} °C · white-painted ${s.white} °C · outdoor air ${s.air} °C`;
+  const text = `Under the roof (O): the warmth the room's ceiling and walls give off under the sheet roofs at ${E.hm(hq)}, an estimate · bare rusty iron ${s.rust} °C · white-painted ${s.white} °C · outdoor air ${s.air} °C`;
   label(R, ctx, text, W, H);
   R.stats.under = n;
   R.stats.underLabel = text;
@@ -5797,12 +5895,14 @@ const { VG_ROOF, vgOverlay } = __m['vgkit'];
 const fmt = (v) => (Math.round(v * 10) / 10).toFixed(1);
 const f2 = (v) => v.toFixed(2);
 const pct = (v) => `${Math.round(v * 100)}%`;
-const K = (v) => `${v < 0 ? '−' : '+'}${fmt(Math.abs(v))} K`;
+const K = (v) => `${v < 0 ? '−' : '+'}${fmt(Math.abs(v))}°`;
 const hm = (h) => `${String(Math.floor(h + 1e-9) % 24).padStart(2, '0')}:${String(Math.round((h % 1) * 60) % 60).padStart(2, '0')}`;
 const tag = (v) => (v.basis !== 'cited' ? ` <span class="basis">${BASIS[v.basis]}</span>` : '') + (v.verified ? '' : ' <span class="unv" title="value not yet checked against the primary source">unverified</span>');
-const srcLine = (keys) => `<p class="src">Sources: ${keys.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: ${gl('forceRestore', 'force-restore')}, simulated, on a 5 m grid with the lanes' sky view and sun from their own width and walls; the air temperature is fixed.</p>`;
+const ref = (k) => `<a href="../../references.html#village">[${k}]</a> ${SOURCES[k]}`;
+/** The closed part at the bottom of a card (#29): the model's terms, flags and sources, with links to the references page. */
+const experts = (body, keys) => `<details class="expert"><summary>For experts</summary>${body}<p class="src">Sources: ${keys.map(ref).join('; ')}. Made-up block, calculated temperatures: a ${gl('forceRestore', 'force-restore')} surface model, on a 5 m grid with the lanes' sky view and sun from their own width and walls; the air temperature is fixed.</p></details>`;
 const close = '<button class="x" aria-label="close">×</button>';
-const MISS = ' <b>(band missed)</b>';
+const MISS = ' <b>(outside the expected range)</b>';
 /** A difference in words: "as warm", or "x.x °C warmer / cooler". */
 const than = (d) => (Math.abs(d) < 0.05 ? 'as warm' : `${fmt(Math.abs(d))} °C ${d > 0 ? 'warmer' : 'cooler'}`);
 
@@ -5816,15 +5916,15 @@ const ROOF_ROWS = [['rustTin', 'rusty corrugated iron'], ['galvTin', 'galvanised
 /** Margin notes (at most 5). d: numbers from the plugin (noteData). */
 function vgNotes(scene, d) {
   const text = {
-    lane: [`Lanes 1.5–3 m wide, walls ${fmt(d.laneH)} m (sky view ${f2(d.laneSvf)}):`, `Tmrt ${fmt(d.lane15)} °C at 3 pm, ${fmt(d.lane22)} °C at 10 pm`],
-    square: [`The open square: Tmrt ${fmt(d.sq15)} °C at 3 pm,`, `${fmt(d.sq22)} °C at 10 pm (lanes ${fmt(d.lane22)} °C)`],
+    lane: [`Lanes 1.5–3 m wide between walls ${fmt(d.laneH)} m high:`, `it feels like ${fmt(d.lane15)} °C at 3 pm, ${fmt(d.lane22)} °C at 10 pm`],
+    square: [`The open square feels like ${fmt(d.sq15)} °C at 3 pm,`, `${fmt(d.sq22)} °C at 10 pm (lanes ${fmt(d.lane22)} °C)`],
     tin: [`Rusty iron roofs ${fmt(d.rust15)} °C at 3 pm,`, `${fmt(d.rust03)} °C at 3 am`],
     white: [`Roofs the residents painted white: ${fmt(d.white15)} °C`, `at 3 pm; bare rusty iron ${fmt(d.rust15)} °C`],
     under: [`Under bare iron (O): the room's radiant`, `temperature ${fmt(d.under15)} °C at 3 pm (air ${fmt(d.air15)} °C)`],
   };
   const terms = {
-    lane: [['handshakeBuilding', 'Lanes 1.5–3 m wide'], ['svf', `sky view ${f2(d.laneSvf)}`]],
-    square: [['tmrt', 'Tmrt']],
+    lane: [['handshakeBuilding', 'Lanes 1.5–3 m wide'], ['tmrt', 'it feels like']],
+    square: [['tmrt', 'feels like']],
     tin: [['surfaceTemp', `${fmt(d.rust15)} °C at 3 pm`]],
     white: [['albedo', 'painted white']],
     under: [['indoorRadiant', "the room's radiant"]],
@@ -5847,19 +5947,19 @@ function lanesCard(d) {
   return `
     ${close}
     <h3>Lanes by day and by night</h3>
+    <p class="lead">A lane two metres wide between walls twenty metres high sees only a sliver of sky: after dark it stays warmer than the open square, ${than(gap)} at ${hm(ni)}.</p>
     <div class="mat">${gl('handshakeBuilding', 'Handshake buildings')} 18–24 m high, lanes 1.5–3 m · air ${fmt(a[nn])} / ${fmt(a[15])} / ${fmt(a[ni])} °C at ${hm(nn)} / 15:00 / ${hm(ni)}</div>
     <table class="cmp">
-      <tr><td></td><td>W / H</td><td>${gl('svf', 'sky view')} lane / 5 m grid</td><td>${gl('tmrt', 'Tmrt')} ${hm(nn)} / 15:00 / ${hm(ni)}</td></tr>
+      <tr><td></td><td>width / walls</td><td>${gl('svf', 'open to the sky')}</td><td>${gl('tmrt', 'feels like')} ${hm(nn)} / 15:00 / ${hm(ni)}</td></tr>
       ${L.byW.filter((x) => x.n).map((x) => row(`${x.W} m lanes`, x)).join('')}
       ${row('Market Lane', L.market)}
       ${row('alleys of the low-rise edge', L.edge)}
       <tr class="t"><td>the open square</td><td>—</td><td>${f2(sq.svf)}</td><td>${fmt(sq.tmrt[nn])} / ${fmt(sq.tmrt[15])} / ${fmt(sq.tmrt[ni])} °C</td></tr>
-      <tr><td colspan="4" class="sub">Village lanes, ${gl('tmrt', 'Tmrt')} − air: ${K(L.village.tmrt[nn] - a[nn])} at ${hm(nn)}${noonMiss ? `, above the brief's +${VG_BANDS.laneNoon} K${MISS}` : ''}; the open square ${K(sq.tmrt[nn] - a[nn])}${openMiss ? `, below the brief's +${VG_BANDS.openNoon} K${MISS}` : ''}. At ${hm(ni)} the lanes are ${K(gap)} warmer than the square${nightMiss ? ` (brief +${VG_BANDS.night[0]} to +${VG_BANDS.night[1]} K${MISS})` : ` (brief +${VG_BANDS.night[0]} to +${VG_BANDS.night[1]} K)`}.</td></tr>
+      <tr><td colspan="4" class="sub">In the village lanes it feels ${K(L.village.tmrt[nn] - a[nn])} against the air at ${hm(nn)}${noonMiss ? `, more than the expected +${VG_BANDS.laneNoon}${MISS}` : ''}; in the open square ${K(sq.tmrt[nn] - a[nn])}${openMiss ? `, less than the expected +${VG_BANDS.openNoon}${MISS}` : ''}. At ${hm(ni)} the lanes feel ${K(gap)} warmer than the square (expected +${VG_BANDS.night[0]} to +${VG_BANDS.night[1]}${nightMiss ? MISS : ''}).</td></tr>
     </table>
     <p class="note">A lane two metres wide between walls twenty metres high sees only a few per cent of the sky. By day the walls keep much of the sun off the floor; after sunset the same walls stand between the people in the lane and the cold night sky, so a person there stays warm into the night while the open square cools.</p>
-    <p class="lit">An urban village in Pingshan, Shenzhen, was warmest against its surroundings between 20:00 and 24:00 (a summer mean of 1.71 K over 18–24 h; at most 3.95 K, at 20:00 in February), and its thermal-humidity index was worse than a green reference, especially at night. In old blocks of Guangzhou the pedestrian Tmrt peaked at 43.7 °C with the air at 41.3 °C (Deng et al. 2023). No measured Tmrt for lanes 1–3 m wide was found.</p>
-    <p class="caveat">The lanes are narrower than the 5 m grid: their sky view and sun come from an endless canyon of the lane's width and its two walls (the grid's own value is shown for comparison); a crossing of two lanes is taken as the east–west lane. Walls are straight: no balconies, air-conditioner boxes, overhangs or washing over the lane, so at noon, with the sun ${fmt(d.noonAlt)}° high, ${pct(L.village.sun[nn])} of a lane floor is in the sun. Every wall is the engine's shared warm wall (air + 2 K, more in the sun), so a lane that sees almost only walls cannot be much cooler than that.${noonMiss ? ` Both are tested in docs/sources.md (Block 10, docs-only runs): without the direct sun in the lanes and with their walls at air + 2 K the lanes come inside the brief's band; each alone does not.` : ''} The air is fixed: the heat held in the lanes' air at night, and the lack of wind, are not modelled.</p>
-    ${srcLine(['pingshan', 'deng2023', 'brief10'])}`;
+    ${experts(`<p class="lit">An urban village in Pingshan, Shenzhen, was warmest against its surroundings between 20:00 and 24:00 (a summer mean of 1.71 K over 18–24 h; at most 3.95 K, at 20:00 in February), and its thermal-humidity index was worse than a green reference, especially at night. In old blocks of Guangzhou the pedestrian Tmrt peaked at 43.7 °C with the air at 41.3 °C (Deng et al. 2023). No measured Tmrt for lanes 1–3 m wide was found.</p>
+    <p class="caveat">The lanes are narrower than the 5 m grid: their sky view and sun come from an endless canyon of the lane's width and its two walls (the grid's own value is shown for comparison); a crossing of two lanes is taken as the east–west lane. Walls are straight: no balconies, air-conditioner boxes, overhangs or washing over the lane, so at noon, with the sun ${fmt(d.noonAlt)}° high, ${pct(L.village.sun[nn])} of a lane floor is in the sun. Every wall is the engine's shared warm wall (air + 2 K, more in the sun), so a lane that sees almost only walls cannot be much cooler than that.${noonMiss ? ` Both are tested in docs/sources.md (Block 10, docs-only runs): without the direct sun in the lanes and with their walls at air + 2 K the lanes come inside the brief's band; each alone does not.` : ''} The air is fixed: the heat held in the lanes' air at night, and the lack of wind, are not modelled.</p>`, ['pingshan', 'deng2023', 'brief10'])}`;
 }
 
 /** Metal roofs card. d: {st}. */
@@ -5872,22 +5972,22 @@ function roofsCard(d) {
   const rows = ROOF_ROWS.filter(([id]) => E[id]).map(([id, name]) => {
     const m = MATERIALS[id];
     const r = E[id];
-    return `<tr><td>${name} (${r.n})</td><td>${m.alpha.value}${tag(m.alpha)} / ${m.eps.value}${tag(m.eps)}</td><td>${m.thinC.value / 1000}${tag(m.thinC)}</td><td>${fmt(r.ts15)} / ${fmt(r.peak)} / ${fmt(r.ts03)} °C</td></tr>`;
+    return `<tr><td>${name} (${r.n})</td><td>${fmt(r.ts15)} / ${fmt(r.peak)} / ${fmt(r.ts03)} °C</td></tr>`;
   }).join('');
   return `
     ${close}
     <h3>Metal roofs: hot by day, cold by night</h3>
+    <p class="lead">A bare sheet of rusty iron bakes in the sun, ${rust ? fmt(rust.ts15) : '—'} °C at 3 pm, then cools below the air at night: it holds almost no heat.</p>
     <div class="mat">Single-storey rooms of the low-rise edge · roofs are single sheets (${gl('heatCapacity', 'thin layers')})</div>
     <table class="cmp">
-      <tr><td></td><td>${gl('albedo', 'α')} / ${gl('emissivity', 'ε')}</td><td>C kJ m⁻² K⁻¹</td><td>15:00 / day's peak / 03:00</td></tr>
+      <tr><td></td><td>3 pm / day's peak / 3 am</td></tr>
       ${rows}
-      <tr><td>flat concrete roofs of the village houses</td><td>${MATERIALS.slabRoof.alpha.value} / ${MATERIALS.slabRoof.eps.value}</td><td>μ ${MATERIALS.slabRoof.mu.value}</td><td>${fmt(d.st.slab.ts15)} / — / ${fmt(d.st.slab.ts03)} °C</td></tr>
-      <tr><td colspan="4" class="sub">Brief at an air of 35 °C: rusty iron 60–75 °C at 15:00${rustMiss ? MISS : ''}; asbestos cement 50–62 °C${asbMiss ? `${MISS}: likely because the sheet here loses no heat through its underside to the room (a docs-only run with that loss, docs/sources.md, puts it inside the band, and rusty iron just below its band)` : ''}.</td></tr>
+      <tr><td>flat concrete roofs of the village houses</td><td>${fmt(d.st.slab.ts15)} / — / ${fmt(d.st.slab.ts03)} °C</td></tr>
+      <tr><td colspan="2" class="sub">Expected at an air of 35 °C: rusty iron 60–75 °C at 3 pm${rustMiss ? MISS : ''}; asbestos cement 50–62 °C${asbMiss ? `${MISS}: likely because the sheet here loses no heat through its underside to the room` : ''}.</td></tr>
     </table>
     <p class="note">A sheet of iron holds almost no heat, so it follows the sun: rust turns it dark, it bakes in the afternoon and cools fast after sunset. Bright galvanised sheet reflects more of the sun but gives off little heat, so it is not much cooler. Asbestos-cement sheet is a recognised health hazard.</p>
-    <p class="lit">Measured rooms: in Delhi in April, tin-roofed rooms were 33.4 °C against 32.8 °C outdoors, in Yavatmal 3–4 K above outdoors in May and June, and warmer than outdoors at night (Tasgaonkar et al. 2022); in Ahmedabad, tin-roofed homes 34.6–35.8 °C, asbestos 32.5–36.8 °C, concrete 31.6–33.8 °C (Vellingiri et al. 2020); in Ghana, metal-roofed rooms 4.5 K warmer by day than mud or thatch and 1.5 K cooler at night (Wilby et al. 2021). In Bangkok one unshaded house at midday in April had a 68.1 °C roof and a 49.2 °C ceiling; a shaded house's roof was 45.5 °C (unverified).</p>
-    <p class="caveat">No measured albedo was found for rusty iron, asbestos cement or tarpaulin: the brief's assumptions. The model's sheet loses heat from its top only: nothing goes through it into the room below, which likely makes every sheet here run hotter than a real roof over a room. A real tarpaulin stores about 0.4 kJ m⁻² K⁻¹; here it is held at 2 kJ, the smallest the 60 s model step can take without going unstable.</p>
-    ${srcLine(['tasgaonkar2022', 'vellingiri2020', 'wilby2021', 'khlongToey', 'emissTables', 'energyStarRoof', 'brief10'])}`;
+    ${experts(`<table class="cmp"><tr><td></td><td>${gl('albedo', 'α')} / ${gl('emissivity', 'ε')}</td><td>C kJ m⁻² K⁻¹</td></tr>${ROOF_ROWS.filter(([id]) => E[id]).map(([id, name]) => `<tr><td>${name}</td><td>${MATERIALS[id].alpha.value}${tag(MATERIALS[id].alpha)} / ${MATERIALS[id].eps.value}${tag(MATERIALS[id].eps)}</td><td>${MATERIALS[id].thinC.value / 1000}${tag(MATERIALS[id].thinC)}</td></tr>`).join('')}<tr><td>concrete slab roof</td><td>${MATERIALS.slabRoof.alpha.value} / ${MATERIALS.slabRoof.eps.value}</td><td>μ ${MATERIALS.slabRoof.mu.value}</td></tr></table>${asbMiss ? '<p class="caveat">The asbestos-cement band is the brief\'s; a docs-only run with the sheet losing heat to the room below (docs/sources.md) puts it inside the band, and rusty iron just below its band.</p>' : ''}<p class="lit">Measured rooms: in Delhi in April, tin-roofed rooms were 33.4 °C against 32.8 °C outdoors, in Yavatmal 3–4 K above outdoors in May and June, and warmer than outdoors at night (Tasgaonkar et al. 2022); in Ahmedabad, tin-roofed homes 34.6–35.8 °C, asbestos 32.5–36.8 °C, concrete 31.6–33.8 °C (Vellingiri et al. 2020); in Ghana, metal-roofed rooms 4.5 K warmer by day than mud or thatch and 1.5 K cooler at night (Wilby et al. 2021). In Bangkok one unshaded house at midday in April had a 68.1 °C roof and a 49.2 °C ceiling; a shaded house's roof was 45.5 °C (unverified).</p>
+    <p class="caveat">No measured albedo was found for rusty iron, asbestos cement or tarpaulin: the brief's assumptions. The model's sheet loses heat from its top only: nothing goes through it into the room below, which likely makes every sheet here run hotter than a real roof over a room. A real tarpaulin stores about 0.4 kJ m⁻² K⁻¹; here it is held at 2 kJ, the smallest the 60 s model step can take without going unstable.</p>`, ['tasgaonkar2022', 'vellingiri2020', 'wilby2021', 'khlongToey', 'emissTables', 'energyStarRoof', 'brief10'])}`;
 }
 
 /** Under the roof card. d: {st}. */
@@ -5903,16 +6003,16 @@ function underCard(d) {
   return `
     ${close}
     <h3>Under the roof: a proxy, not the room</h3>
-    <div class="mat">${gl('indoorRadiant', 'Indoor radiant temperature')}: the ceiling (the roof sheet) takes F_r ${fr.value}${tag(fr)} of the view, the walls the rest at air + ${VG.wallUp.value} K${tag(VG.wallUp)}</div>
+    <p class="lead">Under a bare iron sheet the ceiling is as hot as the roof, so it radiates heat onto everyone in the room: about ${E.rustTin ? fmt(E.rustTin.radiant15) : '—'} °C at 3 pm under rusty iron.</p>
+    <div class="mat">${gl('indoorRadiant', 'The warmth a room radiates')}: from the ceiling (the roof sheet) and the walls</div>
     <table class="cmp">
-      <tr><td>roof</td><td>radiant 15:00 / 03:00</td><td>air, illustrative: day's peak</td></tr>
+      <tr><td>roof</td><td>radiant 3 pm / 3 am</td><td>room air, illustrative: day's peak</td></tr>
       ${rows}
-      <tr><td colspan="3" class="sub">Outdoor air ${fmt(st.air[15])} °C at 15:00, ${fmt(st.air[3])} °C at 03:00. The air figure is illustrative only: h_ci (T_roof − Ta) / (h_ci + ρc_p n h / 3600) with h_ci ${VG.hci.value}${tag(VG.hci)} W m⁻² K⁻¹, a room ${VG.roomH.value} m high${tag(VG.roomH)} and n = ${fmt(st.n)} air changes an hour, set (as the brief says) so the bare rusty-iron rooms peak at +${VG.airTarget.value} K; never shown beyond ±${VG.airCap.value} K.</td></tr>
+      <tr><td colspan="3" class="sub">Outdoor air ${fmt(st.air[15])} °C at 3 pm, ${fmt(st.air[3])} °C at 3 am. The room-air figure is illustrative only, set so the bare rusty-iron rooms peak about ${VG.airTarget.value} degrees above the outdoor air.</td></tr>
     </table>
     <p class="note">On a hot afternoon the room under a bare iron sheet has a ceiling at the roof's own temperature, so it radiates onto everyone beneath it; the air of the room warms much less, because it is changed through gaps, doors and windows. At night the sheet is the coldest surface around.</p>
-    <p class="lit">Measured indoor air under tin roofs was 0.6–4 K above the outdoor air in the studies the brief found, not the 5–8 K sometimes quoted (Tasgaonkar et al. 2022; Vellingiri et al. 2020).</p>
-    <p class="caveat">Both numbers are proxies of the brief, not a simulation of the room: no walls' or floor's heat store, no people, cooking or appliances, no fans. The ceiling is taken as a black surface at the roof's temperature, which likely overstates the radiant heat under a bright galvanised sheet. The air figure is calibrated, so it can only show differences between roofs, not a measured room.</p>
-    ${srcLine(['tasgaonkar2022', 'vellingiri2020', 'brief10'])}`;
+    ${experts(`<p class="lit">The ceiling takes F_r ${fr.value}${tag(fr)} of the view, the walls the rest at air + ${VG.wallUp.value} K${tag(VG.wallUp)}. Air: h_ci (T_roof − Ta) / (h_ci + ρc_p n h / 3600) with h_ci ${VG.hci.value}${tag(VG.hci)} W m⁻² K⁻¹, a room ${VG.roomH.value} m high${tag(VG.roomH)} and n = ${fmt(st.n)} air changes an hour, set (as the brief says) so the bare rusty-iron rooms peak at +${VG.airTarget.value} K; never shown beyond ±${VG.airCap.value} K.</p><p class="lit">Measured indoor air under tin roofs was 0.6–4 K above the outdoor air in the studies the brief found, not the 5–8 K sometimes quoted (Tasgaonkar et al. 2022; Vellingiri et al. 2020).</p>
+    <p class="caveat">Both numbers are proxies of the brief, not a simulation of the room: no walls' or floor's heat store, no people, cooking or appliances, no fans. The ceiling is taken as a black surface at the roof's temperature, which likely overstates the radiant heat under a bright galvanised sheet. The air figure is calibrated, so it can only show differences between roofs, not a measured room.</p>`, ['tasgaonkar2022', 'vellingiri2020', 'brief10'])}`;
 }
 
 /** The residents' white roofs card. d: {st, cool (coolStats), on}. */
@@ -5931,19 +6031,19 @@ function whiteCard(d) {
   return `
     ${close}
     <h3>The residents' white roofs</h3>
-    <div class="mat">${c.n} bare iron roofs repainted white (W) · ${d.on ? 'white roofs on' : 'white roofs off (W to show them)'}</div>
+    <p class="lead">Painting a roof white is one of the few changes residents can make themselves: on rusty iron rooms the roof is ${rr ? fmt(-rr.d15) : '—'} degrees cooler at 3 pm.</p>
+    <div class="mat">${c.n} bare iron roofs repainted white · ${d.on ? 'white roofs on' : 'white roofs off (the white-roofs button, W, shows them)'}</div>
     <table class="cmp">
       <tr><td>roofs painted (W)</td><td>bare</td><td>new white paint</td><td>change</td></tr>
       ${rr ? `<tr class="t"><td>rusty iron rooms, roof at 15:00</td><td>${fmt(rr.ts15)} °C</td><td>${fmt(rr.cool15)} °C</td><td>${K(rr.d15)}${dMiss ? MISS : ''}</td></tr>
       <tr><td>the same, radiant under the roof 15:00</td><td>${fmt(rr.rad15)} °C</td><td>${fmt(rr.radW15)} °C</td><td>${K(rr.dRad15)}</td></tr>
       <tr class="t"><td>the same, air (illustrative), day's peak</td><td>${sAir(rr.airPeakBare)}</td><td>${sAir(rr.airPeakWhite)}</td><td>${K(rr.dAirPeak)}${aMiss ? MISS : ''}</td></tr>` : ''}
       <tr><td>all ${all.n} painted roofs, 15:00</td><td>${fmt(all.ts15)} °C</td><td>${fmt(all.cool15)} °C</td><td>${K(all.d15)}</td></tr>
-      ${aged && rust ? `<tr><td colspan="4" class="sub">Painted years ago (weathered, α ${MATERIALS.whiteTinAged.alpha.value}): ${fmt(aged.ts15)} °C at 15:00 against ${fmt(rust.ts15)} °C for bare rusty iron.</td></tr>` : ''}
+      ${aged && rust ? `<tr><td colspan="4" class="sub">Painted years ago (weathered): ${fmt(aged.ts15)} °C at 15:00 against ${fmt(rust.ts15)} °C for bare rusty iron.</td></tr>` : ''}
     </table>
-    <p class="note">Painting a roof white is one of the few changes residents can make themselves, and many do, often together: in this block some roofs are already white, and W paints the rest of the bare iron. New white paint (${gl('albedo', 'albedo')} ${MATERIALS.whiteTin.alpha.value}${tag(MATERIALS.whiteTin.alpha)}) turns back most of the sun, so the sheet and the ceiling under it stay far cooler.</p>
-    <p class="lit">In 16 homes in Ahmedabad, white paint on a tin roof cooled the room by about 1.1 K, a cool-roof sheet by 2.0 K and insulation under an asbestos roof by 2.4 K (Vellingiri et al. 2020, with MHT and IIPH). Simulated for 17 cities, cool roofs cut the hours of heat stress indoors by up to 91% (Nutkiewicz et al. 2022). A cluster randomised trial of cool roofs in Burkina Faso has published its protocol (Bunker et al. 2024); its results were found in the press only.</p>
-    <p class="caveat">Paint ages: the brief gives albedo 0.65 new and 0.50 weathered. The room figures are the proxies of the "Under the roof" card. ${dMiss || aMiss ? 'Where a band is missed, the likely cause is named in docs/sources.md (Block 10).' : ''}</p>
-    ${srcLine(['vellingiri2020', 'nutkiewicz2022', 'bunker2024', 'brief10'])}`;
+    <p class="note">Painting a roof white is one of the few changes residents can make themselves, and many do, often together: in this block some roofs are already white, and W paints the rest of the bare iron. New white paint turns back most of the sun, so the sheet and the ceiling under it stay far cooler.</p>
+    ${experts(`<p class="lit">New white paint ${gl('albedo', 'albedo')} ${MATERIALS.whiteTin.alpha.value}${tag(MATERIALS.whiteTin.alpha)}, weathered ${MATERIALS.whiteTinAged.alpha.value}.</p><p class="lit">In 16 homes in Ahmedabad, white paint on a tin roof cooled the room by about 1.1 K, a cool-roof sheet by 2.0 K and insulation under an asbestos roof by 2.4 K (Vellingiri et al. 2020, with MHT and IIPH). Simulated for 17 cities, cool roofs cut the hours of heat stress indoors by up to 91% (Nutkiewicz et al. 2022). A cluster randomised trial of cool roofs in Burkina Faso has published its protocol (Bunker et al. 2024); its results were found in the press only.</p>
+    <p class="caveat">Paint ages: the brief gives albedo 0.65 new and 0.50 weathered. The room figures are the proxies of the "Under the roof" card. ${dMiss || aMiss ? 'Where a band is missed, the likely cause is named in docs/sources.md (Block 10).' : ''}</p>`, ['vellingiri2020', 'nutkiewicz2022', 'bunker2024', 'brief10'])}`;
 }
 
 /** Urban villages measured card. d: {st}. */
@@ -5954,17 +6054,17 @@ function measuredCard(d) {
   return `
     ${close}
     <h3>${gl('urbanVillage', 'Urban villages')}, measured</h3>
+    <p class="lead">Studies of real urban villages find them warmest against their surroundings in the evening, as this page does.</p>
     <div class="mat">What studies of real urban villages and informal settlements found (quoted, not simulated)</div>
     <table class="cmp">
       <tr><td>Shenzhen, satellite surface heat island</td><td>high-density urban village 3.53 K · multi-storey 2.62 K · high-rise 1.60 K</td></tr>
       <tr><td>Shenzhen, Pingshan traverses (2011–12)</td><td>heat island largest 20:00–24:00; 1.71 K summer mean 18–24 h, 3.95 K at most (February)</td></tr>
       <tr><td>Shenzhen, comfort survey</td><td>urban villages the worst summer thermal-humidity index; density worsens it, vegetation mitigates</td></tr>
       <tr><td>Nairobi, informal settlements</td><td>+3.1 K daily maximum, +1.83 K daily minimum against the station; sites with vegetation 0.7 K cooler</td></tr>
-      <tr class="t"><td>this model, ${hm(ni)}</td><td>village lanes ${gl('tmrt', 'Tmrt')} ${fmt(L.tmrt[ni])} °C, open square ${fmt(sq.tmrt[ni])} °C (${K(L.tmrt[ni] - sq.tmrt[ni])})</td></tr>
+      <tr class="t"><td>this model, ${hm(ni)}</td><td>village lanes feel like ${fmt(L.tmrt[ni])} °C, the open square ${fmt(sq.tmrt[ni])} °C (${K(L.tmrt[ni] - sq.tmrt[ni])})</td></tr>
     </table>
-    <p class="note">The measurements are of the air, the surface or a comfort index; the model's numbers are of the radiation a person feels (Tmrt) with the air held fixed, so they show the same direction, a warm village in the evening, not the same quantity.</p>
-    <p class="caveat">Most of these figures come through the brief and are unverified (the Pingshan study's journal was not confirmed); a computational study of wind in Shenzhen's lanes (Ren et al. 2025) is not used here, as the lanes have no wind in this model.</p>
-    ${srcLine(['wu2015', 'pingshan', 'yi2022', 'scott2017', 'ren2025', 'brief10'])}`;
+    <p class="note">The measurements are of the air, the surface or a comfort index; the model's numbers are of the radiation a person feels, with the air held fixed, so they show the same direction, a warm village in the evening, not the same quantity.</p>
+    ${experts(`<p class="caveat">Most of these figures come through the brief and are unverified (the Pingshan study's journal was not confirmed); a computational study of wind in Shenzhen's lanes (Ren et al. 2025) is not used here, as the lanes have no wind in this model.</p>`, ['wu2015', 'pingshan', 'yi2022', 'scott2017', 'ren2025', 'brief10'])}`;
 }
 
 /** Who is most at risk card (literature only). */
@@ -5972,6 +6072,7 @@ function riskCard() {
   return `
     ${close}
     <h3>Who is most at risk</h3>
+    <p class="lead">Heat harms most where a hot room, outdoor work, older age or poor health meet little money for cooling or care.</p>
     <div class="mat">${gl('heatVulnerability', 'Heat vulnerability')}: exposure plus a lack of resources to cope, not a trait of the people who live here</div>
     <table class="cmp">
       <tr><td>China, 66 communities</td><td>+5.0% deaths on heat-wave days (2.9–7.2%), more among older people, women, deaths out of hospital and in dense communities</td></tr>
@@ -5981,8 +6082,7 @@ function riskCard() {
       <tr><td>work outdoors, China</td><td>about 100 million outdoor workers</td></tr>
     </table>
     <p class="note">The studies name the same things again and again: a hot room, especially at night, work outdoors, older age and poor health, and little money for cooling or care. They add up, and they are not spread evenly. Residents and community groups do act, with white roofs and shade on the roofs, and city plans such as Ahmedabad's Heat Action Plan were followed by fewer deaths.</p>
-    <p class="caveat">No estimate of heat deaths by type of housing, or for people who moved to the city for work and live in urban villages, was found; nothing on this card is modelled. Most figures are via the brief and unverified.</p>
-    ${srcLine(['ma2015', 'natMed2024', 'hess2018', 'carbonBriefAc', 'dialogueEarth', 'brief10'])}`;
+    ${experts(`<p class="caveat">No estimate of heat deaths by type of housing, or for people who moved to the city for work and live in urban villages, was found; nothing on this card is modelled. Most figures are via the brief and unverified.</p>`, ['ma2015', 'natMed2024', 'hess2018', 'carbonBriefAc', 'dialogueEarth', 'brief10'])}`;
 }
 
 /** Button labels for the village panel cards. */
@@ -6610,17 +6710,17 @@ function boot(scene, root = document) {
   let notes = retro ? retrofitNotes(scene, V.before, V.after, S.d, S.aged) : glassMode ? cbdNotes(scene, cbdNoteData()) : wfMode ? wfNotes(scene, wfNoteData()) : htMode || pkMode || esMode || cpMode || bsMode || vgMode || dsMode || nmMode ? null : block1Notes();
   function block1Notes() {
   const notesText = {
-    asphalt: ['Kiln Street, old asphalt (albedo 0.12):', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
+    asphalt: ['Kiln Street, old dark asphalt:', `${fmt(at('asphalt', 15))} °C at 3 pm, still ${fmt(at('asphalt', 23))} °C at 11 pm`],
     lawn: [`Park lawn: ${fmt(at('grass', 15))} °C at 3 pm;`, `${fmt(at('grass', 23))} °C at 11 pm, below the ${fmt(thermal.air(23))} °C air`],
-    shade: ['In the hot hours walkers keep', 'to the shady pavement'],
+    shade: ['3 pm · walkers take', 'the shady side'],
     roofs: [`White roof ${fmt(at('coolRoof', 15))} °C,`, `dark roof ${fmt(at('darkRoof', 15))} °C at 3 pm`],
     pond: [`The pond stays near ${fmt(at('water', 15))} °C`],
   };
   // glossary terms inside the canvas notes: [key, exact substring of a line]
   const notesTerms = {
-    asphalt: [['albedo', 'albedo 0.12'], ['nightLag', `still ${fmt(at('asphalt', 23))} °C at 11 pm`]],
+    asphalt: [['albedo', 'old dark asphalt'], ['nightLag', `still ${fmt(at('asphalt', 23))} °C at 11 pm`]],
     lawn: [['surfaceTemp', `${fmt(at('grass', 15))} °C at 3 pm`], ['nightLag', `${fmt(at('grass', 23))} °C at 11 pm`]],
-    shade: [['tmrt', 'shady pavement']],
+    shade: [['tmrt', 'the shady side']],
     roofs: [['coolRoof', 'White roof']],
     pond: [],
   };
@@ -6696,6 +6796,9 @@ function boot(scene, root = document) {
       lastStats.frameMs = performance.now() - tDraw;
     }
     dirty = false;
+    // the loading hint (#29 item 3) while the pen draws and the washes come in: a DOM element, never the canvas
+    const ink = S.intro && S.frame < INTRO.wash;
+    if (inkHint.hidden === ink) inkHint.hidden = !ink;
     // a released scrub ends once the frame is exact again
     if (S.scrub && S.released && !lastStats.preview) {
       S.scrub = false;
@@ -6710,11 +6813,31 @@ function boot(scene, root = document) {
   const hourLabel = $('hourLabel');
   const legend = $('legend');
   const card = $('card');
+  const heatBtn = $('heatBtn');
+  const inkHint = $('inkHint');
+  // the bar's buttons (#29: every key has a visible button): T, H and h, as the keys
+  $('bar').addEventListener('click', (e) => {
+    const b = e.target.closest ? e.target.closest('button[data-k]') : null;
+    if (b) window.dispatchEvent(new KeyboardEvent('keydown', { key: b.dataset.k }));
+  });
+  // block panels fold (#29); on a narrow screen they start folded
+  const foldPanels = () => {
+    for (const p of root.querySelectorAll('.blockpanel')) {
+      if (p.querySelector(':scope > details:not(.cards)')) continue;
+      const d = root.createElement('details');
+      d.open = window.innerWidth > 700;
+      d.innerHTML = `<summary class="hand">${p.getAttribute('aria-label') ?? 'Controls'}</summary>`;
+      while (p.firstChild) d.appendChild(p.firstChild);
+      p.appendChild(d);
+    }
+    if (window.innerWidth <= 700) for (const d of root.querySelectorAll('.blockpanel > details')) d.open = false;
+  };
   const syncUi = () => {
     slider.value = String(S.hour);
     hourLabel.textContent = `${hhmm(S.hour)}  ·  air ${fmt(thermal.air(S.hour))} °C`;
     legend.style.opacity = S.thermal ? '1' : '0';
     root.body.classList.toggle('thermal', S.thermal);
+    heatBtn.setAttribute('aria-pressed', String(!!S.thermal));
   };
   // legend gradient from the palette
   const lo = PALETTE_STOPS[0][0];
@@ -6757,10 +6880,10 @@ function boot(scene, root = document) {
     root.body.insertAdjacentHTML(
       'beforeend',
       `<div id="retro" class="blockpanel" aria-label="Retrofit controls">
-        <div class="seg" role="group" aria-label="Show Before, After or both">${btn('data-state', 'before', 'Before')}${btn('data-state', 'split', 'Split')}${btn('data-state', 'after', 'After')}</div>
+        <div class="seg" role="group" aria-label="Show Before, After or both">${btn('data-state', 'before', 'Before')}${btn('data-state', 'split', 'Split')}${btn('data-state', 'after', 'After')}${btn('data-swap', '1', 'swap (B)')}</div>
         <div class="row"><label for="rain">${gl('daysSinceRain', 'days since rain')}</label><input id="rain" type="range" min="0" max="${D_MAX}" step="1" aria-label="days since rain"><span id="rainLabel" class="hand"></span></div>
         <div class="seg" role="group" aria-label="Materials aged or new"><span>${gl('albedoAgeing', 'materials')}:</span>${btn('data-aged', '1', 'aged')}${btn('data-aged', '0', 'new')}</div>
-        <div class="measures"><div class="hand">Retrofit measures</div>${MEASURES.map((m) => btn('data-measure', m.id, m.name)).join('')}${btn('data-measure', 'tradeoff', 'Trade-off: reflective pavement', 'class="warn"')}${btn('data-measure', 'sponge', 'Sponge city (海绵城市)')}</div>
+        <details class="cards"><summary class="hand">What each measure does (${MEASURES.length + 2} cards)</summary><div class="measures">${MEASURES.map((m) => btn('data-measure', m.id, m.name)).join('')}${btn('data-measure', 'tradeoff', 'Trade-off: reflective pavement', 'class="warn"')}${btn('data-measure', 'sponge', 'Sponge city (海绵城市, China\'s rain plan)')}</div></details>
       </div>`,
     );
     const el = root.getElementById('retro');
@@ -6768,7 +6891,10 @@ function boot(scene, root = document) {
       const b = e.target.closest ? e.target.closest('button') : null;
       if (!b) return;
       if (b.dataset.state) setState(b.dataset.state);
-      else if (b.dataset.aged) setAged(b.dataset.aged === '1');
+      else if (b.dataset.swap) {
+        swapStates();
+        redraw();
+      } else if (b.dataset.aged) setAged(b.dataset.aged === '1');
       else if (b.dataset.measure) showMeasure(b.dataset.measure, b);
     });
     const rain = root.getElementById('rain');
@@ -6780,7 +6906,7 @@ function boot(scene, root = document) {
     for (const b of retroUi.el.querySelectorAll('[data-state]')) b.setAttribute('aria-pressed', String(b.dataset.state === S.state));
     for (const b of retroUi.el.querySelectorAll('[data-aged]')) b.setAttribute('aria-pressed', String((b.dataset.aged === '1') === S.aged));
     retroUi.rain.value = String(S.d);
-    retroUi.label.textContent = S.d === 0 ? 'd = 0 · best case: clear day after overnight rain' : `d = ${S.d}`;
+    retroUi.label.textContent = S.d === 0 ? 'the day after overnight rain (best case)' : `${S.d} day${S.d === 1 ? '' : 's'} after rain`;
     root.body.dataset.state = S.state;
   }
   const redraw = () => {
@@ -7088,17 +7214,19 @@ function boot(scene, root = document) {
 
   // drag to pan, click to pick
   let drag = null;
-  /** True if a CSS-px x is on the split divider (handle or line). */
-  const onDivider = (x) => retro && S.state === 'split' && Math.abs(x * R.dpr - Math.round(S.split * canvas.width)) <= 12 * R.dpr;
+  /** True if a CSS-px point is on the split divider's round handle (#29 item 8: anywhere else a drag pans the map). */
+  const onDivider = (x, y) => retro && S.state === 'split' && Math.hypot(x * R.dpr - Math.round(S.split * canvas.width), y * R.dpr - canvas.height * 0.5) <= 20 * R.dpr;
   canvas.addEventListener('pointerdown', (e) => {
-    drag = { x: e.clientX, y: e.clientY, cam: { ...S.cam }, moved: false, divider: onDivider(e.clientX) };
+    // any press on the map closes an open footnote (hover or pinned), unless it lands on a margin note
+    if (!fn.hidden && !noteHit(e.clientX, e.clientY)) hideFn();
+    drag = { x: e.clientX, y: e.clientY, cam: { ...S.cam }, moved: false, divider: onDivider(e.clientX, e.clientY) };
     canvas.setPointerCapture(e.pointerId);
   });
   const noteHit = (x, y) => (notesR.noteHits ?? []).find((h) => x >= h.x && x <= h.x + h.w && y >= h.y - h.h && y <= h.y + 3);
   canvas.addEventListener('pointermove', (e) => {
     if (!drag) {
       const h = noteHit(e.clientX, e.clientY);
-      canvas.style.cursor = h ? 'help' : onDivider(e.clientX) ? 'ew-resize' : '';
+      canvas.style.cursor = h ? 'help' : onDivider(e.clientX, e.clientY) ? 'ew-resize' : '';
       if (h && fn.hidden) showFn(h.key, { left: h.x, right: h.x + h.w, top: h.y - h.h, bottom: h.y + 3 }, false);
       else if (!h && !fn.hidden && !fnPinned) hideFn();
       return;
@@ -7275,6 +7403,8 @@ function boot(scene, root = document) {
     };
   }
 
+  /** A source key with its text, the key linking to this block's group on the references page (#29 item 5). */
+  const refLink = (k) => `<a class="ref" href="../../references.html">[${k}]</a> ${SOURCES[k]}`;
   function showCard(p, x, y) {
     if (!p) return;
     const d = cardData(p);
@@ -7302,10 +7432,24 @@ function boot(scene, root = document) {
         ${d.compare.tmrtBefore !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} 15:00 Before → After</td><td>${fmt(d.compare.tmrtBefore)} → ${fmt(d.compare.tmrtAfter)} °C</td></tr>` : ''}
         <tr><td colspan="2" class="sub">Before: ${d.compare.beforeMat}; After: ${d.compare.afterMat}</td></tr>`
       : '';
+    const feel = d.tmrtNow !== null ? `; standing here feels like ${fmt(d.tmrtNow)} °C` : '';
     card.innerHTML = `
       <button class="x" aria-label="close">×</button>
       <h3>${d.title}</h3>
+      <p class="lead">At ${hhmm(d.hour)} the ${d.groundNow !== null ? 'top' : 'surface'} here is ${fmt(d.tsNow)} °C${feel}, with the air at ${fmt(d.air)} °C.</p>
       <div class="mat">${d.matId === 'coolroof' || d.matId === 'coolroofAged' || d.matId === 'coolroofNew' ? gl('coolRoof', d.material) : d.material}${retro ? ` · ${d.state === 'after' ? 'After' : 'Before'}` : ''}</div>
+      <table>
+        <tr class="t"><td>${gl('surfaceTemp', 'surface')} now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
+        <tr class="t"><td>surface at 3 pm / ${gl('nightLag', '11 pm')}</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
+        ${d.groundNow !== null ? `<tr><td>ground beneath now</td><td>${fmt(d.groundNow)} °C</td></tr>` : ''}
+        ${d.tmrtNow !== null ? `<tr><td>how hot it ${gl('tmrt', 'feels')} to stand here, now / 3 pm</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
+        <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
+        ${blk && d[blk.cardKey] ? blk.cardRows(d[blk.cardKey]) : ''}
+        ${d.wind && d.wind.at !== null ? `<tr><td>${gl('apparentTemp', 'feels like, with the wind')} now</td><td>${fmt(d.wind.at)} °C</td></tr>` : ''}
+        ${cmp}
+      </table>
+      <p class="note">${d.note}</p>
+      <details class="expert"><summary>For experts</summary>
       <table>
         <tr><td>${gl('albedo', 'albedo α')}</td><td>${P.alpha.value}${tag(P.alpha)}</td></tr>
         <tr><td>${gl('emissivity', 'emissivity ε')}</td><td>${P.eps.value}${tag(P.eps)}</td></tr>
@@ -7313,18 +7457,11 @@ function boot(scene, root = document) {
         <tr><td>${gl('ef', 'evaporative fraction')}</td><td>${efCell}</td></tr>
         ${wet}
         <tr><td>${gl('svf', 'sky view factor')}</td><td>${d.svf.toFixed(2)}</td></tr>
-        <tr class="t"><td>${gl('surfaceTemp', 'surface')} now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
-        <tr class="t"><td>surface 15:00 / ${gl('nightLag', '23:00')}</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
-        ${d.groundNow !== null ? `<tr><td>ground beneath now</td><td>${fmt(d.groundNow)} °C</td></tr>` : ''}
-        ${d.tmrtNow !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} (person) now / 15:00</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
+        ${d.tmrtNow !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} now / 15:00</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
         ${d.wallsNow !== null ? `<tr><td>sun off the ${gl('wallReflection', 'walls')} now</td><td>${Math.round(d.wallsNow)} W m⁻²</td></tr>` : ''}
         ${d.glassNow !== null && glassMode ? `<tr><td>sun off the ${gl('specular', 'glass')} now</td><td>${Math.round(d.glassNow)} W m⁻²</td></tr>` : ''}
-        <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
-        ${blk && d[blk.cardKey] ? blk.cardRows(d[blk.cardKey]) : ''}
         ${d.wind ? `<tr><td>${gl('windFactor', 'wind factor f_w')}</td><td>${d.wind.fw.toFixed(2)} · ${fmt(d.wind.u)} of ${d.wind.site} m/s</td></tr>
-        <tr><td>convection h_c</td><td>${fmt(d.wind.hc)} W m⁻² K⁻¹</td></tr>
-        ${d.wind.at !== null ? `<tr><td>${gl('apparentTemp', 'apparent temp.')} now</td><td>${fmt(d.wind.at)} °C</td></tr>` : ''}` : ''}
-        ${cmp}
+        <tr><td>convection h_c</td><td>${fmt(d.wind.hc)} W m⁻² K⁻¹</td></tr>` : ''}
       </table>
       ${d.glass ? `<table>
         <tr><td colspan="2" class="sub">${gl('curtainWall', 'Curtain wall')}: ${d.glass.name}</td></tr>
@@ -7332,10 +7469,10 @@ function boot(scene, root = document) {
         ${d.glass.faces.map((f) => `<tr><td>${f.face} face now</td><td>${f.rho !== null ? `${gl('fresnel', `ρ ${f.rho.toFixed(2)}`)} at θ ${Math.round(f.theta)}°` : 'not in sun'} · glass ${fmt(f.tg)} °C</td></tr>`).join('')}
         <tr><td>glass ${gl('emissivity', 'ε')} / absorptance</td><td>${d.glass.eps.value}${tag(d.glass.eps)} / ${d.glass.absorb.value}${tag(d.glass.absorb)}</td></tr>
       </table>` : ''}
-      <p class="note">${d.note}</p>
       ${d.caveat ? `<p class="caveat">${d.caveat}</p>` : ''}
       ${d.prescribed ? `<p class="caveat">${d.prescribed}</p>` : ''}
-      <p class="src">Sources: ${srcs.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: ${gl('forceRestore', 'force-restore')} (Deardorff 1978), simulated. Basis tags and the model-vs-literature table: docs/sources.md.</p>`;
+      <p class="src">Sources: ${srcs.map(refLink).join('; ')}. Made-up block, calculated temperatures: a ${gl('forceRestore', 'force-restore')} surface model (Deardorff 1978) on a 5 m grid; the air temperature is fixed.</p></details>`;
+    for (const a of card.querySelectorAll('a.ref')) a.setAttribute('href', `${a.getAttribute('href')}#${scene.id}`); // this block's group on the references page
     card.querySelector('.x').onclick = hideCard;
     card._pick = p;
     card._measure = null;
@@ -7533,6 +7670,7 @@ function boot(scene, root = document) {
   syncGlass();
   syncWf();
   if (blk) blk.sync();
+  foldPanels();
   draw();
   requestAnimationFrame(loop);
 
@@ -7541,6 +7679,8 @@ function boot(scene, root = document) {
   const vw = (which) => (which ? V[which] : main);
   const api = {
     ready: true,
+    /** True while the loading hint is shown (#29 item 3). */
+    hint: () => !inkHint.hidden,
     info: {
       worldMs: t1 - t0,
       modelMs: t2 - t1,
