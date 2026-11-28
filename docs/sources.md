@@ -3031,7 +3031,8 @@ The block's own values live in `engine/market.js` (`NM`):
 | `coalTemp` | 600 [brief12] *engine assumption (no source)*, unverified (temperature of the coal bed, °C: the brief's 600 (an assumption)) |
 | `coalEps` | 0.95 [engine] *engine assumption (no source)*, unverified (emissivity of the coal bed: 0.95, which reproduces the brief's +490 W m⁻² at 1 m (engine assumption)) |
 | `grillMin` | 0.5 [brief12] *cited value*, unverified (nearest distance in the point-source formula, m (the brief: d ≥ 0.5 m)) |
-| `grillMax` | 3 [brief12] *cited value*, unverified (the term is added within this distance of an open grill, m (the spec: ≤ 3 m)) |
+| `grillMax` | 3 [brief12] *cited value*, unverified (the term is added in full within this distance of an open grill, m (the spec: ≤ 3 m)) |
+| `grillTaper` | 4 [engine] *engine assumption (no source)*, unverified (the term fades out by a cosine taper from the distance above to zero at this one, m (engine choice, so there is no step at 3 m; review of PR #33)) |
 | `keepAway` | 1.5 [engine] *engine assumption (no source)*, unverified (the crowd keeps at least this far from a grill's coals, m (engine assumption; the cooks stand nearer)) |
 | `vendorAt` | 0.9 [engine] *engine assumption (no source)*, unverified (where a cook stands, m from the stall's centre (engine assumption)) |
 | `lights` | 0.6 [brief12] *cited range*, unverified (heat of the string lights over the street and the square when on, W m⁻²: LED strings 0.2–1 (the brief, unverified), the middle) |
@@ -3102,16 +3103,18 @@ of 65 °C or more, so they show the sweat cue. Walkers at 15:00 (the market clos
 ### The grill's radiant term
 
 The brief's illustrative point source, added to the Tmrt of a point (a person drawn, a heat card's cell centre), never to the grid:
-ΔS = ε_c·σ·(T_c⁴ − T_b⁴)·A_c / (4πd²), d ≥ 0.5 m, summed over the open grills within 3 m, T_b the air, Tmrt' = (Tmrt⁴ + ΔS/σ)^¼.
+ΔS = ε_c·σ·(T_c⁴ − T_b⁴)·A_c / (4πd²), d ≥ 0.5 m, summed over the open grills, in full within 3 m and times a cosine taper
+(1 + cos(π(d − 3) / 1))/2 down to zero at 4 m (so a person walking away meets no step at 3 m; band 5 still
+reads the full term at 3 m), T_b the air, Tmrt' = (Tmrt⁴ + ΔS/σ)^¼.
 At 21:00 on the stall row (Tmrt 30.1 °C):
 
-| d, m | 0.5 | 0.9 | 1 | 1.5 | 2 | 2.5 | 3 | 3.01 |
-|---|---|---|---|---|---|---|---|---|
-| ΔS, W m⁻² | 1964 | 606 | 491 | 218 | 123 | 79 | 55 | 0 |
-| Tmrt, °C | 182.5 | 98.8 | 88.5 | 59.9 | 47.9 | 41.8 | 38.4 | 30.1 |
-| ΔTmrt, K | 152.4 | 68.7 | 58.5 | 29.8 | 17.8 | 11.7 | 8.3 | 0.0 |
+| d, m | 0.5 | 0.9 | 1 | 1.5 | 2 | 2.5 | 3 | 3.25 | 3.5 | 3.75 | 4 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| ΔS, W m⁻² | 1964 | 606 | 491 | 218 | 123 | 79 | 55 | 40 | 20 | 5 | 0 |
+| Tmrt, °C | 182.5 | 98.8 | 88.5 | 59.9 | 47.9 | 41.8 | 38.4 | 36.2 | 33.2 | 30.9 | 30.1 |
+| ΔTmrt, K | 152.4 | 68.7 | 58.5 | 29.8 | 17.8 | 11.7 | 8.3 | 6.1 | 3.1 | 0.8 | 0.0 |
 
-The brief: about +490 W m⁻² at 1 m (Tmrt about 88 °C) and about +120 at 2 m (about 48 °C). Without the cut-off the term would fall
+The brief: about +490 W m⁻² at 1 m (Tmrt about 88 °C) and about +120 at 2 m (about 48 °C). Without the taper the term would fall
 below 5 K at 3.89 m.
 
 ### Sensitivity
@@ -3200,7 +3203,8 @@ At 21:00 (the brief's "stone 21 h"); the places as above.
 | 5. Grill term at 3 m (the stall row's Tmrt at 21:00), K | 8.28 K | ≤ 5 | brief12 | **outside** |
 | 5. ∝ 1/d² (by construction): the term at 1 m over the term at 2 m, W m⁻² over W m⁻² | 4.000 | 4 | brief12 | inside |
 | 5. Zero when closed (by construction): the largest term next to a grill outside the opening hours or with the market closed, W m⁻² | 0.00 W m⁻² | 0 | brief12 | inside |
-| 5. Zero beyond 3 m (by construction): the term at 3.01 m, W m⁻² | 0.00 W m⁻² | 0 | brief12 | inside |
+| 5. Zero from 4 m on (by construction; a cosine taper from 3 to 4 m): the term at 4 m, W m⁻² | 0.00 W m⁻² | 0 | brief12 | inside |
+| 5. Supplementary: the tapered term at 3.5 m (the stall row's Tmrt at 21:00), K | 3.12 K | — (reported) | brief12 | reported (supplementary, not counted) |
 | 5. Supplementary: Tmrt 1 m from a grill at 21:00 (the brief: about 88 °C), °C | 88.53 °C | — (reported) | brief12 | reported (supplementary, not counted) |
 | 5. Supplementary: Tmrt 2 m from a grill at 21:00 (the brief: about 48 °C), °C | 47.86 °C | — (reported) | brief12 | reported (supplementary, not counted) |
 | 5. Supplementary: distance where the uncut term falls below 5 K, m | 3.89 m | — (reported) | brief12 | reported (supplementary, not counted) |
@@ -3213,7 +3217,7 @@ At 21:00 (the brief's "stone 21 h"); the places as above.
 | People dwelling at 15:00 (n 12) whose place is in shade | 1.000 | ≥ 0.5 | melnikov | inside |
 | Supplementary (by construction): the crowd's nearest approach to a grill's coals, 16:00–24:00, m | 2.12 m | ≥ 1.5 | brief12 | inside (supplementary, not counted) |
 
-1 of 23 counted checks fall outside their band; 16 supplementary rows are not counted. By the brief's bands: 4 of 5 independent bands met (1, 2, 3, 4); missed: 5; bands 6–9 check the overlays' bookkeeping by construction (4 of 4 met). Band 5's ∝ 1/d², closed and beyond-3-m rows are by construction too; its 3 m row is the one that tests the brief's numbers. They are reported, not tuned away: every parameter value is the brief's central value (or the shared value the brief names), committed before the first band run.
+1 of 23 counted checks fall outside their band; 17 supplementary rows are not counted. By the brief's bands: 4 of 5 independent bands met (1, 2, 3, 4); missed: 5; bands 6–9 check the overlays' bookkeeping by construction (4 of 4 met). Band 5's ∝ 1/d², closed and from-4-m rows are by construction too; its 3 m row is the one that tests the brief's numbers. They are reported, not tuned away: every parameter value is the brief's central value (or the shared value the brief names), committed before the first band run.
 
 Misses:
 - **Band 5** (the grill term at 3 m +8.3 K): the brief's formula and coal bed give it (tested above); stated on the grill card with its number.

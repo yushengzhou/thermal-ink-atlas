@@ -35,7 +35,7 @@ export function bands12Markdown(rows) {
 |---|---|---|---|---|
 ${lines.join('\n')}
 
-${out} of ${counted.length} counted checks fall outside their band; ${rows.length - counted.length} supplementary rows are not counted. By the brief's bands: ${met.length} of ${ind.length} independent bands met (${met.join(', ')})${missed.length ? `; missed: ${missed.join(', ')}` : ''}; bands ${cons[0]}–${cons[cons.length - 1]} check the overlays' bookkeeping by construction (${consMet.length} of ${cons.length} met). Band 5's ∝ 1/d², closed and beyond-3-m rows are by construction too; its 3 m row is the one that tests the brief's numbers. They are reported, not tuned away: every parameter value is the brief's central value (or the shared value the brief names), committed before the first band run.`;
+${out} of ${counted.length} counted checks fall outside their band; ${rows.length - counted.length} supplementary rows are not counted. By the brief's bands: ${met.length} of ${ind.length} independent bands met (${met.join(', ')})${missed.length ? `; missed: ${missed.join(', ')}` : ''}; bands ${cons[0]}–${cons[cons.length - 1]} check the overlays' bookkeeping by construction (${consMet.length} of ${cons.length} met). Band 5's ∝ 1/d², closed and from-4-m rows are by construction too; its 3 m row is the one that tests the brief's numbers. They are reported, not tuned away: every parameter value is the brief's central value (or the shared value the brief names), committed before the first band run.`;
 }
 
 export function nightmarketMarkdown() {
@@ -144,7 +144,9 @@ ${Math.round(wk.shade * 100)}% of the ${wk.dwellers} people dwelling are in shad
 ### The grill's radiant term
 
 The brief's illustrative point source, added to the Tmrt of a point (a person drawn, a heat card's cell centre), never to the grid:
-ΔS = ε_c·σ·(T_c⁴ − T_b⁴)·A_c / (4πd²), d ≥ ${NM.grillMin.value} m, summed over the open grills within ${NM.grillMax.value} m, T_b the air, Tmrt' = (Tmrt⁴ + ΔS/σ)^¼.
+ΔS = ε_c·σ·(T_c⁴ − T_b⁴)·A_c / (4πd²), d ≥ ${NM.grillMin.value} m, summed over the open grills, in full within ${NM.grillMax.value} m and times a cosine taper
+(1 + cos(π(d − ${NM.grillMax.value}) / ${NM.grillTaper.value - NM.grillMax.value}))/2 down to zero at ${NM.grillTaper.value} m (so a person walking away meets no step at ${NM.grillMax.value} m; band 5 still
+reads the full term at ${NM.grillMax.value} m), T_b the air, Tmrt' = (Tmrt⁴ + ΔS/σ)^¼.
 At ${h}:00 on the stall row (Tmrt ${f1(P.stallRow[h].tmrt)} °C):
 
 | d, m | ${st.grill.map((r) => r.d).join(' | ')} |
@@ -153,7 +155,7 @@ At ${h}:00 on the stall row (Tmrt ${f1(P.stallRow[h].tmrt)} °C):
 | Tmrt, °C | ${st.grill.map((r) => f1(r.tmrt)).join(' | ')} |
 | ΔTmrt, K | ${st.grill.map((r) => f1(r.dT)).join(' | ')} |
 
-The brief: about +490 W m⁻² at 1 m (Tmrt about 88 °C) and about +120 at 2 m (about 48 °C). Without the cut-off the term would fall
+The brief: about +490 W m⁻² at 1 m (Tmrt about 88 °C) and about +120 at 2 m (about 48 °C). Without the taper the term would fall
 below 5 K at ${f2(st.under5)} m.
 
 ### Sensitivity

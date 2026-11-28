@@ -172,7 +172,7 @@ export function nightCard(d) {
 export function grillCard(d) {
   const st = d.st;
   const g = (x) => st.grill.find((r) => r.d === x);
-  const rows = [0.9, 1, 1.5, 2, 2.5, 3].map((x) => `<tr${x === 0.9 ? ' class="t"' : ''}><td>${x} m${x === 0.9 ? ' (where the cook stands)' : x === 1.5 ? ' (the crowd keeps at least this far)' : ''}</td><td>${r0(g(x).tmrt)} °C</td><td>${fmt(g(x).dT)} degrees${x === 3 && g(3).dT >= NM_BANDS.grill3 ? MISS : ''}</td></tr>`).join('');
+  const rows = [0.9, 1, 1.5, 2, 2.5, 3, 3.5, 4].map((x) => `<tr${x === 0.9 ? ' class="t"' : ''}><td>${x} m${x === 0.9 ? ' (where the cook stands)' : x === 1.5 ? ' (the crowd keeps at least this far)' : ''}</td><td>${r0(g(x).tmrt)} °C</td><td>${fmt(g(x).dT)} degrees${x === 3 && g(3).dT >= NM_BANDS.grill3 ? MISS : ''}</td></tr>`).join('');
   const miss = g(3).dT >= NM_BANDS.grill3;
   return `
     ${close}
@@ -181,10 +181,10 @@ export function grillCard(d) {
     <table class="cmp">
       <tr><td>9 pm, from the coals</td><td>feels like</td><td>extra</td></tr>
       ${rows}
-      <tr><td colspan="3" class="sub">Beyond 3 m the page adds nothing; when the market is closed, nothing at all.${miss ? ` At 3 m the extra heat is ${fmt(g(3).dT)} degrees, more than the less than 5 expected: the same formula that gives about ${r0(g(1).tmrt)} °C at 1 m gives this at 3 m, because it treats the coal bed as a glowing patch facing you from every side with nothing in the way (an upper bound); it falls below 5 degrees only about ${fmt(st.under5)} m away.` : ''}</td></tr>
+      <tr><td colspan="3" class="sub">Between 3 and 4 m the page fades the extra heat out smoothly (no sudden step as you walk away) and adds nothing beyond 4 m; when the market is closed, nothing at all.${miss ? ` At 3 m the extra heat is ${fmt(g(3).dT)} degrees, more than the less than 5 expected: the same formula that gives about ${r0(g(1).tmrt)} °C at 1 m gives this at 3 m, because it treats the coal bed as a glowing patch facing you from every side with nothing in the way (an upper bound); it falls below 5 degrees only about ${fmt(st.under5)} m away.` : ''}</td></tr>
     </table>
     <p class="note">This is an upper bound and only illustrative: a real grill is partly hidden by its own rim and the food on it, and the cook moves. It is the only stall heat this page lets reach a person, and only for people standing near a grill, not for the 5 m squares of the heat view. Cooks at the grill sweat; the crowd keeps a little distance.</p>
-    ${experts(`<p class="lit">ΔS = ε_c·σ·(T_c⁴ − T_b⁴)·A_c / (4πd²), d ≥ ${NM.grillMin.value} m, summed over the open grills within ${NM.grillMax.value} m; Tmrt' = (Tmrt⁴ + ΔS/σ)^¼. Coal bed ${NM.coalArea.value} m²${tag(NM.coalArea)} at ${NM.coalTemp.value} °C${tag(NM.coalTemp)}, ε_c ${NM.coalEps.value}${tag(NM.coalEps)}, T_b the air. The brief: about +490 W m⁻² at 1 m (Tmrt about 88 °C) and about +120 at 2 m (about 48 °C), an upper bound. Here at 1 m +${r0(g(1).dS)} W m⁻², at 2 m +${r0(g(2).dS)}, at 3 m +${r0(g(3).dS)}.</p>
+    ${experts(`<p class="lit">ΔS = ε_c·σ·(T_c⁴ − T_b⁴)·A_c / (4πd²), d ≥ ${NM.grillMin.value} m, summed over the open grills, in full within ${NM.grillMax.value} m and times a cosine taper (1 + cos(π(d − ${NM.grillMax.value}) / ${NM.grillTaper.value - NM.grillMax.value}))/2 to zero at ${NM.grillTaper.value} m${tag(NM.grillTaper)}; Tmrt' = (Tmrt⁴ + ΔS/σ)^¼. Coal bed ${NM.coalArea.value} m²${tag(NM.coalArea)} at ${NM.coalTemp.value} °C${tag(NM.coalTemp)}, ε_c ${NM.coalEps.value}${tag(NM.coalEps)}, T_b the air. The brief: about +490 W m⁻² at 1 m (Tmrt about 88 °C) and about +120 at 2 m (about 48 °C), an upper bound. Here at 1 m +${r0(g(1).dS)} W m⁻², at 2 m +${r0(g(2).dS)}, at 3 m +${r0(g(3).dS)}, at 3.5 m +${r0(g(3.5).dS)} (tapered), at 4 m ${r0(g(4).dS)}.</p>
       <p class="caveat">Added to the Tmrt of a point (the people drawn, a heat card's cell centre), never to the grid model: surfaces, the air and the 5 m Tmrt are unchanged.</p>`, ['brief12', 'charcoalVendor'])}`;
 }
 
@@ -231,7 +231,7 @@ const LANES = [186.8, 188.9, 195.7, 197.6, 199.5, 201.6];
  * strollers along the street's lanes (about half), customers in front of a
  * stall (a new stall every minute), and people walking the food court; one
  * cook behind each stall, NM.vendorAt from its centre. Nobody but the cooks
- * comes nearer than NM.keepAway to a grill. A figure within 3 m of a grill
+ * comes nearer than NM.keepAway to a grill. A figure within 4 m of a grill
  * carries its point Tmrt (heatOf). Pure function of (t, hq).
  */
 export function crowdAt(world, t, hq, heatOf) {

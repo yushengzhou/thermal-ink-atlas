@@ -42,7 +42,8 @@ export const NM_NOTES = {
   coalTemp: 'temperature of the coal bed, °C: the brief\'s 600 (an assumption)',
   coalEps: 'emissivity of the coal bed: 0.95, which reproduces the brief\'s +490 W m⁻² at 1 m (engine assumption)',
   grillMin: 'nearest distance in the point-source formula, m (the brief: d ≥ 0.5 m)',
-  grillMax: 'the term is added within this distance of an open grill, m (the spec: ≤ 3 m)',
+  grillMax: 'the term is added in full within this distance of an open grill, m (the spec: ≤ 3 m)',
+  grillTaper: 'the term fades out by a cosine taper from the distance above to zero at this one, m (engine choice, so there is no step at 3 m; review of PR #33)',
   keepAway: 'the crowd keeps at least this far from a grill\'s coals, m (engine assumption; the cooks stand nearer)',
   vendorAt: 'where a cook stands, m from the stall\'s centre (engine assumption)',
   lights: 'heat of the string lights over the street and the square when on, W m⁻²: LED strings 0.2–1 (the brief, unverified), the middle',
@@ -203,7 +204,8 @@ export function bands12() {
   add('5. ∝ 1/d² (by construction): the term at 1 m over the term at 2 m, W m⁻² over W m⁻²', g(1).dS / g(2).dS, 4, 4, 'brief12', '');
   const o = overlays12();
   add('5. Zero when closed (by construction): the largest term next to a grill outside the opening hours or with the market closed, W m⁻²', o.grillClosed, 0, 0, 'brief12', 'W m⁻²');
-  add('5. Zero beyond 3 m (by construction): the term at 3.01 m, W m⁻²', g(3.01).dS, 0, 0, 'brief12', 'W m⁻²');
+  add('5. Zero from 4 m on (by construction; a cosine taper from 3 to 4 m): the term at 4 m, W m⁻²', g(4).dS, 0, 0, 'brief12', 'W m⁻²');
+  add('5. Supplementary: the tapered term at 3.5 m (the stall row\'s Tmrt at 21:00), K', g(3.5).dT, null, null, 'brief12', 'K', { supp: true });
   add('5. Supplementary: Tmrt 1 m from a grill at 21:00 (the brief: about 88 °C), °C', g(1).tmrt, null, null, 'brief12', '°C', { supp: true });
   add('5. Supplementary: Tmrt 2 m from a grill at 21:00 (the brief: about 48 °C), °C', g(2).tmrt, null, null, 'brief12', '°C', { supp: true });
   add('5. Supplementary: distance where the uncut term falls below 5 K, m', st.under5, null, null, 'brief12', 'm', { supp: true });

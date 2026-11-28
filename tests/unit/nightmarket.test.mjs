@@ -13,7 +13,7 @@ import { SCENE } from '../../cities/nightmarket/scene.js';
 import { STORE } from '../../engine/thermal.js';
 import { MATERIALS, SOURCES, BASIS } from '../../engine/materials.js';
 import { GLOSSARY, termsFor } from '../../engine/glossary.js';
-import { NM, isMarket, crowdShape, density, personW, grillFlux, withFlux, grillAt, heatParts, release, isOpen, lightsOn, stallPower, tmrtAt } from '../../engine/market.js';
+import { NM, isMarket, crowdShape, density, personW, grillFlux, grillRaw, grillTaper, withFlux, grillAt, heatParts, release, isOpen, lightsOn, stallPower, tmrtAt } from '../../engine/market.js';
 import { NM_CARDS, NM_BANDS, nmNotes, stoneCard, crowdCard, stallsCard, lightsCard, nightCard, grillCard, hoursCard } from '../../engine/nmui.js';
 import { base12, bands12, bandVerdicts12, causes12, sensitivity12, walkers12, crowd12, overlays12, NM_NOTES } from '../../scripts/nightmarket.mjs';
 import { bands12Markdown } from '../../scripts/nightmarket-docs.mjs';
@@ -132,12 +132,23 @@ test('the crowd\'s hours: none before 16:00 or from midnight, the peak 20:00-23:
   assert.equal(personW(), 167.5);
 });
 
-test('the grill term: the brief\'s +490 W per m² at 1 m, 1/d², nothing beyond 3 m or closed, d >= 0.5 m; a point\'s Tmrt', () => {
+test('the grill term: the brief\'s +490 W per m² at 1 m, 1/d², in full to 3 m, a smooth taper to zero at 4 m, nothing when closed, d >= 0.5 m; a point\'s Tmrt', () => {
   const { world, T } = base12();
   near(grillFlux(1, 30), 490, 6, '1 m');
   near(grillFlux(1, 31) / grillFlux(2, 31), 4, 1e-12, '1/d²');
-  assert.equal(grillFlux(3.0001, 31), 0);
-  assert.ok(grillFlux(3, 31) > 0);
+  assert.equal(grillFlux(3, 31), grillRaw(3, 31), 'in full at 3 m');
+  assert.equal(grillFlux(4, 31), 0, 'zero at 4 m');
+  assert.equal(grillFlux(4.5, 31), 0, 'zero beyond 4 m');
+  near(grillFlux(3.5, 31), grillRaw(3.5, 31) / 2, 1e-9, 'half at 3.5 m');
+  // no step: the term is continuous and never rises with distance from 2.9 to 4.1 m
+  let prev = grillFlux(2.9, 31);
+  for (let d = 2.9; d <= 4.1; d += 0.001) {
+    const f = grillFlux(d, 31);
+    assert.ok(f <= prev + 1e-9 && prev - f < 0.2, `continuous and falling at ${d.toFixed(3)} m`);
+    prev = f;
+  }
+  assert.equal(grillTaper(3), 1);
+  assert.equal(grillTaper(4), 0);
   assert.equal(grillFlux(0.2, 31), grillFlux(0.5, 31));
   assert.equal(withFlux(30, 0), 30);
   near(withFlux(28, 491), 87.4, 0.3, 'the brief\'s about 88 °C at 1 m');
@@ -151,6 +162,9 @@ test('the grill term: the brief\'s +490 W per m² at 1 m, 1/d², nothing beyond 
   near(p.tmrt, withFlux(p.base, p.dS), 1e-9);
   const far = tmrtAt(world, T, g.x, g.y + 3.2, 21);
   assert.ok(far.dT === 0 || far.dS === grillAt(world, T, g.x, g.y + 3.2, 21));
+  // a point 4 m or more from every grill gets nothing
+  const lone = world.nm.grills.map((q) => [q.x, q.y + 4.2]).find(([x, y]) => world.nm.grills.every((q) => Math.hypot(q.x - x, q.y - y) >= 4));
+  if (lone) assert.equal(grillAt(world, T, lone[0], lone[1], 21), 0);
 });
 
 test('heat given off: the parts add up, the crowd is rho M, a grill cell 480 W per m² while open, the lights only on the street and square after sunset; the stone\'s release is the model\'s own -G at night', () => {
@@ -203,7 +217,8 @@ const PINS = [
   [/^5\. Grill term at 3 m/, 8.281, 0.03],
   [/^5\. ∝ 1\/d²/, 4, 1e-9],
   [/^5\. Zero when closed/, 0, 0],
-  [/^5\. Zero beyond 3 m/, 0, 0],
+  [/^5\. Zero from 4 m on/, 0, 0],
+  [/^5\. Supplementary: the tapered term at 3\.5 m/, 3.12, 0.05],
   [/^5\. Supplementary: Tmrt 1 m/, 88.534, 0.1],
   [/^5\. Supplementary: Tmrt 2 m/, 47.862, 0.05],
   [/^5\. Supplementary: distance/, 3.892, 0.01],

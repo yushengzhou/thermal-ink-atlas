@@ -11,8 +11,9 @@
 //   so none of it warms the air or changes a surface or Tmrt here;
 // - one radiant term for a person near an open charcoal grill (the brief's
 //   illustrative point source eps_c sigma (T_c^4 - T_b^4) A_c / (4 pi d^2),
-//   d >= 0.5 m, within 3 m, only while the market is open), added to the
-//   Tmrt of a point, never to the grid model.
+//   d >= 0.5 m, in full within 3 m, tapering smoothly to zero between 3 and
+//   4 m, only while the market is open), added to the Tmrt of a point, never
+//   to the grid model.
 import { runModel, sunSlots, cellMat, SIGMA } from './thermal.js';
 import { solarPosition } from './sun.js';
 import { NM_DRAW } from './nmkit.js';
@@ -54,6 +55,7 @@ export const NM = {
   coalEps: v(0.95, 'engine', 'engine'),
   grillMin: v(0.5, 'brief12', 'cited'),
   grillMax: v(3, 'brief12', 'cited'),
+  grillTaper: v(4, 'engine', 'engine'),
   keepAway: v(1.5, 'engine', 'engine'),
   vendorAt: v(0.9, 'engine', 'engine'),
   lights: v(0.6, 'brief12', 'range'),
@@ -110,15 +112,30 @@ export function lightsOn(site, h) {
 /**
  * Mean extra radiant flux on a body at distance d (m) from one open charcoal
  * bed, W m⁻² (the brief's illustrative point source, an upper bound):
- * eps_c sigma (T_c^4 - T_b^4) A_c / (4 pi d^2), d >= 0.5 m; zero beyond 3 m.
+ * eps_c sigma (T_c^4 - T_b^4) A_c / (4 pi d^2), d >= 0.5 m; in full within
+ * 3 m, then times a cosine taper from 1 at 3 m to 0 at 4 m (no step where
+ * the term stops); zero from 4 m on.
  * T_b: the air temperature (the background the bed hides), °C.
  */
 export function grillFlux(d, tb) {
-  if (d > NM.grillMax.value) return 0;
+  return grillTaper(d) * grillRaw(d, tb);
+}
+
+/** The point-source term without the taper (the brief's formula as it stands), W m⁻². */
+export function grillRaw(d, tb) {
   const r = Math.max(NM.grillMin.value, d);
   const tc = NM.coalTemp.value + K0;
   const t = tb + K0;
   return (NM.coalEps.value * SIGMA * (tc ** 4 - t ** 4) * NM.coalArea.value) / (4 * Math.PI * r * r);
+}
+
+/** The taper's weight at distance d: 1 within 3 m, (1 + cos(pi (d - 3) / (4 - 3))) / 2 between, 0 from 4 m. */
+export function grillTaper(d) {
+  const a = NM.grillMax.value;
+  const b = NM.grillTaper.value;
+  if (d <= a) return 1;
+  if (d >= b) return 0;
+  return (1 + Math.cos((Math.PI * (d - a)) / (b - a))) / 2;
 }
 
 /** Tmrt (°C) with an extra mean radiant flux dS (W m⁻²) on the body. */
@@ -258,7 +275,7 @@ export function grillAt(world, T, x, y, h, open = true) {
   const ta = T.air(h);
   for (const g of world.nm.grills) {
     const d = Math.hypot(g.x - x, g.y - y);
-    if (d <= NM.grillMax.value) s += grillFlux(d, ta);
+    if (d < NM.grillTaper.value) s += grillFlux(d, ta);
   }
   return s;
 }
@@ -316,12 +333,12 @@ export function marketStats(world, T) {
   const h = NM.hour.value;
   const t0 = place.stallRow[h].tmrt;
   const ta = air[h];
-  const grill = [0.5, 0.9, 1, 1.5, 2, 2.5, 3, 3.01].map((d) => {
+  const grill = [0.5, 0.9, 1, 1.5, 2, 2.5, 3, 3.25, 3.5, 3.75, 4].map((d) => {
     const dS = grillFlux(d, ta);
     return { d, dS, tmrt: withFlux(t0, dS), dT: withFlux(t0, dS) - t0 };
   });
-  // where the term falls below 5 K (bisection on d, the term not cut off)
-  const raw = (d) => withFlux(t0, (NM.coalEps.value * SIGMA * ((NM.coalTemp.value + K0) ** 4 - (ta + K0) ** 4) * NM.coalArea.value) / (4 * Math.PI * d * d)) - t0;
+  // where the term falls below 5 K (bisection on d, the term without the taper)
+  const raw = (d) => withFlux(t0, grillRaw(d, ta)) - t0;
   let a = 1;
   let b = 10;
   for (let k = 0; k < 50; k++) {
