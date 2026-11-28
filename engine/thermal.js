@@ -1201,13 +1201,12 @@ export const PALETTE_STOPS = [
   [70, '#7e4038'],
 ];
 
-// Default heat view (#36): surface minus air (K). Paper within ~1 K of the air,
-// blue below, amber -> cinnabar above, darker both ways; limits: docs/sources.md.
+// Heat view: surface minus air (K); limits: docs/sources.md
 export const DT_STOPS = [
   [-8, '#2b4060'],
   [-5, '#3b6573'],
   [-2.5, '#6f958f'],
-  [-1, '#c2cbc6'],
+  [-1, '#bfcad0'],
   [0, '#e9e1cb'],
   [1, '#e6d9bd'],
   [5, '#dcb987'],
@@ -1222,7 +1221,6 @@ const rgbStops = (st) => st.map(([t, c]) => [t, hexRgb(c)]);
 const STOP_RGB = rgbStops(PALETTE_STOPS);
 const DT_RGB = rgbStops(DT_STOPS);
 
-/** Colour [r,g,b] at t on [[t, rgb]] stops, clamped. */
 function rampRgb(s, t) {
   if (t <= s[0][0]) return s[0][1].slice();
   for (let k = 1; k < s.length; k++) {
@@ -1239,10 +1237,9 @@ function rampRgb(s, t) {
 /** Colour [r,g,b] for a temperature in deg C (absolute 18-70 C scale). */
 export const heatRgb = (t) => rampRgb(STOP_RGB, t);
 
-/** Colour [r,g,b] for surface minus air, d in K. */
 export const dtRgb = (d) => rampRgb(DT_RGB, d);
 
-/** Read-back table [deg C, rgb] per 0.25 step: absolute, or with air given the ΔT scale keyed by air + ΔT. */
+/** Read-back table [deg C, rgb]: absolute, or (air given) ΔT keyed by air + ΔT. */
 export function paletteLut(air) {
   const st = air == null ? PALETTE_STOPS : DT_STOPS;
   const out = [];

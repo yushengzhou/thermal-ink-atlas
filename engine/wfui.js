@@ -4,7 +4,7 @@
 import { SOURCES, BASIS, MODEL } from './materials.js';
 import { gl } from './glossary.js';
 import { OVERLAY, overlayDT, dayWeight } from './wind.js';
-import { rgbCss, clamp, hexRgb } from './core.js';
+import { rgbCss, clamp, hexRgb, mixRgb } from './core.js';
 import { HAND_FONT, labelX } from './render.js';
 
 const fmt = (v) => (Math.round(v * 10) / 10).toFixed(1);
@@ -159,6 +159,7 @@ export const WF_CARDS = [
 const AIR_COOL = hexRgb('#3b6573');
 const AIR_WARM = hexRgb('#b96d4d');
 const WIND_INK = hexRgb('#24354a');
+const WIND_GREY = hexRgb('#4a4744'); // heat view: ink grey, not the palette's cool blue (#36)
 
 /**
  * Block 4: the water's illustrative air overlay (a soft band along each wind
@@ -217,9 +218,10 @@ export function drawWind(R, ctx, f, cam, W, H, alpha, look, hq) {
     }
     labels.push([wd > 0.5 ? AIR_COOL : AIR_WARM, `Air effect of the water: illustrative, from literature, not simulated (${wd > 0.5 ? 'cooler' : wd < 0.5 ? 'warmer' : 'cooler / warmer'})`]);
   }
+  const wInk = mixRgb(WIND_INK, WIND_GREY, look.thermalMix ?? 0);
   if (look.wind) {
-    ctx.strokeStyle = rgbCss(WIND_INK);
-    ctx.fillStyle = rgbCss(WIND_INK);
+    ctx.strokeStyle = rgbCss(wInk);
+    ctx.fillStyle = rgbCss(wInk);
     ctx.lineWidth = Math.max(1.6 * d, R.lineBase(cam.z) * 1.9);
     ctx.globalAlpha = alpha * 0.9;
     ctx.beginPath();
@@ -277,7 +279,7 @@ export function drawWind(R, ctx, f, cam, W, H, alpha, look, hq) {
     }
     ctx.stroke();
     R.stats.windDashes = dashes;
-    labels.unshift([WIND_INK, `Wind lines: assumed direction × shelter factor, not computed flow · ${u} m/s from the river`]);
+    labels.unshift([wInk, `Wind lines: assumed direction × shelter factor, not computed flow · ${u} m/s from the river`]);
   }
   // labels, bottom centre above the hour bar
   ctx.globalAlpha = alpha;

@@ -15,7 +15,7 @@ export const quantHour = (h) => (Math.round((((h % 24) + 24) % 24) / HOUR_STEP) 
 
 const PAPER_CSS = rgbCss(PAPER);
 const SHADOW_RGB = hexRgb('#4b5a78');
-const THERMAL_WALL = hexRgb('#e7dfcd');
+export const THERMAL_WALL = hexRgb('#cec4d4'); // walls (not calculated): hatched grey, in no palette
 const NIGHT_RGB = hexRgb('#27355a');
 const LIT = hexRgb('#f4cf7a');
 const SWEAT_CSS = 'rgba(143,182,207,0.95)';
@@ -127,7 +127,7 @@ export class Renderer {
     this.pins = {}; // mode -> Set of `z|hour|dpr` the scrub preview needs
     this.clip = null; // [x0, x1] device px: draw only this vertical band (split view)
     this.glass = 'lowe'; // glass type (block 3): pane colours
-    this.dt = true; // heat view: surface minus air (#36), or false: absolute
+    this.dt = true; // heat view: surface minus air, or absolute
     this.spotFor = null; // (hq) -> reflection spot field on the 2 m grid, or null (block 3)
     this.wind = null; // block 4: {lines, items} wind lines (wind.js windLines + pen.stream items)
     this.flux = null; // block 6: (hq) -> [{x, y, z, g}] ground heat flux samples (parking.js fluxSamples)
@@ -479,11 +479,8 @@ export class Renderer {
       if (bb && (b[2] < bb[0] || b[0] > bb[2] || b[3] < bb[1] || b[1] > bb[3])) continue;
       const t = it.t;
       if (t === 'glint' && mode === 'thermal') continue;
-      if (t === 'hatchS' || t === 'hatchE') {
-        if (mode !== 'day') continue;
-        const L = t === 'hatchS' ? hc.lightS : hc.lightE;
-        if (!hc.up || L > 0.8) continue;
-      }
+      // hatch: by day on faces from the sun; heat view: every opaque wall (t ends in g on glass)
+      if (t && t.startsWith('hatch') && (mode === 'thermal' ? t[6] : mode !== 'day' || !hc.up || (t[5] === 'S' ? hc.lightS : hc.lightE) > 0.8)) continue;
       let alpha = it.a ?? 1;
       let strokeA = alpha;
       if (mode === 'thermal') {

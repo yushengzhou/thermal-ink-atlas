@@ -42,6 +42,8 @@ import { nmApp } from './nmui.js';
 const ZOOMS = [1.25, 1.75, 2.5, 3, 4, 5.5, 7.5];
 const FADE = 60; // thermal cross-fade, frames (~1 s)
 const fmt = (v) => (Math.round(v * 10) / 10).toFixed(1);
+// tag: no line break in "30.9 °C", "a / b", "3 pm"
+const nb = (a, ...v) => String.raw({ raw: a }, ...v).replace(/ (?=°C|\/ |[ap]m\b)|(?<= \/) /g, '\u00a0');
 const hhmm = (h) => {
   const m = Math.round((((h % 24) + 24) % 24) * 60);
   return `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
@@ -249,7 +251,7 @@ export function boot(scene, root = document) {
     cam: { ...scene.startCam },
     hour: scene.startHour ?? 15, // block 12 opens in the evening
     thermal: false,
-    dt: q.get('scale') !== 'abs', // heat view: surface minus air (#36); ?scale=abs the 18-70 C scale
+    dt: q.get('scale') !== 'abs',
     since: -1e9,
     notes: q.get('notes') !== '0',
     people: q.get('people') !== '0',
@@ -521,17 +523,22 @@ export function boot(scene, root = document) {
     hourLabel.textContent = `${hhmm(S.hour)}  ·  air ${fmt(thermal.air(S.hour))} °C`;
     legend.style.opacity = S.thermal ? '1' : '0';
     legend.classList.toggle('abs', !S.dt);
-    $('legendVs').hidden = !S.dt;
-    scaleBtn.textContent = S.dt ? '°C scale' : 'vs the air';
+    legend.inert = !S.thermal;
+    $('legendVs').textContent = S.dt ? ': how much hotter or cooler than the air (°C)' : ' temperature (°C)';
+    scaleBtn.textContent = S.dt ? 'show real °C' : 'compare with the air';
     scaleBtn.setAttribute('aria-pressed', String(!S.dt));
-    $('legendAir').textContent = `0 K = the air at ${hhmm(S.hour)}, ${fmt(thermal.air(S.hour))} °C`;
+    $('legendAir').textContent = `0 = the air at ${hhmm(S.hour)}, ${fmt(thermal.air(S.hour))} °C`;
     root.body.classList.toggle('thermal', S.thermal);
     heatBtn.setAttribute('aria-pressed', String(!!S.thermal));
   };
-  // legend bars: absolute (18-70 C) and surface minus air (#36), with K ticks
-  const at01 = (st, t) => (t - st[0][0]) / (st.at(-1)[0] - st[0][0]);
-  const grad = (st, f) => `linear-gradient(90deg, ${st.map(([t]) => `rgb(${f(t).map(Math.round)}) ${(at01(st, t) * 100).toFixed(1)}%`)})`;
-  $('legendTicks').innerHTML = [-8, 0, 10, 20, 30, 40].map((d, k) => `<span style="left:${(at01(DT_STOPS, d) * 100).toFixed(1)}%${k ? (k > 4 ? ';transform:translateX(-100%)' : '') : ';transform:none'}">${d > 0 ? '+' : d ? '−' : ''}${Math.abs(d)}${k % 5 ? '' : ' K'}</span>`).join('');
+  // legend: absolute bar, or ΔT in two equal halves (cool side stretched)
+  const [dLo, dHi] = [DT_STOPS[0][0], DT_STOPS.at(-1)[0]];
+  const pos = (st, t) => (st === DT_STOPS ? (t < 0 ? 1 - t / dLo : 1 + t / dHi) / 2 : (t - st[0][0]) / (st.at(-1)[0] - st[0][0]));
+  const grad = (st, f) => `linear-gradient(90deg, ${st.map(([t]) => `rgb(${f(t).map(Math.round)}) ${(pos(st, t) * 100).toFixed(1)}%`)})`;
+  // ticks (class m: not on a phone)
+  $('legendTicks').innerHTML = [dLo, dLo / 2, 0, 10, 20, 30, dHi].map((d, k) => `<span${k % 2 ? ' class="m"' : ''} style="left:${(pos(DT_STOPS, d) * 100).toFixed(1)}%${k ? '' : ';transform:none'}">${d > 0 ? '+' : d ? '−' : ''}${Math.abs(d)}</span>`).join('');
+  // phone: a chip, a tap opens it
+  legend.addEventListener('click', (e) => e.target.closest('button,.gl') || legend.classList.toggle('open'));
   $('legendLo').textContent = `${PALETTE_STOPS[0][0]} °C`;
   $('legendHi').textContent = `≥ ${PALETTE_STOPS.at(-1)[0]} °C`;
   const setScale = (dt) => {
@@ -1149,7 +1156,7 @@ export function boot(scene, root = document) {
           ? '; only part of this square is in their shade now (see the sunlit share above).'
           : '; at this hour the sun gets in under the crown, so this square is not in their shade now.');
     const groundRow = treeSun ? 'ground in this square now (sun and shade)' : 'ground beneath now';
-    card.innerHTML = `
+    card.innerHTML = nb`
       <button class="x" aria-label="close">×</button>
       <h3>${d.title}</h3>
       <p class="lead">At ${hhmm(d.hour)} the ${d.groundNow !== null ? 'top' : 'surface'} here is ${fmt(d.tsNow)} °C, ${Math.abs(d.tsNow - d.air) < 0.05 ? 'the same as the air' : `${fmt(Math.abs(d.tsNow - d.air))} degrees ${d.tsNow > d.air ? 'hotter' : 'cooler'} than the air`} (${fmt(d.air)} °C)${feel}.</p>
@@ -1463,9 +1470,7 @@ export function boot(scene, root = document) {
       out.air = thermal.air(h);
       return out;
     },
-    /** Read-back table [deg C, rgb] of the heat view at hour h. */
     palette: (h = S.hour) => paletteLut(S.dt ? thermal.air(h) : null),
-    /** Heat view scale: scale(true) ΔT, scale(false) absolute; returns 'dt' or 'abs'. */
     scale(dt) {
       if (dt !== undefined) {
         setScale(!!dt);
@@ -1473,11 +1478,9 @@ export function boot(scene, root = document) {
       }
       return S.dt ? 'dt' : 'abs';
     },
-    /** Sorted surface minus air (K) of every cell at hour h. */
-    heatSpread(h = S.hour, which) {
-      const { world, thermal } = vw(which);
-      const a = thermal.air(h);
-      return Array.from({ length: world.n * world.n }, (_, i) => thermal.ts(i, h) - a).sort((x, y) => x - y);
+    heatSpread(h, which) {
+      const { world: w, thermal: t } = vw(which);
+      return Array.from({ length: w.n ** 2 }, (_, i) => t.ts(i, h) - t.air(h)).sort((x, y) => x - y);
     },
     agents(frame = S.frame, hour = S.hour, which) {
       const { life, shadeFor } = vw(which);
