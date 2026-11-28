@@ -131,6 +131,7 @@ export const SCENE = {
     taMax: 35,
     wind: 1,
     vapourHpa: 25,
+    plain: 'A hot midsummer day in a northern Chinese city: the air goes from 25 °C at dawn to 35 °C in the afternoon.',
     note: 'Assumed heat-wave day: 39.9° N, 21 June (the solstice), air 25–35 °C, vapour pressure 25 hPa, light wind 1 m/s. Air temperature is fixed: the courtyards’ cooler air is quoted, not simulated.',
   },
   // Ground parcels, painted in order (later wins). The base is courtyard brick.

@@ -110,6 +110,7 @@ export const SCENE = {
     taMax: 34,
     wind: 1,
     vapourHpa: 30,
+    plain: 'A hot, humid summer day and evening in a city like Taipei: the air goes from 27 °C to 34 °C.',
     note: 'A hot, humid July day and evening in a subtropical city like Taipei (25° N): air 27–34 °C, humid (vapour pressure 30 hPa), light wind 1 m/s. Made-up block, calculated temperatures; the air temperature is fixed: the crowd, the stalls and the lights do not warm it here.',
   },
   ground,

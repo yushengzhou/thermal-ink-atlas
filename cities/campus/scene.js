@@ -106,6 +106,7 @@ export const SCENE = {
     taMax: 35,
     wind: 1.5,
     vapourHpa: 20,
+    plain: 'A hot summer-holiday day with a day camp at the school: the air goes from 25 °C at dawn to 35 °C in the afternoon.',
     note: 'Assumed heat-wave day: 35° N, 20 July (a summer day camp in the school holidays), air 25–35 °C, light wind 1.5 m/s (as block 1). Air temperature is fixed: no air layer over the hot turf.',
   },
   track: TRACK,

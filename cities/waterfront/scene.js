@@ -46,6 +46,7 @@ export const SCENE = {
     taMax: 35,
     wind: 3,
     vapourHpa: 20,
+    plain: 'A hot summer day with a breeze off the river: the air goes from 25 °C at dawn to 35 °C in the afternoon.',
     note: 'Assumed heat-wave day: 35° N, 20 July, air 25–35 °C, wind from the river (north) at 3 m/s (breezy) or 1 m/s (calm). Air temperature is fixed: the air effect of the water is an illustrative overlay only.',
   },
   // Ground parcels, painted in order (later wins). Base is concrete pavement.

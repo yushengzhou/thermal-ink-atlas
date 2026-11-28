@@ -408,11 +408,11 @@ export function boot(scene, root = document) {
   };
   let notesR = R; // renderer whose note hit boxes are live
   // the page panels a bottom overlay label moves beside (render.js labelX), in canvas pixels
-  const avoidRects = () => {
+  const avoidRects = (sel = '.blockpanel, #cartouche, #legend') => {
     const c = canvas.getBoundingClientRect();
     const k = canvas.width / (c.width || 1);
     const out = [];
-    for (const el of root.querySelectorAll('.blockpanel, #cartouche, #legend')) {
+    for (const el of root.querySelectorAll(sel)) {
       const r = el.getBoundingClientRect();
       if (r.width > 0 && r.height > 0) out.push([(r.left - c.left) * k, (r.top - c.top) * k, (r.right - c.left) * k, (r.bottom - c.top) * k]);
     }
@@ -425,7 +425,12 @@ export function boot(scene, root = document) {
   const draw = () => {
     const tDraw = performance.now();
     const avoid = avoidRects();
-    for (const v of Object.values(V)) v.R.avoid = avoid;
+    // margin notes also keep out from under the bottom bar (outside evaluation of #33)
+    const avoidNotes = avoidRects('.blockpanel, #cartouche, #legend, #bar');
+    for (const v of Object.values(V)) {
+      v.R.avoid = avoid;
+      v.R.avoidNotes = avoidNotes;
+    }
     if (!retro) lastStats = R.frame(S.frame, S.cam, look(S.frame));
     else {
       const lk = look(S.frame);
@@ -480,6 +485,15 @@ export function boot(scene, root = document) {
   card.addEventListener('toggle', () => {
     const top = parseFloat(card.style.top) || 0;
     card.style.top = `${Math.max(10, Math.min(top, window.innerHeight - card.offsetHeight - 10))}px`;
+  }, true);
+  // a tap opens the card on pointerup; the click the browser sends next lands on the new card
+  // (on a phone, often on its "For experts" fold): swallow that one click so the fold stays closed
+  card.addEventListener('click', (e) => {
+    if (card._shownAt && performance.now() - card._shownAt < 400) {
+      card._shownAt = 0;
+      e.preventDefault();
+      e.stopPropagation();
+    }
   }, true);
   const inkHint = $('inkHint');
   // the bar's buttons (#29: every key has a visible button): T, H and h, as the keys
@@ -671,7 +685,7 @@ export function boot(scene, root = document) {
     root.body.insertAdjacentHTML(
       'beforeend',
       `<div id="glass" class="blockpanel" aria-label="Glass controls">
-        <div class="seg" role="group" aria-label="Glass type"><span>${gl('curtainWall', 'glass')}:</span>${GLASS_IDS.map((id) => btn('data-glass', id, { clear: 'clear', lowe: 'low-e', mirror: 'mirror' }[id])).join('')}</div>
+        <div class="seg" role="group" aria-label="Glass type"><span>${gl('curtainWall', 'glass')}:</span>${GLASS_IDS.map((id) => btn('data-glass', id, { clear: 'clear', lowe: 'coated', mirror: 'mirror' }[id])).join('')}</div>
         <div class="seg">${btn('data-ac', '1', 'AC heat overlay', 'aria-pressed="false"')}</div>
         <div class="measures"><div class="hand">Cards</div>${CBD_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'extreme' || id === 'spot' ? 'class="warn"' : '')).join('')}</div>
       </div>`,
@@ -743,7 +757,7 @@ export function boot(scene, root = document) {
       'beforeend',
       `<div id="wind" class="blockpanel" aria-label="Wind controls">
         <div class="seg" role="group" aria-label="Wind speed"><span>${gl('windFactor', 'wind')}:</span>${btn('data-u', '1', 'calm 1 m/s')}${btn('data-u', '3', 'breezy 3 m/s')}</div>
-        <div class="seg">${btn('data-lines', '1', 'wind lines (W)')}${btn('data-air', '1', 'air overlay (A)')}</div>
+        <div class="seg">${btn('data-lines', '1', 'wind lines', 'title="keyboard shortcut: W"')}${btn('data-air', '1', 'air overlay', 'title="keyboard shortcut: A"')}</div>
         <div class="measures"><div class="hand">Cards</div>${WF_CARDS.map(([id, label]) => btn('data-card', id, label, id === 'shelter' ? 'class="warn"' : '')).join('')}</div>
       </div>`,
     );
@@ -922,8 +936,10 @@ export function boot(scene, root = document) {
       }
       if (!fn.hidden) hideFn();
       const p = pick(e.clientX, e.clientY);
-      if (p) showCard(p, e.clientX, e.clientY);
-      else hideCard();
+      if (p) {
+        showCard(p, e.clientX, e.clientY);
+        card._shownAt = performance.now();
+      } else hideCard();
     }
   });
 
@@ -1061,6 +1077,8 @@ export function boot(scene, root = document) {
       ts23: ts(23),
       groundNow: leaf ? mean(h) : null,
       tmrtNow: tmrtCell !== null ? thermal.tmrt(tmrtCell, h) : null,
+      // the share of the 5 m square in the sun now (a person's radiant heat takes the square's mean)
+      sunNow: tmrtCell !== null ? thermal.sunlit(tmrtCell, h) : null,
       tmrt15: tmrtCell !== null ? thermal.tmrt(tmrtCell, 15) : null,
       air: thermal.air(h),
       note: m.note,
@@ -1099,17 +1117,20 @@ export function boot(scene, root = document) {
         ${d.compare.tmrtBefore !== null ? `<tr><td>${gl('tmrt', 'Tmrt')} 15:00 Before → After</td><td>${fmt(d.compare.tmrtBefore)} → ${fmt(d.compare.tmrtAfter)} °C</td></tr>` : ''}
         <tr><td colspan="2" class="sub">Before: ${d.compare.beforeMat}; After: ${d.compare.afterMat}</td></tr>`
       : '';
-    const feel = d.tmrtNow !== null ? `; standing here feels like ${fmt(d.tmrtNow)} °C` : '';
+    const feel = d.tmrtNow !== null ? `; the ${gl('tmrt', 'radiant heat')} on someone standing here is ${fmt(d.tmrtNow)} °C` : '';
+    // a square only partly in shade: say so, since the number mixes sun and shade (outside evaluation of #33)
+    const partial = d.tmrtNow !== null && d.sunNow > 0.1 && d.sunNow < 0.9 ? `<p class="sub">This 5 m square is about ${Math.round(d.sunNow * 10) * 10}% in the sun now, so the radiant heat here mixes sun and shade: standing fully in the shade is cooler than this.</p>` : '';
     card.innerHTML = `
       <button class="x" aria-label="close">×</button>
       <h3>${d.title}</h3>
       <p class="lead">At ${hhmm(d.hour)} the ${d.groundNow !== null ? 'top' : 'surface'} here is ${fmt(d.tsNow)} °C${feel}, with the air at ${fmt(d.air)} °C.</p>
+      ${partial}
       <div class="mat">${d.matId === 'coolroof' || d.matId === 'coolroofAged' || d.matId === 'coolroofNew' ? gl('coolRoof', d.material) : d.material}${retro ? ` · ${d.state === 'after' ? 'After' : 'Before'}` : ''}</div>
       <table>
         <tr class="t"><td>${gl('surfaceTemp', 'surface')} now (${hhmm(d.hour)})</td><td>${fmt(d.tsNow)} °C</td></tr>
         <tr class="t"><td>surface at 3 pm / ${gl('nightLag', '11 pm')}</td><td>${fmt(d.ts15)} / ${fmt(d.ts23)} °C</td></tr>
         ${d.groundNow !== null ? `<tr><td>ground beneath now</td><td>${fmt(d.groundNow)} °C</td></tr>` : ''}
-        ${d.tmrtNow !== null ? `<tr><td>how hot it ${gl('tmrt', 'feels')} to stand here, now / 3 pm</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
+        ${d.tmrtNow !== null ? `<tr><td>${gl('tmrt', 'radiant heat')} on you standing here, now / 3 pm</td><td>${fmt(d.tmrtNow)} / ${fmt(d.tmrt15)} °C</td></tr>` : ''}
         <tr><td>air now</td><td>${fmt(d.air)} °C</td></tr>
         ${blk && d[blk.cardKey] ? blk.cardRows(d[blk.cardKey]) : ''}
         ${d.wind && d.wind.at !== null ? `<tr><td>${gl('apparentTemp', 'feels like, with the wind')} now</td><td>${fmt(d.wind.at)} °C</td></tr>` : ''}

@@ -111,6 +111,7 @@ export const SCENE = {
     tmaxHour: 16.5,
     wind: 1.5,
     vapourHpa: 12,
+    plain: 'A clear, very dry summer day in a desert city like Phoenix: the air goes from 30 °C at dawn to 43 °C in the late afternoon.',
     note: 'A clear mid-July day in a hot desert city like Phoenix (33.4° N, no daylight saving): air 30–43 °C, warmest at 4:30 pm, very dry (vapour pressure 12 hPa), light wind 1.5 m/s. Made-up block, calculated temperatures; the air temperature is fixed: misters and the lawn do not cool it here.',
   },
   ground,

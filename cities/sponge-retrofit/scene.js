@@ -39,6 +39,7 @@ export const SCENE = {
     taMax: 35,
     wind: 1.5,
     vapourHpa: 20,
+    plain: 'A hot summer day: the air goes from 25 °C at dawn to 35 °C in the afternoon, the same before and after.',
     note: 'Assumed heat-wave day: 35° N, 20 July, air 25–35 °C, light wind 1.5 m/s. Air temperature is the same in both states.',
   },
   // Ground parcels, painted in order (later wins). Base is concrete yards and pavements.

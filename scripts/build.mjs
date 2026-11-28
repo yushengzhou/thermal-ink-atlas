@@ -207,9 +207,12 @@ function build(city) {
 
   const meta = /title: '([^']+)'/.exec(scene)[1];
   const sub = /note: '([^']+)'/.exec(scene)[1];
+  // the plain one-line day for the title box; the full site note (latitude, wind, vapour, fixed air) folds under For experts
+  const plain = /plain: '([^']+)'/.exec(scene)[1];
   const html = read('engine/shell.html')
     .replace(/__TITLE__/g, meta)
     .replace('__SUBTITLE__', sub)
+    .replace('__PLAIN__', plain)
     .replace('__BUNDLE__', () => bundle.replace(/<\/script/gi, '<\\/script'));
 
   const external = externalRefs(html, `cities/${city}/index.html`);
@@ -252,7 +255,7 @@ export function ownSources(city, keys = pageParts(city).keys) {
  * went from 282,913-286,762 B to 291,550-295,319 B. All twelve blocks are
  * built and the largest page is 392 KB of the 500 KB limit.
  */
-export const CORE_BUDGET = 300000;
+export const CORE_BUDGET = 310000; // 300,000 since the #29 pass; 310,000 since the outside evaluation of #33 (shared UI fixes: note placement, card tap, plain title box, ~4 KB)
 
 export function coreBytes(city) {
   const size = Buffer.byteLength(read(`cities/${city}/index.html`));

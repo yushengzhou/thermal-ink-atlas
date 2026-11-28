@@ -731,6 +731,17 @@ export class Renderer {
       s.closePath();
     }
     s.fill('nonzero');
+    // keep the shadows on the board: a long low-sun shadow must not fall on the paper around it (outside evaluation of #33)
+    const W0 = this.world.size;
+    s.globalCompositeOperation = 'destination-in';
+    s.beginPath();
+    for (const [x, y] of [[0, 0], [W0, 0], [W0, W0], [0, W0]]) {
+      const q = iso(x, y, 0);
+      if (x === 0 && y === 0) s.moveTo(q[0], q[1]);
+      else s.lineTo(q[0], q[1]);
+    }
+    s.closePath();
+    s.fill();
     s.setTransform(1, 0, 0, 1, 0, 0);
     s.globalCompositeOperation = 'source-in';
     const strength = clamp(hc.sun.alt / 8, 0, 1);
@@ -1231,6 +1242,10 @@ export class Renderer {
     const fs = W / d < 700 ? 12 : 15; // smaller hand on a phone (#29 item 4)
     ctx.font = `${Math.round(fs * d)}px "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive`;
     ctx.textBaseline = 'top';
+    const lh = (fs + 3) * d;
+    const top = (W / d < 700 ? 96 : 8) * d; // on a phone the cartouche spans the top
+    // first pass: where each note goes
+    const placed = [];
     notes.forEach((n, i) => {
       const p = iso(n.at[0], n.at[1], n.at[2] ?? 0);
       const ax = ox + p[0] * Z;
@@ -1239,19 +1254,44 @@ export class Renderer {
       let ty = ay + n.dy * d;
       if (tx < -200 * d || tx > W + 50 || ty < -60 || ty > H + 20) return;
       const lines = n.text;
-      const lh = (fs + 3) * d;
       const w = Math.max(...lines.map((l) => ctx.measureText(l).width));
       let bx = tx - (n.dx < 0 ? w + 6 * d : -6 * d);
       let by = ty - (n.dy < 0 ? lines.length * lh : 0);
       // keep the whole note on the canvas (#29 items 4 and 7): shift the box and the leader's end with it
       const sx = Math.min(0, W - 8 * d - (bx + w + 5 * d)) || Math.max(0, 8 * d - (bx - 5 * d));
-      const top = (W / d < 700 ? 96 : 8) * d; // on a phone the cartouche spans the top
       const sy = Math.min(0, H - 8 * d - (by + lines.length * lh + 3 * d)) || Math.max(0, top - (by - 3 * d));
       bx += sx;
       by += sy;
       tx += sx;
       ty += sy;
-      ctx.globalAlpha = alpha;
+      // and out from under the page's panels and the bottom bar (R.avoidNotes, canvas px; outside evaluation of #33):
+      // up above a panel in the lower half of the canvas, down below one in the upper half, if it still fits
+      const bh = lines.length * lh + 6 * d;
+      for (const r of this.avoidNotes ?? []) {
+        if (r[2] <= bx - 5 * d || r[0] >= bx + w + 5 * d || r[3] <= by - 3 * d || r[1] >= by - 3 * d + bh) continue;
+        const dy = (r[1] + r[3]) / 2 > H / 2 ? r[1] - 4 * d - (by - 3 * d + bh) : r[3] + 4 * d - (by - 3 * d);
+        if (by + dy - 3 * d >= top && by + dy - 3 * d + bh <= H - 8 * d) {
+          by += dy;
+          ty += dy;
+        }
+      }
+      // and off the notes placed before it: below the other box, or above it if that does not fit
+      for (const o of placed) {
+        const oh = o.lines.length * lh + 6 * d;
+        if (o.bx + o.w + 5 * d <= bx - 5 * d || o.bx - 5 * d >= bx + w + 5 * d || o.by - 3 * d + oh <= by - 3 * d || o.by - 3 * d >= by - 3 * d + bh) continue;
+        const down = o.by - 3 * d + oh + 3 * d - (by - 3 * d);
+        const up = o.by - 3 * d - 3 * d - (by - 3 * d + bh);
+        const dy = by - 3 * d + bh + down <= H - 8 * d ? down : up;
+        if (by + dy - 3 * d >= top && by + dy - 3 * d + bh <= H - 8 * d) {
+          by += dy;
+          ty += dy;
+        }
+      }
+      placed.push({ n, i, ax, ay, tx, ty, bx, by, w, lines });
+    });
+    ctx.globalAlpha = alpha;
+    // second pass: every leader first, so no leader is drawn across another note's text
+    for (const { ax, ay, tx, ty } of placed) {
       // leader: a gently bowed ink line with a dot at the anchor
       ctx.strokeStyle = rgbCss(INK);
       ctx.lineWidth = 1.1 * d;
@@ -1265,6 +1305,9 @@ export class Renderer {
       ctx.beginPath();
       ctx.arc(ax, ay, 2.2 * d, 0, Math.PI * 2);
       ctx.fill();
+    }
+    // third pass: the boxes and their text
+    for (const { n, i, bx, by, w, lines } of placed) {
       ctx.fillStyle = 'rgba(248,243,231,0.94)';
       ctx.fillRect(bx - 5 * d, by - 3 * d, w + 10 * d, lines.length * lh + 6 * d);
       ctx.strokeStyle = 'rgba(43,38,33,0.55)';
@@ -1277,7 +1320,7 @@ export class Renderer {
         const k = lines.findIndex((l) => l.includes(sub));
         if (k < 0) continue;
         const x0 = bx + ctx.measureText(lines[k].slice(0, lines[k].indexOf(sub))).width;
-        const w = ctx.measureText(sub).width;
+        const tw = ctx.measureText(sub).width;
         const y = by + k * lh + (fs + 1) * d;
         ctx.save();
         ctx.setLineDash([1.5 * d, 2 * d]);
@@ -1285,12 +1328,12 @@ export class Renderer {
         ctx.strokeStyle = ctx.fillStyle;
         ctx.beginPath();
         ctx.moveTo(x0, y);
-        ctx.lineTo(x0 + w, y);
+        ctx.lineTo(x0 + tw, y);
         ctx.stroke();
         ctx.restore();
-        this.noteHits.push({ key, x: x0 / d, y: y / d, w: w / d, h: lh / d });
+        this.noteHits.push({ key, x: x0 / d, y: y / d, w: tw / d, h: lh / d });
       }
-    });
+    }
     ctx.globalAlpha = 1;
   }
 }

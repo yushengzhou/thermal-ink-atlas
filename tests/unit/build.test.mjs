@@ -90,7 +90,7 @@ test('external-reference rule: allow-listed relative links pass; schemes, hosts,
 // grow past this budget; a block's own code belongs in its own modules.
 // A page's own SOURCES keys (carried by no other page: the sources only its
 // block cites) count as the page's own bytes, not core (build.mjs ownSources).
-// CORE_BUDGET (scripts/build.mjs): 290,000 B when set (largest core then 283,013 B, waterfront); 300,000 B since the #29 pass
+// CORE_BUDGET (scripts/build.mjs): 290,000 B when set (largest core then 283,013 B, waterfront); 300,000 B since the #29 pass; 310,000 B since the outside evaluation of #33 (largest core then about 303,600 B, desert)
 const { CORE_BUDGET } = await import('../../scripts/build.mjs');
 
 test(`the shared core stays under its budget (${CORE_BUDGET} bytes on every page)`, async () => {

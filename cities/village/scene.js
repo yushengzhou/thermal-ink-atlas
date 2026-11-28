@@ -170,6 +170,7 @@ export const SCENE = {
     taMax: 35,
     wind: 1,
     vapourHpa: 28,
+    plain: 'A hot, humid summer day in a southern Chinese city: the air goes from 27 °C at dawn to 35 °C in the afternoon.',
     note: 'Assumed heat-wave day: 22.5° N, 20 July, air 27–35 °C, vapour pressure 28 hPa, light wind 1 m/s. Air temperature is fixed: no warm air held in the lanes at night, no wind in the lanes, no heat from people or appliances.',
   },
   storey: STOREY,
