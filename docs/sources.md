@@ -393,6 +393,36 @@ The wall term's daytime part peaks at 6.8 K on the design day (total wall excess
 - Pedestrian route cost [melnikov]: sun distance + w_b × building-shade distance + w_t × tree-shade distance, with w_b = 1 − 0.16·s and w_t = 1 − 0.08·s.
   w_b = 0.84 at full heat is cited; w_t = 0.92 is an *interpretation* of "tree shade about half as effective"; the heat factor s rises linearly from 0 at air ≤ 26 °C to 1 at air ≥ 32 °C (*engine assumption*, not in the source). The same weights drive the sideways drift toward shade within a pavement (only when air > 28 °C).
 
+## Heat view colours
+
+Drawing only: no model value depends on it. By default (issue #36) the heat view colours each surface by **ΔT = Ts − Ta(t)**,
+its difference from the page's own air temperature at the hour shown, on a diverging scale from −8 K to +40 K:
+paper-toned at 0 K (within about ±1 K), Prussian blue / blue-green below the air, amber → cinnabar above it. Lightness is highest at
+0 K and falls steadily both ways, so the order also reads in grey and with colour-vision deficiencies (checked in
+`tests/unit/thermal.test.mjs` with the Machado et al. 2009 deuteranopia, protanopia and tritanopia simulations). Colour stops (K):
+−8 #2b4060 · −5 #3b6573 · −2.5 #6f958f · −1 #c2cbc6 · 0 #e9e1cb · +1 #e6d9bd · +5 #dcb987 · +12 #d3965f · +20 #b96d4d · +27 #9e5040 · +34 #7e4038 · +40 #62332f.
+
+The limits are the same on every block, so blocks stay comparable. They were picked from the model's ΔT over every cell (ground
+and roofs) of all 12 blocks at 15:00, 23:00 and 04:00 (and the retrofit's Before / After, the glass types, the white roofs, the
+coating, irrigation and AC variants), measured with `atlas.heatSpread` (2026-11-28):
+
+| | coolest cell | 99th percentile | hottest cell |
+|---|---|---|---|
+| 15:00 | −6.5 K (block 4's water) | +40.1 K (block 3, mirror glass) | +46.2 K (block 3, mirror glass: reflected hot spots) |
+| 23:00 | −4.2 K (block 11) | +6.5 K (block 12) | +7.2 K (block 3, mirror glass) |
+| 04:00 | −3.7 K (blocks 1, 2, 8, 9) | +7.1 K (block 12) | +8.0 K (block 3, mirror glass) |
+
+Most sunlit roofs and roads sit at +29 to +36 K at 15:00 (block medians up to +32.6 K), water, lawns and tree shade at −6.5 to +4 K.
+So the cool end, −8 K, holds the coolest cell anywhere with 1.5 K to spare, and the warm end, +40 K, holds every
+block's 99th percentile as the page opens (largest +39.1 K, block 3; +40.1 K with its mirror glass); only block 3's reflected hot
+spots (about 1% of its cells, up to +46 K) show in the top colour. The
+asymmetry (−8 / +40 rather than symmetric) lets both sides use their whole colour range. `tests/e2e/delta.test.mjs` re-checks on
+every block (as it opens) that the coolest cell stays above the cool end and the 99th percentile below the warm end.
+
+The legend shows the air at the hour (0 K) and "cooler than the air / hotter than the air"; its °C toggle (or `?scale=abs`)
+switches to the earlier absolute scale, 18–70 °C, for comparing absolute temperatures. Heat cards and margin notes keep
+absolute °C; the cards add how many degrees above or below the air.
+
 ## Glossary sources
 
 Numbers quoted in the on-page footnotes (`engine/glossary.js`). Literature ranges carry a source key;
@@ -2754,8 +2784,10 @@ Misses:
   floor; no measured albedo for rusty iron, asbestos cement or tarpaulin (the brief's assumptions).
 - **Indoor values are proxies:** the radiant proxy treats the ceiling as black at the roof's temperature; the air figure is
   illustrative, calibrated to the brief's band (so that band is by construction) and capped at ±5 K; the room under a concrete slab is not computed.
-- **Thermal palette:** it tops out at 70 °C, so rusty iron at 15:00 (71.2 °C) and every sheet's daily peak (up to
-  79.9 °C) show in the top colour; the heat cards give the numbers.
+- **Thermal palette:** the default heat view (surface minus air, issue #36) tops out at +40 K, 75 °C at 15:00 (air 35 °C), so rusty iron at
+  15:00 (71.2 °C) keeps its own colour; the sheets near their daily peak (up to
+  79.9 °C) may reach the top colour. The absolute scale (the legend's °C toggle) tops
+  out at 70 °C, so there both show in the top colour; the heat cards give the numbers.
 - **Engine sun** (`sun.js`, issue #24): against suncalc at this site, the altitude differs by +0.12° at 12:00 and −0.06° at 15:00 (azimuth −0.83°, +0.25°); the village lanes' sunlit floor is 36.9% against 35.7% and 20.9% against 22.5% with the reference sun: too small to move band 5.
 - **Language:** "urban village (城中村)", "informal settlement", "residents"; vulnerability is described as exposure plus a lack of
   resources, with cited and hedged figures only; asbestos cement is named a health hazard in one line, without advice. The block's
@@ -3039,7 +3071,7 @@ Misses:
   (issue #20); the engine's clear-sky sun, about 5–10% strong at noon by the brief; the lawn's EF is fixed (no response to the dry air,
   no advection).
 - **Engine sun** (`sun.js`, issue #24): against suncalc at this site the sun differs by +0.15° in altitude and +0.13° in azimuth at 12:00, −0.04° in altitude and +0.27° in azimuth at 15:00: too small to move any band here.
-- **Thermal palette:** it tops out at 70 °C; the hottest surfaces here (the dark membrane roofs, up to 77.9 °C at 14:00) show in its top colour; the heat cards give the numbers.
+- **Thermal palette:** the default heat view (surface minus air, issue #36) tops out at +40 K; the hottest surfaces here (the dark membrane roofs, up to 77.9 °C at 14:00, +36.5 K against the air) stay below it. The absolute scale (the legend's °C toggle) tops out at 70 °C, so there they show in its top colour; the heat cards give the numbers.
 - **Health wording:** the heat-deaths card quotes the county's counts and its named risk factors, hedged, without advice beyond the
   county's; nothing on it is modelled.
 

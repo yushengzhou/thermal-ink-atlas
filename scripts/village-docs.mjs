@@ -283,8 +283,10 @@ Misses:
   floor; no measured albedo for rusty iron, asbestos cement or tarpaulin (the brief's assumptions).
 - **Indoor values are proxies:** the radiant proxy treats the ceiling as black at the roof's temperature; the air figure is
   illustrative, calibrated to the brief's band (so that band is by construction) and capped at ±5 K; the room under a concrete slab is not computed.
-- **Thermal palette:** it tops out at 70 °C, so rusty iron at 15:00 (${f1(st.edge.rustTin.ts15)} °C) and every sheet's daily peak (up to
-  ${f1(Math.max(...Object.values(st.edge).filter(Boolean).map((r) => r.peak)))} °C) show in the top colour; the heat cards give the numbers.
+- **Thermal palette:** the default heat view (surface minus air, issue #36) tops out at +40 K, 75 °C at 15:00 (air 35 °C), so rusty iron at
+  15:00 (${f1(st.edge.rustTin.ts15)} °C) keeps its own colour; the sheets near their daily peak (up to
+  ${f1(Math.max(...Object.values(st.edge).filter(Boolean).map((r) => r.peak)))} °C) may reach the top colour. The absolute scale (the legend's °C toggle) tops
+  out at 70 °C, so there both show in the top colour; the heat cards give the numbers.
 - **Engine sun** (\`sun.js\`, issue #24): against suncalc at this site, the altitude differs by ${sc.map((x) => `${signed(x.dAlt, 2)}° at ${x.h}:00`).join(' and ')} (azimuth ${sc.map((x) => `${signed(x.dAz, 2)}°`).join(', ')}); the village lanes' sunlit floor is ${sc.map((x) => `${Math.round(x.lit * 1000) / 10}% against ${Math.round(x.litRef * 1000) / 10}%`).join(' and ')} with the reference sun: too small to move band 5.
 - **Language:** "urban village (城中村)", "informal settlement", "residents"; vulnerability is described as exposure plus a lack of
   resources, with cited and hedged figures only; asbestos cement is named a health hazard in one line, without advice. The block's

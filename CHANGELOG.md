@@ -5,6 +5,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions: [Sem
 
 ## [Unreleased]
 
+### Changed
+- Heat view colours each surface by how much hotter or cooler it is than the air at that hour (surface minus air, −8 to +40 K, the same on every block) on a diverging mineral palette: blue below the air, paper-neutral at it, amber to cinnabar above. Tree shade, lawns and water now stand apart from sunlit roads and roofs at 3 pm, and at night lawns below the air show blue while asphalt stays warm. Model values are unchanged (#36).
+- Legend shows the air temperature at the current hour, "cooler than the air / hotter than the air" and K ticks; a small **°C scale** button (or `?scale=abs`) switches back to the absolute 18–70 °C scale (#36).
+- Heat cards say how many degrees above or below the air a surface is, next to its °C (#36).
+- `docs/sources.md`: new "Heat view colours" section with the limits and the model's ΔT spread over all 12 blocks they come from (#36).
+
 ## [1.0.0] - 2026-11-28
 
 ### Added
