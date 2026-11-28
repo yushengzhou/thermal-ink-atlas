@@ -474,11 +474,11 @@ const SOURCES = {
   takebayashi2023: 'Takebayashi et al. (2023) Atmosphere 14, 1014, doi 10.3390/atmos14061014: road watering in Kobe, 0.025 mm per pass, -2 to -4 K at once, about 6 K on average, gone within 30 min in sun, evening watering recommended; lE = l beta alpha_w (X_s - X_a) with beta 0.15 on asphalt',
   kato2008: 'Kato et al. (2008), via the block-5 brief: a watered road 50 -> 40 C in about 60 min (unverified)',
   nippon: 'nippon.com feature on uchimizu (via the block-5 brief): sprinkling water in the evening and in shade, a custom since the Edo period',
-  lin2019: 'Lin et al. (2019) Int. J. Environ. Res. Public Health 16, 2986, doi 10.3390/ijerph16162986: traditional block in Harbin, SVF lanes 0.09-0.27, courtyards 0.22-0.37; lower-SVF courtyards 0.3 K cooler air (at most 0.6 K) and 0.4 K globe (at most 1.0 K)',
+  lin2019: 'Lin, Jin & Jin (2019) Int. J. Environ. Res. Public Health 16(16), 2986, doi 10.3390/ijerph16162986: traditional block in Harbin, SVF lanes 0.09-0.27, courtyards 0.22-0.37; courtyards with a lower SVF had cooler air, by 0.4 K on average in the abstract (the brief: 0.3 K, at most 0.6 K, and 0.4 K globe, at most 1.0 K; the full text not checked)',
   spainCourtyard: 'Cordoba and Seville courtyard studies, MDPI Proceedings 2(22) 1390 and 1381, 38(1) 17 (abstracts only, unverified): courtyards 3-6 K below the outdoor air on hot days, up to 11-15 K at 40-45 C',
   yang2024: 'Yang & Wang (2024) J. Beijing Forestry Univ., doi 10.12171/j.1000-1522.20240012 (abstract only): Beijing street-tree shade -1.0 to -2.1 K air and -481 to -789 W m-2; pagoda tree second for comfort',
   ucdavis: 'UC Davis guidance, via the block-5 brief: overhead vine arbours give more than 90% cover',
-  jjshs: 'J. Japan. Soc. Hort. Sci. 54(3) 293, via the block-5 brief: pergola vines need LAI 2 or more, ideally 3',
+  jjshs: 'Takahashi (1985) J. Japan. Soc. Hort. Sci. 54(3) 293-300, doi 10.2503/jjshs.54.293, optimum leaf area index of Delaware grape vines, via the block-5 brief: LAI 2 or more, ideally 3; the paper is about the LAI best for grape yield and quality, not for shade (the LAI figure not checked)',
   deng: 'Deng Yunxiang, Tianpeng zheyin (The Paper, newsDetail_forward_18319465), via the block-5 brief: summer mat awnings over Beijing courtyards; the old Beijing saying "tianpeng, fish bowl, pomegranate tree", which the cartoonist Li Binsheng drew',
   visitBeijing: 'Visit Beijing (official tourism site), via the block-5 brief: jujube and pagoda trees in courtyards; the pomegranate stands for many children',
   bolton1980: 'Bolton (1980) Monthly Weather Review 108, 1046-1053: saturation vapour pressure e_s = 6.112 exp(17.67 T / (T + 243.5)) hPa (formula from memory, not checked)',
@@ -728,7 +728,7 @@ Object.assign(MATERIALS, {
   jujube: { name: 'Jujube tree (枣树)', ...leaf(0.6, 'brief value', 0.37, 'exp(-0.5 x 2.0); brief LAI 1.5-2.5 (no measured LAI for jujube), i.e. 0.29-0.47'), note: 'A small courtyard tree with an open, airy crown: patchy shade.' },
   pomegranate: { name: 'Pomegranate (石榴)', ...leaf(0.6, 'brief value', 0.29, 'exp(-0.5 x 2.5); brief LAI 2-3, i.e. 0.22-0.37'), note: 'A low, dense courtyard tree; its fruit stands for many children.' },
   pagodaTree: { name: 'Pagoda tree (国槐)', ...leaf(0.7, 'brief value', 0.17, 'exp(-0.5 x 3.5); brief LAI 3-4 (no measured LAI), i.e. 0.14-0.22'), note: 'The big shade tree of the Beijing lanes: a wide, dense crown high above the roofs.' },
-  pergola: { name: 'Vine pergola (葡萄架)', ...leaf(0.6, 'brief value', 0.29, 'exp(-0.5 x 2.5); pergola vines LAI 2-3 [jjshs], overhead arbours > 90% cover [ucdavis]', 'jjshs'), note: 'A grape vine trained over a trellis at head height: dappled shade over the courtyard path.' },
+  pergola: { name: 'Vine pergola (葡萄架)', ...leaf(0.6, 'brief value', 0.29, 'exp(-0.5 x 2.5); vines LAI 2-3 [jjshs] (a yield study; an interpretation), overhead arbours > 90% cover [ucdavis]', 'jjshs'), note: 'A grape vine trained over a trellis at head height: dappled shade over the courtyard path.' },
   awning: {
     name: 'Summer mat awning (天棚)',
     alpha: v(0.3, 'engine', 'engine', false),
@@ -5643,7 +5643,7 @@ function courtyardCard(d) {
       <tr><td colspan="4" class="sub">Sky view over all courtyard cells: ${f2(c.svf10)}–${f2(c.svf90)} (10th–90th percentile).</td></tr>
     </table>
     <p class="note">Houses on all four sides shade only the edges of a yard; the rest is shaded from above, by a tree, a vine or, in the richest yards, a mat awning over the whole court. Walkers who stop to rest pick these spots.</p>
-    <p class="lit">Measured courtyard air (quoted, not simulated): in Córdoba and Seville courtyards were 3–6 K below the outdoor air on hot days and up to 11–15 K at 40–45 °C (abstracts only, unverified); in Harbin, courtyards with a lower sky view were only 0.3 K cooler (at most 0.6 K) and 0.4 K lower on a globe thermometer (Lin et al. 2019); the Fez medina's air was about 10 K cooler than the modern town in the early afternoon but 2–4 K warmer before dawn (Johansson 2006).</p>
+    <p class="lit">Measured courtyard air (quoted, not simulated): in Córdoba and Seville courtyards were 3–6 K below the outdoor air on hot days and up to 11–15 K at 40–45 °C (abstracts only, unverified); in Harbin, courtyards with a lower sky view had air only about 0.4 K cooler on average (Lin et al. 2019); the Fez medina's air was about 10 K cooler than the modern town in the early afternoon but 2–4 K warmer before dawn (Johansson 2006).</p>
     <p class="caveat">The air temperature in this model is fixed, so the courtyards' "cool pond" of air cannot appear: only the surfaces and the radiation differ. Awnings and pergolas count as full cover for the sky view (crown factor${tag(MODEL.screenCover)}).</p>
     ${srcLine(['spainCourtyard', 'lin2019', 'johansson2006', 'brief5'])}`;
 }
@@ -5710,7 +5710,7 @@ function treesCard(d) {
       <tr><td>courtyard in full sun</td><td>100%</td><td>${fmt(d.court.sun.tmrt)} °C</td></tr>
     </table>
     <p class="note">The pagoda tree's wide, dense crown stands above the roofs and shades the lanes; jujubes are open and airy; pomegranates are small and low. The trunk cell is not always in its own tree's shade at 3 pm, when the sun is in the west.</p>
-    <p class="lit">Beijing street trees in summer: shade cooled the air by 1.0–2.1 K and cut the sunshine by 481–789 W m⁻²; the pagoda tree came second for comfort (Yang &amp; Wang 2024, abstract only). Overhead vine arbours give more than 90% cover; pergola vines need a leaf area index of 2 or more, ideally 3.</p>
+    <p class="lit">Beijing street trees in summer: shade cooled the air by 1.0–2.1 K and cut the sunshine by 481–789 W m⁻²; the pagoda tree came second for comfort (Yang &amp; Wang 2024, abstract only). Overhead vine arbours give more than 90% cover; a grape study puts the best leaf area index of trained vines at 2–3 (for the crop, not for shade; read here as the pergola's leaf cover).</p>
     <p class="caveat">No measured leaf area for jujube or pagoda trees was found: the indices are the brief's (unverified). Crowns are spheres; leaf temperature is an engine assumption. Trees and screens enter the sky view through the crown factor, as in the other blocks.</p>
     ${srcLine(['yang2024', 'ucdavis', 'jjshs', 'brief5'])}`;
 }

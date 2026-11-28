@@ -171,7 +171,7 @@ before the first model run and was not changed after the bands were checked; 0.3
   open and sunlit ${f1(c.sun.tmrt)} °C; paving ${f1(c.awning.ts)}, ${f1(c.pergola.ts)}, ${f1(c.crown.ts)} and ${f1(c.sun.ts)} °C. Courtyard sky view
   ${f2(c.svf10)}–${f2(c.svf90)} (10th–90th percentile; Harbin's traditional courtyards 0.22–0.37, lanes 0.09–0.27 [lin2019]).
 - Courtyard air ("cool pond") is **quoted, not simulated**: Córdoba and Seville 3–6 K below the outdoor air, up to
-  11–15 K at 40–45 °C [spainCourtyard] (abstracts only, unverified); Harbin 0.3 K (at most 0.6 K) [lin2019]; the Fez medina
+  11–15 K at 40–45 °C [spainCourtyard] (abstracts only, unverified); Harbin about 0.4 K on average (the abstract; the brief's 0.3 K, at most 0.6 K, not checked) [lin2019]; the Fez medina
   about 10 K cooler in the early afternoon, 2–4 K warmer before dawn [johansson2006]. The air temperature is fixed.
 
 Trees by species at 15:00 (ground cell at the trunk; at 3 pm the shade falls east of it):

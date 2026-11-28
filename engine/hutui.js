@@ -69,7 +69,7 @@ export function courtyardCard(d) {
       <tr><td colspan="4" class="sub">Sky view over all courtyard cells: ${f2(c.svf10)}–${f2(c.svf90)} (10th–90th percentile).</td></tr>
     </table>
     <p class="note">Houses on all four sides shade only the edges of a yard; the rest is shaded from above, by a tree, a vine or, in the richest yards, a mat awning over the whole court. Walkers who stop to rest pick these spots.</p>
-    <p class="lit">Measured courtyard air (quoted, not simulated): in Córdoba and Seville courtyards were 3–6 K below the outdoor air on hot days and up to 11–15 K at 40–45 °C (abstracts only, unverified); in Harbin, courtyards with a lower sky view were only 0.3 K cooler (at most 0.6 K) and 0.4 K lower on a globe thermometer (Lin et al. 2019); the Fez medina's air was about 10 K cooler than the modern town in the early afternoon but 2–4 K warmer before dawn (Johansson 2006).</p>
+    <p class="lit">Measured courtyard air (quoted, not simulated): in Córdoba and Seville courtyards were 3–6 K below the outdoor air on hot days and up to 11–15 K at 40–45 °C (abstracts only, unverified); in Harbin, courtyards with a lower sky view had air only about 0.4 K cooler on average (Lin et al. 2019); the Fez medina's air was about 10 K cooler than the modern town in the early afternoon but 2–4 K warmer before dawn (Johansson 2006).</p>
     <p class="caveat">The air temperature in this model is fixed, so the courtyards' "cool pond" of air cannot appear: only the surfaces and the radiation differ. Awnings and pergolas count as full cover for the sky view (crown factor${tag(MODEL.screenCover)}).</p>
     ${srcLine(['spainCourtyard', 'lin2019', 'johansson2006', 'brief5'])}`;
 }
@@ -136,7 +136,7 @@ export function treesCard(d) {
       <tr><td>courtyard in full sun</td><td>100%</td><td>${fmt(d.court.sun.tmrt)} °C</td></tr>
     </table>
     <p class="note">The pagoda tree's wide, dense crown stands above the roofs and shades the lanes; jujubes are open and airy; pomegranates are small and low. The trunk cell is not always in its own tree's shade at 3 pm, when the sun is in the west.</p>
-    <p class="lit">Beijing street trees in summer: shade cooled the air by 1.0–2.1 K and cut the sunshine by 481–789 W m⁻²; the pagoda tree came second for comfort (Yang &amp; Wang 2024, abstract only). Overhead vine arbours give more than 90% cover; pergola vines need a leaf area index of 2 or more, ideally 3.</p>
+    <p class="lit">Beijing street trees in summer: shade cooled the air by 1.0–2.1 K and cut the sunshine by 481–789 W m⁻²; the pagoda tree came second for comfort (Yang &amp; Wang 2024, abstract only). Overhead vine arbours give more than 90% cover; a grape study puts the best leaf area index of trained vines at 2–3 (for the crop, not for shade; read here as the pergola's leaf cover).</p>
     <p class="caveat">No measured leaf area for jujube or pagoda trees was found: the indices are the brief's (unverified). Crowns are spheres; leaf temperature is an engine assumption. Trees and screens enter the sky view through the crown factor, as in the other blocks.</p>
     ${srcLine(['yang2024', 'ucdavis', 'jjshs', 'brief5'])}`;
 }
