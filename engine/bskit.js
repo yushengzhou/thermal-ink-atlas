@@ -320,7 +320,7 @@ export function drawFlags(R, ctx, cam, W, H, alpha, hq) {
     ctx.fillStyle = 'rgba(250,246,236,1)';
     ctx.fillText(t, X + 3 * d, Y - 4 * d);
   }
-  const text = `Flags: above the 1-min contact-burn limit (ISO 13732-1): metal ${E.limits.metal} °C · concrete ${E.limits.stone} °C; "1 s": metal above ≈${E.limits.s1} °C (unverified) · ${n} flagged`;
+  const text = `Flags: hot enough to burn bare skin in a minute: metal above ${E.limits.metal} °C · concrete above ${E.limits.stone} °C; "1 s": bare metal above about ${E.limits.s1} °C · ${n} flagged`;
   label(R, ctx, text, RING, W, H, 1);
   R.stats.flags = n;
   R.stats.flags1s = n1;

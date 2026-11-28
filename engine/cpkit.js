@@ -238,7 +238,7 @@ export function drawBurn(R, ctx, cam, W, H, alpha, hq) {
   ctx.drawImage(E.layer.c, 0, 0);
   R.stats.burnCells = E.layer.n;
   R.stats.burnDrawn = E.layer.drawn;
-  const text = `Hatched: above the 1-min burn limit (ISO 13732-1): plastics ${E.limits.plastic} °C · concrete, asphalt ${E.limits.stone} °C · metal ${E.limits.metal} °C · ${E.layer.n} cells`;
+  const text = `Hatched: hot enough to burn bare skin in a minute: plastics above ${E.limits.plastic} °C · concrete, asphalt above ${E.limits.stone} °C · metal above ${E.limits.metal} °C · ${E.layer.n} patches`;
   label(R, ctx, text, BURN, W, H, 1);
   R.stats.burnLabel = text;
   ctx.restore();

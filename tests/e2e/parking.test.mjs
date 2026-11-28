@@ -75,7 +75,7 @@ test('night-release overlay: default off, ?flux=0|1, G and the button; strokes r
     return window.atlas.stats();
   });
   assert.ok(night.fluxUp > 300 && night.fluxDown === 0, `23:00: ${night.fluxUp} up, ${night.fluxDown} down`);
-  assert.ok(/stored heat coming back out/.test(night.fluxLabel) && /simulated/.test(night.fluxLabel));
+  assert.ok(/stored heat coming back out/.test(night.fluxLabel) && /calculated/.test(night.fluxLabel));
   const noon = await page.evaluate(() => {
     window.atlas.look({ hour: 12 });
     window.atlas.seek(400);
@@ -194,7 +194,7 @@ test('cards: storage, PV canopy, lot trees, shed, brownfield, hot car (quoted nu
     assert.equal(await page.locator('#card').getAttribute('data-kind'), id);
   }
   const html = await page.evaluate(() => Object.fromEntries(['storage', 'pv', 'trees', 'shed', 'soil', 'car'].map((id) => [id, window.atlas.parking.html(id)])));
-  for (const s of ['47.6 / 39.5 °C', '69 / 48 °C', 'press release', 'about 20 degrees hotter', '+1.8 K per 5 min', '80% of the rise in 30 min', 'up to 47 °C', '−26 K', 'up to 25 K', '1,010 (39 in 2024)', 'Not modelled', 'information only']) assert.ok(html.car.includes(s), `hot car: ${s}`);
+  for (const s of ['47.6 / 39.5 °C', '69 / 48 °C', 'press release', 'about 20 degrees hotter', '+1.8 degrees per 5 min', '80% of the rise in 30 min', 'up to 47 °C', '−26 degrees', 'up to 25 degrees', '1,010 (39 in 2024)', 'Not modelled', 'information only']) assert.ok(html.car.includes(s), `hot car: ${s}`);
   assert.ok(html.pv.includes('Golden') && html.pv.includes('63.5 / 28.5') && html.pv.includes('37.0 / 27.7') && html.pv.includes('outside the spec'));
   assert.ok(html.storage.includes('damping depth') && html.storage.includes('W m⁻²') && html.storage.includes('No measured night-time'));
   assert.ok(html.trees.includes('Scott') && html.trees.includes('7.26 K'));

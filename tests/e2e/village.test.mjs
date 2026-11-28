@@ -46,7 +46,7 @@ test('white roofs and under the roof: default off, ?coolroof=1 and ?under=1, key
     const cells = [];
     for (let i = 0; i < B.world.bld.length; i++) if (B.world.bld[i] === painted.index) cells.push(i);
     assert.ok(Math.abs(st.roof - cells.reduce((a, i) => a + model.ts(i, 15), 0) / cells.length) < 1e-6);
-    if (under) assert.ok(/Under the roof/.test(st.stats.underLabel) && /proxy/.test(st.stats.underLabel), st.stats.underLabel);
+    if (under) assert.ok(/Under the roof/.test(st.stats.underLabel) && /an estimate/.test(st.stats.underLabel), st.stats.underLabel);
     assert.deepEqual(errors, []);
     await context.close();
   }

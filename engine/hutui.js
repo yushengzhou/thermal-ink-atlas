@@ -10,27 +10,30 @@ const fmt = (v) => (Math.round(v * 10) / 10).toFixed(1);
 const f2 = (v) => v.toFixed(2);
 const pct = (v) => `${Math.round(v * 100)}%`;
 const sgn = (v) => `${v < 0 ? '−' : '+'}${fmt(Math.abs(v))}`;
-const K = (v) => `${sgn(v)} K`;
+const K = (v) => `${sgn(v)}°`;
 const hhmm = (h) => `${String(Math.floor(h) % 24).padStart(2, '0')}:${String(Math.round((h % 1) * 60)).padStart(2, '0')}`;
 const tag = (v) => (v.basis !== 'cited' ? ` <span class="basis">${BASIS[v.basis]}</span>` : '') + (v.verified ? '' : ' <span class="unv" title="value not yet checked against the primary source">unverified</span>');
-const srcLine = (keys) => `<p class="src">Sources: ${keys.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: ${gl('forceRestore', 'force-restore')}, simulated, on a 5 m grid; the air temperature is fixed.</p>`;
+const ref = (k) => `<a href="../../references.html#hutong">[${k}]</a> ${SOURCES[k]}`;
+/** The closed part at the bottom of a card (#29): the model's terms, flags and sources, with links to the references page. */
+const experts = (body, keys) => `<details class="expert"><summary>For experts</summary>${body}<p class="src">Sources: ${keys.map(ref).join('; ')}. Made-up block, calculated temperatures: a ${gl('forceRestore', 'force-restore')} surface model on a 5 m grid; the air temperature is fixed.</p></details>`;
 const close = '<button class="x" aria-label="close">×</button>';
 
 /** Margin notes (at most 5). d: numbers from the app (app.js htNoteData). */
+const degs = (v) => `${Math.max(1, Math.round(Math.abs(v)))} degree${Math.round(Math.abs(v)) > 1 ? 's' : ''}`;
 export function htNotes(scene, d) {
   const text = {
-    lane: [`Jujube Lane, 5 m wide, 4 m walls (H/W ${f2(d.laneHw)}):`, `at noon ${pct(d.laneNoon)} of the floor is in sun`],
-    roofs: [`Grey tile roofs ${fmt(d.roof15)} °C at 3 pm,`, "above the brief's 50–62 °C (see docs/sources.md)"],
-    awning: ['Under the mat awning (天棚):', `Tmrt ${fmt(d.awningTmrt)} °C; open courtyard sun ${fmt(d.sunTmrt)} °C`],
-    splash: [`Splash at 19:00 (P): Lantern Lane ${sgn(d.d20)} K by 20:00,`, `${sgn(d.d23)} K at 23:00`],
-    tree: ['Pagoda trees on the main lane:', `Tmrt ${fmt(d.treeTmrt)} °C beneath, ${fmt(d.laneSunTmrt)} °C in the sun`],
+    lane: ['Jujube Lane, 5 m wide between 4 m walls:', `at noon ${pct(d.laneNoon)} of the floor is in sun`],
+    roofs: [`Grey tile roofs ${fmt(d.roof15)} °C at 3 pm,`, 'hotter than the 50–62 °C measured'],
+    awning: ['Under the mat awning (天棚) it feels like', `${fmt(d.awningTmrt)} °C; in the open courtyard sun ${fmt(d.sunTmrt)} °C`],
+    splash: [`Splash at 7 pm (P): Lantern Lane ${degs(d.d20)} ${d.d20 < 0 ? 'cooler' : 'warmer'} by 8 pm,`, `${degs(d.d23)} at 11 pm`],
+    tree: ['Pagoda trees on the main lane: it feels like', `${fmt(d.treeTmrt)} °C beneath, ${fmt(d.laneSunTmrt)} °C in the sun`],
   };
   const terms = {
-    lane: [['canyon', `H/W ${f2(d.laneHw)}`]],
+    lane: [['canyon', '4 m walls']],
     roofs: [['surfaceTemp', `${fmt(d.roof15)} °C at 3 pm`]],
-    awning: [['tianpeng', 'mat awning (天棚)'], ['tmrt', 'Tmrt']],
-    splash: [['waterStore', 'Splash at 19:00 (P)']],
-    tree: [['tmrt', 'Tmrt']],
+    awning: [['tianpeng', 'mat awning (天棚)'], ['tmrt', 'it feels like']],
+    splash: [['waterStore', 'Splash at 7 pm (P)']],
+    tree: [['tmrt', 'it feels like']],
   };
   return scene.notes.slice(0, 5).map((n) => ({ ...n, text: text[n.key], terms: terms[n.key] }));
 }
@@ -42,15 +45,15 @@ export function lanesCard(d) {
   return `
     ${close}
     <h3>Low lanes: in sun at noon</h3>
+    <p class="lead">At noon ${pct(l5.noon.sunlit)} of a 5 m lane is in the sun: the low walls give little shade, so trees, vines and mat awnings do the work.</p>
     <div class="mat">Single-storey lanes, walls ${fmt(l5.H)} m at the eaves · solar noon ${hhmm(d.noon.h)}, sun ${fmt(d.noon.alt)}° high</div>
-    <table class="cmp">
+    <p class="note">At midsummer noon the sun stands ${fmt(d.noon.alt)}° high, so a 4 m wall casts only ${fmt(l5.noon.shadow)} m of shadow: three quarters of a 5 m lane is in the sun. The lanes are open to the sky, so the midday shade comes from trees, vine pergolas and the summer mat awnings, not from the walls.</p>
+    ${experts(`<table class="cmp">
       <tr><td></td><td>W</td><td>${gl('canyon', 'H/W')}</td><td>${gl('svf', 'sky view')} model / canyon</td><td>noon sun model / 1 − (H/tan β)/W</td></tr>
       ${rows}
     </table>
-    <p class="note">At midsummer noon the sun stands ${fmt(d.noon.alt)}° high, so a 4 m wall casts only ${fmt(l5.noon.shadow)} m of shadow: three quarters of a 5 m lane is in the sun. The lanes are open to the sky (sky view about ${f2(l5.svf)}), so the midday shade comes from trees, vine pergolas and the summer mat awnings, not from the walls.</p>
-    <p class="lit">Deep lanes are different: the Fez medina (H/W about 10, sky view 0.05) stays near the air temperature by day, about 10 K cooler than the modern town in the early afternoon (Johansson 2006). Lanes of a traditional block in Harbin have sky views 0.09–0.27 (Lin et al. 2019).</p>
-    <p class="caveat">Invented geometry: plot sizes, the 4 m eaves and the lane widths are assumptions in the brief's range (hutong dimensions unverified). Lanes narrower than the 5 m grid cannot be shown. The houses are boxes at eave height: the pitched roofs are drawn but not in the shade or sky-view calculation (shade sampled every 1.25 m${tag(MODEL.shadeSamples)}). Sky view model vs an endless canyon at the same cell centres (the 10 m lane's cells sit off its centre line; its centre-line value is ${f2(d.lanes.find((l) => l.W === 10).svfCentre)}).</p>
-    ${srcLine(['johansson2006', 'lin2019', 'brief5'])}`;
+    <p class="lit">Lane sky view about ${f2(l5.svf)}. Deep lanes are different: the Fez medina (H/W about 10, sky view 0.05) stays near the air temperature by day, about 10 K cooler than the modern town in the early afternoon (Johansson 2006). Lanes of a traditional block in Harbin have sky views 0.09–0.27 (Lin et al. 2019).</p>
+    <p class="caveat">Invented geometry: plot sizes, the 4 m eaves and the lane widths are assumptions in the brief's range (hutong dimensions unverified). Lanes narrower than the 5 m grid cannot be shown. The houses are boxes at eave height: the pitched roofs are drawn but not in the shade or sky-view calculation (shade sampled every 1.25 m${tag(MODEL.shadeSamples)}). Sky view model vs an endless canyon at the same cell centres (the 10 m lane's cells sit off its centre line; its centre-line value is ${f2(d.lanes.find((l) => l.W === 10).svfCentre)}).</p>`, ['johansson2006', 'lin2019', 'brief5'])}`;
 }
 
 /** Courtyard card. d: {court (courtyardStats at 15:00)}. */
@@ -59,9 +62,10 @@ export function courtyardCard(d) {
   return `
     ${close}
     <h3>${gl('siheyuan', 'Courtyards')}: shade from above</h3>
+    <p class="lead">At 3 pm it feels like ${fmt(c.awning.tmrt)} °C under a mat awning and ${fmt(c.sun.tmrt)} °C in the open sun of the same courtyards.</p>
     <div class="mat">Paved grey-brick courtyards, 15:00 · air ${fmt(c.air)} °C</div>
     <table class="cmp">
-      <tr><td></td><td>${gl('svf', 'sky view')}</td><td>${gl('surfaceTemp', 'paving')}</td><td>${gl('tmrt', 'Tmrt')}</td></tr>
+      <tr><td></td><td>${gl('svf', 'open to the sky')}</td><td>${gl('surfaceTemp', 'paving')}</td><td>${gl('tmrt', 'feels like')}</td></tr>
       <tr class="t"><td>under a mat awning</td><td>${f2(c.awning.svf)}</td><td>${fmt(c.awning.ts)} °C</td><td>${fmt(c.awning.tmrt)} °C</td></tr>
       <tr><td>under a vine pergola</td><td>${f2(c.pergola.svf)}</td><td>${fmt(c.pergola.ts)} °C</td><td>${fmt(c.pergola.tmrt)} °C</td></tr>
       <tr><td>under a tree crown</td><td>${f2(c.crown.svf)}</td><td>${fmt(c.crown.ts)} °C</td><td>${fmt(c.crown.tmrt)} °C</td></tr>
@@ -69,9 +73,8 @@ export function courtyardCard(d) {
       <tr><td colspan="4" class="sub">Sky view over all courtyard cells: ${f2(c.svf10)}–${f2(c.svf90)} (10th–90th percentile).</td></tr>
     </table>
     <p class="note">Houses on all four sides shade only the edges of a yard; the rest is shaded from above, by a tree, a vine or, in the richest yards, a mat awning over the whole court. Walkers who stop to rest pick these spots.</p>
-    <p class="lit">Measured courtyard air (quoted, not simulated): in Córdoba and Seville courtyards were 3–6 K below the outdoor air on hot days and up to 11–15 K at 40–45 °C (abstracts only, unverified); in Harbin, courtyards with a lower sky view had air only about 0.4 K cooler on average (Lin et al. 2019); the Fez medina's air was about 10 K cooler than the modern town in the early afternoon but 2–4 K warmer before dawn (Johansson 2006).</p>
-    <p class="caveat">The air temperature in this model is fixed, so the courtyards' "cool pond" of air cannot appear: only the surfaces and the radiation differ. Awnings and pergolas count as full cover for the sky view (crown factor${tag(MODEL.screenCover)}).</p>
-    ${srcLine(['spainCourtyard', 'lin2019', 'johansson2006', 'brief5'])}`;
+    ${experts(`<p class="lit">Measured courtyard air (quoted, not simulated): in Córdoba and Seville courtyards were 3–6 K below the outdoor air on hot days and up to 11–15 K at 40–45 °C (abstracts only, unverified); in Harbin, courtyards with a lower sky view had air only about 0.4 K cooler on average (Lin et al. 2019); the Fez medina's air was about 10 K cooler than the modern town in the early afternoon but 2–4 K warmer before dawn (Johansson 2006).</p>
+    <p class="caveat">The air temperature in this model is fixed, so the courtyards' "cool pond" of air cannot appear: only the surfaces and the radiation differ. Awnings and pergolas count as full cover for the sky view (crown factor${tag(MODEL.screenCover)}).</p>`, ['spainCourtyard', 'lin2019', 'johansson2006', 'brief5'])}`;
 }
 
 /** The summer mat awning, tianpeng: the cultural card, in Chinese and English. d: {court}. */
@@ -81,16 +84,16 @@ export function tianpengCard(d) {
   return `
     ${close}
     <h3>天棚 · The summer mat awning</h3>
+    <p class="lead">Old Beijing families roofed their courtyards with reed mats in summer: under one it feels like ${fmt(c.awning.tmrt)} °C at 3 pm, against ${fmt(c.sun.tmrt)} °C in the open sun.</p>
     <div class="mat">天棚鱼缸石榴树 · an old Beijing saying: "tianpeng, fish bowl, pomegranate tree"</div>
     <p lang="zh-Hans">老北京夏天在院里搭天棚：芦席棚顶高出屋檐，四周席子可卷起通风。老北京俗语“天棚鱼缸石榴树”说的就是四合院的夏景，漫画家李滨声曾以此作画（见邓云乡《天棚遮阴》）。院中多种枣树、槐树，石榴寓意多子。傍晚往地上洒水降温，与日本江户时代以来的“打ち水”（洒水）同理。</p>
     <p lang="en">In old Beijing summers a family built a tianpeng over the courtyard: a roof of reed mats on poles, higher than the eaves, with side mats that roll up to let the air through. An old Beijing saying sums up a courtyard summer as "tianpeng, fish bowl, pomegranate tree"; the cartoonist Li Binsheng drew it (as recorded by Deng Yunxiang, "Tianpeng zheyin"). Courtyards were planted with jujube and pagoda trees, and the pomegranate stands for many children. Sprinkling water on the ground in the evening cools it, the same idea as Japan's uchimizu (打ち水), practised since the Edo period.</p>
     <table class="cmp">
-      <tr><td></td><td>${gl('tmrt', 'Tmrt')} 15:00</td></tr>
-      <tr class="t"><td>under the awning (lets through ${pct(a.tr.value)} of the sun${tag(a.tr)})</td><td>${fmt(c.awning.tmrt)} °C</td></tr>
+      <tr><td></td><td>${gl('tmrt', 'feels like')}, 3 pm</td></tr>
+      <tr class="t"><td>under the awning (lets through ${pct(a.tr.value)} of the sun)</td><td>${fmt(c.awning.tmrt)} °C</td></tr>
       <tr><td>the same courtyards' open sun</td><td>${fmt(c.sun.tmrt)} °C</td></tr>
     </table>
-    <p class="caveat">北京傍晚泼水的习俗本身：未找到可引用的来源（未核实）。 No citable source was found for the Beijing evening-splashing custom itself (unverified); the uchimizu parallel and the awning are from the sources below. The awning's transmission (10–30% for reed mats) is the brief's, unverified.</p>
-    ${srcLine(['deng', 'visitBeijing', 'nippon', 'brief5'])}`;
+    ${experts(`<p class="caveat">北京傍晚泼水的习俗本身：未找到可引用的来源（未核实）。 No citable source was found for the Beijing evening-splashing custom itself (unverified); the uchimizu parallel and the awning are from the sources below. The awning's transmission ${a.tr.value}${tag(a.tr)} (10–30% for reed mats) is the brief's, unverified.</p>`, ['deng', 'visitBeijing', 'nippon', 'brief5'])}`;
 }
 
 /** Splash card. d: {s (splashStats on the splashed lanes), sens: [{beta, peak, d23}], ef (efPathStats), on}. */
@@ -99,26 +102,28 @@ export function splashCard(d) {
   const P = (k) => MODEL[k];
   return `
     ${close}
-    <h3>Splashing at 19:00: cool for a few hours</h3>
+    <h3>Splashing at 7 pm: cool for a few hours</h3>
+    <p class="lead">Water thrown on the warm brick at 7 pm cools the paving by ${degs(s.peak)} within the hour, and the coolness lasts until the water is gone after midnight.</p>
     <div class="mat">${gl('waterStore', 'Water store')} on the splashed lanes and courtyards · ${d.on ? 'splash on' : 'splash off (P to show it)'}</div>
     <table class="cmp">
-      <tr><td>water left on the paving, W0</td><td>${P('splashW0').value} mm${tag(P('splashW0'))}</td></tr>
-      <tr><td>wetness of splashed brick, β_wet</td><td>${P('splashBeta').value}${tag(P('splashBeta'))}</td></tr>
-      <tr><td colspan="2" class="sub">Splashed lanes (sky view ${f2(s.svf)}), splash minus no splash:</td></tr>
+      <tr><td colspan="2" class="sub">On the splashed lanes, splash minus no splash:</td></tr>
       <tr class="t"><td>paving, ${hhmm(s.peakAt)} (largest within 1 h)</td><td>${K(s.peak)}</td></tr>
       <tr><td>paving, 21:00 / 23:00</td><td>${K(s.d21)} / ${K(s.d23)}</td></tr>
       <tr><td>paving, next day 15:00</td><td>${K(s.next15)}</td></tr>
-      <tr class="t"><td>${gl('tmrt', 'Tmrt')}, 20:00 / 21:00</td><td>${K(s.tmrt20)} / ${K(s.tmrt21)}</td></tr>
+      <tr class="t"><td>how it ${gl('tmrt', 'feels')}, 8 pm / 9 pm</td><td>${K(s.tmrt20)} / ${K(s.tmrt21)}</td></tr>
       <tr><td>water left at 21:00 / 23:00</td><td>${f2(s.w21)} / ${f2(s.w23)} mm</td></tr>
       <tr><td>evaporated per splash (at most)</td><td>${f2(s.perSplash)} of ${s.w0} mm</td></tr>
+    </table>
+    <p class="note">A bucket of water thrown on the warm brick at 19:00 evaporates over the evening; the heat that takes comes out of the paving, which cools by several degrees within the hour and stays cooler until the water is gone after midnight. By the next afternoon the sun has dried it: only the ground's lower daily mean remains.</p>
+    ${experts(`<table class="cmp">
+      <tr><td>water left on the paving, W0</td><td>${P('splashW0').value} mm${tag(P('splashW0'))}</td></tr>
+      <tr><td>wetness of splashed brick, β_wet</td><td>${P('splashBeta').value}${tag(P('splashBeta'))}</td></tr>
+      <tr><td>splashed lanes' ${gl('svf', 'sky view')}</td><td>${f2(s.svf)}</td></tr>
       <tr><td>coolest wet paving minus the ${gl('wetBulb', 'wet-bulb')}</td><td>${K(s.margin)}</td></tr>
       <tr><td>the old evaporation term alone (EF × Q*)</td><td>${K(-d.ef.max)}</td></tr>
       ${d.sens.map((x) => `<tr><td class="sub">β_wet ${x.beta}: largest / 23:00</td><td class="sub">${K(x.peak)} / ${K(x.d23)}</td></tr>`).join('')}
-    </table>
-    <p class="note">A bucket of water thrown on the warm brick at 19:00 evaporates over the evening; the heat that takes comes out of the paving, which cools by several degrees within the hour and stays cooler until the water is gone after midnight. By the next afternoon the sun has dried it: only the ground's lower daily mean remains.</p>
-    <p class="lit">Paris, Rue du Louvre: about 1 L m⁻² per cycle, the surface −7.5 K at 19:30 and −6 K at 20:30, lasting several hours (Hendel et al. 2015); air −0.79 K at most and Tmrt −1.76 K (Hendel et al. 2016). Kobe: 0.025 mm per pass cools −2 to −4 K at once but is gone within 30 minutes in sun, so evening watering is recommended (Takebayashi et al. 2023). A watered road fell from 50 to 40 °C in about an hour (Kato et al. 2008, unverified).</p>
-    <p class="caveat">The model's old evaporation term needs positive net radiation, which is gone after sunset, so it cannot show an evening splash; the water store W is a separate term (bulk evaporation${tag(P('waterStore'))}). The air is fixed: the splash cools the paving and the radiation people feel, not the air. The design day repeats with a splash every evening, so the paving is about ${fmt(Math.abs(s.before))} K cooler even before the splash. W0 sits at the top edge of the brief's 0.5–1.0 mm; β_wet is the brief's range (0.3–1).</p>
-    ${srcLine(['hendel2015', 'hendel2016', 'takebayashi2023', 'kato2008', 'bolton1980', 'brief5'])}`;
+    </table><p class="lit">Paris, Rue du Louvre: about 1 L m⁻² per cycle, the surface −7.5 K at 19:30 and −6 K at 20:30, lasting several hours (Hendel et al. 2015); air −0.79 K at most and Tmrt −1.76 K (Hendel et al. 2016). Kobe: 0.025 mm per pass cools −2 to −4 K at once but is gone within 30 minutes in sun, so evening watering is recommended (Takebayashi et al. 2023). A watered road fell from 50 to 40 °C in about an hour (Kato et al. 2008, unverified).</p>
+    <p class="caveat">The model's old evaporation term needs positive net radiation, which is gone after sunset, so it cannot show an evening splash; the water store W is a separate term (bulk evaporation${tag(P('waterStore'))}). The air is fixed: the splash cools the paving and the radiation people feel, not the air. The design day repeats with a splash every evening, so the paving is about ${fmt(Math.abs(s.before))} K cooler even before the splash. W0 sits at the top edge of the brief's 0.5–1.0 mm; β_wet is the brief's range (0.3–1).</p>`, ['hendel2015', 'hendel2016', 'takebayashi2023', 'kato2008', 'bolton1980', 'brief5'])}`;
 }
 
 /** Trees and screens card. d: {trees (treeStats at 15:00), court}. */
@@ -127,18 +132,17 @@ export function treesCard(d) {
   return `
     ${close}
     <h3>Pagoda, jujube, pomegranate: shade by species</h3>
-    <div class="mat">Crown transmission from leaf area, exp(−0.5 LAI) · 15:00</div>
+    <p class="lead">Under a pagoda tree it feels like ${fmt(d.trees.pagodaTree ? d.trees.pagodaTree.tmrt : d.court.crown.tmrt)} °C at 3 pm, against ${fmt(d.court.sun.tmrt)} °C in full sun: its dense crown lets through only ${pct(MATERIALS.pagodaTree.tr.value)} of the sun.</p>
     <table class="cmp">
-      <tr><td></td><td>lets through</td><td>${gl('tmrt', 'Tmrt')} at the trunk</td></tr>
-      ${sp.map((k) => `<tr><td>${MATERIALS[k].name}</td><td>${pct(MATERIALS[k].tr.value)}${tag(MATERIALS[k].tr)}</td><td>${fmt(d.trees[k].tmrt)} °C</td></tr>`).join('')}
-      <tr><td>${MATERIALS.pergola.name}</td><td>${pct(MATERIALS.pergola.tr.value)}${tag(MATERIALS.pergola.tr)}</td><td>${fmt(d.court.pergola.tmrt)} °C</td></tr>
-      <tr><td>${MATERIALS.awning.name}</td><td>${pct(MATERIALS.awning.tr.value)}${tag(MATERIALS.awning.tr)}</td><td>${fmt(d.court.awning.tmrt)} °C</td></tr>
+      <tr><td>3 pm</td><td>lets through</td><td>${gl('tmrt', 'feels like')} at the trunk</td></tr>
+      ${sp.map((k) => `<tr><td>${MATERIALS[k].name}</td><td>${pct(MATERIALS[k].tr.value)}</td><td>${fmt(d.trees[k].tmrt)} °C</td></tr>`).join('')}
+      <tr><td>${MATERIALS.pergola.name}</td><td>${pct(MATERIALS.pergola.tr.value)}</td><td>${fmt(d.court.pergola.tmrt)} °C</td></tr>
+      <tr><td>${MATERIALS.awning.name}</td><td>${pct(MATERIALS.awning.tr.value)}</td><td>${fmt(d.court.awning.tmrt)} °C</td></tr>
       <tr><td>courtyard in full sun</td><td>100%</td><td>${fmt(d.court.sun.tmrt)} °C</td></tr>
     </table>
     <p class="note">The pagoda tree's wide, dense crown stands above the roofs and shades the lanes; jujubes are open and airy; pomegranates are small and low. The trunk cell is not always in its own tree's shade at 3 pm, when the sun is in the west.</p>
-    <p class="lit">Beijing street trees in summer: shade cooled the air by 1.0–2.1 K and cut the sunshine by 481–789 W m⁻²; the pagoda tree came second for comfort (Yang &amp; Wang 2024, abstract only). Overhead vine arbours give more than 90% cover; a grape study puts the best leaf area index of trained vines at 2–3 (for the crop, not for shade; read here as the pergola's leaf cover).</p>
-    <p class="caveat">No measured leaf area for jujube or pagoda trees was found: the indices are the brief's (unverified). Crowns are spheres; leaf temperature is an engine assumption. Trees and screens enter the sky view through the crown factor, as in the other blocks.</p>
-    ${srcLine(['yang2024', 'ucdavis', 'jjshs', 'brief5'])}`;
+    ${experts(`<p class="lit">Crown transmission from leaf area, exp(−0.5 LAI): ${[...sp, 'pergola', 'awning'].map((k) => `${MATERIALS[k].name} ${MATERIALS[k].tr.value}${tag(MATERIALS[k].tr)}`).join('; ')}.</p><p class="lit">Beijing street trees in summer: shade cooled the air by 1.0–2.1 K and cut the sunshine by 481–789 W m⁻²; the pagoda tree came second for comfort (Yang &amp; Wang 2024, abstract only). Overhead vine arbours give more than 90% cover; a grape study puts the best leaf area index of trained vines at 2–3 (for the crop, not for shade; read here as the pergola's leaf cover).</p>
+    <p class="caveat">No measured leaf area for jujube or pagoda trees was found: the indices are the brief's (unverified). Crowns are spheres; leaf temperature is an engine assumption. Trees and screens enter the sky view through the crown factor, as in the other blocks.</p>`, ['yang2024', 'ucdavis', 'jjshs', 'brief5'])}`;
 }
 
 /** Button labels for the hutong panel cards. */

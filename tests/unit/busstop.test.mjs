@@ -265,7 +265,7 @@ test('glossary: transmittance, profile angle, headway, heat dose, contact-burn t
     assert.deepEqual(GLOSSARY[k].scenes, ['busstop']);
     for (const c of ['asphalt-park', 'campus']) assert.ok(!termsFor(c).includes(k), `${k} on ${c}`);
   }
-  assert.ok(/not compute/.test(GLOSSARY.heatDose.range) && /unverified/.test(GLOSSARY.burnThreshold.range));
+  assert.ok(/not compute/.test(GLOSSARY.heatDose.range) && /not yet checked/.test(GLOSSARY.burnThreshold.range));
 });
 
 test('build: the block\'s materials are one @page busstop group, carried by the bus stop page only, as its own bytes', () => {

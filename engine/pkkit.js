@@ -177,7 +177,7 @@ export function drawFlux(R, ctx, f, cam, W, H, alpha, hq) {
     R.stats.fluxDown += P.length / 4;
   }
   const night = R.stats.fluxUp >= R.stats.fluxDown;
-  const text = `Ground heat flux G (simulated): ${night ? 'rising strokes = stored heat coming back out' : 'ticks down = heat going into the ground; rising strokes = heat coming back out'} · more and longer strokes = more W/m²`;
+  const text = `Heat into and out of the ground (calculated): ${night ? 'rising strokes = stored heat coming back out' : 'ticks down = heat going into the ground; rising strokes = heat coming back out'} · more and longer strokes = more heat`;
   ctx.globalAlpha = alpha;
   ctx.font = `${Math.round(13 * d)}px ${HAND_FONT}`;
   ctx.textBaseline = 'bottom';

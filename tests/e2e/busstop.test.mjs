@@ -228,7 +228,7 @@ test('cards: west screen, stops A-E, which kerb, waiting, footbridges, burn flag
   assert.ok(/Chen et al/.test(html.bridge) && /upper bounds/.test(html.bridge) && /likely/.test(html.bridge));
   assert.ok(html.burn.includes('ISO 13732-1') && html.burn.includes('51 °C') && html.burn.includes('apply to children too') && html.burn.includes('ceramics, glass and stone') && !html.burn.includes('healthy adult skin') && /unverified/.test(html.burn));
   assert.ok(/UTCI/.test(html.wait) && /not a measure of risk/.test(html.wait) && html.wait.includes('5.8 min'));
-  assert.ok(/east kerb/.test(html.kerb) && /far outside the 20–35 K/.test(html.kerb));
+  assert.ok(/east kerb/.test(html.kerb) && /far less than the 20–35 an opaque roof usually gives/.test(html.kerb));
   for (const h of Object.values(html)) assert.ok(!/https?:/.test(h));
   // heat cards: at stop A the point model's rows; under the open footbridge its deck
   const d = await page.evaluate(() => [window.atlas.card('ground', 303.5, 211), window.atlas.card('ground', 200, 262.5), window.atlas.card('ground', 130, 100)]);

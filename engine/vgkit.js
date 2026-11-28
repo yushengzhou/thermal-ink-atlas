@@ -270,7 +270,7 @@ export function drawUnder(R, ctx, cam, W, H, alpha, hq) {
   }
   ctx.globalAlpha = alpha;
   const s = E.under(hq).summary;
-  const text = `Under the roof (O): indoor radiant temperature under the sheet roofs at ${E.hm(hq)}, a proxy (F_r ${E.fr}) · bare rusty iron ${s.rust} °C · white-painted ${s.white} °C · outdoor air ${s.air} °C`;
+  const text = `Under the roof (O): the warmth the room's ceiling and walls give off under the sheet roofs at ${E.hm(hq)}, an estimate · bare rusty iron ${s.rust} °C · white-painted ${s.white} °C · outdoor air ${s.air} °C`;
   label(R, ctx, text, W, H);
   R.stats.under = n;
   R.stats.underLabel = text;

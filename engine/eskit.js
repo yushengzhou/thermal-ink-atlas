@@ -363,7 +363,7 @@ export function drawPlumes(R, ctx, f, cam, W, H, alpha, hq) {
     labels++;
   }
   R.stats.faceLabels = labels;
-  const text = `AC condensers (overlay; the air here is fixed, so it does not feel them): ${Math.round(E.wm2(hq))} W/m² over the site at this hour · ${E.qRej.toFixed(1)} kW and +${E.dtExh(hq).toFixed(1)} K exhaust per condenser`;
+  const text = `AC condensers (shown; the air here is fixed, so it does not feel them): ${Math.round(E.wm2(hq))} watts per m² over the site at this hour · each blows out ${E.qRej.toFixed(1)} kW, ${E.dtExh(hq).toFixed(1)} degrees warmer than the air`;
   label(R, ctx, text, PLUME, W, H, 0);
   R.stats.plumeLabel = text;
   ctx.restore();

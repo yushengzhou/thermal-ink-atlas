@@ -85,7 +85,7 @@ test('watering and burn limits: default off, ?irrigate= and ?burn=, keys I and U
     window.atlas.seek(400);
     return window.atlas.stats();
   });
-  assert.ok(/1-min burn limit/.test(s.burnLabel) && /60 °C/.test(s.burnLabel) && /56 °C/.test(s.burnLabel) && /51 °C/.test(s.burnLabel), s.burnLabel);
+  assert.ok(/burn bare skin in a minute/.test(s.burnLabel) && /60 °C/.test(s.burnLabel) && /56 °C/.test(s.burnLabel) && /51 °C/.test(s.burnLabel), s.burnLabel);
   assert.ok(/watered at 14:00/.test(s.waterLabel) && /not cooled/.test(s.waterLabel), s.waterLabel);
   // no spray after half an hour, none before; at night nothing is hatched
   const later = await page.evaluate(() => [13.75, 15, 3].map((h) => {

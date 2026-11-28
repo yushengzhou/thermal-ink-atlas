@@ -73,7 +73,7 @@ export const GLOSSARY = {
     term: 'Thermal inertia / night lag',
     text: 'Heavy materials store heat during the day and release it after sunset, so they stay warm into the night.',
     model: (S) => S.lagLine,
-    why: 'Night lag keeps cities warm at night, when people most need to cool down.',
+    why: 'So the street is still above the air temperature at 11 pm, while the lawn has dropped below it.',
   },
   coolRoof: {
     term: 'Cool roof',
@@ -164,7 +164,7 @@ export const GLOSSARY = {
   ventilationCorridor: {
     term: 'Ventilation corridor',
     text: 'A wide, open street or green strip that lines up with the prevailing wind, so the breeze (here, off the river) can run into the city.',
-    range: 'Planning guides ask for corridors within about 30° of the prevailing wind; along the Ota River (Hiroshima) river cooling was detected 150–500 m inland along streets perpendicular to the river (unverified).',
+    range: 'Planning guides ask for corridors within about 30° of the prevailing wind; along the Ota River (Hiroshima) river cooling was detected 150–500 m inland along streets perpendicular to the river (not yet checked).',
     src: 'corridor, ota',
     why: 'Streets across the wind are sheltered by the buildings upwind; corridors keep the wind moving.',
     scenes: ['waterfront'],
@@ -204,7 +204,7 @@ export const GLOSSARY = {
   tianpeng: {
     term: 'Tianpeng (天棚), the summer mat awning',
     text: 'A shed of reed mats on poles built over a Beijing courtyard each summer, higher than the eaves, with side mats that roll up to let the air through.',
-    range: 'Reed mats let through about 10–30% of the sun (the brief, unverified); this model uses 20%.',
+    range: 'Reed mats let through about 10–30% of the sun (not yet checked); this model uses 20%.',
     src: 'deng, brief5',
     why: 'It shades the whole courtyard at midday, when the low walls give almost no shade.',
     scenes: ['hutong'],
@@ -256,7 +256,7 @@ export const GLOSSARY = {
   sunlightRule: {
     term: '大寒日 sunlight rule',
     text: 'The Chinese planning rule that every home gets a minimum of direct sun at its ground-floor window on the Great Cold day (大寒, about 20 January), counted from 08:00 to 16:00 solar time at the sill.',
-    range: 'GB 50180-2018: at least 2 h on 大寒 in zones I, II, III and VII for cities of 500,000 or more (3 h in smaller ones); flats for the elderly 2 h on the winter solstice (冬至); new homes in old-area renovation 1 h on 大寒 (table values not checked against the standard, unverified). The draft of the Zhejiang rules (DB33/1050, now the 2016 edition): only stretches of 10 min or more count, steps of at most 5 min, the point 0.9 m above the floor.',
+    range: 'GB 50180-2018: at least 2 h on 大寒 in zones I, II, III and VII for cities of 500,000 or more (3 h in smaller ones); flats for the elderly 2 h on the winter solstice (冬至); new homes in old-area renovation 1 h on 大寒 (table values not checked against the standard, not yet checked). The draft of the Zhejiang rules (DB33/1050, now the 2016 edition): only stretches of 10 min or more count, steps of at most 5 min, the point 0.9 m above the floor.',
     src: 'gb50180, db33',
     why: 'It sets how far apart the slab rows stand, and it is written for the winter sun: the same spacing leaves the courtyards open to the high summer sun.',
     scenes: ['estate'],
@@ -272,7 +272,7 @@ export const GLOSSARY = {
   spacingCoefficient: {
     term: 'Spacing coefficient (G / H_eff)',
     text: 'The clear distance between two rows of east-west slabs divided by the effective height of the southern row: a quick way to meet the sunlight rule for long, parallel slabs.',
-    range: 'At 35° N for long slabs: 1.45 for 1 h, 1.47 for 2 h and 1.52 for 3 h of 大寒 sun; 1.64–1.74 on the winter solstice (calculated in the brief). The coefficient method is "no longer appropriate" for high-rises in the draft of the Zhejiang rules (DB33/1050).',
+    range: 'At 35° N for long slabs: 1.45 for 1 h, 1.47 for 2 h and 1.52 for 3 h of 大寒 sun; 1.64–1.74 on the winter solstice (a worked estimate). The coefficient method is "no longer appropriate" for high-rises in the draft of the Zhejiang rules (DB33/1050).',
     src: 'brief7, db33',
     why: 'At 1.47 the July noon shadow covers only about a sixth of the courtyard.',
     scenes: ['estate'],
@@ -280,7 +280,7 @@ export const GLOSSARY = {
   condenserHeat: {
     term: 'Condenser heat rejection',
     text: 'The heat an air conditioner\'s outdoor unit blows out: the heat taken from the flat plus the electricity used to move it, Q_rej = Q_cool (1 + 1/EER).',
-    range: 'A 3.5 kW split unit with EER 3.3 rejects about 4.6 kW; at 0.5–0.7 m³/s of fan air that is 5.5–7.5 K above the air (calculated in the brief). Measured in Changsha: exhaust 5.2 K above the air by day, 6.5 K at night (Mu et al. 2025).',
+    range: 'A 3.5 kW split unit with EER 3.3 rejects about 4.6 kW; at 0.5–0.7 m³/s of fan air that is 5.5–7.5 K above the air (a worked estimate). Measured in Changsha: exhaust 5.2 K above the air by day, 6.5 K at night (Mu et al. 2025).',
     src: 'brief7, mu2025',
     why: 'Stacked on a façade, hundreds of units put tens of watts per square metre of site into the air, most of it in the evening.',
     scenes: ['estate'],
@@ -288,7 +288,7 @@ export const GLOSSARY = {
   eer: {
     term: 'EER (energy efficiency ratio)',
     text: 'Cooling delivered per unit of electricity used, in W/W: an EER of 3.3 moves 3.3 kW of heat out of the flat for every 1 kW of power.',
-    range: 'Split air conditioners about 3–4; the brief uses 3.3.',
+    range: 'Split air conditioners about 3–4; this block uses 3.3.',
     src: 'brief7',
     why: 'A lower EER means more heat out of the condenser for the same cooling, and the hotter the air at the condenser, the lower the EER.',
     scenes: ['estate'],
@@ -321,7 +321,7 @@ export const GLOSSARY = {
   shadeSail: {
     term: 'Shade sail',
     text: 'A sheet of knitted plastic cloth (HDPE) stretched between posts a few metres above a play area or a seating area.',
-    range: 'Lets through about 10–30% of the sun (unverified); Gilbert, Arizona at noon: rubber 46.7 °C under a sail against 87.2 °C in sun; Lubbock: 168 W m⁻² less radiation absorbed by a child.',
+    range: 'Lets through about 10–30% of the sun (not yet checked); Gilbert, Arizona at noon: rubber 46.7 °C under a sail against 87.2 °C in sun; Lubbock: 168 W m⁻² less radiation absorbed by a child.',
     src: 'brief8, vanos2016, vanos2017',
     why: 'It is the quickest shade a school can add; unlike a tree it does not cool the air by evaporation, and after sunset it holds a little warmth over the ground.',
     scenes: ['campus', 'desert'],
@@ -330,7 +330,7 @@ export const GLOSSARY = {
   transmittance: {
     term: 'Solar transmittance (τ)',
     text: 'The share of direct sunlight that passes through a roof sheet, a screen or a pane: 0 for an opaque sheet, 1 for nothing in the way.',
-    range: '10 mm twinwall polycarbonate: clear 0.80, opal 0.47, bronze 0.43 (a datasheet, unverified); opaque metal, PV and ad panels 0; the solar heat gain coefficient of a window is a different number.',
+    range: '10 mm twinwall polycarbonate: clear 0.80, opal 0.47, bronze 0.43 (a datasheet, not yet checked); opaque metal, PV and ad panels 0; the solar heat gain coefficient of a window is a different number.',
     src: 'brettMartin, brief9',
     why: 'A see-through roof keeps the rain off but lets most of the sun through to the people under it.',
     scenes: ['busstop'],
@@ -346,7 +346,7 @@ export const GLOSSARY = {
   headway: {
     term: 'Headway',
     text: 'The time between two buses of a route at a stop.',
-    range: 'Here 10 min (an assumption of the brief, 5–15 min), with gaps spread by a coefficient of variation of 0.4 (0.3–0.5, unverified); riders who arrive at random then wait (h / 2)(1 + cv²) on average.',
+    range: 'Here 10 min (an assumption, 5–15 min), with gaps spread by a coefficient of variation of 0.4 (0.3–0.5, not yet checked); riders who arrive at random then wait (h / 2)(1 + cv²) on average.',
     src: 'brief9, fan2002',
     why: 'The longer and the less regular the gap between buses, the longer people stand at the stop in the heat.',
     scenes: ['busstop'],
@@ -354,7 +354,7 @@ export const GLOSSARY = {
   heatDose: {
     term: 'Heat dose of a wait',
     text: 'This page\'s own measure of how much heat a wait brings: the minutes waited times how far the apparent temperature (with the sun\'s radiation) is above 32 °C, summed minute by minute (K·min).',
-    range: 'No standard dose exists for a few minutes of waiting; the brief defines it on UTCI, which this engine does not compute, so the apparent temperature stands in.',
+    range: 'No standard dose exists for a few minutes of waiting; its definition uses UTCI, which this engine does not compute, so the apparent temperature stands in.',
     src: 'brief9, bom',
     why: 'It adds up how long and how hot: a short wait in the sun and a long wait in the shade can come out alike.',
     scenes: ['busstop'],
@@ -362,9 +362,9 @@ export const GLOSSARY = {
   burnThreshold: {
     term: 'Contact-burn threshold (benches, rails, decks)',
     text: 'The surface temperature at which touching it with bare skin starts to burn, for a material and a contact time (ISO 13732-1). Metal conducts heat into the skin fastest, so its limit is lowest.',
-    range: '1 min of contact: metal 51 °C, ceramics, glass and stone 56 °C (concrete read with them), plastics and wood 60 °C; 10 min: 48 °C; bare metal burns in about 1 s at 65–70 °C (unverified).',
+    range: '1 min of contact: metal 51 °C, ceramics, glass and stone 56 °C (concrete read with them), plastics and wood 60 °C; 10 min: 48 °C; bare metal burns in about 1 s at 65–70 °C (not yet checked).',
     src: 'iso13732, brief9',
-    why: 'A hand on a sunlit handrail or bare legs on a metal bench meet the hottest metal of the street; from 1 min of contact the limits apply to children too, and for short touches the brief advises reading at least 4 s for older people and children.',
+    why: 'A hand on a sunlit handrail or bare legs on a metal bench meet the hottest metal of the street; from 1 min of contact the limits apply to children too, and for short touches it is safer to read at least 4 s for older people and children.',
     scenes: ['busstop'],
   },
   // ---- block 10 (village) ------------------------------------------------------
@@ -436,7 +436,7 @@ export const GLOSSARY = {
   bowen: {
     term: 'Bowen ratio and evaporative fraction',
     text: 'Two ways to describe how much of a surface’s energy goes into evaporating water. In this model the evaporative fraction (EF) is the share of the positive net radiation spent on evaporation (EF × max(Q*, 0)). The Bowen ratio, used in field studies, is sensible heat ÷ latent heat; if heat stored in the ground is ignored, EF ≈ 1 ÷ (1 + Bowen ratio).',
-    range: 'Green roofs: Bowen ratio below 1 to about 2 in field data; this block uses EF 0.5 for a wet and 0.25 for a dry green roof (the brief’s values); dry paving EF near 0.',
+    range: 'Green roofs: Bowen ratio below 1 to about 2 in field data; this block uses EF 0.5 for a wet and 0.25 for a dry green roof (values chosen for this block); dry paving EF near 0.',
     src: 'heusinger, brief2',
     why: 'The more energy goes into evaporation, the less is left to heat the surface.',
     scenes: ['sponge-retrofit'],

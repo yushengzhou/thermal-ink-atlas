@@ -16,20 +16,26 @@ const K = (v) => `${sgn(v)} K`;
 const W = (v) => `${v < 0 ? '−' : ''}${r0(Math.abs(v))} W m⁻²`;
 const hhmm = (h) => `${String(Math.floor(h) % 24).padStart(2, '0')}:${String(Math.round((h % 1) * 60)).padStart(2, '0')}`;
 const tag = (v) => (v.basis !== 'cited' ? ` <span class="basis">${BASIS[v.basis]}</span>` : '') + (v.verified ? '' : ' <span class="unv" title="value not yet checked against the primary source">unverified</span>');
-const srcLine = (keys) => `<p class="src">Sources: ${keys.map((s) => `[${s}] ${SOURCES[s]}`).join('; ')}. Model: ${gl('forceRestore', 'force-restore')}, simulated, on a 5 m grid; the air temperature is fixed.</p>`;
+const ref = (k) => `<a href="../../references.html#parking">[${k}]</a> ${SOURCES[k]}`;
+/** The closed part at the bottom of a card (#29): the model's terms, flags and sources, with links to the references page. */
+const experts = (body, keys) => `<details class="expert"><summary>For experts</summary>${body}<p class="src">Sources: ${keys.map(ref).join('; ')}. Made-up block, calculated temperatures: a ${gl('forceRestore', 'force-restore')} surface model on a 5 m grid; the air temperature is fixed.</p></details>`;
+/** Watts per m² in words, for the visible part. */
+const Ww = (v) => `${v < 0 ? '−' : ''}${r0(Math.abs(v))} watts per m²`;
+const dg = (v) => `${v < 0 ? '−' : '+'}${fmt(Math.abs(v))}°`;
 const close = '<button class="x" aria-label="close">×</button>';
 
 /** Margin notes (at most 5). d: numbers from the app (app.js pkNoteData). */
+const degs = (v) => `${Math.max(1, Math.round(Math.abs(v)))} degree${Math.round(Math.abs(v)) > 1 ? 's' : ''}`;
 export function pkNotes(scene, d) {
   const text = {
-    asphalt: [`Open asphalt: ${fmt(d.asphalt15)} °C at 3 pm,`, `still ${fmt(d.asphalt23)} °C at 11 pm, giving back ${r0(-d.asphaltG23)} W m⁻²`],
+    asphalt: [`Open asphalt: ${fmt(d.asphalt15)} °C at 3 pm,`, `still ${fmt(d.asphalt23)} °C at 11 pm, giving back the day's heat`],
     shed: [`Rusty shed roof: ${fmt(d.shed15)} °C at 3 pm,`, `${fmt(d.shed23)} °C at 11 pm, below the ${fmt(d.air23)} °C air`],
     pv: ['Under the solar canopy:', `${fmt(d.pv15)} °C at 3 pm; open asphalt ${fmt(d.asphalt15)} °C`],
-    soil: ['Bare soil and ballast cool sooner:', `soil ${fmt(d.soil23)} °C at 11 pm, ${fmt(d.asphalt23 - d.soil23)} K below the asphalt`],
+    soil: ['Bare soil and ballast cool sooner:', `soil ${fmt(d.soil23)} °C at 11 pm, ${degs(d.asphalt23 - d.soil23)} below the asphalt`],
     yard: [`Concrete yard: ${fmt(d.yard15)} °C at 3 pm (cooler),`, `${fmt(d.yard23)} °C at 11 pm (asphalt ${fmt(d.asphalt23)} °C)`],
   };
   const terms = {
-    asphalt: [['groundFlux', `giving back ${r0(-d.asphaltG23)} W m⁻²`], ['nightLag', `still ${fmt(d.asphalt23)} °C at 11 pm`]],
+    asphalt: [['groundFlux', "giving back the day's heat"], ['nightLag', `still ${fmt(d.asphalt23)} °C at 11 pm`]],
     shed: [['heatCapacity', 'Rusty shed roof']],
     pv: [['svf', 'Under the solar canopy']],
     soil: [['thermalInertia', 'Bare soil and ballast cool sooner']],
@@ -48,22 +54,22 @@ export function storageCard(d) {
   return `
     ${close}
     <h3>${gl('heatStorage', 'Thick pavement')}: hot by day, warm all night</h3>
-    <div class="mat">${gl('groundFlux', 'Ground heat flux G')}: + into the ground, − given back · ${d.flux ? 'night-release strokes on (G)' : 'press G for the night-release strokes'}</div>
+    <p class="lead">Thick asphalt soaks up heat all day and gives it back all night: at 11 pm the open lot is still ${fmt(t.openAsphalt.t23)} °C, warmer than the ${fmt(d.st.air.t23)} °C air.</p>
+    <div class="mat">${gl('groundFlux', 'Heat into the ground')}: + going in, − given back · ${d.flux ? 'night-release strokes on (G)' : 'the night-release button (G) shows it'}</div>
     <table class="cmp">
-      <tr><td>°C (G in W m⁻² below)</td>${head}</tr>
+      <tr><td>°C (heat into or out of the ground below, watts per m²)</td>${head}</tr>
       ${rows}
       <tr><td>air</td>${d.curve.map((c) => `<td>${fmt(c.air)}</td>`).join('')}</tr>
     </table>
-    <p class="note">By day the dense asphalt and concrete soak heat down into the slab (G up to ${W(d.st.peakG.g)} at ${hhmm(d.st.peakG.h)}). After sunset the slab gives it back: at 23:00 open asphalt still sends ${W(-t.openAsphalt.g23)} up to its surface, so it stays ${K(t.openAsphalt.t23 - d.st.air.t23)} above the air and ${K(t.openAsphalt.t23 - t.soil.t23)} above the bare soil. The rusty shed roof stores almost nothing (${W(t.shed.g23)}): it is already below the air.</p>
-    <table class="cmp">
+    <p class="note">By day the dense asphalt and concrete soak heat down into the slab (up to ${Ww(d.st.peakG.g)} at ${hhmm(d.st.peakG.h)}). After sunset the slab gives it back: at 11 pm open asphalt still sends ${Ww(-t.openAsphalt.g23)} up to its surface, so it stays ${fmt(t.openAsphalt.t23 - d.st.air.t23)} degrees above the air and ${fmt(t.openAsphalt.t23 - t.soil.t23)} above the bare soil. The rusty shed roof stores almost nothing: it is already below the air.</p>
+    ${experts(`<table class="cmp">
       <tr><td>${gl('dampingDepth', 'damping depth')} d = √(κτ/π), asphalt / concrete</td><td>${d.slabs.hma.d.toFixed(3)} / ${d.slabs.pcc.d.toFixed(3)} m${tag(MODEL.dampingDepth)}</td></tr>
       <tr><td>admittance √(kρc) from the same inputs / used here</td><td>${r0(d.slabs.hma.mu)} / ${MATERIALS.asphalt.mu.value}, ${r0(d.slabs.pcc.mu)} / ${MATERIALS.concrete.mu.value}</td></tr>
       <tr><td>G peaks before Ts: model / pure sine wave</td><td>${fmt(lead)} h / 3 h</td></tr>
       <tr><td>asphalt minus lawn, heat to the air at 23:00 (h_c ΔT)</td><td>${W(d.st.gap.find((g) => g.h === 23).gap)}</td></tr>
     </table>
     <p class="lit">Grass parking vs asphalt: about 50 W m⁻² less sensible heat at night, 100–150 by day (Takebayashi &amp; Moriyama 2009). Modelled Phoenix pavements: minimum 34.0 °C for asphalt and 33.5 °C for concrete; surface temperatures stop changing above about 203 mm thickness (Stempihar et al. 2012). From space, roads were the only surface class warming the night in Phoenix (Zhu et al. 2022, interpretation, unverified).</p>
-    <p class="caveat">Force-restore treats each surface as a uniform slab deeper than about 1.5 damping depths (0.2 m): right for the thick lot and yard, not for thin paving (lower μ, see the thin-layer row in docs/sources.md). No measured night-time W m⁻² for a car park was found: the night fluxes are the model's alone. The air is fixed, so the heat the lot gives the air is not felt by the air here.</p>
-    ${srcLine(['stempihar2012', 'takebayashi2009', 'zhu2022', 'deardorff', 'brief6'])}`;
+    <p class="caveat">Force-restore treats each surface as a uniform slab deeper than about 1.5 damping depths (0.2 m): right for the thick lot and yard, not for thin paving (lower μ, see the thin-layer row in the docs). No measured night-time W m⁻² for a car park was found: the night fluxes are the model's alone. The air is fixed, so the heat the lot gives the air is not felt by the air here.</p>`, ['stempihar2012', 'takebayashi2009', 'zhu2022', 'deardorff', 'brief6'])}`;
 }
 
 /** PV canopy. d: {pv: {open, empty, bays, openBays}: dayRange-like {max, min, range, t15, t05}}. */
@@ -73,18 +79,18 @@ export function pvCard(d) {
   return `
     ${close}
     <h3>Solar canopy: shade by day, a lid at night</h3>
-    <div class="mat">Opaque PV panels 4.2 m up · ground beneath: ${gl('svf', 'sky view')} ${MODEL.pvSvf.value}${tag(MODEL.pvSvf)} (as measured by Golden et al.)</div>
+    <p class="lead">The solar panels keep the sun off the bays: at 3 pm the asphalt under them is ${fmt(p.empty.t15)} °C, against ${fmt(p.open.t15)} °C in the open lot.</p>
+    <div class="mat">Opaque solar panels 4.2 m up</div>
     <table class="cmp">
       <tr><td></td><td>15:00</td><td>max / min</td><td>daily range</td></tr>
-      <tr><td>open asphalt (no car)</td><td>${fmt(p.open.t15)} °C</td><td>${fmt(p.open.max)} / ${fmt(p.open.min)}</td><td>${fmt(p.open.range)} K</td></tr>
-      <tr class="t"><td>an empty bay under the canopy</td><td>${fmt(p.empty.t15)} °C</td><td>${fmt(p.empty.max)} / ${fmt(p.empty.min)}</td><td>${fmt(p.empty.range)} K (${red(p.empty)})</td></tr>
-      <tr><td>the canopy's bays, with the cars</td><td>${fmt(p.bays.t15)} °C</td><td>${fmt(p.bays.max)} / ${fmt(p.bays.min)}</td><td>${fmt(p.bays.range)} K</td></tr>
-      <tr><td>open bays, with the cars</td><td>${fmt(p.openBays.t15)} °C</td><td>${fmt(p.openBays.max)} / ${fmt(p.openBays.min)}</td><td>${fmt(p.openBays.range)} K</td></tr>
+      <tr><td>open asphalt (no car)</td><td>${fmt(p.open.t15)} °C</td><td>${fmt(p.open.max)} / ${fmt(p.open.min)}</td><td>${fmt(p.open.range)}°</td></tr>
+      <tr class="t"><td>an empty bay under the canopy</td><td>${fmt(p.empty.t15)} °C</td><td>${fmt(p.empty.max)} / ${fmt(p.empty.min)}</td><td>${fmt(p.empty.range)}° (${red(p.empty)})</td></tr>
+      <tr><td>the canopy's bays, with the cars</td><td>${fmt(p.bays.t15)} °C</td><td>${fmt(p.bays.max)} / ${fmt(p.bays.min)}</td><td>${fmt(p.bays.range)}°</td></tr>
+      <tr><td>open bays, with the cars</td><td>${fmt(p.openBays.t15)} °C</td><td>${fmt(p.openBays.max)} / ${fmt(p.openBays.min)}</td><td>${fmt(p.openBays.range)}°</td></tr>
     </table>
-    <p class="note">The panels take the sun off the bays all day, so the asphalt beneath stays near the air temperature; at night they hide the cold sky, so it cools a little less than the open lot. Cars under the canopy are out of the sun too.</p>
-    <p class="lit">Phoenix, 17 June 2004 (air up to 41 °C): exposed asphalt 63.5 / 28.5 °C (max / min), under a PV canopy 37.0 / 27.7 °C, the daily range about 70% smaller (Golden et al. 2007; the paper has internal inconsistencies).</p>
-    <p class="caveat">Here the range shrinks by ${red(p.empty)}, more than in Phoenix and outside the spec's −60 to −75% band (see docs/sources.md): the open asphalt swings ${fmt(p.open.range)} K here against 35.0 K there, the bay under the canopy ${fmt(p.empty.range)} K against 9.3 K, on a cooler day. Not tuned. The panel undersides count as warm walls (air + 2 K, more by day); a test run with hotter undersides by day and cooler ones at night brings the range inside the band (a sensitivity in docs/sources.md, not used here). The panels' own heat, their electricity and the air under them are not modelled.</p>
-    ${srcLine(['golden2007', 'brief6'])}`;
+    <p class="note">The panels take the sun off the bays all day, so the asphalt beneath stays near the air temperature; at night they hide the cold sky, so it cools a little less than the open lot. Cars under the canopy are out of the sun too. The day's range shrinks by ${red(p.empty)} here, more than the 60 to 75% measured in Phoenix (outside the measured range; not tuned).</p>
+    ${experts(`<p class="lit">Ground beneath: ${gl('svf', 'sky view')} ${MODEL.pvSvf.value}${tag(MODEL.pvSvf)} (as measured by Golden et al.).</p><p class="lit">Phoenix, 17 June 2004 (air up to 41 °C): exposed asphalt 63.5 / 28.5 °C (max / min), under a PV canopy 37.0 / 27.7 °C, the daily range about 70% smaller (Golden et al. 2007; the paper has internal inconsistencies).</p>
+    <p class="caveat">Here the range shrinks by ${red(p.empty)}, more than in Phoenix and outside the spec's −60 to −75% band (docs/sources.md, block 6): the open asphalt swings ${fmt(p.open.range)} K here against 35.0 K there, the bay under the canopy ${fmt(p.empty.range)} K against 9.3 K, on a cooler day. Not tuned. The panel undersides count as warm walls (air + 2 K, more by day); a test run with hotter undersides by day and cooler ones at night brings the range inside the band (a sensitivity in docs/sources.md, not used here). The panels' own heat, their electricity and the air under them are not modelled.</p>`, ['golden2007', 'brief6'])}`;
 }
 
 /** Lot trees. d: {trees, openBays (15:00 Ts of the bay rows), share}. */
@@ -92,17 +98,17 @@ export function lotTreesCard(d) {
   return `
     ${close}
     <h3>Trees between the bays</h3>
-    <div class="mat">Crowns 4.2 m across the footpaths, every 8 m · 15:00 · tree crowns let through ${pct(MODEL.canopyTransmission.value)} of the sun${tag(MODEL.canopyTransmission)}</div>
+    <p class="lead">Trees between the bays keep the asphalt cooler: at 3 pm the shaded bay rows are ${fmt(d.trees.t15)} °C, against ${fmt(d.openBays.t15)} °C in the open rows.</p>
+    <div class="mat">Crowns 4.2 m across the footpaths, every 8 m · they let through ${pct(MODEL.canopyTransmission.value)} of the sun</div>
     <table class="cmp">
       <tr><td></td><td>bays, 15:00</td><td>bays, 23:00</td></tr>
       <tr><td>open bay rows</td><td>${fmt(d.openBays.t15)} °C</td><td>${fmt(d.openBays.t23)} °C</td></tr>
       <tr class="t"><td>bay rows under the trees</td><td>${fmt(d.trees.t15)} °C</td><td>${fmt(d.trees.t23)} °C</td></tr>
-      <tr><td>difference</td><td>${K(d.trees.t15 - d.openBays.t15)}</td><td>${K(d.trees.t23 - d.openBays.t23)}</td></tr>
+      <tr><td>difference</td><td>${dg(d.trees.t15 - d.openBays.t15)}</td><td>${dg(d.trees.t23 - d.openBays.t23)}</td></tr>
     </table>
     <p class="note">Shade keeps the sun off the asphalt and off the cars; less heat goes into the slab, so less comes out at night. The bay rows are about ${pct(d.share)} covered by cars in both sections, which shade the ground beneath them too.</p>
-    <p class="lit">Sacramento parking lots: tree shade lowered asphalt by about 20 K, the air at 0.5 m by 1.3 K and car cabins by 26 K (Scott, Simpson &amp; McPherson 1999); in a model of Nagoya, greening one parking lot lowered its summer surface temperature by up to 7.26 K, though over the whole area the effect was slight (Onishi et al. 2010).</p>
-    <p class="caveat">The model's 5 m cells mix shaded and sunlit ground under each crown, so the cell means differ by less than a spot right under a tree. The air under the trees is not simulated (fixed air).</p>
-    ${srcLine(['scott1999', 'onishi2010', 'brief6'])}`;
+    ${experts(`<p class="lit">Crown transmission ${MODEL.canopyTransmission.value}${tag(MODEL.canopyTransmission)}.</p><p class="lit">Sacramento parking lots: tree shade lowered asphalt by about 20 K, the air at 0.5 m by 1.3 K and car cabins by 26 K (Scott, Simpson &amp; McPherson 1999); in a model of Nagoya, greening one parking lot lowered its summer surface temperature by up to 7.26 K, though over the whole area the effect was slight (Onishi et al. 2010).</p>
+    <p class="caveat">The model's 5 m cells mix shaded and sunlit ground under each crown, so the cell means differ by less than a spot right under a tree. The air under the trees is not simulated (fixed air).</p>`, ['scott1999', 'onishi2010', 'brief6'])}`;
 }
 
 /** Rusty shed. d: {shed: table row, cool: {peak, at, after}, tau (min), air, set}. */
@@ -111,8 +117,14 @@ export function shedCard(d) {
   return `
     ${close}
     <h3>The rusty shed: no heat to give back</h3>
-    <div class="mat">One sheet of corrugated steel: ${gl('heatCapacity', 'heat capacity')} C ${m.thinC.value / 1000} kJ m⁻² K⁻¹${tag(m.thinC)} · ${gl('emissivity', 'ε')} ${m.eps.value}${tag(m.eps)}</div>
+    <p class="lead">A thin steel roof holds almost no heat: ${fmt(d.shed.t15)} °C at 3 pm, it has cooled below the air by 11 pm.</p>
+    <div class="mat">One sheet of corrugated, rusty steel</div>
     <table class="cmp">
+      <tr><td>roof at 3 pm / 11 pm</td><td>${fmt(d.shed.t15)} / ${fmt(d.shed.t23)} °C</td></tr>
+      <tr><td>air at 11 pm</td><td>${fmt(d.air.t23)} °C</td></tr>
+    </table>
+    <p class="note">The thin roof follows its sunshine within minutes. As the low evening sun leaves it, it drops faster than any other surface of the block, and by sunset it has already lost most of its heat: after that it only follows the slowly cooling sky and ends the night below the air. In the first hour after sunset the thick slabs cool faster than the roof, unlike what was expected (outside the expected pattern; not tuned).</p>
+    ${experts(`<p class="lit">${gl('heatCapacity', 'Heat capacity')} C ${m.thinC.value / 1000} kJ m⁻² K⁻¹${tag(m.thinC)} · ${gl('emissivity', 'ε')} ${m.eps.value}${tag(m.eps)}</p><table class="cmp">
       <tr><td>roof at 15:00 / 23:00</td><td>${fmt(d.shed.t15)} / ${fmt(d.shed.t23)} °C</td></tr>
       <tr><td>air at 23:00</td><td>${fmt(d.air.t23)} °C</td></tr>
       <tr><td>fastest evening cooling (at ${hhmm(d.cool.at)}, before sunset)</td><td>${fmt(d.cool.peak)} K/h</td></tr>
@@ -120,31 +132,29 @@ export function shedCard(d) {
       <tr><td>time constant C / (4εσT³ + h_c)</td><td>${fmt(d.tau)} min</td></tr>
       <tr><td>${gl('groundFlux', 'G')} at 23:00</td><td>${W(d.shed.g23)}</td></tr>
     </table>
-    <p class="note">The thin roof follows its sunshine within minutes. As the low evening sun leaves it, it drops faster than any other surface of the block, and by sunset it has already lost most of its heat: after that it only follows the slowly cooling sky and ends the night below the air.</p>
-    <p class="caveat">In the first hour after sunset the asphalt, concrete and soil cool faster than the roof, so the spec's "steepest cooling after sunset" is not met (band 4 missed; see docs/sources.md): the roof's fastest cooling comes before sunset. Not tuned. The shed's walls, its dark inside and the air in it are not modelled; the roof is one cell layer at 5–8 m. Emissivity of rusted steel varies widely (0.69–0.88 in emissivity tables, unverified); with a lower ε the roof cools less at night.</p>
-    ${srcLine(['optris', 'brief6'])}`;
+    <p class="caveat">In the first hour after sunset the asphalt, concrete and soil cool faster than the roof, so the spec's "steepest cooling after sunset" is not met (band 4 missed; docs/sources.md, block 6): the roof's fastest cooling comes before sunset. Not tuned. The shed's walls, its dark inside and the air in it are not modelled; the roof is one cell layer at 5–8 m. Emissivity of rusted steel varies widely (0.69–0.88 in emissivity tables, unverified); with a lower ε the roof cools less at night.</p>`, ['optris', 'brief6'])}`;
 }
 
 /** Brownfield ground. d: {st}. */
 export function soilCard(d) {
   const t = d.st.table;
-  const row = (k, name) => `<tr><td>${name}</td><td>${fmt(t[k].t15)}</td><td>${fmt(t[k].t23)}</td><td>${W(t[k].g23)}</td></tr>`;
+  const row = (k, name) => `<tr><td>${name}</td><td>${fmt(t[k].t15)}</td><td>${fmt(t[k].t23)}</td><td>${r0(t[k].g23)}</td></tr>`;
   return `
     ${close}
     <h3>Brownfield: soil, scrub and ballast cool sooner</h3>
-    <div class="mat">Open ground, sky view about 1 · °C at 15:00 and 23:00, ${gl('groundFlux', 'G')} at 23:00</div>
+    <p class="lead">Bare soil and ballast get nearly as hot as asphalt in the sun, but hold less heat: by 11 pm the soil is ${fmt(t.openAsphalt.t23 - t.soil.t23)} degrees cooler than the asphalt.</p>
+    <div class="mat">Open ground · °C at 3 pm and 11 pm, ${gl('groundFlux', 'heat out of the ground')} at 11 pm</div>
     <table class="cmp">
-      <tr><td></td><td>15:00</td><td>23:00</td><td>G 23:00</td></tr>
+      <tr><td></td><td>3 pm</td><td>11 pm</td><td>watts per m², 11 pm</td></tr>
       ${row('openAsphalt', 'open asphalt')}
       ${row('soil', 'bare compacted soil')}
       ${row('scrub', 'scrubby dry vegetation')}
       ${row('ballast', 'rail ballast')}
       ${row('lawn', 'irrigated lawn')}
     </table>
-    <p class="note">Dry soil and loose ballast get nearly as hot as asphalt in the afternoon sun, but they hold less heat (lower ${gl('admittance', 'admittance')}), so by 23:00 they are ${fmt(t.openAsphalt.t23 - t.soil.t23)}–${fmt(t.openAsphalt.t23 - t.ballast.t23)} K cooler and give back less. Only the watered lawn, which spends sunshine on evaporation, stays cool by day.</p>
-    <p class="lit">At its hottest, asphalt sends out about 150 W m⁻² more infrared than bare soil (Asaeda, Ca &amp; Wake 1996, via the brief, unverified).</p>
-    <p class="caveat">The brownfield values (soil, scrub, ballast: albedo, admittance, evaporation) are the brief's assumptions, not measurements; real brownfield soils vary with moisture, rubble and crust. Moisture after rain is not modelled.</p>
-    ${srcLine(['asaeda1996', 'oke', 'brief6'])}`;
+    <p class="note">Dry soil and loose ballast get nearly as hot as asphalt in the afternoon sun, but they hold less heat (lower ${gl('admittance', 'admittance')}), so by 11 pm they are ${fmt(t.openAsphalt.t23 - t.soil.t23)}–${fmt(t.openAsphalt.t23 - t.ballast.t23)} degrees cooler and give back less. Only the watered lawn, which spends sunshine on evaporation, stays cool by day.</p>
+    ${experts(`<p class="lit">At its hottest, asphalt sends out about 150 W m⁻² more infrared than bare soil (Asaeda, Ca &amp; Wake 1996, via the brief, unverified).</p>
+    <p class="caveat">The brownfield values (soil, scrub, ballast: albedo, admittance, evaporation) are the brief's assumptions, not measurements; real brownfield soils vary with moisture, rubble and crust. Moisture after rain is not modelled.</p>`, ['asaeda1996', 'oke', 'brief6'])}`;
 }
 
 /** The hot car: information only (not modelled). d: {openBay15, openAsphalt15}. */
@@ -152,22 +162,22 @@ export function hotCarCard(d) {
   return `
     ${close}
     <h3>A parked car in the sun (information only)</h3>
+    <p class="lead">A car parked in the sun becomes an oven within half an hour, even on a mild day: never leave a child or a pet inside.</p>
     <div class="mat">Not modelled: cars here only shade the asphalt beneath them</div>
     <table class="cmp">
       <tr><td>cabin air, in sun / in shade (Tempe, the study's steady-state mean)</td><td>47.6 / 39.5 °C</td></tr>
       <tr><td>dashboard after 1 h, sun / shade (the university's press release)</td><td>69 / 48 °C</td></tr>
-      <tr><td>cabin rise, first minutes</td><td>+1.8 K per 5 min; 80% of the rise in 30 min</td></tr>
+      <tr><td>cabin rise, first minutes</td><td>+1.8 degrees per 5 min; 80% of the rise in 30 min</td></tr>
       <tr><td>on a mild 22 °C day</td><td>cabin up to 47 °C</td></tr>
-      <tr><td>cabins under lot trees</td><td>−26 K</td></tr>
-      <tr><td>black vs silver car roof</td><td>up to 25 K hotter; cabin air 5–6 K</td></tr>
+      <tr><td>cabins under lot trees</td><td>−26 degrees</td></tr>
+      <tr><td>black vs silver car roof</td><td>up to 25 degrees hotter; cabin air 5–6 degrees</td></tr>
       <tr><td>black vs white car roofs (Lisbon)</td><td>about 71 °C, about 20 degrees hotter</td></tr>
       <tr><td>air next to a black car (Lisbon)</td><td>up to 3.8 degrees warmer</td></tr>
       <tr class="t"><td>US children who died in hot cars, 1998–2024</td><td>1,010 (39 in 2024)</td></tr>
     </table>
     <p class="note">A closed car is a small greenhouse: sunlight comes in through the glass and the heat stays. Most of the rise happens in the first half hour, and cracking the windows does not help. Never leave a child or a pet in a parked car.</p>
-    <p class="lit">Vanos et al. 2018 (Tempe, Arizona); McLaren, Null &amp; Quinn 2005; Scott, Simpson &amp; McPherson 1999; Levinson et al. 2011; Matias et al. 2025 (air) and 2026 (car roofs, unverified); US National Safety Council (via the brief).</p>
-    <p class="caveat">This model does not simulate cabins, car bodies or the warm air next to them. For scale, the asphalt in the open bays is ${fmt(d.openBay15)} °C at 15:00 and open asphalt ${fmt(d.openAsphalt15)} °C (model).</p>
-    ${srcLine(['vanos2018', 'mclaren2005', 'scott1999', 'levinson2011', 'matias2025', 'matias2026', 'nsc'])}`;
+    ${experts(`<p class="lit">Vanos et al. 2018 (Tempe, Arizona); McLaren, Null &amp; Quinn 2005; Scott, Simpson &amp; McPherson 1999; Levinson et al. 2011; Matias et al. 2025 (air) and 2026 (car roofs, unverified); US National Safety Council (via the brief).</p>
+    <p class="caveat">This model does not simulate cabins, car bodies or the warm air next to them. For scale, the asphalt in the open bays is ${fmt(d.openBay15)} °C at 15:00 and open asphalt ${fmt(d.openAsphalt15)} °C (model).</p>`, ['vanos2018', 'mclaren2005', 'scott1999', 'levinson2011', 'matias2025', 'matias2026', 'nsc'])}`;
 }
 
 /** Button labels for the parking panel cards. */

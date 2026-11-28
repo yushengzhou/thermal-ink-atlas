@@ -147,7 +147,7 @@ export function cabinNumbers() {
   const h = hotCarCard({ openBay15: 0, openAsphalt15: 0 });
   const pair = (re) => re.exec(h).slice(1).map(Number);
   const [sun, shade] = pair(/cabin air, in sun \/ in shade \(Tempe, the study's steady-state mean\)<\/td><td>([\d.]+) \/ ([\d.]+) °C/);
-  const [trees] = pair(/cabins under lot trees<\/td><td>−(\d+) K/);
+  const [trees] = pair(/cabins under lot trees<\/td><td>−(\d+) degrees/);
   return { sun, shade, trees };
 }
 

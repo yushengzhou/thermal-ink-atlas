@@ -3,6 +3,10 @@
 // hits) and every terms-panel footnote. Fails on "undefined", "NaN",
 // "[object", a source key with no text (a key built at runtime that the
 // per-page SOURCES cut dropped), an empty "Sources:" line, or a page error.
+// Every card also keeps the outside evaluation's layout (#29 item 1): a
+// heading, then one everyday sentence; the expert part closed and last; no
+// file paths, "the brief", "from memory", "unverified" tags or source keys in
+// the visible part; links only to the references page (#29 item 5).
 import { test, after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { readdirSync, existsSync } from 'node:fs';
@@ -22,6 +26,26 @@ export function problemsIn(text) {
   return out;
 }
 
+/** Breaches of the #29 card layout in a card's HTML. */
+export function layoutProblems(html) {
+  const out = [];
+  const body = html.replace(/<button[^>]*>.*?<\/button>/, '').trim();
+  if (!/^<h3>[\s\S]*?<\/h3>\s*<p class="lead">/.test(body)) out.push('no heading + lead sentence first');
+  const lead = /<p class="lead">([\s\S]*?)<\/p>/.exec(html)?.[1] ?? '';
+  if (/[αεμτρΔ]|W m⁻²|J m⁻²|\bK\b|Tmrt|unverified|\[\w+\]/.test(lead.replace(/<[^>]+>/g, ''))) out.push(`lead not plain: ${lead.replace(/<[^>]+>/g, '').slice(0, 80)}`);
+  const i = html.indexOf('<details class="expert">');
+  if (i < 0) out.push('no expert part');
+  else {
+    if (/<details class="expert" open/.test(html)) out.push('expert part open');
+    if (!html.trim().endsWith('</details>')) out.push('expert part not last');
+    const visible = html.slice(0, i).replace(/<[^>]+>/g, ' ');
+    const m = visible.match(/docs\/|\.md\b|the brief|from memory|unverified|\[\w+\]/);
+    if (m) out.push(`visible part says "${m[0]}"`);
+  }
+  for (const m of html.matchAll(/href="([^"]*)"/g)) if (!/^\.\.\/\.\.\/references\.html(#[\w-]+)?$/.test(m[1])) out.push(`link ${m[1]}`);
+  return out;
+}
+
 let browser;
 before(async () => {
   browser = await launch();
@@ -34,6 +58,12 @@ test('the check itself flags what it should', () => {
   assert.ok(problemsIn('Sources: [brief7]; [oke] Oke.').length > 0);
   assert.ok(problemsIn('Sources: .').length > 0);
   assert.ok(problemsIn('Tmrt NaN °C').length > 0);
+  const ok = '<button class="x">×</button><h3>A</h3><p class="lead">Plain words.</p><p>x</p><details class="expert"><summary>For experts</summary><a href="../../references.html#desert">[k]</a> unverified</details>';
+  assert.deepEqual(layoutProblems(ok), []);
+  assert.ok(layoutProblems(ok.replace('Plain words.', 'Tmrt +2 K')).length > 0);
+  assert.ok(layoutProblems(ok.replace('<p>x</p>', '<p>see docs/sources.md</p>')).length > 0);
+  assert.ok(layoutProblems(ok.replace('<details class="expert">', '<details class="expert" open>')).length > 0);
+  assert.ok(layoutProblems(ok.replace('../../references.html#desert', 'docs/sources.md')).length > 0);
 });
 
 for (const city of CITIES) {
@@ -41,8 +71,17 @@ for (const city of CITIES) {
     const { page, context, errors } = await open(browser, 'hour=15&f=400', { city });
     await page.evaluate(() => window.atlas.look({ notes: false, people: false }));
     const problems = [];
-    const cardText = () => page.locator('#card').evaluate((e) => (e.style.display === 'none' ? '' : e.innerText));
-    // block-panel cards (and the retrofit measures)
+    // the card's text with its expert part opened (so it is read too), and its HTML as built
+    const cardText = () => page.locator('#card').evaluate((e) => {
+      if (e.style.display === 'none') return '';
+      const html = e.innerHTML;
+      for (const d of e.querySelectorAll('details')) d.open = true;
+      e.dataset.html = html;
+      return e.innerText;
+    });
+    const cardHtml = () => page.locator('#card').evaluate((e) => e.dataset.html ?? '');
+    // block-panel cards (and the retrofit measures), every folded list opened
+    await page.evaluate(() => { for (const d of document.querySelectorAll('.blockpanel details')) d.open = true; });
     let blockCards = 0;
     for (const b of await page.locator('button[data-card], button[data-measure]').all()) {
       if (!(await b.isVisible())) continue;
@@ -50,7 +89,9 @@ for (const city of CITIES) {
       const t = await cardText();
       if (!t) continue;
       blockCards++;
-      for (const p of problemsIn(t)) problems.push(`card ${(await b.getAttribute('data-card')) ?? (await b.getAttribute('data-measure'))}: ${p}`);
+      const id = (await b.getAttribute('data-card')) ?? (await b.getAttribute('data-measure'));
+      for (const p of problemsIn(t)) problems.push(`card ${id}: ${p}`);
+      for (const p of layoutProblems(await cardHtml())) problems.push(`card ${id}: ${p}`);
       await page.keyboard.press('Escape');
     }
     // heat cards on a 45 m grid (whatever the click hits: ground, roof or tree)
@@ -64,6 +105,7 @@ for (const city of CITIES) {
         if (!t) continue;
         heat++;
         for (const p of problemsIn(t)) problems.push(`heat card at ${gx},${gy}: ${p}`);
+        for (const p of layoutProblems(await cardHtml())) problems.push(`heat card at ${gx},${gy}: ${p}`);
         await page.keyboard.press('Escape');
       }
     }
