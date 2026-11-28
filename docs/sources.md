@@ -3012,10 +3012,10 @@ The block's own values live in `engine/market.js` (`NM`):
 | `hour` | 21 [brief12] *cited value*, unverified (the bands' evening hour, 21:00 (the brief's "stone 21 h")) |
 | `late` | 23 [brief12] *cited value*, unverified (a later evening hour quoted on the cards, 23:00 (the brief's stone target at 23:00)) |
 | `day` | 15 [engine] *engine assumption (no source)*, unverified (the walkers' check hour, 15:00 (the shared hour of the other blocks; the market is closed)) |
-| `opens` | 16 [travelTaipei] *cited value*, unverified (the market opens, clock hour: Shilin Night Market 16:00 (Taipei Travel via the brief)) |
-| `closes` | 24 [travelTaipei] *cited value*, unverified (the market closes, clock hour: midnight (24:00)) |
-| `peakFrom` | 20 [shilinWiki] *cited value*, unverified (start of the busiest hours: 20:00 (Wikipedia; guides say 19:00)) |
-| `peakTo` | 23 [shilinWiki] *cited value*, unverified (end of the busiest hours: 23:00 (Wikipedia; guides say 22:00)) |
+| `opens` | 16 [travelTaipei] *interpretation of the source*, unverified (the market opens, clock hour: Shilin Night Market 16:00 (Taipei Travel via the brief; a tourism page, not a measurement, so tagged as an interpretation: timing for an invented market, no physical number rests on it)) |
+| `closes` | 24 [travelTaipei] *interpretation of the source*, unverified (the market closes, clock hour: midnight (24:00) (the same tourism page; an interpretation)) |
+| `peakFrom` | 20 [shilinWiki] *interpretation of the source*, unverified (start of the busiest hours: 20:00 (Wikipedia; guides say 19:00; a wiki and travel guides, so tagged as an interpretation)) |
+| `peakTo` | 23 [shilinWiki] *interpretation of the source*, unverified (end of the busiest hours: 23:00 (Wikipedia; guides say 22:00; an interpretation, as above)) |
 | `peak` | 1 [brief12] *cited range*, unverified (crowd density at the peak in the busiest aisles, people per m²: the brief's 1.0 (0.3–2.0, an assumption: no night-market measurement found)) |
 | `cap` | 1.5 [engine] *engine assumption (no source)*, unverified (the largest density allowed anywhere, people per m²: the spec's 1.5 (below the event limit of about 2)) |
 | `walk` | 210 [ashrae55] *cited value*, unverified (heat of a person walking slowly (0.9 m/s, about 2.0 met), W (ASHRAE 55 / ISO 8996 via the brief, from memory)) |
