@@ -111,7 +111,7 @@ const SHOTS = [
     tag: ['Glass towers and street canyons', '玻璃塔楼与街道峡谷'],
     cap: (N) => {
       const [spot, shade] = nums(note(N, 'spot'), '°C');
-      return { en: `Sun bounced off a glass tower: in the shade, yet it feels like ${r0(spot)} °C (plain shade ${r0(shade)} °C)`, zh: `玻璃幕墙反射的阳光：人在阴影里，体感却像 ${r0(spot)} °C（普通阴影 ${r0(shade)} °C）` };
+      return { en: `Sun bounced off a glass tower: in the shade, yet ${r0(spot)} °C of radiant heat on you (plain shade ${r0(shade)} °C)`, zh: `玻璃幕墙反射的阳光：人在阴影里，身上受到的辐射热却有 ${r0(spot)} °C（普通阴影 ${r0(shade)} °C）` };
     },
   },
   {
@@ -156,11 +156,11 @@ const SHOTS = [
     pan: [8, 0],
     hour: 23,
     thermal: true,
-    tag: ['Car park and brownfield', '停车场与棕地'],
+    tag: ['Car park and old rail yard', '停车场与废弃铁路货场'],
     cap: (N) => {
       const [, night] = nums(note(N, 'asphalt'), '°C');
       const [, shed] = nums(note(N, 'shed'), '°C');
-      return { en: `11 pm: the car park asphalt is still ${r0(night)} °C, giving back the day's heat; the metal shed roofs are down to ${r0(shed)} °C`, zh: `晚上 11 点：停车场沥青仍有 ${r0(night)} °C，正把白天的热放出来；铁皮棚顶已降到 ${r0(shed)} °C` };
+      return { en: `11 pm: the car park asphalt is still ${r0(night)} °C, giving back some of the day's heat; the metal shed roofs are down to ${r0(shed)} °C`, zh: `晚上 11 点：停车场沥青仍有 ${r0(night)} °C，还在放出白天存下的一部分热；铁皮棚顶已降到 ${r0(shed)} °C` };
     },
   },
   {
@@ -205,7 +205,7 @@ const SHOTS = [
     tag: ['Bus stops and footbridges', '公交站与人行天桥'],
     cap: (N) => {
       const [shade, kerb] = nums(note(N, 'stopA'), '°C');
-      return { en: `3 pm at a bus stop: in the shade of its metal roof it feels like ${r0(shade)} °C, at the kerb in the sun ${r0(kerb)} °C`, zh: `下午 3 点的公交站：金属顶棚阴影下体感 ${r0(shade)} °C，路边阳光下 ${r0(kerb)} °C` };
+      return { en: `3 pm at a bus stop: radiant heat on you ${r0(shade)} °C under its metal roof (likely too low), ${r0(kerb)} °C at the kerb`, zh: `下午 3 点的公交站：金属顶棚下身上受到的辐射热 ${r0(shade)} °C（很可能偏低），路边阳光下 ${r0(kerb)} °C` };
     },
   },
   {
@@ -236,7 +236,7 @@ const SHOTS = [
     tag: ['Desert courtyard neighbourhood', '沙漠庭院街区'],
     cap: (N) => {
       const [d] = nums(note(N, 'sail'), 'degrees');
-      return { en: `Desert, 3 pm: under the shade sails it feels about ${r0(d)} degrees cooler than in the open sun`, zh: `沙漠街区，下午 3 点：遮阳帆下体感比烈日下凉约 ${r0(d)} 度` };
+      return { en: `Desert, 3 pm: a shade sail takes about ${r0(d)} degrees of radiant heat off you (measured: 14–20)`, zh: `沙漠街区，下午 3 点：遮阳帆让身上受到的辐射热少约 ${r0(d)} 度（实测 14–20 度）` };
     },
   },
   {
@@ -250,7 +250,7 @@ const SHOTS = [
     tag: ['Night market street', '夜市街道'],
     cap: (N) => {
       const [grill] = nums(note(N, 'grill'), '°C');
-      return { en: `9 pm at the night market: 1 m from a charcoal grill it feels like up to ${r0(grill)} °C`, zh: `晚上 9 点的夜市：离炭火烤炉 1 米，体感最高约 ${r0(grill)} °C` };
+      return { en: `9 pm at the night market: 1 m from a charcoal grill, up to ${r0(grill)} °C of radiant heat on you`, zh: `晚上 9 点的夜市：离炭火烤炉 1 米，身上受到的辐射热最高约 ${r0(grill)} °C` };
     },
   },
   { id: 'end', page: 'asphalt-park', q: 'f=0', len: END },
