@@ -74,7 +74,7 @@ test('splash toggle: default on, ?splash=0|1, P and the button; notes follow', a
   assert.equal((await page.evaluate(() => window.atlas.hutong.state())).splash, false, 'the button');
   const notes = await page.evaluate(() => window.atlas.notes());
   assert.equal(notes.length, 5);
-  assert.ok(notes.some((n) => n.key === 'splash' && n.text.join(' ').includes('19:00')));
+  assert.ok(notes.some((n) => n.key === 'splash' && n.text.join(' ').includes('7 pm')));
   assert.deepEqual(errors, []);
   await context.close();
 });

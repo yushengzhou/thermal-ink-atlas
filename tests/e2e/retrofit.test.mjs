@@ -221,9 +221,9 @@ test('measure cards: ΔTs and ΔTmrt at 12:00 and 15:00, unverified flags, sourc
     assert.ok(text.includes(m.name), m.id);
     assert.match(text, /12:00/);
     assert.match(text, /15:00/);
-    assert.match(text, /ΔTs/);
-    assert.match(text, /ΔTmrt/);
-    assert.match(text, /[−+]\d+\.\d K/);
+    assert.match(text, /surface/);
+    assert.match(text, /how it feels/);
+    assert.match(text, /[−+]\d+\.\d°/);
     assert.match(text, /Sources:/);
     assert.match(text, /unverified/i, `${m.id}: unverified inputs are flagged`);
     assert.match(text, /no air cooling is modelled/);
@@ -233,8 +233,8 @@ test('measure cards: ΔTs and ΔTmrt at 12:00 and 15:00, unverified flags, sourc
   let text = await page.locator('#card').textContent();
   assert.match(text, /cools the road, not the person/);
   assert.match(text, /shade/);
-  assert.match(text, /new, α 0\.25/);
-  assert.match(text, /1 year, α 0\.18/);
+  assert.match(text, /new 0\.25/);
+  assert.match(text, /after a year 0\.18/);
   assert.match(text, /diffuse wall reflection/);
   const coat = await page.evaluate(() => window.atlas.retro.measure('coating').h12);
   assert.ok(coat.dTs < 0 && coat.dTmrt > 0);

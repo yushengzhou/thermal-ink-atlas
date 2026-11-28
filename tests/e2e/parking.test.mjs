@@ -229,7 +229,7 @@ test('block-6 glossary terms open their footnotes; notes carry their terms and t
   assert.equal(notes.length, 5);
   const st = await page.evaluate(() => window.atlas.parking.stats());
   const a = notes.find((n) => n.key === 'asphalt').text.join(' ');
-  assert.ok(a.includes(`${st.table.openAsphalt.t23.toFixed(1)} °C at 11 pm`) && a.includes(`${Math.round(-st.table.openAsphalt.g23)} W m⁻²`), a);
+  assert.ok(a.includes(`${st.table.openAsphalt.t23.toFixed(1)} °C at 11 pm`) && a.includes("giving back the day's heat") && !/W m⁻²/.test(a), a);
   assert.ok(notes.find((n) => n.key === 'shed').text.join(' ').includes('below the'));
   assert.ok((await page.evaluate(() => window.atlas.noteTerms())).length >= 5);
   await context.close();

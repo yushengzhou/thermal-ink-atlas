@@ -38,7 +38,8 @@ for (const city of CITIES) {
     await page.click('#bar [data-k="H"]');
     assert.equal((await page.evaluate(() => window.atlas.state())).hour, h0);
     assert.equal(await page.locator('#keys').textContent(), 'drag · zoom · click a spot');
-    // a footnote opened from the cartouche closes when the map is pressed (hover and pinned alike)
+    // a footnote opened from the cartouche closes when the map is pressed (hover and pinned alike); the margin notes off, so the press lands on the map
+    await page.evaluate(() => window.atlas.look({ notes: false }));
     await page.locator('#cartouche .gl').first().click();
     assert.equal(await page.locator('#fn').isHidden(), false);
     await page.mouse.move(900, 420);

@@ -83,7 +83,7 @@ test('大寒 view and condensers: default off, ?date= and ?ac=, keys S and C, th
     return window.atlas.stats();
   });
   assert.ok(/geometry only/.test(s.winterLabel) && /20 July/.test(s.winterLabel) && /rule ≥ 2 h/.test(s.winterLabel), s.winterLabel);
-  assert.ok(/does not feel them/.test(s.plumeLabel) && /W\/m²/.test(s.plumeLabel), s.plumeLabel);
+  assert.ok(/does not feel them/.test(s.plumeLabel) && /watts per m²/.test(s.plumeLabel), s.plumeLabel);
   assert.equal(s.faceLabels > 6, true);
   // more plumes at 21:00 (every flat's AC on) than at 09:00
   const n = await page.evaluate(() => [21, 9].map((h) => {
@@ -246,7 +246,7 @@ test('block-7 glossary terms open their footnotes; notes carry their terms and t
   const st = await page.evaluate(() => window.atlas.estate.stats());
   const sill = notes.find((n) => n.key === 'sill').text.join(' ');
   assert.ok(sill.includes(`${st.ruleMin.toFixed(1)}–`), sill);
-  assert.ok(notes.find((n) => n.key === 'ac').text.join(' ').includes(`${Math.round(st.peak.wm2)} W/m²`));
+  assert.ok(notes.find((n) => n.key === 'ac').text.join(' ').includes(`${Math.round(st.peak.wm2)} watts per m²`));
   assert.ok((await page.evaluate(() => window.atlas.noteTerms())).length >= 5);
   await context.close();
 });

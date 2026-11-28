@@ -36,13 +36,17 @@ test('heat card, header and legend terms open footnotes (click, hover, focus); c
   const { page, context } = await open(browser, 'thermal&hour=15&f=400');
   const [x, y] = await page.evaluate(() => window.atlas.project(215, 160, 0));
   await page.mouse.click(x, y);
+  // the model's terms sit in the card's closed expert part (#29): open it
+  await page.locator('#card details.expert summary').click();
   for (const key of ['albedo', 'emissivity', 'admittance', 'ef', 'svf', 'surfaceTemp', 'nightLag', 'tmrt', 'forceRestore']) {
-    await page.locator(`#card .gl[data-gl="${key}"]`).click();
+    await page.locator(`#card .gl[data-gl="${key}"]`).first().click();
     assert.equal(await fnKey(page), key, `card ${key}`);
   }
   // click outside (on the cartouche text) closes
   await page.click('#cartouche h1');
   assert.equal(await fnKey(page), null);
+  // the card, taller with its expert part open, may reach the legend: close it (Escape)
+  await page.keyboard.press('Escape');
   // hover opens and leaving closes
   await page.hover('#legend .gl[data-gl="forceRestore"]');
   assert.equal(await fnKey(page), 'forceRestore');
@@ -74,7 +78,7 @@ test('heat card, header and legend terms open footnotes (click, hover, focus); c
   await page.evaluate(() => window.atlas.seek(400, { z: 3, cx: 325, cy: 128 }));
   const [rx, ry] = await page.evaluate(() => window.atlas.project(325, 127.5, 18));
   await page.mouse.click(rx, ry);
-  await page.locator('#card .gl[data-gl="coolRoof"]').click();
+  await page.locator('#card .gl[data-gl="coolRoof"]').first().click();
   assert.equal(await fnKey(page), 'coolRoof');
   await context.close();
 });

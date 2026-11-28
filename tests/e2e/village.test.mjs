@@ -191,13 +191,13 @@ test('cards: lanes, metal roofs, under the roof, white roofs, villages measured,
   }
   const html = await page.evaluate((ids) => Object.fromEntries(ids.map((id) => [id, window.atlas.village.html(id)])), ids);
   const st = B.st;
-  assert.ok(/band missed/.test(html.lanes) && /docs\/sources.md/.test(html.lanes) && html.lanes.includes(`+${(Math.round((st.lanes.village.tmrt[12] - st.air[12]) * 10) / 10).toFixed(1)} K`), 'lanes card states the noon miss');
+  assert.ok(/outside the expected range/.test(html.lanes) && /docs\/sources.md/.test(html.lanes) && html.lanes.includes(`+${(Math.round((st.lanes.village.tmrt[12] - st.air[12]) * 10) / 10).toFixed(1)}°`), 'lanes card states the noon miss');
   assert.ok(/Pingshan/.test(html.lanes) && /straight/.test(html.lanes));
-  assert.ok(/band missed/.test(html.roofs) && /likely/.test(html.roofs) && html.roofs.includes(st.edge.asbestosRoof.ts15.toFixed(1)), 'roofs card states the asbestos miss');
+  assert.ok(/outside the expected range/.test(html.roofs) && /likely/.test(html.roofs) && html.roofs.includes(st.edge.asbestosRoof.ts15.toFixed(1)), 'roofs card states the asbestos miss');
   assert.ok(/health hazard/.test(html.roofs) && !/remov|replac/i.test(html.roofs), 'one neutral asbestos line, no advice');
   assert.ok(/proxy/.test(html.under) && /calibrat|set \(as the brief says\)/.test(html.under) && /±5 K/.test(html.under));
   assert.ok(/Vellingiri/.test(html.white) && /Nutkiewicz/.test(html.white) && html.white.includes(Math.abs(st.cool.rustRooms.d15).toFixed(1)));
-  assert.ok(!/band missed/.test(html.white), 'bands 2 and 7 are met');
+  assert.ok(!/outside the expected range/.test(html.white), 'bands 2 and 7 are met');
   assert.ok(/not a trait/.test(html.risk) && /No estimate/.test(html.risk));
   assert.ok(/Scott|Nairobi/.test(html.measured));
   for (const h of Object.values(html)) assert.ok(!/https?:/.test(h));
