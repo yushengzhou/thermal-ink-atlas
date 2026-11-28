@@ -21,6 +21,7 @@ const CPS = 'campus';
 const BSS = 'busstop';
 const UV = 'village';
 const DC = 'desert';
+const NMK = 'nightmarket';
 const shots = [
   [AP, 'docs/media/day-1500.jpg', 'hour=15&f=400', { width: 1280, height: 800 }],
   [AP, 'docs/media/thermal-1500.jpg', 'thermal&hour=15&f=400', { width: 1280, height: 800 }],
@@ -200,6 +201,23 @@ const shots = [
     },
   ],
   [DC, 'thumbs/desert.jpg', 'hour=15&f=640&notes=0&ui=0&cam=2.2,215,110', { width: 640, height: 400 }],
+  // block 12: the market at 21:00 (day view and heat view), the heat given off, a close look at a grill in the heat view, the street at 17:00, the intro hint, the grill card
+  [NMK, 'docs/media/nm-night-2100.jpg', 'f=640', { width: 1280, height: 800 }],
+  [NMK, 'docs/media/nm-thermal-2100.jpg', 'thermal&f=640', { width: 1280, height: 800 }],
+  [NMK, 'docs/media/nm-heat-2100.jpg', 'f=640&heat=1&notes=0&people=0&cam=3.5,190,180', { width: 1280, height: 800 }],
+  [NMK, 'docs/media/nm-grill-2100.jpg', 'thermal&f=640&notes=0&cam=7.5,245,195', { width: 1280, height: 800 }],
+  [NMK, 'docs/media/nm-day-1700.jpg', 'hour=17&f=640&notes=0&cam=4,200,170', { width: 1280, height: 800 }],
+  [NMK, 'docs/media/nm-intro-hint.jpg', 'f=60', { width: 1280, height: 800 }],
+  [
+    NMK,
+    'docs/media/nm-grill-card.jpg',
+    'f=640&notes=0&cam=6,245,190',
+    { width: 1280, height: 800 },
+    async (page) => {
+      await page.click('#market [data-card="grill"]');
+    },
+  ],
+  [NMK, 'thumbs/nightmarket.jpg', 'f=640&notes=0&ui=0&cam=4.5,215,180', { width: 640, height: 400 }],
 ];
 const browser = await chromium.launch();
 for (const [city, out, q, viewport, act] of shots) {

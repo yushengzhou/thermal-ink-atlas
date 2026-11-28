@@ -70,6 +70,20 @@ Hand-inked isometric city blocks that show urban heat through one heat-wave day:
   band 7 is semi-constructed (missed); the misses are stated on the cards
   with their likely causes. Its cards follow the
   outside evaluation's plain-words layout (#29) from the start.
+- Block 12, `nightmarket`: a night market street in a humid subtropical
+  city like Taipei, opening at 9 pm: granite paving between shophouses with
+  awnings, a row of food stalls and a food court on a temple square, string
+  lights and a crowd. At 9 pm the stone still gives off about 100 W per m²
+  of the day's heat (about 40 in the narrow alleys, 13 under the awnings);
+  a crowd of one person per m² gives off about 170 W per m² and the stalls
+  about 45 over the street, shown as "heat given off" (`Q`) but not felt,
+  because the air temperature is fixed. Standing in the open square feels
+  about 2 K cooler than the air, under an awning or in an alley about 1 K
+  warmer; only next to a charcoal grill is it hot (about 89 °C of Tmrt at
+  1 m, an illustrative upper bound). `M` closes the market. 4 of the 5
+  independent bands are met; the grill band is missed and stated on its
+  card. Its cards follow the outside evaluation's plain-words layout (#29)
+  from the start.
 
 Live: https://yushengzhou.github.io/thermal-ink-atlas/
 
@@ -85,7 +99,8 @@ modelled with a simple surface energy-balance model, not measured.
   `cities/waterfront/index.html`, `cities/hutong/index.html`,
   `cities/parking/index.html`, `cities/estate/index.html`,
   `cities/campus/index.html`, `cities/busstop/index.html`,
-  `cities/village/index.html` or `cities/desert/index.html`.
+  `cities/village/index.html`, `cities/desert/index.html` or
+  `cities/nightmarket/index.html`.
   Each is one offline file.
 - Or serve the folder and open <http://localhost:8000/>:
 
