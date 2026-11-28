@@ -139,7 +139,7 @@ ${curve.join('\n')}
 - Water: one splash evaporates at most ${f2(s.perSplash)} of its ${s.w0} mm before the next (what is left at ${p.hour}:00 is topped up, not
   added); the day's evaporation balances the store to ${s.balanceErr.toExponential(1)} mm; the store's day-to-day drift is
   ${s.drift.toExponential(1)} mm (the model day is not exactly periodic). W is never negative.
-- The wet paving stays at least ${f2(s.margin)} K above the air's wet-bulb temperature while water is left (checked
+- The wet paving stays at least ${f2(rows.find((r) => /^Wet paving minus the wet-bulb/.test(r.label)).value)} K above the air's wet-bulb temperature while water is left (checked
   inside the model at every 1-min step of the last model day, over all ${setup.cells.length} wet-able cells).
 - Literature: Paris, about 1 L m⁻² per cycle, surface −7.5 K at 19:30 and −6 K at 20:30, lasting several hours
   [hendel2015]; air −0.79 K at most and Tmrt −1.76 K [hendel2016]; Kobe, 0.025 mm per pass, −2 to −4 K at once, gone

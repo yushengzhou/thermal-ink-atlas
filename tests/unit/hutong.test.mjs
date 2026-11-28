@@ -311,3 +311,10 @@ test('scene: lanes 5–10 m on the grid, at most five notes, splash cells in lan
   assert.ok(world.screens.some((p) => p.kind === 'awning') && world.screens.some((p) => p.kind === 'pergola'));
   assert.equal(world.shadeS, 4);
 });
+
+test('docs/sources.md prints the wet-bulb margin as one generated number (the text and the band table agree)', () => {
+  const md = readFileSync(new URL('../../docs/sources.md', import.meta.url), 'utf8');
+  const text = /stays at least ([\d.]+) K above the air's wet-bulb temperature/.exec(md)[1];
+  const table = /\| Wet paving minus the wet-bulb temperature of the air[^|]*\| \+([\d.]+) K \|/.exec(md)[1];
+  assert.equal(text, table);
+});
