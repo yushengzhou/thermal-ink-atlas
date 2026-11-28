@@ -150,7 +150,7 @@ The flat concrete roofs of the village houses (${st.slab.n} cells): ${f1(st.slab
 is not computed. Measured rooms (quoted, not simulated): Delhi in April, tin roofs 33.4 °C indoors against 32.8 °C outdoors;
 Yavatmal 3–4 K above outdoors in May–June [tasgaonkar2022]; Ahmedabad homes 34.6–35.8 °C under tin, 32.5–36.8 °C under
 asbestos, 31.6–33.8 °C under concrete [vellingiri2020]; Ghana, metal-roofed rooms 4.5 K warmer by day than mud or thatch,
-1.5 K cooler at night [wilby2021]; Bangkok at 37 °C air, roof 68.1 °C and ceiling 49.2 °C [khlongToey].
+1.5 K cooler at night [wilby2021]; Bangkok, one unshaded house at midday in April, roof 68.1 °C and ceiling 49.2 °C (a shaded house's roof 45.5 °C) [khlongToey].
 
 ### Under the roof (proxies)
 
